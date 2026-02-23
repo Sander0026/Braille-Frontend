@@ -17,7 +17,7 @@ export class Login {
 
   loginForm: FormGroup = this.fb.group({
     username: ['', [Validators.required]],
-    senha: ['', [Validators.required, Validators.minLength(6)]]
+    senha: ['', [Validators.required, Validators.minLength(8)]]
   });
 
   mensagemErro = '';
