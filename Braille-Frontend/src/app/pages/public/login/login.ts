@@ -16,7 +16,7 @@ export class Login {
   private router = inject(Router);
 
   loginForm: FormGroup = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    username: ['', [Validators.required]],
     senha: ['', [Validators.required, Validators.minLength(6)]]
   });
 
@@ -24,16 +24,16 @@ export class Login {
 
   fazerLogin() {
     if (this.loginForm.valid) {
-      const { email, senha } = this.loginForm.value;
+      const { username, senha } = this.loginForm.value;
       
-      this.authService.login(email, senha).subscribe({
+      this.authService.login(username, senha).subscribe({
         next: () => {
           // Deu certo! Vai para o Painel Admin
           this.router.navigate(['/admin']);
         },
         error: (err) => {
-          // Deu erro (senha errada, etc)
-          this.mensagemErro = 'E-mail ou senha incorretos!';
+          // Deu erro (senha errada, usuário não existe, etc)
+          this.mensagemErro = 'Nome de usuário ou senha incorretos!';
           console.error(err);
         }
       });

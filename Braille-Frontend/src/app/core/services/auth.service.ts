@@ -7,9 +7,9 @@ export class AuthService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:3000/auth'; // A URL do nosso backend
 
-  login(email: string, senha: string) {
+  login(username: string, senha: string) {
     // Faz o POST para a API e, se der certo, salva o token no LocalStorage do navegador
-    return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, { email, senha })
+    return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, { username, senha })
       .pipe(
         tap(resposta => {
           localStorage.setItem('braille_token', resposta.access_token);
