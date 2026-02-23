@@ -1,27 +1,10 @@
-<main class="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-8 p-4">
-  
-  <h1 class="text-4xl font-bold text-high-black mb-4">
-    Sistema Braillix
+<div class="min-h-screen flex items-center justify-center flex-col gap-4">
+  <h1 class="text-4xl font-bold text-blue-600">
+    Braille API - Frontend Conectado! 🚀
   </h1>
+  <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition-all">
+    Botão com Tailwind
+  </button>
+</div>
 
-  <div class="flex flex-col gap-4 w-full max-w-md">
-    
-    <app-ui-button 
-      label="Entrar no Sistema" 
-      variant="primary"
-      ariaLabel="Entrar no painel administrativo">
-    </app-ui-button>
-
-    <app-ui-button 
-      label="Criar Conta Voluntária" 
-      variant="outline">
-    </app-ui-button>
-
-  </div>
-
-  <p class="text-high-gray mt-8 text-center max-w-lg">
-    Pressione <kbd class="bg-gray-200 px-2 py-1 rounded border border-gray-300">TAB</kbd> 
-    para navegar. Note o anel amarelo de foco!
-  </p>
-
-</main>
+<router-outlet></router-outlet>
