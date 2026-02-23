@@ -4,7 +4,7 @@ import { UiButtonComponent } from './shared/components/ui-button/ui-button';
 
 @Component({
   selector: 'app-root',
-  imports: [UiButtonComponent, RouterOutlet],
+  imports: [ RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
