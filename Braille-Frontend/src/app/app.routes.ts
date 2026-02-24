@@ -1,29 +1,52 @@
 import { Routes } from '@angular/router';
-import { PublicLayout} from './layouts/public-layout/public-layout';
-import { AdminLayout} from './layouts/admin-layout/admin-layout';
+
+// Layouts
+import { PublicLayout } from './layouts/public-layout/public-layout';
+import { AdminLayout } from './layouts/admin-layout/admin-layout';
+
+// Telas Públicas
 import { Home } from './pages/public/home/home';
-import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { Login } from './pages/public/login/login'; 
+
+// Telas Privadas (Admin)
+import { Dashboard } from './pages/admin/dashboard/dashboard';
 import { CadastroWizard } from './pages/admin/beneficiarios/cadastro-wizard/cadastro-wizard';
 
+// O nosso Segurança!
+import { authGuard } from './core/guards/auth-guard';
+
 export const routes: Routes = [
-  // 🌐 ROTA PÚBLICA (Site Institucional)
+  // ==========================================
+  // 🌐 ÁREA PÚBLICA (Site Institucional)
+  // ==========================================
   {
     path: '',
     component: PublicLayout,
     children: [
-      { path: '', component: Home },
-      { path: 'login', component: Login } // 👈 2. Tem que estar exatamente AQUI, com vírgula na linha de cima!
+      { path: '', component: Home }, // Página inicial do site
+      { path: 'login', component: Login } // Tela de entrar no sistema
     ]
   },
 
-  // 🔒 ROTA PRIVADA (Painel de Gestão)
+  // ==========================================
+  // 🔒 ÁREA RESTRITA (Gerenciamento da Instituição)
+  // ==========================================
   {
     path: 'admin',
     component: AdminLayout,
+    canActivate: [authGuard], // 👈 O CADEADO! Ninguém entra aqui sem token.
     children: [
       { path: '', component: Dashboard },
       { path: 'beneficiarios/cadastro', component: CadastroWizard }
+      
+      // Futuramente, adicionaremos rotas com verificação de Role aqui:
+      // { path: 'professores/diario', component: DiarioClasse, canActivate: [roleGuard] }
     ]
-  }
+  },
+
+  // ==========================================
+  // ⚠️ ROTA CORINGA (Página 404)
+  // ==========================================
+  // Se o usuário digitar um link que não existe, manda de volta pro início
+  { path: '**', redirectTo: '' }
 ];
