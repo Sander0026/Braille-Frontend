@@ -227,3 +227,35 @@ $error-red: #D32F2F; // Vermelho escuro acessível (WCAG AA)
     content: '⚠️ ';
   }
 }
+
+// =========================================
+// BANNER DE FEEDBACK
+// =========================================
+.feedback-banner {
+  padding: 1rem 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: fadeIn 0.3s ease-in-out;
+
+  &.sucesso {
+    background-color: $brand-yellow;
+    color: $brand-black;
+    border: 3px solid $brand-black;
+  }
+
+  &.erro {
+    background-color: #FFF5F5;
+    color: $error-red;
+    border: 3px solid $error-red;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

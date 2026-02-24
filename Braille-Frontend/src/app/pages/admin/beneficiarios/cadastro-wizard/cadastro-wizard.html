@@ -1,6 +1,11 @@
 <div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
 
 <div class="wizard-container">
+  <div *ngIf="mensagemFeedback" class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
+    <strong *ngIf="tipoFeedback === 'sucesso'">✅ Sucesso: </strong>
+    <strong *ngIf="tipoFeedback === 'erro'">⚠️ Erro: </strong>
+    {{ mensagemFeedback }}
+  </div>
   <header class="wizard-header">
     <h1>Cadastro de Alunos (PCD Visual)</h1>
     <p>Preencha as informações do aluno. Passo {{ passoAtual }} de 4.</p>
@@ -186,8 +191,8 @@
         Avançar Etapa
       </button>
 
-      <button type="submit" class="btn btn-success" *ngIf="passoAtual === 4" [disabled]="cadastroForm.invalid">
-        Salvar Cadastro
+      <button type="submit" class="btn btn-success" *ngIf="passoAtual === 4" [disabled]="cadastroForm.invalid || isSalvando">
+        {{ isSalvando ? 'Salvando Aguarde...' : 'Salvar Cadastro' }}
       </button>
     </footer>
 
