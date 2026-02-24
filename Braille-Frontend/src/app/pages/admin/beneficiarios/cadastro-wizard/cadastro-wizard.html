@@ -1,0 +1,95 @@
+<div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
+
+<div class="wizard-container">
+  <header class="wizard-header">
+    <h1>Cadastro de Beneficiário (PCD Visual)</h1>
+    <p>Preencha as informações do aluno. Passo {{ passoAtual }} de 4.</p>
+    
+    <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1" aria-valuemax="4">
+      <div class="progress-fill" [style.width.%]="(passoAtual / 4) * 100"></div>
+    </div>
+  </header>
+
+  <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="wizard-form">
+    
+    <fieldset formGroupName="dadosPessoais" *ngIf="passoAtual === 1">
+      <legend>Passo 1: Dados Identificadores</legend>
+
+      <div class="form-group">
+        <label for="nomeCompleto">Nome Completo *</label>
+        <input type="text" id="nomeCompleto" formControlName="nomeCompleto" placeholder="Digite o nome completo" aria-required="true">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dataNascimento">Data de Nascimento *</label>
+          <input type="date" id="dataNascimento" formControlName="dataNascimento" aria-required="true">
+        </div>
+
+        <div class="form-group">
+          <label for="cpfRg">CPF ou RG *</label>
+          <input type="text" id="cpfRg" formControlName="cpfRg" placeholder="Apenas números" aria-required="true">
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="enderecoLocalizacao" *ngIf="passoAtual === 2">
+      <legend>Passo 2: Contato e Localização</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cep">CEP *</label>
+          <input type="text" id="cep" formControlName="cep" placeholder="00000-000">
+          </div>
+      </div>
+
+      <div class="form-group">
+        <label for="rua">Rua *</label>
+        <input type="text" id="rua" formControlName="rua">
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="perfilDeficiencia" *ngIf="passoAtual === 3">
+      <legend>Passo 3: Perfil da Deficiência</legend>
+
+      <div class="form-group">
+        <label for="tipoDeficiencia">Tipo de Deficiência Visual *</label>
+        <select id="tipoDeficiencia" formControlName="tipoDeficiencia" aria-required="true">
+          <option value="">Selecione...</option>
+          <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
+          <option value="BAIXA_VISAO">Baixa Visão / Visão Subnormal</option>
+          <option value="VISAO_MONOCULAR">Visão Monocular</option>
+        </select>
+      </div>
+
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="possuiLaudo" formControlName="possuiLaudo">
+        <label for="possuiLaudo">Possui Laudo Médico Atualizado?</label>
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="socioeconomico" *ngIf="passoAtual === 4">
+      <legend>Passo 4: Situação Socioeconômica e Saúde</legend>
+
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="precisaAcompanhante" formControlName="precisaAcompanhante">
+        <label for="precisaAcompanhante">Necessita de acompanhante para deslocamentos?</label>
+      </div>
+    </fieldset>
+
+    <footer class="wizard-footer">
+      <button type="button" class="btn btn-secondary" (click)="voltarPasso()" *ngIf="passoAtual > 1">
+        Voltar Etapa
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="avancarPasso()" *ngIf="passoAtual < 4" [disabled]="!cadastroForm.get(getGroupName(passoAtual))?.valid">
+        Avançar Etapa
+      </button>
+
+      <button type="submit" class="btn btn-success" *ngIf="passoAtual === 4" [disabled]="cadastroForm.invalid">
+        Salvar Cadastro
+      </button>
+    </footer>
+
+  </form>
+</div>
