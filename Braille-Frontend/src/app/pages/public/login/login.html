@@ -1,21 +1,412 @@
-<div class="min-h-screen bg-black flex flex-col lg:flex-row font-sans text-white overflow-hidden">
+<style>
+  /* Reset and base styles */
+  :host {
+    display: block;
+    width: 100%;
+  }
 
-  <!-- Lado Esquerdo (Banner de Identidade Visual - Fundo Amarelo) -->
-  <div
-    class="relative w-full lg:w-1/2 flex flex-col justify-center items-center bg-yellow-400 p-8 pt-16 lg:p-20 overflow-hidden flex-shrink-0">
-    <!-- Grafismos de fundo para não ficar totalmente liso -->
-    <div
-      class="absolute top-0 right-0 w-64 h-64 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 transform translate-x-1/2 -translate-y-1/2">
-    </div>
-    <div
-      class="absolute bottom-0 left-0 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-3xl opacity-30 transform -translate-x-1/3 translate-y-1/3">
-    </div>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
 
-    <div class="relative z-10 text-center lg:text-left flex flex-col justify-center w-full max-w-md mx-auto h-full">
-      <div
-        class="w-20 h-20 sm:w-24 sm:h-24 bg-black rounded-3xl flex items-center justify-center mb-8 mx-auto lg:mx-0 shadow-2xl transform transition-transform duration-500 hover:-translate-y-2 hover:rotate-3">
-        <!-- Ícone / Logo do Instituto (Pontos representando braille estilizado) -->
-        <svg class="w-10 h-10 sm:w-12 sm:h-12 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+  .login-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #000000;
+    color: #ffffff;
+    overflow-x: hidden;
+  }
+
+  .login-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    flex-direction: column;
+  }
+
+  @media (min-width: 1024px) {
+    .login-container {
+      flex-direction: row;
+    }
+  }
+
+  /* Left Side: Brand/Banner */
+  .brand-section {
+    position: relative;
+    background-color: #fbbf24;
+    /* Yellow-400 */
+    color: #000000;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 2rem;
+    overflow: hidden;
+    flex: 1;
+    text-align: center;
+  }
+
+  @media (min-width: 1024px) {
+    .brand-section {
+      width: 50%;
+      text-align: left;
+      align-items: flex-start;
+      padding: 5rem;
+    }
+  }
+
+  .brand-bg-shape1 {
+    position: absolute;
+    top: -10%;
+    right: -10%;
+    width: 300px;
+    height: 300px;
+    background-color: #fcd34d;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.7;
+  }
+
+  .brand-bg-shape2 {
+    position: absolute;
+    bottom: -10%;
+    left: -10%;
+    width: 400px;
+    height: 400px;
+    background-color: #f59e0b;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.5;
+  }
+
+  .logo-box {
+    position: relative;
+    z-index: 10;
+    width: 80px;
+    height: 80px;
+    background-color: #000000;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease;
+  }
+
+  @media (min-width: 1024px) {
+    .logo-box {
+      width: 100px;
+      height: 100px;
+      margin: 0 0 2rem 0;
+    }
+  }
+
+  .logo-box:hover {
+    transform: translateY(-5px) scale(1.05);
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    color: #fbbf24;
+  }
+
+  .brand-title {
+    position: relative;
+    z-index: 10;
+    font-size: 2.5rem;
+    font-weight: 900;
+    line-height: 1.1;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+  }
+
+  @media (min-width: 1024px) {
+    .brand-title {
+      font-size: 4rem;
+    }
+  }
+
+  .brand-subtitle {
+    position: relative;
+    z-index: 10;
+    font-size: 1.1rem;
+    font-weight: 600;
+    opacity: 0.8;
+    max-width: 300px;
+  }
+
+  /* Right Side: Form */
+  .form-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 3rem 1.5rem;
+    background-color: #000000;
+    flex: 1;
+    position: relative;
+  }
+
+  @media (min-width: 1024px) {
+    .form-section {
+      width: 50%;
+      padding: 5rem;
+    }
+  }
+
+  .form-section::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(251, 191, 36, 0.3), transparent);
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .form-section::before {
+      display: block;
+    }
+  }
+
+  .form-container {
+    width: 100%;
+    max-width: 400px;
+    z-index: 10;
+  }
+
+  .form-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (min-width: 1024px) {
+    .form-header {
+      text-align: left;
+    }
+  }
+
+  .form-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-subtitle {
+    color: #a1a1aa;
+    font-weight: 500;
+  }
+
+  .error-message {
+    background-color: #18181b;
+    border: 1px solid rgba(251, 191, 36, 0.5);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    color: #fbbf24;
+    font-weight: 500;
+    font-size: 0.9rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .input-group {
+    margin-bottom: 1.5rem;
+    width: 100%;
+  }
+
+  .input-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    margin-left: 0.25rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+    width: 100%;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    color: #71717a;
+    transition: color 0.3s;
+  }
+
+  .input-field {
+    width: 100%;
+    background-color: rgba(24, 24, 27, 0.5);
+    border: 2px solid #27272a;
+    border-radius: 16px;
+    padding: 1rem 1rem 1rem 3.5rem;
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    outline: none;
+  }
+
+  .input-field::placeholder {
+    color: #52525b;
+  }
+
+  .input-field:focus {
+    border-color: #fbbf24;
+    background-color: #18181b;
+  }
+
+  .input-field:focus+.input-icon,
+  .input-wrapper:focus-within .input-icon {
+    color: #fbbf24;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+  }
+
+  .checkbox-custom {
+    width: 20px;
+    height: 20px;
+    background-color: #18181b;
+    border: 2px solid #3f3f46;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: border-color 0.2s;
+  }
+
+  .checkbox-wrapper:hover .checkbox-custom {
+    border-color: #fbbf24;
+  }
+
+  .checkbox-input {
+    display: none;
+  }
+
+  .checkbox-input:checked+.checkbox-custom {
+    background-color: #fbbf24;
+    border-color: #fbbf24;
+  }
+
+  .checkbox-input:checked+.checkbox-custom::after {
+    content: '';
+    width: 5px;
+    height: 10px;
+    border: solid #000;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+  }
+
+  .checkbox-label {
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    font-weight: 500;
+  }
+
+  .forgot-link {
+    color: #71717a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .forgot-link:hover {
+    color: #fbbf24;
+  }
+
+  .submit-btn {
+    width: 100%;
+    background-color: #fbbf24;
+    color: #000000;
+    font-weight: 800;
+    font-size: 1.1rem;
+    padding: 1.25rem;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background-color: #fcd34d;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(251, 191, 36, 0.4);
+  }
+
+  .submit-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .spinner {
+    animation: spin 1s linear infinite;
+    width: 24px;
+    height: 24px;
+    margin-right: 0.75rem;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<div class="login-wrapper">
+  <div class="login-container">
+
+    <!-- Lado Esquerdo (Banner de Identidade Visual - Fundo Amarelo) -->
+    <div class="brand-section">
+      <div class="brand-bg-shape1"></div>
+      <div class="brand-bg-shape2"></div>
+
+      <div class="logo-box">
+        <svg class="logo-icon" fill="currentColor" viewBox="0 0 24 24">
           <circle cx="6" cy="6" r="2.5"></circle>
           <circle cx="6" cy="12" r="2.5"></circle>
           <circle cx="6" cy="18" r="2.5"></circle>
@@ -24,125 +415,85 @@
           <circle cx="12" cy="18" r="2.5"></circle>
         </svg>
       </div>
-      <h1
-        class="text-4xl sm:text-5xl lg:text-6xl font-black text-black leading-tight tracking-tighter mb-4 sm:mb-6 uppercase">
+      <h1 class="brand-title">
         Instituto<br />Braille
       </h1>
-      <p class="text-black/80 font-semibold text-base sm:text-lg lg:text-xl max-w-sm mx-auto lg:mx-0">
+      <p class="brand-subtitle">
         Acesso restrito ao painel administrativo.
       </p>
     </div>
-  </div>
 
-  <!-- Lado Direito (Área de Login - Fundo Preto) -->
-  <div
-    class="relative w-full lg:w-1/2 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-24 bg-black min-h-[60vh] lg:min-h-screen flex-grow">
+    <!-- Lado Direito (Área de Login - Fundo Preto) -->
+    <div class="form-section">
+      <div class="form-container">
+        <div class="form-header">
+          <h2 class="form-title">Entrar</h2>
+          <p class="form-subtitle">Insira suas credenciais para continuar</p>
+        </div>
 
-    <!-- Reflexo sutil nas bordas -->
-    <div
-      class="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-yellow-400/20 to-transparent lg:block hidden">
-    </div>
+        <!-- Alerta de Erro -->
+        <div *ngIf="erroLogin" class="error-message">
+          <svg style="width: 24px; height: 24px; margin-right: 0.75rem; flex-shrink: 0;" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{{ erroLogin }}</span>
+        </div>
 
-    <div class="w-full max-w-md relative z-10">
-      <div class="mb-10 text-center lg:text-left">
-        <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-2 tracking-tight">Entrar</h2>
-        <p class="text-zinc-500 font-medium">Insira suas credenciais para continuar</p>
-      </div>
+        <!-- Formulário com Angular bindings intactos -->
+        <form [formGroup]="loginForm" (ngSubmit)="fazerLogin()">
 
-      <!-- Alerta de Erro -->
-      <div *ngIf="erroLogin"
-        class="mb-8 p-4 bg-zinc-900 border border-yellow-400/50 rounded-xl flex items-start shadow-lg transform transition-all animate-in fade-in slide-in-from-top-2">
-        <svg class="w-6 h-6 text-yellow-400 mr-3 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <p class="text-yellow-400 font-medium text-sm sm:text-base leading-snug">{{ erroLogin }}</p>
-      </div>
-
-      <!-- Formulário com Angular bindings intactos -->
-      <form [formGroup]="loginForm" (ngSubmit)="fazerLogin()" class="space-y-6">
-
-        <!-- Campo: Usuário -->
-        <div class="space-y-2">
-          <label for="username"
-            class="block text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-widest ml-1">Usuário</label>
-          <div class="relative group">
-            <input type="text" id="username" formControlName="username"
-              class="w-full bg-zinc-900/50 border-2 border-zinc-800 rounded-2xl px-5 py-4 pl-14 text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-400 focus:bg-zinc-900 transition-all duration-300 text-base shadow-inner"
-              placeholder="Digite seu usuário">
-            <div
-              class="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-yellow-400 transition-colors">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <!-- Campo: Usuário -->
+          <div class="input-group">
+            <label for="username" class="input-label">Usuário</label>
+            <div class="input-wrapper">
+              <input type="text" id="username" formControlName="username" class="input-field"
+                placeholder="Digite seu usuário">
+              <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </div>
           </div>
-        </div>
 
-        <!-- Campo: Senha -->
-        <div class="space-y-2">
-          <label for="senha"
-            class="block text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-widest ml-1">Senha</label>
-          <div class="relative group">
-            <input type="password" id="senha" formControlName="senha"
-              class="w-full bg-zinc-900/50 border-2 border-zinc-800 rounded-2xl px-5 py-4 pl-14 text-white placeholder-zinc-600 focus:outline-none focus:border-yellow-400 focus:bg-zinc-900 transition-all duration-300 text-base shadow-inner"
-              placeholder="••••••••">
-            <div
-              class="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-yellow-400 transition-colors">
-              <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <!-- Campo: Senha -->
+          <div class="input-group">
+            <label for="senha" class="input-label">Senha</label>
+            <div class="input-wrapper">
+              <input type="password" id="senha" formControlName="senha" class="input-field" placeholder="••••••••">
+              <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
           </div>
-        </div>
 
-        <!-- Checkbox & Esqueceu Senha -->
-        <div class="flex items-center justify-between pt-2">
-          <label class="flex items-center cursor-pointer group">
-            <div
-              class="relative flex items-center justify-center w-5 h-5 bg-zinc-900 border-2 border-zinc-700 rounded mr-3 flex-shrink-0 group-hover:border-yellow-400 transition-colors">
-              <input type="checkbox" class="absolute opacity-0 w-full h-full cursor-pointer peer">
-              <svg class="w-3 h-3 text-black opacity-0 peer-checked:opacity-100 transition-opacity" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <div
-                class="absolute inset-0 bg-yellow-400 rounded-sm opacity-0 peer-checked:opacity-100 -z-10 transition-opacity">
-              </div>
-            </div>
-            <span class="text-sm font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">Lembrar
-              acesso</span>
-          </label>
-          <a href="#" class="text-sm font-bold text-zinc-500 hover:text-yellow-400 transition-colors">Esqueci a
-            senha</a>
-        </div>
+          <!-- Checkbox & Esqueceu Senha -->
+          <div class="form-actions">
+            <label class="checkbox-wrapper">
+              <input type="checkbox" class="checkbox-input">
+              <div class="checkbox-custom"></div>
+              <span class="checkbox-label">Lembrar acesso</span>
+            </label>
+            <a href="#" class="forgot-link">Esqueci a senha</a>
+          </div>
 
-        <!-- Botão Submit -->
-        <div class="pt-6">
-          <button type="submit" [disabled]="loginForm.invalid || carregando"
-            class="w-full bg-yellow-400 text-black font-extrabold text-base sm:text-lg py-4 sm:py-5 rounded-2xl hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-400/30 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-yellow-400 disabled:active:scale-100 disabled:cursor-not-allowed transition-all duration-300 flex justify-center items-center overflow-hidden relative group">
+          <!-- Botão Submit -->
+          <button type="submit" [disabled]="loginForm.invalid || carregando" class="submit-btn">
 
-            <span
-              class="absolute w-0 h-0 transition-all duration-500 ease-out bg-black rounded-full group-hover:w-full group-hover:h-56 opacity-10"></span>
-
-            <svg *ngIf="carregando" class="animate-spin -ml-2 mr-3 h-6 w-6 text-black relative z-10"
-              xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor"
+            <svg *ngIf="carregando" class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle style="opacity: 0.25;" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path style="opacity: 0.75;" fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
               </path>
             </svg>
 
-            <span
-              class="relative z-10 tracking-wider uppercase group-hover:tracking-[0.2em] transition-all duration-300">{{
-              carregando ? 'Acessando...' : 'Acessar Plataforma' }}</span>
+            <span>{{ carregando ? 'Acessando...' : 'Acessar Plataforma' }}</span>
           </button>
-        </div>
 
-      </form>
+        </form>
+      </div>
     </div>
-
   </div>
 </div>
