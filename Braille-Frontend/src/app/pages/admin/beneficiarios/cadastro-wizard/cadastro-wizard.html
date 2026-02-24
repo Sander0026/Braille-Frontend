@@ -2,7 +2,7 @@
 
 <div class="wizard-container">
   <header class="wizard-header">
-    <h1>Cadastro de Beneficiário (PCD Visual)</h1>
+    <h1>Cadastro de Alunos (PCD Visual)</h1>
     <p>Preencha as informações do aluno. Passo {{ passoAtual }} de 4.</p>
     
     <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1" aria-valuemax="4">
@@ -34,6 +34,7 @@
         <div class="form-group">
           <label for="cpfRg">CPF ou RG *</label>
           <input type="text" id="cpfRg" formControlName="cpfRg" 
+                 (input)="formatarDocumento($event)" maxlength="14" minlength="7"
                  [class.input-error]="isCampoInvalido('dadosPessoais', 'cpfRg')" placeholder="Apenas números" aria-required="true">
           <span *ngIf="isCampoInvalido('dadosPessoais', 'cpfRg')" class="error-text" role="alert">O documento é obrigatório.</span>
         </div>
@@ -79,26 +80,92 @@
           <input type="text" id="uf" formControlName="uf" [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'uf')" placeholder="Ex: ES">
         </div>
       </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telefoneContato">Telefone de Contato *</label>
+          <input type="tel" id="telefoneContato" formControlName="telefoneContato" 
+                 (input)="formatarTelefone($event)" maxlength="15"
+                 [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" placeholder="(00) 00000-0000">
+          <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" class="error-text" role="alert">O telefone é obrigatório.</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" formControlName="email" placeholder="exemplo@email.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contatoEmergencia">Contato de Emergência</label>
+        <input type="text" id="contatoEmergencia" formControlName="contatoEmergencia" placeholder="Nome e telefone de um familiar">
+      </div>
     </fieldset>
 
     <fieldset formGroupName="perfilDeficiencia" *ngIf="passoAtual === 3">
       <legend>Passo 3: Perfil da Deficiência</legend>
 
-      <div class="form-group">
-        <label for="tipoDeficiencia">Tipo de Deficiência Visual *</label>
-        <select id="tipoDeficiencia" formControlName="tipoDeficiencia" [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')">
-          <option value="">Selecione...</option>
-          <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
-          <option value="BAIXA_VISAO">Baixa Visão / Visão Subnormal</option>
-          <option value="VISAO_MONOCULAR">Visão Monocular</option>
-        </select>
-        <span *ngIf="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')" class="error-text" role="alert">Selecione o tipo.</span>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tipoDeficiencia">Tipo de Deficiência Visual *</label>
+          <select id="tipoDeficiencia" formControlName="tipoDeficiencia" [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')">
+            <option value="">Selecione...</option>
+            <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
+            <option value="BAIXA_VISAO">Baixa Visão / Visão Subnormal</option>
+            <option value="VISAO_MONOCULAR">Visão Monocular</option>
+          </select>
+          <span *ngIf="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')" class="error-text" role="alert">Selecione o tipo.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="causaDeficiencia">Causa da Deficiência</label>
+          <select id="causaDeficiencia" formControlName="causaDeficiencia">
+            <option value="">Selecione...</option>
+            <option value="CONGENITA">Congênita (Desde o nascimento)</option>
+            <option value="ADQUIRIDA">Adquirida</option>
+          </select>
+        </div>
       </div>
 
-      <div class="form-group checkbox-group">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="idadeOcorrencia">Idade em que ocorreu (se adquirida)</label>
+          <input type="text" id="idadeOcorrencia" formControlName="idadeOcorrencia" placeholder="Ex: Aos 15 anos">
+        </div>
+
+        <div class="form-group">
+          <label for="tecAssistivas">Tecnologias Assistivas Utilizadas</label>
+          <input type="text" id="tecAssistivas" formControlName="tecAssistivas" placeholder="Ex: Bengala, Leitor de Tela, Cão-guia">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="prefAcessibilidade">Preferência de Acessibilidade (Comunicação) *</label>
+        <select id="prefAcessibilidade" formControlName="prefAcessibilidade" [class.input-error]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')">
+          <option value="">Selecione...</option>
+          <option value="BRAILLE">Braille</option>
+          <option value="FONTE_AMPLIADA">Texto com Fonte Ampliada</option>
+          <option value="ARQUIVO_DIGITAL">Arquivo Digital Acessível (PDF/Doc para leitor de tela)</option>
+          <option value="AUDIO">Áudio</option>
+        </select>
+        <span *ngIf="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')" class="error-text" role="alert">A preferência de comunicação é obrigatória.</span>
+      </div>
+
+      <div class="form-group checkbox-group" style="margin-bottom: 1.5rem;">
         <input type="checkbox" id="possuiLaudo" formControlName="possuiLaudo">
         <label for="possuiLaudo">Possui Laudo Médico Atualizado?</label>
       </div>
+
+      <div class="form-group" *ngIf="cadastroForm.get('perfilDeficiencia.possuiLaudo')?.value" 
+           style="padding: 1.5rem; background-color: #fffbea; border: 3px dashed #FFD700; border-radius: 8px;">
+        <label for="laudoArquivo" style="color: #111;">Anexar Imagem do Laudo Médico</label>
+        <p style="font-size: 0.9rem; color: #555; margin-bottom: 1rem;">Envie apenas arquivos de imagem digitalizados (JPG, PNG).</p>
+        
+        <input type="file" id="laudoArquivo" formControlName="laudoArquivo" 
+               accept="image/*" (change)="onFileSelected($event)" 
+               style="border: none; padding: 0; background: transparent; box-shadow: none;">
+      </div>
+
     </fieldset>
 
     <fieldset formGroupName="socioeconomico" *ngIf="passoAtual === 4">

@@ -107,21 +107,18 @@ fieldset {
     font-size: 1.05rem;
   }
 
-  input[type="text"], input[type="date"], select {
+  input[type="text"], input[type="date"], input[type="email"], input[type="tel"], input[type="number"], select {
     width: 100%;
     padding: 0.85rem;
-    // Borda padrão mais escura para contraste
     border: 2px solid #999;
     border-radius: 6px;
-    font-size: 1.1rem; // Fonte ligeiramente maior
+    font-size: 1.1rem;
     background-color: #fff;
     color: $brand-black;
 
-    // ESTADO DE FOCO (Quando clica no campo)
     &:focus {
-      border-color: $brand-black; // Borda fica preta
+      border-color: $brand-black;
       outline: none;
-      // Brilho amarelo forte em volta
       box-shadow: 0 0 0 4px rgba($brand-yellow, 0.6);
     }
   }

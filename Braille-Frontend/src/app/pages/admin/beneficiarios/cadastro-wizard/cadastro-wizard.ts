@@ -50,6 +50,7 @@ export class CadastroWizard implements OnInit {
         causaDeficiencia: [''],
         idadeOcorrencia: [''],
         possuiLaudo: [false],
+        laudoArquivo: [''],
         tecAssistivas: [''],
         prefAcessibilidade: ['', Validators.required]
       }),
@@ -98,6 +99,62 @@ export class CadastroWizard implements OnInit {
     }
   }
 
+  // Máscara Dinâmica de CPF e RG
+  formatarDocumento(event: any) {
+    let input = event.target;
+    // 1. Remove tudo que não for número
+    let valor = input.value.replace(/\D/g, ''); 
+    
+    // 2. Limita a 11 dígitos no máximo (Tamanho do CPF)
+    if (valor.length > 11) {
+      valor = valor.substring(0, 11);
+    }
+
+    // 3. Aplica a máscara enquanto digita
+    if (valor.length <= 9) {
+      // Máscara genérica de RG (Ex: 12.345.678-9)
+      valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+      // Máscara de CPF (Ex: 123.456.789-00)
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    }
+
+    // 4. Atualiza o valor no HTML e no "Cérebro" do formulário
+    input.value = valor;
+    this.cadastroForm.get('dadosPessoais.cpfRg')?.setValue(valor, { emitEvent: false });
+  }
+
+  // Máscara Dinâmica de Telefone (Fixo e Celular)
+  formatarTelefone(event: any) {
+    let input = event.target;
+    // 1. Remove tudo que não for número
+    let valor = input.value.replace(/\D/g, ''); 
+    
+    // 2. Limita a 11 dígitos no máximo (DDD + 9 dígitos)
+    if (valor.length > 11) {
+      valor = valor.substring(0, 11);
+    }
+
+    // 3. Aplica a máscara enquanto digita
+    if (valor.length <= 10) {
+      // Máscara para Fixo (Ex: (27) 3333-4444)
+      valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
+      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+    } else {
+      // Máscara para Celular (Ex: (27) 99999-8888)
+      valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
+      valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+    }
+
+    // 4. Atualiza o valor no HTML e no "Cérebro" do formulário
+    input.value = valor;
+    this.cadastroForm.get('enderecoLocalizacao.telefoneContato')?.setValue(valor, { emitEvent: false });
+  }
+
   //  VERIFICADOR DE ERRO PARA O HTML
   isCampoInvalido(grupo: string, campo: string): boolean {
     const controle = this.cadastroForm.get(`${grupo}.${campo}`);
@@ -141,6 +198,15 @@ export class CadastroWizard implements OnInit {
       console.log('Dados prontos:', this.cadastroForm.value);
     } else {
       this.cadastroForm.markAllAsTouched();
+    }
+  }
+
+  // 👇 NOVA FUNÇÃO: Captura o arquivo de imagem do laudo
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.anunciarParaLeitorDeTela(`Foto do laudo selecionada: ${file.name}`);
+      // Futuramente, enviaremos isso para o Cloudinary!
     }
   }
 }
