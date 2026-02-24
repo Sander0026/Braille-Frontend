@@ -1,18 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http'; 
+import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { BeneficiariosService } from '../services/beneficiarios.service';
 
 @Component({
   selector: 'app-cadastro-wizard',
-  standalone: true, 
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule], 
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './cadastro-wizard.html',
-  styleUrls: ['./cadastro-wizard.scss']
+  styleUrls: ['./cadastro-wizard.scss'],
 })
 export class CadastroWizard implements OnInit {
-  
   passoAtual = 1;
   cadastroForm!: FormGroup;
   arquivoLaudoSelecionado: File | null = null;
@@ -20,11 +19,10 @@ export class CadastroWizard implements OnInit {
   mensagemFeedback = '';
   tipoFeedback: 'sucesso' | 'erro' | '' = '';
 
-  // Injetamos o HttpClient aqui no construtor
   constructor(
-    private fb: FormBuilder, 
+    private fb: FormBuilder,
     private http: HttpClient,
-    private beneficiariosService: BeneficiariosService 
+    private beneficiariosService: BeneficiariosService,
   ) {}
 
   ngOnInit(): void {
@@ -38,7 +36,7 @@ export class CadastroWizard implements OnInit {
         dataNascimento: ['', Validators.required],
         cpfRg: ['', Validators.required],
         genero: [''],
-        estadoCivil: ['']
+        estadoCivil: [''],
       }),
 
       enderecoLocalizacao: this.fb.group({
@@ -48,10 +46,11 @@ export class CadastroWizard implements OnInit {
         complemento: [''],
         bairro: ['', Validators.required],
         cidade: ['', Validators.required],
-        uf: ['', Validators.required],
+        uf: ['', [Validators.required, Validators.maxLength(2)]],
+        pontoReferencia: [''],
         telefoneContato: ['', Validators.required],
-        email: [''],
-        contatoEmergencia: ['']
+        email: ['', Validators.email],
+        contatoEmergencia: [''],
       }),
 
       perfilDeficiencia: this.fb.group({
@@ -59,9 +58,10 @@ export class CadastroWizard implements OnInit {
         causaDeficiencia: [''],
         idadeOcorrencia: [''],
         possuiLaudo: [false],
+        // laudoArquivo é SOMENTE para a UI — NÃO é enviado ao backend diretamente
         laudoArquivo: [''],
         tecAssistivas: [''],
-        prefAcessibilidade: ['', Validators.required]
+        prefAcessibilidade: ['', Validators.required],
       }),
 
       socioeconomico: this.fb.group({
@@ -69,105 +69,92 @@ export class CadastroWizard implements OnInit {
         profissao: [''],
         rendaFamiliar: [''],
         beneficiosGov: [''],
+        composicaoFamiliar: [''],
         precisaAcompanhante: [false],
         acompOftalmologico: [false],
-        outrasComorbidades: ['']
-      })
+        outrasComorbidades: [''],
+      }),
     });
   }
 
-  // A MÁGICA DO VIACEP
+  // ViaCEP — Busca automática de endereço pelo CEP
   buscarCep() {
     let cep = this.cadastroForm.get('enderecoLocalizacao.cep')?.value;
     if (!cep) return;
-    
-    cep = cep.replace(/\D/g, ''); // Limpa traços e pontos
+
+    cep = cep.replace(/\D/g, '');
 
     if (cep.length === 8) {
       this.anunciarParaLeitorDeTela('Buscando endereço pelo CEP...');
-      
+
       this.http.get(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
         next: (dados: any) => {
           if (dados.erro) {
             this.anunciarParaLeitorDeTela('CEP não encontrado. Verifique a digitação.');
             return;
           }
-          
-          // Preenche os campos sozinhos!
+
           this.cadastroForm.get('enderecoLocalizacao')?.patchValue({
             rua: dados.logradouro,
             bairro: dados.bairro,
             cidade: dados.localidade,
-            uf: dados.uf
+            uf: dados.uf,
           });
-          
-          this.anunciarParaLeitorDeTela(`Endereço encontrado e preenchido: Rua ${dados.logradouro}, Bairro ${dados.bairro}.`);
+
+          this.anunciarParaLeitorDeTela(
+            `Endereço encontrado: ${dados.logradouro}, ${dados.bairro}, ${dados.localidade} - ${dados.uf}.`,
+          );
         },
-        error: () => this.anunciarParaLeitorDeTela('Erro ao conectar com o serviço de CEP.')
+        error: () => this.anunciarParaLeitorDeTela('Erro ao conectar com o serviço de CEP.'),
       });
     }
   }
 
-  // Máscara Dinâmica de CPF e RG
+  // Máscara de CPF / RG
   formatarDocumento(event: any) {
-    let input = event.target;
-    // 1. Remove tudo que não for número
-    let valor = input.value.replace(/\D/g, ''); 
-    
-    // 2. Limita a 11 dígitos no máximo (Tamanho do CPF)
-    if (valor.length > 11) {
-      valor = valor.substring(0, 11);
-    }
+    const input = event.target;
+    let valor = input.value.replace(/\D/g, '');
 
-    // 3. Aplica a máscara enquanto digita
+    if (valor.length > 11) valor = valor.substring(0, 11);
+
     if (valor.length <= 9) {
-      // Máscara genérica de RG (Ex: 12.345.678-9)
       valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
       valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     } else {
-      // Máscara de CPF (Ex: 123.456.789-00)
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
       valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
     }
 
-    // 4. Atualiza o valor no HTML e no "Cérebro" do formulário
     input.value = valor;
     this.cadastroForm.get('dadosPessoais.cpfRg')?.setValue(valor, { emitEvent: false });
   }
 
-  // Máscara Dinâmica de Telefone (Fixo e Celular)
+  // Máscara de Telefone
   formatarTelefone(event: any) {
-    let input = event.target;
-    // 1. Remove tudo que não for número
-    let valor = input.value.replace(/\D/g, ''); 
-    
-    // 2. Limita a 11 dígitos no máximo (DDD + 9 dígitos)
-    if (valor.length > 11) {
-      valor = valor.substring(0, 11);
-    }
+    const input = event.target;
+    let valor = input.value.replace(/\D/g, '');
 
-    // 3. Aplica a máscara enquanto digita
+    if (valor.length > 11) valor = valor.substring(0, 11);
+
     if (valor.length <= 10) {
-      // Máscara para Fixo (Ex: (27) 3333-4444)
       valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
       valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
     } else {
-      // Máscara para Celular (Ex: (27) 99999-8888)
       valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
       valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
     }
 
-    // 4. Atualiza o valor no HTML e no "Cérebro" do formulário
     input.value = valor;
-    this.cadastroForm.get('enderecoLocalizacao.telefoneContato')?.setValue(valor, { emitEvent: false });
+    this.cadastroForm
+      .get('enderecoLocalizacao.telefoneContato')
+      ?.setValue(valor, { emitEvent: false });
   }
 
-  //  VERIFICADOR DE ERRO PARA O HTML
+  // Verifica se campo é inválido (para exibir erro)
   isCampoInvalido(grupo: string, campo: string): boolean {
     const controle = this.cadastroForm.get(`${grupo}.${campo}`);
-    // Retorna TRUE se o campo for inválido E o usuário já tiver tocado/digitado nele
     return !!(controle && controle.invalid && (controle.dirty || controle.touched));
   }
 
@@ -182,9 +169,9 @@ export class CadastroWizard implements OnInit {
 
     if (formGrupo?.valid) {
       this.passoAtual++;
-      this.anunciarParaLeitorDeTela(`Avançou para a etapa ${this.passoAtual}`);
+      this.anunciarParaLeitorDeTela(`Avançou para a etapa ${this.passoAtual} de 4.`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      // Se tiver erro, marca tudo como "tocado" para acender os alertas vermelhos
       formGrupo?.markAllAsTouched();
       this.anunciarParaLeitorDeTela('Existem campos obrigatórios não preenchidos nesta etapa.');
     }
@@ -193,7 +180,8 @@ export class CadastroWizard implements OnInit {
   voltarPasso() {
     if (this.passoAtual > 1) {
       this.passoAtual--;
-      this.anunciarParaLeitorDeTela(`Voltou para a etapa ${this.passoAtual}`);
+      this.anunciarParaLeitorDeTela(`Voltou para a etapa ${this.passoAtual} de 4.`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
@@ -202,10 +190,10 @@ export class CadastroWizard implements OnInit {
     if (anuncio) anuncio.textContent = mensagem;
   }
 
- salvarCadastro() {
+  salvarCadastro() {
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
-      this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho.');
+      this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho antes de continuar.');
       return;
     }
 
@@ -213,66 +201,94 @@ export class CadastroWizard implements OnInit {
     this.mensagemFeedback = '';
     this.anunciarParaLeitorDeTela('Salvando cadastro, por favor aguarde...');
 
-    // 1. Junta todos os dados dos 4 passos em um objeto só para o Backend
     const formValues = this.cadastroForm.value;
+
+    // ✅ FIX: Monta o payload SEM o campo laudoArquivo (campo exclusivo da UI)
+    // e SEM campos de endereço que não existem no grupo correto
+    const { laudoArquivo, ...perfilDeficienciaSemArquivo } = formValues.perfilDeficiencia;
+
     const payloadBackend = {
       ...formValues.dadosPessoais,
       ...formValues.enderecoLocalizacao,
-      ...formValues.perfilDeficiencia,
-      ...formValues.socioeconomico
+      ...perfilDeficienciaSemArquivo,
+      ...formValues.socioeconomico,
     };
 
-    // 2. Verifica se tem foto para subir antes de salvar os dados
+    // ✅ FIX: Remove campos com string vazia para não falhar @IsEnum() do backend
+    // O backend usa @IsOptional() em todos os enums, então undefined é aceito
+    const enumFields = ['tipoDeficiencia', 'causaDeficiencia', 'prefAcessibilidade'];
+    for (const field of enumFields) {
+      if (payloadBackend[field] === '' || payloadBackend[field] === null) {
+        delete payloadBackend[field];
+      }
+    }
+
+    // ✅ FIX: Remove strings vazias de campos opcionais para manter o banco limpo
+    const optionalStringFields = [
+      'genero', 'estadoCivil', 'complemento', 'pontoReferencia', 'email',
+      'contatoEmergencia', 'idadeOcorrencia', 'tecAssistivas', 'escolaridade',
+      'profissao', 'rendaFamiliar', 'beneficiosGov', 'composicaoFamiliar', 'outrasComorbidades',
+    ];
+    for (const field of optionalStringFields) {
+      if (payloadBackend[field] === '') {
+        delete payloadBackend[field];
+      }
+    }
+
+    // Se tem laudo para subir, faz o upload primeiro
     if (this.arquivoLaudoSelecionado) {
       this.beneficiariosService.uploadImagem(this.arquivoLaudoSelecionado).subscribe({
         next: (resposta) => {
-          // Foto subiu! Coloca o link do Cloudinary no payload
-          payloadBackend.laudoArquivo = resposta.url;
+          // Foto subiu com sucesso no Cloudinary — salva a URL no campo correto
+          payloadBackend['laudoUrl'] = resposta.url;
           this.enviarDadosParaBanco(payloadBackend);
         },
-        error: () => this.exibirFeedback('Erro ao enviar a imagem do laudo.', 'erro')
+        error: () => {
+          this.exibirFeedback('Erro ao enviar a imagem do laudo. Tente novamente.', 'erro');
+        },
       });
     } else {
-      // Não tem foto, salva direto!
       this.enviarDadosParaBanco(payloadBackend);
     }
   }
 
-  // Função auxiliar que manda para o banco e limpa a tela
   private enviarDadosParaBanco(dados: any) {
     this.beneficiariosService.criarBeneficiario(dados).subscribe({
       next: () => {
-        this.exibirFeedback('Beneficiário cadastrado com sucesso!', 'sucesso');
-        this.cadastroForm.reset(); // Limpa o formulário
-        this.passoAtual = 1;       // Volta pro passo 1
+        this.exibirFeedback('Aluno cadastrado com sucesso!', 'sucesso');
+        this.cadastroForm.reset();
+        this.passoAtual = 1;
         this.arquivoLaudoSelecionado = null;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       },
       error: (err) => {
-        console.error(err);
-        this.exibirFeedback('Erro ao salvar no banco de dados. Verifique a conexão.', 'erro');
-      }
+        console.error('Erro ao salvar beneficiário:', err);
+        const mensagemErro =
+          err?.error?.message || 'Erro ao salvar. Verifique os dados e tente novamente.';
+        this.exibirFeedback(
+          Array.isArray(mensagemErro) ? mensagemErro.join(', ') : mensagemErro,
+          'erro',
+        );
+      },
     });
   }
 
-  // Controla as mensagens coloridas na tela
   private exibirFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {
     this.isSalvando = false;
     this.mensagemFeedback = mensagem;
     this.tipoFeedback = tipo;
     this.anunciarParaLeitorDeTela(mensagem);
 
-    // Some a mensagem de sucesso depois de 5 segundos
     if (tipo === 'sucesso') {
-      setTimeout(() => this.mensagemFeedback = '', 5000);
+      setTimeout(() => (this.mensagemFeedback = ''), 6000);
     }
   }
 
-  // Captura o arquivo de imagem do laudo
- onFileSelected(event: any) {
+  onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      this.arquivoLaudoSelecionado = file; // 👈 Salva o arquivo real
-      this.anunciarParaLeitorDeTela(`Foto do laudo selecionada: ${file.name}`);
+      this.arquivoLaudoSelecionado = file;
+      this.anunciarParaLeitorDeTela(`Arquivo de laudo selecionado: ${file.name}`);
     }
   }
 }
