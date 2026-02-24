@@ -33,7 +33,7 @@ export class BeneficiariosService {
 
   criarBeneficiario(dados: any): Observable<any> {
     // 👇 Aqui também!
-    return this.http.post(`${this.apiUrl}/beneficiarios`, dados, { 
+    return this.http.post(`${this.apiUrl}/beneficiaries`, dados, { 
       headers: this.getHeaders() 
     });
   }
