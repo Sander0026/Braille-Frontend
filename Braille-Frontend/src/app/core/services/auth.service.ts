@@ -1,27 +1,26 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { tap } from 'rxjs/operators';
+import { Observable, tap } from 'rxjs';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-  private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:3000/auth'; // A URL do nosso backend
+  private apiUrl = 'http://localhost:3000/auth'; // Rota do nosso NestJS
 
-  login(username: string, senha: string) {
-    // Faz o POST para a API e, se der certo, salva o token no LocalStorage do navegador
-    return this.http.post<{ access_token: string }>(`${this.apiUrl}/login`, { username, senha })
-      .pipe(
-        tap(resposta => {
-          localStorage.setItem('braille_token', resposta.access_token);
-        })
-      );
-  }
+  constructor(private http: HttpClient) {}
 
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('braille_token');
+  login(credenciais: { username: string; senha: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, credenciais).pipe(
+      tap((resposta: any) => {
+        if (resposta.access_token) {
+          localStorage.setItem('token_braille', resposta.access_token);
+        }
+      })
+    );
   }
 
   logout() {
-    localStorage.removeItem('braille_token');
+    localStorage.removeItem('token_braille');
   }
 }
