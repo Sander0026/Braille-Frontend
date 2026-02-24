@@ -1,0 +1,194 @@
+<div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
+
+<div class="wizard-container">
+  <header class="wizard-header">
+    <h1>Cadastro de Alunos (PCD Visual)</h1>
+    <p>Preencha as informações do aluno. Passo {{ passoAtual }} de 4.</p>
+    
+    <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1" aria-valuemax="4">
+      <div class="progress-fill" [style.width.%]="(passoAtual / 4) * 100"></div>
+    </div>
+  </header>
+
+  <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="wizard-form">
+    
+    <fieldset formGroupName="dadosPessoais" *ngIf="passoAtual === 1">
+      <legend>Passo 1: Dados Identificadores</legend>
+
+      <div class="form-group">
+        <label for="nomeCompleto">Nome Completo *</label>
+        <input type="text" id="nomeCompleto" formControlName="nomeCompleto" 
+               [class.input-error]="isCampoInvalido('dadosPessoais', 'nomeCompleto')" 
+               placeholder="Digite o nome completo" aria-required="true">
+        <span *ngIf="isCampoInvalido('dadosPessoais', 'nomeCompleto')" class="error-text" role="alert">O nome completo é obrigatório.</span>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dataNascimento">Data de Nascimento *</label>
+          <input type="date" id="dataNascimento" formControlName="dataNascimento" 
+                 [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true">
+          <span *ngIf="isCampoInvalido('dadosPessoais', 'dataNascimento')" class="error-text" role="alert">A data é obrigatória.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="cpfRg">CPF ou RG *</label>
+          <input type="text" id="cpfRg" formControlName="cpfRg" 
+                 (input)="formatarDocumento($event)" maxlength="14" minlength="7"
+                 [class.input-error]="isCampoInvalido('dadosPessoais', 'cpfRg')" placeholder="Apenas números" aria-required="true">
+          <span *ngIf="isCampoInvalido('dadosPessoais', 'cpfRg')" class="error-text" role="alert">O documento é obrigatório.</span>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="enderecoLocalizacao" *ngIf="passoAtual === 2">
+      <legend>Passo 2: Contato e Localização</legend>
+
+      <div class="form-row">
+        <div class="form-group" style="flex: 0.5;">
+          <label for="cep">CEP *</label>
+          <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
+                 [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="Ex: 29000000">
+          <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'cep')" class="error-text" role="alert">Informe um CEP válido.</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="rua">Rua *</label>
+          <input type="text" id="rua" formControlName="rua" [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')">
+          <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'rua')" class="error-text" role="alert">A rua é obrigatória.</span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group" style="flex: 0.3;">
+          <label for="numero">Número *</label>
+          <input type="text" id="numero" formControlName="numero" [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'numero')">
+        </div>
+        <div class="form-group">
+          <label for="bairro">Bairro *</label>
+          <input type="text" id="bairro" formControlName="bairro" [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'bairro')">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cidade">Cidade *</label>
+          <input type="text" id="cidade" formControlName="cidade" [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cidade')">
+        </div>
+        <div class="form-group" style="flex: 0.3;">
+          <label for="uf">UF *</label>
+          <input type="text" id="uf" formControlName="uf" [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'uf')" placeholder="Ex: ES">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="telefoneContato">Telefone de Contato *</label>
+          <input type="tel" id="telefoneContato" formControlName="telefoneContato" 
+                 (input)="formatarTelefone($event)" maxlength="15"
+                 [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" placeholder="(00) 00000-0000">
+          <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" class="error-text" role="alert">O telefone é obrigatório.</span>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" formControlName="email" placeholder="exemplo@email.com">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="contatoEmergencia">Contato de Emergência</label>
+        <input type="text" id="contatoEmergencia" formControlName="contatoEmergencia" placeholder="Nome e telefone de um familiar">
+      </div>
+    </fieldset>
+
+    <fieldset formGroupName="perfilDeficiencia" *ngIf="passoAtual === 3">
+      <legend>Passo 3: Perfil da Deficiência</legend>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="tipoDeficiencia">Tipo de Deficiência Visual *</label>
+          <select id="tipoDeficiencia" formControlName="tipoDeficiencia" [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')">
+            <option value="">Selecione...</option>
+            <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
+            <option value="BAIXA_VISAO">Baixa Visão / Visão Subnormal</option>
+            <option value="VISAO_MONOCULAR">Visão Monocular</option>
+          </select>
+          <span *ngIf="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')" class="error-text" role="alert">Selecione o tipo.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="causaDeficiencia">Causa da Deficiência</label>
+          <select id="causaDeficiencia" formControlName="causaDeficiencia">
+            <option value="">Selecione...</option>
+            <option value="CONGENITA">Congênita (Desde o nascimento)</option>
+            <option value="ADQUIRIDA">Adquirida</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="idadeOcorrencia">Idade em que ocorreu (se adquirida)</label>
+          <input type="text" id="idadeOcorrencia" formControlName="idadeOcorrencia" placeholder="Ex: Aos 15 anos">
+        </div>
+
+        <div class="form-group">
+          <label for="tecAssistivas">Tecnologias Assistivas Utilizadas</label>
+          <input type="text" id="tecAssistivas" formControlName="tecAssistivas" placeholder="Ex: Bengala, Leitor de Tela, Cão-guia">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="prefAcessibilidade">Preferência de Acessibilidade (Comunicação) *</label>
+        <select id="prefAcessibilidade" formControlName="prefAcessibilidade" [class.input-error]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')">
+          <option value="">Selecione...</option>
+          <option value="BRAILLE">Braille</option>
+          <option value="FONTE_AMPLIADA">Texto com Fonte Ampliada</option>
+          <option value="ARQUIVO_DIGITAL">Arquivo Digital Acessível (PDF/Doc para leitor de tela)</option>
+          <option value="AUDIO">Áudio</option>
+        </select>
+        <span *ngIf="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')" class="error-text" role="alert">A preferência de comunicação é obrigatória.</span>
+      </div>
+
+      <div class="form-group checkbox-group" style="margin-bottom: 1.5rem;">
+        <input type="checkbox" id="possuiLaudo" formControlName="possuiLaudo">
+        <label for="possuiLaudo">Possui Laudo Médico Atualizado?</label>
+      </div>
+
+      <div class="form-group" *ngIf="cadastroForm.get('perfilDeficiencia.possuiLaudo')?.value" 
+           style="padding: 1.5rem; background-color: #fffbea; border: 3px dashed #FFD700; border-radius: 8px;">
+        <label for="laudoArquivo" style="color: #111;">Anexar Imagem do Laudo Médico</label>
+        <p style="font-size: 0.9rem; color: #555; margin-bottom: 1rem;">Envie apenas arquivos de imagem digitalizados (JPG, PNG).</p>
+        
+        <input type="file" id="laudoArquivo" formControlName="laudoArquivo" 
+               accept="image/*" (change)="onFileSelected($event)" 
+               style="border: none; padding: 0; background: transparent; box-shadow: none;">
+      </div>
+
+    </fieldset>
+
+    <fieldset formGroupName="socioeconomico" *ngIf="passoAtual === 4">
+      <legend>Passo 4: Situação Socioeconômica e Saúde</legend>
+
+      <div class="form-group checkbox-group">
+        <input type="checkbox" id="precisaAcompanhante" formControlName="precisaAcompanhante">
+        <label for="precisaAcompanhante">Necessita de acompanhante para deslocamentos?</label>
+      </div>
+    </fieldset>
+
+    <footer class="wizard-footer">
+      <button type="button" class="btn btn-secondary" (click)="voltarPasso()" *ngIf="passoAtual > 1">
+        Voltar Etapa
+      </button>
+
+      <button type="button" class="btn btn-primary" (click)="avancarPasso()" *ngIf="passoAtual < 4" [disabled]="!cadastroForm.get(getGroupName(passoAtual))?.valid">
+        Avançar Etapa
+      </button>
+
+      <button type="submit" class="btn btn-success" *ngIf="passoAtual === 4" [disabled]="cadastroForm.invalid">
+        Salvar Cadastro
+      </button>
+    </footer>
+
+  </form> </div>
