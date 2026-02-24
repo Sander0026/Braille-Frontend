@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http'; 
+import { BeneficiariosService } from '../services/beneficiarios.service';
 
 @Component({
   selector: 'app-cadastro-wizard',
@@ -14,9 +15,17 @@ export class CadastroWizard implements OnInit {
   
   passoAtual = 1;
   cadastroForm!: FormGroup;
+  arquivoLaudoSelecionado: File | null = null;
+  isSalvando = false;
+  mensagemFeedback = '';
+  tipoFeedback: 'sucesso' | 'erro' | '' = '';
 
   // Injetamos o HttpClient aqui no construtor
-  constructor(private fb: FormBuilder, private http: HttpClient) {}
+  constructor(
+    private fb: FormBuilder, 
+    private http: HttpClient,
+    private beneficiariosService: BeneficiariosService 
+  ) {}
 
   ngOnInit(): void {
     this.iniciarFormulario();
@@ -193,20 +202,77 @@ export class CadastroWizard implements OnInit {
     if (anuncio) anuncio.textContent = mensagem;
   }
 
-  salvarCadastro() {
-    if (this.cadastroForm.valid) {
-      console.log('Dados prontos:', this.cadastroForm.value);
-    } else {
+ salvarCadastro() {
+    if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
+      this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho.');
+      return;
+    }
+
+    this.isSalvando = true;
+    this.mensagemFeedback = '';
+    this.anunciarParaLeitorDeTela('Salvando cadastro, por favor aguarde...');
+
+    // 1. Junta todos os dados dos 4 passos em um objeto só para o Backend
+    const formValues = this.cadastroForm.value;
+    const payloadBackend = {
+      ...formValues.dadosPessoais,
+      ...formValues.enderecoLocalizacao,
+      ...formValues.perfilDeficiencia,
+      ...formValues.socioeconomico
+    };
+
+    // 2. Verifica se tem foto para subir antes de salvar os dados
+    if (this.arquivoLaudoSelecionado) {
+      this.beneficiariosService.uploadImagem(this.arquivoLaudoSelecionado).subscribe({
+        next: (resposta) => {
+          // Foto subiu! Coloca o link do Cloudinary no payload
+          payloadBackend.laudoArquivo = resposta.url;
+          this.enviarDadosParaBanco(payloadBackend);
+        },
+        error: () => this.exibirFeedback('Erro ao enviar a imagem do laudo.', 'erro')
+      });
+    } else {
+      // Não tem foto, salva direto!
+      this.enviarDadosParaBanco(payloadBackend);
     }
   }
 
-  // 👇 NOVA FUNÇÃO: Captura o arquivo de imagem do laudo
-  onFileSelected(event: any) {
+  // Função auxiliar que manda para o banco e limpa a tela
+  private enviarDadosParaBanco(dados: any) {
+    this.beneficiariosService.criarBeneficiario(dados).subscribe({
+      next: () => {
+        this.exibirFeedback('Beneficiário cadastrado com sucesso!', 'sucesso');
+        this.cadastroForm.reset(); // Limpa o formulário
+        this.passoAtual = 1;       // Volta pro passo 1
+        this.arquivoLaudoSelecionado = null;
+      },
+      error: (err) => {
+        console.error(err);
+        this.exibirFeedback('Erro ao salvar no banco de dados. Verifique a conexão.', 'erro');
+      }
+    });
+  }
+
+  // Controla as mensagens coloridas na tela
+  private exibirFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {
+    this.isSalvando = false;
+    this.mensagemFeedback = mensagem;
+    this.tipoFeedback = tipo;
+    this.anunciarParaLeitorDeTela(mensagem);
+
+    // Some a mensagem de sucesso depois de 5 segundos
+    if (tipo === 'sucesso') {
+      setTimeout(() => this.mensagemFeedback = '', 5000);
+    }
+  }
+
+  // Captura o arquivo de imagem do laudo
+ onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
+      this.arquivoLaudoSelecionado = file; // 👈 Salva o arquivo real
       this.anunciarParaLeitorDeTela(`Foto do laudo selecionada: ${file.name}`);
-      // Futuramente, enviaremos isso para o Cloudinary!
     }
   }
 }
