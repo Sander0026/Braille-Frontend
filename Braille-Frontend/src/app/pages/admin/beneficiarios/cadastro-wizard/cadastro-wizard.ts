@@ -1,23 +1,22 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http'; 
 
 @Component({
   selector: 'app-cadastro-wizard',
-  standalone: true, // Se o seu Angular for 17+, usamos standalone components
-  imports: [CommonModule, ReactiveFormsModule],
+  standalone: true, 
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule], 
   templateUrl: './cadastro-wizard.html',
   styleUrls: ['./cadastro-wizard.scss']
 })
 export class CadastroWizard implements OnInit {
   
-  // Controle de qual passo o usuário está (1 a 4)
   passoAtual = 1;
-
-  // O Formulário Gigante dividido em pedaços
   cadastroForm!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  // Injetamos o HttpClient aqui no construtor
+  constructor(private fb: FormBuilder, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.iniciarFormulario();
@@ -25,18 +24,16 @@ export class CadastroWizard implements OnInit {
 
   iniciarFormulario() {
     this.cadastroForm = this.fb.group({
-      // Passo 1: Dados Pessoais
       dadosPessoais: this.fb.group({
-        nomeCompleto: ['', Validators.required],
+        nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
         dataNascimento: ['', Validators.required],
         cpfRg: ['', Validators.required],
         genero: [''],
         estadoCivil: ['']
       }),
 
-      // Passo 2: Endereço (com busca de CEP futura)
       enderecoLocalizacao: this.fb.group({
-        cep: ['', Validators.required],
+        cep: ['', [Validators.required, Validators.minLength(8)]],
         rua: ['', Validators.required],
         numero: ['', Validators.required],
         complemento: [''],
@@ -48,7 +45,6 @@ export class CadastroWizard implements OnInit {
         contatoEmergencia: ['']
       }),
 
-      // Passo 3: Perfil da Deficiência
       perfilDeficiencia: this.fb.group({
         tipoDeficiencia: ['', Validators.required],
         causaDeficiencia: [''],
@@ -58,7 +54,6 @@ export class CadastroWizard implements OnInit {
         prefAcessibilidade: ['', Validators.required]
       }),
 
-      // Passo 4: Socioeconômico e Saúde
       socioeconomico: this.fb.group({
         escolaridade: [''],
         profissao: [''],
@@ -71,11 +66,61 @@ export class CadastroWizard implements OnInit {
     });
   }
 
-  // Funções de Navegação para a Tela
+  // A MÁGICA DO VIACEP
+  buscarCep() {
+    let cep = this.cadastroForm.get('enderecoLocalizacao.cep')?.value;
+    if (!cep) return;
+    
+    cep = cep.replace(/\D/g, ''); // Limpa traços e pontos
+
+    if (cep.length === 8) {
+      this.anunciarParaLeitorDeTela('Buscando endereço pelo CEP...');
+      
+      this.http.get(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
+        next: (dados: any) => {
+          if (dados.erro) {
+            this.anunciarParaLeitorDeTela('CEP não encontrado. Verifique a digitação.');
+            return;
+          }
+          
+          // Preenche os campos sozinhos!
+          this.cadastroForm.get('enderecoLocalizacao')?.patchValue({
+            rua: dados.logradouro,
+            bairro: dados.bairro,
+            cidade: dados.localidade,
+            uf: dados.uf
+          });
+          
+          this.anunciarParaLeitorDeTela(`Endereço encontrado e preenchido: Rua ${dados.logradouro}, Bairro ${dados.bairro}.`);
+        },
+        error: () => this.anunciarParaLeitorDeTela('Erro ao conectar com o serviço de CEP.')
+      });
+    }
+  }
+
+  //  VERIFICADOR DE ERRO PARA O HTML
+  isCampoInvalido(grupo: string, campo: string): boolean {
+    const controle = this.cadastroForm.get(`${grupo}.${campo}`);
+    // Retorna TRUE se o campo for inválido E o usuário já tiver tocado/digitado nele
+    return !!(controle && controle.invalid && (controle.dirty || controle.touched));
+  }
+
+  getGroupName(passo: number): string {
+    const grupos = ['dadosPessoais', 'enderecoLocalizacao', 'perfilDeficiencia', 'socioeconomico'];
+    return grupos[passo - 1];
+  }
+
   avancarPasso() {
-    if (this.passoAtual < 4) {
+    const grupoAtual = this.getGroupName(this.passoAtual);
+    const formGrupo = this.cadastroForm.get(grupoAtual);
+
+    if (formGrupo?.valid) {
       this.passoAtual++;
       this.anunciarParaLeitorDeTela(`Avançou para a etapa ${this.passoAtual}`);
+    } else {
+      // Se tiver erro, marca tudo como "tocado" para acender os alertas vermelhos
+      formGrupo?.markAllAsTouched();
+      this.anunciarParaLeitorDeTela('Existem campos obrigatórios não preenchidos nesta etapa.');
     }
   }
 
@@ -86,27 +131,16 @@ export class CadastroWizard implements OnInit {
     }
   }
 
-  // Acessibilidade: Força o leitor de tela (NVDA/VoiceOver) a falar que a página mudou
   anunciarParaLeitorDeTela(mensagem: string) {
-    // Isso é uma técnica avançada de acessibilidade (Aria-Live)
     const anuncio = document.getElementById('leitor-tela-anuncio');
-    if (anuncio) {
-      anuncio.textContent = mensagem;
-    }
+    if (anuncio) anuncio.textContent = mensagem;
   }
 
   salvarCadastro() {
     if (this.cadastroForm.valid) {
-      console.log('Dados prontos para o Backend:', this.cadastroForm.value);
-      // Aqui chamaremos o Serviço de Beneficiários depois!
+      console.log('Dados prontos:', this.cadastroForm.value);
     } else {
-      this.anunciarParaLeitorDeTela('Erro. Preencha os campos obrigatórios antes de salvar.');
       this.cadastroForm.markAllAsTouched();
     }
-  }
-
-  getGroupName(passo: number): string {
-    const grupos = ['dadosPessoais', 'enderecoLocalizacao', 'perfilDeficiencia', 'socioeconomico'];
-    return grupos[passo - 1];
   }
 }

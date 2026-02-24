@@ -206,3 +206,27 @@ fieldset {
     }
   }
 }
+
+// =========================================
+// FEEDBACK DE ERRO E ACESSIBILIDADE
+// =========================================
+$error-red: #D32F2F; // Vermelho escuro acessível (WCAG AA)
+
+.input-error {
+  border-color: $error-red !important;
+  box-shadow: 0 0 0 3px rgba($error-red, 0.2) !important;
+  background-color: #FFF5F5 !important; // Fundo levemente avermelhado
+}
+
+.error-text {
+  display: block;
+  color: $error-red;
+  font-weight: 800;
+  font-size: 0.95rem;
+  margin-top: 0.4rem;
+  
+  // Adiciona um asterisco visualmente antes do texto do erro para chamar atenção
+  &::before {
+    content: '⚠️ ';
+  }
+}
