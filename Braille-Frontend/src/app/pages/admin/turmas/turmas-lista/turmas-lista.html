@@ -1,0 +1,46 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Turmas</h1>
+    <p class="page-subtitle">Gerencie as oficinas e turmas do instituto</p>
+  </div>
+  <button class="btn btn-primary" aria-label="Criar nova turma">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
+    Nova Turma
+  </button>
+</div>
+
+@if (isLoading) {
+  <div class="empty-state" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-label="Carregando turmas..."></div>
+  </div>
+} @else if (erro) {
+  <div class="empty-state" role="alert">
+    <p>{{ erro }}</p>
+  </div>
+} @else if (turmas.length === 0) {
+  <div class="empty-state">
+    <h3>Nenhuma turma encontrada</h3>
+    <p>Crie a primeira turma clicando no botão acima.</p>
+  </div>
+} @else {
+  <div class="turmas-grid" role="list" aria-label="Lista de turmas">
+    @for (turma of turmas; track turma.id) {
+      <article class="card card-hover" role="listitem">
+        <div class="card-body">
+          <h2>{{ turma.nome }}</h2>
+          @if (turma.professor) {
+            <p class="turma-professor">Prof. {{ turma.professor.nome }}</p>
+          }
+          @if (turma.horario) {
+            <p class="turma-horario">{{ turma.horario }}</p>
+          }
+          <p class="turma-alunos">{{ turma.alunos?.length ?? 0 }} aluno(s)</p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-sm btn-secondary" [attr.aria-label]="'Editar turma ' + turma.nome">Editar</button>
+          <button class="btn btn-sm btn-danger" [attr.aria-label]="'Excluir turma ' + turma.nome">Excluir</button>
+        </div>
+      </article>
+    }
+  </div>
+}

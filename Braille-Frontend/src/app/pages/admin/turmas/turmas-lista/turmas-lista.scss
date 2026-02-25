@@ -1,0 +1,32 @@
+.turmas-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 576px) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (min-width: 1024px) {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+.turma-professor {
+    font-size: 0.875rem;
+    color: #5c5c5c;
+    margin-top: 0.25rem;
+}
+
+.turma-horario {
+    font-size: 0.8rem;
+    color: #737373;
+    margin-top: 0.25rem;
+}
+
+.turma-alunos {
+    font-size: 0.8rem;
+    color: #f5c800;
+    font-weight: 700;
+    margin-top: 0.5rem;
+}
