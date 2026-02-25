@@ -191,6 +191,7 @@ export class CadastroWizard implements OnInit {
   }
 
   salvarCadastro() {
+    if (this.isSalvando) return; // Previne duplo envio
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
       this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho antes de continuar.');
@@ -252,7 +253,7 @@ export class CadastroWizard implements OnInit {
     }
   }
 
-  private enviarDadosParaBanco(dados: any) {
+  private enviarDadosParaBanco(dados: Record<string, unknown>) {
     this.beneficiariosService.criarBeneficiario(dados).subscribe({
       next: () => {
         this.exibirFeedback('Aluno cadastrado com sucesso!', 'sucesso');
@@ -261,10 +262,19 @@ export class CadastroWizard implements OnInit {
         this.arquivoLaudoSelecionado = null;
         window.scrollTo({ top: 0, behavior: 'smooth' });
       },
-      error: (err) => {
+      error: (err: { status: number; error?: { message?: string | string[] } }) => {
         console.error('Erro ao salvar beneficiário:', err);
-        const mensagemErro =
-          err?.error?.message || 'Erro ao salvar. Verifique os dados e tente novamente.';
+
+        // 409 = registro já existe no banco (CPF/RG ou e-mail duplicado)
+        if (err.status === 409) {
+          this.exibirFeedback(
+            'Este aluno já está cadastrado. Verifique se o CPF/RG ou e-mail informado já existe no sistema.',
+            'erro'
+          );
+          return;
+        }
+
+        const mensagemErro = err?.error?.message ?? 'Erro ao salvar. Verifique os dados e tente novamente.';
         this.exibirFeedback(
           Array.isArray(mensagemErro) ? mensagemErro.join(', ') : mensagemErro,
           'erro',
