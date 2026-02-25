@@ -4,8 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-beneficiary-form',
   imports: [],
   templateUrl: './beneficiary-form.html',
-  styleUrl: './beneficiary-form.css',
+  styleUrl: './beneficiary-form.scss',
 })
 export class BeneficiaryForm {
 
 }
+

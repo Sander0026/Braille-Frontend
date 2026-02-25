@@ -1,405 +1,165 @@
-// =========================================
-// VARIÁVEIS DE COR INSTITUCIONAL (Alto Contraste)
-// =========================================
-$brand-yellow: #FFD700; // Amarelo Ouro forte
-$brand-yellow-dark: #E6C200; // Amarelo Ouro mais escuro para hover
-$brand-black: #111111; // Preto quase puro para texto
-$brand-grey: #f4f4f4; // Cinza bem claro para fundos
-$error-red: #C62828; // Vermelho escuro acessível (WCAG AA — 4.5:1 sobre branco)
+// ============================================================
+// cadastro-wizard.scss — Estilos do Wizard de Cadastro de Alunos
+// USA variáveis do Design System global (_variables.scss)
+// ============================================================
 
-// Classe para leitores de tela 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
+// Nota: as variáveis globais estão acessíveis via styles.scss
+// Use as classes globais (.btn, .form-input, .card, etc.) sempre que possível
 
+// --- Wrapper do Wizard ---
 .wizard-container {
-  max-width: 800px;
-  margin: 2rem auto;
-  padding: 2.5rem;
-  background: #ffffff;
-  border-radius: 12px;
-  // Borda sutil preta para definir bem o container
-  border: 2px solid #e0e0e0;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
-
-  @media (max-width: 600px) {
-    padding: 1.5rem;
-    margin: 1rem;
-    border-width: 1px;
-  }
+  max-width: 720px;
+  margin: 0 auto;
 }
 
-.wizard-header {
-  margin-bottom: 2.5rem;
-
-  h1 {
-    font-size: 1.75rem;
-    color: $brand-black;
-    font-weight: 800; // Negrito extra
-    margin-bottom: 0.5rem;
-  }
-
-  p {
-    color: #444;
-    font-weight: 500;
-    margin-bottom: 1.5rem;
-  }
-}
-
-// Indicadores de passo (bolinhas)
-.steps-indicator {
+// --- Steps Indicator ---
+.wizard-steps {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1rem;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
 
-  .step-dot {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 3px solid #ccc;
+  .step-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 0.9rem;
-    color: #888;
-    transition: all 0.3s;
-    flex-shrink: 0;
+    flex: 1;
 
-    &.active {
-      border-color: $brand-black;
-      background-color: $brand-yellow;
-      color: $brand-black;
+    .step-dot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2rem;
+      height: 2rem;
+      border-radius: 50%;
+      border: 2px solid #d4d4d4;
+      background: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #737373;
+      transition: all 200ms ease;
+      flex-shrink: 0;
+
+      &.active {
+        border-color: #f5c800;
+        background: #f5c800;
+        color: #1a1a00;
+      }
+
+      &.done {
+        border-color: #16a34a;
+        background: #16a34a;
+        color: #fff;
+      }
     }
 
-    &.done {
-      border-color: $brand-black;
-      background-color: $brand-black;
-      color: $brand-yellow;
+    .step-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #737373;
+      margin-left: 0.4rem;
+      white-space: nowrap;
+
+      &.active {
+        color: #1a1a00;
+      }
+
+      &.done {
+        color: #16a34a;
+      }
+    }
+
+    .step-line {
+      flex: 1;
+      height: 2px;
+      background: #d4d4d4;
+      margin: 0 0.5rem;
+
+      &.done {
+        background: #16a34a;
+      }
     }
   }
 }
 
-// Barra de Progresso Amarela
-.progress-bar {
-  width: 100%;
-  height: 14px; // Um pouco mais grossa para visibilidade
-  background-color: #e0e0e0;
-  border-radius: 7px;
-  overflow: hidden;
-  border: 1px solid #ccc;
-
-  .progress-fill {
-    height: 100%;
-    background-color: $brand-yellow; // COR INSTITUCIONAL
-    transition: width 0.4s ease-in-out;
-  }
+// --- Seção do Formulário ---
+.wizard-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f1f1f;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f5c800;
 }
 
-// Títulos das Etapas
-fieldset {
-  border: none;
-  padding: 0;
-  margin: 0 0 2.5rem 0;
-
-  legend {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: $brand-black;
-    margin-bottom: 1.5rem;
-    width: 100%;
-    // Linha grossa amarela embaixo do título
-    border-bottom: 4px solid $brand-yellow;
-    padding-bottom: 0.75rem;
-  }
-}
-
-.form-row {
-  display: flex;
-  gap: 1.5rem;
-
-  @media (max-width: 600px) {
-    flex-direction: column;
-    gap: 0;
-  }
-}
-
-.form-group {
-  margin-bottom: 1.75rem;
-  flex: 1;
-
-  &--small {
-    flex: 0.6;
-  }
-
-  &--xsmall {
-    flex: 0.35;
-  }
-
-  label {
-    display: block;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    color: $brand-black;
-    font-size: 1.05rem;
-  }
-
-  input[type="text"],
-  input[type="date"],
-  input[type="email"],
-  input[type="tel"],
-  input[type="number"],
-  select,
-  textarea {
-    width: 100%;
-    padding: 0.85rem;
-    border: 2px solid #999;
-    border-radius: 6px;
-    font-size: 1.1rem;
-    background-color: #fff;
-    color: $brand-black;
-    font-family: inherit;
-    box-sizing: border-box;
-
-    &:focus {
-      border-color: $brand-black;
-      outline: none;
-      box-shadow: 0 0 0 4px rgba($brand-yellow, 0.6);
-    }
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-}
-
-.field-hint {
-  display: block;
-  font-size: 0.875rem;
-  color: #666;
-  margin-top: 0.4rem;
-  font-style: italic;
-}
-
-.required {
-  color: $error-red;
-  font-weight: 900;
-  margin-left: 2px;
-}
-
-// Separador de seção dentro do fieldset
-.section-divider {
-  display: flex;
-  align-items: center;
-  margin: 1.5rem 0 1.75rem;
+// --- Grid de campos ---
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 1rem;
 
-  span {
-    font-weight: 700;
-    font-size: 1rem;
-    color: #555;
-    white-space: nowrap;
+  @media (min-width: 576px) {
+    grid-template-columns: 1fr 1fr;
   }
 
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 2px;
-    background: #e0e0e0;
-  }
-}
-
-// Área de upload do laudo
-.laudo-upload-area {
-  border: 3px dashed #FFD700;
-  border-radius: 8px;
-  padding: 1.5rem;
-  background-color: #fffbea;
-  margin-bottom: 1.75rem;
-
-  label {
-    display: block;
-    font-weight: 700;
-    font-size: 1.05rem;
-    color: $brand-black;
-    margin-bottom: 0.5rem;
+  &.form-grid-3 {
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
   }
 
-  .file-input {
-    width: 100%;
-    padding: 0.5rem 0;
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-    cursor: pointer;
-    font-size: 1rem;
-
-    &:focus {
-      outline: 3px solid $brand-yellow;
+  .full-width {
+    @media (min-width: 576px) {
+      grid-column: 1 / -1;
     }
   }
 }
 
-.checkbox-group {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  background-color: $brand-grey;
-  padding: 1rem;
-  border-radius: 6px;
-  border: 2px solid #ccc;
-
-  input[type="checkbox"] {
-    width: 24px;
-    height: 24px;
-    accent-color: $brand-yellow; // Cor do checkbox quando marcado
-    cursor: pointer;
-  }
-
-  label {
-    margin-bottom: 0;
-    font-weight: 600;
-    cursor: pointer;
-  }
-}
-
-// Botões Institucionais
+// --- Rodapé do Wizard ---
 .wizard-footer {
   display: flex;
-  justify-content: space-between;
-  margin-top: 3rem;
-  padding-top: 1.5rem;
-  border-top: 2px solid #eee;
-  gap: 1rem;
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-
-    .btn {
-      width: 100%;
-      text-align: center;
-    }
-  }
-
-  .btn {
-    padding: 0.85rem 1.75rem;
-    font-size: 1.1rem;
-    font-weight: 800;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    text-transform: uppercase; // Letras maiúsculas para destaque
-
-    // Estado Desabilitado (Cinza)
-    &:disabled {
-      opacity: 1; // Mantém opacidade total para leitura
-      background-color: #e0e0e0 !important;
-      color: #777 !important;
-      border: 2px solid #ccc !important;
-      cursor: not-allowed;
-    }
-  }
-
-  // Botão Principal (Avançar/Salvar) - AMARELO
-  .btn-primary,
-  .btn-success {
-    background-color: $brand-yellow;
-    color: $brand-black; // Texto preto no fundo amarelo (Preto sobre Amarelo)
-    border: 3px solid $brand-yellow;
-
-    &:hover:not(:disabled) {
-      background-color: $brand-yellow-dark;
-      border-color: $brand-yellow-dark;
-    }
-
-    &:focus {
-      outline: none;
-      box-shadow: 0 0 0 4px rgba($brand-black, 0.3);
-    }
-  }
-
-  // Botão Secundário (Voltar) - Preto Outline
-  .btn-secondary {
-    background-color: transparent;
-    color: $brand-black;
-    border: 3px solid $brand-black;
-
-    &:hover:not(:disabled) {
-      background-color: $brand-black;
-      color: $brand-yellow;
-    }
-  }
-}
-
-// =========================================
-// FEEDBACK DE ERRO E ACESSIBILIDADE
-// =========================================
-
-
-.input-error {
-  border-color: $error-red !important;
-  box-shadow: 0 0 0 3px rgba($error-red, 0.2) !important;
-  background-color: #FFF5F5 !important; // Fundo levemente avermelhado
-}
-
-.error-text {
-  display: block;
-  color: $error-red;
-  font-weight: 800;
-  font-size: 0.95rem;
-  margin-top: 0.4rem;
-
-  // Adiciona um asterisco visualmente antes do texto do erro para chamar atenção
-  &::before {
-    content: '⚠️ ';
-  }
-}
-
-// =========================================
-// BANNER DE FEEDBACK
-// =========================================
-.feedback-banner {
-  padding: 1rem 1.5rem;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  animation: fadeIn 0.3s ease-in-out;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e5e5;
+  margin-top: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 
-  &.sucesso {
-    background-color: $brand-yellow;
-    color: $brand-black;
-    border: 3px solid $brand-black;
-  }
-
-  &.erro {
-    background-color: #FFF5F5;
-    color: $error-red;
-    border: 3px solid $error-red;
+  .wizard-footer-left,
+  .wizard-footer-right {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
   }
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
+// --- Upload de arquivo ---
+.file-input-wrapper {
+  position: relative;
+
+  .file-input-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 0.75rem;
+    border: 1.5px dashed #d4d4d4;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #5c5c5c;
+    transition: border-color 200ms;
+
+    &:hover {
+      border-color: #f5c800;
+    }
   }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
   }
 }

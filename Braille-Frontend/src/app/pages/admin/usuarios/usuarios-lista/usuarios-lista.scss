@@ -1,7 +1,5 @@
-// Using TailwindCSS classes directly in the HTML instead of custom CSS.
+﻿// ============================================================
+// usuarios-lista.scss — Estilos da Lista de Usuários
+// ============================================================
 
-// Custom overrides if needed
-:host {
-    display: block;
-    height: 100%;
-}
+// Component-level styles - global tokens available via styles.scss

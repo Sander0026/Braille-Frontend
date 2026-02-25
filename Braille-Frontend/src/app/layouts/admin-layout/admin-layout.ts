@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-admin-layout',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './admin-layout.html',
-  styleUrl: './admin-layout.css',
+  styleUrl: './admin-layout.scss',
 })
 export class AdminLayout {
   isSidebarOpen = true;
@@ -15,3 +15,4 @@ export class AdminLayout {
     this.isSidebarOpen = !this.isSidebarOpen;
   }
 }
+

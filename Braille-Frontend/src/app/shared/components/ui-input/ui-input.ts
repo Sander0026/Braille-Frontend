@@ -4,8 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-ui-input',
   imports: [],
   templateUrl: './ui-input.html',
-  styleUrl: './ui-input.css',
+  styleUrl: './ui-input.scss',
 })
 export class UiInput {
 
 }
+
