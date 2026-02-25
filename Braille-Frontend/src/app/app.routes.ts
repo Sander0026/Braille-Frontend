@@ -23,10 +23,10 @@ export const routes: Routes = [
     path: '',
     component: PublicLayout,
     children: [
-      { path: '', component: Home }, // Página inicial do site
-      { path: 'login', component: Login } // Tela de entrar no sistema
+      { path: '', component: Home } // Página inicial do site
     ]
   },
+  { path: 'login', component: Login }, // Tela de entrar no sistema
 
   // ==========================================
   // 🔒 ÁREA RESTRITA (Gerenciamento da Instituição)
