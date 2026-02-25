@@ -235,7 +235,40 @@
         <div class="spinner" aria-hidden="true"></div>
         <p>Carregando alunos...</p>
       </div>
-      } @else if (!turmaDetalhes?.alunos || turmaDetalhes!.alunos!.length === 0) {
+      <!-- Buscar Alunos -->
+      <div class="busca-alunos-container" style="margin-bottom: 1.5rem;">
+        <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>
+        <input type="search" id="buscarAlunoInput" class="form-input" placeholder="Buscar aluno para adicionar..."
+          [formControl]="buscaAlunoCtrl" aria-label="Buscar aluno por nome para matricular" autocomplete="off"
+          [attr.aria-busy]="buscandoAlunos" />
+
+        @if (buscandoAlunos) {
+        <div class="loading-state empty-state--sm" aria-busy="true">
+          <div class="spinner" aria-hidden="true" style="width: 20px; height: 20px;"></div>
+        </div>
+        }
+
+        @if (alunosBuscaRestado.length > 0) {
+        <ul class="busca-resultados" role="listbox" aria-label="Resultados da busca de alunos">
+          @for (aluno of alunosBuscaRestado; track aluno.id) {
+          <li class="busca-resultado-item" role="option">
+            <span>{{ aluno.nomeCompleto }}</span>
+            <button class="btn btn-sm btn-primary" (click)="adicionarAluno(aluno)" [disabled]="operacaoEmProgresso"
+              aria-label="Adicionar {{ aluno.nomeCompleto }} à turma">
+              + Adicionar
+            </button>
+          </li>
+          }
+        </ul>
+        }
+      </div>
+
+      <h3
+        style="font-size: 1rem; margin-bottom: 0.5rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
+        Alunos Matriculados ({{ turmaDetalhes!.alunos?.length || 0 }})
+      </h3>
+
+      @if (!turmaDetalhes?.alunos || turmaDetalhes!.alunos!.length === 0) {
       <div class="empty-state empty-state--sm">
         <span class="empty-icon" aria-hidden="true">👤</span>
         <p>Nenhum aluno matriculado nesta oficina.</p>
@@ -243,17 +276,20 @@
       } @else {
       <ul class="alunos-list" aria-label="Lista de alunos matriculados">
         @for (aluno of turmaDetalhes!.alunos; track aluno.id) {
-        <li class="aluno-item">
-          <div class="aluno-avatar" aria-hidden="true">
-            {{ aluno.nomeCompleto.charAt(0) }}
+        <li class="aluno-item" style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="aluno-avatar" aria-hidden="true">
+              {{ aluno.nomeCompleto.charAt(0) }}
+            </div>
+            <span>{{ aluno.nomeCompleto }}</span>
           </div>
-          <span>{{ aluno.nomeCompleto }}</span>
+          <button class="btn btn-danger btn-sm" (click)="removerAluno(aluno.id, aluno.nomeCompleto)"
+            [disabled]="operacaoEmProgresso" aria-label="Remover {{ aluno.nomeCompleto }} da turma">
+            🗑️
+          </button>
         </li>
         }
       </ul>
-      <p class="alunos-total">
-        Total: {{ turmaDetalhes!.alunos!.length }} aluno(s)
-      </p>
       }
 
     </div>

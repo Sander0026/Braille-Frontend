@@ -1,9 +1,11 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
+import { BeneficiariosService, Beneficiario } from '../../../../core/services/beneficiarios.service';
 
 @Component({
     selector: 'app-turmas-lista',
@@ -42,16 +44,22 @@ export class TurmasLista implements OnInit {
     modalAlunosAberto = false;
     turmaDetalhes: Turma | null = null;
     carregandoDetalhes = false;
+    buscaAlunoCtrl = new FormControl('');
+    alunosBuscaRestado: Beneficiario[] = [];
+    buscandoAlunos = false;
+    operacaoEmProgresso = false;
 
     constructor(
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
+        private beneficiariosService: BeneficiariosService,
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef,
     ) { }
 
     ngOnInit(): void {
         this.iniciarFormulario();
+        this.iniciarBuscaAlunos();
         this.carregarTurmas();
         this.carregarProfessores();
     }
@@ -208,6 +216,8 @@ export class TurmasLista implements OnInit {
         this.turmaDetalhes = null;
         this.carregandoDetalhes = true;
         this.modalAlunosAberto = true;
+        this.buscaAlunoCtrl.setValue(''); // Limpa a busca anterior
+        this.alunosBuscaRestado = [];
 
         this.turmasService.buscarPorId(turma.id).subscribe({
             next: (t) => {
@@ -222,9 +232,87 @@ export class TurmasLista implements OnInit {
         });
     }
 
+    iniciarBuscaAlunos(): void {
+        this.buscaAlunoCtrl.valueChanges
+            .pipe(
+                debounceTime(400),
+                distinctUntilChanged()
+            )
+            .subscribe((termo) => {
+                if (!termo || termo.length < 3) {
+                    this.alunosBuscaRestado = [];
+                    this.buscandoAlunos = false;
+                    this.cdr.detectChanges();
+                    return;
+                }
+
+                this.buscandoAlunos = true;
+                this.cdr.detectChanges();
+
+                this.beneficiariosService.listar(1, 10, termo).subscribe({
+                    next: (res) => {
+                        // Filtra os alunos que já estão matriculados
+                        const IDsMatriculados = this.turmaDetalhes?.alunos?.map(a => a.id) || [];
+                        this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
+                        this.buscandoAlunos = false;
+                        this.cdr.detectChanges();
+                    },
+                    error: () => {
+                        this.buscandoAlunos = false;
+                        this.cdr.detectChanges();
+                    }
+                });
+            });
+    }
+
+    adicionarAluno(aluno: Beneficiario): void {
+        if (!this.turmaDetalhes || this.operacaoEmProgresso) return;
+        this.operacaoEmProgresso = true;
+
+        this.turmasService.matricularAluno(this.turmaDetalhes.id, aluno.id).subscribe({
+            next: (turmaAtualizada) => {
+                // Atualiza a visualização local para refletir a nova matrícula
+                this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
+                // Retira da listagem de resultados de busca
+                this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => a.id !== aluno.id);
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                alert('Falha ao adicionar aluno. Verifique se ele já não está matriculado na turma.');
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    removerAluno(alunoId: string, nome: string): void {
+        if (!this.turmaDetalhes || this.operacaoEmProgresso) return;
+
+        if (!confirm(`Remover permanentemente o aluno ${nome} desta oficina?`)) return;
+
+        this.operacaoEmProgresso = true;
+
+        this.turmasService.desmatricularAluno(this.turmaDetalhes.id, alunoId).subscribe({
+            next: (turmaAtualizada) => {
+                // Atualiza a visualização local para refletir a remoção
+                this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                alert('Falha ao remover o aluno da oficina.');
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
     fecharModalAlunos(): void {
         this.modalAlunosAberto = false;
         this.turmaDetalhes = null;
+        this.buscaAlunoCtrl.setValue('');
+        this.alunosBuscaRestado = [];
     }
 
     // ── Paginação ──────────────────────────────────────────────

@@ -348,6 +348,49 @@ $transition: 200ms ease;
     margin-bottom: 1rem;
 }
 
+// ── Busca Alunos (Autocomplete) ────────────────────────────
+.busca-alunos-container {
+    position: relative;
+    width: 100%;
+}
+
+.busca-resultados {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid $gray-200;
+    border-radius: 0 0 $border-r $border-r;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 50;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: none;
+}
+
+.busca-resultado-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid $gray-100;
+    font-size: 0.875rem;
+    color: $gray-900;
+    transition: background $transition;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: $gray-100;
+    }
+}
+
 // ── Alunos list ────────────────────────────────────────────
 .alunos-list {
     list-style: none;
