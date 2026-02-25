@@ -1,14 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-
-interface UsuarioMock {
-    id: string;
-    nome: string;
-    login: string;
-    funcao: string;
-}
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 
 @Component({
     selector: 'app-usuarios-lista',
@@ -17,53 +12,106 @@ interface UsuarioMock {
     templateUrl: './usuarios-lista.html',
     styleUrls: ['./usuarios-lista.scss']
 })
-export class UsuariosLista implements OnInit {
-    // TODO: Trocar por dados reais vindos da API (HttpClient)
-    usuarios: UsuarioMock[] = [
-        { id: '1', nome: 'Victor Oliveira', login: 'voliveira', funcao: 'Administrador' },
-        { id: '2', nome: 'Maria Silva', login: 'msilva', funcao: 'Professor' },
-        { id: '3', nome: 'João Souza', login: 'jsouza', funcao: 'Atendente' }
+export class UsuariosLista implements OnInit, OnDestroy {
+    usuarios: Usuario[] = [];
+    isLoading = true;
+    erro = '';
+    total = 0;
+    paginaAtual = 1;
+    totalPaginas = 1;
+    readonly limite = 10;
+
+    buscaCtrl = new FormControl('');
+    usuarioEmEdicao: Usuario | null = null;
+    editForm!: FormGroup;
+    salvando = false;
+
+    private destroy$ = new Subject<void>();
+
+    readonly roles = [
+        { value: 'ADMIN', label: 'Administrador' },
+        { value: 'SECRETARIA', label: 'Secretaria' },
+        { value: 'PROFESSOR', label: 'Professor' }
     ];
 
-    usuarioEmEdicao: UsuarioMock | null = null;
-    editForm!: FormGroup;
-
-    constructor(private fb: FormBuilder) {
+    constructor(private usuariosService: UsuariosService, private fb: FormBuilder) {
         this.editForm = this.fb.group({
-            nome: ['', Validators.required],
-            login: ['', Validators.required],
-            funcao: ['', Validators.required]
+            nome: ['', [Validators.required, Validators.minLength(3)]],
+            username: ['', [Validators.required, Validators.minLength(3)]],
+            email: ['', [Validators.required, Validators.email]],
+            role: ['', Validators.required]
         });
     }
 
     ngOnInit(): void {
+        this.buscaCtrl.valueChanges.pipe(
+            debounceTime(400),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+        ).subscribe(() => { this.paginaAtual = 1; this.carregar(); });
+
+        this.carregar();
     }
 
-    abrirModalEdicao(usuario: UsuarioMock) {
-        this.usuarioEmEdicao = usuario;
-        this.editForm.patchValue({
-            nome: usuario.nome,
-            login: usuario.login,
-            funcao: usuario.funcao
+    ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
+
+    carregar(): void {
+        this.isLoading = true;
+        const nome = this.buscaCtrl.value?.trim() || undefined;
+        this.usuariosService.listar(this.paginaAtual, this.limite, nome).subscribe({
+            next: (res) => {
+                this.usuarios = res.data;
+                this.total = res.meta.total;
+                this.totalPaginas = res.meta.lastPage;
+                this.isLoading = false;
+            },
+            error: () => { this.erro = 'Erro ao carregar usuários.'; this.isLoading = false; }
         });
     }
 
-    fecharModalEdicao() {
+    abrirModal(usuario: Usuario): void {
+        this.usuarioEmEdicao = usuario;
+        this.editForm.patchValue({
+            nome: usuario.nome,
+            username: usuario.username,
+            email: usuario.email,
+            role: usuario.role
+        });
+    }
+
+    fecharModal(): void {
         this.usuarioEmEdicao = null;
         this.editForm.reset();
     }
 
-    salvarEdicao() {
-        if (this.editForm.valid && this.usuarioEmEdicao) {
-            // Find the user and update the mock data
-            const index = this.usuarios.findIndex(u => u.id === this.usuarioEmEdicao!.id);
-            if (index !== -1) {
-                this.usuarios[index] = {
-                    ...this.usuarios[index],
-                    ...this.editForm.value
-                };
-            }
-            this.fecharModalEdicao();
-        }
+    salvar(): void {
+        if (this.editForm.invalid || !this.usuarioEmEdicao) return;
+        this.salvando = true;
+        this.usuariosService.atualizar(this.usuarioEmEdicao.id, this.editForm.value).subscribe({
+            next: () => { this.salvando = false; this.fecharModal(); this.carregar(); },
+            error: () => { this.salvando = false; alert('Erro ao salvar alterações.'); }
+        });
+    }
+
+    excluir(usuario: Usuario): void {
+        if (!confirm(`Excluir o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`)) return;
+        this.usuariosService.excluir(usuario.id).subscribe({
+            next: () => this.carregar(),
+            error: () => alert('Erro ao excluir usuário.')
+        });
+    }
+
+    labelRole(role: string): string {
+        return this.roles.find(r => r.value === role)?.label ?? role;
+    }
+
+    irParaPagina(p: number): void {
+        if (p < 1 || p > this.totalPaginas) return;
+        this.paginaAtual = p;
+        this.carregar();
+    }
+
+    get paginas(): number[] {
+        return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
     }
 }

@@ -1,22 +1,88 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 
 @Component({
-    selector: 'app-comunicados-lista',
-    standalone: true,
-    imports: [CommonModule],
-    template: `
-    <div class="page-header">
-      <div>
-        <h1 class="page-title">Comunicados</h1>
-        <p class="page-subtitle">Mural de avisos e comunicações</p>
-      </div>
-    </div>
-    <div class="empty-state">
-      <h3>Em desenvolvimento</h3>
-      <p>Esta tela será implementada em breve.</p>
-    </div>
-  `,
-    styles: []
+  selector: 'app-comunicados-lista',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './comunicados-lista.html',
+  styleUrl: './comunicados-lista.scss'
 })
-export class ComunicadosLista { }
+export class ComunicadosLista implements OnInit {
+  comunicados: Comunicado[] = [];
+  isLoading = true;
+  erro = '';
+  mostrarModal = false;
+  editando: Comunicado | null = null;
+  salvando = false;
+
+  form!: FormGroup;
+
+  constructor(private comunicadosService: ComunicadosService, private fb: FormBuilder) {
+    this.form = this.fb.group({
+      titulo: ['', [Validators.required, Validators.minLength(5)]],
+      conteudo: ['', [Validators.required, Validators.minLength(10)]]
+    });
+  }
+
+  ngOnInit(): void { this.carregar(); }
+
+  carregar(): void {
+    this.isLoading = true;
+    this.comunicadosService.listar().subscribe({
+      next: (data) => { this.comunicados = data; this.isLoading = false; },
+      error: () => { this.erro = 'Erro ao carregar comunicados.'; this.isLoading = false; }
+    });
+  }
+
+  novo(): void {
+    this.editando = null;
+    this.form.reset();
+    this.mostrarModal = true;
+  }
+
+  editar(c: Comunicado): void {
+    this.editando = c;
+    this.form.patchValue({ titulo: c.titulo, conteudo: c.conteudo });
+    this.mostrarModal = true;
+  }
+
+  fecharModal(): void {
+    this.mostrarModal = false;
+    this.editando = null;
+    this.form.reset();
+  }
+
+  salvar(): void {
+    if (this.form.invalid) return;
+    this.salvando = true;
+    const dados = this.form.value;
+
+    const op = this.editando
+      ? this.comunicadosService.atualizar(this.editando.id, dados)
+      : this.comunicadosService.criar(dados);
+
+    op.subscribe({
+      next: () => { this.salvando = false; this.fecharModal(); this.carregar(); },
+      error: () => { this.salvando = false; alert('Erro ao salvar comunicado.'); }
+    });
+  }
+
+  excluir(c: Comunicado): void {
+    if (!confirm(`Excluir o comunicado "${c.titulo}"?`)) return;
+    this.comunicadosService.excluir(c.id).subscribe({
+      next: () => this.carregar(),
+      error: () => alert('Erro ao excluir comunicado.')
+    });
+  }
+
+  formatarData(data: string): string {
+    return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  preview(texto: string, max = 120): string {
+    return texto.length > max ? texto.slice(0, max) + '…' : texto;
+  }
+}

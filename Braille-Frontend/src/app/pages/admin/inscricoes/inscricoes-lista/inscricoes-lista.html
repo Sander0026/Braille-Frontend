@@ -1,0 +1,140 @@
+<!-- Cabeçalho -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Inscrições</h1>
+        <p class="page-subtitle">Formulários de inscrição recebidos pelo site</p>
+    </div>
+</div>
+
+<!-- Abas de status -->
+<div class="tab-bar" role="tablist" aria-label="Filtrar inscrições por status">
+    @for (tab of tabs; track tab.valor) {
+    <button role="tab" class="tab-btn" [class.active]="statusAtivo === tab.valor"
+        [attr.aria-selected]="statusAtivo === tab.valor" (click)="mudarAba(tab.valor)"
+        [attr.aria-label]="'Ver inscrições ' + tab.label">
+        {{ tab.label }}
+        @if (statusAtivo === tab.valor && total > 0) {
+        <span class="tab-count" aria-hidden="true">{{ total }}</span>
+        }
+    </button>
+    }
+</div>
+
+<!-- Lista -->
+@if (isLoading) {
+<div class="loading-container" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <span>Carregando inscrições...</span>
+</div>
+} @else if (erro) {
+<div role="alert" class="card card-body" aria-live="assertive">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else if (inscricoes.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhuma inscrição {{ statusAtivo === 'PENDENTE' ? 'pendente' : statusAtivo === 'APROVADA' ? 'aprovada' :
+        'recusada' }}</h3>
+    <p>Novas inscrições do site aparecerão aqui.</p>
+</div>
+} @else {
+<div class="inscricoes-grid" role="list" aria-label="Lista de inscrições">
+    @for (ins of inscricoes; track ins.id) {
+    <article class="inscricao-card" role="listitem">
+        <div class="inscricao-header">
+            <div class="inscricao-info">
+                <strong class="inscricao-nome">{{ ins.nomeCompleto }}</strong>
+                <span class="inscricao-meta">
+                    {{ calcularIdade(ins.dataNascimento) }} anos · {{ ins.email }}
+                </span>
+            </div>
+            <span class="badge" [class.badge-warning]="ins.status === 'PENDENTE'"
+                [class.badge-success]="ins.status === 'APROVADA'" [class.badge-danger]="ins.status === 'RECUSADA'">
+                {{ ins.status }}
+            </span>
+        </div>
+        <p class="inscricao-data">Enviado em {{ formatarData(ins.criadoEm) }}</p>
+        @if (ins.observacoesAdmin) {
+        <p class="inscricao-obs"><em>Obs: {{ ins.observacoesAdmin }}</em></p>
+        }
+        @if (ins.status === 'PENDENTE') {
+        <div class="inscricao-acoes">
+            <button class="btn btn-sm btn-secondary" (click)="abrirDetalhe(ins)"
+                [attr.aria-label]="'Ver detalhes de ' + ins.nomeCompleto">
+                Ver detalhes
+            </button>
+        </div>
+        }
+    </article>
+    }
+</div>
+
+@if (totalPaginas > 1) {
+<nav class="pagination" role="navigation" aria-label="Paginação de inscrições">
+    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+        aria-label="Página anterior">‹</button>
+    @for (p of paginas; track p) {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual"
+        [attr.aria-current]="p === paginaAtual ? 'page' : null" [attr.aria-label]="'Ir para página ' + p">{{ p
+        }}</button>
+    }
+    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+        aria-label="Próxima página">›</button>
+</nav>
+}
+}
+
+<!-- Modal de detalhe / decisão -->
+@if (inscricaoSelecionada) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Detalhes de ' + inscricaoSelecionada.nomeCompleto" (click)="fecharDetalhe()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ inscricaoSelecionada.nomeCompleto }}</h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharDetalhe()" aria-label="Fechar">✕</button>
+        </div>
+        <div class="modal-body">
+            <dl class="detalhe-grid">
+                <div>
+                    <dt>E-mail</dt>
+                    <dd>{{ inscricaoSelecionada.email }}</dd>
+                </div>
+                <div>
+                    <dt>Telefone</dt>
+                    <dd>{{ inscricaoSelecionada.telefone }}</dd>
+                </div>
+                <div>
+                    <dt>Nascimento</dt>
+                    <dd>{{ formatarData(inscricaoSelecionada.dataNascimento) }} ({{
+                        calcularIdade(inscricaoSelecionada.dataNascimento) }} anos)</dd>
+                </div>
+                <div>
+                    <dt>Enviado em</dt>
+                    <dd>{{ formatarData(inscricaoSelecionada.criadoEm) }}</dd>
+                </div>
+            </dl>
+
+            <div class="form-group" style="margin-top: 1rem;">
+                <label for="obs-decisao" class="form-label">Observação (opcional)</label>
+                <textarea id="obs-decisao" class="form-textarea" [formControl]="obsCtrl"
+                    placeholder="Adicione uma observação para o responsável..." rows="3"
+                    aria-describedby="obs-hint"></textarea>
+                <span id="obs-hint" class="form-hint">Esta observação ficará registrada na inscrição.</span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharDetalhe()" [disabled]="processando">Cancelar</button>
+            <button class="btn btn-danger" (click)="decidir('RECUSADA')" [disabled]="processando"
+                [attr.aria-label]="'Recusar inscrição de ' + inscricaoSelecionada.nomeCompleto">
+                Recusar
+            </button>
+            <button class="btn btn-primary" (click)="decidir('APROVADA')" [disabled]="processando"
+                [attr.aria-label]="'Aprovar inscrição de ' + inscricaoSelecionada.nomeCompleto">
+                @if (processando) { <span class="loading-spinner" style="width:1rem;height:1rem"
+                    aria-hidden="true"></span> }
+                Aprovar
+            </button>
+        </div>
+    </div>
+</div>
+}
