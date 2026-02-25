@@ -1,16 +1,63 @@
-<div class="flex flex-col items-center justify-center py-10 lg:py-16">
-    <div
-        class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mb-6 shadow-sm border border-yellow-200">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="text-yellow-600">
-            <rect width="7" height="9" x="3" y="3" rx="1" />
-            <rect width="7" height="5" x="14" y="3" rx="1" />
-            <rect width="7" height="9" x="14" y="12" rx="1" />
-            <rect width="7" height="5" x="3" y="16" rx="1" />
-        </svg>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Visão geral do Instituto Luiz Braille</p>
     </div>
-    <h2 class="text-3xl font-bold text-gray-800 text-center mb-3">Bem-vindo ao Painel Admin!</h2>
-    <p class="text-gray-500 text-center max-w-md">Neste ambiente você pode gerenciar os alunos, as turmas e as
-        configurações gerais através do menu lateral.</p>
 </div>
+
+<!-- Cards de Estatísticas -->
+@if (isLoading) {
+<div class="stats-grid" aria-busy="true" aria-label="Carregando estatísticas...">
+    @for (i of [1,2,3,4]; track i) {
+    <div class="stat-card stat-card--skeleton" aria-hidden="true">
+        <div class="skeleton-box"></div>
+        <div class="skeleton-line"></div>
+    </div>
+    }
+</div>
+} @else if (erro) {
+<div class="card card-body" role="alert" aria-live="assertive">
+    <p style="color: #dc2626">{{ erro }}</p>
+</div>
+} @else {
+<section class="stats-grid" role="region" aria-label="Resumo de estatísticas">
+    @for (card of cards; track card.label) {
+    <a [routerLink]="card.rota" class="stat-card stat-card--{{ card.cor }}" [attr.aria-label]="card.ariaLabel"
+        role="article">
+        <div class="stat-icon" aria-hidden="true">
+            <span class="material-symbols-rounded">{{ card.icon }}</span>
+        </div>
+        <div class="stat-info">
+            <span class="stat-valor">{{ card.valor }}</span>
+            <span class="stat-label">{{ card.label }}</span>
+        </div>
+        <div class="stat-arrow" aria-hidden="true">
+            <span class="material-symbols-rounded">arrow_forward</span>
+        </div>
+    </a>
+    }
+</section>
+
+<!-- Acesso Rápido -->
+<section class="quick-actions" aria-label="Ações rápidas">
+    <h2 class="section-title">Ações rápidas</h2>
+    <div class="actions-grid">
+        <a routerLink="/admin/alunos/cadastro" class="action-btn" aria-label="Cadastrar novo aluno">
+            <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
+            <span>Novo Aluno</span>
+        </a>
+        <a routerLink="/admin/turmas" class="action-btn" aria-label="Gerenciar turmas">
+            <span class="material-symbols-rounded" aria-hidden="true">school</span>
+            <span>Gerenciar Turmas</span>
+        </a>
+        <a routerLink="/admin/inscricoes" class="action-btn" aria-label="Ver inscrições pendentes">
+            <span class="material-symbols-rounded" aria-hidden="true">assignment</span>
+            <span>Inscrições</span>
+        </a>
+        <a routerLink="/admin/contatos" class="action-btn" aria-label="Ver mensagens de contato">
+            <span class="material-symbols-rounded" aria-hidden="true">mail</span>
+            <span>Fale Conosco</span>
+        </a>
+    </div>
+</section>
+}
