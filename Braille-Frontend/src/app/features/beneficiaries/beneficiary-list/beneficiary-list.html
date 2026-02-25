@@ -1,1 +1,117 @@
-<p>beneficiary-list works!</p>
+<!-- Cabeçalho da página -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Alunos</h1>
+        <p class="page-subtitle">
+            @if (total > 0) { {{ total }} aluno(s) cadastrado(s) }
+        </p>
+    </div>
+    <a routerLink="/admin/alunos/cadastro" class="btn btn-primary" aria-label="Cadastrar novo aluno">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" x2="12" y1="5" y2="19" />
+            <line x1="5" x2="19" y1="12" y2="12" />
+        </svg>
+        Novo Aluno
+    </a>
+</div>
+
+<!-- Barra de busca -->
+<div class="filter-bar" role="search">
+    <div class="filter-search">
+        <label for="busca-aluno" class="sr-only">Buscar aluno por nome</label>
+        <input id="busca-aluno" type="search" class="form-input" placeholder="Buscar por nome..."
+            [formControl]="buscaCtrl" aria-label="Buscar aluno por nome" autocomplete="off" />
+    </div>
+</div>
+
+<!-- Tabela de Alunos -->
+@if (isLoading) {
+<div class="data-table-wrapper" aria-busy="true" aria-label="Carregando lista de alunos...">
+    <div class="loading-container">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p>Carregando alunos...</p>
+    </div>
+</div>
+} @else if (erro) {
+<div role="alert" aria-live="assertive" class="card card-body">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else if (alunos.length === 0) {
+<div class="empty-state" role="status">
+    <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.5" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+    <h3>Nenhum aluno encontrado</h3>
+    <p>@if (buscaCtrl.value) { Nenhum resultado para "{{ buscaCtrl.value }}". } @else { Comece cadastrando o primeiro
+        aluno. }</p>
+</div>
+} @else {
+<div class="data-table-wrapper">
+    <table class="data-table" role="table" aria-label="Lista de alunos ativos">
+        <caption class="sr-only">{{ total }} alunos cadastrados, página {{ paginaAtual }} de {{ totalPaginas }}
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Nome Completo</th>
+                <th scope="col">CPF / RG</th>
+                <th scope="col">Nascimento</th>
+                <th scope="col">Tipo de Deficiência</th>
+                <th scope="col">Telefone</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (aluno of alunos; track aluno.id) {
+            <tr>
+                <td>
+                    <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
+                </td>
+                <td>{{ aluno.cpfRg || '—' }}</td>
+                <td>{{ formatarData(aluno.dataNascimento) }}</td>
+                <td>
+                    @if (aluno.tipoDeficiencia) {
+                    <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
+                    } @else { <span>—</span> }
+                </td>
+                <td>{{ aluno.telefoneContato || '—' }}</td>
+                <td class="acoes-cell">
+                    <button class="btn btn-sm btn-ghost" [attr.aria-label]="'Ver detalhes de ' + aluno.nomeCompleto">
+                        Ver
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="inativar(aluno)"
+                        [attr.aria-label]="'Inativar aluno ' + aluno.nomeCompleto">
+                        Inativar
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+@if (totalPaginas > 1) {
+<nav class="pagination" role="navigation" aria-label="Paginação dos alunos">
+    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+        aria-label="Página anterior">‹</button>
+
+    @for (p of paginas; track p) {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual" [attr.aria-label]="'Ir para página ' + p"
+        [attr.aria-current]="p === paginaAtual ? 'page' : null">{{ p }}</button>
+    }
+
+    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+        aria-label="Próxima página">›</button>
+
+    <span class="pagination-info" aria-live="polite">
+        Página {{ paginaAtual }} de {{ totalPaginas }}
+    </span>
+</nav>
+}
+}
