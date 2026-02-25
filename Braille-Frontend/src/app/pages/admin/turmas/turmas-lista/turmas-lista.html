@@ -1,46 +1,265 @@
+<!-- ══════════ CABEÇALHO ══════════ -->
 <div class="page-header">
   <div>
-    <h1 class="page-title">Turmas</h1>
+    <h1 class="page-title">Oficinas / Turmas</h1>
     <p class="page-subtitle">Gerencie as oficinas e turmas do instituto</p>
   </div>
-  <button class="btn btn-primary" aria-label="Criar nova turma">
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" x2="12" y1="5" y2="19"/><line x1="5" x2="19" y1="12" y2="12"/></svg>
-    Nova Turma
+  <button class="btn btn-primary" (click)="abrirModalCriar()" aria-label="Criar nova oficina">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="12" x2="12" y1="5" y2="19" />
+      <line x1="5" x2="19" y1="12" y2="12" />
+    </svg>
+    Nova Oficina
   </button>
 </div>
 
+<!-- ══════════ ESTADOS ══════════ -->
 @if (isLoading) {
-  <div class="empty-state" role="status" aria-live="polite">
-    <div class="loading-spinner" aria-label="Carregando turmas..."></div>
-  </div>
+<div class="loading-state" role="status" aria-busy="true" aria-label="Carregando turmas">
+  <div class="spinner" aria-hidden="true"></div>
+  <p>Carregando oficinas...</p>
+</div>
 } @else if (erro) {
-  <div class="empty-state" role="alert">
-    <p>{{ erro }}</p>
-  </div>
+<div class="error-banner" role="alert">⚠️ {{ erro }}</div>
 } @else if (turmas.length === 0) {
-  <div class="empty-state">
-    <h3>Nenhuma turma encontrada</h3>
-    <p>Crie a primeira turma clicando no botão acima.</p>
-  </div>
+<div class="empty-state">
+  <span class="empty-icon" aria-hidden="true">🏫</span>
+  <h3>Nenhuma oficina cadastrada</h3>
+  <p>Crie a primeira oficina clicando no botão "Nova Oficina".</p>
+  <button class="btn btn-primary" (click)="abrirModalCriar()">
+    + Nova Oficina
+  </button>
+</div>
+
 } @else {
-  <div class="turmas-grid" role="list" aria-label="Lista de turmas">
-    @for (turma of turmas; track turma.id) {
-      <article class="card card-hover" role="listitem">
-        <div class="card-body">
-          <h2>{{ turma.nome }}</h2>
-          @if (turma.professor) {
-            <p class="turma-professor">Prof. {{ turma.professor.nome }}</p>
+
+<!-- Grade de cards -->
+<div class="turmas-grid" role="list" aria-label="Lista de oficinas">
+  @for (turma of turmas; track turma.id) {
+  <article class="turma-card" role="listitem">
+
+    <!-- Indicador de status -->
+    <div class="card-status-bar" [class.inativa]="!turma.statusAtivo" aria-hidden="true"></div>
+
+    <div class="card-body">
+      <div class="card-title-row">
+        <h2 class="turma-nome">{{ turma.nome }}</h2>
+        <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">{{
+          turma.statusAtivo ? 'Ativa' : 'Inativa' }}</span>
+      </div>
+
+      @if (turma.descricao) {
+      <p class="turma-descricao">{{ turma.descricao }}</p>
+      }
+
+      <div class="turma-meta">
+        @if (turma.professor) {
+        <span class="meta-item">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          {{ turma.professor.nome }}
+        </span>
+        }
+        @if (turma.horario) {
+        <span class="meta-item">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {{ turma.horario }}
+        </span>
+        }
+        <span class="meta-item meta-alunos">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          {{ turma.alunos?.length ?? 0 }} aluno(s)
+        </span>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <button class="btn btn-sm btn-ghost" (click)="verAlunos(turma)"
+        [attr.aria-label]="'Ver alunos da oficina ' + turma.nome">👥 Alunos</button>
+      <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
+        [attr.aria-label]="'Editar oficina ' + turma.nome">✏️ Editar</button>
+      <button class="btn btn-sm btn-danger" (click)="abrirModalExcluir(turma)"
+        [attr.aria-label]="'Excluir oficina ' + turma.nome">🗑️ Excluir</button>
+    </div>
+
+  </article>
+  }
+</div>
+
+<!-- Paginação -->
+@if (totalPaginas > 1) {
+<nav class="pagination" aria-label="Paginação de oficinas">
+  <button class="btn btn-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaAtual === 1"
+    aria-label="Página anterior">←</button>
+  <span class="pagination-info">
+    Página {{ paginaAtual }} de {{ totalPaginas }} ({{ totalTurmas }} oficinas)
+  </span>
+  <button class="btn btn-secondary btn-sm" (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas"
+    aria-label="Próxima página">→</button>
+</nav>
+}
+}
+
+<!-- ══════════ MODAL CRIAR / EDITAR ══════════ -->
+@if (modalAberto) {
+<div class="modal-overlay" role="dialog" [attr.aria-label]="modoEdicao ? 'Editar oficina' : 'Criar nova oficina'"
+  aria-modal="true" (click)="fecharModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">{{ modoEdicao ? '✏️ Editar Oficina' : '+ Nova Oficina' }}</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">✕</button>
+    </div>
+
+    <form [formGroup]="turmaForm" (ngSubmit)="salvarModal()" class="modal-body" novalidate>
+
+      @if (erroModal) {
+      <div class="error-banner" role="alert">⚠️ {{ erroModal }}</div>
+      }
+
+      <div class="form-group">
+        <label for="modalNomeTurma">
+          Nome da Oficina <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input type="text" id="modalNomeTurma" formControlName="nome" class="form-input"
+          [class.is-invalid]="isCampoInvalido('nome')" placeholder="Ex: Oficina de Braille" aria-required="true"
+          [attr.aria-invalid]="isCampoInvalido('nome')" />
+        @if (isCampoInvalido('nome')) {
+        <span class="error-text" role="alert">Nome é obrigatório (mínimo 3 caracteres).</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="modalProfessor">
+          Professor Responsável <span class="required" aria-hidden="true">*</span>
+        </label>
+        <select id="modalProfessor" formControlName="professorId" class="form-input"
+          [class.is-invalid]="isCampoInvalido('professorId')" aria-required="true"
+          [attr.aria-invalid]="isCampoInvalido('professorId')">
+          <option value="">Selecione um professor...</option>
+          @for (prof of professores; track prof.id) {
+          <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
           }
-          @if (turma.horario) {
-            <p class="turma-horario">{{ turma.horario }}</p>
-          }
-          <p class="turma-alunos">{{ turma.alunos?.length ?? 0 }} aluno(s)</p>
-        </div>
-        <div class="card-footer">
-          <button class="btn btn-sm btn-secondary" [attr.aria-label]="'Editar turma ' + turma.nome">Editar</button>
-          <button class="btn btn-sm btn-danger" [attr.aria-label]="'Excluir turma ' + turma.nome">Excluir</button>
-        </div>
-      </article>
-    }
+        </select>
+        @if (isCampoInvalido('professorId')) {
+        <span class="error-text" role="alert">Selecione o professor responsável.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="modalHorario">Horário</label>
+        <input type="text" id="modalHorario" formControlName="horario" class="form-input"
+          placeholder="Ex: Seg e Qua — 14h às 16h" />
+      </div>
+
+      <div class="form-group">
+        <label for="modalDescricao">Descrição</label>
+        <textarea id="modalDescricao" formControlName="descricao" class="form-input" rows="3"
+          placeholder="Descreva brevemente o conteúdo da oficina..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="turmaForm.invalid || salvandoModal"
+          [attr.aria-busy]="salvandoModal">
+          {{ salvandoModal ? '⏳ Salvando...' : (modoEdicao ? '✔ Atualizar' : '+ Criar Oficina') }}
+        </button>
+      </div>
+
+    </form>
   </div>
+</div>
+}
+
+<!-- ══════════ MODAL EXCLUIR ══════════ -->
+@if (modalExcluirAberto && turmaParaExcluir) {
+<div class="modal-overlay" role="dialog" aria-label="Confirmar exclusão de oficina" aria-modal="true"
+  (click)="fecharModalExcluir()">
+  <div class="modal modal--sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">🗑️ Excluir Oficina</h2>
+      <button class="modal-close" (click)="fecharModalExcluir()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="excluir-texto">
+        Tem certeza que deseja excluir a oficina
+        <strong>{{ turmaParaExcluir.nome }}</strong>?
+      </p>
+      <p class="excluir-aviso">
+        ⚠️ Esta ação não poderá ser desfeita. Os registros de frequência vinculados também serão afetados.
+      </p>
+      @if (erroExclusao) {
+      <div class="error-banner" role="alert">{{ erroExclusao }}</div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="fecharModalExcluir()">Cancelar</button>
+      <button class="btn btn-danger" (click)="confirmarExclusao()" [disabled]="excluindo" [attr.aria-busy]="excluindo">
+        {{ excluindo ? '⏳ Excluindo...' : 'Sim, excluir' }}
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══════════ MODAL ALUNOS ══════════ -->
+@if (modalAlunosAberto) {
+<div class="modal-overlay" role="dialog" aria-label="Alunos matriculados" aria-modal="true"
+  (click)="fecharModalAlunos()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        👥 Alunos — {{ turmaDetalhes?.nome ?? '...' }}
+      </h2>
+      <button class="modal-close" (click)="fecharModalAlunos()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+
+      @if (carregandoDetalhes) {
+      <div class="loading-state" aria-busy="true">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Carregando alunos...</p>
+      </div>
+      } @else if (!turmaDetalhes?.alunos || turmaDetalhes!.alunos!.length === 0) {
+      <div class="empty-state empty-state--sm">
+        <span class="empty-icon" aria-hidden="true">👤</span>
+        <p>Nenhum aluno matriculado nesta oficina.</p>
+      </div>
+      } @else {
+      <ul class="alunos-list" aria-label="Lista de alunos matriculados">
+        @for (aluno of turmaDetalhes!.alunos; track aluno.id) {
+        <li class="aluno-item">
+          <div class="aluno-avatar" aria-hidden="true">
+            {{ aluno.nomeCompleto.charAt(0) }}
+          </div>
+          <span>{{ aluno.nomeCompleto }}</span>
+        </li>
+        }
+      </ul>
+      <p class="alunos-total">
+        Total: {{ turmaDetalhes!.alunos!.length }} aluno(s)
+      </p>
+      }
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="fecharModalAlunos()">Fechar</button>
+    </div>
+  </div>
+</div>
 }
