@@ -10,7 +10,7 @@ import { UsuariosService, Usuario } from '../../../../core/services/usuarios.ser
     standalone: true,
     imports: [CommonModule, RouterModule, ReactiveFormsModule],
     templateUrl: './usuarios-lista.html',
-    styleUrls: ['./usuarios-lista.scss']
+    styleUrl: './usuarios-lista.scss'
 })
 export class UsuariosLista implements OnInit, OnDestroy {
     usuarios: Usuario[] = [];

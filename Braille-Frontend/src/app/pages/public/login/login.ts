@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth.service'; // 👈 Verif
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.html',
-  styleUrls: ['./login.scss']
+  styleUrl: './login.scss'
 })
 export class Login {
   loginForm: FormGroup;
@@ -17,17 +17,17 @@ export class Login {
   carregando = false;
 
   constructor(
-    private fb: FormBuilder, 
-    private authService: AuthService, 
+    private fb: FormBuilder,
+    private authService: AuthService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
-      username: ['', Validators.required], 
+      username: ['', Validators.required],
       senha: ['', Validators.required]
     });
   }
 
- fazerLogin() {
+  fazerLogin() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
