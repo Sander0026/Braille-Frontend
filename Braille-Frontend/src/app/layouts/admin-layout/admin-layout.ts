@@ -27,7 +27,6 @@ export class AdminLayout implements OnInit {
     { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas' },
     { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para registro de frequências' },
     { rota: '/admin/comunicados', label: 'Comunicados', icon: 'campaign', aria: 'Ir para comunicados' },
-    { rota: '/admin/inscricoes', label: 'Inscrições', icon: 'assignment', aria: 'Ir para inscrições do site' },
     { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para mensagens de contato' },
     { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para gestão de usuários' },
   ];

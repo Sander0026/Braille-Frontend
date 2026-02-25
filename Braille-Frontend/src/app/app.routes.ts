@@ -73,13 +73,6 @@ export const routes: Routes = [
         title: 'Comunicados — ILBES'
       },
 
-      // Inscrições do site
-      {
-        path: 'inscricoes',
-        loadComponent: () => import('./pages/admin/inscricoes/inscricoes-lista/inscricoes-lista').then(m => m.InscricoesLista),
-        title: 'Inscrições — ILBES'
-      },
-
       // Contatos / Fale Conosco
       {
         path: 'contatos',
