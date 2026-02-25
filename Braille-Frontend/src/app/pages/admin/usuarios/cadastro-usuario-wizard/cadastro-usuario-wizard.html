@@ -1,0 +1,188 @@
+<div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
+
+<div class="wizard-container">
+    <div *ngIf="mensagemFeedback" class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
+        <strong *ngIf="tipoFeedback === 'sucesso'">✅ Sucesso: </strong>
+        <strong *ngIf="tipoFeedback === 'erro'">⚠️ Erro: </strong>
+        {{ mensagemFeedback }}
+    </div>
+    <header class="wizard-header">
+        <h1>Cadastro de Usuário</h1>
+        <p>Preencha as informações do novo usuário ou administrador. Passo {{ passoAtual }} de 3.</p>
+
+        <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1"
+            aria-valuemax="3">
+            <div class="progress-fill" [style.width.%]="(passoAtual / 3) * 100"></div>
+        </div>
+    </header>
+
+    <form [formGroup]="cadastroUsuarioForm" (ngSubmit)="salvarCadastro()" class="wizard-form">
+
+        <fieldset formGroupName="dadosPessoais" *ngIf="passoAtual === 1">
+            <legend>Passo 1: Dados Pessoais</legend>
+
+            <div class="form-group">
+                <label for="nomeCompleto">Nome Completo *</label>
+                <input type="text" id="nomeCompleto" formControlName="nomeCompleto"
+                    [class.input-error]="isCampoInvalido('dadosPessoais', 'nomeCompleto')"
+                    placeholder="Digite o nome completo" aria-required="true">
+                <span *ngIf="isCampoInvalido('dadosPessoais', 'nomeCompleto')" class="error-text" role="alert">O nome
+                    completo é obrigatório.</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cpf">CPF *</label>
+                    <input type="text" id="cpf" formControlName="cpf" (input)="formatarCpf($event)" maxlength="14"
+                        minlength="14" [class.input-error]="isCampoInvalido('dadosPessoais', 'cpf')"
+                        placeholder="000.000.000-00" aria-required="true">
+                    <span *ngIf="isCampoInvalido('dadosPessoais', 'cpf')" class="error-text" role="alert">O CPF é
+                        obrigatório.</span>
+                </div>
+
+                <div class="form-group" style="flex: 0.5;">
+                    <label for="idade">Idade *</label>
+                    <input type="number" id="idade" formControlName="idade"
+                        [class.input-error]="isCampoInvalido('dadosPessoais', 'idade')" placeholder="Ex: 30"
+                        aria-required="true" min="18" max="120">
+                    <span *ngIf="isCampoInvalido('dadosPessoais', 'idade')" class="error-text" role="alert">A idade é
+                        obrigatória (mínimo 18).</span>
+                </div>
+            </div>
+
+            <div class="form-group"
+                style="padding: 1.5rem; background-color: #fffbea; border: 3px dashed #FFD700; border-radius: 8px;">
+                <label for="fotoPerfil" style="color: #111;">Anexar Foto de Perfil</label>
+                <p style="font-size: 0.9rem; color: #555; margin-bottom: 1rem;">Envie um arquivo de imagem (JPG, PNG).
+                </p>
+
+                <input type="file" id="fotoPerfil" formControlName="fotoPerfil" accept="image/*"
+                    (change)="onFileSelected($event)"
+                    style="border: none; padding: 0; background: transparent; box-shadow: none;">
+            </div>
+        </fieldset>
+
+        <fieldset formGroupName="enderecoLocalizacao" *ngIf="passoAtual === 2">
+            <legend>Passo 2: Contato e Localização</legend>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 0.5;">
+                    <label for="cep">CEP *</label>
+                    <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="Ex: 29000000">
+                    <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'cep')" class="error-text" role="alert">Informe
+                        um CEP válido.</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="rua">Rua *</label>
+                    <input type="text" id="rua" formControlName="rua"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')">
+                    <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'rua')" class="error-text" role="alert">A rua é
+                        obrigatória.</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 0.3;">
+                    <label for="numero">Número *</label>
+                    <input type="text" id="numero" formControlName="numero"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'numero')">
+                </div>
+                <div class="form-group">
+                    <label for="bairro">Bairro *</label>
+                    <input type="text" id="bairro" formControlName="bairro"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'bairro')">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cidade">Cidade *</label>
+                    <input type="text" id="cidade" formControlName="cidade"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cidade')">
+                </div>
+                <div class="form-group" style="flex: 0.3;">
+                    <label for="uf">UF *</label>
+                    <input type="text" id="uf" formControlName="uf"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'uf')" placeholder="Ex: ES">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="telefoneContato">Número de Contato *</label>
+                    <input type="tel" id="telefoneContato" formControlName="telefoneContato"
+                        (input)="formatarTelefone($event)" maxlength="15"
+                        [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')"
+                        placeholder="(00) 00000-0000">
+                    <span *ngIf="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" class="error-text"
+                        role="alert">O telefone é obrigatório.</span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset formGroupName="credenciais" *ngIf="passoAtual === 3">
+            <legend>Passo 3: Credenciais de Acesso</legend>
+
+            <div class="form-group">
+                <label for="funcao">Função no Sistema *</label>
+                <select id="funcao" formControlName="funcao"
+                    [class.input-error]="isCampoInvalido('credenciais', 'funcao')">
+                    <option value="">Selecione a função...</option>
+                    <option value="ADMIN">Administrador</option>
+                    <option value="PROFESSOR">Professor</option>
+                    <option value="ATENDENTE">Atendente</option>
+                </select>
+                <span *ngIf="isCampoInvalido('credenciais', 'funcao')" class="error-text" role="alert">A função é
+                    obrigatória.</span>
+            </div>
+
+            <div class="form-group">
+                <label for="login">Login *</label>
+                <input type="text" id="login" formControlName="login"
+                    [class.input-error]="isCampoInvalido('credenciais', 'login')" placeholder="Ex: nome.sobrenome">
+                <span *ngIf="isCampoInvalido('credenciais', 'login')" class="error-text" role="alert">O login é
+                    obrigatório.</span>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="senha">Senha *</label>
+                    <input type="password" id="senha" formControlName="senha"
+                        [class.input-error]="isCampoInvalido('credenciais', 'senha')"
+                        placeholder="Crie uma senha forte">
+                    <span *ngIf="isCampoInvalido('credenciais', 'senha')" class="error-text" role="alert">A senha é
+                        obrigatória (mín. 6 caracteres).</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmarSenha">Confirmar Senha *</label>
+                    <input type="password" id="confirmarSenha" formControlName="confirmarSenha"
+                        [class.input-error]="cadastroUsuarioForm.hasError('senhasNaoCoincidem') && cadastroUsuarioForm.get('credenciais.confirmarSenha')?.touched"
+                        placeholder="Repita a senha">
+                    <span
+                        *ngIf="cadastroUsuarioForm.hasError('senhasNaoCoincidem') && (cadastroUsuarioForm.get('credenciais.confirmarSenha')?.touched || cadastroUsuarioForm.get('credenciais.confirmarSenha')?.dirty)"
+                        class="error-text" role="alert">As senhas não coincidem.</span>
+                </div>
+            </div>
+        </fieldset>
+
+        <footer class="wizard-footer">
+            <button type="button" class="btn btn-secondary" (click)="voltarPasso()" *ngIf="passoAtual > 1">
+                Voltar Etapa
+            </button>
+
+            <button type="button" class="btn btn-primary" (click)="avancarPasso()" *ngIf="passoAtual < 3"
+                [disabled]="!cadastroUsuarioForm.get(getGroupName(passoAtual))?.valid">
+                Avançar Etapa
+            </button>
+
+            <button type="submit" class="btn btn-success" *ngIf="passoAtual === 3"
+                [disabled]="cadastroUsuarioForm.invalid || isSalvando || cadastroUsuarioForm.hasError('senhasNaoCoincidem')">
+                {{ isSalvando ? 'Salvando Aguarde...' : 'Salvar Cadastro' }}
+            </button>
+        </footer>
+
+    </form>
+</div>

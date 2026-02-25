@@ -1,23 +1,131 @@
-<div class="flex h-screen bg-gray-100">
-  
-  <aside class="w-64 bg-slate-800 text-white flex flex-col">
-    <div class="p-4 bg-slate-900 border-b border-slate-700">
-      <h2 class="text-xl font-bold">Gestão Braille</h2>
+<div class="flex h-screen bg-gray-50 overflow-hidden font-sans text-black">
+
+  <!-- Mobile Overlay -->
+  <div *ngIf="isSidebarOpen" (click)="toggleSidebar()"
+    class="fixed inset-0 bg-black/50 z-20 lg:hidden transition-opacity"></div>
+
+  <!-- Sidebar -->
+  <aside [ngClass]="isSidebarOpen ? 'ml-0' : '-ml-[112px]'"
+    class="fixed lg:static inset-y-0 left-0 z-30 w-[112px] bg-white border-r border-gray-200 flex flex-col transition-all duration-300 ease-in-out shadow-xl lg:shadow-none">
+
+    <div class="h-16 flex items-center justify-center border-b border-gray-200 bg-white shrink-0">
+      <h2 class="text-sm font-bold tracking-wider text-black">ILBES</h2>
     </div>
-    <nav class="flex-1 p-4 space-y-2">
-      <a routerLink="/admin" class="block py-2 px-4 rounded hover:bg-slate-700 transition">📊 Dashboard</a>
-      <a routerLink="/admin/alunos" class="block py-2 px-4 rounded hover:bg-slate-700 transition">🎓 Alunos</a>
-      <a routerLink="/admin/turmas" class="block py-2 px-4 rounded hover:bg-slate-700 transition">🏫 Turmas</a>
+
+    <nav class="flex-1 overflow-y-auto py-4 flex flex-col gap-2">
+      <a routerLink="/admin" routerLinkActive="text-yellow-600 bg-gray-50 border-r-4 border-yellow-500"
+        [routerLinkActiveOptions]="{exact: true}"
+        class="flex flex-col items-center justify-center py-4 px-2 text-gray-600 hover:text-yellow-600 hover:bg-gray-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1">
+          <rect width="7" height="9" x="3" y="3" rx="1" />
+          <rect width="7" height="5" x="14" y="3" rx="1" />
+          <rect width="7" height="9" x="14" y="12" rx="1" />
+          <rect width="7" height="5" x="3" y="16" rx="1" />
+        </svg>
+        <span class="text-[11px] font-semibold text-center mt-1">Dashboard</span>
+      </a>
+
+      <a routerLink="/admin/alunos" routerLinkActive="text-yellow-600 bg-gray-50 border-r-4 border-yellow-500"
+        class="flex flex-col items-center justify-center py-4 px-2 text-gray-600 hover:text-yellow-600 hover:bg-gray-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+          <path d="M6 12v5c3 3 9 3 12 0v-5" />
+        </svg>
+        <span class="text-[11px] font-semibold text-center mt-1">Alunos</span>
+      </a>
+
+      <a routerLink="/admin/turmas" routerLinkActive="text-yellow-600 bg-gray-50 border-r-4 border-yellow-500"
+        class="flex flex-col items-center justify-center py-4 px-2 text-gray-600 hover:text-yellow-600 hover:bg-gray-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" x2="8" y1="13" y2="13" />
+          <line x1="16" x2="8" y1="17" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+        <span class="text-[11px] font-semibold text-center mt-1">Turmas</span>
+      </a>
+
+      <a routerLink="/admin/beneficiarios/cadastro"
+        routerLinkActive="text-yellow-600 bg-gray-50 border-r-4 border-yellow-500"
+        class="flex flex-col items-center justify-center py-4 px-2 text-gray-600 hover:text-yellow-600 hover:bg-gray-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <line x1="19" x2="19" y1="8" y2="14" />
+          <line x1="22" x2="16" y1="11" y2="11" />
+        </svg>
+        <span class="text-[11px] font-semibold text-center mt-1 text-balance">Novo Aluno</span>
+      </a>
+
+      <a routerLink="/admin/usuarios" routerLinkActive="text-yellow-600 bg-gray-50 border-r-4 border-yellow-500"
+        class="flex flex-col items-center justify-center py-4 px-2 text-gray-600 hover:text-yellow-600 hover:bg-gray-50 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span class="text-[11px] font-semibold text-center mt-1 text-balance">Usuários</span>
+      </a>
     </nav>
-    <div class="p-4 border-t border-slate-700">
-      <a routerLink="/" class="block py-2 px-4 text-center text-red-400 hover:bg-slate-700 rounded transition">Sair / Voltar ao Site</a>
+
+    <div class="p-2 border-t border-gray-200">
+      <a routerLink="/"
+        class="flex flex-col items-center justify-center py-4 px-2 text-gray-600 hover:text-red-600 hover:bg-red-50 transition-colors rounded-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" x2="9" y1="12" y2="12" />
+        </svg>
+        <span class="text-[11px] font-semibold text-center mt-1">Sair</span>
+      </a>
     </div>
   </aside>
 
-  <main class="flex-1 overflow-y-auto">
-    <div class="p-8">
-      <router-outlet></router-outlet>
-    </div>
-  </main>
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col h-screen overflow-hidden transition-all duration-300 relative">
 
+    <!-- Top Header -->
+    <header
+      class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6 shrink-0 shadow-sm z-10 w-full">
+      <div class="flex items-center">
+        <button (click)="toggleSidebar()"
+          class="p-2 mr-4 rounded-lg text-gray-600 bg-gray-50 border border-gray-200 hover:text-black hover:bg-yellow-100 hover:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" x2="21" y1="12" y2="12" />
+            <line x1="3" x2="21" y1="6" y2="6" />
+            <line x1="3" x2="21" y1="18" y2="18" />
+          </svg>
+        </button>
+        <h1 class="text-lg lg:text-xl font-bold text-gray-800 hidden sm:block">Painel Administrativo</h1>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <div class="hidden sm:block text-right mr-2">
+          <p class="text-sm font-semibold text-gray-800">Admin</p>
+          <p class="text-xs text-gray-500">Instituto Luiz Braille</p>
+        </div>
+        <div
+          class="w-9 h-9 rounded-full bg-yellow-400 border border-yellow-500 flex items-center justify-center text-black font-bold text-sm">
+          A
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content Router -->
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50">
+      <div class="bg-white min-h-full rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+
+  </div>
 </div>

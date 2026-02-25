@@ -1,0 +1,183 @@
+<div class="flex flex-col h-full bg-white rounded-2xl shadow-sm border border-gray-100 p-6 lg:p-8">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 lg:mb-8 gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Usuários</h2>
+            <p class="text-sm text-gray-500 mt-1">Gerencie os usuários e administradores do sistema.</p>
+        </div>
+        <button routerLink="/admin/usuarios/cadastro"
+            class="inline-flex items-center justify-center px-4 py-2 font-medium text-white transition-colors bg-yellow-600 rounded-lg hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" x2="19" y1="8" y2="14" />
+                <line x1="22" x2="16" y1="11" y2="11" />
+            </svg>
+            Cadastrar Usuário
+        </button>
+    </div>
+
+    <!-- Search and Actions bar -->
+    <div
+        class="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6 gap-4">
+        <!-- Search -->
+        <div class="relative w-full md:w-96">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="text-gray-400">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="m21 21-4.3-4.3" />
+                </svg>
+            </div>
+            <input type="text"
+                class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full pl-10 p-2.5"
+                placeholder="Buscar usuário por nome ou login...">
+        </div>
+
+        <!-- Filter -->
+        <div class="w-full md:w-auto flex items-center">
+            <select
+                class="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
+                <option value="">Todas as Funções</option>
+                <option value="ADMIN">Administrador</option>
+                <option value="PROFESSOR">Professor</option>
+                <option value="ATENDENTE">Atendente</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto rounded-xl border border-gray-200">
+        <table class="w-full text-sm text-left text-gray-500">
+            <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+                <tr>
+                    <th scope="col" class="px-6 py-4">Nome do Usuário</th>
+                    <th scope="col" class="px-6 py-4">Login</th>
+                    <th scope="col" class="px-6 py-4">Função</th>
+                    <th scope="col" class="px-6 py-4 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Empty State -->
+                <tr *ngIf="usuarios.length === 0">
+                    <td colspan="4" class="px-6 py-12 text-center text-gray-500 bg-white">
+                        <div class="flex flex-col items-center justify-center">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="text-gray-400">
+                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                </svg>
+                            </div>
+                            <p class="text-lg font-medium text-gray-900 mb-1">Nenhum usuário cadastrado</p>
+                            <p class="text-sm text-gray-500 max-w-sm">Comece adicionando o primeiro usuário do sistema
+                                clicando no botão "Cadastrar Usuário" acima.</p>
+                        </div>
+                    </td>
+                </tr>
+
+                <!-- Data Rows -->
+                <tr *ngFor="let usuario of usuarios" class="bg-white border-b hover:bg-yellow-50 transition-colors">
+                    <td class="px-6 py-4 font-medium text-gray-900 flex items-center">
+                        <div
+                            class="w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 flex items-center justify-center font-bold mr-3 text-xs border border-yellow-200">
+                            {{ usuario.nome.charAt(0) }}
+                        </div>
+                        {{ usuario.nome }}
+                    </td>
+                    <td class="px-6 py-4">
+                        {{ usuario.login }}
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium" [ngClass]="{
+                    'bg-purple-100 text-purple-800': usuario.funcao === 'Administrador',
+                    'bg-blue-100 text-blue-800': usuario.funcao === 'Professor',
+                    'bg-gray-100 text-gray-800': usuario.funcao !== 'Administrador' && usuario.funcao !== 'Professor'
+                  }">
+                            {{ usuario.funcao }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button (click)="abrirModalEdicao(usuario)"
+                                class="text-gray-500 hover:text-yellow-600 bg-gray-50 hover:bg-yellow-50 p-2 rounded-lg transition-colors border border-transparent hover:border-yellow-200"
+                                title="Editar Usuário">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <path d="M12 20h9" />
+                                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de Edição -->
+    <div *ngIf="usuarioEmEdicao"
+        class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-black bg-opacity-50">
+        <div class="relative p-4 w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-xl shadow">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
+                    <h3 class="text-xl font-semibold text-gray-900">
+                        Editar Usuário
+                    </h3>
+                    <button type="button" (click)="fecharModalEdicao()"
+                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        </svg>
+                        <span class="sr-only">Fechar modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+                <div class="p-4 md:p-5 space-y-4">
+                    <form [formGroup]="editForm" (ngSubmit)="salvarEdicao()">
+                        <div class="grid gap-4 mb-4 grid-cols-2">
+                            <div class="col-span-2">
+                                <label for="nome" class="block mb-2 text-sm font-medium text-gray-900">Nome
+                                    Completo</label>
+                                <input type="text" formControlName="nome" id="nome"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-yellow-600 focus:border-yellow-600 block w-full p-2.5"
+                                    placeholder="Nome Completo">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label for="login" class="block mb-2 text-sm font-medium text-gray-900">Login</label>
+                                <input type="text" formControlName="login" id="login"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-yellow-600 focus:border-yellow-600 block w-full p-2.5"
+                                    placeholder="Login">
+                            </div>
+                            <div class="col-span-2 sm:col-span-1">
+                                <label for="funcao" class="block mb-2 text-sm font-medium text-gray-900">Função</label>
+                                <select id="funcao" formControlName="funcao"
+                                    class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5">
+                                    <option value="Administrador">Administrador</option>
+                                    <option value="Professor">Professor</option>
+                                    <option value="Atendente">Atendente</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Modal footer -->
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b gap-3">
+                    <button (click)="salvarEdicao()" [disabled]="editForm.invalid" type="button"
+                        class="text-white bg-yellow-600 hover:bg-yellow-700 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center disabled:opacity-50">Salvar
+                        Alterações</button>
+                    <button (click)="fecharModalEdicao()" type="button"
+                        class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-yellow-700 focus:z-10 focus:ring-4 focus:ring-gray-100">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
