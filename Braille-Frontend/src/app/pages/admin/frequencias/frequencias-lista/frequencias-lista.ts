@@ -42,12 +42,26 @@ export class FrequenciasLista implements OnInit {
   readonly Math = Math;
 
   // ── Histórico (aba) ────────────────────────────────────────
-  abaAtiva: 'chamada' | 'historico' = 'chamada';
-  historico: Frequencia[] = [];
+  abaAtiva: 'chamada' | 'historico' | 'relatorio' = 'chamada';
+  historico: any[] = [];
   carregandoHistorico = false;
   totalHistorico = 0;
   paginaHistorico = 1;
   erroHistorico = '';
+
+  // ── Detalhes do Histórico (Modal) ──────────────────────────
+  modalDetalhesAberto = false;
+  detalhesResumo: any = null;
+  detalhesAlunos: Frequencia[] = [];
+  carregandoDetalhes = false;
+
+  // ── Relatório (aba) ────────────────────────────────────────
+  alunoSelecionadoId = '';
+  alunosRelatorio: any[] = [];
+  relatorioEstatisticas: any = null;
+  relatorioHistorico: any[] = [];
+  carregandoRelatorio = false;
+  erroRelatorio = '';
 
   constructor(
     private frequenciasService: FrequenciasService,
@@ -203,7 +217,7 @@ export class FrequenciasLista implements OnInit {
   }
 
   // ── Histórico ──────────────────────────────────────────────
-  mudarAba(aba: 'chamada' | 'historico'): void {
+  mudarAba(aba: 'chamada' | 'historico' | 'relatorio'): void {
     this.abaAtiva = aba;
     if (aba === 'historico' && this.historico.length === 0) {
       this.carregarHistorico();
@@ -216,7 +230,7 @@ export class FrequenciasLista implements OnInit {
 
     const turmaId = this.turmaSelecionadaId || undefined;
 
-    this.frequenciasService.listar(this.paginaHistorico, 20, turmaId).subscribe({
+    this.frequenciasService.listarResumo(this.paginaHistorico, 20, turmaId).subscribe({
       next: (res) => {
         this.historico = res.data;
         this.totalHistorico = res.meta.total;
@@ -243,6 +257,69 @@ export class FrequenciasLista implements OnInit {
       this.paginaHistorico++;
       this.carregarHistorico();
     }
+  }
+
+  // ── Modal Histórico ────────────────────────────────────────
+  abrirDetalhes(resumo: any): void {
+    this.detalhesResumo = resumo;
+    this.carregandoDetalhes = true;
+    this.modalDetalhesAberto = true;
+    this.detalhesAlunos = [];
+
+    this.frequenciasService.listar(1, 400, resumo.turmaId, resumo.dataAula).subscribe({
+      next: (res) => {
+        this.detalhesAlunos = res.data;
+        this.carregandoDetalhes = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoDetalhes = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  fecharDetalhes(): void {
+    this.modalDetalhesAberto = false;
+    this.detalhesResumo = null;
+  }
+
+  // ── Relatório ──────────────────────────────────────────────
+  onTurmaRelatorioChange(): void {
+    this.alunoSelecionadoId = '';
+    this.relatorioEstatisticas = null;
+    this.relatorioHistorico = [];
+    this.alunosRelatorio = [];
+
+    if (!this.turmaSelecionadaId) return;
+
+    this.turmasService.buscarPorId(this.turmaSelecionadaId).subscribe({
+      next: (turma) => {
+        this.alunosRelatorio = turma.alunos ?? [];
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  carregarRelatorio(): void {
+    if (!this.turmaSelecionadaId || !this.alunoSelecionadoId) return;
+
+    this.carregandoRelatorio = true;
+    this.erroRelatorio = '';
+
+    this.frequenciasService.obterRelatorioAluno(this.turmaSelecionadaId, this.alunoSelecionadoId).subscribe({
+      next: (res) => {
+        this.relatorioEstatisticas = res.estatisticas;
+        this.relatorioHistorico = res.historico;
+        this.carregandoRelatorio = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroRelatorio = 'Erro ao carregar relatório do aluno.';
+        this.carregandoRelatorio = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // ── Utilidades ─────────────────────────────────────────────

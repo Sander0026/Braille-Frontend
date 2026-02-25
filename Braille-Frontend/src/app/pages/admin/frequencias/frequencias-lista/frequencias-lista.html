@@ -17,6 +17,10 @@
         [attr.aria-selected]="abaAtiva === 'historico'" (click)="mudarAba('historico')">
         📊 Histórico
     </button>
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'relatorio'"
+        [attr.aria-selected]="abaAtiva === 'relatorio'" (click)="mudarAba('relatorio')">
+        📈 Relatório Individual
+    </button>
 </div>
 
 <!-- ══════════ ABA: CHAMADA ══════════ -->
@@ -201,21 +205,27 @@
         <thead>
             <tr>
                 <th scope="col">Data</th>
-                <th scope="col">Aluno</th>
                 <th scope="col">Oficina</th>
-                <th scope="col" class="text-center">Status</th>
+                <th scope="col" class="text-center">Alunos Totais</th>
+                <th scope="col" class="text-center">Presenças</th>
+                <th scope="col" class="text-center">Ações</th>
             </tr>
         </thead>
         <tbody>
-            @for (freq of historico; track freq.id) {
+            @for (resumo of historico; track resumo.dataAula + resumo.turmaId) {
             <tr>
-                <td>{{ formatarData(freq.dataAula) }}</td>
-                <td>{{ freq.aluno?.nomeCompleto ?? '—' }}</td>
-                <td>{{ freq.turma?.nome ?? '—' }}</td>
+                <td>{{ formatarData(resumo.dataAula) }}</td>
+                <td>{{ resumo.turmaNome }}</td>
+                <td class="text-center">{{ resumo.totalAlunos }}</td>
                 <td class="text-center">
-                    <span class="badge" [class.badge--success]="freq.presente" [class.badge--danger]="!freq.presente">
-                        {{ freq.presente ? 'Presente' : 'Falta' }}
-                    </span>
+                    <span class="badge badge--success" style="margin-right: 4px;">{{ resumo.presentes }}</span>
+                    <span class="badge badge--danger">{{ resumo.faltas }}</span>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-secondary" (click)="abrirDetalhes(resumo)"
+                        aria-label="Ver mais detalhes da turma nesta data">
+                        👁️ Detalhes
+                    </button>
                 </td>
             </tr>
             }
@@ -235,4 +245,144 @@
         [disabled]="paginaHistorico >= Math.ceil(totalHistorico / 20)" aria-label="Próxima página">→</button>
 </nav>
 }
+}
+
+<!-- ══════════ ABA: RELATÓRIO INDIVIDUAL ══════════ -->
+@if (abaAtiva === 'relatorio') {
+
+<section class="filtro-card" aria-label="Buscar relatório do aluno">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="relatorioTurmaSelect">Oficina</label>
+            <select id="relatorioTurmaSelect" [(ngModel)]="turmaSelecionadaId" (change)="onTurmaRelatorioChange()"
+                class="form-input">
+                <option value="">Selecione uma oficina...</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="relatorioAlunoSelect">Aluno</label>
+            <select id="relatorioAlunoSelect" [(ngModel)]="alunoSelecionadoId" class="form-input"
+                [disabled]="!turmaSelecionadaId || alunosRelatorio.length === 0">
+                <option value="">Selecione um aluno da oficina...</option>
+                @for (aluno of alunosRelatorio; track aluno.id) {
+                <option [value]="aluno.id">{{ aluno.nomeCompleto }}</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="carregarRelatorio()"
+            [disabled]="!alunoSelecionadoId || carregandoRelatorio" aria-label="Gerar Relatório de Frequência">
+            @if (carregandoRelatorio) { ⏳ Gerando... }
+            @else { 📊 Gerar Relatório }
+        </button>
+    </div>
+</section>
+
+@if (erroRelatorio) {
+<div class="error-banner" role="alert">⚠️ {{ erroRelatorio }}</div>
+}
+
+@if (relatorioEstatisticas) {
+<!-- Estatísticas Rápidas -->
+<div class="chamada-header" style="flex-wrap: nowrap; margin-bottom: 2rem;">
+    <div class="chamada-info" style="flex: 1;">
+        <span class="chamada-turma">Estatísticas do Aluno</span>
+        <span class="chamada-data">Total de {{ relatorioEstatisticas.totalAulas }} aulas registradas nesta
+            oficina.</span>
+    </div>
+    <div class="chamada-stats" style="gap: 1.5rem;">
+        <span class="stat stat--presente" style="font-size: 1.1rem; padding: 0.5rem 1rem;">✅ {{
+            relatorioEstatisticas.taxaPresenca }}% de Presença</span>
+        <span class="stat stat--falta" style="font-size: 1.1rem; padding: 0.5rem 1rem;">❌ {{
+            relatorioEstatisticas.faltas }} Faltas</span>
+    </div>
+</div>
+
+<h3 style="font-size: 1.1rem; color: #1f1f1f; margin-bottom: 1rem;">Extrato de Aulas</h3>
+
+@if (relatorioHistorico.length === 0) {
+<div class="empty-state empty-state--sm">
+    <p>Nenhuma aula letiva registrada na oficina confirmada para pesquisa ainda.</p>
+</div>
+} @else {
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Data da Aula</th>
+                <th scope="col" class="text-right">Status do Aluno</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (historico of relatorioHistorico; track historico.id) {
+            <tr>
+                <td>{{ formatarData(historico.dataAula) }}</td>
+                <td class="text-right">
+                    <span class="badge" [class.badge--success]="historico.presente"
+                        [class.badge--danger]="!historico.presente">
+                        {{ historico.presente ? '✔ Presente' : '❌ Falta' }}
+                    </span>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}
+
+}
+
+}
+
+<!-- ══════════ MODAL DE DETALHES DE FREQUENCIA ══════════ -->
+@if (modalDetalhesAberto) {
+<div class="modal-overlay" role="dialog" aria-label="Detalhes da chamada da turma" aria-modal="true"
+    (click)="fecharDetalhes()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                Chamada — {{ formatarData(detalhesResumo?.dataAula) }}
+            </h2>
+            <button class="modal-close" (click)="fecharDetalhes()" aria-label="Fechar modal">✕</button>
+        </div>
+        <div class="modal-body">
+            @if (carregandoDetalhes) {
+            <div class="loading-state empty-state--sm" aria-busy="true">
+                <div class="spinner" aria-hidden="true"></div>
+                <p>Buscando lista de alunos...</p>
+            </div>
+            } @else {
+
+            <div
+                style="display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; justify-content: space-around;">
+                <div style="font-size: 0.9rem; color: #374151;"><strong>Total de Alunos:</strong> {{
+                    detalhesAlunos.length }}</div>
+                <div style="font-size: 0.9rem; color: #166534;"><strong>Presentes:</strong> {{ detalhesResumo?.presentes
+                    }}</div>
+                <div style="font-size: 0.9rem; color: #991b1b;"><strong>Faltas:</strong> {{ detalhesResumo?.faltas }}
+                </div>
+            </div>
+
+            <ul class="alunos-list" style="max-height: 400px; overflow-y: auto;">
+                @for (aluno of detalhesAlunos; track aluno.id) {
+                <li class="aluno-item"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
+                    <span style="font-weight: 500;">{{ aluno.aluno?.nomeCompleto }}</span>
+                    <span class="badge" [class.badge--success]="aluno.presente" [class.badge--danger]="!aluno.presente">
+                        {{ aluno.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharDetalhes()">Sair</button>
+        </div>
+    </div>
+</div>
 }
