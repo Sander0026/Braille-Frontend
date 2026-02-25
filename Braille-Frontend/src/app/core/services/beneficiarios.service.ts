@@ -10,6 +10,7 @@ export interface Beneficiario {
     genero?: string;
     telefoneContato?: string;
     email?: string;
+    fotoPerfil?: string;
     cep?: string;
     rua?: string;
     numero?: string;
@@ -73,5 +74,10 @@ export class BeneficiariosService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<{ url: string }>('http://localhost:3000/upload', formData);
+    }
+
+    excluirArquivo(urlArquivo: string): Observable<any> {
+        let params = new HttpParams().set('url', urlArquivo);
+        return this.http.delete('http://localhost:3000/upload', { params });
     }
 }

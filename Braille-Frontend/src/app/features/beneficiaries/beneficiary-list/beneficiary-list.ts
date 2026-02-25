@@ -20,6 +20,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // Modal Ver Aluno
   modalAberto = false;
   carregandoDetalhes = false;
+  uploadingImage = false;
+  deletandoImage = false;
   alunoSelecionado: Beneficiario | null = null;
 
   // Paginação
@@ -123,8 +125,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   getAvatarUrl(aluno: Beneficiario): string {
-    if (aluno.laudoUrl) {
-      return aluno.laudoUrl;
+    if (aluno.fotoPerfil) {
+      return aluno.fotoPerfil;
     }
     // Avatar default baseado no gênero
     const genero = aluno.genero ? aluno.genero.toLowerCase() : '';
@@ -135,5 +137,81 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       return 'assets/images/avatar-male.svg';
     }
     return 'assets/images/avatar-neutral.svg';
+  }
+
+  // --- Lógica de Upload e Exclusão de Arquivos no Perfil ---
+  async processarUploadArquivo(event: any, tipo: 'fotoPerfil' | 'laudoUrl'): Promise<void> {
+    const file = event.target.files[0];
+    if (!file || !this.alunoSelecionado) return;
+
+    this.uploadingImage = true;
+    this.cdr.detectChanges();
+
+    this.beneficiariosService.uploadImagem(file).subscribe({
+      next: (res) => {
+        // Sucesso no Cloudinary, agora salva no Banco (Prisma)
+        const updatePayload: Partial<Beneficiario> = {};
+        updatePayload[tipo] = res.url;
+
+        this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
+          next: (alunoAtualizado) => {
+            this.alunoSelecionado = alunoAtualizado; // Atualiza a tela com o novo dado
+            this.carregar(); // Recarrega a tabela no fundo
+            this.uploadingImage = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            alert('Documento salvo na nuvem, mas falhou ao vincular no cadastro.');
+            this.uploadingImage = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: () => {
+        alert('Falha ao enviar o arquivo (verifique o tamanho ou formato).');
+        this.uploadingImage = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl'): void {
+    if (!this.alunoSelecionado) return;
+    const urlAtual = this.alunoSelecionado[tipo];
+
+    if (!urlAtual) return;
+    if (!confirm('Tem certeza que deseja apagar este arquivo definitivamente?')) return;
+
+    this.deletandoImage = true;
+    this.cdr.detectChanges();
+
+    this.beneficiariosService.excluirArquivo(urlAtual).subscribe({
+      next: () => {
+        // Sucesso na exclusão do Cloudinary, limpa o Banco
+        const updatePayload: Partial<Beneficiario> = {};
+        updatePayload[tipo] = ''; // Prisma pode gravar string vazia ou anular via Backend
+
+        this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
+          next: () => {
+            // Força a UI a remover o arquivo localmente
+            if (this.alunoSelecionado) {
+              this.alunoSelecionado[tipo] = '';
+            }
+            this.carregar(); // Recarrega a tabela
+            this.deletandoImage = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.deletandoImage = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: () => {
+        alert('Falha ao excluir o documento da nuvem.');
+        this.deletandoImage = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
