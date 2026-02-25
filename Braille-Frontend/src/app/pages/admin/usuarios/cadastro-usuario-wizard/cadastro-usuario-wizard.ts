@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { UsuariosService } from '../../../../core/services/usuarios.service';
 
 @Component({
     selector: 'app-cadastro-usuario-wizard',
@@ -23,7 +24,8 @@ export class CadastroUsuarioWizard implements OnInit {
     constructor(
         private fb: FormBuilder,
         private http: HttpClient,
-        private router: Router
+        private router: Router,
+        private usuariosService: UsuariosService
     ) { }
 
     ngOnInit(): void {
@@ -34,6 +36,7 @@ export class CadastroUsuarioWizard implements OnInit {
         this.cadastroUsuarioForm = this.fb.group({
             dadosPessoais: this.fb.group({
                 nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
+                email: ['', [Validators.required, Validators.email]],
                 cpf: ['', [Validators.required, Validators.minLength(14)]],
                 idade: ['', [Validators.required, Validators.min(18)]],
                 fotoPerfil: ['']
@@ -171,6 +174,8 @@ export class CadastroUsuarioWizard implements OnInit {
     }
 
     salvarCadastro() {
+        if (this.isSalvando) return;
+
         if (this.cadastroUsuarioForm.invalid || this.cadastroUsuarioForm.hasError('senhasNaoCoincidem')) {
             this.cadastroUsuarioForm.markAllAsTouched();
             this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho ou senhas não coincidem.');
@@ -181,30 +186,35 @@ export class CadastroUsuarioWizard implements OnInit {
         this.mensagemFeedback = '';
         this.anunciarParaLeitorDeTela('Salvando cadastro do usuário, por favor aguarde...');
 
-        const formValues = this.cadastroUsuarioForm.value;
-        const payloadBackend = {
-            ...formValues.dadosPessoais,
-            ...formValues.enderecoLocalizacao,
-            // Only send the necessary credentials (not the confirmed password check)
-            login: formValues.credenciais.login,
-            senha: formValues.credenciais.senha,
-            funcao: formValues.credenciais.funcao
+        const v = this.cadastroUsuarioForm.value;
+
+        // Mapeamento: form -> CreateUsuarioDto do backend
+        const payload = {
+            nome: v.dadosPessoais.nomeCompleto,
+            email: v.dadosPessoais.email,
+            username: v.credenciais.login,
+            senha: v.credenciais.senha,
+            role: v.credenciais.funcao,
         };
 
-        // TODO: Connect this with a real UsuariosService
-        // For now, mock successful request
-        setTimeout(() => {
-            this.exibirFeedback('Usuário cadastrado com sucesso!', 'sucesso');
-            this.cadastroUsuarioForm.reset();
-            this.passoAtual = 1;
-            this.arquivoFotoSelecionado = null;
+        this.usuariosService.criar(payload).subscribe({
+            next: () => {
+                this.exibirFeedback('Usuário cadastrado com sucesso!', 'sucesso');
+                this.cadastroUsuarioForm.reset();
+                this.passoAtual = 1;
+                this.arquivoFotoSelecionado = null;
 
-            // Redirect to list after short delay 
-            setTimeout(() => {
-                this.router.navigate(['/admin/usuarios']);
-            }, 3000);
-
-        }, 1500);
+                setTimeout(() => {
+                    this.router.navigate(['/admin/usuarios']);
+                }, 2500);
+            },
+            error: (err: HttpErrorResponse) => {
+                const msg = err.status === 409
+                    ? 'Este login (username) já está em uso. Escolha outro.'
+                    : (err.error?.message ?? 'Erro ao cadastrar. Tente novamente.');
+                this.exibirFeedback(msg, 'erro');
+            },
+        });
     }
 
     private exibirFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {

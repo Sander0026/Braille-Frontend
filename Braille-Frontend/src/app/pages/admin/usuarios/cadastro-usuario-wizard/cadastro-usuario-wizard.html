@@ -30,6 +30,16 @@
                     completo é obrigatório.</span>
             </div>
 
+            <div class="form-group">
+                <label for="email">E-mail *</label>
+                <input type="email" id="email" formControlName="email"
+                    [class.input-error]="isCampoInvalido('dadosPessoais', 'email')" placeholder="usuario@exemplo.com"
+                    autocomplete="email" aria-required="true">
+                <span *ngIf="isCampoInvalido('dadosPessoais', 'email')" class="error-text" role="alert">
+                    Informe um e-mail válido.
+                </span>
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="cpf">CPF *</label>
