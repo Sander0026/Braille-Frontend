@@ -1,0 +1,319 @@
+// ============================================================
+// contato.scss
+// ============================================================
+
+$primary: #f5c800;
+$black: #1a1a00;
+$danger: #dc2626;
+$success: #16a34a;
+$gray-100: #f7f7f7;
+$gray-200: #e8e8e8;
+$gray-600: #5c5c5c;
+$gray-900: #1a1a1a;
+
+// ── Page hero (reutiliza classes do sobre.scss via :host) ──
+.page-hero {
+    background: $black;
+    padding: 4rem 1.5rem 3.5rem;
+    text-align: center;
+}
+
+.page-hero-inner {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.page-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: $primary;
+    margin: 0 0 0.75rem;
+}
+
+.page-hero-title {
+    font-size: clamp(1.75rem, 4vw, 2.8rem);
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+}
+
+.page-hero-desc {
+    font-size: 1rem;
+    color: rgba(#fff, .7);
+    line-height: 1.7;
+    margin: 0;
+}
+
+// ── Seção principal ───────────────────────────────────────
+.contato-section {
+    background: $gray-100;
+    padding: 4rem 1.5rem;
+}
+
+.contato-inner {
+    max-width: 1060px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: 2.5rem;
+    align-items: start;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ── Info lateral ──────────────────────────────────────────
+.contato-info {
+    background: $black;
+    border-radius: 1rem;
+    padding: 2rem 1.75rem;
+    color: #fff;
+    position: sticky;
+    top: 80px;
+}
+
+.info-titulo {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $primary;
+    margin: 0 0 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    gap: 0.875rem;
+    align-items: flex-start;
+    margin-bottom: 1.25rem;
+
+    strong {
+        display: block;
+        font-size: 0.82rem;
+        color: $primary;
+        margin-bottom: 0.125rem;
+    }
+
+    p {
+        font-size: 0.8rem;
+        color: rgba(#fff, .75);
+        margin: 0;
+        line-height: 1.5;
+    }
+}
+
+.info-icon {
+    font-size: 1.3rem;
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+.info-hint {
+    font-size: 0.72rem !important;
+    opacity: 0.6;
+}
+
+.info-aviso {
+    background: rgba($primary, .1);
+    border: 1px solid rgba($primary, .25);
+    border-radius: 0.5rem;
+    padding: 0.875rem 1rem;
+    margin-top: 1.5rem;
+
+    p {
+        font-size: 0.78rem;
+        color: rgba(#fff, .8);
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    strong {
+        color: $primary;
+    }
+}
+
+// ── Formulário ────────────────────────────────────────────
+.form-card {
+    background: #fff;
+    border: 1px solid $gray-200;
+    border-radius: 1rem;
+    padding: 2rem 1.75rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .05);
+}
+
+.form-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: $gray-900;
+    margin: 0 0 0.25rem;
+}
+
+.form-subtitle {
+    font-size: 0.78rem;
+    color: $gray-600;
+    margin: 0 0 1.5rem;
+}
+
+.req-mark {
+    color: $danger;
+    font-weight: 700;
+}
+
+// Error banner global
+.form-error-banner {
+    background: #fef2f2;
+    border: 1.5px solid $danger;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.82rem;
+    color: #991b1b;
+    margin-bottom: 1.25rem;
+}
+
+// Form group
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 1rem;
+
+    label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $gray-600;
+    }
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+
+    @media (max-width: 520px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.6rem 0.875rem;
+    border: 1.5px solid $gray-200;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: $gray-900;
+    background: #fff;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+    box-sizing: border-box;
+
+    &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, .2);
+    }
+
+    &.invalid {
+        border-color: $danger;
+    }
+
+    &::placeholder {
+        color: $gray-200;
+    }
+}
+
+textarea.form-input {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.field-error {
+    font-size: 0.73rem;
+    color: $danger;
+    font-weight: 500;
+}
+
+.field-hint {
+    font-size: 0.73rem;
+    color: $gray-600;
+    margin: -0.5rem 0 0.75rem;
+    font-style: italic;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+// Botão submit
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.75rem;
+    background: $black;
+    color: $primary;
+    font-weight: 800;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: transform 200ms ease, background 200ms ease;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    &.btn-full {
+        width: 100%;
+        margin-top: 0.5rem;
+    }
+}
+
+// ── Estado de sucesso ─────────────────────────────────────
+.success-state {
+    background: #fff;
+    border: 1px solid $gray-200;
+    border-radius: 1rem;
+    padding: 3rem 2rem;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, .05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+
+    h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: $gray-900;
+        margin: 0;
+    }
+
+    p {
+        font-size: 0.9rem;
+        color: $gray-600;
+        margin: 0;
+        line-height: 1.65;
+        max-width: 380px;
+    }
+}
+
+.success-icon {
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}

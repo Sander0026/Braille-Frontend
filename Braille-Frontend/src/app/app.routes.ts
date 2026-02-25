@@ -9,7 +9,18 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        loadComponent: () => import('./pages/public/home/home').then(m => m.Home)
+        loadComponent: () => import('./pages/public/home/home').then(m => m.Home),
+        title: 'Início — Instituto Luiz Braille'
+      },
+      {
+        path: 'sobre',
+        loadComponent: () => import('./pages/public/sobre/sobre').then(m => m.Sobre),
+        title: 'Sobre Nós — Instituto Luiz Braille'
+      },
+      {
+        path: 'contato',
+        loadComponent: () => import('./pages/public/contato/contato').then(m => m.Contato),
+        title: 'Fale Conosco — Instituto Luiz Braille'
       }
     ]
   },

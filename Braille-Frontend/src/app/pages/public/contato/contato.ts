@@ -1,0 +1,107 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+
+interface ContatoPayload {
+    nome: string;
+    email: string;
+    telefone: string;
+    assunto: string;
+    mensagem: string;
+}
+
+@Component({
+    selector: 'app-contato',
+    standalone: true,
+    imports: [CommonModule, FormsModule],
+    templateUrl: './contato.html',
+    styleUrl: './contato.scss',
+})
+export class Contato {
+
+    form: ContatoPayload = {
+        nome: '',
+        email: '',
+        telefone: '',
+        assunto: '',
+        mensagem: '',
+    };
+
+    enviando = false;
+    enviado = false;
+    erroEnvio = '';
+
+    // Campos tocados (para validação visual)
+    tocado: Record<string, boolean> = {};
+
+    constructor(private http: HttpClient) { }
+
+    marcarTocado(campo: string): void {
+        this.tocado[campo] = true;
+    }
+
+    get formValido(): boolean {
+        return !!(
+            this.form.nome.trim().length >= 2 &&
+            this.form.assunto.trim().length >= 3 &&
+            this.form.mensagem.trim().length >= 10 &&
+            (this.form.email.trim() || this.form.telefone.trim())
+        );
+    }
+
+    isCampoInvalido(campo: keyof ContatoPayload): boolean {
+        if (!this.tocado[campo]) return false;
+
+        switch (campo) {
+            case 'nome':
+                return this.form.nome.trim().length < 2;
+            case 'assunto':
+                return this.form.assunto.trim().length < 3;
+            case 'mensagem':
+                return this.form.mensagem.trim().length < 10;
+            case 'email':
+                // email OU telefone são obrigatórios
+                return !this.form.email.trim() && !this.form.telefone.trim();
+            default:
+                return false;
+        }
+    }
+
+    enviar(): void {
+        // Marca todos como tocados para mostrar erros
+        ['nome', 'email', 'assunto', 'mensagem'].forEach(c => (this.tocado[c] = true));
+
+        if (!this.formValido || this.enviando) return;
+
+        this.enviando = true;
+        this.erroEnvio = '';
+
+        // Monta payload removendo campos vazios
+        const payload: Record<string, string> = {
+            nome: this.form.nome.trim(),
+            assunto: this.form.assunto.trim(),
+            mensagem: this.form.mensagem.trim(),
+        };
+        if (this.form.email.trim()) payload['email'] = this.form.email.trim();
+        if (this.form.telefone.trim()) payload['telefone'] = this.form.telefone.trim();
+
+        this.http.post('http://localhost:3000/contatos', payload).subscribe({
+            next: () => {
+                this.enviando = false;
+                this.enviado = true;
+            },
+            error: () => {
+                this.enviando = false;
+                this.erroEnvio = 'Não foi possível enviar a mensagem. Tente novamente em instantes.';
+            },
+        });
+    }
+
+    novoContato(): void {
+        this.enviado = false;
+        this.erroEnvio = '';
+        this.tocado = {};
+        this.form = { nome: '', email: '', telefone: '', assunto: '', mensagem: '' };
+    }
+}
