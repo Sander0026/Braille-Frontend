@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
     templateUrl: './cadastro-usuario-wizard.html',
-    styleUrls: ['./cadastro-usuario-wizard.scss']
+    styleUrl: './cadastro-usuario-wizard.scss'
 })
 export class CadastroUsuarioWizard implements OnInit {
 

@@ -2,14 +2,14 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { BeneficiariosService } from '../services/beneficiarios.service';
+import { BeneficiariosService } from '../../../../core/services/beneficiarios.service';
 
 @Component({
   selector: 'app-cadastro-wizard',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
   templateUrl: './cadastro-wizard.html',
-  styleUrls: ['./cadastro-wizard.scss'],
+  styleUrl: './cadastro-wizard.scss',
 })
 export class CadastroWizard implements OnInit {
   passoAtual = 1;
@@ -23,7 +23,7 @@ export class CadastroWizard implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private beneficiariosService: BeneficiariosService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.iniciarFormulario();

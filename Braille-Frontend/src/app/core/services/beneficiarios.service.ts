@@ -41,4 +41,14 @@ export class BeneficiariosService {
     inativar(id: string): Observable<any> {
         return this.http.delete(`${this.url}/${id}`);
     }
+
+    criarBeneficiario(dados: Record<string, unknown>): Observable<Beneficiario> {
+        return this.http.post<Beneficiario>(this.url, dados);
+    }
+
+    uploadImagem(file: File): Observable<{ url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url: string }>('http://localhost:3000/upload', formData);
+    }
 }
