@@ -74,6 +74,11 @@ $gray-900: #1a1a1a;
     color: #fff;
     position: sticky;
     top: 80px;
+
+    @media (max-width: 768px) {
+        position: static; // remove sticky no mobile
+        top: auto;
+    }
 }
 
 .info-titulo {
