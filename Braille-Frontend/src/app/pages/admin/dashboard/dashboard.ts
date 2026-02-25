@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { DashboardService, DashboardStats } from '../../../core/services/dashboard.service';
@@ -26,7 +26,7 @@ export class Dashboard implements OnInit {
 
   cards: StatCard[] = [];
 
-  constructor(private dashboardService: DashboardService) { }
+  constructor(private dashboardService: DashboardService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
     this.dashboardService.getEstatisticas().subscribe({
@@ -34,10 +34,12 @@ export class Dashboard implements OnInit {
         this.stats = data;
         this.isLoading = false;
         this.buildCards();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.erro = 'Não foi possível carregar as estatísticas.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

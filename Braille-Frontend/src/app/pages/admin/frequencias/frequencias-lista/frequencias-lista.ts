@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
@@ -52,6 +52,7 @@ export class FrequenciasLista implements OnInit {
   constructor(
     private frequenciasService: FrequenciasService,
     private turmasService: TurmasService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -63,9 +64,11 @@ export class FrequenciasLista implements OnInit {
     this.turmasService.listar(1, 100).subscribe({
       next: (res) => {
         this.turmas = res.data.filter(t => t.statusAtivo);
+        this.cdr.detectChanges();
       },
       error: () => {
         this.erroCarregamento = 'Não foi possível carregar as turmas. Verifique se o servidor está online.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -110,16 +113,19 @@ export class FrequenciasLista implements OnInit {
 
             this.carregandoChamada = false;
             this.chamadaCarregada = true;
+            this.cdr.detectChanges();
           },
           error: () => {
             this.erroCarregamento = 'Erro ao buscar registros de chamada.';
             this.carregandoChamada = false;
+            this.cdr.detectChanges();
           },
         });
       },
       error: () => {
         this.erroCarregamento = 'Erro ao carregar alunos desta turma.';
         this.carregandoChamada = false;
+        this.cdr.detectChanges();
       },
     });
   }
@@ -185,11 +191,13 @@ export class FrequenciasLista implements OnInit {
         });
         this.salvandoTudo = false;
         this.feedbackSalvo = 'Chamada salva com sucesso!';
-        setTimeout(() => (this.feedbackSalvo = ''), 5000);
+        this.cdr.detectChanges();
+        setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
       },
       error: () => {
         this.salvandoTudo = false;
         this.feedbackSalvo = 'Erro ao salvar chamada. Tente novamente.';
+        this.cdr.detectChanges();
       },
     });
   }
@@ -213,10 +221,12 @@ export class FrequenciasLista implements OnInit {
         this.historico = res.data;
         this.totalHistorico = res.meta.total;
         this.carregandoHistorico = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.erroHistorico = 'Erro ao carregar histórico.';
         this.carregandoHistorico = false;
+        this.cdr.detectChanges();
       },
     });
   }

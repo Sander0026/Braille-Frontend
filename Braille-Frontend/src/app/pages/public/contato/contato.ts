@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -35,7 +35,7 @@ export class Contato {
     // Campos tocados (para validação visual)
     tocado: Record<string, boolean> = {};
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
 
     marcarTocado(campo: string): void {
         this.tocado[campo] = true;
@@ -120,10 +120,12 @@ export class Contato {
             next: () => {
                 this.enviando = false;
                 this.enviado = true;
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.enviando = false;
                 this.erroEnvio = 'Não foi possível enviar a mensagem. Tente novamente em instantes.';
+                this.cdr.detectChanges();
             },
         });
     }

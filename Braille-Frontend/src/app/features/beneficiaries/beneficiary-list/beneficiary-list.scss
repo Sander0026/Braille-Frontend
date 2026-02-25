@@ -19,3 +19,88 @@
     gap: 0.5rem;
     white-space: nowrap;
 }
+
+/* Modal and Profile Styles */
+.modal-lg {
+    max-width: 800px;
+    width: 95%;
+}
+
+.profile-body {
+    padding: 2rem;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e5e7eb;
+    
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.profile-title {
+    h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.5rem;
+        color: #111827;
+    }
+}
+
+.profile-badges {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+}
+
+.profile-section {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 8px;
+
+    h4 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.5rem;
+    }
+
+    p {
+        margin: 0.5rem 0;
+        font-size: 0.95rem;
+        color: #4b5563;
+        
+        strong {
+            color: #1f2937;
+        }
+    }
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}

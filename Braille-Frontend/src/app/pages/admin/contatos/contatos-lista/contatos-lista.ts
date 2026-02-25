@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { ContatosService, Contato } from '../../../../core/services/contatos.service';
@@ -30,7 +30,7 @@ export class ContatosLista implements OnInit {
     { valor: 'lidas', label: 'Lidas' }
   ];
 
-  constructor(private contatosService: ContatosService) { }
+  constructor(private contatosService: ContatosService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void { this.carregar(); }
 
@@ -50,8 +50,9 @@ export class ContatosLista implements OnInit {
         this.total = res.meta.total;
         this.totalPaginas = res.meta.lastPage;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.erro = 'Erro ao carregar mensagens.'; this.isLoading = false; }
+      error: () => { this.erro = 'Erro ao carregar mensagens.'; this.isLoading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -64,7 +65,7 @@ export class ContatosLista implements OnInit {
 
   marcarLida(contato: Contato): void {
     this.contatosService.marcarComoLida(contato.id).subscribe({
-      next: () => { contato.lida = true; },
+      next: () => { contato.lida = true; this.cdr.detectChanges(); },
       error: () => { }
     });
   }
@@ -73,7 +74,7 @@ export class ContatosLista implements OnInit {
     if (!confirm(`Excluir mensagem de "${contato.nome}"?`)) return;
     this.contatosService.excluir(contato.id).subscribe({
       next: () => { this.fecharMensagem(); this.carregar(); },
-      error: () => alert('Erro ao excluir mensagem.')
+      error: () => { alert('Erro ao excluir mensagem.'); this.cdr.detectChanges(); }
     });
   }
 

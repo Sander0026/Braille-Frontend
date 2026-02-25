@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { InscricoesService, Inscricao } from '../../../../core/services/inscricoes.service';
@@ -32,7 +32,7 @@ export class InscricoesLista implements OnInit {
   obsCtrl = new FormControl('');
   processando = false;
 
-  constructor(private inscricoesService: InscricoesService) { }
+  constructor(private inscricoesService: InscricoesService, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void { this.carregar(); }
 
@@ -50,8 +50,9 @@ export class InscricoesLista implements OnInit {
         this.total = res.meta.total;
         this.totalPaginas = res.meta.lastPage;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
-      error: () => { this.erro = 'Erro ao carregar inscrições.'; this.isLoading = false; }
+      error: () => { this.erro = 'Erro ao carregar inscrições.'; this.isLoading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -72,7 +73,7 @@ export class InscricoesLista implements OnInit {
       this.inscricaoSelecionada.id, status, this.obsCtrl.value ?? ''
     ).subscribe({
       next: () => { this.processando = false; this.fecharDetalhe(); this.carregar(); },
-      error: () => { this.processando = false; alert('Erro ao processar inscrição.'); }
+      error: () => { this.processando = false; alert('Erro ao processar inscrição.'); this.cdr.detectChanges(); }
     });
   }
 

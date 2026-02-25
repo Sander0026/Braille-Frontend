@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -47,6 +47,7 @@ export class TurmasLista implements OnInit {
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
         private fb: FormBuilder,
+        private cdr: ChangeDetectorRef,
     ) { }
 
     ngOnInit(): void {
@@ -83,10 +84,12 @@ export class TurmasLista implements OnInit {
                 this.turmas = res.data;
                 this.totalTurmas = res.meta.total;
                 this.isLoading = false;
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.erro = 'Não foi possível carregar as turmas. Verifique se o servidor está online.';
                 this.isLoading = false;
+                this.cdr.detectChanges();
             },
         });
     }
@@ -162,6 +165,7 @@ export class TurmasLista implements OnInit {
                 this.erroModal = err.status === 409
                     ? 'Já existe uma turma com este nome.'
                     : (err.error?.message ?? 'Erro ao salvar. Tente novamente.');
+                this.cdr.detectChanges();
             },
         });
     }
@@ -194,6 +198,7 @@ export class TurmasLista implements OnInit {
             error: (err: { error?: { message?: string } }) => {
                 this.excluindo = false;
                 this.erroExclusao = err.error?.message ?? 'Não foi possível excluir a turma.';
+                this.cdr.detectChanges();
             },
         });
     }
@@ -208,9 +213,11 @@ export class TurmasLista implements OnInit {
             next: (t) => {
                 this.turmaDetalhes = t;
                 this.carregandoDetalhes = false;
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.carregandoDetalhes = false;
+                this.cdr.detectChanges();
             },
         });
     }

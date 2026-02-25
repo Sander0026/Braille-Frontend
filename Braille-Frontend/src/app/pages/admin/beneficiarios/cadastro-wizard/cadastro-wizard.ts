@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -23,6 +23,7 @@ export class CadastroWizard implements OnInit {
     private fb: FormBuilder,
     private http: HttpClient,
     private beneficiariosService: BeneficiariosService,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -104,8 +105,9 @@ export class CadastroWizard implements OnInit {
           this.anunciarParaLeitorDeTela(
             `Endereço encontrado: ${dados.logradouro}, ${dados.bairro}, ${dados.localidade} - ${dados.uf}.`,
           );
+          this.cdr.detectChanges();
         },
-        error: () => this.anunciarParaLeitorDeTela('Erro ao conectar com o serviço de CEP.'),
+        error: () => { this.anunciarParaLeitorDeTela('Erro ao conectar com o serviço de CEP.'); this.cdr.detectChanges(); },
       });
     }
   }
@@ -279,6 +281,7 @@ export class CadastroWizard implements OnInit {
           Array.isArray(mensagemErro) ? mensagemErro.join(', ') : mensagemErro,
           'erro',
         );
+        this.cdr.detectChanges();
       },
     });
   }

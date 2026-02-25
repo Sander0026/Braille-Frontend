@@ -81,7 +81,8 @@
                 </td>
                 <td>{{ aluno.telefoneContato || '—' }}</td>
                 <td class="acoes-cell">
-                    <button class="btn btn-sm btn-ghost" [attr.aria-label]="'Ver detalhes de ' + aluno.nomeCompleto">
+                    <button class="btn btn-sm btn-ghost" (click)="abrirModal(aluno)"
+                        [attr.aria-label]="'Ver detalhes de ' + aluno.nomeCompleto">
                         Ver
                     </button>
                     <button class="btn btn-sm btn-danger" (click)="inativar(aluno)"
@@ -114,4 +115,106 @@
     </span>
 </nav>
 }
+}
+
+<!-- Modal Visualizar Aluno -->
+@if (modalAberto) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAlunoTitulo">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2 id="modalAlunoTitulo">Perfil do Aluno</h2>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar janela de perfil">×</button>
+        </div>
+
+        <div class="modal-body profile-body">
+            @if (carregandoDetalhes) {
+            <div class="loading-container p-4 text-center">
+                <div class="loading-spinner"></div>
+                <p>Buscando ficha completa...</p>
+            </div>
+            } @else if (alunoSelecionado) {
+
+            <div class="profile-header">
+                <div class="profile-avatar">
+                    <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}" />
+                </div>
+                <div class="profile-title">
+                    <h3>{{ alunoSelecionado.nomeCompleto }}</h3>
+                    <div class="profile-badges">
+                        @if (alunoSelecionado.statusAtivo) {
+                        <span class="badge badge-success">Ativo</span>
+                        } @else {
+                        <span class="badge badge-danger">Inativo</span>
+                        }
+                        @if (alunoSelecionado.tipoDeficiencia) {
+                        <span class="badge badge-primary">{{ alunoSelecionado.tipoDeficiencia }}</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                <!-- Informações Pessoais -->
+                <div class="profile-section">
+                    <h4>Informações Pessoais</h4>
+                    <p><strong>CPF/RG:</strong> {{ alunoSelecionado.cpfRg || 'N/I' }}</p>
+                    <p><strong>Nascimento:</strong> {{ formatarData(alunoSelecionado.dataNascimento) }}</p>
+                    <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
+                    <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
+                    <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
+                    <p><strong>Contato Emergência:</strong> {{ alunoSelecionado.contatoEmergencia || 'N/I' }}</p>
+                </div>
+
+                <!-- Perfil da Deficiência -->
+                <div class="profile-section">
+                    <h4>Perfil Inclusivo</h4>
+                    <p><strong>Causa:</strong> {{ alunoSelecionado.causaDeficiencia || 'N/I' }}</p>
+                    <p><strong>Idade da Ocorrência:</strong> {{ alunoSelecionado.idadeOcorrencia || 'N/I' }}</p>
+                    <p><strong>Acessibilidade Preferida:</strong> {{ alunoSelecionado.prefAcessibilidade || 'N/I' }}</p>
+                    <p><strong>Tec. Assistivas:</strong> {{ alunoSelecionado.tecAssistivas || 'Nenhuma informada' }}</p>
+                    <p><strong>Precisa de acompanhante?</strong> {{ alunoSelecionado.precisaAcompanhante ? 'Sim' : 'Não'
+                        }}</p>
+
+                    @if (alunoSelecionado.laudoUrl) {
+                    <div style="margin-top: 1rem;">
+                        <a [href]="alunoSelecionado.laudoUrl" target="_blank" class="btn btn-primary btn-sm"
+                            title="Clique para visualizar o laudo original (abre em uma nova guia, você pode dar zoom ou baixar)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" style="margin-right: 6px;">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                            Ver Laudo Médico
+                        </a>
+                    </div>
+                    }
+                </div>
+
+                <!-- Endereço -->
+                <div class="profile-section full-width">
+                    <h4>Endereço</h4>
+                    <p>
+                        {{ alunoSelecionado.rua || 'Rua não informada' }}, {{ alunoSelecionado.numero || 'SN' }}
+                        @if (alunoSelecionado.complemento) { - {{ alunoSelecionado.complemento }} }
+                        <br>
+                        {{ alunoSelecionado.bairro || 'Bairro' }} - {{ alunoSelecionado.cidade || 'Cidade' }}/{{
+                        alunoSelecionado.uf || 'UF' }}
+                        <br>
+                        <strong>CEP:</strong> {{ alunoSelecionado.cep || 'N/I' }}
+                    </p>
+                </div>
+            </div>
+
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+        </div>
+    </div>
+</div>
 }

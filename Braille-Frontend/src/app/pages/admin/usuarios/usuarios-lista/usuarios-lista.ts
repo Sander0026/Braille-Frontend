@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
@@ -34,7 +34,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         { value: 'PROFESSOR', label: 'Professor' }
     ];
 
-    constructor(private usuariosService: UsuariosService, private fb: FormBuilder) {
+    constructor(private usuariosService: UsuariosService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
             username: ['', [Validators.required, Validators.minLength(3)]],
@@ -64,8 +64,9 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.total = res.meta.total;
                 this.totalPaginas = res.meta.lastPage;
                 this.isLoading = false;
+                this.cdr.detectChanges();
             },
-            error: () => { this.erro = 'Erro ao carregar usuários.'; this.isLoading = false; }
+            error: () => { this.erro = 'Erro ao carregar usuários.'; this.isLoading = false; this.cdr.detectChanges(); }
         });
     }
 
@@ -89,7 +90,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         this.salvando = true;
         this.usuariosService.atualizar(this.usuarioEmEdicao.id, this.editForm.value).subscribe({
             next: () => { this.salvando = false; this.fecharModal(); this.carregar(); },
-            error: () => { this.salvando = false; alert('Erro ao salvar alterações.'); }
+            error: () => { this.salvando = false; alert('Erro ao salvar alterações.'); this.cdr.detectChanges(); }
         });
     }
 
@@ -97,7 +98,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         if (!confirm(`Excluir o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`)) return;
         this.usuariosService.excluir(usuario.id).subscribe({
             next: () => this.carregar(),
-            error: () => alert('Erro ao excluir usuário.')
+            error: () => { alert('Erro ao excluir usuário.'); this.cdr.detectChanges(); }
         });
     }
 
