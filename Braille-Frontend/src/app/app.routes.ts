@@ -90,10 +90,9 @@ export const routes: Routes = [
     ]
   },
 
-  // ── Login ──────────────────────────────────────────────────────
   {
     path: 'login',
-    loadComponent: () => import('./features/auth/login/login').then(m => m.Login),
+    loadComponent: () => import('./pages/public/login/login').then(m => m.Login),
     title: 'Entrar — ILBES'
   },
 
