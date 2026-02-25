@@ -41,13 +41,39 @@ export class Contato {
         this.tocado[campo] = true;
     }
 
+    private readonly regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     get formValido(): boolean {
+        const emailPreenchido = this.form.email.trim();
+        const emailValido = !emailPreenchido || this.regexEmail.test(emailPreenchido);
+        const contatoInformado = !!(emailPreenchido || this.form.telefone.trim());
+
         return !!(
             this.form.nome.trim().length >= 2 &&
             this.form.assunto.trim().length >= 3 &&
             this.form.mensagem.trim().length >= 10 &&
-            (this.form.email.trim() || this.form.telefone.trim())
+            contatoInformado &&
+            emailValido
         );
+    }
+
+    // ── Máscara de telefone ─────────────────────────────────
+    aplicarMascaraTelefone(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        // Remove tudo que não for dígito
+        let digits = input.value.replace(/\D/g, '').slice(0, 11);
+
+        // Formata: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
+        if (digits.length > 10) {
+            digits = digits.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+        } else if (digits.length > 6) {
+            digits = digits.replace(/(\d{2})(\d{4})(\d+)/, '($1) $2-$3');
+        } else if (digits.length > 2) {
+            digits = digits.replace(/(\d{2})(\d+)/, '($1) $2');
+        }
+
+        this.form.telefone = digits;
+        input.value = digits; // atualiza o DOM imediatamente
     }
 
     isCampoInvalido(campo: keyof ContatoPayload): boolean {
@@ -60,9 +86,13 @@ export class Contato {
                 return this.form.assunto.trim().length < 3;
             case 'mensagem':
                 return this.form.mensagem.trim().length < 10;
-            case 'email':
-                // email OU telefone são obrigatórios
-                return !this.form.email.trim() && !this.form.telefone.trim();
+            case 'email': {
+                const v = this.form.email.trim();
+                // Inválido se: nenhum contato informado OU e-mail preenchido com formato errado
+                if (!v && !this.form.telefone.trim()) return true;  // nenhum contato
+                if (v && !this.regexEmail.test(v)) return true;    // formato inválido
+                return false;
+            }
             default:
                 return false;
         }

@@ -108,15 +108,22 @@
 
                     <div class="form-group">
                         <label for="cTelefone">Telefone</label>
-                        <input type="tel" id="cTelefone" name="telefone" [(ngModel)]="form.telefone" class="form-input"
-                            placeholder="(XX) XXXXX-XXXX" autocomplete="tel" />
+                        <input type="tel" id="cTelefone" name="telefone" [value]="form.telefone"
+                            (input)="aplicarMascaraTelefone($event)" (blur)="marcarTocado('telefone')"
+                            class="form-input" placeholder="(XX) XXXXX-XXXX" autocomplete="tel" inputmode="numeric"
+                            maxlength="15" />
                     </div>
                 </div>
                 <p id="contato-hint" class="field-hint">
                     * Informe ao menos e-mail <em>ou</em> telefone para podermos responder.
                 </p>
                 @if (isCampoInvalido('email')) {
+                @if (form.email.trim() && !form.telefone.trim()) {
+                <span class="field-error" role="alert">E-mail inválido. Verifique o formato (ex:
+                    usuario&#64;email.com).</span>
+                } @else {
                 <span class="field-error" role="alert">Informe ao menos e-mail ou telefone.</span>
+                }
                 }
 
                 <!-- Assunto -->
