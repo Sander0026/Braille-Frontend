@@ -1,39 +1,41 @@
-<a href="#conteudo-principal" class="skip-link">Ir para o conteúdo principal</a>
+<div class="public-shell">
+  <a href="#conteudo-principal" class="skip-link">Ir para o conteúdo principal</a>
 
-<header class="site-header" role="banner">
-  <div class="header-inner">
-    <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
-      <span class="logo-icon" aria-hidden="true">⬡</span>
-      <span class="logo-text">Instituto Luiz <strong>Braille</strong></span>
-    </a>
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
+        <span class="logo-icon" aria-hidden="true">⬡</span>
+        <span class="logo-text">Instituto Luiz <strong>Braille</strong></span>
+      </a>
 
-    <nav class="main-nav" role="navigation" aria-label="Navegação principal">
-      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">Início</a>
-      <a routerLink="/sobre" routerLinkActive="active" class="nav-link">Sobre</a>
-      <a routerLink="/contato" routerLinkActive="active" class="nav-link">Contato</a>
-    </nav>
+      <nav class="main-nav" role="navigation" aria-label="Navegação principal">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">Início</a>
+        <a routerLink="/sobre" routerLinkActive="active" class="nav-link">Sobre</a>
+        <a routerLink="/contato" routerLinkActive="active" class="nav-link">Contato</a>
+      </nav>
 
-    <a routerLink="/contato" class="btn-inscricao" aria-label="Entre em contato conosco">
-      Fale Conosco
-    </a>
-  </div>
-</header>
-
-<main id="conteudo-principal">
-  <router-outlet></router-outlet>
-</main>
-
-<footer class="site-footer" role="contentinfo">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <span class="logo-icon" aria-hidden="true">⬡</span>
-      <span>Instituto Luiz Braille</span>
+      <a routerLink="/contato" class="btn-inscricao" aria-label="Entre em contato conosco">
+        Fale Conosco
+      </a>
     </div>
-    <p class="footer-tagline">
-      Inclusão, educação e autonomia para pessoas com deficiência visual.
-    </p>
-    <p class="footer-copy">
-      &copy; {{ currentYear }} Instituto Luiz Braille. Todos os direitos reservados.
-    </p>
-  </div>
-</footer>
+  </header>
+
+  <main id="conteudo-principal">
+    <router-outlet></router-outlet>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <span class="logo-icon" aria-hidden="true">⬡</span>
+        <span>Instituto Luiz Braille</span>
+      </div>
+      <p class="footer-tagline">
+        Inclusão, educação e autonomia para pessoas com deficiência visual.
+      </p>
+      <p class="footer-copy">
+        &copy; {{ currentYear }} Instituto Luiz Braille. Todos os direitos reservados.
+      </p>
+    </div>
+  </footer>
+</div><!-- /.public-shell -->
