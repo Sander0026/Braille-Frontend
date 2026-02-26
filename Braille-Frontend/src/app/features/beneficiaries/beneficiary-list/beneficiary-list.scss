@@ -1,4 +1,9 @@
 ﻿// Beneficiary List Styles
+:host {
+    display: block; // garante que o componente ocupa espaço como bloco
+}
+
+
 .loading-container {
     display: flex;
     flex-direction: column;

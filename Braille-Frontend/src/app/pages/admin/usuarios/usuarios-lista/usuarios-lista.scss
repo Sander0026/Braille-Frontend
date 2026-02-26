@@ -1,4 +1,9 @@
 ﻿// Usuarios Lista Styles
+:host {
+    display: block; // garante que o componente ocupa espaço como bloco
+}
+
+
 .table-loading {
     display: flex;
     align-items: center;
