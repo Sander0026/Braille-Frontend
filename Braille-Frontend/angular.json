@@ -56,6 +56,14 @@
         },
         "serve": {
           "builder": "@angular/build:dev-server",
+          "options": {
+            "allowedHosts": [
+              ".ngrok-free.dev",
+              ".ngrok-free.app",
+              ".ngrok.io",
+              ".ngrok.app"
+            ]
+          },
           "configurations": {
             "production": {
               "buildTarget": "Braille-Frontend:build:production"

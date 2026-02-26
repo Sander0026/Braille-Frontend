@@ -13,7 +13,7 @@ export interface UserInfo {
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3000/auth';
+  private readonly apiUrl = '/api/auth';
   private readonly TOKEN_KEY = 'token_braille';
 
   constructor(private http: HttpClient) { }

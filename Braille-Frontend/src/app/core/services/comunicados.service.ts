@@ -13,7 +13,7 @@ export interface Comunicado {
 
 @Injectable({ providedIn: 'root' })
 export class ComunicadosService {
-    private readonly url = 'http://localhost:3000/comunicados';
+    private readonly url = '/api/comunicados';
 
     constructor(private http: HttpClient) { }
 

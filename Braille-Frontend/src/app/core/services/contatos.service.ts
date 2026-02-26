@@ -15,7 +15,7 @@ export interface Contato {
 
 @Injectable({ providedIn: 'root' })
 export class ContatosService {
-    private readonly url = 'http://localhost:3000/contatos';
+    private readonly url = '/api/contatos';
 
     constructor(private http: HttpClient) { }
 

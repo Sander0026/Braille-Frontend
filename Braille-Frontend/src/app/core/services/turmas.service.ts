@@ -24,7 +24,7 @@ export interface CreateTurmaDto {
 
 @Injectable({ providedIn: 'root' })
 export class TurmasService {
-    private readonly url = 'http://localhost:3000/turmas';
+    private readonly url = '/api/turmas';
 
     constructor(private http: HttpClient) { }
 

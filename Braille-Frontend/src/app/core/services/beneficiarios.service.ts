@@ -44,7 +44,7 @@ export interface PaginatedResponse<T> {
 
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
-    private readonly url = 'http://localhost:3000/beneficiaries';
+    private readonly url = '/api/beneficiaries';
 
     constructor(private http: HttpClient) { }
 
@@ -73,11 +73,11 @@ export class BeneficiariosService {
     uploadImagem(file: File): Observable<{ url: string }> {
         const formData = new FormData();
         formData.append('file', file);
-        return this.http.post<{ url: string }>('http://localhost:3000/upload', formData);
+        return this.http.post<{ url: string }>('/api/upload', formData);
     }
 
     excluirArquivo(urlArquivo: string): Observable<any> {
         let params = new HttpParams().set('url', urlArquivo);
-        return this.http.delete('http://localhost:3000/upload', { params });
+        return this.http.delete('/api/upload', { params });
     }
 }

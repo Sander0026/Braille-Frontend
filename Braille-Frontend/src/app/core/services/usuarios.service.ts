@@ -22,7 +22,7 @@ export interface CreateUsuarioDto {
 
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
-    private readonly url = 'http://localhost:3000/users';
+    private readonly url = '/api/users';
 
     constructor(private http: HttpClient) { }
 

@@ -15,7 +15,7 @@ export interface Frequencia {
 
 @Injectable({ providedIn: 'root' })
 export class FrequenciasService {
-    private readonly url = 'http://localhost:3000/frequencias';
+    private readonly url = '/api/frequencias';
 
     constructor(private http: HttpClient) { }
 

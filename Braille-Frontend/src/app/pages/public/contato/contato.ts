@@ -116,7 +116,7 @@ export class Contato {
         if (this.form.email.trim()) payload['email'] = this.form.email.trim();
         if (this.form.telefone.trim()) payload['telefone'] = this.form.telefone.trim();
 
-        this.http.post('http://localhost:3000/contatos', payload).subscribe({
+        this.http.post('/api/contatos', payload).subscribe({
             next: () => {
                 this.enviando = false;
                 this.enviado = true;
