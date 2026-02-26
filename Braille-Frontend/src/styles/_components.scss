@@ -128,8 +128,8 @@
 // CARDS
 // ============================================================
 .card {
-    background-color: $color-white;
-    border: 1px solid $color-gray-200;
+    background-color: $color-gray-900;
+    border: 1px solid $color-gray-800;
     border-radius: $border-radius-xl;
     box-shadow: $shadow-sm;
     overflow: hidden;
@@ -146,7 +146,7 @@
 
 .card-header {
     padding: $space-5 $space-6;
-    border-bottom: 1px solid $color-gray-100;
+    border-bottom: 1px solid $color-gray-800;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -159,8 +159,8 @@
 
 .card-footer {
     padding: $space-4 $space-6;
-    border-top: 1px solid $color-gray-100;
-    background-color: $color-gray-50;
+    border-top: 1px solid $color-gray-800;
+    background-color: $color-gray-900;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -466,12 +466,12 @@
     .page-title {
         font-size: $font-size-2xl;
         font-weight: $font-weight-bold;
-        color: $color-gray-900;
+        color: $color-white;
     }
 
     .page-subtitle {
         font-size: $font-size-sm;
-        color: $color-gray-500;
+        color: $color-gray-400;
         margin-top: $space-1;
     }
 }
@@ -483,8 +483,8 @@
     gap: $space-3;
     flex-wrap: wrap;
     padding: $space-4;
-    background-color: $color-gray-50;
-    border: 1px solid $color-gray-200;
+    background-color: $color-gray-900;
+    border: 1px solid $color-gray-800;
     border-radius: $border-radius-lg;
     margin-bottom: $space-5;
 
