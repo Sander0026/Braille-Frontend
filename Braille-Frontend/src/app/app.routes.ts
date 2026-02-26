@@ -41,7 +41,9 @@ export const routes: Routes = [
       { path: '', component: Dashboard },
       { path: 'beneficiarios/cadastro', component: CadastroWizard },
       { path: 'usuarios', component: UsuariosLista },
-      { path: 'usuarios/cadastro', component: CadastroUsuarioWizard }
+      { path: 'usuarios/cadastro', component: CadastroUsuarioWizard },
+      { path: 'turmas', loadComponent: () => import('./pages/admin/turmas/turmas-lista/turmas-lista').then(m => m.TurmasLista) },
+      { path: 'turmas/cadastro', loadComponent: () => import('./pages/admin/turmas/cadastro-turma-wizard/cadastro-turma-wizard').then(m => m.CadastroTurmaWizard) }
 
       // Futuramente, adicionaremos rotas com verificação de Role aqui:
       // { path: 'professores/diario', component: DiarioClasse, canActivate: [roleGuard] }

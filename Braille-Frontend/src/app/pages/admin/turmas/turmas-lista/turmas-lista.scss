@@ -1,0 +1,92 @@
+// =========================================
+// VARIÁVEIS DE COR INSTITUCIONAL (Alto Contraste)
+// =========================================
+$brand-yellow: #FFD700;
+$brand-yellow-dark: #E6C200;
+$brand-black: #111111;
+$brand-grey: #f4f4f4;
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.accordion {
+    .card {
+        transition: all 0.3s ease;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+
+        &:hover {
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-color: $brand-black;
+        }
+
+        .card-header {
+            border-bottom: 1px solid rgba(0, 0, 0, .125);
+            background-color: #fff;
+            padding: 1.25rem 1.5rem;
+
+            h4 {
+                color: $brand-black;
+                font-weight: 700;
+            }
+        }
+
+        .card-body {
+            background-color: #fcfcfc;
+        }
+    }
+}
+
+.btn-primary {
+    background-color: $brand-yellow;
+    color: $brand-black;
+    border: 2px solid $brand-yellow;
+    font-weight: 700;
+
+    &:hover {
+        background-color: $brand-yellow-dark;
+        border-color: $brand-yellow-dark;
+    }
+}
+
+.btn-outline-primary {
+    color: $brand-black;
+    border: 2px solid $brand-black;
+    background-color: transparent;
+    font-weight: 700;
+
+    &:hover {
+        background-color: $brand-black;
+        color: $brand-yellow;
+    }
+}
+
+.btn-outline-danger {
+    color: #D32F2F;
+    border: 2px solid #D32F2F;
+    background-color: transparent;
+    font-weight: 700;
+
+    &:hover {
+        background-color: #D32F2F;
+        color: #fff;
+    }
+}
+
+.form-control {
+    border: 2px solid #999;
+    border-radius: 6px;
+    color: $brand-black;
+
+    &:focus {
+        border-color: $brand-black;
+        box-shadow: 0 0 0 4px rgba($brand-yellow, 0.6);
+    }
+}
+
+label.form-control-label {
+    color: $brand-black;
+    font-weight: 700;
+}

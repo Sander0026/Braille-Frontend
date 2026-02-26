@@ -2,8 +2,8 @@
 
 <div class="wizard-container">
   <div *ngIf="mensagemFeedback" class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-    <strong *ngIf="tipoFeedback === 'sucesso'">✅ Sucesso: </strong>
-    <strong *ngIf="tipoFeedback === 'erro'">⚠️ Erro: </strong>
+    <strong *ngIf="tipoFeedback === 'sucesso'">Sucesso: </strong>
+    <strong *ngIf="tipoFeedback === 'erro'">Erro: </strong>
     {{ mensagemFeedback }}
   </div>
   <header class="wizard-header">

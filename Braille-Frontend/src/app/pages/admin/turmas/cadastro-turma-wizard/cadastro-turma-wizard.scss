@@ -1,0 +1,187 @@
+// =========================================
+// VARIÁVEIS DE COR INSTITUCIONAL (Alto Contraste)
+// =========================================
+$brand-yellow: #FFD700; // Amarelo Ouro forte
+$brand-yellow-dark: #E6C200; // Amarelo Ouro mais escuro para hover
+$brand-black: #111111; // Preto quase puro para texto
+$brand-grey: #f4f4f4; // Cinza bem claro para fundos
+
+.wizard-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #e0e0e0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+
+    @media (max-width: 600px) {
+        padding: 1.5rem;
+        margin: 1rem;
+        border-width: 1px;
+    }
+}
+
+.wizard-header {
+    margin-bottom: 2.5rem;
+
+    h1 {
+        font-size: 1.75rem;
+        color: $brand-black;
+        font-weight: 800; // Negrito extra
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        color: #444;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+    }
+}
+
+.progress-bar {
+    width: 100%;
+    height: 14px;
+    background-color: #e0e0e0;
+    border-radius: 7px;
+    overflow: hidden;
+    border: 1px solid #ccc;
+
+    .progress-fill {
+        height: 100%;
+        background-color: $brand-yellow; // COR INSTITUCIONAL
+        transition: width 0.4s ease-in-out;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.75rem;
+    flex: 1;
+
+    label {
+        display: block;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        color: $brand-black;
+        font-size: 1.05rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.85rem;
+        border: 2px solid #999;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        background-color: #fff;
+        color: $brand-black;
+
+        &:focus {
+            border-color: $brand-black;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba($brand-yellow, 0.6);
+        }
+    }
+}
+
+.wizard-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #eee;
+    gap: 1rem;
+
+    .btn {
+        padding: 0.85rem 1.75rem;
+        font-size: 1.1rem;
+        font-weight: 800;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+
+        &:disabled {
+            opacity: 1;
+            background-color: #e0e0e0 !important;
+            color: #777 !important;
+            border: 2px solid #ccc !important;
+            cursor: not-allowed;
+        }
+    }
+
+    .btn-primary,
+    .btn-success {
+        background-color: $brand-yellow;
+        color: $brand-black;
+        border: 3px solid $brand-yellow;
+
+        &:hover:not(:disabled) {
+            background-color: $brand-yellow-dark;
+            border-color: $brand-yellow-dark;
+        }
+
+        &:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba($brand-black, 0.3);
+        }
+    }
+
+    .btn-secondary {
+        background-color: transparent;
+        color: $brand-black;
+        border: 3px solid $brand-black;
+
+        &:hover:not(:disabled) {
+            background-color: $brand-black;
+            color: $brand-yellow;
+        }
+    }
+}
+
+$error-red: #D32F2F;
+
+.input-error {
+    border-color: $error-red !important;
+    box-shadow: 0 0 0 3px rgba($error-red, 0.2) !important;
+    background-color: #FFF5F5 !important;
+}
+
+.feedback-banner {
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeIn 0.3s ease-in-out;
+
+    &.sucesso {
+        background-color: $brand-yellow;
+        color: $brand-black;
+        border: 3px solid $brand-black;
+    }
+
+    &.erro {
+        background-color: #FFF5F5;
+        color: $error-red;
+        border: 3px solid $error-red;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
