@@ -2,25 +2,69 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
 
+export interface UserInfo {
+  sub: string;
+  username: string;
+  nome?: string;
+  role: string;
+  precisaTrocarSenha?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/auth'; // Rota do nosso NestJS
+  private readonly apiUrl = '/api/auth';
+  private readonly TOKEN_KEY = 'token_braille';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(credenciais: { username: string; senha: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credenciais).pipe(
       tap((resposta: any) => {
         if (resposta.access_token) {
-          localStorage.setItem('token_braille', resposta.access_token);
+          localStorage.setItem(this.TOKEN_KEY, resposta.access_token);
         }
       })
     );
   }
 
-  logout() {
-    localStorage.removeItem('token_braille');
+  logout(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    try {
+      const payload = this.decodeToken(token);
+      // Verifica se o token expirou
+      return payload.exp ? payload.exp * 1000 > Date.now() : true;
+    } catch {
+      return false;
+    }
+  }
+
+  getUser(): UserInfo | null {
+    const token = this.getToken();
+    if (!token) return null;
+    try {
+      return this.decodeToken(token) as UserInfo;
+    } catch {
+      return null;
+    }
+  }
+
+  trocarSenha(senhaAtual: string, novaSenha: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/trocar-senha`, { senhaAtual, novaSenha });
+  }
+
+  private decodeToken(token: string): any {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload));
   }
 }

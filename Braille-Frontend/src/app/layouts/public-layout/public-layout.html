@@ -1,18 +1,39 @@
-<header class="bg-blue-600 text-white shadow-md">
-  <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold tracking-wider">👁️ Instituto Braille</h1>
-    <nav class="space-x-4">
-      <a routerLink="/" class="hover:text-blue-200 transition">Início</a>
-      <a routerLink="/mural" class="hover:text-blue-200 transition">Mural</a>
-      <a routerLink="/admin" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-gray-100 transition">Área Restrita</a>
+<a href="#conteudo-principal" class="skip-link">Ir para o conteúdo principal</a>
+
+<header class="site-header" role="banner">
+  <div class="header-inner">
+    <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
+      <span class="logo-icon" aria-hidden="true">⬡</span>
+      <span class="logo-text">Instituto Luiz <strong>Braille</strong></span>
+    </a>
+
+    <nav class="main-nav" role="navigation" aria-label="Navegação principal">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">Início</a>
+      <a routerLink="/sobre" routerLinkActive="active" class="nav-link">Sobre</a>
+      <a routerLink="/contato" routerLinkActive="active" class="nav-link">Contato</a>
     </nav>
+
+    <a routerLink="/contato" class="btn-inscricao" aria-label="Entre em contato conosco">
+      Fale Conosco
+    </a>
   </div>
 </header>
 
-<main class="min-h-screen bg-gray-50">
+<main id="conteudo-principal">
   <router-outlet></router-outlet>
 </main>
 
-<footer class="bg-gray-800 text-white text-center py-6">
-  <p>&copy; 2026 Instituto Braille. Todos os direitos reservados.</p>
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span class="logo-icon" aria-hidden="true">⬡</span>
+      <span>Instituto Luiz Braille</span>
+    </div>
+    <p class="footer-tagline">
+      Inclusão, educação e autonomia para pessoas com deficiência visual.
+    </p>
+    <p class="footer-copy">
+      &copy; {{ currentYear }} Instituto Luiz Braille. Todos os direitos reservados.
+    </p>
+  </div>
 </footer>

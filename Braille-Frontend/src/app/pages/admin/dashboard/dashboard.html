@@ -1,1 +1,63 @@
-<h2 class="text-3xl text-center mt-10">📊 Bem-vindo ao Painel Admin!</h2>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Visão geral do Instituto Luiz Braille</p>
+    </div>
+</div>
+
+<!-- Cards de Estatísticas -->
+@if (isLoading) {
+<div class="stats-grid" aria-busy="true" aria-label="Carregando estatísticas...">
+    @for (i of [1,2,3,4]; track i) {
+    <div class="stat-card stat-card--skeleton" aria-hidden="true">
+        <div class="skeleton-box"></div>
+        <div class="skeleton-line"></div>
+    </div>
+    }
+</div>
+} @else if (erro) {
+<div class="card card-body" role="alert" aria-live="assertive">
+    <p style="color: #dc2626">{{ erro }}</p>
+</div>
+} @else {
+<section class="stats-grid" role="region" aria-label="Resumo de estatísticas">
+    @for (card of cards; track card.label) {
+    <a [routerLink]="card.rota" class="stat-card stat-card--{{ card.cor }}" [attr.aria-label]="card.ariaLabel"
+        role="article">
+        <div class="stat-icon" aria-hidden="true">
+            <span class="material-symbols-rounded">{{ card.icon }}</span>
+        </div>
+        <div class="stat-info">
+            <span class="stat-valor">{{ card.valor }}</span>
+            <span class="stat-label">{{ card.label }}</span>
+        </div>
+        <div class="stat-arrow" aria-hidden="true">
+            <span class="material-symbols-rounded">arrow_forward</span>
+        </div>
+    </a>
+    }
+</section>
+
+<!-- Acesso Rápido -->
+<section class="quick-actions" aria-label="Ações rápidas">
+    <h2 class="section-title">Ações rápidas</h2>
+    <div class="actions-grid">
+        <a routerLink="/admin/alunos/cadastro" class="action-btn" aria-label="Cadastrar novo aluno">
+            <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
+            <span>Novo Aluno</span>
+        </a>
+        <a routerLink="/admin/turmas" class="action-btn" aria-label="Gerenciar turmas">
+            <span class="material-symbols-rounded" aria-hidden="true">school</span>
+            <span>Gerenciar Turmas</span>
+        </a>
+        <a routerLink="/admin/inscricoes" class="action-btn" aria-label="Ver inscrições pendentes">
+            <span class="material-symbols-rounded" aria-hidden="true">assignment</span>
+            <span>Inscrições</span>
+        </a>
+        <a routerLink="/admin/contatos" class="action-btn" aria-label="Ver mensagens de contato">
+            <span class="material-symbols-rounded" aria-hidden="true">mail</span>
+            <span>Fale Conosco</span>
+        </a>
+    </div>
+</section>
+}

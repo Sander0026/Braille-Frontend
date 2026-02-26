@@ -1,0 +1,388 @@
+<div id="freq-anuncio" aria-live="polite" class="sr-only"></div>
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Frequências</h1>
+        <p class="page-subtitle">Registro de chamadas por oficina e data</p>
+    </div>
+</div>
+
+<!-- ── Abas ──────────────────────────────────────────────── -->
+<div class="tab-bar" role="tablist" aria-label="Seções de frequência">
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'chamada'"
+        [attr.aria-selected]="abaAtiva === 'chamada'" (click)="mudarAba('chamada')">
+        📋 Fazer Chamada
+    </button>
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'historico'"
+        [attr.aria-selected]="abaAtiva === 'historico'" (click)="mudarAba('historico')">
+        📊 Histórico
+    </button>
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'relatorio'"
+        [attr.aria-selected]="abaAtiva === 'relatorio'" (click)="mudarAba('relatorio')">
+        📈 Relatório Individual
+    </button>
+</div>
+
+<!-- ══════════ ABA: CHAMADA ══════════ -->
+@if (abaAtiva === 'chamada') {
+
+<!-- Seletor de turma + data -->
+<section class="filtro-card" aria-label="Selecione a oficina e data">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="turmaSelect">Oficina / Turma</label>
+            <select id="turmaSelect" [(ngModel)]="turmaSelecionadaId" class="form-input" aria-required="true">
+                <option value="">Selecione uma oficina...</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="dataAulaInput">Data da Aula</label>
+            <input type="date" id="dataAulaInput" [(ngModel)]="dataAula" class="form-input" aria-required="true"
+                [max]="hojeISO()" />
+        </div>
+
+        <button class="btn btn-primary" (click)="carregarChamada()"
+            [disabled]="!turmaSelecionadaId || !dataAula || carregandoChamada" aria-label="Carregar lista de chamada">
+            @if (carregandoChamada) { ⏳ Carregando... }
+            @else { 🔍 Carregar Chamada }
+        </button>
+    </div>
+</section>
+
+<!-- Erro de carregamento -->
+@if (erroCarregamento) {
+<div class="error-banner" role="alert">
+    ⚠️ {{ erroCarregamento }}
+</div>
+}
+
+<!-- Chamada carregada -->
+@if (chamadaCarregada) {
+
+<!-- Cabeçalho da chamada -->
+<div class="chamada-header">
+    <div class="chamada-info">
+        <span class="chamada-turma">{{ turmaSelecionadaNome }}</span>
+        <span class="chamada-data">{{ formatarData(dataAula) }}</span>
+    </div>
+    <div class="chamada-stats">
+        <span class="stat stat--presente">✅ {{ totalPresentes }} presentes</span>
+        <span class="stat stat--falta">❌ {{ totalFaltas }} faltas</span>
+    </div>
+</div>
+
+@if (alunosNaChamada.length === 0) {
+<!-- Turma sem alunos -->
+<div class="empty-state">
+    <span class="empty-icon" aria-hidden="true">👥</span>
+    <h3>Nenhum aluno matriculado</h3>
+    <p>Esta oficina ainda não tem alunos matriculados.</p>
+</div>
+
+} @else {
+
+<!-- Ações em massa -->
+<div class="acoes-massa" role="group" aria-label="Marcar todos">
+    <button class="btn btn-sm btn-secondary" (click)="marcarTodos(true)" aria-label="Marcar todos como presentes">
+        ✅ Marcar todos presentes
+    </button>
+    <button class="btn btn-sm btn-secondary" (click)="marcarTodos(false)" aria-label="Marcar todos como ausentes">
+        ❌ Marcar todos ausentes
+    </button>
+</div>
+
+<!-- Tabela de chamada -->
+<div class="table-wrapper" role="region" aria-label="Lista de chamada">
+    <table class="table" aria-describedby="chamada-desc">
+        <caption id="chamada-desc" class="sr-only">
+            Chamada da oficina {{ turmaSelecionadaNome }} em {{ formatarData(dataAula) }}.
+            Clique em Presente ou Falta para alternar o status de cada aluno.
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Aluno</th>
+                <th scope="col" class="text-center">Status</th>
+                <th scope="col" class="text-center">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (aluno of alunosNaChamada; track aluno.alunoId) {
+            <tr [class.linha-presente]="aluno.presente" [class.linha-falta]="!aluno.presente">
+                <td>
+                    <div class="aluno-nome">
+                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
+                            [class.avatar--falta]="!aluno.presente" aria-hidden="true">
+                            {{ aluno.nomeCompleto.charAt(0) }}
+                        </div>
+                        <span>{{ aluno.nomeCompleto }}</span>
+                        @if (aluno.salvo) {
+                        <span class="badge-salvo" aria-label="Registrado">✔</span>
+                        }
+                    </div>
+                </td>
+                <td class="text-center">
+                    <span class="badge" [class.badge--success]="aluno.presente" [class.badge--danger]="!aluno.presente"
+                        [attr.aria-label]="aluno.presente ? 'Presente' : 'Falta'">
+                        {{ aluno.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm" [class.btn-danger]="aluno.presente" [class.btn-success]="!aluno.presente"
+                        (click)="togglePresente(aluno)" [disabled]="aluno.salvando || salvandoTudo" [attr.aria-label]="aluno.presente
+                      ? 'Marcar ' + aluno.nomeCompleto + ' como ausente'
+                      : 'Marcar ' + aluno.nomeCompleto + ' como presente'">
+                        {{ aluno.presente ? 'Marcar Falta' : 'Marcar Presente' }}
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Feedback salvo -->
+@if (feedbackSalvo) {
+<div class="feedback-banner" [class.sucesso]="feedbackSalvo.includes('sucesso')"
+    [class.erro]="feedbackSalvo.includes('Erro')" role="alert" aria-live="assertive">
+    {{ feedbackSalvo }}
+</div>
+}
+
+<!-- Botão salvar chamada -->
+<div class="salvar-footer">
+    <button class="btn btn-success btn-lg" (click)="salvarChamada()" [disabled]="salvandoTudo"
+        aria-label="Salvar chamada de todos os alunos" [attr.aria-busy]="salvandoTudo">
+        @if (salvandoTudo) { ⏳ Salvando chamada... }
+        @else { 💾 Salvar Chamada }
+    </button>
+</div>
+
+}
+}
+}
+
+<!-- ══════════ ABA: HISTÓRICO ══════════ -->
+@if (abaAtiva === 'historico') {
+
+<section class="filtro-card" aria-label="Filtros do histórico">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="turmaHistorico">Filtrar por Oficina</label>
+            <select id="turmaHistorico" [(ngModel)]="turmaSelecionadaId" class="form-input">
+                <option value="">Todas as oficinas</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+        <button class="btn btn-secondary" (click)="carregarHistorico()" aria-label="Aplicar filtro">
+            🔍 Filtrar
+        </button>
+    </div>
+</section>
+
+@if (carregandoHistorico) {
+<div class="loading-state" aria-busy="true" aria-label="Carregando histórico">
+    <div class="spinner" aria-hidden="true"></div>
+    <p>Carregando histórico...</p>
+</div>
+} @else if (erroHistorico) {
+<div class="error-banner" role="alert">⚠️ {{ erroHistorico }}</div>
+} @else if (historico.length === 0) {
+<div class="empty-state">
+    <span class="empty-icon" aria-hidden="true">📊</span>
+    <h3>Nenhum registro encontrado</h3>
+    <p>Ainda não há chamadas registradas para os filtros selecionados.</p>
+</div>
+} @else {
+
+<div class="table-wrapper" role="region" aria-label="Histórico de frequências">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Data</th>
+                <th scope="col">Oficina</th>
+                <th scope="col" class="text-center">Alunos Totais</th>
+                <th scope="col" class="text-center">Presenças</th>
+                <th scope="col" class="text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (resumo of historico; track resumo.dataAula + resumo.turmaId) {
+            <tr>
+                <td>{{ formatarData(resumo.dataAula) }}</td>
+                <td>{{ resumo.turmaNome }}</td>
+                <td class="text-center">{{ resumo.totalAlunos }}</td>
+                <td class="text-center">
+                    <span class="badge badge--success" style="margin-right: 4px;">{{ resumo.presentes }}</span>
+                    <span class="badge badge--danger">{{ resumo.faltas }}</span>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-secondary" (click)="abrirDetalhes(resumo)"
+                        aria-label="Ver mais detalhes da turma nesta data">
+                        👁️ Detalhes
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+<nav class="pagination" aria-label="Paginação do histórico">
+    <button class="btn btn-secondary btn-sm" (click)="paginaAnteriorHistorico()" [disabled]="paginaHistorico === 1"
+        aria-label="Página anterior">←</button>
+    <span class="pagination-info">
+        Página {{ paginaHistorico }} de {{ Math.ceil(totalHistorico / 20) }}
+        ({{ totalHistorico }} registros)
+    </span>
+    <button class="btn btn-secondary btn-sm" (click)="proximaPaginaHistorico()"
+        [disabled]="paginaHistorico >= Math.ceil(totalHistorico / 20)" aria-label="Próxima página">→</button>
+</nav>
+}
+}
+
+<!-- ══════════ ABA: RELATÓRIO INDIVIDUAL ══════════ -->
+@if (abaAtiva === 'relatorio') {
+
+<section class="filtro-card" aria-label="Buscar relatório do aluno">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="relatorioTurmaSelect">Oficina</label>
+            <select id="relatorioTurmaSelect" [(ngModel)]="turmaSelecionadaId" (change)="onTurmaRelatorioChange()"
+                class="form-input">
+                <option value="">Selecione uma oficina...</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="relatorioAlunoSelect">Aluno</label>
+            <select id="relatorioAlunoSelect" [(ngModel)]="alunoSelecionadoId" class="form-input"
+                [disabled]="!turmaSelecionadaId || alunosRelatorio.length === 0">
+                <option value="">Selecione um aluno da oficina...</option>
+                @for (aluno of alunosRelatorio; track aluno.id) {
+                <option [value]="aluno.id">{{ aluno.nomeCompleto }}</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="carregarRelatorio()"
+            [disabled]="!alunoSelecionadoId || carregandoRelatorio" aria-label="Gerar Relatório de Frequência">
+            @if (carregandoRelatorio) { ⏳ Gerando... }
+            @else { 📊 Gerar Relatório }
+        </button>
+    </div>
+</section>
+
+@if (erroRelatorio) {
+<div class="error-banner" role="alert">⚠️ {{ erroRelatorio }}</div>
+}
+
+@if (relatorioEstatisticas) {
+<!-- Estatísticas Rápidas -->
+<div class="chamada-header" style="flex-wrap: nowrap; margin-bottom: 2rem;">
+    <div class="chamada-info" style="flex: 1;">
+        <span class="chamada-turma">Estatísticas do Aluno</span>
+        <span class="chamada-data">Total de {{ relatorioEstatisticas.totalAulas }} aulas registradas nesta
+            oficina.</span>
+    </div>
+    <div class="chamada-stats" style="gap: 1.5rem;">
+        <span class="stat stat--presente" style="font-size: 1.1rem; padding: 0.5rem 1rem;">✅ {{
+            relatorioEstatisticas.taxaPresenca }}% de Presença</span>
+        <span class="stat stat--falta" style="font-size: 1.1rem; padding: 0.5rem 1rem;">❌ {{
+            relatorioEstatisticas.faltas }} Faltas</span>
+    </div>
+</div>
+
+<h3 style="font-size: 1.1rem; color: #1f1f1f; margin-bottom: 1rem;">Extrato de Aulas</h3>
+
+@if (relatorioHistorico.length === 0) {
+<div class="empty-state empty-state--sm">
+    <p>Nenhuma aula letiva registrada na oficina confirmada para pesquisa ainda.</p>
+</div>
+} @else {
+<div class="table-wrapper">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Data da Aula</th>
+                <th scope="col" class="text-right">Status do Aluno</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (historico of relatorioHistorico; track historico.id) {
+            <tr>
+                <td>{{ formatarData(historico.dataAula) }}</td>
+                <td class="text-right">
+                    <span class="badge" [class.badge--success]="historico.presente"
+                        [class.badge--danger]="!historico.presente">
+                        {{ historico.presente ? '✔ Presente' : '❌ Falta' }}
+                    </span>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}
+
+}
+
+}
+
+<!-- ══════════ MODAL DE DETALHES DE FREQUENCIA ══════════ -->
+@if (modalDetalhesAberto) {
+<div class="modal-overlay" role="dialog" aria-label="Detalhes da chamada da turma" aria-modal="true"
+    (click)="fecharDetalhes()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                Chamada — {{ formatarData(detalhesResumo?.dataAula) }}
+            </h2>
+            <button class="modal-close" (click)="fecharDetalhes()" aria-label="Fechar modal">✕</button>
+        </div>
+        <div class="modal-body">
+            @if (carregandoDetalhes) {
+            <div class="loading-state empty-state--sm" aria-busy="true">
+                <div class="spinner" aria-hidden="true"></div>
+                <p>Buscando lista de alunos...</p>
+            </div>
+            } @else {
+
+            <div
+                style="display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; justify-content: space-around;">
+                <div style="font-size: 0.9rem; color: #374151;"><strong>Total de Alunos:</strong> {{
+                    detalhesAlunos.length }}</div>
+                <div style="font-size: 0.9rem; color: #166534;"><strong>Presentes:</strong> {{ detalhesResumo?.presentes
+                    }}</div>
+                <div style="font-size: 0.9rem; color: #991b1b;"><strong>Faltas:</strong> {{ detalhesResumo?.faltas }}
+                </div>
+            </div>
+
+            <ul class="alunos-list" style="max-height: 400px; overflow-y: auto;">
+                @for (aluno of detalhesAlunos; track aluno.id) {
+                <li class="aluno-item"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
+                    <span style="font-weight: 500;">{{ aluno.aluno?.nomeCompleto }}</span>
+                    <span class="badge" [class.badge--success]="aluno.presente" [class.badge--danger]="!aluno.presente">
+                        {{ aluno.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharDetalhes()">Sair</button>
+        </div>
+    </div>
+</div>
+}

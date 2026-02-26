@@ -4,8 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-beneficiary-details',
   imports: [],
   templateUrl: './beneficiary-details.html',
-  styleUrl: './beneficiary-details.css',
+  styleUrl: './beneficiary-details.scss',
 })
 export class BeneficiaryDetails {
 
 }
+

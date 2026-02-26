@@ -1,195 +1,337 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-interface TurmaMock {
-    id: string;
-    nome: string;
-    mes: string;
-    ano: number;
-    professor: string;
-    arquivada: boolean;
-    alunos: AlunoMock[];
-}
-
-interface AlunoMock {
-    id: string;
-    nome: string;
-    idade: number;
-    contato: string;
-}
+import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
+import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
+import { BeneficiariosService, Beneficiario } from '../../../../core/services/beneficiarios.service';
 
 @Component({
     selector: 'app-turmas-lista',
     standalone: true,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule],
     templateUrl: './turmas-lista.html',
-    styleUrls: ['./turmas-lista.scss']
+    styleUrl: './turmas-lista.scss',
 })
 export class TurmasLista implements OnInit {
-    // Mock global de alunos do sistema
-    alunosSistema: AlunoMock[] = [
-        { id: '101', nome: 'João Pedro', idade: 25, contato: '(11) 99999-9999' },
-        { id: '102', nome: 'Maria Clara', idade: 30, contato: '(11) 98888-8888' },
-        { id: '103', nome: 'Lucas Silva', idade: 22, contato: '(11) 97777-7777' },
-        { id: '104', nome: 'Ana Souza', idade: 28, contato: '(11) 96666-6666' },
-        { id: '105', nome: 'Carlos Oliveira', idade: 35, contato: '(11) 95555-5555' },
-        { id: '106', nome: 'Fernanda Lima', idade: 19, contato: '(11) 94444-4444' }
-    ];
 
-    professoresSistema: string[] = [
-        'Roberto Carlos',
-        'Amanda Nunes',
-        'Sérgio Cortella',
-        'Luciana Sampaio',
-        'Fernando Pessoa'
-    ];
+    // ── Lista ──────────────────────────────────────────────────
+    turmas: Turma[] = [];
+    isLoading = true;
+    erro = '';
+    totalTurmas = 0;
+    paginaAtual = 1;
 
-    turmas: TurmaMock[] = [
-        {
-            id: '1', nome: 'Turma Informática Básica', mes: 'Fevereiro', ano: 2026, professor: 'Roberto Carlos', arquivada: false, alunos: [
-                this.alunosSistema[0], // João Pedro
-                this.alunosSistema[1]  // Maria Clara
-            ]
-        },
-        {
-            id: '2', nome: 'Turma Braille', mes: 'Março', ano: 2026, professor: 'Amanda Nunes', arquivada: false, alunos: [
-                this.alunosSistema[2]  // Lucas Silva
-            ]
-        }
-    ];
+    // ── Professores (para o dropdown) ──────────────────────────
+    professores: Usuario[] = [];
 
-    mesFiltro: string = '';
-    anoFiltro: string = '';
-    nomeFiltro: string = '';
+    // ── Modal Criar/Editar ─────────────────────────────────────
+    modalAberto = false;
+    modoEdicao = false;
+    turmaEmEdicaoId = '';
+    salvandoModal = false;
+    erroModal = '';
+    turmaForm!: FormGroup;
 
-    turmaExpandida: string | null = null;
-    alunoSelecionado: AlunoMock | null = null;
+    // ── Modal Excluir ──────────────────────────────────────────
+    modalExcluirAberto = false;
+    turmaParaExcluir: Turma | null = null;
+    excluindo = false;
+    erroExclusao = '';
 
-    turmaEmEdicao: TurmaMock | null = null;
-    editTurmaForm!: FormGroup;
+    // ── Modal Alunos ───────────────────────────────────────────
+    modalAlunosAberto = false;
+    turmaDetalhes: Turma | null = null;
+    carregandoDetalhes = false;
+    buscaAlunoCtrl = new FormControl('');
+    alunosBuscaRestado: Beneficiario[] = [];
+    buscandoAlunos = false;
+    operacaoEmProgresso = false;
 
-    constructor(private fb: FormBuilder) {
-        this.editTurmaForm = this.fb.group({
-            nome: [''],
-            mes: [''],
-            ano: [''],
-            professor: [''],
-            alunosSelecionadosIds: [[]]
+    constructor(
+        private turmasService: TurmasService,
+        private usuariosService: UsuariosService,
+        private beneficiariosService: BeneficiariosService,
+        private fb: FormBuilder,
+        private cdr: ChangeDetectorRef,
+    ) { }
+
+    ngOnInit(): void {
+        this.iniciarFormulario();
+        this.iniciarBuscaAlunos();
+        this.carregarTurmas();
+        this.carregarProfessores();
+    }
+
+    // ── Formulário ─────────────────────────────────────────────
+    iniciarFormulario(): void {
+        this.turmaForm = this.fb.group({
+            nome: ['', [Validators.required, Validators.minLength(3)]],
+            descricao: [''],
+            horario: [''],
+            professorId: ['', Validators.required],
         });
     }
 
-    ngOnInit(): void { }
+    get f() { return this.turmaForm.controls; }
 
-    get turmasFiltradas(): TurmaMock[] {
-        return this.turmas.filter(t => {
-            const matchMes = !this.mesFiltro || t.mes.toLowerCase() === this.mesFiltro.toLowerCase();
-            const matchAno = !this.anoFiltro || t.ano.toString() === this.anoFiltro;
-            const matchNome = !this.nomeFiltro || t.nome.toLowerCase().includes(this.nomeFiltro.toLowerCase());
-            return matchMes && matchAno && matchNome;
+    isCampoInvalido(campo: string): boolean {
+        const ctrl = this.turmaForm.get(campo);
+        return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
+    }
+
+    // ── Carregamentos ──────────────────────────────────────────
+    carregarTurmas(pagina = 1): void {
+        this.isLoading = true;
+        this.erro = '';
+        this.paginaAtual = pagina;
+
+        this.turmasService.listar(pagina, 12).subscribe({
+            next: (res) => {
+                this.turmas = res.data;
+                this.totalTurmas = res.meta.total;
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.erro = 'Não foi possível carregar as turmas. Verifique se o servidor está online.';
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            },
         });
     }
 
-    get alunosDisponiveisParaAdicionar(): AlunoMock[] {
-        if (!this.turmaEmEdicao) return [];
-        const alunosNaTurmaIds = this.turmaEmEdicao.alunos.map(a => a.id);
-        return this.alunosSistema.filter(a => !alunosNaTurmaIds.includes(a.id));
+    carregarProfessores(): void {
+        this.usuariosService.listar(1, 100).subscribe({
+            next: (res) => {
+                // Só professores e admins podem ser responsáveis por turma
+                this.professores = res.data.filter(u =>
+                    u.role === 'PROFESSOR' || u.role === 'ADMIN'
+                );
+            },
+            error: () => { /* silencioso — dropdown mostrará vazio */ },
+        });
     }
 
-    toggleTurma(turmaId: string) {
-        if (this.turmaExpandida === turmaId) {
-            this.turmaExpandida = null;
-        } else {
-            this.turmaExpandida = turmaId;
-        }
+    // ── Modal Criar ────────────────────────────────────────────
+    abrirModalCriar(): void {
+        this.modoEdicao = false;
+        this.turmaEmEdicaoId = '';
+        this.erroModal = '';
+        this.turmaForm.reset();
+        this.modalAberto = true;
+        setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
     }
 
-    abrirDetalhesAluno(aluno: AlunoMock) {
-        this.alunoSelecionado = aluno;
-    }
+    // ── Modal Editar ───────────────────────────────────────────
+    abrirModalEditar(turma: Turma): void {
+        this.modoEdicao = true;
+        this.turmaEmEdicaoId = turma.id;
+        this.erroModal = '';
 
-    fecharDetalhesAluno() {
-        this.alunoSelecionado = null;
-    }
-
-    editarTurma(turma: TurmaMock, event: Event) {
-        event.stopPropagation();
-        this.turmaEmEdicao = turma;
-        this.editTurmaForm.patchValue({
+        this.turmaForm.patchValue({
             nome: turma.nome,
-            mes: turma.mes,
-            ano: turma.ano,
-            professor: turma.professor || '',
-            alunosSelecionadosIds: []
+            descricao: turma.descricao ?? '',
+            horario: turma.horario ?? '',
+            professorId: turma.professor?.id ?? '',
+        });
+
+        this.modalAberto = true;
+        setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
+    }
+
+    fecharModal(): void {
+        this.modalAberto = false;
+        this.erroModal = '';
+        this.turmaForm.reset();
+    }
+
+    salvarModal(): void {
+        if (this.turmaForm.invalid || this.salvandoModal) {
+            this.turmaForm.markAllAsTouched();
+            return;
+        }
+
+        this.salvandoModal = true;
+        this.erroModal = '';
+
+        const dados: CreateTurmaDto = this.turmaForm.value;
+
+        const operacao$ = this.modoEdicao
+            ? this.turmasService.atualizar(this.turmaEmEdicaoId, dados)
+            : this.turmasService.criar(dados);
+
+        operacao$.subscribe({
+            next: () => {
+                this.fecharModal();
+                this.salvandoModal = false;
+                this.carregarTurmas(this.paginaAtual);
+            },
+            error: (err: { status: number; error?: { message?: string } }) => {
+                this.salvandoModal = false;
+                this.erroModal = err.status === 409
+                    ? 'Já existe uma turma com este nome.'
+                    : (err.error?.message ?? 'Erro ao salvar. Tente novamente.');
+                this.cdr.detectChanges();
+            },
         });
     }
 
-    fecharModalEdicaoTurma() {
-        this.turmaEmEdicao = null;
-        this.editTurmaForm.reset();
+    // ── Modal Excluir ──────────────────────────────────────────
+    abrirModalExcluir(turma: Turma): void {
+        this.turmaParaExcluir = turma;
+        this.erroExclusao = '';
+        this.modalExcluirAberto = true;
     }
 
-    toggleAlunoSelecao(alunoId: string, event: Event) {
-        const isChecked = (event.target as HTMLInputElement).checked;
-        const controle = this.editTurmaForm.get('alunosSelecionadosIds');
-        let valoresAtuais = controle?.value || [];
-
-        if (isChecked) {
-            if (!valoresAtuais.includes(alunoId)) {
-                valoresAtuais.push(alunoId);
-            }
-        } else {
-            valoresAtuais = valoresAtuais.filter((id: string) => id !== alunoId);
-        }
-        controle?.setValue(valoresAtuais);
+    fecharModalExcluir(): void {
+        this.modalExcluirAberto = false;
+        this.turmaParaExcluir = null;
+        this.erroExclusao = '';
     }
 
-    adicionarAluno() {
-        if (this.turmaEmEdicao) {
-            const alunosIds: string[] = this.editTurmaForm.value.alunosSelecionadosIds || [];
+    confirmarExclusao(): void {
+        if (!this.turmaParaExcluir || this.excluindo) return;
 
-            if (alunosIds.length > 0) {
-                const alunosParaAdicionar = this.alunosSistema.filter(a => alunosIds.includes(a.id));
-                this.turmaEmEdicao.alunos.push(...alunosParaAdicionar);
+        this.excluindo = true;
+        this.erroExclusao = '';
 
-                this.editTurmaForm.patchValue({
-                    alunosSelecionadosIds: []
+        this.turmasService.excluir(this.turmaParaExcluir.id).subscribe({
+            next: () => {
+                this.excluindo = false;
+                this.fecharModalExcluir();
+                this.carregarTurmas(this.paginaAtual);
+            },
+            error: (err: { error?: { message?: string } }) => {
+                this.excluindo = false;
+                this.erroExclusao = err.error?.message ?? 'Não foi possível excluir a turma.';
+                this.cdr.detectChanges();
+            },
+        });
+    }
+
+    // ── Modal Alunos ───────────────────────────────────────────
+    verAlunos(turma: Turma): void {
+        this.turmaDetalhes = null;
+        this.carregandoDetalhes = true;
+        this.modalAlunosAberto = true;
+        this.buscaAlunoCtrl.setValue(''); // Limpa a busca anterior
+        this.alunosBuscaRestado = [];
+
+        this.turmasService.buscarPorId(turma.id).subscribe({
+            next: (t) => {
+                this.turmaDetalhes = t;
+                this.carregandoDetalhes = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.carregandoDetalhes = false;
+                this.cdr.detectChanges();
+            },
+        });
+    }
+
+    iniciarBuscaAlunos(): void {
+        this.buscaAlunoCtrl.valueChanges
+            .pipe(
+                debounceTime(400),
+                distinctUntilChanged()
+            )
+            .subscribe((termo) => {
+                if (!termo || termo.length < 3) {
+                    this.alunosBuscaRestado = [];
+                    this.buscandoAlunos = false;
+                    this.cdr.detectChanges();
+                    return;
+                }
+
+                this.buscandoAlunos = true;
+                this.cdr.detectChanges();
+
+                this.beneficiariosService.listar(1, 10, termo).subscribe({
+                    next: (res) => {
+                        // Filtra os alunos que já estão matriculados
+                        const IDsMatriculados = this.turmaDetalhes?.alunos?.map(a => a.id) || [];
+                        this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
+                        this.buscandoAlunos = false;
+                        this.cdr.detectChanges();
+                    },
+                    error: () => {
+                        this.buscandoAlunos = false;
+                        this.cdr.detectChanges();
+                    }
                 });
+            });
+    }
+
+    adicionarAluno(aluno: Beneficiario): void {
+        if (!this.turmaDetalhes || this.operacaoEmProgresso) return;
+        this.operacaoEmProgresso = true;
+
+        this.turmasService.matricularAluno(this.turmaDetalhes.id, aluno.id).subscribe({
+            next: (turmaAtualizada) => {
+                // Atualiza a visualização local para refletir a nova matrícula
+                this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
+                // Retira da listagem de resultados de busca
+                this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => a.id !== aluno.id);
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                alert('Falha ao adicionar aluno. Verifique se ele já não está matriculado na turma.');
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
             }
-        }
+        });
     }
 
-    removerAlunoNaEdicao(alunoId: string) {
-        if (this.turmaEmEdicao) {
-            this.turmaEmEdicao.alunos = this.turmaEmEdicao.alunos.filter(a => a.id !== alunoId);
-        }
-    }
+    removerAluno(alunoId: string, nome: string): void {
+        if (!this.turmaDetalhes || this.operacaoEmProgresso) return;
 
-    salvarEdicaoTurma() {
-        if (this.turmaEmEdicao) {
-            const index = this.turmas.findIndex(t => t.id === this.turmaEmEdicao!.id);
-            if (index !== -1) {
-                this.turmas[index] = {
-                    ...this.turmaEmEdicao,
-                    nome: this.editTurmaForm.value.nome,
-                    mes: this.editTurmaForm.value.mes,
-                    ano: this.editTurmaForm.value.ano,
-                    professor: this.editTurmaForm.value.professor
-                };
+        if (!confirm(`Remover permanentemente o aluno ${nome} desta oficina?`)) return;
+
+        this.operacaoEmProgresso = true;
+
+        this.turmasService.desmatricularAluno(this.turmaDetalhes.id, alunoId).subscribe({
+            next: (turmaAtualizada) => {
+                // Atualiza a visualização local para refletir a remoção
+                this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                alert('Falha ao remover o aluno da oficina.');
+                this.operacaoEmProgresso = false;
+                this.cdr.detectChanges();
             }
-            this.fecharModalEdicaoTurma();
-        }
+        });
     }
 
-    arquivarTurma(turma: TurmaMock, event: Event) {
-        event.stopPropagation();
+    fecharModalAlunos(): void {
+        this.modalAlunosAberto = false;
+        this.turmaDetalhes = null;
+        this.buscaAlunoCtrl.setValue('');
+        this.alunosBuscaRestado = [];
+    }
 
-        const index = this.turmas.findIndex(t => t.id === turma.id);
-        if (index !== -1) {
-            this.turmas[index].arquivada = !this.turmas[index].arquivada;
-            const status = this.turmas[index].arquivada ? 'arquivada' : 'desarquivada';
-            alert(`Turma ${status} com sucesso. Ela continua visível na busca.`);
-        }
+    // ── Paginação ──────────────────────────────────────────────
+    readonly Math = Math;
+
+    get totalPaginas(): number {
+        return Math.ceil(this.totalTurmas / 12);
+    }
+
+    paginaAnterior(): void {
+        if (this.paginaAtual > 1) this.carregarTurmas(this.paginaAtual - 1);
+    }
+
+    proximaPagina(): void {
+        if (this.paginaAtual < this.totalPaginas) this.carregarTurmas(this.paginaAtual + 1);
+    }
+
+    // ── Utilitários ────────────────────────────────────────────
+    trackById(_: number, item: { id: string }): string {
+        return item.id;
     }
 }

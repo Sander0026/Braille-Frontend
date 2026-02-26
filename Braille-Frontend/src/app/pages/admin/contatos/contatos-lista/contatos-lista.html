@@ -1,0 +1,122 @@
+<!-- Cabeçalho -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Fale Conosco</h1>
+        <p class="page-subtitle">Mensagens recebidas pelo formulário de contato</p>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="tab-bar" role="tablist" aria-label="Filtrar mensagens">
+    @for (f of filtros; track f.valor) {
+    <button role="tab" class="tab-btn" [class.active]="filtroAtivo === f.valor"
+        [attr.aria-selected]="filtroAtivo === f.valor" (click)="mudarFiltro(f.valor)"
+        [attr.aria-label]="'Mostrar ' + f.label">
+        {{ f.label }}
+        @if (filtroAtivo === f.valor && total > 0) {
+        <span class="tab-count" aria-hidden="true">{{ total }}</span>
+        }
+    </button>
+    }
+</div>
+
+<!-- Lista de mensagens -->
+@if (isLoading) {
+<div class="loading-container" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <span>Carregando mensagens...</span>
+</div>
+} @else if (erro) {
+<div role="alert" class="card card-body" aria-live="assertive">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else if (contatos.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhuma mensagem</h3>
+    <p>Quando alguém preencher o formulário de contato, aparecerá aqui.</p>
+</div>
+} @else {
+<div class="mensagens-lista" role="list" aria-label="Lista de mensagens de contato">
+    @for (contato of contatos; track contato.id) {
+    <article class="mensagem-item" [class.nao-lida]="!contato.lida" role="listitem">
+        <div class="mensagem-header">
+            <div class="mensagem-remetente">
+                <div class="remetente-avatar" aria-hidden="true">
+                    {{ contato.nome.slice(0, 1).toUpperCase() }}
+                </div>
+                <div>
+                    <strong class="remetente-nome">
+                        @if (!contato.lida) {
+                        <span class="badge-nao-lida" aria-label="Não lida">•</span>
+                        }
+                        {{ contato.nome }}
+                    </strong>
+                    <span class="remetente-email">{{ contato.email }}</span>
+                </div>
+            </div>
+            <div class="mensagem-acoes">
+                <span class="mensagem-data">{{ formatarData(contato.criadoEm) }}</span>
+                <button class="btn btn-sm btn-secondary" (click)="abrirMensagem(contato)"
+                    [attr.aria-label]="'Ler mensagem de ' + contato.nome">
+                    Ler
+                </button>
+                <button class="btn btn-sm btn-danger" (click)="excluir(contato)"
+                    [attr.aria-label]="'Excluir mensagem de ' + contato.nome">
+                    Excluir
+                </button>
+            </div>
+        </div>
+        @if (contato.assunto) {
+        <p class="mensagem-assunto">{{ contato.assunto }}</p>
+        }
+        <p class="mensagem-preview">{{ contato.mensagem.slice(0, 100) }}{{ contato.mensagem.length > 100 ? '…' : '' }}
+        </p>
+    </article>
+    }
+</div>
+
+@if (totalPaginas > 1) {
+<nav class="pagination" role="navigation" aria-label="Paginação de mensagens">
+    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+        aria-label="Página anterior">‹</button>
+    @for (p of paginas; track p) {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual"
+        [attr.aria-current]="p === paginaAtual ? 'page' : null" [attr.aria-label]="'Ir para página ' + p">{{ p
+        }}</button>
+    }
+    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+        aria-label="Próxima página">›</button>
+</nav>
+}
+}
+
+<!-- Modal leitura completa -->
+@if (contatoSelecionado) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Mensagem de ' + contatoSelecionado.nome"
+    (click)="fecharMensagem()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h2>{{ contatoSelecionado.nome }}</h2>
+                <p style="font-size:.8rem;color:#737373;margin-top:.2rem">{{ contatoSelecionado.email }} · {{
+                    formatarData(contatoSelecionado.criadoEm) }}</p>
+            </div>
+            <button class="btn btn-icon btn-ghost" (click)="fecharMensagem()" aria-label="Fechar mensagem">✕</button>
+        </div>
+        <div class="modal-body">
+            @if (contatoSelecionado.assunto) {
+            <p class="mensagem-assunto-full">{{ contatoSelecionado.assunto }}</p>
+            }
+            <p class="mensagem-texto">{{ contatoSelecionado.mensagem }}</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-danger" (click)="excluir(contatoSelecionado)"
+                [attr.aria-label]="'Excluir mensagem de ' + contatoSelecionado.nome">
+                Excluir
+            </button>
+            <button class="btn btn-secondary" (click)="fecharMensagem()">Fechar</button>
+        </div>
+    </div>
+</div>
+}

@@ -1,0 +1,256 @@
+<!-- Cabeçalho -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Usuários</h1>
+        <p class="page-subtitle">Gerencie os usuários e suas permissões</p>
+    </div>
+    <a routerLink="/admin/usuarios/cadastro" class="btn btn-primary" aria-label="Cadastrar novo usuário">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" x2="12" y1="5" y2="19" />
+            <line x1="5" x2="19" y1="12" y2="12" />
+        </svg>
+        Novo Usuário
+    </a>
+</div>
+
+<!-- Busca -->
+<div class="filter-bar" role="search">
+    <div class="filter-search">
+        <label for="busca-usuario" class="sr-only">Buscar usuário por nome</label>
+        <input id="busca-usuario" type="search" class="form-input" placeholder="Buscar por nome..."
+            [formControl]="buscaCtrl" aria-label="Buscar usuário por nome" autocomplete="off" />
+    </div>
+</div>
+
+<!-- Estado de carregamento -->
+@if (isLoading) {
+<div class="table-loading" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <span>Carregando usuários...</span>
+</div>
+} @else if (erro) {
+<div role="alert" class="card card-body" aria-live="assertive">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else if (usuarios.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhum usuário encontrado</h3>
+    <p>Adicione o primeiro usuário clicando em "Novo Usuário".</p>
+</div>
+} @else {
+<div class="data-table-wrapper">
+    <table class="data-table" role="table" aria-label="Lista de usuários do sistema">
+        <caption class="sr-only">{{ total }} usuários, página {{ paginaAtual }} de {{ totalPaginas }}</caption>
+        <thead>
+            <tr>
+                <th scope="col">Usuário</th>
+                <th scope="col">Login</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Função</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (usuario of usuarios; track usuario.id) {
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        @if (usuario.fotoPerfil) {
+                        <img [src]="usuario.fotoPerfil" alt="Foto de {{ usuario.nome }}" class="user-avatar-sm-img" />
+                        } @else {
+                        <div class="user-avatar-sm" aria-hidden="true">
+                            {{ usuario.nome.slice(0, 2).toUpperCase() }}
+                        </div>
+                        }
+                        <span class="user-nome">{{ usuario.nome }}</span>
+                    </div>
+                </td>
+                <td>{{ usuario.username }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                    <span class="badge" [class.badge-primary]="usuario.role === 'ADMIN'"
+                        [class.badge-info]="usuario.role === 'SECRETARIA'"
+                        [class.badge-neutral]="usuario.role === 'PROFESSOR'">
+                        {{ labelRole(usuario.role) }}
+                    </span>
+                </td>
+                <td class="acoes-cell">
+                    <button class="btn btn-sm btn-ghost" (click)="abrirPerfil(usuario)"
+                        [attr.aria-label]="'Ver perfil de ' + usuario.nome">Ver</button>
+                    <button class="btn btn-sm btn-secondary" (click)="abrirModal(usuario)"
+                        [attr.aria-label]="'Editar usuário ' + usuario.nome">Editar</button>
+                    <button class="btn btn-sm btn-danger" (click)="excluir(usuario)"
+                        [attr.aria-label]="'Excluir usuário ' + usuario.nome">Excluir</button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+@if (totalPaginas > 1) {
+<nav class="pagination" role="navigation" aria-label="Paginação de usuários">
+    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+        aria-label="Página anterior">‹</button>
+    @for (p of paginas; track p) {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual" [attr.aria-label]="'Ir para página ' + p"
+        [attr.aria-current]="p === paginaAtual ? 'page' : null">{{ p }}</button>
+    }
+    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+        aria-label="Próxima página">›</button>
+    <span class="pagination-info" aria-live="polite">Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+</nav>
+}
+}
+
+<!-- Modal de edição -->
+@if (usuarioEmEdicao) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Editar usuário ' + usuarioEmEdicao.nome"
+    (click)="fecharModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo">Editar Usuário</h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModal()"
+                aria-label="Fechar modal de edição">✕</button>
+        </div>
+
+        <form [formGroup]="editForm" (ngSubmit)="salvar()" class="modal-body">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="edit-nome" class="form-label">Nome completo <span class="required"
+                            aria-hidden="true">*</span></label>
+                    <input id="edit-nome" type="text" class="form-input"
+                        [class.is-invalid]="editForm.get('nome')?.invalid && editForm.get('nome')?.touched"
+                        formControlName="nome" autocomplete="name" />
+                    @if (editForm.get('nome')?.invalid && editForm.get('nome')?.touched) {
+                    <span class="form-error" role="alert">Nome obrigatório (mín. 3 caracteres)</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-username" class="form-label">Login <span class="required"
+                            aria-hidden="true">*</span></label>
+                    <input id="edit-username" type="text" class="form-input"
+                        [class.is-invalid]="editForm.get('username')?.invalid && editForm.get('username')?.touched"
+                        formControlName="username" autocomplete="username" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-email" class="form-label">E-mail <span class="required"
+                            aria-hidden="true">*</span></label>
+                    <input id="edit-email" type="email" class="form-input"
+                        [class.is-invalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
+                        formControlName="email" autocomplete="email" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-role" class="form-label">Função <span class="required"
+                            aria-hidden="true">*</span></label>
+                    <select id="edit-role" class="form-select" formControlName="role">
+                        @for (r of roles; track r.value) {
+                        <option [value]="r.value">{{ r.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        </form>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="fecharModal()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-primary" type="submit" (click)="salvar()" [disabled]="editForm.invalid || salvando">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Salvando... }
+                @else { Salvar Alterações }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Perfil do Usuário -->
+@if (usuarioVisualizado) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" (click)="fecharPerfil()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="perfil-titulo">Perfil do Usuário</h2>
+            <button class="btn btn-close" (click)="fecharPerfil()" aria-label="Fechar perfil">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+        </div>
+
+        <div class="modal-body profile-body">
+            <!-- Cabeçalho do Perfil -->
+            <div class="profile-header">
+                <div class="profile-avatar avatar-wrapper">
+                    @if (usuarioVisualizado.fotoPerfil) {
+                    <img [src]="usuarioVisualizado.fotoPerfil" alt="Foto de Perfil de {{ usuarioVisualizado.nome }}" />
+                    } @else {
+                    <span class="material-symbols-rounded" style="font-size: 3rem; color: #9ca3af;"
+                        aria-hidden="true">person</span>
+                    }
+
+                    <!-- Botões de Trocar/Remover Foto sobrepostos -->
+                    <div class="avatar-actions">
+                        <label class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto"
+                            aria-label="Atualizar Foto de Perfil" tabindex="0">
+                            <span class="material-symbols-rounded">photo_camera</span>
+                            <input type="file" (change)="onFileSelected($event)"
+                                accept="image/jpeg, image/png, image/webp" class="sr-only" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="profile-title">
+                    <h3>{{ usuarioVisualizado.nome }}</h3>
+                    <div class="profile-badges">
+                        <span class="badge" [class.badge-primary]="usuarioVisualizado.role === 'ADMIN'"
+                            [class.badge-info]="usuarioVisualizado.role === 'SECRETARIA'"
+                            [class.badge-neutral]="usuarioVisualizado.role === 'PROFESSOR'">
+                            {{ labelRole(usuarioVisualizado.role) }}
+                        </span>
+                        @if (usuarioVisualizado.precisaTrocarSenha) {
+                        <span class="badge badge-warning">Senha Padrão Ativa</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Informações -->
+            <div class="profile-grid">
+                <!-- Informações do Sistema -->
+                <div class="profile-section">
+                    <h4>Informações de Acesso</h4>
+                    <p><strong>Login:</strong> {{ usuarioVisualizado.username }}</p>
+                    <p><strong>E-mail:</strong> {{ usuarioVisualizado.email || 'Não informado' }}</p>
+                    <p><strong>Nível de Acesso:</strong> {{ labelRole(usuarioVisualizado.role) }}</p>
+                </div>
+
+                <!-- Segurança (Ações Rápidas) -->
+                <div class="profile-section">
+                    <h4>Segurança</h4>
+                    <p style="margin-bottom: 1rem; color: #4b5563;">
+                        Se o usuário esqueceu a senha, você pode resetá-la para o valor padrão do sistema.
+                        No próximo login, ele será forçado a cadastrar uma senha nova.
+                    </p>
+                    <button class="btn btn-warning" (click)="resetarSenhaAdmin()" [disabled]="salvando"
+                        aria-label="Forçar Reset de Senha do Usuário">
+                        <span class="material-symbols-rounded" aria-hidden="true">lock_reset</span>
+                        Resetar Senha
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-ghost" (click)="fecharPerfil()">Fechar</button>
+            <button class="btn btn-primary" (click)="abrirModal(usuarioVisualizado); fecharPerfil()">
+                <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+                Editar Dados
+            </button>
+        </div>
+    </div>
+</div>
+}

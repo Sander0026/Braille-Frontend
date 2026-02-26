@@ -1,0 +1,239 @@
+// Shared public page variables
+$primary: #f5c800;
+$black: #1a1a00;
+$gray-100: #f7f7f7;
+$gray-200: #e8e8e8;
+$gray-600: #5c5c5c;
+$gray-900: #1a1a1a;
+
+// ── Page hero (shared with Sobre/Contato) ─────────────────
+.page-hero {
+    background: $black;
+    padding: 4rem 1.5rem 3.5rem;
+    text-align: center;
+}
+
+.page-hero-inner {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.page-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $primary;
+    margin: 0 0 0.75rem;
+}
+
+.page-hero-title {
+    font-size: clamp(1.75rem, 4vw, 2.8rem);
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+}
+
+.page-hero-desc {
+    font-size: 1rem;
+    color: rgba(#fff, .7);
+    line-height: 1.7;
+    margin: 0;
+}
+
+// ── Content section ───────────────────────────────────────
+.content-section {
+    background: $gray-100;
+    padding: 5rem 0;
+}
+
+.content-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.content-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 800;
+    color: $gray-900;
+    margin: 0 0 1.25rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.content-text p {
+    font-size: 0.95rem;
+    color: $gray-600;
+    line-height: 1.75;
+    margin-bottom: 1rem;
+}
+
+// ── Timeline ──────────────────────────────────────────────
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        left: 4rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: $gray-200;
+    }
+}
+
+.timeline-item {
+    display: grid;
+    grid-template-columns: 5rem 1fr;
+    gap: 1rem;
+    padding: 1rem 0;
+    position: relative;
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: calc(4rem - 5px);
+        top: 1.5rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: $primary;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px $primary;
+    }
+}
+
+.timeline-year {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: $primary;
+    padding-top: 0.1rem;
+    text-align: right;
+    padding-right: 1.5rem;
+}
+
+.timeline-content {
+    strong {
+        font-size: 0.9rem;
+        color: $gray-900;
+        display: block;
+        margin-bottom: 0.15rem;
+    }
+
+    p {
+        font-size: 0.8rem;
+        color: $gray-600;
+        margin: 0;
+        line-height: 1.5;
+    }
+}
+
+// ── Equipe ────────────────────────────────────────────────
+.equipe-section {
+    background: #fff;
+    padding: 5rem 0;
+}
+
+.equipe-desc {
+    text-align: center;
+    color: $gray-600;
+    font-size: 0.95rem;
+    margin: 0 auto 2.5rem;
+    max-width: 500px;
+}
+
+.equipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.equipe-card {
+    background: $gray-100;
+    border: 1px solid $gray-200;
+    border-radius: 0.875rem;
+    padding: 1.75rem 1.5rem;
+    text-align: center;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+    }
+
+    h3 {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: $gray-900;
+        margin: 0.5rem 0 0.375rem;
+    }
+
+    p {
+        font-size: 0.78rem;
+        color: $gray-600;
+        margin: 0;
+        line-height: 1.55;
+    }
+}
+
+.equipe-avatar {
+    font-size: 2.5rem;
+    line-height: 1;
+}
+
+// ── CTA footer ────────────────────────────────────────────
+.sobre-cta {
+    background: $primary;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.sobre-cta-inner {
+    h2 {
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 900;
+        color: $black;
+        margin: 0 0 0.5rem;
+    }
+
+    p {
+        font-size: 0.9rem;
+        color: rgba($black, .7);
+        margin: 0 0 1.5rem;
+    }
+}
+
+.btn-cta {
+    display: inline-flex;
+    padding: 0.75rem 2rem;
+    background: $black;
+    color: $primary;
+    font-weight: 800;
+    border-radius: 9999px;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: transform 200ms ease;
+
+    &:hover {
+        transform: translateY(-2px);
+    }
+}

@@ -1,91 +1,331 @@
-$brand-yellow: #FFD700; 
-$brand-black: #111111;
-$error-red: #D32F2F;
-$brand-yellow-dark: #E6C200;
+﻿// ============================================================
+// login.scss — Tela de Login ILBES
+// ============================================================
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f4f4f4; // Fundo cinza claro
-}
+$primary: #f5c800;
+$primary-text: #1a1a00;
+$black: #000000;
+$surface: #111111;
+$surface-2: #181818;
+$border: #2a2a2a;
+$text-muted: #a1a1a1;
+$text-dim: #525252;
+$white: #ffffff;
+$transition: 250ms ease;
 
-.login-box {
-  background: #fff;
-  padding: 3rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 450px;
-  border-top: 6px solid $brand-yellow; // Detalhe amarelo no topo
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 2rem;
-
-  h1 { color: $brand-black; font-weight: 800; font-size: 1.8rem; margin-bottom: 0.5rem; }
-  p { color: #666; font-size: 1rem; }
-}
-
-.alert-error {
-  background-color: #FFF5F5;
-  color: $error-red;
-  padding: 1rem;
-  border-radius: 6px;
-  border: 2px solid $error-red;
-  margin-bottom: 1.5rem;
-  font-weight: bold;
-  text-align: center;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-
-  label {
+// ── Shell ─────────────────────────────────────────────────────
+:host {
     display: block;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color: $brand-black;
-  }
+}
 
-  input {
-    width: 100%;
-    padding: 0.85rem;
-    border: 2px solid #ccc;
-    border-radius: 6px;
+.login-wrapper {
+    display: flex;
+    min-height: 100vh;
+    background: $black;
+    font-family: 'Inter', sans-serif;
+}
+
+// ── Painel Esquerdo (Identidade Visual) ───────────────────────
+.brand-panel {
+    display: none;
+    position: relative;
+    flex: 1;
+    background-color: $primary;
+    overflow: hidden;
+
+    @media (min-width: 1024px) {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 5rem;
+    }
+}
+
+.brand-glow-1,
+.brand-glow-2 {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+}
+
+.brand-glow-1 {
+    width: 320px;
+    height: 320px;
+    background: rgba(255, 255, 255, .25);
+    top: -10%;
+    right: -8%;
+}
+
+.brand-glow-2 {
+    width: 400px;
+    height: 400px;
+    background: rgba(0, 0, 0, .12);
+    bottom: -12%;
+    left: -10%;
+}
+
+.brand-logo {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: $black;
+    border-radius: 20px;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, .5);
+    transition: transform $transition;
+    flex-shrink: 0;
+
+    svg {
+        width: 40px;
+        height: 40px;
+        color: $primary;
+    }
+
+    &:hover {
+        transform: translateY(-5px) scale(1.06);
+    }
+}
+
+.brand-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1.05;
+    color: $black;
+    text-transform: uppercase;
+    letter-spacing: -1.5px;
+    margin-bottom: 1rem;
+    position: relative;
+}
+
+.brand-subtitle {
     font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, .65);
+    max-width: 300px;
+    position: relative;
+    line-height: 1.5;
+}
+
+// ── Painel Direito (Formulário) ───────────────────────────────
+.form-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1.5rem;
+    width: 100%;
+    position: relative;
+
+    @media (min-width: 1024px) {
+        width: 50%;
+        min-width: 480px;
+        padding: 5rem;
+    }
+
+    // Linha divisória vertical no desktop
+    &::before {
+        content: '';
+        display: none;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: linear-gradient(to bottom, transparent, rgba($primary, .3), transparent);
+
+        @media (min-width: 1024px) {
+            display: block;
+        }
+    }
+}
+
+.form-card {
+    width: 100%;
+    max-width: 420px;
+}
+
+// Cabeçalho do formulário
+.form-heading {
+    margin-bottom: 2.5rem;
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: $white;
+        margin-bottom: 0.4rem;
+        letter-spacing: -1px;
+    }
+
+    p {
+        color: $text-muted;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+}
+
+// Alerta de erro
+.alert-erro {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    background: $surface-2;
+    border: 1.5px solid rgba($primary, .4);
+    border-radius: 12px;
+    padding: 0.875rem 1rem;
+    margin-bottom: 1.5rem;
+    color: $primary;
+    font-size: 0.875rem;
+    font-weight: 500;
+    animation: slideDown 200ms ease;
+
+    svg {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Grupos de campo
+.input-group {
+    margin-bottom: 1.25rem;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $text-muted;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+    position: relative;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    color: $text-dim;
+    pointer-events: none;
+    transition: color $transition;
+}
+
+.input-field {
+    width: 100%;
+    background: rgba($surface-2, .8);
+    border: 2px solid $border;
+    border-radius: 14px;
+    padding: 0.9rem 1rem 0.9rem 3.25rem;
+    color: $white;
+    font-size: 1rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color $transition, background $transition, box-shadow $transition;
+
+    &::placeholder {
+        color: $text-dim;
+    }
 
     &:focus {
-      border-color: $brand-black;
-      outline: none;
-      box-shadow: 0 0 0 4px rgba($brand-yellow, 0.4);
+        border-color: $primary;
+        background: $surface-2;
+        box-shadow: 0 0 0 4px rgba($primary, .12);
+
+        ~.input-icon {
+            color: $primary;
+        }
     }
-  }
+
+    &.is-invalid {
+        border-color: #dc2626;
+
+        &:focus {
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, .12);
+        }
+    }
 }
 
-.btn-login {
-  width: 100%;
-  padding: 1rem;
-  background-color: $brand-yellow;
-  color: $brand-black;
-  border: none;
-  border-radius: 6px;
-  font-size: 1.2rem;
-  font-weight: 800;
-  cursor: pointer;
-  text-transform: uppercase;
-  margin-top: 1rem;
-  transition: all 0.2s;
+// Focus-within para o ícone
+.input-wrapper:focus-within .input-icon {
+    color: $primary;
+}
 
-  &:hover:not(:disabled) {
-    background-color: $brand-yellow-dark; 
-  }
+// Botão de envio
+.submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    width: 100%;
+    background: $primary;
+    color: $primary-text;
+    font-weight: 800;
+    font-size: 1.05rem;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 1.125rem;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-top: 2rem;
+    transition: background $transition, transform $transition, box-shadow $transition;
+    position: relative;
+    overflow: hidden;
 
-  &:disabled {
-    background-color: #e0e0e0;
-    color: #888;
-    cursor: not-allowed;
-  }
+    &:hover:not(:disabled) {
+        background: #ffd633;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px -8px rgba($primary, .5);
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0) scale(0.99);
+    }
+
+    &:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    &:focus-visible {
+        outline: 3px solid $primary;
+        outline-offset: 3px;
+    }
+}
+
+.spinner {
+    width: 20px;
+    height: 20px;
+    animation: spin 0.8s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }

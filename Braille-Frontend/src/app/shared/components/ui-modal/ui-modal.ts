@@ -4,8 +4,9 @@ import { Component } from '@angular/core';
   selector: 'app-ui-modal',
   imports: [],
   templateUrl: './ui-modal.html',
-  styleUrl: './ui-modal.css',
+  styleUrl: './ui-modal.scss',
 })
 export class UiModal {
 
 }
+
