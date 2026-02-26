@@ -11,7 +11,6 @@ interface NavItem {
   aria: string;
 }
 
-/** Estados possíveis do sidebar */
 type SidebarState = 'full' | 'icons' | 'hidden';
 
 @Component({
@@ -22,6 +21,8 @@ type SidebarState = 'full' | 'icons' | 'hidden';
 })
 export class AdminLayout implements OnInit {
   sidebarState: SidebarState = 'full';
+  // Armazenada como propriedade estável — evita NG0100 nos getters
+  isMobile = false;
   usuario: UserInfo | null = null;
 
   readonly navItems: NavItem[] = [
@@ -41,30 +42,43 @@ export class AdminLayout implements OnInit {
 
   ngOnInit(): void {
     this.usuario = this.authService.getUser();
-    this.setSidebarForViewport();
+    this.updateMobileState();
   }
 
-  /** Ajusta o estado inicial conforme viewport */
-  private setSidebarForViewport(): void {
-    this.sidebarState = window.innerWidth > 768 ? 'full' : 'icons';
+  @HostListener('window:resize')
+  onResize(): void {
+    this.updateMobileState();
   }
 
-  /** Botão de toggle do header */
-  toggleSidebar(): void {
-    if (window.innerWidth > 768) {
-      // Desktop: alterna entre full ↔ icons
-      this.sidebarState = this.sidebarState === 'full' ? 'icons' : 'full';
-    } else {
-      // Mobile: alterna entre icons ↔ hidden
-      this.sidebarState = this.sidebarState === 'hidden' ? 'icons' : 'hidden';
+  private updateMobileState(): void {
+    const wasMobile = this.isMobile;
+    this.isMobile = window.innerWidth <= 768;
+
+    // Ajusta estado do sidebar na troca de breakpoint
+    if (!wasMobile && this.isMobile) {
+      // Desktop → Mobile: full passa a icons
+      if (this.sidebarState === 'full') this.sidebarState = 'icons';
+    } else if (wasMobile && !this.isMobile) {
+      // Mobile → Desktop: hidden passa a icons
+      if (this.sidebarState === 'hidden') this.sidebarState = 'icons';
+    } else if (!wasMobile && !this.isMobile) {
+      // Desktop: define estado inicial na primeira carga
+      if (this.sidebarState !== 'full' && this.sidebarState !== 'icons') {
+        this.sidebarState = 'full';
+      }
+    } else if (wasMobile && this.isMobile) {
+      // Mobile: define estado inicial na primeira carga
+      if (this.sidebarState === 'full') this.sidebarState = 'icons';
     }
   }
 
-  /** Quando a tela redimensiona, reajusta o sidebar */
-  @HostListener('window:resize')
-  onResize(): void {
-    if (window.innerWidth > 768 && this.sidebarState === 'hidden') {
-      this.sidebarState = 'icons';
+  toggleSidebar(): void {
+    if (!this.isMobile) {
+      // Desktop: full ↔ icons
+      this.sidebarState = this.sidebarState === 'full' ? 'icons' : 'full';
+    } else {
+      // Mobile: icons ↔ hidden
+      this.sidebarState = this.sidebarState === 'hidden' ? 'icons' : 'hidden';
     }
   }
 
@@ -87,16 +101,16 @@ export class AdminLayout implements OnInit {
     return roles[this.usuario?.role ?? ''] ?? 'Usuário';
   }
 
-  /** Ícone do botão de toggle (hamburguer / seta) */
+  // Getters usam this.isMobile (estável) — sem risco de NG0100
   get toggleIcon(): string {
-    if (window.innerWidth <= 768) {
+    if (this.isMobile) {
       return this.sidebarState === 'hidden' ? 'menu' : 'close';
     }
     return this.sidebarState === 'full' ? 'chevron_left' : 'chevron_right';
   }
 
   get toggleLabel(): string {
-    if (window.innerWidth <= 768) {
+    if (this.isMobile) {
       return this.sidebarState === 'hidden' ? 'Abrir menu lateral' : 'Fechar menu lateral';
     }
     return this.sidebarState === 'full' ? 'Recolher menu lateral' : 'Expandir menu lateral';

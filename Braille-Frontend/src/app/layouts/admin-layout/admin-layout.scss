@@ -52,12 +52,11 @@ $transition: 250ms ease;
     color: $white;
     display: flex;
     flex-direction: column;
-    height: 100vh; // mesma altura que o shell
+    height: 100%; // preenche a coluna do grid (que já é 100vh)
     overflow: hidden; // conteúdo recortado — nunca vaza
     transition: width $transition;
     z-index: 100;
-    position: sticky;
-    top: 0;
+
 }
 
 // Logo
