@@ -7,6 +7,7 @@ export interface UserInfo {
   username: string;
   nome?: string;
   role: string;
+  precisaTrocarSenha?: boolean;
 }
 
 @Injectable({

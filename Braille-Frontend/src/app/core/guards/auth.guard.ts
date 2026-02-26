@@ -11,6 +11,15 @@ export const authGuard: CanActivateFn = () => {
     const router = inject(Router);
 
     if (authService.isLoggedIn()) {
+        const user = authService.getUser();
+
+        // Se ainda precisa trocar a senha, o token existe mas o acesso é revogado até trocar
+        if (user?.precisaTrocarSenha) {
+            authService.logout(); // Opcional: desloga para forçar um login limpo, ou os envia pro login pra ver a view de troca
+            router.navigate(['/login']);
+            return false;
+        }
+
         return true;
     }
 

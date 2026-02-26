@@ -44,6 +44,7 @@
       </div>
       }
 
+      @if (!precisaTrocarSenha) {
       <!-- Formulário -->
       <form id="login-form" [formGroup]="loginForm" (ngSubmit)="fazerLogin()"
         aria-label="Formulário de acesso ao sistema" novalidate>
@@ -100,6 +101,66 @@
         </button>
 
       </form>
+      } @else {
+      <!-- Formulário de Nova Senha Obrigatória -->
+      <form id="nova-senha-form" [formGroup]="novaSenhaForm" (ngSubmit)="confirmarNovaSenha()"
+        aria-label="Formulário de definição de nova senha" novalidate>
+
+        <div
+          style="margin-bottom: 1.5rem; padding: 1rem; background-color: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; border-radius: 4px; font-size: 0.9rem;">
+          <b>Ação Necessária:</b> A coordenação redefiniu sua conta. Você precisa criar uma nova senha pessoal
+          permanente antes de prosseguir.
+        </div>
+
+        <!-- Campo: Nova Senha -->
+        <div class="input-group">
+          <label for="novaSenha" class="input-label">Nova Senha</label>
+          <div class="input-wrapper">
+            <input id="novaSenha" type="password" class="input-field"
+              [class.is-invalid]="novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched"
+              formControlName="novaSenha" placeholder="Mínimo 8 caracteres" aria-required="true" />
+            <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2 2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          @if (novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched) {
+          <span class="form-error" role="alert">A senha precisa ter pelo menos 8 caracteres</span>
+          }
+        </div>
+
+        <!-- Campo: Confirmar Senha -->
+        <div class="input-group">
+          <label for="confirmarSenha" class="input-label">Confirmar Senha</label>
+          <div class="input-wrapper">
+            <input id="confirmarSenha" type="password" class="input-field"
+              [class.is-invalid]="(novaSenhaForm.get('confirmarSenha')?.invalid || novaSenhaForm.errors?.['mismatch']) && novaSenhaForm.get('confirmarSenha')?.touched"
+              formControlName="confirmarSenha" placeholder="Repita a senha" aria-required="true" />
+            <svg class="input-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          @if (novaSenhaForm.errors?.['mismatch'] && novaSenhaForm.get('confirmarSenha')?.touched) {
+          <span class="form-error" role="alert">As senhas não coincidem</span>
+          }
+        </div>
+
+        <button type="submit" class="submit-btn" [disabled]="novaSenhaForm.invalid || carregando"
+          [attr.aria-busy]="carregando" aria-label="Confirmar nova senha de acesso">
+          @if (carregando) {
+          <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+            <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+            <path style="opacity:.75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <span>Salvando...</span>
+          } @else {
+          <span>Salvar Nova Senha</span>
+          }
+        </button>
+      </form>
+      }
     </div>
   </div>
 
