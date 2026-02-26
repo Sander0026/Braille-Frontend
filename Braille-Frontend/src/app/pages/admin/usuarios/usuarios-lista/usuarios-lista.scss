@@ -1,0 +1,7 @@
+// Using TailwindCSS classes directly in the HTML instead of custom CSS.
+
+// Custom overrides if needed
+:host {
+    display: block;
+    height: 100%;
+}
