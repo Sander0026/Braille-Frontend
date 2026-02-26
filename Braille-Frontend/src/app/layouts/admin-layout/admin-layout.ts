@@ -38,8 +38,6 @@ export class AdminLayout implements OnInit {
 
   ngOnInit(): void {
     this.usuario = this.authService.getUser();
-    // Em mobile (≤768px) a sidebar inicia fechada para evitar overflow horizontal
-    this.isSidebarOpen = window.innerWidth > 768;
   }
 
   toggleSidebar(): void {
