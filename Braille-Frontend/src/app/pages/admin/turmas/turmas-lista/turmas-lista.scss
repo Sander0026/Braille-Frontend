@@ -1,0 +1,26 @@
+/* Add any specific styles here if needed */
+/* Most styling is handled via Tailwind classes in the HTML */
+
+.form-input,
+.form-select {
+    @apply focus:ring-yellow-500 focus:border-yellow-500;
+}
+
+// Custom scrollbar setup to make the modal and selections look cleaner
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}

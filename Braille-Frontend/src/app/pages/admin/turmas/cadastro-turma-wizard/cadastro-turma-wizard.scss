@@ -1,0 +1,219 @@
+// Cores da marca do Instituto (Baseado na UI global)
+$brand-yellow: #fcd34d; // yellow-300 / 400
+$brand-yellow-dark: #fbbf24; // yellow-400 / 500
+$bg-light: #f9fafb;
+$text-dark: #111827;
+$text-muted: #6b7280;
+$border-color: #e5e7eb;
+$error-color: #ef4444;
+$success-bg: #dcfce7;
+$success-text: #166534;
+$error-bg: #fee2e2;
+$error-text: #991b1b;
+
+.wizard-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 2.5rem;
+    border: 1px solid $border-color;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.wizard-header {
+    margin-bottom: 2rem;
+    text-align: center;
+
+    h1 {
+        font-size: 1.875rem;
+        font-weight: 800;
+        color: $text-dark;
+        margin-bottom: 0.5rem;
+    }
+
+    p {
+        color: $text-muted;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+// Progress Bar
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: #f3f4f6;
+    border-radius: 9999px;
+    overflow: hidden;
+
+    .progress-fill {
+        height: 100%;
+        background-color: $brand-yellow-dark;
+        transition: width 0.4s ease-in-out;
+    }
+}
+
+// Form Structure (Using simple flex/grid rows similar to Bootstrap logic but custom)
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -15px;
+    margin-left: -15px;
+}
+
+.col-md-12,
+.col-lg-12 {
+    flex: 0 0 100%;
+    max-width: 100%;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+
+.col-lg-6 {
+    flex: 0 0 50%;
+    max-width: 50%;
+    padding-right: 15px;
+    padding-left: 15px;
+
+    @media (max-width: 768px) {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.wizard-step {
+    border: none;
+    padding: 0;
+    margin: 0;
+
+    legend {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $text-dark;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid $brand-yellow;
+        padding-bottom: 0.5rem;
+        width: 100%;
+    }
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+
+    label {
+        display: block;
+        font-weight: 600;
+        color: $text-dark;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        color: $text-dark;
+        background-color: #fff;
+        border: 1px solid $border-color;
+        border-radius: 8px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        outline: none;
+
+        &:focus {
+            border-color: $brand-yellow-dark;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.2);
+        }
+
+        &::placeholder {
+            color: #9ca3af;
+        }
+    }
+
+    .input-error {
+        border-color: $error-color !important;
+
+        &:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+        }
+    }
+
+    .error-text {
+        display: block;
+        color: $error-color;
+        font-size: 0.8rem;
+        margin-top: 0.4rem;
+        font-weight: 500;
+    }
+}
+
+.wizard-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid $border-color;
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+
+        // Default Button reset
+        outline: none;
+    }
+
+    .btn-primary,
+    .btn-success {
+        background-color: $brand-yellow-dark;
+        color: $text-dark;
+        border-color: darken($brand-yellow-dark, 5%);
+        font-weight: 700;
+
+        &:hover {
+            background-color: darken($brand-yellow-dark, 5%);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .btn-secondary {
+        background-color: white;
+        color: $text-muted;
+        border-color: $border-color;
+
+        &:hover {
+            background-color: $bg-light;
+            color: $text-dark;
+        }
+    }
+}
+
+// Feedback Banner
+.feedback-banner {
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+
+    &.sucesso {
+        background-color: $success-bg;
+        color: $success-text;
+        border: 1px solid scale-color($success-bg, $lightness: -10%);
+    }
+
+    &.erro {
+        background-color: $error-bg;
+        color: $error-text;
+        border: 1px solid scale-color($error-bg, $lightness: -10%);
+    }
+}
