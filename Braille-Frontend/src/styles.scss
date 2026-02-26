@@ -13,8 +13,11 @@
 // 3. Componentes reutilizáveis (.btn, .card, .badge, .form-input, etc.)
 @use 'styles/components';
 
-// Garante que o app ocupa a tela toda
+// Garante que o app propaga a altura corretamente para os layouts filhos
 app-root {
     display: block;
-    min-height: 100vh;
+    height: 100%;
+    /* propaga a altura do body (100vh) para os layouts */
+    overflow: hidden;
+    /* cada layout gerencia seu próprio scroll internamente */
 }

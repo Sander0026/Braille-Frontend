@@ -11,6 +11,19 @@ $gray-600: #5c5c5c;
 $gray-900: #1a1a1a;
 $transition: 200ms ease;
 
+// ── Shell da página pública ──────────────────────────────────
+// Gerencia o scroll internamente, pois html/body têm overflow:hidden
+.public-shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* herda 100% do app-root que herda do body */
+    overflow-y: auto;
+    /* aqui fica o scroll vertical das páginas públicas */
+    overflow-x: hidden;
+    /* sem scroll horizontal */
+}
+
 // ── Skip link ──────────────────────────────────────────────
 .skip-link {
     position: absolute;
