@@ -1,0 +1,122 @@
+<div class="wizard-container">
+    <div *ngIf="mensagemFeedback" class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
+        <strong *ngIf="tipoFeedback === 'sucesso'">✅ Sucesso: </strong>
+        <strong *ngIf="tipoFeedback === 'erro'">⚠️ Erro: </strong>
+        {{ mensagemFeedback }}
+    </div>
+
+    <header class="wizard-header">
+        <h1>Nova Turma</h1>
+        <p>Preencha os dados da nova turma no sistema. Passo {{ etapaAtual }} de {{ totalEtapas }}.</p>
+
+        <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="etapaAtual" aria-valuemin="1"
+            [attr.aria-valuemax]="totalEtapas">
+            <div class="progress-fill" [style.width.%]="(etapaAtual / totalEtapas) * 100"></div>
+        </div>
+    </header>
+
+    <form [formGroup]="formTurma" class="wizard-form">
+
+        <!-- ETAPA 1: Informações Básicas da Turma -->
+        <fieldset *ngIf="etapaAtual === 1" class="wizard-step">
+            <legend>Passo 1: Informações Básicas</legend>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="input-nome">Nome da Turma *</label>
+                        <input type="text" id="input-nome" placeholder="Ex: Informática Básica I" formControlName="nome"
+                            [class.input-error]="isFieldInvalid('nome')">
+                        <span class="error-text" *ngIf="isFieldInvalid('nome')">O nome da turma é obrigatório.</span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="input-professor">Professor Responsável *</label>
+                        <select id="input-professor" formControlName="professor"
+                            [class.input-error]="isFieldInvalid('professor')">
+                            <option value="">Selecione um Professor</option>
+                            <option *ngFor="let prof of professoresSistema" [value]="prof">{{ prof }}</option>
+                        </select>
+                        <span class="error-text" *ngIf="isFieldInvalid('professor')">A escolha do professor é
+                            obrigatória.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="input-mes">Mês de Início *</label>
+                        <select id="input-mes" formControlName="mes" [class.input-error]="isFieldInvalid('mes')">
+                            <option value="">Selecione...</option>
+                            <option value="Janeiro">Janeiro</option>
+                            <option value="Fevereiro">Fevereiro</option>
+                            <option value="Março">Março</option>
+                            <option value="Abril">Abril</option>
+                            <option value="Maio">Maio</option>
+                            <option value="Junho">Junho</option>
+                            <option value="Julho">Julho</option>
+                            <option value="Agosto">Agosto</option>
+                            <option value="Setembro">Setembro</option>
+                            <option value="Outubro">Outubro</option>
+                            <option value="Novembro">Novembro</option>
+                            <option value="Dezembro">Dezembro</option>
+                        </select>
+                        <span class="error-text" *ngIf="isFieldInvalid('mes')">Mês de início é obrigatório.</span>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="input-ano">Ano *</label>
+                        <input type="number" id="input-ano" placeholder="Ex: 2026" formControlName="ano"
+                            [class.input-error]="isFieldInvalid('ano')">
+                        <span class="error-text" *ngIf="isFieldInvalid('ano')">Ano inválido.</span>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- ETAPA 2: Detalhes Adicionais -->
+        <fieldset *ngIf="etapaAtual === 2" class="wizard-step">
+            <legend>Passo 2: Detalhes Adicionais</legend>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="form-group">
+                        <label for="input-capacidade">Capacidade Máxima de Alunos *</label>
+                        <input type="number" id="input-capacidade" placeholder="20" formControlName="capacidade"
+                            [class.input-error]="isFieldInvalid('capacidade')">
+                        <span class="error-text" *ngIf="isFieldInvalid('capacidade')">A capacidade deve ser maior que
+                            0.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="input-descricao">Descrição ou Observação (Opcional)</label>
+                        <textarea id="input-descricao" rows="3"
+                            placeholder="Detalhes sobre a turma, sala de aula, professor responsável..."
+                            formControlName="descricao"></textarea>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Controles do Assistente (Botões Voltar/Avançar/Salvar) -->
+        <footer class="wizard-actions">
+            <button type="button" class="btn btn-secondary" *ngIf="etapaAtual > 1" (click)="etapaAnterior()">
+                Voltar Etapa
+            </button>
+
+            <button *ngIf="etapaAtual < totalEtapas" type="button" class="btn btn-primary" (click)="proximaEtapa()">
+                Avançar Etapa
+            </button>
+
+            <button *ngIf="etapaAtual === totalEtapas" type="button" class="btn btn-success"
+                (click)="finalizarCadastro()">
+                Cadastrar Turma
+            </button>
+        </footer>
+
+    </form>
+</div>

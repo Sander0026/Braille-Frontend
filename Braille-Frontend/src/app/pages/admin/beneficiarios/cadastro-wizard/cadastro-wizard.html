@@ -1,6 +1,7 @@
 <div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
 
 <div class="wizard-container">
+<<<<<<< HEAD
 
   <!-- ====== FEEDBACK BANNER ====== -->
   @if (mensagemFeedback) {
@@ -16,6 +17,13 @@
   }
 
   <!-- ====== CABEÇALHO + BARRA DE PROGRESSO ====== -->
+=======
+  <div *ngIf="mensagemFeedback" class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
+    <strong *ngIf="tipoFeedback === 'sucesso'">Sucesso: </strong>
+    <strong *ngIf="tipoFeedback === 'erro'">Erro: </strong>
+    {{ mensagemFeedback }}
+  </div>
+>>>>>>> feat/visual/login
   <header class="wizard-header">
     <h1>Cadastro de Alunos (PcD Visual)</h1>
     <p>Preencha as informações do aluno. Etapa <strong>{{ passoAtual }}</strong> de 4.</p>

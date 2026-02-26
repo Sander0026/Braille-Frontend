@@ -58,6 +58,11 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/turmas/turmas-lista/turmas-lista').then(m => m.TurmasLista),
         title: 'Turmas — ILBES'
       },
+      {
+        path: 'turmas/cadastro',
+        loadComponent: () => import('./pages/admin/turmas/cadastro-turma-wizard/cadastro-turma-wizard').then(m => m.CadastroTurmaWizard),
+        title: 'Nova Turma — ILBES'
+      },
 
       // Frequências
       {
