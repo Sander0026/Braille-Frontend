@@ -28,6 +28,8 @@ $transition: 250ms ease;
 .admin-shell {
     position: relative;
     min-height: 100vh;
+    min-height: 100dvh;
+    /* ajusta quando a barra do browser mobile aparece/some */
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -39,6 +41,8 @@ $transition: 250ms ease;
     top: 0;
     left: 0;
     height: 100vh;
+    height: 100dvh;
+    /* dvh = dynamic viewport height, correto no mobile */
     width: $sidebar-full; // largura padrao (full)
     background-color: $black;
     color: $white;
@@ -64,8 +68,10 @@ $transition: 250ms ease;
 // AREA PRINCIPAL — recebe margin-left que espelha a largura da sidebar
 // ══════════════════════════════════════════════════════════════
 .main-area {
-    margin-left: $sidebar-full; // espelha sidebar-full
+    margin-left: $sidebar-full;
     height: 100vh;
+    height: 100dvh;
+    /* dvh = dynamic viewport height, correto no mobile */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -296,13 +302,18 @@ $transition: 250ms ease;
     flex: 1;
     min-height: 0;
     padding: 1.75rem 2rem;
+    /* padding-bottom extra garante que o ultimo item nao fica cortado
+       pelo nav bar do browser mobile ou pelo home indicator do iOS */
+    padding-bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
     overflow-y: auto; // scroll vertical — so aqui
     overflow-x: hidden; // tabelas containidas — sem scroll lateral
 
     @media (max-width: 768px) {
         padding: 1rem;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
     }
 }
+
 
 // ══════════════════════════════════════════════════════════════
 // RESPONSIVO — mobile (≤ 768px)
