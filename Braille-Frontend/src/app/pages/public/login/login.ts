@@ -13,8 +13,11 @@ import { AuthService } from '../../../core/services/auth.service'; // 👈 Verif
 })
 export class Login {
   loginForm: FormGroup;
+  novaSenhaForm: FormGroup;
   erroLogin = '';
   carregando = false;
+  precisaTrocarSenha = false;
+  senhaAntigaTemp = '';
 
   constructor(
     private fb: FormBuilder,
@@ -25,6 +28,15 @@ export class Login {
       username: ['', Validators.required],
       senha: ['', Validators.required]
     });
+
+    this.novaSenhaForm = this.fb.group({
+      novaSenha: ['', [Validators.required, Validators.minLength(8)]],
+      confirmarSenha: ['', [Validators.required]]
+    }, { validators: this.senhasIguaisValidator });
+  }
+
+  senhasIguaisValidator(g: FormGroup) {
+    return g.get('novaSenha')?.value === g.get('confirmarSenha')?.value ? null : { mismatch: true };
   }
 
   fazerLogin() {
@@ -38,13 +50,47 @@ export class Login {
 
     this.authService.login(this.loginForm.value).subscribe({
       next: () => {
-        this.router.navigate(['/admin']);
+        this.carregando = false;
+        const user = this.authService.getUser();
+
+        if (user?.precisaTrocarSenha) {
+          this.precisaTrocarSenha = true;
+          this.senhaAntigaTemp = this.loginForm.value.senha; // Salva para enviar no Patch
+        } else {
+          this.router.navigate(['/admin']);
+        }
       },
       error: (err: any) => {
         this.carregando = false;
-        // 👇 Atualizamos a mensagem de erro também!
         this.erroLogin = 'Usuário ou senha incorretos. Tente novamente.';
         console.error(err);
+      }
+    });
+  }
+
+  confirmarNovaSenha() {
+    if (this.novaSenhaForm.invalid) {
+      this.novaSenhaForm.markAllAsTouched();
+      return;
+    }
+
+    this.carregando = true;
+    this.erroLogin = '';
+
+    const novaSenha = this.novaSenhaForm.value.novaSenha;
+
+    this.authService.trocarSenha(this.senhaAntigaTemp, novaSenha).subscribe({
+      next: () => {
+        alert('Senha alterada com sucesso! Faça login novamente com a nova senha.');
+        this.authService.logout();
+        this.precisaTrocarSenha = false;
+        this.loginForm.reset();
+        this.novaSenhaForm.reset();
+        this.carregando = false;
+      },
+      error: (err) => {
+        this.carregando = false;
+        this.erroLogin = 'Erro ao alterar a senha. A senha não atende aos requisitos ou expirou.';
       }
     });
   }

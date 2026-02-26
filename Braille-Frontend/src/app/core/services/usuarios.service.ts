@@ -10,6 +10,7 @@ export interface Usuario {
     email: string;
     role: 'ADMIN' | 'SECRETARIA' | 'PROFESSOR';
     fotoPerfil?: string;
+    precisaTrocarSenha?: boolean;
 }
 
 export interface CreateUsuarioDto {
@@ -18,6 +19,8 @@ export interface CreateUsuarioDto {
     email: string;
     senha: string;
     role: string;
+    fotoPerfil?: string;
+    precisaTrocarSenha?: boolean;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -42,5 +45,15 @@ export class UsuariosService {
 
     excluir(id: string): Observable<any> {
         return this.http.delete(`${this.url}/${id}`);
+    }
+
+    resetarSenha(id: string): Observable<Usuario> {
+        return this.http.patch<Usuario>(`${this.url}/${id}/reset-password`, {});
+    }
+
+    uploadFoto(file: File): Observable<{ url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url: string }>('/api/upload', formData);
     }
 }

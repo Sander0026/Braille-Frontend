@@ -57,9 +57,13 @@
             <tr>
                 <td>
                     <div class="user-cell">
+                        @if (usuario.fotoPerfil) {
+                        <img [src]="usuario.fotoPerfil" alt="Foto de {{ usuario.nome }}" class="user-avatar-sm-img" />
+                        } @else {
                         <div class="user-avatar-sm" aria-hidden="true">
                             {{ usuario.nome.slice(0, 2).toUpperCase() }}
                         </div>
+                        }
                         <span class="user-nome">{{ usuario.nome }}</span>
                     </div>
                 </td>
@@ -73,6 +77,8 @@
                     </span>
                 </td>
                 <td class="acoes-cell">
+                    <button class="btn btn-sm btn-ghost" (click)="abrirPerfil(usuario)"
+                        [attr.aria-label]="'Ver perfil de ' + usuario.nome">Ver</button>
                     <button class="btn btn-sm btn-secondary" (click)="abrirModal(usuario)"
                         [attr.aria-label]="'Editar usuário ' + usuario.nome">Editar</button>
                     <button class="btn btn-sm btn-danger" (click)="excluir(usuario)"
@@ -158,6 +164,91 @@
             <button class="btn btn-primary" type="submit" (click)="salvar()" [disabled]="editForm.invalid || salvando">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Salvando... }
                 @else { Salvar Alterações }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Perfil do Usuário -->
+@if (usuarioVisualizado) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" (click)="fecharPerfil()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="perfil-titulo">Perfil do Usuário</h2>
+            <button class="btn btn-close" (click)="fecharPerfil()" aria-label="Fechar perfil">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+        </div>
+
+        <div class="modal-body profile-body">
+            <!-- Cabeçalho do Perfil -->
+            <div class="profile-header">
+                <div class="profile-avatar avatar-wrapper">
+                    @if (usuarioVisualizado.fotoPerfil) {
+                    <img [src]="usuarioVisualizado.fotoPerfil" alt="Foto de Perfil de {{ usuarioVisualizado.nome }}" />
+                    } @else {
+                    <span class="material-symbols-rounded" style="font-size: 3rem; color: #9ca3af;"
+                        aria-hidden="true">person</span>
+                    }
+
+                    <!-- Botões de Trocar/Remover Foto sobrepostos -->
+                    <div class="avatar-actions">
+                        <label class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto"
+                            aria-label="Atualizar Foto de Perfil" tabindex="0">
+                            <span class="material-symbols-rounded">photo_camera</span>
+                            <input type="file" (change)="onFileSelected($event)"
+                                accept="image/jpeg, image/png, image/webp" class="sr-only" />
+                        </label>
+                    </div>
+                </div>
+
+                <div class="profile-title">
+                    <h3>{{ usuarioVisualizado.nome }}</h3>
+                    <div class="profile-badges">
+                        <span class="badge" [class.badge-primary]="usuarioVisualizado.role === 'ADMIN'"
+                            [class.badge-info]="usuarioVisualizado.role === 'SECRETARIA'"
+                            [class.badge-neutral]="usuarioVisualizado.role === 'PROFESSOR'">
+                            {{ labelRole(usuarioVisualizado.role) }}
+                        </span>
+                        @if (usuarioVisualizado.precisaTrocarSenha) {
+                        <span class="badge badge-warning">Senha Padrão Ativa</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid de Informações -->
+            <div class="profile-grid">
+                <!-- Informações do Sistema -->
+                <div class="profile-section">
+                    <h4>Informações de Acesso</h4>
+                    <p><strong>Login:</strong> {{ usuarioVisualizado.username }}</p>
+                    <p><strong>E-mail:</strong> {{ usuarioVisualizado.email || 'Não informado' }}</p>
+                    <p><strong>Nível de Acesso:</strong> {{ labelRole(usuarioVisualizado.role) }}</p>
+                </div>
+
+                <!-- Segurança (Ações Rápidas) -->
+                <div class="profile-section">
+                    <h4>Segurança</h4>
+                    <p style="margin-bottom: 1rem; color: #4b5563;">
+                        Se o usuário esqueceu a senha, você pode resetá-la para o valor padrão do sistema.
+                        No próximo login, ele será forçado a cadastrar uma senha nova.
+                    </p>
+                    <button class="btn btn-warning" (click)="resetarSenhaAdmin()" [disabled]="salvando"
+                        aria-label="Forçar Reset de Senha do Usuário">
+                        <span class="material-symbols-rounded" aria-hidden="true">lock_reset</span>
+                        Resetar Senha
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-ghost" (click)="fecharPerfil()">Fechar</button>
+            <button class="btn btn-primary" (click)="abrirModal(usuarioVisualizado); fecharPerfil()">
+                <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+                Editar Dados
             </button>
         </div>
     </div>

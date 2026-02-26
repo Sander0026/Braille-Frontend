@@ -23,6 +23,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
     buscaCtrl = new FormControl('');
     usuarioEmEdicao: Usuario | null = null;
+    usuarioVisualizado: Usuario | null = null;
     editForm!: FormGroup;
     salvando = false;
 
@@ -70,6 +71,14 @@ export class UsuariosLista implements OnInit, OnDestroy {
         });
     }
 
+    abrirPerfil(usuario: Usuario): void {
+        this.usuarioVisualizado = usuario;
+    }
+
+    fecharPerfil(): void {
+        this.usuarioVisualizado = null;
+    }
+
     abrirModal(usuario: Usuario): void {
         this.usuarioEmEdicao = usuario;
         this.editForm.patchValue({
@@ -114,5 +123,54 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
     get paginas(): number[] {
         return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+    }
+
+    // --- Novas Ações de Perfil ---
+    onFileSelected(event: any): void {
+        const file = event.target.files?.[0];
+        if (!file || !this.usuarioVisualizado) return;
+
+        this.usuariosService.uploadFoto(file).subscribe({
+            next: (res) => {
+                // Atualiza a foto no DB do usuário
+                const url = res.url;
+                if (!this.usuarioVisualizado) return;
+
+                this.usuariosService.atualizar(this.usuarioVisualizado.id, { fotoPerfil: url }).subscribe({
+                    next: () => {
+                        if (this.usuarioVisualizado) this.usuarioVisualizado.fotoPerfil = url;
+                        this.carregar();
+                        alert('Foto atualizada com sucesso!');
+                    },
+                    error: () => alert('Erro ao salvar URL da foto atualizada.')
+                });
+            },
+            error: () => alert('Erro ao fazer upload da imagem.')
+        });
+    }
+
+    resetarSenhaAdmin(): void {
+        if (!this.usuarioVisualizado) return;
+
+        const confirmado = confirm(
+            `ATENÇÃO: Você está prestes a resetar a senha de ${this.usuarioVisualizado.nome}.\n\n` +
+            `A nova senha provisória será: Ilbes@123\n\n` +
+            `O usuário será forçado a criar uma nova senha pessoal assim que logar.\nConfirmar ação?`
+        );
+
+        if (!confirmado) return;
+
+        this.salvando = true;
+        this.usuariosService.resetarSenha(this.usuarioVisualizado.id).subscribe({
+            next: () => {
+                this.salvando = false;
+                alert('A senha foi redefinida com sucesso.');
+            },
+            error: () => {
+                this.salvando = false;
+                alert('Ocorreu um erro ao resetar a senha deste usuário.');
+                this.cdr.detectChanges();
+            }
+        });
     }
 }

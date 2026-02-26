@@ -100,6 +100,30 @@
     }
 }
 
+// Botão de fechar modal — compacto, sem forçar largura
+.btn-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: $border-radius;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: $color-gray-500;
+    cursor: pointer;
+    transition: background-color $transition-fast, color $transition-fast;
+
+    &:hover {
+        background-color: $color-gray-100;
+        color: $color-gray-900;
+    }
+}
+
 // ============================================================
 // CARDS
 // ============================================================
@@ -595,5 +619,98 @@
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+// ============================================================
+// RESPONSIVIDADE MOBILE — Modais e layouts internos
+// ============================================================
+@media (max-width: 640px) {
+
+    // --- Modal global (backdrop + modal) ---
+    .modal-backdrop {
+        padding: $space-2;
+        align-items: flex-end;
+    }
+
+    .modal,
+    .modal.modal-lg,
+    .modal.modal-sm {
+        max-width: 100%;
+        border-radius: $border-radius-2xl $border-radius-2xl 0 0;
+        max-height: 95vh;
+    }
+
+    // --- Modal overlay (usado no beneficiary-list) ---
+    .modal-overlay {
+        padding: 0.5rem;
+        align-items: flex-end;
+    }
+
+    .modal-content,
+    .modal-content.modal-lg {
+        max-width: 100% !important;
+        width: 100% !important;
+        border-radius: 12px 12px 0 0;
+        max-height: 95vh;
+    }
+
+    // --- Cabeçalho e corpo do modal ---
+    .modal-header {
+        padding: $space-4 $space-4;
+
+        h2 {
+            font-size: $font-size-base;
+        }
+    }
+
+    .modal-body,
+    .profile-body {
+        padding: $space-4;
+    }
+
+    .modal-footer {
+        padding: $space-3 $space-4;
+    }
+
+    // --- Perfil do aluno: header horizontal compacto ---
+    .profile-header {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        gap: $space-3;
+        margin-bottom: $space-4;
+        padding-bottom: $space-3;
+    }
+
+    .profile-title {
+        min-width: 0;
+
+        h3 {
+            font-size: $font-size-base;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    .profile-badges {
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    // --- Grid 2 colunas → 1 coluna ---
+    .profile-grid {
+        grid-template-columns: 1fr !important;
+        gap: $space-3;
+    }
+
+    .profile-section {
+        padding: $space-4;
+    }
+
+    // --- Botões de foto sempre visíveis em touch ---
+    .avatar-actions {
+        opacity: 1 !important;
     }
 }
