@@ -1,6 +1,8 @@
 ﻿// ============================================================
 // admin-layout.scss — Layout do Painel Administrativo ILBES
+// Abordagem: position:fixed para o sidebar (imune ao tamanho do conteudo)
 // ============================================================
+@use 'sass:color';
 
 // --- Variáveis ---
 $sidebar-full: 260px;
@@ -21,45 +23,67 @@ $transition: 250ms ease;
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&family=Inter:wght@400;500;600;700&display=swap');
 
 // ══════════════════════════════════════════════════════════════
-// SHELL — grade principal que ocupa exatamente o viewport
+// SHELL — apenas um wrapper posicional, sem grid
 // ══════════════════════════════════════════════════════════════
 .admin-shell {
-    display: grid;
-    height: 100vh; // trava no viewport — sem sobra
-    overflow: hidden; // nada vaza para fora do shell
-
-    // ── Estados do sidebar ──────────────────────────────────
-    &.sidebar-full {
-        grid-template-columns: $sidebar-full 1fr;
-    }
-
-    &.sidebar-icons {
-        grid-template-columns: $sidebar-icons 1fr;
-    }
-
-    &.sidebar-hidden {
-        grid-template-columns: 0 1fr;
-    }
-
-    transition: grid-template-columns $transition;
+    position: relative;
+    min-height: 100vh;
 }
 
 // ══════════════════════════════════════════════════════════════
-// SIDEBAR — coluna esquerda, FIXA na tela (não rola)
+// SIDEBAR — position:FIXED, completamente fora do fluxo
+// Imune ao tamanho de qualquer conteudo da pagina
 // ══════════════════════════════════════════════════════════════
 .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: $sidebar-full; // largura padrao (full)
     background-color: $black;
     color: $white;
     display: flex;
     flex-direction: column;
-    height: 100%; // preenche a coluna do grid (que já é 100vh)
-    overflow: hidden; // conteúdo recortado — nunca vaza
-    transition: width $transition;
-    z-index: 100;
-
+    overflow: hidden;
+    z-index: 200;
+    transition: width $transition, transform $transition;
 }
 
-// Logo
+// Estados do sidebar via classes no .admin-shell
+.admin-shell.sidebar-icons .sidebar {
+    width: $sidebar-icons;
+}
+
+.admin-shell.sidebar-hidden .sidebar {
+    // Mobile: desliza para fora da tela com transform
+    transform: translateX(-100%);
+    width: $sidebar-icons; // mantém a largura para a animaçao ser suave
+}
+
+// ══════════════════════════════════════════════════════════════
+// AREA PRINCIPAL — recebe margin-left que espelha a largura da sidebar
+// ══════════════════════════════════════════════════════════════
+.main-area {
+    margin-left: $sidebar-full; // espelha sidebar-full
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: $gray-50;
+    transition: margin-left $transition;
+}
+
+.admin-shell.sidebar-icons .main-area {
+    margin-left: $sidebar-icons;
+}
+
+.admin-shell.sidebar-hidden .main-area {
+    margin-left: 0;
+}
+
+// ══════════════════════════════════════════════════════════════
+// LOGO
+// ══════════════════════════════════════════════════════════════
 .sidebar-logo {
     display: flex;
     align-items: center;
@@ -93,12 +117,14 @@ $transition: 250ms ease;
     }
 }
 
-// Nav
+// ══════════════════════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════════════════════
 .sidebar-nav {
     flex: 1;
     list-style: none;
     padding: 0.75rem 0.5rem;
-    overflow-y: auto; // só a nav rola se tiver muitos itens
+    overflow-y: auto;
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
@@ -157,7 +183,7 @@ $transition: 250ms ease;
     text-overflow: ellipsis;
 }
 
-// Footer do sidebar (botão sair)
+// Footer do sidebar (botao sair)
 .sidebar-footer {
     padding: 0.5rem;
     border-top: 1px solid rgba($white, 0.08);
@@ -174,18 +200,8 @@ $transition: 250ms ease;
 }
 
 // ══════════════════════════════════════════════════════════════
-// ÁREA PRINCIPAL — header + conteúdo
+// HEADER — sticky dentro do .main-area
 // ══════════════════════════════════════════════════════════════
-.main-area {
-    display: flex;
-    flex-direction: column;
-    min-height: 0; // permite encolher no eixo vertical dentro do grid
-    min-width: 0; // ← REGRA DE OURO: impede tabelas largas de expandir a célula do grid
-    overflow: hidden; // contém header + page-content
-    background-color: $gray-50;
-}
-
-// Header
 .admin-header {
     height: $header-h;
     background-color: $white;
@@ -195,10 +211,10 @@ $transition: 250ms ease;
     justify-content: space-between;
     padding: 0 1.5rem;
     gap: 1rem;
-    flex-shrink: 0; // nunca encolhe
+    flex-shrink: 0;
     position: sticky;
     top: 0;
-    z-index: 50;
+    z-index: 100;
 }
 
 .toggle-btn {
@@ -278,10 +294,10 @@ $transition: 250ms ease;
 // ══════════════════════════════════════════════════════════════
 .page-content {
     flex: 1;
-    min-height: 0; // permite flex-child rolar corretamente
+    min-height: 0;
     padding: 1.75rem 2rem;
-    overflow-y: auto; // ← scroll vertical apenas aqui
-    overflow-x: hidden; // tabelas largas ficam contidas
+    overflow-y: auto; // scroll vertical — so aqui
+    overflow-x: hidden; // tabelas containidas — sem scroll lateral
 
     @media (max-width: 768px) {
         padding: 1rem;
@@ -293,22 +309,32 @@ $transition: 250ms ease;
 // ══════════════════════════════════════════════════════════════
 @media (max-width: 768px) {
 
-    // Em mobile, sidebar-icons = 68px fixo (padrão)
-    // Em mobile, sidebar-hidden = sidebar some (só hamburguer)
-    .admin-shell {
-        &.sidebar-full {
-            // No mobile, "full" não faz sentido
-            // Trata como icons para não quebrar o layout
-            grid-template-columns: $sidebar-icons 1fr;
-        }
+    // Em mobile, "full" nao faz sentido — funciona como icons
+    .admin-shell.sidebar-full .sidebar {
+        width: $sidebar-icons;
     }
 
-    // Esconde detalhes de usuário no header em mobile pequeno
+    .admin-shell.sidebar-full .main-area {
+        margin-left: $sidebar-icons;
+    }
+
+    // Oculta detalhes de usuario em telas muito pequenas
     @media (max-width: 480px) {
         .user-details {
             display: none;
         }
     }
+}
+
+// ══════════════════════════════════════════════════════════════
+// OVERLAY — aparece no mobile quando sidebar esta aberta
+// ══════════════════════════════════════════════════════════════
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 199; // abaixo da sidebar (200) mas acima do conteudo
 }
 
 // ══════════════════════════════════════════════════════════════
