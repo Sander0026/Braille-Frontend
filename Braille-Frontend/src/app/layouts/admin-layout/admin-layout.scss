@@ -179,7 +179,8 @@ $transition: 250ms ease;
 .main-area {
     display: flex;
     flex-direction: column;
-    min-height: 0; // permite encolher dentro do grid
+    min-height: 0; // permite encolher no eixo vertical dentro do grid
+    min-width: 0; // ← REGRA DE OURO: impede tabelas largas de expandir a célula do grid
     overflow: hidden; // contém header + page-content
     background-color: $gray-50;
 }
