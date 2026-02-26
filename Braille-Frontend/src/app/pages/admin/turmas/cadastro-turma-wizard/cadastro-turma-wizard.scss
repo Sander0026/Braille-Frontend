@@ -1,3 +1,4 @@
+@use 'sass:color';
 // Cores da marca do Instituto (Baseado na UI global)
 $brand-yellow: #fcd34d; // yellow-300 / 400
 $brand-yellow-dark: #fbbf24; // yellow-400 / 500
@@ -177,11 +178,11 @@ $error-text: #991b1b;
     .btn-success {
         background-color: $brand-yellow-dark;
         color: $text-dark;
-        border-color: darken($brand-yellow-dark, 5%);
+        border-color: color.adjust($brand-yellow-dark, $lightness: -5%);
         font-weight: 700;
 
         &:hover {
-            background-color: darken($brand-yellow-dark, 5%);
+            background-color: color.adjust($brand-yellow-dark, $lightness: -5%);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     }
@@ -208,12 +209,12 @@ $error-text: #991b1b;
     &.sucesso {
         background-color: $success-bg;
         color: $success-text;
-        border: 1px solid scale-color($success-bg, $lightness: -10%);
+        border: 1px solid color.scale($success-bg, $lightness: -10%);
     }
 
     &.erro {
         background-color: $error-bg;
         color: $error-text;
-        border: 1px solid scale-color($error-bg, $lightness: -10%);
+        border: 1px solid color.scale($error-bg, $lightness: -10%);
     }
 }

@@ -2,6 +2,8 @@
 // public-layout.scss
 // ============================================================
 
+@use 'sass:color';
+
 $primary: #f5c800;
 $primary-dk: #c9a300;
 $black: #1a1a00;
@@ -142,7 +144,7 @@ $transition: 200ms ease;
     white-space: nowrap;
 
     &:hover {
-        background: lighten($primary, 8%);
+        background: color.adjust($primary, $lightness: 8%);
         transform: translateY(-1px);
     }
 
