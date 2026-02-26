@@ -154,7 +154,8 @@ $transition: 200ms ease;
 
 // ── Main ───────────────────────────────────────────────────
 main {
-    min-height: calc(100vh - 64px - 120px);
+    flex: 1;
+    /* cresce para preencher o espaço e empurrar o footer para o fim */
 }
 
 // ── Footer ─────────────────────────────────────────────────
