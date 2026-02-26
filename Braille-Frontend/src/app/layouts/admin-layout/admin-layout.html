@@ -1,15 +1,17 @@
 <!-- Skip to Content — Acessibilidade de teclado -->
 <a href="#main-content" class="skip-to-content">Pular para o conteúdo principal</a>
 
-<div class="admin-shell" [class.sidebar-collapsed]="!isSidebarOpen">
+<div class="admin-shell" [class.sidebar-full]="sidebarState === 'full'" [class.sidebar-icons]="sidebarState === 'icons'"
+  [class.sidebar-hidden]="sidebarState === 'hidden'">
 
   <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
   <aside class="sidebar" role="navigation" aria-label="Menu principal de administração"
-    [attr.aria-expanded]="isSidebarOpen">
+    [attr.aria-hidden]="sidebarState === 'hidden'">
+
     <!-- Logo -->
     <div class="sidebar-logo" aria-hidden="true">
       <div class="logo-mark">IB</div>
-      @if (isSidebarOpen) {
+      @if (showLabels) {
       <span class="logo-text">Instituto Luiz Braille</span>
       }
     </div>
@@ -18,9 +20,10 @@
     <ul class="sidebar-nav" role="list">
       @for (item of navItems; track item.rota) {
       <li role="listitem">
-        <a [routerLink]="item.rota" routerLinkActive="active" [attr.aria-label]="item.aria" class="nav-link">
+        <a [routerLink]="item.rota" routerLinkActive="active" [attr.aria-label]="item.aria" class="nav-link"
+          [attr.title]="!showLabels ? item.label : null">
           <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
-          @if (isSidebarOpen) {
+          @if (showLabels) {
           <span class="nav-label">{{ item.label }}</span>
           }
         </a>
@@ -30,9 +33,10 @@
 
     <!-- Botão Sair -->
     <div class="sidebar-footer">
-      <button class="nav-link sair-btn" (click)="sair()" aria-label="Sair da conta e ir para login">
+      <button class="nav-link sair-btn" (click)="sair()" aria-label="Sair da conta e ir para login"
+        [attr.title]="!showLabels ? 'Sair' : null">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">logout</span>
-        @if (isSidebarOpen) {
+        @if (showLabels) {
         <span class="nav-label">Sair</span>
         }
       </button>
@@ -44,10 +48,8 @@
 
     <!-- Header -->
     <header class="admin-header" role="banner">
-      <button class="toggle-btn" (click)="toggleSidebar()"
-        [attr.aria-label]="isSidebarOpen ? 'Recolher menu lateral' : 'Expandir menu lateral'"
-        [attr.aria-expanded]="isSidebarOpen">
-        <span class="material-symbols-rounded" aria-hidden="true">menu</span>
+      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel" aria-controls="sidebar">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ toggleIcon }}</span>
       </button>
 
       <div class="header-right">
@@ -62,7 +64,7 @@
       </div>
     </header>
 
-    <!-- Conteúdo das páginas -->
+    <!-- Conteúdo das páginas — único elemento com scroll -->
     <main id="main-content" class="page-content" role="main" aria-label="Conteúdo da página" tabindex="-1">
       <router-outlet />
     </main>
