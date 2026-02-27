@@ -34,9 +34,21 @@
 <div class="comunicados-lista" role="list" aria-label="Lista de comunicados">
     @for (c of comunicados; track c.id) {
     <article class="comunicado-card card" role="listitem">
+        @if (c.imagemCapa) {
+        <div class="card-img-wrapper">
+            <img [src]="c.imagemCapa" alt="Capa" class="card-img" />
+        </div>
+        }
         <div class="card-body">
             <div class="comunicado-header">
-                <h2 class="comunicado-titulo">{{ c.titulo }}</h2>
+                <div class="cabecalho-principal">
+                    <h2 class="comunicado-titulo">
+                        {{ c.titulo }}
+                        @if(c.fixado) { <span class="material-symbols-rounded icon-fixado"
+                            title="Fixado no topo">push_pin</span> }
+                    </h2>
+                    <span class="badge badge-default">{{ c.categoria || 'GERAL' }}</span>
+                </div>
                 <span class="comunicado-data">{{ formatarData(c.criadoEm) }}</span>
             </div>
             <p class="comunicado-preview">{{ preview(c.conteudo) }}</p>
@@ -63,15 +75,55 @@
         </div>
 
         <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
-            <div class="form-group">
-                <label for="com-titulo" class="form-label">Título <span class="required"
-                        aria-hidden="true">*</span></label>
-                <input id="com-titulo" type="text" class="form-input"
-                    [class.is-invalid]="form.get('titulo')?.invalid && form.get('titulo')?.touched"
-                    formControlName="titulo" placeholder="Ex: Aviso sobre funcionamento no feriado" />
-                @if (form.get('titulo')?.invalid && form.get('titulo')?.touched) {
-                <span class="form-error" role="alert">Título obrigatório (mín. 5 caracteres)</span>
-                }
+
+            <div class="form-row form-row-2">
+                <div class="form-group">
+                    <label for="com-titulo" class="form-label">Título <span class="required"
+                            aria-hidden="true">*</span></label>
+                    <input id="com-titulo" type="text" class="form-input"
+                        [class.is-invalid]="form.get('titulo')?.invalid && form.get('titulo')?.touched"
+                        formControlName="titulo" placeholder="Ex: Aviso sobre funcionamento no feriado" />
+                    @if (form.get('titulo')?.invalid && form.get('titulo')?.touched) {
+                    <span class="form-error" role="alert">Título obrigatório (mín. 5 caracteres)</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="com-categoria" class="form-label">Categoria</label>
+                    <select id="com-categoria" class="form-input" formControlName="categoria">
+                        @for (cat of CATEGORIAS; track cat.valor) {
+                        <option [value]="cat.valor">{{ cat.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Capa e Fixado -->
+            <div class="form-row form-row-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">Imagem de Capa (Recomendado: 800x600)</label>
+
+                    @if (fotoPreview) {
+                    <div class="foto-preview-wrapper mb-2">
+                        <img [src]="fotoPreview" alt="Pré-visualização da Capa" class="foto-preview" />
+                        <button type="button" class="btn btn-secondary btn-sm btn-remover"
+                            (click)="removerFotoDaPrevia()">
+                            Remover Capa
+                        </button>
+                    </div>
+                    } @else {
+                    <input type="file" id="foto-capa" class="form-input" accept="image/png, image/jpeg, image/webp"
+                        (change)="onFotoChange($event)" />
+                    }
+                </div>
+
+                <div class="form-group flex-center-y">
+                    <label class="switch">
+                        <input type="checkbox" formControlName="fixado">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="ml-2 form-label mb-0" style="margin-bottom: 0;">Fixar no topo do mural</span>
+                </div>
             </div>
 
             <div class="form-group" style="margin-top:1rem">
@@ -79,7 +131,8 @@
                         aria-hidden="true">*</span></label>
                 <textarea id="com-conteudo" class="form-textarea"
                     [class.is-invalid]="form.get('conteudo')?.invalid && form.get('conteudo')?.touched"
-                    formControlName="conteudo" rows="6" placeholder="Escreva o comunicado aqui..."></textarea>
+                    formControlName="conteudo" rows="6"
+                    placeholder="Escreva o comunicado aqui... Podem ser inseridas quebras de linhas para formar parágrafos."></textarea>
                 @if (form.get('conteudo')?.invalid && form.get('conteudo')?.touched) {
                 <span class="form-error" role="alert">Conteúdo obrigatório (mín. 10 caracteres)</span>
                 }

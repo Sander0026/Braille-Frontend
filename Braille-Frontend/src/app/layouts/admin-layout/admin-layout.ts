@@ -11,6 +11,7 @@ interface NavItem {
   label: string;
   icon: string;
   aria: string;
+  role?: string[];
 }
 
 type SidebarState = 'full' | 'icons' | 'hidden';
@@ -64,10 +65,22 @@ export class AdminLayout implements OnInit, OnDestroy {
     { rota: '/admin/alunos', label: 'Alunos', icon: 'people', aria: 'Ir para lista de alunos' },
     { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas' },
     { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências' },
-    { rota: '/admin/comunicados', label: 'Comunicados', icon: 'campaign', aria: 'Ir para comunicados' },
-    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos' },
-    { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários' },
+    { rota: '/admin/conteudo', label: 'Conteúdo do Site', icon: 'web', aria: 'Gerir conteúdo público', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
+    { rota: '/admin/comunicados', label: 'Comunicados', icon: 'campaign', aria: 'Ir para comunicados', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
+    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
+    { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários', role: ['MASTER', 'ADMIN'] },
   ];
+
+  get rotasPermitidas(): NavItem[] {
+    const userRole = this.usuario?.role || 'PROFESSOR';
+    return this.navItems.filter(item => {
+      // Se a rota tem restrição de role, verifica. Senão, mostra pra todos
+      if (item.role) {
+        return item.role.includes(userRole);
+      }
+      return true;
+    });
+  }
 
   constructor(
     private authService: AuthService,

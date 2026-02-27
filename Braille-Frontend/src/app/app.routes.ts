@@ -71,6 +71,13 @@ export const routes: Routes = [
         title: 'Frequências — ILBES'
       },
 
+      // Conteúdo do Site (CMS)
+      {
+        path: 'conteudo',
+        loadComponent: () => import('./pages/admin/conteudo-site/conteudo-site').then(m => m.ConteudoSite),
+        title: 'Conteúdo do Site — ILBES'
+      },
+
       // Comunicados
       {
         path: 'comunicados',

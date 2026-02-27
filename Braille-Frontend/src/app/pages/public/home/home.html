@@ -118,6 +118,10 @@
                 <h3 class="oficina-titulo">{{ of.titulo }}</h3>
                 <p class="oficina-desc">{{ of.descricao }}</p>
             </article>
+            } @empty {
+            <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;">
+                <p>Nenhuma oficina cadastrada no momento.</p>
+            </div>
             }
         </div>
 
@@ -143,10 +147,14 @@
                     <div class="dep-avatar" aria-hidden="true">{{ dep.nome.charAt(0) }}</div>
                     <div>
                         <cite class="dep-nome">{{ dep.nome }}</cite>
-                        <span class="dep-idade">{{ dep.idade }} anos</span>
+                        <span class="dep-idade">{{ dep.idade > 0 ? dep.idade + ' anos' : '' }}</span>
                     </div>
                 </footer>
             </blockquote>
+            } @empty {
+            <div class="feed-vazio" style="grid-column: 1 / -1; color: white; min-height: 100px; text-align: center;">
+                <p>Nenhum depoimento cadastrado no momento.</p>
+            </div>
             }
         </div>
     </div>
