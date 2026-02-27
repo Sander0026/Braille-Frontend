@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 
 @Component({
@@ -32,7 +34,12 @@ export class ComunicadosLista implements OnInit {
     { valor: 'GERAL', label: 'Aviso Geral' },
   ];
 
-  constructor(private comunicadosService: ComunicadosService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
+  constructor(
+    private comunicadosService: ComunicadosService,
+    private fb: FormBuilder,
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
+  ) {
     this.form = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
       conteudo: ['', [Validators.required, Validators.minLength(10)]],
@@ -47,7 +54,6 @@ export class ComunicadosLista implements OnInit {
     this.isLoading = true;
     this.comunicadosService.listar(1, 100).subscribe({
       next: (res: any) => {
-        // O Http retorna { data, meta }
         this.comunicados = res.data || res;
         this.isLoading = false;
         this.cdr.detectChanges();
@@ -99,33 +105,65 @@ export class ComunicadosLista implements OnInit {
     this.form.reset();
   }
 
-  salvar(): void {
+  /**
+   * Salva o comunicado em dois passos:
+   * 1. Se houver nova foto, faz upload via /api/upload e obtém a URL
+   * 2. Envia payload JSON limpo para o backend (corrige o 400 que ocorria com FormData)
+   */
+  async salvar(): Promise<void> {
     if (this.form.invalid) return;
     this.salvando = true;
 
-    // Tratamos multipart/form-data
-    const fd = new FormData();
-    fd.append('titulo', this.form.value.titulo);
-    fd.append('conteudo', this.form.value.conteudo);
-    fd.append('categoria', this.form.value.categoria);
-    // Campos boolean não podem ser convertidos puros no form-data -> usar strings ou 1/0
-    fd.append('fixado', this.form.value.fixado ? 'true' : 'false');
+    try {
+      // Passo 1: Upload da imagem (se nova foto selecionada)
+      let imagemCapaUrl: string | null | undefined = undefined;
 
-    if (this.fotoSelecionada) {
-      fd.append('imagemCapa', this.fotoSelecionada);
-    } else if (this.fotoPreview === null && this.editando?.imagemCapa) {
-      // Remover imagem se usuário clicou em X
-      fd.append('removerImagemCapa', 'true');
+      if (this.fotoSelecionada) {
+        const token = localStorage.getItem('token') || '';
+        const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+        const fd = new FormData();
+        fd.append('file', this.fotoSelecionada);
+        const uploadRes = await firstValueFrom(
+          this.http.post<{ url: string }>('/api/upload', fd, { headers })
+        );
+        imagemCapaUrl = uploadRes.url;
+      } else if (this.fotoPreview === null && this.editando?.imagemCapa) {
+        // Usuário clicou em X para remover
+        imagemCapaUrl = null;
+      } else if (this.editando?.imagemCapa) {
+        // Mantém a imagem existente
+        imagemCapaUrl = this.editando.imagemCapa;
+      }
+
+      // Passo 2: Monta payload JSON e envia
+      const payload: Record<string, any> = {
+        titulo: this.form.value.titulo,
+        conteudo: this.form.value.conteudo,
+        categoria: this.form.value.categoria,
+        fixado: Boolean(this.form.value.fixado),
+      };
+      if (imagemCapaUrl !== undefined) {
+        payload['imagemCapa'] = imagemCapaUrl;
+      }
+
+      if (this.editando) {
+        await firstValueFrom(this.comunicadosService.atualizar(this.editando.id, payload));
+      } else {
+        await firstValueFrom(this.comunicadosService.criar(payload));
+      }
+
+      this.salvando = false;
+      this.fecharModal();
+      this.carregar();
+      this.cdr.detectChanges();
+
+    } catch (err: any) {
+      this.salvando = false;
+      const msg = err?.error?.message || 'Verifique os campos e tente novamente.';
+      console.error('Erro ao salvar comunicado:', err?.error || err);
+      alert(`Erro ao salvar comunicado: ${msg}`);
+      this.cdr.detectChanges();
     }
-
-    const op = this.editando
-      ? this.comunicadosService.atualizar(this.editando.id, fd)
-      : this.comunicadosService.criar(fd);
-
-    op.subscribe({
-      next: () => { this.salvando = false; this.fecharModal(); this.carregar(); },
-      error: () => { this.salvando = false; alert('Erro ao salvar comunicado.'); this.cdr.detectChanges(); }
-    });
   }
 
   excluir(c: Comunicado): void {

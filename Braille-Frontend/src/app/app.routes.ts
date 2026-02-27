@@ -78,13 +78,6 @@ export const routes: Routes = [
         title: 'Conteúdo do Site — ILBES'
       },
 
-      // Comunicados
-      {
-        path: 'comunicados',
-        loadComponent: () => import('./pages/admin/comunicados/comunicados-lista/comunicados-lista').then(m => m.ComunicadosLista),
-        title: 'Comunicados — ILBES'
-      },
-
       // Contatos / Fale Conosco
       {
         path: 'contatos',

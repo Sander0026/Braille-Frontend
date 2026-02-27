@@ -36,11 +36,11 @@ export class ComunicadosService {
         return this.http.get<ComunicadoResponse | Comunicado[]>(`${this.url}${qs}`);
     }
 
-    criar(dados: FormData): Observable<Comunicado> {
+    criar(dados: Record<string, any>): Observable<Comunicado> {
         return this.http.post<Comunicado>(this.url, dados);
     }
 
-    atualizar(id: string, dados: FormData | any): Observable<Comunicado> {
+    atualizar(id: string, dados: Record<string, any>): Observable<Comunicado> {
         return this.http.patch<Comunicado>(`${this.url}/${id}`, dados);
     }
 

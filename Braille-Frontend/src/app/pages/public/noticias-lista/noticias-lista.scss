@@ -374,6 +374,24 @@ $transition: 0.2s ease-in-out;
     padding-top: 1rem;
     margin-top: auto;
 
+    // Garante que TODOS os ícones dentro do footer renderizem o material symbols
+    .material-symbols-rounded {
+        font-family: 'Material Symbols Rounded', sans-serif !important;
+        font-weight: normal;
+        font-style: normal;
+        display: inline-block;
+        line-height: 1;
+        text-transform: none;
+        letter-spacing: normal;
+        word-wrap: normal;
+        white-space: nowrap;
+        direction: ltr;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        -moz-osx-font-smoothing: grayscale;
+        font-feature-settings: 'liga';
+    }
+
     .data {
         display: flex;
         align-items: center;
@@ -383,7 +401,7 @@ $transition: 0.2s ease-in-out;
         font-weight: 500;
 
         span {
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
     }
 

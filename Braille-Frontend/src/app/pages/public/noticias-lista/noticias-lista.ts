@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -24,6 +24,7 @@ export interface ComunicadoPublico {
 export class NoticiasLista implements OnInit {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
+  private cdr = inject(ChangeDetectorRef);
 
   comunicados: ComunicadoPublico[] = [];
   carregando = true;
@@ -70,7 +71,6 @@ export class NoticiasLista implements OnInit {
 
     this.http.get<any>(url).subscribe({
       next: (res) => {
-        // API retorna { data, total, page, limit, totalPages } na raiz
         const items = Array.isArray(res) ? res : (res.data ?? []);
 
         if (reset) {
@@ -82,10 +82,12 @@ export class NoticiasLista implements OnInit {
         this.totalItems = res.total ?? items.length;
         this.temMais = this.paginaAtual < (res.totalPages ?? 1);
         this.carregando = false;
+        this.cdr.detectChanges(); // withFetch() roda fora do Zone.js
       },
       error: (err) => {
         console.error('Erro ao carregar comunicados', err);
         this.carregando = false;
+        this.cdr.detectChanges();
       }
     });
   }

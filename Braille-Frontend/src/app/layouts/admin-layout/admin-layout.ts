@@ -66,7 +66,6 @@ export class AdminLayout implements OnInit, OnDestroy {
     { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas' },
     { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências' },
     { rota: '/admin/conteudo', label: 'Conteúdo do Site', icon: 'web', aria: 'Gerir conteúdo público', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
-    { rota: '/admin/comunicados', label: 'Comunicados', icon: 'campaign', aria: 'Ir para comunicados', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
     { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
     { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários', role: ['MASTER', 'ADMIN'] },
   ];
