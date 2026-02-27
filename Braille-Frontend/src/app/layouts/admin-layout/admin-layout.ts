@@ -14,7 +14,7 @@ interface NavItem {
 }
 
 type SidebarState = 'full' | 'icons' | 'hidden';
-type Modal = 'none' | 'foto' | 'senha';
+type Modal = 'none' | 'foto' | 'senha' | 'perfil';
 
 @Component({
   selector: 'app-admin-layout',
@@ -44,11 +44,18 @@ export class AdminLayout implements OnInit, OnDestroy {
   senhaSucesso = false;
   carregandoSenha = false;
 
+  // ── Form: Perfil ─────────────────────────────────────
+  formPerfil!: FormGroup;
+  perfilErro: string | null = null;
+  perfilSucesso = false;
+  carregandoPerfil = false;
+
   // ── Form: Trocar Foto ────────────────────────────────
   fotoPreview: string | null = null;
   fotoSelecionada: File | null = null;
   fotoErro: string | null = null;
   carregandoFoto = false;
+
 
   private destroy$ = new Subject<void>();
 
@@ -73,6 +80,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.usuario = this.authService.getUser();
     this.updateMobileState();
     this.inicializarFormSenha();
+    this.inicializarFormPerfil();
     this.carregarPerfil();
   }
 
@@ -89,9 +97,17 @@ export class AdminLayout implements OnInit, OnDestroy {
         next: (perfil) => {
           this.perfil = perfil;
           this.fotoPerfil = perfil.fotoPerfil;
+          this.atualizarFormPerfil(perfil);
         },
-        error: () => { /* silencioso — usa dados do JWT */ }
+        error: () => { /* usa dados do JWT */ }
       });
+  }
+
+  private atualizarFormPerfil(perfil: PerfilUsuario): void {
+    this.formPerfil?.patchValue({
+      nome: perfil.nome ?? '',
+      email: perfil.email ?? '',
+    });
   }
 
   // ── Sidebar ─────────────────────────────────────────
@@ -150,6 +166,14 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.senhaErro = null;
     this.senhaSucesso = false;
     this.modalAtivo = 'senha';
+  }
+
+  abrirModalPerfil(): void {
+    this.menuAberto = false;
+    this.perfilErro = null;
+    this.perfilSucesso = false;
+    if (this.perfil) this.atualizarFormPerfil(this.perfil);
+    this.modalAtivo = 'perfil';
   }
 
   fecharModal(): void {
@@ -218,6 +242,34 @@ export class AdminLayout implements OnInit, OnDestroy {
       novaSenha: ['', [Validators.required, Validators.minLength(8)]],
       confirmarSenha: ['', Validators.required]
     }, { validators: this.senhasIguaisValidator });
+  }
+
+  private inicializarFormPerfil(): void {
+    this.formPerfil = this.fb.group({
+      nome: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', Validators.email],
+    });
+  }
+
+  salvarPerfil(): void {
+    if (this.formPerfil.invalid || this.carregandoPerfil) return;
+    const { nome, email } = this.formPerfil.value;
+    this.carregandoPerfil = true;
+    this.perfilErro = null;
+    this.authService.atualizarPerfil({ nome, email: email || undefined })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (p) => {
+          this.perfil = p;
+          this.carregandoPerfil = false;
+          this.perfilSucesso = true;
+          setTimeout(() => { this.perfilSucesso = false; }, 2500);
+        },
+        error: (err) => {
+          this.carregandoPerfil = false;
+          this.perfilErro = err?.error?.message ?? 'Erro ao atualizar o perfil.';
+        }
+      });
   }
 
   private senhasIguaisValidator(group: FormGroup): { [key: string]: boolean } | null {

@@ -82,6 +82,10 @@ export class AuthService {
     return this.http.patch(`${this.apiUrl}/foto-perfil`, { fotoPerfil });
   }
 
+  atualizarPerfil(dados: { nome?: string; email?: string }): Observable<PerfilUsuario> {
+    return this.http.patch<PerfilUsuario>(`${this.apiUrl}/perfil`, dados);
+  }
+
   uploadFoto(file: File): Observable<{ url: string }> {
     const form = new FormData();
     form.append('file', file);
