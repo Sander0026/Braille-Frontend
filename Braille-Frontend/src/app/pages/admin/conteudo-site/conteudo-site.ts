@@ -6,10 +6,11 @@ import { Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { environment } from '../../../../environments/environment';
+import { ComunicadosLista } from '../comunicados/comunicados-lista/comunicados-lista';
 
 @Component({
   selector: 'app-conteudo-site',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista],
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })

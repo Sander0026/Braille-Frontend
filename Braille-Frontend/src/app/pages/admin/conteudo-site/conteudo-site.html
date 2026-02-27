@@ -37,6 +37,9 @@
         <button class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
             <span class="material-symbols-rounded">reviews</span> Depoimentos
         </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
+            <span class="material-symbols-rounded">newspaper</span> Notícias
+        </button>
     </nav>
 
     <!-- LOADING -->
@@ -365,6 +368,18 @@
                 </button>
             </div>
         </form>
+    </div>
+    }
+
+    <!-- ABA: NOTÍCIAS / COMUNICADOS -->
+    @if (abaAtiva === 'comunicados') {
+    <div class="tab-pane active" id="pane-comunicados" role="tabpanel">
+        <div class="form-header">
+            <h2>Notícias e Comunicados</h2>
+            <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
+        </div>
+        <!-- Componente interno de lista (mesma funcionalidade da antiga rota) -->
+        <app-comunicados-lista></app-comunicados-lista>
     </div>
     }
 
