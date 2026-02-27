@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { SiteConfigService } from '../../../core/services/site-config';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-conteudo-site',
@@ -20,12 +22,18 @@ export class ConteudoSite implements OnInit {
 
   carregando = false;
   salvando = false;
+  uploadandoLogo = false;
   mensagemSucesso = '';
   mensagemErro = '';
 
+  // Logo
+  logoPreview: string | null = null;
+  private apiUrl = environment.apiUrl;
+
   constructor(
     private fb: FormBuilder,
-    private siteConfig: SiteConfigService
+    private siteConfig: SiteConfigService,
+    private http: HttpClient
   ) { }
 
   ngOnInit() {
@@ -128,10 +136,12 @@ export class ConteudoSite implements OnInit {
     this.carregando = true;
 
     this.siteConfig.carregarConfigs().subscribe(configs => {
+      const logoUrl = configs['logoUrl'] || '';
       this.formConfig.patchValue({
         corPrimaria: configs['corPrimaria'] || '#f5c800',
-        logoUrl: configs['logoUrl'] || '',
+        logoUrl,
       });
+      if (logoUrl) this.logoPreview = logoUrl;
       this.carregando = false;
     });
 
@@ -185,6 +195,42 @@ export class ConteudoSite implements OnInit {
 
   salvarHero() { this.salvarSecaoValorUnico('hero', this.formHero.value); }
   salvarMissao() { this.salvarSecaoValorUnico('missao', this.formMissao.value); }
+
+  // ── Upload de logo ────────────────────────────────────────
+  onLogoChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file) return;
+
+    // Preview local imediato
+    const reader = new FileReader();
+    reader.onload = () => this.logoPreview = reader.result as string;
+    reader.readAsDataURL(file);
+
+    this.uploadandoLogo = true;
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const form = new FormData();
+    form.append('file', file);
+
+    this.http.post<{ url: string }>(`${this.apiUrl}/upload`, form, { headers }).subscribe({
+      next: (res) => {
+        this.formConfig.patchValue({ logoUrl: res.url });
+        this.logoPreview = res.url;
+        this.uploadandoLogo = false;
+        this.mensagemSucesso = 'Logo enviada! Clique em "Salvar Configurações" para aplicar.';
+      },
+      error: () => {
+        this.uploadandoLogo = false;
+        this.mensagemErro = 'Erro ao enviar a logo. Tente novamente.';
+      }
+    });
+  }
+
+  removerLogo() {
+    this.logoPreview = null;
+    this.formConfig.patchValue({ logoUrl: '' });
+  }
 
   private salvarSecaoValorUnico(secao: string, values: any) {
     this.salvando = true;

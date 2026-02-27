@@ -411,3 +411,90 @@ h3 {
 .mb-2 {
     margin-bottom: 0.5rem;
 }
+
+// ── Upload de Logo ─────────────────────────────────────────
+.logo-preview-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: $gray-50;
+    border: 1px solid $gray-200;
+    border-radius: 0.5rem;
+    width: fit-content;
+
+    .logo-preview-img {
+        max-height: 60px;
+        max-width: 200px;
+        object-fit: contain;
+        border-radius: 4px;
+    }
+
+    .btn-remover-logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.8rem;
+    }
+}
+
+.upload-label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border: 1.5px dashed $gray-300;
+    border-radius: 0.5rem;
+    color: $gray-600;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    width: 100%;
+    max-width: 320px;
+
+    &:hover:not(.uploading) {
+        border-color: $primary;
+        background: rgba(30, 64, 175, 0.04);
+        color: $gray-900;
+    }
+
+    &.uploading {
+        opacity: 0.7;
+        cursor: not-allowed;
+
+        .material-symbols-rounded {
+            animation: spin 1s linear infinite;
+        }
+    }
+
+    .material-symbols-rounded {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+
+    // Botão invisível que ocupa toda a área para receber o clique
+    .upload-trigger {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        border: none;
+        background: none;
+    }
+}
+
+.form-hint {
+    font-size: 0.8rem;
+    color: $gray-500;
+    margin-top: 0.375rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
