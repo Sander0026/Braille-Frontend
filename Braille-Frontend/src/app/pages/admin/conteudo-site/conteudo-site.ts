@@ -1,7 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Subject } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { environment } from '../../../../environments/environment';
 
@@ -11,7 +13,8 @@ import { environment } from '../../../../environments/environment';
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })
-export class ConteudoSite implements OnInit {
+export class ConteudoSite implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   abaAtiva = 'config';
 
   formConfig!: FormGroup;
@@ -33,7 +36,8 @@ export class ConteudoSite implements OnInit {
   constructor(
     private fb: FormBuilder,
     private siteConfig: SiteConfigService,
-    private http: HttpClient
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit() {
@@ -135,7 +139,14 @@ export class ConteudoSite implements OnInit {
   private carregarDados() {
     this.carregando = true;
 
-    this.siteConfig.carregarConfigs().subscribe(configs => {
+    // ── Configs gerais ───────────────────────────────────────
+    // Usa o BehaviorSubject do serviço (já populado no boot pelo app.ts).
+    // filter garante que ignoramos o estado vazio {} inicial.
+    // Resultado: preenchimento instantâneo sem nova chamada HTTP.
+    this.siteConfig.configs$.pipe(
+      filter(c => Object.keys(c).length > 0),
+      take(1)
+    ).subscribe(configs => {
       const logoUrl = configs['logoUrl'] || '';
       this.formConfig.patchValue({
         corPrimaria: configs['corPrimaria'] || '#f5c800',
@@ -145,37 +156,61 @@ export class ConteudoSite implements OnInit {
       this.carregando = false;
     });
 
-    this.siteConfig.getSecao('hero').subscribe(dados => {
-      if (dados) this.formHero.patchValue(dados);
-    });
+    // ── Seções ───────────────────────────────────────────────
+    // Mesma estratégia: usa o secoesSubject, já populado pelo boot.
+    this.siteConfig.secoes$.pipe(
+      filter(s => Object.keys(s).length > 0),
+      take(1)
+    ).subscribe(secoes => {
+      // Hero
+      const hero = secoes['hero'];
+      if (hero && Object.keys(hero).length > 0) this.formHero.patchValue(hero);
 
-    this.siteConfig.getSecao('missao').subscribe(dados => {
-      if (dados) this.formMissao.patchValue(dados);
-    });
+      // Missão
+      const missao = secoes['missao'];
+      if (missao && Object.keys(missao).length > 0) this.formMissao.patchValue(missao);
 
-    this.siteConfig.getSecao('oficinas').subscribe(dados => {
-      if (dados && dados['lista']) {
+      // Oficinas
+      const oficinas = secoes['oficinas'];
+      if (oficinas?.['lista']) {
         try {
-          const listaParseada = JSON.parse(dados['lista']);
-          listaParseada.forEach((item: any) => this.adicionarOficina(item.icon, item.titulo, item.descricao));
-        } catch (e) { }
+          const lista = JSON.parse(oficinas['lista']);
+          if (lista.length > 0) {
+            lista.forEach((item: any) => this.adicionarOficina(item.icon, item.titulo, item.descricao));
+          } else {
+            this.adicionarOficina();
+          }
+        } catch (e) {
+          this.adicionarOficina();
+        }
       } else {
-        // Fallback caso vazio (1 item em branco para o usuário preencher)
         this.adicionarOficina();
       }
-    });
 
-    this.siteConfig.getSecao('depoimentos').subscribe(dados => {
-      if (dados && dados['lista']) {
+      // Depoimentos
+      const depoimentos = secoes['depoimentos'];
+      if (depoimentos?.['lista']) {
         try {
-          const listaParseada = JSON.parse(dados['lista']);
-          listaParseada.forEach((item: any) => this.adicionarDepoimento(item.texto, item.nome, item.idade));
-        } catch (e) { }
+          const lista = JSON.parse(depoimentos['lista']);
+          if (lista.length > 0) {
+            lista.forEach((item: any) => this.adicionarDepoimento(item.texto, item.nome, item.idade));
+          } else {
+            this.adicionarDepoimento();
+          }
+        } catch (e) {
+          this.adicionarDepoimento();
+        }
       } else {
         this.adicionarDepoimento();
       }
     });
   }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
 
   salvarConfig() {
     this.salvando = true;
@@ -188,8 +223,13 @@ export class ConteudoSite implements OnInit {
         this.salvando = false;
         this.mensagemSucesso = 'Configurações salvas com sucesso!';
         this.siteConfig.aplicarCorPrimaria(values.corPrimaria);
+        this.cdr.detectChanges(); // withFetch() roda fora do Zone.js — forçar CD
+        setTimeout(() => this.siteConfig.carregarConfigs().subscribe(), 0);
       },
-      error: () => this.tratarErro('configurações')
+      error: () => {
+        this.tratarErro('configurações');
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -276,10 +316,13 @@ export class ConteudoSite implements OnInit {
   private tratarSucesso(nome: string) {
     this.salvando = false;
     this.mensagemSucesso = `Aba ${nome.toUpperCase()} salva com sucesso!`;
+    this.cdr.detectChanges(); // withFetch() roda fora do Zone.js — forçar CD
+    setTimeout(() => this.siteConfig.carregarSecoes().subscribe(), 0);
   }
 
   private tratarErro(nome: string) {
     this.salvando = false;
     this.mensagemErro = `Erro ao salvar a aba ${nome.toUpperCase()}.`;
+    this.cdr.detectChanges();
   }
 }

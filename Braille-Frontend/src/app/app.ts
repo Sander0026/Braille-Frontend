@@ -16,5 +16,6 @@ export class App {
 
   constructor() {
     this.siteConfig.carregarConfigs().subscribe();
+    this.siteConfig.carregarSecoes().subscribe();
   }
 }

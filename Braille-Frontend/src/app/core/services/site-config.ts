@@ -1,15 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface SiteConfigMap {
   [chave: string]: string;
 }
 
-export interface SecaoMap {
-  [chave: string]: string;
-}
+export type SecoesMap = Record<string, Record<string, string>>;
 
 @Injectable({
   providedIn: 'root'
@@ -18,15 +16,23 @@ export class SiteConfigService {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 
-  // Estado global reativo das configurações (para a cor primária, logo, etc)
+  // ── Estado reativo: configs gerais (cor, logo…) ───────────
   private configsSubject = new BehaviorSubject<SiteConfigMap>({});
   public configs$ = this.configsSubject.asObservable();
 
+  // ── Estado reativo: conteúdo das seções ───────────────────
+  private secoesSubject = new BehaviorSubject<SecoesMap>({});
+  public secoes$ = this.secoesSubject.asObservable();
+
   constructor() { }
 
+  // ──────────────────────────────────────────────────────────
+  // CONFIGS GERAIS
+  // ──────────────────────────────────────────────────────────
+
   /**
-   * Busca todas as configurações gerais do site e atualiza o estado interno.
-   * Chamado no inicializador do App ou AppComponent.
+   * Busca todas as configs gerais e atualiza o estado interno.
+   * Chamado no boot do App (app.ts) e após salvar.
    */
   carregarConfigs(): Observable<SiteConfigMap> {
     return this.http.get<SiteConfigMap>(`${this.apiUrl}/site-config`).pipe(
@@ -38,45 +44,69 @@ export class SiteConfigService {
   }
 
   /**
-   * Pega o valor atual síncrono de uma configuração específica (ex: 'logo').
+   * Pega o valor atual síncrono de uma configuração específica.
    */
   getConfig(chave: string): string | undefined {
     return this.configsSubject.value[chave];
   }
 
   /**
-   * Busca o conteúdo de uma seção específica da home.
-   */
-  getSecao(secao: string): Observable<SecaoMap> {
-    return this.http.get<SecaoMap>(`${this.apiUrl}/site-config/secoes/${secao}`);
-  }
-
-  /**
-   * Atualiza as configurações no banco (Uso exclusivo do ADMIN)
+   * Atualiza configs gerais no banco e recarrega o estado.
    */
   salvarConfigs(configs: { chave: string, valor: string }[]): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/site-config`, { configs }).pipe(
-      tap(() => this.carregarConfigs().subscribe()) // Secundariza a recarga
+    const body: Record<string, string> = {};
+    configs.forEach(c => body[c.chave] = c.valor);
+    // Sem tap de refresh — o componente faz o refresh após a UI atualizar
+    return this.http.patch(`${this.apiUrl}/site-config`, body);
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // SEÇÕES DO SITE (hero, missão, oficinas…)
+  // ──────────────────────────────────────────────────────────
+
+  /**
+   * Busca TODAS as seções de uma vez e atualiza o estado interno.
+   * Chamado no boot do App (app.ts) e após cada salvarSecao().
+   */
+  carregarSecoes(): Observable<SecoesMap> {
+    return this.http.get<SecoesMap>(`${this.apiUrl}/site-config/secoes`).pipe(
+      tap(secoes => this.secoesSubject.next(secoes))
     );
   }
 
   /**
-   * Atualiza o conteúdo de uma seção no banco (Uso exclusivo do ADMIN)
+   * Retorna um Observable reativo de uma seção específica.
+   * Todos os componentes que usam getSecao() passam a receber
+   * atualizações automáticas quando o admin salvar.
    */
-  salvarSecao(secao: string, conteudo: { chave: string, valor: string }[]): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/site-config/secoes`, { secao, conteudo });
+  getSecao(secao: string): Observable<Record<string, string>> {
+    return this.secoes$.pipe(
+      map(secoes => secoes[secao] ?? {})
+    );
   }
 
   /**
-   * Aplica a cor definida no banco diretamente nas variáveis CSS do Root (HTML).
+   * Atualiza o conteúdo de uma seção no banco e recarrega o estado.
+   */
+  salvarSecao(secao: string, conteudo: { chave: string, valor: string }[]): Observable<any> {
+    const body: Record<string, string> = {};
+    conteudo.forEach(c => body[c.chave] = c.valor);
+    // Sem tap de refresh — o componente faz o refresh após a UI atualizar
+    return this.http.patch(`${this.apiUrl}/site-config/secoes/${secao}`, body);
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // UTILIDADES
+  // ──────────────────────────────────────────────────────────
+
+  /**
+   * Aplica a cor primária diretamente nas variáveis CSS do Root.
    */
   public aplicarCorPrimaria(corHex?: string) {
     if (!corHex) return;
 
-    // Seta a cor primária global
     document.documentElement.style.setProperty('--color-primary', corHex);
 
-    // Função simples auxiliar pra escurecer o hex em ~10% para o hover dos botões
     const darkenHex = (hex: string, amount: number) => {
       let color = hex.replace('#', '');
       if (color.length === 3) color = color.split('').map(c => c + c).join('');
