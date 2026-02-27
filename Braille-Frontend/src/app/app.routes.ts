@@ -21,6 +21,11 @@ export const routes: Routes = [
         path: 'contato',
         loadComponent: () => import('./pages/public/contato/contato').then(m => m.Contato),
         title: 'Fale Conosco — Instituto Luiz Braille'
+      },
+      {
+        path: 'noticias',
+        loadComponent: () => import('./pages/public/noticias-lista/noticias-lista').then(m => m.NoticiasLista),
+        title: 'Notícias e Comunicados — ILBES'
       }
     ]
   },

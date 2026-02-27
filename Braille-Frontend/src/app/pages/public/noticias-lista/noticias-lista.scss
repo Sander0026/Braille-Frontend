@@ -1,0 +1,551 @@
+// ══════════════════════════════════════════════════════════════
+// VARIÁVEIS DO TEMA PÚBLICO
+// ══════════════════════════════════════════════════════════════
+// O --color-primary vem do :root injetado pela API futuramente
+// Por enquanto temos defaults se falhar
+:host {
+    display: block;
+    background-color: #f9fafb;
+    min-height: 100vh;
+}
+
+$color-primary: var(--color-primary, #f5c800);
+$color-primary-dark: var(--color-primary-dark, #dcb300);
+$color-text-main: var(--color-text-main, #1a1a00);
+$gray-50: #f9fafb;
+$gray-100: #f3f4f6;
+$gray-200: #e5e7eb;
+$gray-300: #d1d5db;
+$gray-400: #9ca3af;
+$gray-500: #6b7280;
+$gray-600: #4b5563;
+$gray-700: #374151;
+$gray-800: #1f2937;
+$gray-900: #111827;
+
+$transition: 0.2s ease-in-out;
+
+// ══════════════════════════════════════════════════════════════
+// TIPOGRAFIA & ESTRUTURA GLOBAL
+// ══════════════════════════════════════════════════════════════
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+// ══════════════════════════════════════════════════════════════
+// HEADER DA PÁGINA
+// ══════════════════════════════════════════════════════════════
+.page-header {
+    background: $color-primary;
+    color: $color-text-main;
+    padding: 4rem 0;
+    text-align: center;
+    border-bottom: 4px solid $color-primary-dark;
+
+    .eyebrow {
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+    }
+
+    .title {
+        font-family: 'Outfit', sans-serif;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1rem;
+        letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+        font-size: 1.125rem;
+        max-width: 600px;
+        margin: 0 auto;
+        opacity: 0.9;
+        line-height: 1.6;
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// FERRAMENTAS (BUSCA E CHIPS)
+// ══════════════════════════════════════════════════════════════
+.toolbar {
+    margin: -2rem auto 3rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 10;
+}
+
+// ------ Busca ------
+.search-box {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-input-wrapper {
+    display: flex;
+    position: relative;
+    align-items: center;
+
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        color: $gray-400;
+        font-size: 1.25rem;
+    }
+
+    input {
+        width: 100%;
+        padding: 0.875rem 1rem 0.875rem 2.75rem;
+        border: 2px solid $gray-200;
+        border-radius: 0.5rem 0 0 0.5rem;
+        font-size: 1rem;
+        color: $gray-900;
+        transition: all $transition;
+        background: $gray-50;
+
+        &::placeholder {
+            color: $gray-400;
+        }
+
+        &:focus {
+            outline: none;
+            border-color: $color-primary;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(245, 200, 0, 0.2); // Fixo por causa da cor original
+        }
+    }
+
+    .btn-buscar {
+        background: $gray-900;
+        color: white;
+        border: none;
+        padding: 0.875rem 1.5rem;
+        font-weight: 600;
+        font-size: 1rem;
+        border-radius: 0 0.5rem 0.5rem 0;
+        cursor: pointer;
+        transition: background $transition;
+
+        &:hover {
+            background: $color-primary;
+            color: $color-text-main;
+        }
+    }
+}
+
+// ------ Chips de Categoria ------
+.categories {
+    overflow-x: auto;
+    padding-bottom: 0.5rem; // Espaço pra scrollbar customizada se aparecer
+
+    // Scrollbar styling (webkit)
+    &::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: $gray-100;
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: $gray-300;
+        border-radius: 4px;
+    }
+}
+
+.chips-list {
+    display: flex;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: max-content;
+    margin: 0 auto; // Centraliza a barra de chips
+
+    .chip {
+        background: $gray-100;
+        border: 1px solid transparent;
+        color: $gray-600;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all $transition;
+        white-space: nowrap;
+
+        &:hover {
+            background: $gray-200;
+            color: $gray-900;
+        }
+
+        &.active {
+            background: $color-primary;
+            color: $color-text-main;
+            border-color: darken(#f5c800, 10%);
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// GRID DE CARDS 
+// ══════════════════════════════════════════════════════════════
+.feed {
+    padding-bottom: 5rem;
+}
+
+.grid-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+}
+
+.card {
+    background: white;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    transition: transform $transition, box-shadow $transition;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+        .card-cover img {
+            transform: scale(1.05);
+        }
+    }
+}
+
+.card-cover {
+    margin: 0;
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+    background: $gray-100;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .cover-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, $gray-100 0%, $gray-200 100%);
+        color: $gray-400;
+
+        span {
+            font-size: 4rem;
+            opacity: 0.5;
+        }
+    }
+
+    .badge-categoria {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        backdrop-filter: blur(4px);
+
+        // Cores padrão (fallback)
+        background: rgba($gray-900, 0.8);
+        color: white;
+
+        // Customização por categoria
+        &[data-categoria="NOTICIA"] {
+            background: rgba(#1d4ed8, 0.9);
+            color: white;
+        }
+
+        &[data-categoria="VAGA_EMPREGO"] {
+            background: rgba(#16a34a, 0.9);
+            color: white;
+        }
+
+        &[data-categoria="SERVICO"] {
+            background: rgba(#ca8a04, 0.9);
+            color: white;
+        }
+
+        &[data-categoria="EVENTO_CULTURAL"] {
+            background: rgba(#9333ea, 0.9);
+            color: white;
+        }
+
+        &[data-categoria="LEGISLACAO"] {
+            background: rgba(#475569, 0.9);
+            color: white;
+        }
+
+        &[data-categoria="TRABALHO_PCD"] {
+            background: rgba(#0ea5e9, 0.9);
+            color: white;
+        }
+    }
+}
+
+.card-content {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+
+    .pin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #b91c1c; // Vermelho destaque
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+
+        span {
+            font-size: 1rem;
+        }
+    }
+
+    .card-title {
+        font-family: 'Outfit', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: $gray-900;
+        margin: 0 0 0.75rem 0;
+        line-height: 1.3;
+
+        // Trunca em 2 linhas
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .card-excerpt {
+        color: $gray-600;
+        font-size: 0.9375rem;
+        line-height: 1.6;
+        margin: 0 0 1.5rem 0;
+        flex-grow: 1;
+
+        // Trunca em 3 linhas
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid $gray-100;
+    padding-top: 1rem;
+    margin-top: auto;
+
+    .data {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8125rem;
+        color: $gray-500;
+        font-weight: 500;
+
+        span {
+            font-size: 1rem;
+        }
+    }
+
+    .btn-ler-mais {
+        background: none;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: $color-primary-dark;
+        font-weight: 700;
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: gap $transition;
+        padding: 0;
+
+        span {
+            font-size: 1.1rem;
+        }
+
+        &:hover {
+            gap: 0.5rem;
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ESTADOS (LOADING, EMPTY, CARREGAR MAIS)
+// ══════════════════════════════════════════════════════════════
+.empty-state {
+    text-align: center;
+    padding: 4rem 1rem;
+    background: white;
+    border-radius: 1rem;
+    border: 2px dashed $gray-200;
+
+    .spinner {
+        font-size: 3rem;
+        color: $color-primary;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    .erro-icon {
+        font-size: 3rem;
+        color: $gray-400;
+        margin-bottom: 1rem;
+    }
+
+    p {
+        color: $gray-600;
+        font-size: 1.125rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-link {
+        background: none;
+        border: none;
+        color: $color-primary-dark;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 1rem;
+    }
+}
+
+.load-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+
+    .btn-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        background: transparent;
+        border: 2px solid $gray-300;
+        border-radius: 2rem;
+        color: $gray-700;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all $transition;
+
+        &:hover {
+            border-color: $gray-900;
+            color: $gray-900;
+            background: $gray-50;
+        }
+    }
+
+    &.loading {
+        gap: 0.5rem;
+        color: $gray-500;
+        font-weight: 600;
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+    }
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// RESPONSIVIDADE
+// ══════════════════════════════════════════════════════════════
+@media (max-width: 768px) {
+    .page-header {
+        padding: 3rem 0;
+    }
+
+    .toolbar {
+        margin: -1.5rem auto 2rem;
+        padding: 1rem;
+    }
+
+    .search-input-wrapper {
+        input {
+            border-radius: 0.5rem;
+        }
+
+        .btn-buscar {
+            display: none; // No mobile, enter no teclado basta pra não ocupar espaço
+        }
+    }
+
+    .chips-list {
+        margin: 0; // Alinha a esquerda p/ scroll ser visivel
+    }
+}
+
+// Acessibilidade
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.sr-only-focusable:active,
+.sr-only-focusable:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    padding: 1rem;
+    background: $color-primary;
+    color: $color-text-main;
+    font-weight: bold;
+    display: block;
+    text-align: center;
+    z-index: 9999;
+}
