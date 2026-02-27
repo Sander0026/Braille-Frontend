@@ -70,15 +70,17 @@ export class NoticiasLista implements OnInit {
 
     this.http.get<any>(url).subscribe({
       next: (res) => {
-        // Se for a página 1, substitui; se não, adiciona ao array existente
+        // API retorna { data, total, page, limit, totalPages } na raiz
+        const items = Array.isArray(res) ? res : (res.data ?? []);
+
         if (reset) {
-          this.comunicados = res.data;
+          this.comunicados = items;
         } else {
-          this.comunicados = [...this.comunicados, ...res.data];
+          this.comunicados = [...this.comunicados, ...items];
         }
 
-        this.totalItems = res.total;
-        this.temMais = this.paginaAtual < res.totalPages;
+        this.totalItems = res.total ?? items.length;
+        this.temMais = this.paginaAtual < (res.totalPages ?? 1);
         this.carregando = false;
       },
       error: (err) => {

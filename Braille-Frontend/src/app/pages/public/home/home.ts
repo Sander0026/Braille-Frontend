@@ -11,7 +11,7 @@ import { SiteConfigService } from '../../../core/services/site-config';
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class Home {
+export class Home implements OnInit {
 
   oficinas: any[] = [];
   depoimentos: any[] = [];
@@ -61,7 +61,7 @@ export class Home {
   carregarUltimasNoticias() {
     this.http.get<any>(`${this.apiUrl}/comunicados?page=1&limit=3`).subscribe({
       next: (res) => {
-        this.ultimasNoticias = res.data;
+        this.ultimasNoticias = Array.isArray(res) ? res : (res.data ?? []);
         this.carregandoNoticias = false;
       },
       error: (err) => {
