@@ -10,6 +10,17 @@ export interface UserInfo {
   precisaTrocarSenha?: boolean;
 }
 
+export interface PerfilUsuario {
+  id: string;
+  nome: string;
+  username: string;
+  email: string | null;
+  role: string;
+  fotoPerfil: string | null;
+  statusAtivo: boolean;
+  criadoEm: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -61,6 +72,20 @@ export class AuthService {
 
   trocarSenha(senhaAtual: string, novaSenha: string): Observable<any> {
     return this.http.patch(`${this.apiUrl}/trocar-senha`, { senhaAtual, novaSenha });
+  }
+
+  getMe(): Observable<PerfilUsuario> {
+    return this.http.get<PerfilUsuario>(`${this.apiUrl}/me`);
+  }
+
+  atualizarFoto(fotoPerfil: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/foto-perfil`, { fotoPerfil });
+  }
+
+  uploadFoto(file: File): Observable<{ url: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<{ url: string }>('/api/upload', form);
   }
 
   private decodeToken(token: string): any {

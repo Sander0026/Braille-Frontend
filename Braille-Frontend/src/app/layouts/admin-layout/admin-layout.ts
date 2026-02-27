@@ -1,8 +1,10 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService, UserInfo } from '../../core/services/auth.service';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
 
 interface NavItem {
   rota: string;
@@ -12,108 +14,280 @@ interface NavItem {
 }
 
 type SidebarState = 'full' | 'icons' | 'hidden';
+type Modal = 'none' | 'foto' | 'senha';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
-export class AdminLayout implements OnInit {
+export class AdminLayout implements OnInit, OnDestroy {
+  // ── Sidebar ──────────────────────────────────────────
   sidebarState: SidebarState = 'full';
-  // Armazenada como propriedade estável — evita NG0100 nos getters
   isMobile = false;
+
+  // ── Usuário ──────────────────────────────────────────
   usuario: UserInfo | null = null;
+  perfil: PerfilUsuario | null = null;
+  fotoPerfil: string | null = null;
+
+  // ── Dropdown de perfil ───────────────────────────────
+  menuAberto = false;
+
+  // ── Modais ───────────────────────────────────────────
+  modalAtivo: Modal = 'none';
+
+  // ── Form: Trocar Senha ───────────────────────────────
+  formSenha!: FormGroup;
+  senhaErro: string | null = null;
+  senhaSucesso = false;
+  carregandoSenha = false;
+
+  // ── Form: Trocar Foto ────────────────────────────────
+  fotoPreview: string | null = null;
+  fotoSelecionada: File | null = null;
+  fotoErro: string | null = null;
+  carregandoFoto = false;
+
+  private destroy$ = new Subject<void>();
 
   readonly navItems: NavItem[] = [
     { rota: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', aria: 'Ir para Dashboard' },
     { rota: '/admin/alunos', label: 'Alunos', icon: 'people', aria: 'Ir para lista de alunos' },
     { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas' },
-    { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para registro de frequências' },
+    { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências' },
     { rota: '/admin/comunicados', label: 'Comunicados', icon: 'campaign', aria: 'Ir para comunicados' },
-    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para mensagens de contato' },
-    { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para gestão de usuários' },
+    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos' },
+    { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários' },
   ];
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private fb: FormBuilder,
+    private elRef: ElementRef
   ) { }
 
   ngOnInit(): void {
     this.usuario = this.authService.getUser();
     this.updateMobileState();
+    this.inicializarFormSenha();
+    this.carregarPerfil();
   }
 
-  @HostListener('window:resize')
-  onResize(): void {
-    this.updateMobileState();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
+  // ── Perfil ──────────────────────────────────────────
+  private carregarPerfil(): void {
+    this.authService.getMe()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (perfil) => {
+          this.perfil = perfil;
+          this.fotoPerfil = perfil.fotoPerfil;
+        },
+        error: () => { /* silencioso — usa dados do JWT */ }
+      });
+  }
+
+  // ── Sidebar ─────────────────────────────────────────
   private updateMobileState(): void {
     const wasMobile = this.isMobile;
     this.isMobile = window.innerWidth <= 768;
 
-    // Ajusta estado do sidebar na troca de breakpoint
     if (!wasMobile && this.isMobile) {
-      // Desktop → Mobile: full passa a icons
       if (this.sidebarState === 'full') this.sidebarState = 'icons';
     } else if (wasMobile && !this.isMobile) {
-      // Mobile → Desktop: hidden passa a icons
       if (this.sidebarState === 'hidden') this.sidebarState = 'icons';
-    } else if (!wasMobile && !this.isMobile) {
-      // Desktop: define estado inicial na primeira carga
-      if (this.sidebarState !== 'full' && this.sidebarState !== 'icons') {
-        this.sidebarState = 'full';
-      }
-    } else if (wasMobile && this.isMobile) {
-      // Mobile: define estado inicial na primeira carga
-      if (this.sidebarState === 'full') this.sidebarState = 'icons';
+    } else if (!this.isMobile && this.sidebarState !== 'icons') {
+      this.sidebarState = 'full';
+    } else if (this.isMobile && this.sidebarState === 'full') {
+      this.sidebarState = 'icons';
     }
   }
 
+  @HostListener('window:resize')
+  onResize(): void { this.updateMobileState(); }
+
   toggleSidebar(): void {
     if (!this.isMobile) {
-      // Desktop: full ↔ icons
       this.sidebarState = this.sidebarState === 'full' ? 'icons' : 'full';
     } else {
-      // Mobile: icons ↔ hidden
       this.sidebarState = this.sidebarState === 'hidden' ? 'icons' : 'hidden';
     }
   }
 
+  // ── Dropdown ─────────────────────────────────────────
+  toggleMenu(event: Event): void {
+    event.stopPropagation();
+    this.menuAberto = !this.menuAberto;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const menuEl = this.elRef.nativeElement.querySelector('.user-menu-wrapper');
+    if (menuEl && !menuEl.contains(event.target as Node)) {
+      this.menuAberto = false;
+    }
+  }
+
+  // ── Modais ───────────────────────────────────────────
+  abrirModalFoto(): void {
+    this.menuAberto = false;
+    this.fotoPreview = null;
+    this.fotoSelecionada = null;
+    this.fotoErro = null;
+    this.modalAtivo = 'foto';
+  }
+
+  abrirModalSenha(): void {
+    this.menuAberto = false;
+    this.formSenha.reset();
+    this.senhaErro = null;
+    this.senhaSucesso = false;
+    this.modalAtivo = 'senha';
+  }
+
+  fecharModal(): void {
+    this.modalAtivo = 'none';
+  }
+
+  // ── Foto ─────────────────────────────────────────────
+  onFotoSelecionada(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    this.fotoErro = null;
+
+    if (!file) return;
+
+    const extensoesValidas = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!extensoesValidas.includes(file.type)) {
+      this.fotoErro = 'Formato inválido. Use JPG, PNG ou WebP.';
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      this.fotoErro = 'A imagem deve ter no máximo 2 MB.';
+      return;
+    }
+
+    this.fotoSelecionada = file;
+    const reader = new FileReader();
+    reader.onload = (e) => { this.fotoPreview = e.target?.result as string; };
+    reader.readAsDataURL(file);
+  }
+
+  salvarFoto(): void {
+    if (!this.fotoSelecionada || this.carregandoFoto) return;
+
+    this.carregandoFoto = true;
+    this.fotoErro = null;
+
+    this.authService.uploadFoto(this.fotoSelecionada)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: ({ url }) => {
+          this.authService.atualizarFoto(url)
+            .pipe(takeUntil(this.destroy$))
+            .subscribe({
+              next: () => {
+                this.fotoPerfil = url;
+                this.carregandoFoto = false;
+                this.fecharModal();
+              },
+              error: () => {
+                this.fotoErro = 'Erro ao salvar a foto. Tente novamente.';
+                this.carregandoFoto = false;
+              }
+            });
+        },
+        error: () => {
+          this.fotoErro = 'Erro ao fazer o upload. Tente novamente.';
+          this.carregandoFoto = false;
+        }
+      });
+  }
+
+  // ── Senha ─────────────────────────────────────────────
+  private inicializarFormSenha(): void {
+    this.formSenha = this.fb.group({
+      senhaAtual: ['', Validators.required],
+      novaSenha: ['', [Validators.required, Validators.minLength(8)]],
+      confirmarSenha: ['', Validators.required]
+    }, { validators: this.senhasIguaisValidator });
+  }
+
+  private senhasIguaisValidator(group: FormGroup): { [key: string]: boolean } | null {
+    const nova = group.get('novaSenha')?.value;
+    const confirmar = group.get('confirmarSenha')?.value;
+    return nova && confirmar && nova !== confirmar ? { senhasDiferentes: true } : null;
+  }
+
+  get confirmacaoInvalida(): boolean {
+    return !!(this.formSenha.hasError('senhasDiferentes') &&
+      this.formSenha.get('confirmarSenha')?.touched);
+  }
+
+  salvarSenha(): void {
+    if (this.formSenha.invalid || this.carregandoSenha) return;
+
+    const { senhaAtual, novaSenha } = this.formSenha.value;
+    this.carregandoSenha = true;
+    this.senhaErro = null;
+
+    this.authService.trocarSenha(senhaAtual, novaSenha)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.carregandoSenha = false;
+          this.senhaSucesso = true;
+          setTimeout(() => this.fecharModal(), 1800);
+        },
+        error: (err) => {
+          this.carregandoSenha = false;
+          this.senhaErro = err?.error?.message ?? 'Erro ao trocar a senha. Verifique a senha atual.';
+        }
+      });
+  }
+
+  // ── Helpers ──────────────────────────────────────────
   sair(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
   }
 
   get iniciais(): string {
-    if (!this.usuario?.username) return 'U';
-    return this.usuario.username.slice(0, 2).toUpperCase();
+    const nome = this.perfil?.nome ?? this.usuario?.nome ?? this.usuario?.username ?? 'U';
+    return nome.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  get nomeDisplay(): string {
+    return this.perfil?.nome ?? this.usuario?.nome ?? this.usuario?.username ?? 'Usuário';
   }
 
   get labelCargo(): string {
     const roles: Record<string, string> = {
       ADMIN: 'Administrador',
       SECRETARIA: 'Secretaria',
-      PROFESSOR: 'Professor'
+      PROFESSOR: 'Professor',
+      COMUNICACAO: 'Comunicação'
     };
-    return roles[this.usuario?.role ?? ''] ?? 'Usuário';
+    return roles[this.perfil?.role ?? this.usuario?.role ?? ''] ?? 'Usuário';
   }
 
-  // Getters usam this.isMobile (estável) — sem risco de NG0100
   get toggleIcon(): string {
-    if (this.isMobile) {
-      return this.sidebarState === 'hidden' ? 'menu' : 'close';
-    }
-    return this.sidebarState === 'full' ? 'chevron_left' : 'chevron_right';
+    return this.isMobile
+      ? (this.sidebarState === 'hidden' ? 'menu' : 'close')
+      : (this.sidebarState === 'full' ? 'chevron_left' : 'chevron_right');
   }
 
   get toggleLabel(): string {
-    if (this.isMobile) {
-      return this.sidebarState === 'hidden' ? 'Abrir menu lateral' : 'Fechar menu lateral';
-    }
-    return this.sidebarState === 'full' ? 'Recolher menu lateral' : 'Expandir menu lateral';
+    return this.isMobile
+      ? (this.sidebarState === 'hidden' ? 'Abrir menu lateral' : 'Fechar menu lateral')
+      : (this.sidebarState === 'full' ? 'Recolher menu lateral' : 'Expandir menu lateral');
   }
 
   get showLabels(): boolean {

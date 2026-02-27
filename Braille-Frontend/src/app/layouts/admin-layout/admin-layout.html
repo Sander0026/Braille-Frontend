@@ -1,44 +1,42 @@
-<!-- Skip to Content — Acessibilidade de teclado -->
+<!-- Skip to Content -->
 <a href="#main-content" class="skip-to-content">Pular para o conteúdo principal</a>
 
-<div class="admin-shell" [class.sidebar-full]="sidebarState === 'full'" [class.sidebar-icons]="sidebarState === 'icons'"
+<div class="admin-shell"
+  [class.sidebar-full]="sidebarState === 'full'"
+  [class.sidebar-icons]="sidebarState === 'icons'"
   [class.sidebar-hidden]="sidebarState === 'hidden'">
 
   <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
   <aside class="sidebar" role="navigation" aria-label="Menu principal de administração"
     [attr.aria-hidden]="sidebarState === 'hidden'">
 
-    <!-- Logo -->
     <div class="sidebar-logo" aria-hidden="true">
       <div class="logo-mark">IB</div>
       @if (showLabels) {
-      <span class="logo-text">Instituto Luiz Braille</span>
+        <span class="logo-text">Instituto Luiz Braille</span>
       }
     </div>
 
-    <!-- Navegação -->
     <ul class="sidebar-nav" role="list">
       @for (item of navItems; track item.rota) {
-      <li role="listitem">
-        <a [routerLink]="item.rota" routerLinkActive="active" [attr.aria-label]="item.aria" class="nav-link"
-          [attr.title]="!showLabels ? item.label : null">
-          <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
-          @if (showLabels) {
-          <span class="nav-label">{{ item.label }}</span>
-          }
-        </a>
-      </li>
+        <li role="listitem">
+          <a [routerLink]="item.rota" routerLinkActive="active"
+             [attr.aria-label]="item.aria" class="nav-link"
+             [attr.title]="!showLabels ? item.label : null">
+            <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
+            @if (showLabels) {
+              <span class="nav-label">{{ item.label }}</span>
+            }
+          </a>
+        </li>
       }
     </ul>
 
-    <!-- Botão Sair -->
     <div class="sidebar-footer">
-      <button class="nav-link sair-btn" (click)="sair()" aria-label="Sair da conta e ir para login"
-        [attr.title]="!showLabels ? 'Sair' : null">
+      <button class="nav-link sair-btn" (click)="sair()"
+        aria-label="Sair da conta" [attr.title]="!showLabels ? 'Sair' : null">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">logout</span>
-        @if (showLabels) {
-        <span class="nav-label">Sair</span>
-        }
+        @if (showLabels) { <span class="nav-label">Sair</span> }
       </button>
     </div>
   </aside>
@@ -48,26 +46,220 @@
 
     <!-- Header -->
     <header class="admin-header" role="banner">
-      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel" aria-controls="sidebar">
+      <button class="toggle-btn" (click)="toggleSidebar()"
+        [attr.aria-label]="toggleLabel">
         <span class="material-symbols-rounded" aria-hidden="true">{{ toggleIcon }}</span>
       </button>
 
       <div class="header-right">
-        <!-- Info do usuário logado -->
-        <div class="user-info" aria-label="Usuário logado">
-          <div class="user-avatar" aria-hidden="true">{{ iniciais }}</div>
-          <div class="user-details">
-            <span class="user-nome">{{ usuario?.username ?? 'Usuário' }}</span>
-            <span class="user-cargo">{{ labelCargo }}</span>
+        <!-- ── Menu de Perfil ── -->
+        <div class="user-menu-wrapper">
+          <button class="user-menu-btn"
+            (click)="toggleMenu($event)"
+            [attr.aria-expanded]="menuAberto"
+            aria-haspopup="menu"
+            aria-label="Abrir menu de perfil">
+
+            <!-- Avatar: foto ou iniciais -->
+            @if (fotoPerfil) {
+              <img [src]="fotoPerfil" class="user-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
+            } @else {
+              <div class="user-avatar" aria-hidden="true">{{ iniciais }}</div>
+            }
+
+            <div class="user-details">
+              <span class="user-nome">{{ nomeDisplay }}</span>
+              <span class="user-cargo">{{ labelCargo }}</span>
+            </div>
+            <span class="material-symbols-rounded chevron-icon" aria-hidden="true">
+              {{ menuAberto ? 'expand_less' : 'expand_more' }}
+            </span>
+          </button>
+
+          <!-- Dropdown -->
+          @if (menuAberto) {
+          <div class="user-dropdown" role="menu" aria-label="Menu de perfil">
+
+            <!-- Cabeçalho com avatar grande -->
+            <div class="dropdown-header">
+              @if (fotoPerfil) {
+                <img [src]="fotoPerfil" class="dropdown-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
+              } @else {
+                <div class="dropdown-avatar">{{ iniciais }}</div>
+              }
+              <div class="dropdown-user-info">
+                <p class="dropdown-nome">{{ nomeDisplay }}</p>
+                <p class="dropdown-cargo">{{ labelCargo }}</p>
+                @if (perfil?.email) {
+                  <p class="dropdown-email">{{ perfil?.email }}</p>
+                }
+              </div>
+            </div>
+
+            <div class="dropdown-divider" role="separator"></div>
+
+            <button class="dropdown-item" role="menuitem" (click)="abrirModalFoto()">
+              <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+              Trocar Foto
+            </button>
+
+            <button class="dropdown-item" role="menuitem" (click)="abrirModalSenha()">
+              <span class="material-symbols-rounded" aria-hidden="true">lock</span>
+              Trocar Senha
+            </button>
+
+            <div class="dropdown-divider" role="separator"></div>
+
+            <button class="dropdown-item danger" role="menuitem" (click)="sair()">
+              <span class="material-symbols-rounded" aria-hidden="true">logout</span>
+              Sair
+            </button>
+
           </div>
+          }
         </div>
       </div>
     </header>
 
-    <!-- Conteúdo das páginas — único elemento com scroll -->
-    <main id="main-content" class="page-content" role="main" aria-label="Conteúdo da página" tabindex="-1">
+    <!-- Conteúdo das páginas -->
+    <main id="main-content" class="page-content" role="main" tabindex="-1">
       <router-outlet />
     </main>
   </div>
 
 </div>
+
+<!-- ══ MODAL: TROCAR FOTO ═══════════════════════════════════════ -->
+@if (modalAtivo === 'foto') {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-foto-titulo"
+  (click)="fecharModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2 id="modal-foto-titulo" class="modal-title">Trocar Foto de Perfil</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Preview -->
+      <div class="foto-preview-area">
+        @if (fotoPreview) {
+          <img [src]="fotoPreview" class="foto-preview-img" alt="Pré-visualização da nova foto" />
+        } @else if (fotoPerfil) {
+          <img [src]="fotoPerfil" class="foto-preview-img" alt="Foto atual" />
+        } @else {
+          <div class="foto-preview-placeholder">
+            <span class="material-symbols-rounded">person</span>
+          </div>
+        }
+      </div>
+
+      <!-- Input arquivo -->
+      <label class="foto-upload-btn" for="input-foto">
+        <span class="material-symbols-rounded" aria-hidden="true">upload</span>
+        @if (fotoSelecionada) { Alterar arquivo } @else { Selecionar foto }
+      </label>
+      <input id="input-foto" type="file" accept="image/jpeg,image/png,image/webp"
+        class="sr-only" (change)="onFotoSelecionada($event)" />
+
+      <p class="foto-hint">Formatos: JPG, PNG, WebP. Máx: 2 MB.</p>
+
+      @if (fotoErro) {
+        <p class="form-error" role="alert">{{ fotoErro }}</p>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="salvarFoto()"
+        [disabled]="!fotoSelecionada || carregandoFoto">
+        @if (carregandoFoto) { Salvando... } @else { Salvar Foto }
+      </button>
+    </div>
+
+  </div>
+</div>
+}
+
+<!-- ══ MODAL: TROCAR SENHA ══════════════════════════════════════ -->
+@if (modalAtivo === 'senha') {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-senha-titulo"
+  (click)="fecharModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2 id="modal-senha-titulo" class="modal-title">Trocar Senha</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    @if (senhaSucesso) {
+      <div class="modal-body">
+        <div class="sucesso-banner" role="status">
+          <span class="material-symbols-rounded">check_circle</span>
+          Senha alterada com sucesso!
+        </div>
+      </div>
+    } @else {
+    <form [formGroup]="formSenha" (ngSubmit)="salvarSenha()" novalidate>
+      <div class="modal-body">
+
+        <!-- Senha atual -->
+        <div class="form-group">
+          <label class="form-label" for="senha-atual">Senha atual</label>
+          <input id="senha-atual" type="password" class="form-input"
+            formControlName="senhaAtual" autocomplete="current-password"
+            placeholder="Digite sua senha atual" />
+          @if (formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched) {
+            <p class="form-error">Campo obrigatório.</p>
+          }
+        </div>
+
+        <!-- Nova senha -->
+        <div class="form-group">
+          <label class="form-label" for="nova-senha">Nova senha</label>
+          <input id="nova-senha" type="password" class="form-input"
+            formControlName="novaSenha" autocomplete="new-password"
+            placeholder="Mínimo 8 caracteres" />
+          @if (formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched) {
+            <p class="form-error">Mínimo de 8 caracteres.</p>
+          }
+        </div>
+
+        <!-- Confirmar nova senha -->
+        <div class="form-group">
+          <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
+          <input id="confirmar-senha" type="password" class="form-input"
+            formControlName="confirmarSenha" autocomplete="new-password"
+            placeholder="Repita a nova senha" />
+          @if (confirmacaoInvalida) {
+            <p class="form-error">As senhas não coincidem.</p>
+          }
+        </div>
+
+        <!-- Erro geral (senha atual incorreta) -->
+        @if (senhaErro) {
+          <p class="form-error" role="alert">{{ senhaErro }}</p>
+        }
+
+        <p class="senha-requisitos">
+          A senha deve ter pelo menos 8 caracteres.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary"
+          [disabled]="formSenha.invalid || carregandoSenha">
+          @if (carregandoSenha) { Salvando... } @else { Salvar Senha }
+        </button>
+      </div>
+    </form>
+    }
+
+  </div>
+</div>
+}
