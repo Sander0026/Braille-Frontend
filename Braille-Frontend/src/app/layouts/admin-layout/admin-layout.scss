@@ -14,11 +14,13 @@ $black: #111111;
 $gray-50: #fafafa;
 $gray-100: #f5f5f5;
 $gray-200: #e5e5e5;
+$gray-400: #a3a3a3;
 $gray-600: #5c5c5c;
 $gray-700: #3d3d3d;
 $gray-900: #1f1f1f;
 $white: #ffffff;
 $transition: 250ms ease;
+
 
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0&family=Inter:wght@400;500;600;700&display=swap');
 
@@ -276,8 +278,14 @@ $transition: 250ms ease;
     border-radius: 0.5rem;
     transition: background $transition;
 
-    &:hover { background-color: $gray-100; }
-    &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+    &:hover {
+        background-color: $gray-100;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $primary;
+        outline-offset: 2px;
+    }
 }
 
 // Avatar: foto ou iniciais
@@ -310,10 +318,20 @@ $transition: 250ms ease;
     line-height: 1.2;
     text-align: left;
 
-    .user-nome  { font-size: 0.875rem; font-weight: 600; color: $gray-900; }
-    .user-cargo { font-size: 0.7rem;   color: $gray-600; }
+    .user-nome {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: $gray-900;
+    }
 
-    @media (max-width: 480px) { display: none; }
+    .user-cargo {
+        font-size: 0.7rem;
+        color: $gray-600;
+    }
+
+    @media (max-width: 480px) {
+        display: none;
+    }
 }
 
 .chevron-icon {
@@ -321,7 +339,9 @@ $transition: 250ms ease;
     font-size: 1.1rem;
     color: $gray-600;
 
-    @media (max-width: 480px) { display: none; }
+    @media (max-width: 480px) {
+        display: none;
+    }
 }
 
 // Dropdown
@@ -333,15 +353,22 @@ $transition: 250ms ease;
     background: $white;
     border: 1px solid $gray-200;
     border-radius: 0.75rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     z-index: 500;
     overflow: hidden;
     animation: dropdownIn 150ms ease;
 }
 
 @keyframes dropdownIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-header {
@@ -381,10 +408,27 @@ $transition: 250ms ease;
     gap: 0.1rem;
     min-width: 0;
 
-    .dropdown-nome  { font-size: 0.875rem; font-weight: 700; color: $gray-900; margin: 0; }
-    .dropdown-cargo { font-size: 0.75rem;  color: $gray-600; margin: 0; }
-    .dropdown-email { font-size: 0.7rem;   color: $gray-600; margin: 0;
-                      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dropdown-nome {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: $gray-900;
+        margin: 0;
+    }
+
+    .dropdown-cargo {
+        font-size: 0.75rem;
+        color: $gray-600;
+        margin: 0;
+    }
+
+    .dropdown-email {
+        font-size: 0.7rem;
+        color: $gray-600;
+        margin: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 }
 
 .dropdown-divider {
@@ -407,15 +451,31 @@ $transition: 250ms ease;
     text-align: left;
     transition: background $transition;
 
-    span { font-family: 'Material Symbols Rounded', sans-serif; font-size: 1.15rem; color: $gray-600; }
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.15rem;
+        color: $gray-600;
+    }
 
-    &:hover { background: $gray-50; }
-    &:focus-visible { outline: 2px solid $primary; outline-offset: -2px; }
+    &:hover {
+        background: $gray-50;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $primary;
+        outline-offset: -2px;
+    }
 
     &.danger {
         color: #dc2626;
-        span { color: #dc2626; }
-        &:hover { background: #fef2f2; }
+
+        span {
+            color: #dc2626;
+        }
+
+        &:hover {
+            background: #fef2f2;
+        }
     }
 }
 
@@ -425,7 +485,7 @@ $transition: 250ms ease;
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -435,8 +495,13 @@ $transition: 250ms ease;
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal-card {
@@ -444,13 +509,20 @@ $transition: 250ms ease;
     border-radius: 1rem;
     width: 100%;
     max-width: 440px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
     animation: slideUp 200ms ease;
 }
 
 @keyframes slideUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .modal-header {
@@ -460,7 +532,12 @@ $transition: 250ms ease;
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid $gray-200;
 
-    .modal-title { font-size: 1rem; font-weight: 700; color: $gray-900; margin: 0; }
+    .modal-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: $gray-900;
+        margin: 0;
+    }
 }
 
 .modal-close {
@@ -474,8 +551,15 @@ $transition: 250ms ease;
     border: none;
     cursor: pointer;
     color: $gray-600;
-    span { font-family: 'Material Symbols Rounded', sans-serif; font-size: 1.25rem; }
-    &:hover { background: $gray-100; }
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.25rem;
+    }
+
+    &:hover {
+        background: $gray-100;
+    }
 }
 
 .modal-body {
@@ -528,7 +612,12 @@ $transition: 250ms ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    span { font-family: 'Material Symbols Rounded', sans-serif; font-size: 2.5rem; color: $gray-400; }
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 2.5rem;
+        color: $gray-400;
+    }
 }
 
 .foto-upload-btn {
@@ -545,8 +634,15 @@ $transition: 250ms ease;
     font-weight: 600;
     color: $gray-700;
     transition: background $transition;
-    span { font-family: 'Material Symbols Rounded', sans-serif; font-size: 1.1rem; }
-    &:hover { background: $gray-200; }
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.1rem;
+    }
+
+    &:hover {
+        background: $gray-200;
+    }
 }
 
 .foto-hint {
@@ -573,7 +669,12 @@ $transition: 250ms ease;
     border-radius: 0.5rem;
     color: #166534;
     font-weight: 600;
-    span { font-family: 'Material Symbols Rounded', sans-serif; font-size: 1.5rem; color: #16a34a; }
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.5rem;
+        color: #16a34a;
+    }
 }
 
 
