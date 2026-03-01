@@ -324,7 +324,22 @@ export class FrequenciasLista implements OnInit {
 
   // ── Utilidades ─────────────────────────────────────────────
   hojeISO(): string {
-    return new Date().toISOString().split('T')[0];
+    const d = new Date();
+    // Usa hora local para compatibilidade com o input[type=date] do navegador
+    const ano = d.getFullYear();
+    const mes = String(d.getMonth() + 1).padStart(2, '0');
+    const dia = String(d.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  /** Verdadeiro quando a data selecionada no filtro é hoje */
+  get ehHoje(): boolean {
+    return this.dataAula === this.hojeISO();
+  }
+
+  /** Verdadeiro quando a chamada é de data anterior — modo somente leitura */
+  get modoVisualizacao(): boolean {
+    return this.chamadaCarregada && !this.ehHoje;
   }
 
   formatarData(iso: string): string {

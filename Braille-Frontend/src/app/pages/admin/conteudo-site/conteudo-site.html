@@ -1,4 +1,4 @@
-<div class="page-header">
+﻿<div class="page-header">
     <div>
         <h1 class="page-title">Gestão de Conteúdo</h1>
         <p class="page-subtitle">Gerencie as informações e visual exibidos no portal público.</p>
@@ -37,10 +37,14 @@
         <button class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
             <span class="material-symbols-rounded">reviews</span> Depoimentos
         </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'sobre'" (click)="setAba('sobre')">
+            <span class="material-symbols-rounded">info</span> Página Sobre
+        </button>
         <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
-            <span class="material-symbols-rounded">newspaper</span> Notícias
+            <span class="material-symbols-rounded">newspaper</span> Noticias
         </button>
     </nav>
+
 
     <!-- LOADING -->
     @if (carregando) {
@@ -50,7 +54,7 @@
     </div>
     } @else {
 
-    <!-- ABA: CONFIGURAÇÕES -->
+    <!-- ABA: CONFIGURAÃ‡Ã•ES -->
     @if (abaAtiva === 'config') {
     <div class="tab-pane active" id="pane-config">
         <form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
@@ -95,7 +99,7 @@
                             <button type="button" class="upload-trigger" (click)="logoInput.click()"
                                 [disabled]="uploadandoLogo" aria-label="Selecionar arquivo de logo"></button>
                         </label>
-                        <p class="form-hint">PNG ou SVG com fundo transparente. Recomendado: 200×60px.</p>
+                        <p class="form-hint">PNG ou SVG com fundo transparente. Recomendado: 200x60px.</p>
                         <!-- Campo oculto que guarda a URL para o formGroup -->
                         <input type="hidden" formControlName="logoUrl">
                     </div>
@@ -132,7 +136,7 @@
                     <div class="form-group">
                         <label class="form-label" for="tituloLinha1">Título Linha 1</label>
                         <input type="text" id="tituloLinha1" class="form-input" formControlName="tituloLinha1"
-                            placeholder="Ex: Mais do que inclusão —">
+                            placeholder="Ex: Mais do que inclusão â€”">
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="tituloDestaque">Palavra em Destaque (Linha 2)</label>
@@ -149,7 +153,7 @@
             </div>
 
             <div class="form-section">
-                <h3>Ações Principais</h3>
+                <h3>Botões Principais</h3>
                 <div class="form-row form-row-2">
                     <div class="form-group mb-0">
                         <label class="form-label" for="btnPrimario">Texto do Botão Primário</label>
@@ -197,7 +201,7 @@
     </div>
     }
 
-    <!-- ABA: MISSÃO -->
+    <!-- ABA: MISSÃƒO -->
     @if (abaAtiva === 'missao') {
     <div class="tab-pane active" id="pane-missao">
         <form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
@@ -243,7 +247,7 @@
                         <label class="form-label">Valor Principal 1</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor1Icone"
-                                placeholder="Ícone ou Emoji (ex: ♿)">
+                                placeholder="Ícone ou Emoji (ex: ™)">
                             <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
                                 placeholder="Título (ex: Inclusão)">
                         </div>
@@ -324,7 +328,7 @@
 
                     <div class="flex-row">
                         <input type="text" class="form-input flex-1" formControlName="icon"
-                            placeholder="Ícone/Emoji (ex: 💻)">
+                            placeholder="Ícone/Emoji (ex: ðŸ’»)">
                         <input type="text" class="form-input flex-3" formControlName="titulo"
                             placeholder="Título da Oficina">
                     </div>
@@ -395,6 +399,198 @@
     </div>
     }
 
+    <!-- ABA: SOBRE -->
+    @if (abaAtiva === 'sobre') {
+    <div class="tab-pane active" id="pane-sobre">
+
+        <!-- Hero do Sobre -->
+        <form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form">
+            <div class="form-header">
+                <h2>Hero da Página Sobre</h2>
+                <p>Texto de destaque que aparece no topo da página /sobre.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="sobreEyebrow">Eyebrow (texto acima do título)</label>
+                    <input type="text" id="sobreEyebrow" formControlName="eyebrow" class="form-input"
+                        placeholder="Ex: Conheça o Instituto" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="sobreTitulo">Título Principal</label>
+                    <input type="text" id="sobreTitulo" formControlName="titulo" class="form-input"
+                        placeholder="Ex: Sobre o Instituto Luiz Braille" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="sobreDescricao">Descrição</label>
+                    <textarea id="sobreDescricao" formControlName="descricao" class="form-input" rows="3"
+                        placeholder="Breve descrição exibida abaixo do título…"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar Hero' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Nossa História -->
+        <form [formGroup]="formSobreHistoria" (ngSubmit)="salvarSobreHistoria()" class="cms-form">
+            <div class="form-header">
+                <h2>Nossa História</h2>
+                <p>Texto da seção de história do instituto.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="historiaTitulo">Título da Seção</label>
+                    <input type="text" id="historiaTitulo" formControlName="titulo" class="form-input"
+                        placeholder="Ex: Nossa História" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="historiaParagrafo1">Parágrafo 1</label>
+                    <textarea id="historiaParagrafo1" formControlName="paragrafo1" class="form-input" rows="4"
+                        placeholder="Primeiro parágrafo da história…"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label for="historiaParagrafo2">Parágrafo 2</label>
+                    <textarea id="historiaParagrafo2" formControlName="paragrafo2" class="form-input" rows="4"
+                        placeholder="Segundo parágrafo da história…"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label for="historiaParagrafo3">Parágrafo 3 (opcional)</label>
+                    <textarea id="historiaParagrafo3" formControlName="paragrafo3" class="form-input" rows="4"
+                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar História' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Linha do Tempo -->
+        <form [formGroup]="formSobreTimeline" (ngSubmit)="salvarSobreTimeline()" class="cms-form">
+            <div class="form-header">
+                <h2>Linha do Tempo</h2>
+                <p>Marcos históricos exibidos ao lado do texto "Nossa História".</p>
+            </div>
+            @for (item of timelineArray.controls; track $index) {
+            <div class="item-card" [formGroupName]="$index">
+                <div class="item-card-header">
+                    <span class="item-badge">{{ $index + 1 }}</span>
+                    <button type="button" class="btn btn-icon btn-ghost" (click)="removerItemTimeline($index)"
+                        aria-label="Remover marco">
+                        <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
+                    </button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label [for]="'tlAno' + $index">Ano / Período</label>
+                        <input type="text" [id]="'tlAno' + $index" formControlName="ano" class="form-input"
+                            placeholder="Ex: 1990 ou Hoje" />
+                    </div>
+                    <div class="form-group">
+                        <label [for]="'tlTitulo' + $index">Título</label>
+                        <input type="text" [id]="'tlTitulo' + $index" formControlName="titulo" class="form-input"
+                            placeholder="Ex: Fundação" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label [for]="'tlDesc' + $index">Descrição</label>
+                        <input type="text" [id]="'tlDesc' + $index" formControlName="descricao" class="form-input"
+                            placeholder="Breve descrição do marco…" />
+                    </div>
+                </div>
+            </div>
+            }
+            <button type="button" class="btn btn-secondary" (click)="adicionarItemTimeline()"
+                style="margin-bottom:1.5rem;">
+                <span class="material-symbols-rounded">add</span> Adicionar Marco
+            </button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formSobreTimeline.invalid">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar Linha do Tempo' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Nossa Equipe -->
+        <form [formGroup]="formSobreEquipe" (ngSubmit)="salvarSobreEquipe()" class="cms-form">
+            <div class="form-header">
+                <h2>Nossa Equipe</h2>
+                <p>Cards de membros ou áreas da equipe exibidos na seção "Nossa Equipe".</p>
+            </div>
+            @for (membro of equipeArray.controls; track $index) {
+            <div class="item-card" [formGroupName]="$index">
+                <div class="item-card-header">
+                    <span class="item-badge">{{ $index + 1 }}</span>
+                    <button type="button" class="btn btn-icon btn-ghost" (click)="removerMembroEquipe($index)"
+                        aria-label="Remover membro">
+                        <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
+                    </button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label [for]="'eqEmoji' + $index">Emoji / Ícone</label>
+                        <input type="text" [id]="'eqEmoji' + $index" formControlName="emoji" class="form-input"
+                            placeholder="Ex: 👩‍⚕️" maxlength="4" />
+                    </div>
+                    <div class="form-group">
+                        <label [for]="'eqCargo' + $index">Cargo / Área</label>
+                        <input type="text" [id]="'eqCargo' + $index" formControlName="cargo" class="form-input"
+                            placeholder="Ex: Coordenação Pedagógica" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label [for]="'eqDesc' + $index">Descrição</label>
+                        <input type="text" [id]="'eqDesc' + $index" formControlName="descricao" class="form-input"
+                            placeholder="Breve descrição da função…" />
+                    </div>
+                </div>
+            </div>
+            }
+            <button type="button" class="btn btn-secondary" (click)="adicionarMembroEquipe()"
+                style="margin-bottom:1.5rem;">
+                <span class="material-symbols-rounded">add</span> Adicionar Membro
+            </button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formSobreEquipe.invalid">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar Equipe' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- CTA / Rodapé -->
+        <form [formGroup]="formSobreCta" (ngSubmit)="salvarSobreCta()" class="cms-form">
+            <div class="form-header">
+                <h2>Chamada para Ação (Rodapé)</h2>
+                <p>Texto do bloco de CTA exibido no final da página /sobre.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="sobreCtaTitulo">Título</label>
+                    <input type="text" id="sobreCtaTitulo" formControlName="titulo" class="form-input"
+                        placeholder="Ex: Quer saber mais ou precisa de atendimento?" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="sobreCtaDesc">Descrição</label>
+                    <textarea id="sobreCtaDesc" formControlName="descricao" class="form-input" rows="2"
+                        placeholder="Ex: Entre em contato com nossa secretaria…"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar CTA' }}
+                </button>
+            </div>
+        </form>
+
+    </div>
+    }
+
     <!-- ABA: NOTÍCIAS / COMUNICADOS -->
     @if (abaAtiva === 'comunicados') {
     <div class="tab-pane active" id="pane-comunicados" role="tabpanel">
@@ -402,7 +598,6 @@
             <h2>Notícias e Comunicados</h2>
             <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
         </div>
-        <!-- Componente interno de lista (mesma funcionalidade da antiga rota) -->
         <app-comunicados-lista></app-comunicados-lista>
     </div>
     }
@@ -481,6 +676,50 @@
                 style="background-color: #ef4444; color: white; border: none;">
                 Remover Depoimento
             </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Marco da Timeline -->
+@if (timelineItemParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Marco"
+    (click)="cancelarExclusaoTimeline()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Remover Marco</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoTimeline()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Deseja remover este marco da linha do tempo?</p>
+            <p>A ação refletirá no site apenas após <strong>Salvar Linha do Tempo</strong>.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoTimeline()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoTimeline()"
+                style="background-color: #ef4444; color: white; border: none;">Remover</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Membro da Equipe -->
+@if (equipeMemberParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Membro"
+    (click)="cancelarExclusaoEquipe()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Remover Membro</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoEquipe()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Deseja remover este membro da equipe?</p>
+            <p>A ação refletirá no site apenas após <strong>Salvar Equipe</strong>.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoEquipe()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoEquipe()"
+                style="background-color: #ef4444; color: white; border: none;">Remover</button>
         </div>
     </div>
 </div>

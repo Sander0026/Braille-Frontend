@@ -89,7 +89,22 @@
 
 } @else {
 
-<!-- Ações em massa -->
+<!-- Banner: modo somente leitura para datas passadas -->
+@if (modoVisualizacao) {
+<div class="alert"
+    style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; display:flex; align-items:center; gap:0.75rem; padding:0.875rem 1rem; border-radius:0.5rem; margin-bottom:1rem;"
+    role="status" aria-live="polite">
+    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1.25rem;">lock</span>
+    <span>
+        <strong>Somente leitura</strong> — Esta chamada é de uma data anterior e não pode ser alterada.
+        Chamadas só podem ser editadas no próprio dia da aula.
+    </span>
+</div>
+}
+
+<!-- Ações em massa (só visíveis quando é hoje) -->
+@if (!modoVisualizacao) {
+
 <div class="acoes-massa" role="group" aria-label="Marcar todos">
     <button class="btn btn-sm btn-secondary" (click)="marcarTodos(true)" aria-label="Marcar todos como presentes">
         <span class="material-symbols-rounded" aria-hidden="true">playlist_add_check</span> Marcar todos presentes
@@ -98,6 +113,8 @@
         <span class="material-symbols-rounded" aria-hidden="true">event_busy</span> Marcar todos ausentes
     </button>
 </div>
+}
+
 
 <!-- Lista de chamada -->
 <div class="data-table-wrapper" role="region" aria-label="Lista de chamada">
@@ -145,14 +162,16 @@
                 <td class="text-center">
                     <button class="btn btn-sm btn-action" [class.btn-danger]="aluno.presente"
                         [class.btn-success]="!aluno.presente" (click)="togglePresente(aluno)"
-                        [disabled]="aluno.salvando || salvandoTudo" [attr.aria-label]="aluno.presente
+                        [disabled]="aluno.salvando || salvandoTudo || modoVisualizacao" [attr.aria-label]="aluno.presente
                       ? 'Marcar ' + aluno.nomeCompleto + ' como ausente'
-                      : 'Marcar ' + aluno.nomeCompleto + ' como presente'">
+                      : 'Marcar ' + aluno.nomeCompleto + ' como presente'"
+                        [title]="modoVisualizacao ? 'Chamada de data anterior — somente leitura' : ''">
                         <span class="material-symbols-rounded" aria-hidden="true">{{ aluno.presente ? 'cancel' :
                             'check_circle' }}</span>
-                        <span class="action-text">{{ aluno.presente ? 'Marcar Falta' : 'Marcar Presente' }}</span>
+                        <span class="action-text">{{ aluno.presente ? 'Presente' : 'Falta' }}</span>
                     </button>
                 </td>
+
             </tr>
             }
         </tbody>
@@ -169,7 +188,8 @@
 </div>
 }
 
-<!-- Botão salvar chamada -->
+<!-- Botão salvar chamada — oculto em modo visualização -->
+@if (!modoVisualizacao) {
 <div class="salvar-footer">
     <button class="btn btn-primary btn-lg" (click)="salvarChamada()" [disabled]="salvandoTudo"
         aria-label="Salvar chamada de todos os alunos" [attr.aria-busy]="salvandoTudo">
@@ -178,6 +198,8 @@
         @else { <span class="material-symbols-rounded" aria-hidden="true">save</span> Salvar Chamada }
     </button>
 </div>
+}
+
 
 }
 }
