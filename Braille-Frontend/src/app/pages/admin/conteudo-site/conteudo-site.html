@@ -26,7 +26,7 @@
             <span class="material-symbols-rounded">settings</span> Configurações
         </button>
         <button class="tab-btn" [class.active]="abaAtiva === 'hero'" (click)="setAba('hero')">
-            <span class="material-symbols-rounded">web_asset</span> Hero Inicial
+            <span class="material-symbols-rounded">web_asset</span> Apresentação Principal
         </button>
         <button class="tab-btn" [class.active]="abaAtiva === 'missao'" (click)="setAba('missao')">
             <span class="material-symbols-rounded">assignment</span> Missão & Valores
@@ -59,43 +59,46 @@
                 <p>Cores e marcação principal do portal aberto.</p>
             </div>
 
-            <div class="form-row form-row-2">
-                <div class="form-group">
-                    <label class="form-label" for="corPrimaria">Cor Primária (HEX)</label>
-                    <div class="color-picker-wrap">
-                        <input type="color" id="corPrimaria-color" class="form-input-color"
-                            formControlName="corPrimaria">
-                        <input type="text" id="corPrimaria" class="form-input" formControlName="corPrimaria"
-                            placeholder="#f5c800">
+            <div class="form-section">
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="corPrimaria">Cor Primária (HEX)</label>
+                        <div class="color-picker-wrap">
+                            <input type="color" id="corPrimaria-color" class="form-input-color"
+                                formControlName="corPrimaria">
+                            <input type="text" id="corPrimaria" class="form-input" formControlName="corPrimaria"
+                                placeholder="#f5c800">
+                        </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Logo do Instituto (Opcional)</label>
+                    <div class="form-group">
+                        <label class="form-label">Logo do Instituto (Opcional)</label>
 
-                    <!-- Preview da logo atual -->
-                    @if (logoPreview) {
-                    <div class="logo-preview-wrapper">
-                        <img [src]="logoPreview" alt="Preview da logo" class="logo-preview-img">
-                        <button type="button" class="btn btn-secondary btn-sm btn-remover-logo" (click)="removerLogo()">
-                            <span class="material-symbols-rounded">delete</span> Remover
-                        </button>
+                        <!-- Preview da logo atual -->
+                        @if (logoPreview) {
+                        <div class="logo-preview-wrapper">
+                            <img [src]="logoPreview" alt="Preview da logo" class="logo-preview-img">
+                            <button type="button" class="btn btn-secondary btn-sm btn-remover-logo"
+                                (click)="removerLogo()">
+                                <span class="material-symbols-rounded">delete</span> Remover
+                            </button>
+                        </div>
+                        }
+
+                        <!-- Upload -->
+                        <label class="upload-label" [class.uploading]="uploadandoLogo">
+                            <input type="file" accept="image/*" (change)="onLogoChange($event)"
+                                [disabled]="uploadandoLogo" style="display:none" #logoInput>
+                            <span class="material-symbols-rounded">{{ uploadandoLogo ? 'cloud_sync' : 'upload' }}</span>
+                            {{ uploadandoLogo ? 'Enviando...' : (logoPreview ? 'Substituir imagem' : 'Escolher imagem da
+                            logo') }}
+                            <!-- Trigger click -->
+                            <button type="button" class="upload-trigger" (click)="logoInput.click()"
+                                [disabled]="uploadandoLogo" aria-label="Selecionar arquivo de logo"></button>
+                        </label>
+                        <p class="form-hint">PNG ou SVG com fundo transparente. Recomendado: 200×60px.</p>
+                        <!-- Campo oculto que guarda a URL para o formGroup -->
+                        <input type="hidden" formControlName="logoUrl">
                     </div>
-                    }
-
-                    <!-- Upload -->
-                    <label class="upload-label" [class.uploading]="uploadandoLogo">
-                        <input type="file" accept="image/*" (change)="onLogoChange($event)" [disabled]="uploadandoLogo"
-                            style="display:none" #logoInput>
-                        <span class="material-symbols-rounded">{{ uploadandoLogo ? 'cloud_sync' : 'upload' }}</span>
-                        {{ uploadandoLogo ? 'Enviando...' : (logoPreview ? 'Substituir imagem' : 'Escolher imagem da
-                        logo') }}
-                        <!-- Trigger click -->
-                        <button type="button" class="upload-trigger" (click)="logoInput.click()"
-                            [disabled]="uploadandoLogo" aria-label="Selecionar arquivo de logo"></button>
-                    </label>
-                    <p class="form-hint">PNG ou SVG com fundo transparente. Recomendado: 200×60px.</p>
-                    <!-- Campo oculto que guarda a URL para o formGroup -->
-                    <input type="hidden" formControlName="logoUrl">
                 </div>
             </div>
 
@@ -113,65 +116,75 @@
     <div class="tab-pane active" id="pane-hero">
         <form [formGroup]="formHero" (ngSubmit)="salvarHero()" class="cms-form">
             <div class="form-header">
-                <h2>Seção Inicial (Hero)</h2>
-                <p>Bem-vindo, títulos e destaques iniciais.</p>
+                <h2>Apresentação Principal</h2>
+                <p>Bem-vindo, títulos e destaques iniciais (primeira dobra do site).</p>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="eyebrow">Pequeno Título Superior</label>
-                <input type="text" id="eyebrow" class="form-input" formControlName="eyebrow"
-                    placeholder="Ex: Instituto de Educação Inclusiva">
-            </div>
-
-            <div class="form-row form-row-2">
+            <div class="form-section">
+                <h3>Títulos e Textos</h3>
                 <div class="form-group">
-                    <label class="form-label" for="tituloLinha1">Título Linha 1</label>
-                    <input type="text" id="tituloLinha1" class="form-input" formControlName="tituloLinha1"
-                        placeholder="Ex: Mais do que inclusão —">
+                    <label class="form-label" for="eyebrow">Pequeno Título Superior</label>
+                    <input type="text" id="eyebrow" class="form-input" formControlName="eyebrow"
+                        placeholder="Ex: Instituto de Educação Inclusiva">
                 </div>
-                <div class="form-group">
-                    <label class="form-label" for="tituloDestaque">Palavra em Destaque (Linha 2)</label>
-                    <input type="text" id="tituloDestaque" class="form-input" formControlName="tituloDestaque"
-                        placeholder="Ex: transformação">
-                </div>
-            </div>
 
-            <div class="form-group">
-                <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
-                <textarea id="descricao" class="form-textarea" formControlName="descricao" rows="3"
-                    placeholder="Insira a descrição..."></textarea>
-            </div>
-
-            <div class="form-row form-row-2">
-                <div class="form-group">
-                    <label class="form-label" for="btnPrimario">Texto do Botão Primário</label>
-                    <input type="text" id="btnPrimario" class="form-input" formControlName="btnPrimario"
-                        placeholder="Ex: Fale Conosco">
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="tituloLinha1">Título Linha 1</label>
+                        <input type="text" id="tituloLinha1" class="form-input" formControlName="tituloLinha1"
+                            placeholder="Ex: Mais do que inclusão —">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tituloDestaque">Palavra em Destaque (Linha 2)</label>
+                        <input type="text" id="tituloDestaque" class="form-input" formControlName="tituloDestaque"
+                            placeholder="Ex: transformação">
+                    </div>
                 </div>
+
                 <div class="form-group">
-                    <label class="form-label" for="btnSecundario">Texto do Botão Secundário</label>
-                    <input type="text" id="btnSecundario" class="form-input" formControlName="btnSecundario"
-                        placeholder="Ex: Conheça o Instituto">
+                    <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
+                    <textarea id="descricao" class="form-textarea" formControlName="descricao" rows="3"
+                        placeholder="Insira a descrição..."></textarea>
                 </div>
             </div>
 
-            <hr class="form-divider">
-            <h3>Estatísticas / Números</h3>
-            <div class="form-row form-row-3">
-                <div class="form-group">
-                    <label class="form-label">Número 1</label>
-                    <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+">
-                    <input type="text" class="form-input mt-2" formControlName="stat1Desc" placeholder="Descrição">
+            <div class="form-section">
+                <h3>Ações Principais</h3>
+                <div class="form-row form-row-2">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="btnPrimario">Texto do Botão Primário</label>
+                        <input type="text" id="btnPrimario" class="form-input" formControlName="btnPrimario"
+                            placeholder="Ex: Fale Conosco">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="btnSecundario">Texto do Botão Secundário</label>
+                        <input type="text" id="btnSecundario" class="form-input" formControlName="btnSecundario"
+                            placeholder="Ex: Conheça o Instituto">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">Número 2</label>
-                    <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+">
-                    <input type="text" class="form-input mt-2" formControlName="stat2Desc" placeholder="Descrição">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Número 3</label>
-                    <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6">
-                    <input type="text" class="form-input mt-2" formControlName="stat3Desc" placeholder="Descrição">
+            </div>
+
+            <div class="form-section">
+                <h3>Estatísticas em Destaque</h3>
+                <div class="form-row form-row-3">
+                    <div class="form-group mb-0">
+                        <label class="form-label">Estatística 1</label>
+                        <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+">
+                        <input type="text" class="form-input mt-2" formControlName="stat1Desc"
+                            placeholder="Descrição (ex: Vidas impactadas)">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label">Estatística 2</label>
+                        <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+">
+                        <input type="text" class="form-input mt-2" formControlName="stat2Desc"
+                            placeholder="Descrição (ex: Profissionais)">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label">Estatística 3</label>
+                        <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6">
+                        <input type="text" class="form-input mt-2" formControlName="stat3Desc"
+                            placeholder="Descrição (ex: Oficinas)">
+                    </div>
                 </div>
             </div>
 
@@ -190,81 +203,92 @@
         <form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
             <div class="form-header">
                 <h2>Nossa Missão & Valores</h2>
-                <p>Textos e cards de valores que aparecem abaixo da dobra.</p>
+                <p>Textos da seção central e cards de princípios orientadores.</p>
             </div>
 
-            <div class="form-group">
-                <label class="form-label" for="titulo-missao">Título da Seção</label>
-                <input type="text" id="titulo-missao" class="form-input" formControlName="titulo"
-                    placeholder="Ex: Nossa Missão">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="descricaoLinha1">Parágrafo 1</label>
-                <textarea id="descricaoLinha1" class="form-textarea" formControlName="descricaoLinha1"
-                    rows="3"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="descricaoLinha2">Parágrafo 2</label>
-                <textarea id="descricaoLinha2" class="form-textarea" formControlName="descricaoLinha2"
-                    rows="2"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="btnSaberMais">Botão Link (Saiba mais)</label>
-                <input type="text" id="btnSaberMais" class="form-input" formControlName="btnSaberMais"
-                    placeholder="Ex: Saiba mais sobre nós →">
-            </div>
-
-            <hr class="form-divider">
-            <h3>Cards de Valores</h3>
-
-            <!-- Valor 1 & 2 -->
-            <div class="form-row form-row-2">
-                <div class="form-group form-card">
-                    <label class="form-label">Valor 1</label>
-                    <div class="flex-row">
-                        <input type="text" class="form-input flex-1" formControlName="valor1Icone"
-                            placeholder="Ícone ou Emoji (ex: ♿)">
-                        <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
-                            placeholder="Título (ex: Inclusão)">
+            <div class="form-section">
+                <h3>Texto de Apresentação</h3>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="titulo-missao">Título da Seção</label>
+                        <input type="text" id="titulo-missao" class="form-input" formControlName="titulo"
+                            placeholder="Ex: Nossa Missão">
                     </div>
-                    <input type="text" class="form-input mt-2" formControlName="valor1Desc"
-                        placeholder="Descrição do valor">
+                    <div class="form-group">
+                        <label class="form-label" for="btnSaberMais">Botão Link (Opcional)</label>
+                        <input type="text" id="btnSaberMais" class="form-input" formControlName="btnSaberMais"
+                            placeholder="Ex: Saiba mais sobre nós →">
+                    </div>
                 </div>
 
-                <div class="form-group form-card">
-                    <label class="form-label">Valor 2</label>
-                    <div class="flex-row">
-                        <input type="text" class="form-input flex-1" formControlName="valor2Icone" placeholder="Ícone">
-                        <input type="text" class="form-input flex-3" formControlName="valor2Titulo"
-                            placeholder="Título">
-                    </div>
-                    <input type="text" class="form-input mt-2" formControlName="valor2Desc" placeholder="Descrição">
+                <div class="form-group">
+                    <label class="form-label" for="descricaoLinha1">Parágrafo de Introdução</label>
+                    <textarea id="descricaoLinha1" class="form-textarea" formControlName="descricaoLinha1"
+                        rows="3"></textarea>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label" for="descricaoLinha2">Parágrafo de Complemento (Opcional)</label>
+                    <textarea id="descricaoLinha2" class="form-textarea" formControlName="descricaoLinha2"
+                        rows="2"></textarea>
                 </div>
             </div>
 
-            <!-- Valor 3 & 4 -->
-            <div class="form-row form-row-2 mt-4">
-                <div class="form-group form-card">
-                    <label class="form-label">Valor 3</label>
-                    <div class="flex-row">
-                        <input type="text" class="form-input flex-1" formControlName="valor3Icone" placeholder="Ícone">
-                        <input type="text" class="form-input flex-3" formControlName="valor3Titulo"
-                            placeholder="Título">
+            <div class="form-section bg-transparent border-0 px-0 shadow-none">
+                <h3 class="mb-3">Cards de Valores</h3>
+
+                <!-- Valor 1 & 2 -->
+                <div class="form-row form-row-2">
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Principal 1</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor1Icone"
+                                placeholder="Ícone ou Emoji (ex: ♿)">
+                            <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
+                                placeholder="Título (ex: Inclusão)">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor1Desc"
+                            placeholder="Breve descrição do valor">
                     </div>
-                    <input type="text" class="form-input mt-2" formControlName="valor3Desc" placeholder="Descrição">
+
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Principal 2</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor2Icone"
+                                placeholder="Ícone">
+                            <input type="text" class="form-input flex-3" formControlName="valor2Titulo"
+                                placeholder="Título">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor2Desc"
+                            placeholder="Breve descrição">
+                    </div>
                 </div>
 
-                <div class="form-group form-card">
-                    <label class="form-label">Valor 4</label>
-                    <div class="flex-row">
-                        <input type="text" class="form-input flex-1" formControlName="valor4Icone" placeholder="Ícone">
-                        <input type="text" class="form-input flex-3" formControlName="valor4Titulo"
-                            placeholder="Título">
+                <!-- Valor 3 & 4 -->
+                <div class="form-row form-row-2 mt-4">
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Complementar 3</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor3Icone"
+                                placeholder="Ícone">
+                            <input type="text" class="form-input flex-3" formControlName="valor3Titulo"
+                                placeholder="Título">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor3Desc"
+                            placeholder="Breve descrição">
                     </div>
-                    <input type="text" class="form-input mt-2" formControlName="valor4Desc" placeholder="Descrição">
+
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Complementar 4</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor4Icone"
+                                placeholder="Ícone">
+                            <input type="text" class="form-input flex-3" formControlName="valor4Titulo"
+                                placeholder="Título">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor4Desc"
+                            placeholder="Breve descrição">
+                    </div>
                 </div>
             </div>
 
