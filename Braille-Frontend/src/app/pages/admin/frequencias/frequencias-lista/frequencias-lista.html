@@ -99,9 +99,9 @@
     </button>
 </div>
 
-<!-- Tabela de chamada -->
-<div class="table-wrapper" role="region" aria-label="Lista de chamada">
-    <table class="table" aria-describedby="chamada-desc">
+<!-- Lista de chamada -->
+<div class="data-table-wrapper" role="region" aria-label="Lista de chamada">
+    <table class="data-table" aria-describedby="chamada-desc">
         <caption id="chamada-desc" class="sr-only">
             Chamada da oficina {{ turmaSelecionadaNome }} em {{ formatarData(dataAula) }}.
             Clique em Presente ou Falta para alternar o status de cada aluno.
@@ -109,8 +109,8 @@
         <thead>
             <tr>
                 <th scope="col">Aluno</th>
-                <th scope="col" class="text-center">Status</th>
-                <th scope="col" class="text-center">Ação</th>
+                <th scope="col" style="width: 150px;" class="text-center">Status</th>
+                <th scope="col" style="width: 200px;" class="text-center">Ação</th>
             </tr>
         </thead>
         <tbody>
@@ -118,29 +118,39 @@
             <tr [class.linha-presente]="aluno.presente" [class.linha-falta]="!aluno.presente">
                 <td>
                     <div class="aluno-nome">
+                        <!-- Icone salvo antes do nome -->
+                        <div class="salvo-indicator" [class.is-salvo]="aluno.salvo" aria-label="Status salvo"
+                            [title]="aluno.salvo ? 'Registrado' : 'Não salvo'">
+                            @if (aluno.salvo) {
+                            <span class="material-symbols-rounded">check_circle</span>
+                            } @else {
+                            <span class="material-symbols-rounded indicator-pendente">radio_button_unchecked</span>
+                            }
+                        </div>
+
+                        <!-- Avatar -->
                         <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
                             [class.avatar--falta]="!aluno.presente" aria-hidden="true">
                             {{ aluno.nomeCompleto.charAt(0) }}
                         </div>
-                        <span>{{ aluno.nomeCompleto }}</span>
-                        @if (aluno.salvo) {
-                        <span class="badge-salvo" aria-label="Registrado" title="Registrado"><span
-                                class="material-symbols-rounded" style="font-size: 0.9rem;">check_circle</span></span>
-                        }
+                        <span class="nome-texto">{{ aluno.nomeCompleto }}</span>
                     </div>
                 </td>
                 <td class="text-center">
-                    <span class="badge" [class.badge--success]="aluno.presente" [class.badge--danger]="!aluno.presente"
+                    <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente"
                         [attr.aria-label]="aluno.presente ? 'Presente' : 'Falta'">
                         {{ aluno.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm" [class.btn-danger]="aluno.presente" [class.btn-success]="!aluno.presente"
-                        (click)="togglePresente(aluno)" [disabled]="aluno.salvando || salvandoTudo" [attr.aria-label]="aluno.presente
+                    <button class="btn btn-sm btn-action" [class.btn-danger]="aluno.presente"
+                        [class.btn-success]="!aluno.presente" (click)="togglePresente(aluno)"
+                        [disabled]="aluno.salvando || salvandoTudo" [attr.aria-label]="aluno.presente
                       ? 'Marcar ' + aluno.nomeCompleto + ' como ausente'
                       : 'Marcar ' + aluno.nomeCompleto + ' como presente'">
-                        {{ aluno.presente ? 'Marcar Falta' : 'Marcar Presente' }}
+                        <span class="material-symbols-rounded" aria-hidden="true">{{ aluno.presente ? 'cancel' :
+                            'check_circle' }}</span>
+                        <span class="action-text">{{ aluno.presente ? 'Marcar Falta' : 'Marcar Presente' }}</span>
                     </button>
                 </td>
             </tr>
@@ -210,8 +220,8 @@
 </div>
 } @else {
 
-<div class="table-wrapper" role="region" aria-label="Histórico de frequências">
-    <table class="table">
+<div class="data-table-wrapper" role="region" aria-label="Histórico de frequências">
+    <table class="data-table">
         <thead>
             <tr>
                 <th scope="col">Data</th>
@@ -228,11 +238,12 @@
                 <td>{{ resumo.turmaNome }}</td>
                 <td class="text-center">{{ resumo.totalAlunos }}</td>
                 <td class="text-center">
-                    <span class="badge badge--success" style="margin-right: 4px;">{{ resumo.presentes }}</span>
-                    <span class="badge badge--danger">{{ resumo.faltas }}</span>
+                    <span class="badge badge-success" style="margin-right: 4px;" title="Presentes">{{ resumo.presentes
+                        }}</span>
+                    <span class="badge badge-danger" title="Faltas">{{ resumo.faltas }}</span>
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-secondary" (click)="abrirDetalhes(resumo)"
+                    <button class="btn btn-sm btn-ghost" (click)="abrirDetalhes(resumo)"
                         aria-label="Ver mais detalhes da turma nesta data">
                         <span class="material-symbols-rounded" aria-hidden="true">visibility</span> Detalhes
                     </button>
@@ -323,21 +334,21 @@
     <p>Nenhuma aula letiva registrada na oficina confirmada para pesquisa ainda.</p>
 </div>
 } @else {
-<div class="table-wrapper">
-    <table class="table">
+<div class="data-table-wrapper">
+    <table class="data-table">
         <thead>
             <tr>
                 <th scope="col">Data da Aula</th>
-                <th scope="col" class="text-right">Status do Aluno</th>
+                <th scope="col" class="text-center">Status do Aluno</th>
             </tr>
         </thead>
         <tbody>
             @for (historico of relatorioHistorico; track historico.id) {
             <tr>
                 <td>{{ formatarData(historico.dataAula) }}</td>
-                <td class="text-right">
-                    <span class="badge" [class.badge--success]="historico.presente"
-                        [class.badge--danger]="!historico.presente">
+                <td class="text-center">
+                    <span class="badge" [class.badge-success]="historico.presente"
+                        [class.badge-danger]="!historico.presente">
                         {{ historico.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </td>
@@ -386,8 +397,15 @@
                 @for (aluno of detalhesAlunos; track aluno.id) {
                 <li class="aluno-item"
                     style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
-                    <span style="font-weight: 500;">{{ aluno.aluno?.nomeCompleto }}</span>
-                    <span class="badge" [class.badge--success]="aluno.presente" [class.badge--danger]="!aluno.presente">
+                    <div class="aluno-nome">
+                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
+                            [class.avatar--falta]="!aluno.presente" aria-hidden="true"
+                            style="width: 2rem; height: 2rem; font-size: 0.8rem;">
+                            {{ aluno.aluno?.nomeCompleto?.charAt(0) || '?' }}
+                        </div>
+                        <span class="nome-texto">{{ aluno.aluno?.nomeCompleto }}</span>
+                    </div>
+                    <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente">
                         {{ aluno.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </li>
