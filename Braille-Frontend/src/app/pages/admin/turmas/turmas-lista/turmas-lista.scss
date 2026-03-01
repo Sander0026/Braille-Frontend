@@ -19,6 +19,38 @@ $transition: 200ms ease;
     display: block;
 }
 
+// ── Abas Switcher ──────────────────────────────────────────
+.abas-switcher {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid $gray-200;
+}
+
+.aba-btn {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 0.5rem;
+    margin: 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: $neutral;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all $transition;
+    margin-bottom: -1px;
+
+    &:hover {
+        color: $gray-900;
+        border-bottom-color: $gray-200;
+    }
+
+    &.ativa {
+        color: $black;
+        border-bottom-color: $primary;
+    }
+}
+
 // ── Grid de cards ──────────────────────────────────────────
 .turmas-grid {
     display: grid;
