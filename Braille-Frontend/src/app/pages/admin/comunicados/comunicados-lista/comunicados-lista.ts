@@ -32,7 +32,6 @@ export class ComunicadosLista implements OnInit {
     { valor: 'SERVICO', label: 'Serviço' },
     { valor: 'EVENTO_CULTURAL', label: 'Evento Cultural' },
     { valor: 'LEGISLACAO', label: 'Legislação' },
-    { valor: 'TRABALHO_PCD', label: 'Trabalho para PCD' },
     { valor: 'GERAL', label: 'Aviso Geral' },
   ];
 

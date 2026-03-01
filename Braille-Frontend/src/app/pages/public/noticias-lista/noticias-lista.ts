@@ -47,7 +47,6 @@ export class NoticiasLista implements OnInit {
     { valor: 'SERVICO', label: 'Serviços' },
     { valor: 'EVENTO_CULTURAL', label: 'Eventos' },
     { valor: 'LEGISLACAO', label: 'Legislação' },
-    { valor: 'TRABALHO_PCD', label: 'Trabalho PCD' },
     { valor: 'GERAL', label: 'Avisos Gerais' }
   ];
 
