@@ -22,6 +22,7 @@ export class TurmasLista implements OnInit {
     erro = '';
     totalTurmas = 0;
     paginaAtual = 1;
+    abaAtual: 'ativas' | 'arquivadas' = 'ativas';
 
     // ── Professores (para o dropdown) ──────────────────────────
     professores: Usuario[] = [];
@@ -34,11 +35,11 @@ export class TurmasLista implements OnInit {
     erroModal = '';
     turmaForm!: FormGroup;
 
-    // ── Modal Excluir ──────────────────────────────────────────
-    modalExcluirAberto = false;
-    turmaParaExcluir: Turma | null = null;
-    excluindo = false;
-    erroExclusao = '';
+    // ── Modal Arquivar ──────────────────────────────────────────
+    modalArquivarAberto = false;
+    turmaParaArquivar: Turma | null = null;
+    arquivando = false;
+    erroArquivamento = '';
 
     // ── Modal Alunos ───────────────────────────────────────────
     modalAlunosAberto = false;
@@ -81,13 +82,22 @@ export class TurmasLista implements OnInit {
         return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
     }
 
+    get turmasFiltradas(): Turma[] {
+        return this.turmas.filter(t => this.abaAtual === 'ativas' ? t.statusAtivo : !t.statusAtivo);
+    }
+
+    alterarAba(aba: 'ativas' | 'arquivadas'): void {
+        this.abaAtual = aba;
+        this.paginaAtual = 1;
+    }
+
     // ── Carregamentos ──────────────────────────────────────────
     carregarTurmas(pagina = 1): void {
         this.isLoading = true;
         this.erro = '';
         this.paginaAtual = pagina;
 
-        this.turmasService.listar(pagina, 12).subscribe({
+        this.turmasService.listar(pagina, 100).subscribe({
             next: (res) => {
                 this.turmas = res.data;
                 this.totalTurmas = res.meta.total;
@@ -178,36 +188,49 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    // ── Modal Excluir ──────────────────────────────────────────
-    abrirModalExcluir(turma: Turma): void {
-        this.turmaParaExcluir = turma;
-        this.erroExclusao = '';
-        this.modalExcluirAberto = true;
+    // ── Modal Arquivar ──────────────────────────────────────────
+    abrirModalArquivar(turma: Turma): void {
+        this.turmaParaArquivar = turma;
+        this.erroArquivamento = '';
+        this.modalArquivarAberto = true;
     }
 
-    fecharModalExcluir(): void {
-        this.modalExcluirAberto = false;
-        this.turmaParaExcluir = null;
-        this.erroExclusao = '';
+    fecharModalArquivar(): void {
+        this.modalArquivarAberto = false;
+        this.turmaParaArquivar = null;
+        this.erroArquivamento = '';
     }
 
-    confirmarExclusao(): void {
-        if (!this.turmaParaExcluir || this.excluindo) return;
+    confirmarArquivamento(): void {
+        if (!this.turmaParaArquivar || this.arquivando) return;
 
-        this.excluindo = true;
-        this.erroExclusao = '';
+        this.arquivando = true;
+        this.erroArquivamento = '';
 
-        this.turmasService.excluir(this.turmaParaExcluir.id).subscribe({
+        this.turmasService.atualizar(this.turmaParaArquivar.id, { statusAtivo: false } as any).subscribe({
             next: () => {
-                this.excluindo = false;
-                this.fecharModalExcluir();
+                this.arquivando = false;
+                this.fecharModalArquivar();
                 this.carregarTurmas(this.paginaAtual);
             },
             error: (err: { error?: { message?: string } }) => {
-                this.excluindo = false;
-                this.erroExclusao = err.error?.message ?? 'Não foi possível excluir a turma.';
+                this.arquivando = false;
+                this.erroArquivamento = err.error?.message ?? 'Não foi possível arquivar a turma.';
                 this.cdr.detectChanges();
             },
+        });
+    }
+
+    restaurarTurma(turma: Turma): void {
+        if (!confirm(`Deseja restaurar a oficina ${turma.nome}?`)) return;
+
+        this.turmasService.atualizar(turma.id, { statusAtivo: true } as any).subscribe({
+            next: () => {
+                this.carregarTurmas(this.paginaAtual);
+            },
+            error: () => {
+                alert('Não foi possível restaurar a oficina.');
+            }
         });
     }
 
@@ -216,13 +239,14 @@ export class TurmasLista implements OnInit {
         this.turmaDetalhes = null;
         this.carregandoDetalhes = true;
         this.modalAlunosAberto = true;
-        this.buscaAlunoCtrl.setValue(''); // Limpa a busca anterior
+        this.buscaAlunoCtrl.setValue('', { emitEvent: false }); // Limpa a busca anterior
         this.alunosBuscaRestado = [];
 
         this.turmasService.buscarPorId(turma.id).subscribe({
             next: (t) => {
                 this.turmaDetalhes = t;
                 this.carregandoDetalhes = false;
+                this.buscarAlunosParaMatricula('');
                 this.cdr.detectChanges();
             },
             error: () => {
@@ -239,30 +263,27 @@ export class TurmasLista implements OnInit {
                 distinctUntilChanged()
             )
             .subscribe((termo) => {
-                if (!termo || termo.length < 3) {
-                    this.alunosBuscaRestado = [];
-                    this.buscandoAlunos = false;
-                    this.cdr.detectChanges();
-                    return;
-                }
-
-                this.buscandoAlunos = true;
-                this.cdr.detectChanges();
-
-                this.beneficiariosService.listar(1, 10, termo).subscribe({
-                    next: (res) => {
-                        // Filtra os alunos que já estão matriculados
-                        const IDsMatriculados = this.turmaDetalhes?.alunos?.map(a => a.id) || [];
-                        this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
-                        this.buscandoAlunos = false;
-                        this.cdr.detectChanges();
-                    },
-                    error: () => {
-                        this.buscandoAlunos = false;
-                        this.cdr.detectChanges();
-                    }
-                });
+                this.buscarAlunosParaMatricula(termo || '');
             });
+    }
+
+    buscarAlunosParaMatricula(termo: string): void {
+        this.buscandoAlunos = true;
+        this.cdr.detectChanges();
+
+        this.beneficiariosService.listar(1, 100, termo).subscribe({
+            next: (res) => {
+                // Filtra os alunos que já estão matriculados
+                const IDsMatriculados = this.turmaDetalhes?.alunos?.map(a => a.id) || [];
+                this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
+                this.buscandoAlunos = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.buscandoAlunos = false;
+                this.cdr.detectChanges();
+            }
+        });
     }
 
     adicionarAluno(aluno: Beneficiario): void {
@@ -319,7 +340,7 @@ export class TurmasLista implements OnInit {
     readonly Math = Math;
 
     get totalPaginas(): number {
-        return Math.ceil(this.totalTurmas / 12);
+        return Math.ceil(this.totalTurmas / 100);
     }
 
     paginaAnterior(): void {
