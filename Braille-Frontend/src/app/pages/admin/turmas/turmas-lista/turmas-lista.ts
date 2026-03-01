@@ -87,12 +87,14 @@ export class TurmasLista implements OnInit {
     }
 
     get turmasFiltradas(): Turma[] {
-        return this.turmas.filter(t => this.abaAtual === 'ativas' ? t.statusAtivo : !t.statusAtivo);
+        // O backend já filtra — retorna todos (a aba é controlada pelo carregarTurmas)
+        return this.turmas;
     }
 
     alterarAba(aba: 'ativas' | 'arquivadas'): void {
         this.abaAtual = aba;
         this.paginaAtual = 1;
+        this.carregarTurmas(1);
     }
 
     // ── Carregamentos ──────────────────────────────────────────
@@ -101,7 +103,10 @@ export class TurmasLista implements OnInit {
         this.erro = '';
         this.paginaAtual = pagina;
 
-        this.turmasService.listar(pagina, 100).subscribe({
+        // Passa statusAtivo baseado na aba: ativas=true, arquivadas=false
+        const statusAtivo = this.abaAtual === 'ativas' ? true : false;
+
+        this.turmasService.listar(pagina, 100, undefined, statusAtivo).subscribe({
             next: (res) => {
                 this.turmas = res.data;
                 this.totalTurmas = res.meta.total;
@@ -225,18 +230,49 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    restaurarTurma(turma: Turma): void {
-        if (!confirm(`Deseja restaurar a oficina ${turma.nome}?`)) return;
+    async restaurarTurma(turma: Turma): Promise<void> {
+        const ok = await this.confirmDialog.confirmar({
+            titulo: 'Restaurar Oficina',
+            mensagem: `Deseja restaurar a oficina "${turma.nome}"? Ela voltará a aparecer na aba de oficinas ativas.`,
+            textoBotaoConfirmar: 'Sim, restaurar',
+            tipo: 'info',
+        });
+        if (!ok) return;
 
-        this.turmasService.atualizar(turma.id, { statusAtivo: true } as any).subscribe({
+        this.turmasService.restaurar(turma.id).subscribe({
             next: () => {
                 this.carregarTurmas(this.paginaAtual);
+                this.cdr.detectChanges();
             },
-            error: () => {
-                alert('Não foi possível restaurar a oficina.');
+            error: (err: { error?: { message?: string } }) => {
+                this.erroArquivamento = err.error?.message ?? 'Não foi possível restaurar a oficina.';
+                this.cdr.detectChanges();
             }
         });
     }
+
+    async ocultarTurma(turma: Turma): Promise<void> {
+        const ok = await this.confirmDialog.confirmar({
+            titulo: 'Remover da Lista',
+            mensagem: `A oficina "${turma.nome}" será removida da lista de arquivadas. Os dados (frequências, matrículas) são 100% preservados no banco.`,
+            textoBotaoConfirmar: 'Sim, remover da lista',
+            tipo: 'warning',
+        });
+        if (!ok) return;
+
+        this.turmasService.ocultarDaAba(turma.id).subscribe({
+            next: () => {
+                this.carregarTurmas(this.paginaAtual);
+                this.cdr.detectChanges();
+            },
+            error: (err: { error?: { message?: string } }) => {
+                this.erroArquivamento = err.error?.message ?? 'Não foi possível ocultar a oficina.';
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+
 
     // ── Modal Alunos ───────────────────────────────────────────
     alterarAbaModalAlunos(aba: 'adicionar' | 'remover'): void {

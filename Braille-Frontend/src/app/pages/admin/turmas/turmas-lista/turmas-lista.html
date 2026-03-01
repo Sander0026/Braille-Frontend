@@ -72,8 +72,9 @@
       <div class="card-title-row">
         <h2 class="turma-nome">{{ turma.nome }}</h2>
         <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">{{
-          turma.statusAtivo ? 'Ativa' : 'Inativa' }}</span>
+          turma.statusAtivo ? 'Ativa' : 'Arquivada' }}</span>
       </div>
+
 
       @if (turma.descricao) {
       <p class="turma-descricao">{{ turma.descricao }}</p>
@@ -114,6 +115,7 @@
     </div>
 
     <div class="card-footer">
+      @if (abaAtual === 'ativas') {
       <button class="btn btn-sm btn-ghost" (click)="verAlunos(turma)"
         [attr.aria-label]="'Ver alunos da oficina ' + turma.nome">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -134,8 +136,6 @@
         </svg>
         Editar
       </button>
-
-      @if (turma.statusAtivo) {
       <button class="btn btn-sm btn-warning" (click)="abrirModalArquivar(turma)"
         [attr.aria-label]="'Arquivar oficina ' + turma.nome"
         style="background:#f59e0b; color:white; border-color:#f59e0b;">
@@ -158,12 +158,22 @@
         </svg>
         Restaurar
       </button>
+      <button class="btn btn-sm btn-danger" (click)="ocultarTurma(turma)"
+        [attr.aria-label]="'Remover da lista a oficina ' + turma.nome">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+        Remover da Lista
+      </button>
       }
     </div>
 
   </article>
   }
 </div>
+
 }
 
 <!-- Paginação -->
