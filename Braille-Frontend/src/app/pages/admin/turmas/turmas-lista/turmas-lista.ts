@@ -43,10 +43,12 @@ export class TurmasLista implements OnInit {
 
     // ── Modal Alunos ───────────────────────────────────────────
     modalAlunosAberto = false;
+    modalAlunosAbaAtual: 'adicionar' | 'remover' = 'adicionar';
     turmaDetalhes: Turma | null = null;
     carregandoDetalhes = false;
     buscaAlunoCtrl = new FormControl('');
     alunosBuscaRestado: Beneficiario[] = [];
+    alunosSelecionadosParaMatricula: string[] = [];
     buscandoAlunos = false;
     operacaoEmProgresso = false;
 
@@ -235,12 +237,22 @@ export class TurmasLista implements OnInit {
     }
 
     // ── Modal Alunos ───────────────────────────────────────────
+    alterarAbaModalAlunos(aba: 'adicionar' | 'remover'): void {
+        this.modalAlunosAbaAtual = aba;
+        if (aba === 'adicionar') {
+            this.buscaAlunoCtrl.setValue('', { emitEvent: false });
+            this.buscarAlunosParaMatricula('');
+        }
+    }
+
     verAlunos(turma: Turma): void {
         this.turmaDetalhes = null;
         this.carregandoDetalhes = true;
         this.modalAlunosAberto = true;
+        this.modalAlunosAbaAtual = 'adicionar';
         this.buscaAlunoCtrl.setValue('', { emitEvent: false }); // Limpa a busca anterior
         this.alunosBuscaRestado = [];
+        this.alunosSelecionadosParaMatricula = [];
 
         this.turmasService.buscarPorId(turma.id).subscribe({
             next: (t) => {
@@ -277,6 +289,13 @@ export class TurmasLista implements OnInit {
                 const IDsMatriculados = this.turmaDetalhes?.alunos?.map(a => a.id) || [];
                 this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
                 this.buscandoAlunos = false;
+
+                // Remove seleções de alunos que não estão mais na busca local 
+                // (opcional, mas garante que não salve alunos que não vê na busca, se buscar de novo)
+                this.alunosSelecionadosParaMatricula = this.alunosSelecionadosParaMatricula.filter(id =>
+                    this.alunosBuscaRestado.some(a => a.id === id)
+                );
+
                 this.cdr.detectChanges();
             },
             error: () => {
@@ -284,6 +303,58 @@ export class TurmasLista implements OnInit {
                 this.cdr.detectChanges();
             }
         });
+    }
+
+    toggleSelecaoAluno(alunoId: string): void {
+        const index = this.alunosSelecionadosParaMatricula.indexOf(alunoId);
+        if (index > -1) {
+            this.alunosSelecionadosParaMatricula.splice(index, 1);
+        } else {
+            this.alunosSelecionadosParaMatricula.push(alunoId);
+        }
+    }
+
+    salvarMatriculasEmLote(): void {
+        if (!this.turmaDetalhes || this.operacaoEmProgresso || this.alunosSelecionadosParaMatricula.length === 0) return;
+        this.operacaoEmProgresso = true;
+
+        const idsParaMatricular = [...this.alunosSelecionadosParaMatricula];
+        let concluidos = 0;
+        let erros = 0;
+
+        // Requisições sequenciais para matricular os alunos usando a API atual que matricula um por um
+        const processarProximo = () => {
+            if (concluidos + erros === idsParaMatricular.length) {
+                this.operacaoEmProgresso = false;
+                this.alunosSelecionadosParaMatricula = [];
+                // Recarregar os detalhes da turma para pegar a lista atualizada do backend
+                this.turmasService.buscarPorId(this.turmaDetalhes!.id).subscribe((t) => {
+                    this.turmaDetalhes = t;
+                    // Retira da listagem local de pesquisa os que acabaram de ser adicionados
+                    this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => !idsParaMatricular.includes(a.id));
+
+                    if (erros > 0) {
+                        alert(`Processo concluído: ${concluidos} adicionados, ${erros} falharam.`);
+                    }
+                    this.cdr.detectChanges();
+                });
+                return;
+            }
+
+            const alunoId = idsParaMatricular[concluidos + erros];
+            this.turmasService.matricularAluno(this.turmaDetalhes!.id, alunoId).subscribe({
+                next: () => {
+                    concluidos++;
+                    processarProximo();
+                },
+                error: () => {
+                    erros++;
+                    processarProximo();
+                }
+            });
+        };
+
+        processarProximo();
     }
 
     adicionarAluno(aluno: Beneficiario): void {
@@ -334,6 +405,7 @@ export class TurmasLista implements OnInit {
         this.turmaDetalhes = null;
         this.buscaAlunoCtrl.setValue('');
         this.alunosBuscaRestado = [];
+        this.alunosSelecionadosParaMatricula = [];
     }
 
     // ── Paginação ──────────────────────────────────────────────

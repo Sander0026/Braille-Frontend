@@ -381,28 +381,21 @@ $transition: 200ms ease;
     margin-bottom: 1rem;
 }
 
-// ── Busca Alunos (Autocomplete) ────────────────────────────
+// ── Busca Alunos (Autocomplete & Checboxes) ────────────────
 .busca-alunos-container {
     position: relative;
     width: 100%;
 }
 
 .busca-resultados {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
     background: #fff;
     border: 1px solid $gray-200;
-    border-radius: 0 0 $border-r $border-r;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border-radius: $border-r;
     max-height: 250px;
     overflow-y: auto;
-    z-index: 50;
     list-style: none;
     padding: 0;
     margin: 0;
-    border-top: none;
 }
 
 .busca-resultado-item {
@@ -422,6 +415,17 @@ $transition: 200ms ease;
     &:hover {
         background: $gray-100;
     }
+}
+
+.custom-checkbox {
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 2px solid $gray-400;
+    border-radius: 4px;
+    cursor: pointer;
+    accent-color: $primary;
+    transition: all $transition;
+    margin: 0;
 }
 
 // ── Alunos list ────────────────────────────────────────────
