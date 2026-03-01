@@ -107,9 +107,12 @@ export class AdminLayout implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (perfil) => {
-          this.perfil = perfil;
-          this.fotoPerfil = perfil.fotoPerfil;
-          this.atualizarFormPerfil(perfil);
+          // Adiar para fora do ciclo de verificação atual (evita NG0100)
+          Promise.resolve().then(() => {
+            this.perfil = perfil;
+            this.fotoPerfil = perfil.fotoPerfil;
+            this.atualizarFormPerfil(perfil);
+          });
         },
         error: () => { /* usa dados do JWT */ }
       });
