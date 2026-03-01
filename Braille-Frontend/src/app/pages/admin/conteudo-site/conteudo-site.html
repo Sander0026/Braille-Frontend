@@ -1,7 +1,7 @@
 <div class="page-header">
-    <div class="header-titles">
-        <h1 class="page-title">Conteúdo do Site</h1>
-        <p class="page-subtitle">Gerencie as informações exibidas no portal público.</p>
+    <div>
+        <h1 class="page-title">Gestão de Conteúdo</h1>
+        <p class="page-subtitle">Gerencie as informações e visual exibidos no portal público.</p>
     </div>
 </div>
 
@@ -385,3 +385,79 @@
 
     } <!-- /else !carregando -->
 </div>
+
+<!-- Modais de Confirmação -->
+
+<!-- Modal Excluir Logo -->
+@if (logoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Logo" (click)="cancelarExclusaoLogo()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Remover Logo</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoLogo()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a remover a logo atual do painel.</p>
+            <p>Deseja continuar?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoLogo()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoLogo()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover Logo
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Oficina -->
+@if (oficinaParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Oficina"
+    (click)="cancelarExclusaoOficina()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Excluir Oficina</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoOficina()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a excluir este card de oficina.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar Oficinas</strong>. Deseja removê-la da lista?
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoOficina()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoOficina()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover Oficina
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Depoimento -->
+@if (depoimentoParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Depoimento"
+    (click)="cancelarExclusaoDepoimento()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Excluir Depoimento</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDepoimento()"
+                aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a excluir este depoimento.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar Depoimentos</strong>. Deseja removê-lo da lista?
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDepoimento()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDepoimento()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover Depoimento
+            </button>
+        </div>
+    </div>
+</div>
+}

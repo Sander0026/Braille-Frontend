@@ -34,6 +34,11 @@ export class ConteudoSite implements OnInit, OnDestroy {
   logoPreview: string | null = null;
   private apiUrl = environment.apiUrl;
 
+  // Modais de Exclusão
+  oficinaParaExcluir: number | null = null;
+  depoimentoParaExcluir: number | null = null;
+  logoParaExcluir: boolean = false;
+
   constructor(
     private fb: FormBuilder,
     private siteConfig: SiteConfigService,
@@ -122,7 +127,18 @@ export class ConteudoSite implements OnInit, OnDestroy {
   }
 
   removerOficina(index: number) {
-    this.oficinasArray.removeAt(index);
+    this.oficinaParaExcluir = index;
+  }
+
+  confirmarExclusaoOficina() {
+    if (this.oficinaParaExcluir !== null) {
+      this.oficinasArray.removeAt(this.oficinaParaExcluir);
+      this.oficinaParaExcluir = null;
+    }
+  }
+
+  cancelarExclusaoOficina() {
+    this.oficinaParaExcluir = null;
   }
 
   adicionarDepoimento(texto = '', nome = '', idade: number | '' = '') {
@@ -134,7 +150,18 @@ export class ConteudoSite implements OnInit, OnDestroy {
   }
 
   removerDepoimento(index: number) {
-    this.depoimentosArray.removeAt(index);
+    this.depoimentoParaExcluir = index;
+  }
+
+  confirmarExclusaoDepoimento() {
+    if (this.depoimentoParaExcluir !== null) {
+      this.depoimentosArray.removeAt(this.depoimentoParaExcluir);
+      this.depoimentoParaExcluir = null;
+    }
+  }
+
+  cancelarExclusaoDepoimento() {
+    this.depoimentoParaExcluir = null;
   }
 
   private carregarDados() {
@@ -269,8 +296,17 @@ export class ConteudoSite implements OnInit, OnDestroy {
   }
 
   removerLogo() {
+    this.logoParaExcluir = true;
+  }
+
+  confirmarExclusaoLogo() {
     this.logoPreview = null;
     this.formConfig.patchValue({ logoUrl: '' });
+    this.logoParaExcluir = false;
+  }
+
+  cancelarExclusaoLogo() {
+    this.logoParaExcluir = false;
   }
 
   private salvarSecaoValorUnico(secao: string, values: any) {

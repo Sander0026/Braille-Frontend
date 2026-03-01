@@ -24,6 +24,8 @@ export class ComunicadosLista implements OnInit {
   fotoSelecionada: File | null = null;
   fotoPreview: string | null = null;
 
+  comunicadoParaExcluir: Comunicado | null = null;
+
   readonly CATEGORIAS = [
     { valor: 'NOTICIA', label: 'Notícia' },
     { valor: 'VAGA_EMPREGO', label: 'Vaga PCD' },
@@ -167,10 +169,25 @@ export class ComunicadosLista implements OnInit {
   }
 
   excluir(c: Comunicado): void {
-    if (!confirm(`Excluir o comunicado "${c.titulo}"?`)) return;
-    this.comunicadosService.excluir(c.id).subscribe({
-      next: () => this.carregar(),
-      error: () => { alert('Erro ao excluir comunicado.'); this.cdr.detectChanges(); }
+    this.comunicadoParaExcluir = c;
+  }
+
+  cancelarExclusao(): void {
+    this.comunicadoParaExcluir = null;
+  }
+
+  confirmarExclusao(): void {
+    if (!this.comunicadoParaExcluir) return;
+    this.comunicadosService.excluir(this.comunicadoParaExcluir.id).subscribe({
+      next: () => {
+        this.comunicadoParaExcluir = null;
+        this.carregar();
+      },
+      error: () => {
+        this.comunicadoParaExcluir = null;
+        alert('Erro ao excluir comunicado.');
+        this.cdr.detectChanges();
+      }
     });
   }
 

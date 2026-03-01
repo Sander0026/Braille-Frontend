@@ -151,3 +151,30 @@
     </div>
 </div>
 }
+
+<!-- Modal de Confirmação de Exclusão -->
+@if (comunicadoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Excluir comunicado ' + comunicadoParaExcluir.titulo" (click)="cancelarExclusao()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Comunicado</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()"
+                aria-label="Cancelar exclusão">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>Você está prestes a excluir o comunicado <strong>{{ comunicadoParaExcluir.titulo }}</strong>.</p>
+            <p>Esta ação não pode ser desfeita. Deseja continuar?</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusao()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusao()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Excluir Comunicado
+            </button>
+        </div>
+    </div>
+</div>
+}
