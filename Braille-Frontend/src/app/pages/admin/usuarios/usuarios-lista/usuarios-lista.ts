@@ -24,6 +24,8 @@ export class UsuariosLista implements OnInit, OnDestroy {
     buscaCtrl = new FormControl('');
     usuarioEmEdicao: Usuario | null = null;
     usuarioVisualizado: Usuario | null = null;
+    usuarioParaExcluir: Usuario | null = null;
+    usuarioParaResetar: Usuario | null = null;
     editForm!: FormGroup;
     salvando = false;
 
@@ -104,10 +106,27 @@ export class UsuariosLista implements OnInit, OnDestroy {
     }
 
     excluir(usuario: Usuario): void {
-        if (!confirm(`Excluir o usuário "${usuario.nome}"? Esta ação não pode ser desfeita.`)) return;
-        this.usuariosService.excluir(usuario.id).subscribe({
-            next: () => this.carregar(),
-            error: () => { alert('Erro ao excluir usuário.'); this.cdr.detectChanges(); }
+        this.usuarioParaExcluir = usuario;
+    }
+
+    cancelarExclusao(): void {
+        this.usuarioParaExcluir = null;
+    }
+
+    confirmarExclusao(): void {
+        if (!this.usuarioParaExcluir) return;
+        this.salvando = true;
+        this.usuariosService.excluir(this.usuarioParaExcluir.id).subscribe({
+            next: () => {
+                this.salvando = false;
+                this.usuarioParaExcluir = null;
+                this.carregar();
+            },
+            error: () => {
+                this.salvando = false;
+                alert('Erro ao excluir usuário.');
+                this.cdr.detectChanges();
+            }
         });
     }
 
@@ -151,23 +170,26 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
     resetarSenhaAdmin(): void {
         if (!this.usuarioVisualizado) return;
+        this.usuarioParaResetar = this.usuarioVisualizado;
+    }
 
-        const confirmado = confirm(
-            `ATENÇÃO: Você está prestes a resetar a senha de ${this.usuarioVisualizado.nome}.\n\n` +
-            `A nova senha provisória será: Ilbes@123\n\n` +
-            `O usuário será forçado a criar uma nova senha pessoal assim que logar.\nConfirmar ação?`
-        );
+    cancelarReset(): void {
+        this.usuarioParaResetar = null;
+    }
 
-        if (!confirmado) return;
+    confirmarResetSenha(): void {
+        if (!this.usuarioParaResetar) return;
 
         this.salvando = true;
-        this.usuariosService.resetarSenha(this.usuarioVisualizado.id).subscribe({
+        this.usuariosService.resetarSenha(this.usuarioParaResetar.id).subscribe({
             next: () => {
                 this.salvando = false;
+                this.usuarioParaResetar = null;
                 alert('A senha foi redefinida com sucesso.');
             },
             error: () => {
                 this.salvando = false;
+                this.usuarioParaResetar = null;
                 alert('Ocorreu um erro ao resetar a senha deste usuário.');
                 this.cdr.detectChanges();
             }
