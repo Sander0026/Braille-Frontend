@@ -70,14 +70,6 @@ export class Dashboard implements OnInit {
         cor: 'success',
         rota: '/admin/usuarios',
         ariaLabel: `${this.stats.membrosEquipe} membros da equipe. Ir para usuários`
-      },
-      {
-        label: 'Comunicados',
-        valor: this.stats.comunicadosGerais,
-        icon: 'campaign',
-        cor: 'warning',
-        rota: '/admin/comunicados',
-        ariaLabel: `${this.stats.comunicadosGerais} comunicados. Ir para comunicados`
       }
     ];
   }
