@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { ContatosService, Contato } from '../../../../core/services/contatos.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 
 type FiltroLida = 'todas' | 'nao-lidas' | 'lidas';
 
@@ -30,7 +31,11 @@ export class ContatosLista implements OnInit {
     { valor: 'lidas', label: 'Lidas' }
   ];
 
-  constructor(private contatosService: ContatosService, private cdr: ChangeDetectorRef) { }
+  constructor(
+    private contatosService: ContatosService,
+    private cdr: ChangeDetectorRef,
+    private confirmDialog: ConfirmDialogService,
+  ) { }
 
   ngOnInit(): void { this.carregar(); }
 
@@ -70,11 +75,17 @@ export class ContatosLista implements OnInit {
     });
   }
 
-  excluir(contato: Contato): void {
-    if (!confirm(`Excluir mensagem de "${contato.nome}"?`)) return;
+  async excluir(contato: Contato): Promise<void> {
+    const ok = await this.confirmDialog.confirmar({
+      titulo: 'Excluir Mensagem',
+      mensagem: `Tem certeza que deseja excluir a mensagem de "${contato.nome}"? Esta ação não pode ser desfeita.`,
+      textoBotaoConfirmar: 'Sim, excluir',
+      tipo: 'danger',
+    });
+    if (!ok) return;
     this.contatosService.excluir(contato.id).subscribe({
       next: () => { this.fecharMensagem(); this.carregar(); },
-      error: () => { alert('Erro ao excluir mensagem.'); this.cdr.detectChanges(); }
+      error: () => { this.cdr.detectChanges(); }
     });
   }
 

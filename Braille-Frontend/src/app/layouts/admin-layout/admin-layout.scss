@@ -958,6 +958,57 @@ $transition: 250ms ease;
             background: $gray-200;
         }
     }
+
+    &-danger {
+        background: #dc2626;
+        color: #fff;
+
+        &:hover:not(:disabled) {
+            background: #b91c1c;
+        }
+    }
+
+    &-success {
+        background: #16a34a;
+        color: #fff;
+
+        &:hover:not(:disabled) {
+            background: #15803d;
+        }
+    }
+
+    // Tamanho pequeno
+    &-sm {
+        padding: 0.375rem 0.875rem;
+        font-size: 0.8125rem;
+        border-radius: 0.375rem;
+    }
+
+    // Botões de ícone (sem texto)
+    &-icon {
+        padding: 0.375rem;
+        border-radius: 0.375rem;
+        width: 2rem;
+        height: 2rem;
+
+        span {
+            font-family: 'Material Symbols Rounded', sans-serif;
+            font-size: 1.1rem;
+            font-weight: normal;
+            line-height: 1;
+        }
+    }
+
+    // Ghost (transparente)
+    &-ghost {
+        background: transparent;
+        color: $gray-600;
+
+        &:hover:not(:disabled) {
+            background: $gray-100;
+            color: $gray-900;
+        }
+    }
 }
 
 // Banner sucesso (reutilizável nos modais)

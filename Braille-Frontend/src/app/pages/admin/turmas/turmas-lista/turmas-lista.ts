@@ -6,6 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { BeneficiariosService, Beneficiario } from '../../../../core/services/beneficiarios.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 
 @Component({
     selector: 'app-turmas-lista',
@@ -55,6 +56,7 @@ export class TurmasLista implements OnInit {
         private beneficiariosService: BeneficiariosService,
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef,
+        private confirmDialog: ConfirmDialogService,
     ) { }
 
     ngOnInit(): void {
@@ -271,37 +273,38 @@ export class TurmasLista implements OnInit {
 
         this.turmasService.matricularAluno(this.turmaDetalhes.id, aluno.id).subscribe({
             next: (turmaAtualizada) => {
-                // Atualiza a visualização local para refletir a nova matrícula
                 this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
-                // Retira da listagem de resultados de busca
                 this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => a.id !== aluno.id);
                 this.operacaoEmProgresso = false;
                 this.cdr.detectChanges();
             },
             error: () => {
-                alert('Falha ao adicionar aluno. Verifique se ele já não está matriculado na turma.');
                 this.operacaoEmProgresso = false;
                 this.cdr.detectChanges();
             }
         });
     }
 
-    removerAluno(alunoId: string, nome: string): void {
+    async removerAluno(alunoId: string, nome: string): Promise<void> {
         if (!this.turmaDetalhes || this.operacaoEmProgresso) return;
 
-        if (!confirm(`Remover permanentemente o aluno ${nome} desta oficina?`)) return;
+        const ok = await this.confirmDialog.confirmar({
+            titulo: 'Remover Aluno',
+            mensagem: `Tem certeza que deseja remover ${nome} desta oficina?`,
+            textoBotaoConfirmar: 'Sim, remover',
+            tipo: 'warning',
+        });
+        if (!ok) return;
 
         this.operacaoEmProgresso = true;
 
         this.turmasService.desmatricularAluno(this.turmaDetalhes.id, alunoId).subscribe({
             next: (turmaAtualizada) => {
-                // Atualiza a visualização local para refletir a remoção
                 this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
                 this.operacaoEmProgresso = false;
                 this.cdr.detectChanges();
             },
             error: () => {
-                alert('Falha ao remover o aluno da oficina.');
                 this.operacaoEmProgresso = false;
                 this.cdr.detectChanges();
             }

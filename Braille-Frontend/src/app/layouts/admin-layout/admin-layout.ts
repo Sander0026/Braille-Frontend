@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
+import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
 
 interface NavItem {
   rota: string;
@@ -19,7 +20,7 @@ type Modal = 'none' | 'foto' | 'senha' | 'perfil';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
