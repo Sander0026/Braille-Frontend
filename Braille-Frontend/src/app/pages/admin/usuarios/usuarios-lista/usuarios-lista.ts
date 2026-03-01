@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 
 @Component({
     selector: 'app-usuarios-lista',
@@ -37,7 +38,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
         { value: 'PROFESSOR', label: 'Professor' }
     ];
 
-    constructor(private usuariosService: UsuariosService, private fb: FormBuilder, private cdr: ChangeDetectorRef) {
+    constructor(
+        private usuariosService: UsuariosService,
+        private fb: FormBuilder,
+        private cdr: ChangeDetectorRef,
+        private confirmDialog: ConfirmDialogService,
+    ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
             username: ['', [Validators.required, Validators.minLength(3)]],
@@ -83,11 +89,17 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
     abrirModal(usuario: Usuario): void {
         this.usuarioEmEdicao = usuario;
-        this.editForm.patchValue({
-            nome: usuario.nome,
-            username: usuario.username,
-            email: usuario.email,
-            role: usuario.role
+        // Primeiro define o usuario, depois popula o form e força detecção de mudanças
+        // (necessário por conta do withFetch() que roda fora do Zone.js)
+        Promise.resolve().then(() => {
+            this.editForm.patchValue({
+                nome: usuario.nome,
+                username: usuario.username,
+                email: usuario.email,
+                role: usuario.role
+            });
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
         });
     }
 
@@ -101,7 +113,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         this.salvando = true;
         this.usuariosService.atualizar(this.usuarioEmEdicao.id, this.editForm.value).subscribe({
             next: () => { this.salvando = false; this.fecharModal(); this.carregar(); },
-            error: () => { this.salvando = false; alert('Erro ao salvar alterações.'); this.cdr.detectChanges(); }
+            error: () => { this.salvando = false; this.cdr.detectChanges(); }
         });
     }
 
@@ -124,7 +136,6 @@ export class UsuariosLista implements OnInit, OnDestroy {
             },
             error: () => {
                 this.salvando = false;
-                alert('Erro ao excluir usuário.');
                 this.cdr.detectChanges();
             }
         });
@@ -151,7 +162,6 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
         this.usuariosService.uploadFoto(file).subscribe({
             next: (res) => {
-                // Atualiza a foto no DB do usuário
                 const url = res.url;
                 if (!this.usuarioVisualizado) return;
 
@@ -159,12 +169,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
                     next: () => {
                         if (this.usuarioVisualizado) this.usuarioVisualizado.fotoPerfil = url;
                         this.carregar();
-                        alert('Foto atualizada com sucesso!');
+                        this.cdr.detectChanges();
                     },
-                    error: () => alert('Erro ao salvar URL da foto atualizada.')
+                    error: () => { this.cdr.detectChanges(); }
                 });
             },
-            error: () => alert('Erro ao fazer upload da imagem.')
+            error: () => { this.cdr.detectChanges(); }
         });
     }
 
@@ -185,12 +195,11 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
-                alert('A senha foi redefinida com sucesso.');
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
-                alert('Ocorreu um erro ao resetar a senha deste usuário.');
                 this.cdr.detectChanges();
             }
         });
