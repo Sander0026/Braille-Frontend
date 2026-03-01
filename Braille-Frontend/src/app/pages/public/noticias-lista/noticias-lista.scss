@@ -235,6 +235,16 @@ $transition: 0.2s ease-in-out;
     }
 }
 
+.card-cover-link {
+    display: block;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover .card-cover img {
+        transform: scale(1.05);
+    }
+}
+
 .card-cover {
     margin: 0;
     height: 200px;

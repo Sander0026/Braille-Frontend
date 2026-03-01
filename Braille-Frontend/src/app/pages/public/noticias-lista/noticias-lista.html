@@ -58,20 +58,24 @@
         } @else {
         <div class="grid-cards">
             @for (item of comunicados; track item.id) {
-            <article class="card">
+            <article class="card" [attr.aria-label]="'Ler notícia: ' + item.titulo">
 
-                <figure class="card-cover">
-                    @if (item.imagemCapa) {
-                    <img [src]="item.imagemCapa" [alt]="'Imagem ilustrativa para: ' + item.titulo" loading="eager" />
-                    } @else {
-                    <div class="cover-placeholder" aria-hidden="true">
-                        <span class="material-symbols-rounded">article</span>
-                    </div>
-                    }
-                    <div class="badge-categoria" [attr.data-categoria]="item.categoria">
-                        {{ getLabelCategoria(item.categoria) }}
-                    </div>
-                </figure>
+                <!-- Capa clicável -->
+                <a [routerLink]="['/noticias', item.id]" class="card-cover-link" tabindex="-1" aria-hidden="true">
+                    <figure class="card-cover">
+                        @if (item.imagemCapa) {
+                        <img [src]="item.imagemCapa" [alt]="'Imagem ilustrativa para: ' + item.titulo"
+                            loading="eager" />
+                        } @else {
+                        <div class="cover-placeholder" aria-hidden="true">
+                            <span class="material-symbols-rounded">article</span>
+                        </div>
+                        }
+                        <div class="badge-categoria" [attr.data-categoria]="item.categoria">
+                            {{ getLabelCategoria(item.categoria) }}
+                        </div>
+                    </figure>
+                </a>
 
                 <div class="card-content">
                     @if (item.fixado) {
@@ -90,11 +94,11 @@
                             <span class="material-symbols-rounded" aria-hidden="true">calendar_today</span>
                             {{ item.criadoEm | date:'dd/MM/yyyy' }}
                         </time>
-                        <button type="button" class="btn-ler-mais"
+                        <a [routerLink]="['/noticias', item.id]" class="btn-ler-mais"
                             [attr.aria-label]="'Ler notícia completa: ' + item.titulo">
                             Ler
                             <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
-                        </button>
+                        </a>
                     </footer>
                 </div>
             </article>

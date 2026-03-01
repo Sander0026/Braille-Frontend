@@ -40,6 +40,10 @@ export class ComunicadosService {
         return this.http.post<Comunicado>(this.url, dados);
     }
 
+    buscarPorId(id: string): Observable<Comunicado> {
+        return this.http.get<Comunicado>(`${this.url}/${id}`);
+    }
+
     atualizar(id: string, dados: Record<string, any>): Observable<Comunicado> {
         return this.http.patch<Comunicado>(`${this.url}/${id}`, dados);
     }
