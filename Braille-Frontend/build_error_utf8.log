@@ -1,0 +1,181 @@
+﻿[33mÔØ»[39m Building...
+[32mÔ£ö[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-3AD3PVF5.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m191.95 kB[39m[2m | [22m               [36m55.71 kB[39m
+[32mchunk-HTDSQJSZ.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m95.35 kB[39m[2m | [22m               [36m23.95 kB[39m
+[32mstyles-DUH6GSI4.css[39m[2m | [22m[2mstyles[22m                 [2m | [22m [36m18.73 kB[39m[2m | [22m                [36m2.86 kB[39m
+[32mmain-FMIUVOQE.js[39m   [2m | [22m[2mmain[22m                   [2m | [22m  [36m3.29 kB[39m[2m | [22m                [36m1.15 kB[39m
+[32mchunk-Y3A2WDSB.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m1.52 kB[39m[2m | [22m              [36m647 bytes[39m
+[32mchunk-WXPACUKX.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m1.22 kB[39m[2m | [22m              [36m530 bytes[39m
+[32mchunk-ZAQJCETW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m52 bytes[39m[2m | [22m               [36m52 bytes[39m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m          [2m | [22m[1m312.09 kB[22m[2m | [22m               [1m84.89 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-IT7UKMNF.js[39m  [2m | [22m[2mconteudo-site[22m          [2m | [22m [36m52.24 kB[39m[2m | [22m               [36m11.21 kB[39m
+[32mchunk-MFJQ6Q44.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m50.52 kB[39m[2m | [22m                [36m9.72 kB[39m
+[32mchunk-DM2OMI4A.js[39m  [2m | [22m[2madmin-layout[22m           [2m | [22m [36m45.59 kB[39m[2m | [22m                [36m8.69 kB[39m
+[32mchunk-VODRHL3W.js[39m  [2m | [22m[2mturmas-lista[22m           [2m | [22m [36m36.06 kB[39m[2m | [22m                [36m8.51 kB[39m
+[32mchunk-6LOH7XFF.js[39m  [2m | [22m[2mfrequencias-lista[22m      [2m | [22m [36m35.31 kB[39m[2m | [22m                [36m7.69 kB[39m
+[32mchunk-Y7MWXPPM.js[39m  [2m | [22m[2mcadastro-wizard[22m        [2m | [22m [36m31.95 kB[39m[2m | [22m                [36m7.64 kB[39m
+[32mchunk-DI4GYG4G.js[39m  [2m | [22m[2mlogin[22m                  [2m | [22m [36m27.69 kB[39m[2m | [22m                [36m4.74 kB[39m
+[32mchunk-TJ2WNM7K.js[39m  [2m | [22m[2mhome[22m                   [2m | [22m [36m25.70 kB[39m[2m | [22m                [36m6.30 kB[39m
+[32mchunk-3LZN24VI.js[39m  [2m | [22m[2musuarios-lista[22m         [2m | [22m [36m24.30 kB[39m[2m | [22m                [36m6.16 kB[39m
+[32mchunk-GBW4HOA7.js[39m  [2m | [22m[2mcadastro-usuario-wizard[22m[2m | [22m [36m22.30 kB[39m[2m | [22m                [36m5.37 kB[39m
+[32mchunk-MITMHZFD.js[39m  [2m | [22m[2mbeneficiary-list[22m       [2m | [22m [36m21.72 kB[39m[2m | [22m                [36m5.99 kB[39m
+[32mchunk-4STA4ZPX.js[39m  [2m | [22m[2mnoticias-lista[22m         [2m | [22m [36m17.83 kB[39m[2m | [22m                [36m4.67 kB[39m
+[32mchunk-QF4CURER.js[39m  [2m | [22m[2mcontato[22m                [2m | [22m [36m14.37 kB[39m[2m | [22m                [36m4.04 kB[39m
+[32mchunk-UD7IPEMY.js[39m  [2m | [22m[2mcontatos-lista[22m         [2m | [22m [36m12.99 kB[39m[2m | [22m                [36m3.76 kB[39m
+[32mchunk-7IMEGA7D.js[39m  [2m | [22m[2mnoticia-detalhe[22m        [2m | [22m [36m12.04 kB[39m[2m | [22m                [36m3.19 kB[39m
+[2m...and 7 more lazy chunks files. Use "--verbose" to show all the files.[22m
+
+Application bundle generation failed. [12.634 seconds] - 2026-03-01T15:38:03.016Z
+
+node.exe : 
+[1m[33m[33mÔû▓ [43;33m[
+[43;30mWARNING[43;33m][0m 
+[1msrc/app/pages/admin/turm
+as/turmas-lista/turmas-lista
+.scss exceeded maximum 
+budget. Budget 4.00 kB was 
+not met by 1.66 kB with a 
+total of 5.66 kB.[0m
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: ([1m  
+  [33m[33mÔ...of 5.66 kB   
+ .[0m:String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1msrc/a
+pp/pages/public/noticia-deta
+lhe/noticia-detalhe.scss 
+exceeded maximum budget. 
+Budget 4.00 kB was not met 
+by 1.27 kB with a total of 
+5.27 kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1msrc/a
+pp/pages/admin/frequencias/f
+requencias-lista/frequencias
+-lista.scss exceeded 
+maximum budget. Budget 4.00 
+kB was not met by 3.71 kB 
+with a total of 7.71 kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1msrc/a
+pp/pages/admin/beneficiarios
+/cadastro-wizard/cadastro-wi
+zard.scss exceeded maximum 
+budget. Budget 4.00 kB was 
+not met by 1.73 kB with a 
+total of 5.73 kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1msrc/a
+pp/pages/admin/conteudo-site
+/conteudo-site.scss 
+exceeded maximum budget. 
+Budget 4.00 kB was not met 
+by 2.78 kB with a total of 
+6.78 kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1mcss-i
+nline-fonts:https://fonts.go
+ogleapis.com/css2?family=Mat
+erial+Symbols+Rounded:opsz,w
+ght,FILL,GRAD@24,400,1,0&fam
+ily=Inter:wght@400;500;600;7
+00&display=swap exceeded 
+maximum budget. Budget 4.00 
+kB was not met by 16.53 kB 
+with a total of 20.53 
+kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1msrc/a
+pp/pages/public/noticias-lis
+ta/noticias-lista.scss 
+exceeded maximum budget. 
+Budget 4.00 kB was not met 
+by 3.94 kB with a total of 
+7.94 kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1mcss-i
+nline-fonts:https://fonts.go
+ogleapis.com/css2?family=Int
+er:wght@400;500;600;700;800;
+900&display=swap exceeded 
+maximum budget. Budget 4.00 
+kB was not met by 12.67 kB 
+with a total of 16.67 
+kB.[0m
+
+
+[33mÔû▓ [43;33m[[43;30mWA
+RNING[43;33m][0m [1msrc/a
+pp/pages/public/home/home.sc
+ss exceeded maximum budget. 
+Budget 4.00 kB was not met 
+by 7.10 kB with a total of 
+11.10 kB.[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[4
+1;97mERROR[41;31m][0m [1m
+css-inline-fonts:https://fon
+ts.googleapis.com/css2?famil
+y=Material+Symbols+Rounded:o
+psz,wght,FILL,GRAD@24,400,1,
+0&family=Inter:wght@400;500;
+600;700&display=swap 
+exceeded maximum budget. 
+Budget 8.00 kB was not met 
+by 12.53 kB with a total of 
+20.53 kB.[0m
+
+
+[31mX [41;31m[[41;97mERRO
+R[41;31m][0m [1mcss-inlin
+e-fonts:https://fonts.google
+apis.com/css2?family=Inter:w
+ght@400;500;600;700;800;900&
+display=swap exceeded 
+maximum budget. Budget 8.00 
+kB was not met by 8.67 kB 
+with a total of 16.67 
+kB.[0m
+
+
+[31mX [41;31m[[41;97mERRO
+R[41;31m][0m [1msrc/app/p
+ages/public/home/home.scss 
+exceeded maximum budget. 
+Budget 8.00 kB was not met 
+by 3.10 kB with a total of 
+11.10 kB.[0m
+
+[39m[22m
+
