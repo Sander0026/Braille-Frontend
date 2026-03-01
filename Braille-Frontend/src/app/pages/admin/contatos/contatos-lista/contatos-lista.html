@@ -52,7 +52,7 @@
                         }
                         {{ contato.nome }}
                     </strong>
-                    <span class="remetente-email">{{ contato.email }}</span>
+                    <span class="remetente-celular">{{ contato.telefone || 'Celular não informado' }}</span>
                 </div>
             </div>
             <div class="mensagem-acoes">
@@ -99,7 +99,8 @@
         <div class="modal-header">
             <div>
                 <h2>{{ contatoSelecionado.nome }}</h2>
-                <p style="font-size:.8rem;color:#737373;margin-top:.2rem">{{ contatoSelecionado.email }} · {{
+                <p style="font-size:.8rem;color:#737373;margin-top:.2rem">{{ contatoSelecionado.telefone || 'Celular não
+                    informado' }} · {{
                     formatarData(contatoSelecionado.criadoEm) }}</p>
             </div>
             <button class="btn btn-icon btn-ghost" (click)="fecharMensagem()" aria-label="Fechar mensagem">✕</button>

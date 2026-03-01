@@ -143,11 +143,12 @@ $gray-900: #1f1f1f;
     filter: brightness(0.85);
 }
 
-.remetente-email {
+.remetente-celular {
     display: block;
     font-size: 0.75rem;
     color: $gray-600;
     margin-top: 0.1rem;
+    word-break: break-all;
 }
 
 .mensagem-acoes {
