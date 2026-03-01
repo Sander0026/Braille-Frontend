@@ -25,6 +25,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   deletandoImage = false;
   alunoSelecionado: Beneficiario | null = null;
 
+  // Modais de Confirmação (Padronizados)
+  alunoParaInativar: Beneficiario | null = null;
+  salvando = false;
+
+  documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl'; url: string } | null = null;
+
   // Paginação
   paginaAtual = 1;
   totalPaginas = 1;
@@ -94,21 +100,28 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     return new Date(data).toLocaleDateString('pt-BR');
   }
 
-  async inativar(aluno: Beneficiario): Promise<void> {
-    const estaAtivo = aluno.statusAtivo !== false; // padrão: ativo
-    const ok = await this.confirmDialog.confirmar({
-      titulo: estaAtivo ? 'Inativar Aluno' : 'Reativar Aluno',
-      mensagem: estaAtivo
-        ? `Deseja inativar "${aluno.nomeCompleto}"? O registro será mantido, mas o aluno ficará inativo.`
-        : `Deseja reativar "${aluno.nomeCompleto}"?`,
-      textoBotaoConfirmar: estaAtivo ? 'Sim, inativar' : 'Sim, reativar',
-      tipo: estaAtivo ? 'warning' : 'info',
-    });
-    if (!ok) return;
+  inativar(aluno: Beneficiario): void {
+    this.alunoParaInativar = aluno;
+  }
 
-    this.beneficiariosService.inativar(aluno.id).subscribe({
-      next: () => this.carregar(),
-      error: () => this.cdr.detectChanges()
+  cancelarInativacao(): void {
+    this.alunoParaInativar = null;
+  }
+
+  confirmarInativacao(): void {
+    if (!this.alunoParaInativar) return;
+    this.salvando = true;
+
+    this.beneficiariosService.inativar(this.alunoParaInativar.id).subscribe({
+      next: () => {
+        this.carregar();
+        this.salvando = false;
+        this.alunoParaInativar = null;
+      },
+      error: () => {
+        this.salvando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -178,25 +191,27 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  async excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl'): Promise<void> {
+  excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl'): void {
     if (!this.alunoSelecionado) return;
     const urlAtual = this.alunoSelecionado[tipo];
     if (!urlAtual) return;
 
-    const ok = await this.confirmDialog.confirmar({
-      titulo: 'Apagar Arquivo',
-      mensagem: tipo === 'fotoPerfil'
-        ? 'Deseja apagar a foto de perfil deste aluno definitivamente?'
-        : 'Deseja apagar o laudo/documento deste aluno definitivamente?',
-      textoBotaoConfirmar: 'Sim, apagar',
-      tipo: 'danger',
-    });
-    if (!ok) return;
+    this.documentoParaExcluir = { tipo, url: urlAtual };
+  }
+
+  cancelarExclusaoDocumento(): void {
+    this.documentoParaExcluir = null;
+  }
+
+  confirmarExclusaoDocumento(): void {
+    if (!this.alunoSelecionado || !this.documentoParaExcluir) return;
 
     this.deletandoImage = true;
     this.cdr.detectChanges();
 
-    this.beneficiariosService.excluirArquivo(urlAtual).subscribe({
+    const { tipo, url } = this.documentoParaExcluir;
+
+    this.beneficiariosService.excluirArquivo(url).subscribe({
       next: () => {
         const updatePayload: Partial<Beneficiario> = {};
         updatePayload[tipo] = '';
@@ -208,6 +223,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
             }
             this.carregar();
             this.deletandoImage = false;
+            this.documentoParaExcluir = null;
             this.cdr.detectChanges();
           },
           error: () => {

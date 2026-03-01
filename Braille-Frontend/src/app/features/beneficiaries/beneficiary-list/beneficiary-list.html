@@ -147,13 +147,12 @@
                         }
                     </div>
 
-                    <!-- Ações de Foto Overlay -->
                     <div class="avatar-actions"
                         style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px;">
                         <label class="btn btn-sm btn-primary"
                             style="padding: 4px 8px; font-size: 11px; cursor: pointer;" title="Alterar Foto"
                             [class.opacity-50]="uploadingImage || deletandoImage">
-                            ✏️
+                            <span class="material-symbols-rounded" style="font-size: 14px;">photo_camera</span>
                             <input type="file" (change)="processarUploadArquivo($event, 'fotoPerfil')"
                                 accept=".jpg,.jpeg,.png,.webp" style="display: none;"
                                 [disabled]="uploadingImage || deletandoImage">
@@ -163,7 +162,7 @@
                         <button class="btn btn-sm btn-danger" style="padding: 4px 8px; font-size: 11px;"
                             title="Remover Foto" (click)="excluirDocumento('fotoPerfil')"
                             [disabled]="uploadingImage || deletandoImage">
-                            🗑️
+                            <span class="material-symbols-rounded" style="font-size: 14px;">delete</span>
                         </button>
                         }
                     </div>
@@ -228,7 +227,9 @@
 
                             <button class="btn btn-danger btn-sm" (click)="excluirDocumento('laudoUrl')"
                                 [disabled]="uploadingImage || deletandoImage">
-                                🗑️ Excluir Laudo
+                                <span class="material-symbols-rounded"
+                                    style="font-size: 16px; margin-right: 6px; vertical-align: middle;">delete</span>
+                                Excluir Laudo
                             </button>
                             } @else {
                             <label class="btn btn-secondary btn-sm" style="cursor: pointer;"
@@ -270,6 +271,80 @@
 
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Inativação -->
+@if (alunoParaInativar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="(alunoParaInativar.statusAtivo !== false ? 'Inativar' : 'Reativar') + ' Aluno ' + alunoParaInativar.nomeCompleto"
+    (click)="cancelarInativacao()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-inativacao"
+                [style.color]="alunoParaInativar.statusAtivo !== false ? '#fbbf24' : '#3b82f6'">
+                {{ alunoParaInativar.statusAtivo !== false ? 'Inativar Aluno' : 'Reativar Aluno' }}
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarInativacao()" aria-label="Cancelar ação">✕</button>
+        </div>
+
+        <div class="modal-body">
+            @if (alunoParaInativar.statusAtivo !== false) {
+            <p>Deseja inativar <strong>{{ alunoParaInativar.nomeCompleto }}</strong>?</p>
+            <p>O registro será mantido, mas o aluno ficará inativo e não aparecerá em operações de nova matrícula.</p>
+            } @else {
+            <p>Deseja reativar <strong>{{ alunoParaInativar.nomeCompleto }}</strong>?</p>
+            <p>Ele passará a ficar disponível para novas matrículas.</p>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarInativacao()"
+                [disabled]="salvando">Cancelar</button>
+            <button [class]="alunoParaInativar.statusAtivo !== false ? 'btn btn-warning' : 'btn btn-primary'"
+                type="button" (click)="confirmarInativacao()" [disabled]="salvando"
+                [style]="alunoParaInativar.statusAtivo !== false ? 'background-color: #fbbf24; color: #111827; border: none;' : ''">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"
+                    style="width:14px; height:14px; border-width:2px;"></span> Verificando... }
+                @else { {{ alunoParaInativar.statusAtivo !== false ? 'Sim, inativar' : 'Sim, reativar' }} }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Excluir Documento -->
+@if (documentoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Documento"
+    (click)="cancelarExclusaoDocumento()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-documento" style="color: #ef4444;">Apagar Arquivo</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDocumento()"
+                aria-label="Cancelar exclusão de documento">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>
+                {{ documentoParaExcluir.tipo === 'fotoPerfil'
+                ? 'Deseja apagar a foto de perfil deste aluno definitivamente?'
+                : 'Deseja apagar o laudo/documento deste aluno definitivamente?'
+                }}
+            </p>
+            <p>Esta ação não pode ser desfeita.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDocumento()"
+                [disabled]="deletandoImage">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDocumento()"
+                [disabled]="deletandoImage" style="background-color: #ef4444; color: white; border: none;">
+                @if (deletandoImage) { <span class="loading-spinner" aria-hidden="true"
+                    style="width:14px; height:14px; border-width:2px;"></span> Apagando... }
+                @else { Sim, apagar }
+            </button>
         </div>
     </div>
 </div>
