@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -86,7 +86,8 @@ export class AdminLayout implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private fb: FormBuilder,
-    private elRef: ElementRef
+    private elRef: ElementRef,
+    private cdr: ChangeDetectorRef,
   ) { }
 
   ngOnInit(): void {
@@ -237,16 +238,19 @@ export class AdminLayout implements OnInit, OnDestroy {
                 this.fotoPerfil = url;
                 this.carregandoFoto = false;
                 this.fecharModal();
+                this.cdr.detectChanges();
               },
               error: () => {
                 this.fotoErro = 'Erro ao salvar a foto. Tente novamente.';
                 this.carregandoFoto = false;
+                this.cdr.detectChanges();
               }
             });
         },
         error: () => {
           this.fotoErro = 'Erro ao fazer o upload. Tente novamente.';
           this.carregandoFoto = false;
+          this.cdr.detectChanges();
         }
       });
   }
@@ -279,11 +283,16 @@ export class AdminLayout implements OnInit, OnDestroy {
           this.perfil = p;
           this.carregandoPerfil = false;
           this.perfilSucesso = true;
-          setTimeout(() => { this.perfilSucesso = false; }, 2500);
+          this.cdr.detectChanges();
+          setTimeout(() => {
+            this.perfilSucesso = false;
+            this.cdr.detectChanges();
+          }, 2500);
         },
         error: (err) => {
           this.carregandoPerfil = false;
           this.perfilErro = err?.error?.message ?? 'Erro ao atualizar o perfil.';
+          this.cdr.detectChanges();
         }
       });
   }
@@ -312,11 +321,13 @@ export class AdminLayout implements OnInit, OnDestroy {
         next: () => {
           this.carregandoSenha = false;
           this.senhaSucesso = true;
+          this.cdr.detectChanges();
           setTimeout(() => this.fecharModal(), 1800);
         },
         error: (err) => {
           this.carregandoSenha = false;
           this.senhaErro = err?.error?.message ?? 'Erro ao trocar a senha. Verifique a senha atual.';
+          this.cdr.detectChanges();
         }
       });
   }
