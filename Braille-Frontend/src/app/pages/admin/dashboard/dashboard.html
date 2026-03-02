@@ -52,7 +52,7 @@
 <section class="quick-actions" aria-label="Ações rápidas">
     <h2 class="section-title">Ações rápidas</h2>
     <div class="actions-grid">
-        @for (acao of acoes; track acao.rota) {
+        @for (acao of acoes; track acao.label) {
         <a [routerLink]="acao.rota" [queryParams]="acao.queryParams || null" class="action-btn"
             [attr.aria-label]="acao.ariaLabel">
             <span class="material-symbols-rounded" aria-hidden="true">{{ acao.icon }}</span>

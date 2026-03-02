@@ -57,7 +57,7 @@
             @if (fotoPerfil) {
             <img [src]="fotoPerfil" class="user-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
             } @else {
-            <div class="user-avatar" aria-hidden="true">{{ iniciais }}</div>
+            <div class="user-avatar" aria-hidden="true">{{ iniciaisDisplay }}</div>
             }
 
             <div class="user-details">
@@ -78,7 +78,7 @@
               @if (fotoPerfil) {
               <img [src]="fotoPerfil" class="dropdown-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
               } @else {
-              <div class="dropdown-avatar">{{ iniciais }}</div>
+              <div class="dropdown-avatar">{{ iniciaisDisplay }}</div>
               }
               <div class="dropdown-user-info">
                 <p class="dropdown-nome">{{ nomeDisplay }}</p>
@@ -274,7 +274,7 @@
         @if (fotoPerfil) {
         <img [src]="fotoPerfil" class="perfil-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
         } @else {
-        <div class="perfil-avatar-iniciais">{{ iniciais }}</div>
+        <div class="perfil-avatar-iniciais">{{ iniciaisDisplay }}</div>
         }
         <div class="perfil-header-info">
           <p class="perfil-nome">{{ nomeDisplay }}</p>

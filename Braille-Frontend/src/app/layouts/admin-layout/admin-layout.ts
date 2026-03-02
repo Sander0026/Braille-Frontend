@@ -33,6 +33,8 @@ export class AdminLayout implements OnInit, OnDestroy {
   usuario: UserInfo | null = null;
   perfil: PerfilUsuario | null = null;
   fotoPerfil: string | null = null;
+  nomeDisplay = 'Usuário';
+  iniciaisDisplay = 'U';
 
   // ── Dropdown de perfil ───────────────────────────────
   menuAberto = false;
@@ -113,10 +115,17 @@ export class AdminLayout implements OnInit, OnDestroy {
           Promise.resolve().then(() => {
             this.perfil = perfil;
             this.fotoPerfil = perfil.fotoPerfil;
+            this.atualizarDisplayUser();
             this.atualizarFormPerfil(perfil);
+            this.cdr.detectChanges();
           });
         },
-        error: () => { /* usa dados do JWT */ }
+        error: () => {
+          Promise.resolve().then(() => {
+            this.atualizarDisplayUser();
+            this.cdr.detectChanges();
+          });
+        }
       });
   }
 
@@ -338,13 +347,9 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  get iniciais(): string {
-    const nome = this.perfil?.nome ?? this.usuario?.nome ?? this.usuario?.username ?? 'U';
-    return nome.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
-  }
-
-  get nomeDisplay(): string {
-    return this.perfil?.nome ?? this.usuario?.nome ?? this.usuario?.username ?? 'Usuário';
+  private atualizarDisplayUser(): void {
+    this.nomeDisplay = this.perfil?.nome ?? this.usuario?.nome ?? this.usuario?.username ?? 'Usuário';
+    this.iniciaisDisplay = this.nomeDisplay.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
   }
 
   get labelCargo(): string {
