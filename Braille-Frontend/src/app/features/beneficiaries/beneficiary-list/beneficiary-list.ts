@@ -27,9 +27,14 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Modais de Confirmação (Padronizados)
   alunoParaInativar: Beneficiario | null = null;
+  alunoParaRestaurar: Beneficiario | null = null;
+  alunoParaExcluirDefinitivo: Beneficiario | null = null;
   salvando = false;
 
   documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl'; url: string } | null = null;
+
+  // Abas
+  abaAtiva: 'ativos' | 'inativos' = 'ativos';
 
   // Paginação
   paginaAtual = 1;
@@ -69,7 +74,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   carregar(): void {
     this.isLoading = true;
     const nome = this.buscaCtrl.value?.trim() || undefined;
-    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome).subscribe({
+    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome, this.abaAtiva === 'inativos').subscribe({
       next: (res) => {
         this.alunos = res.data;
         this.total = res.meta.total;
@@ -117,6 +122,65 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         this.carregar();
         this.salvando = false;
         this.alunoParaInativar = null;
+      },
+      error: () => {
+        this.salvando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  setAba(aba: 'ativos' | 'inativos'): void {
+    if (this.abaAtiva === aba) return;
+    this.abaAtiva = aba;
+    this.paginaAtual = 1;
+    this.carregar();
+  }
+
+  // Lógica de Exclusão Definitiva
+  excluirDefinitivamente(aluno: Beneficiario): void {
+    this.alunoParaExcluirDefinitivo = aluno;
+  }
+
+  cancelarExclusaoDefinitiva(): void {
+    this.alunoParaExcluirDefinitivo = null;
+  }
+
+  confirmarExclusaoDefinitiva(): void {
+    if (!this.alunoParaExcluirDefinitivo) return;
+    this.salvando = true;
+
+    this.beneficiariosService.excluirDefinitivo(this.alunoParaExcluirDefinitivo.id).subscribe({
+      next: () => {
+        this.carregar();
+        this.salvando = false;
+        this.alunoParaExcluirDefinitivo = null;
+      },
+      error: () => {
+        this.salvando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // Lógica de Restauração
+  restaurarConta(aluno: Beneficiario): void {
+    this.alunoParaRestaurar = aluno;
+  }
+
+  cancelarRestauracao(): void {
+    this.alunoParaRestaurar = null;
+  }
+
+  confirmarRestauracao(): void {
+    if (!this.alunoParaRestaurar) return;
+    this.salvando = true;
+
+    this.beneficiariosService.restaurar(this.alunoParaRestaurar.id).subscribe({
+      next: () => {
+        this.carregar();
+        this.salvando = false;
+        this.alunoParaRestaurar = null;
       },
       error: () => {
         this.salvando = false;

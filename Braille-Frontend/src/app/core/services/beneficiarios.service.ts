@@ -48,9 +48,10 @@ export class BeneficiariosService {
 
     constructor(private http: HttpClient) { }
 
-    listar(page = 1, limit = 10, nome?: string): Observable<PaginatedResponse<Beneficiario>> {
+    listar(page = 1, limit = 10, nome?: string, inativos?: boolean): Observable<PaginatedResponse<Beneficiario>> {
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (nome) params = params.set('nome', nome);
+        if (inativos) params = params.set('inativos', 'true');
         return this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params });
     }
 
@@ -64,6 +65,14 @@ export class BeneficiariosService {
 
     inativar(id: string): Observable<any> {
         return this.http.delete(`${this.url}/${id}`);
+    }
+
+    restaurar(id: string): Observable<any> {
+        return this.http.patch(`${this.url}/${id}/restore`, {});
+    }
+
+    excluirDefinitivo(id: string): Observable<any> {
+        return this.http.delete(`${this.url}/${id}/hard`);
     }
 
     criarBeneficiario(dados: Record<string, unknown>): Observable<Beneficiario> {
