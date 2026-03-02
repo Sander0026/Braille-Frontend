@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -24,7 +24,11 @@ export class Home implements OnInit {
   heroConfig: any = {};
   missaoConfig: any = {};
 
-  constructor(private http: HttpClient, private siteConfig: SiteConfigService) { }
+  constructor(
+    private http: HttpClient,
+    private siteConfig: SiteConfigService,
+    private cdr: ChangeDetectorRef,
+  ) { }
 
   ngOnInit() {
     this.carregarUltimasNoticias();
@@ -63,13 +67,16 @@ export class Home implements OnInit {
       next: (res) => {
         this.ultimasNoticias = Array.isArray(res) ? res : (res.data ?? []);
         this.carregandoNoticias = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         console.error('Erro ao buscar as últimas notícias', err);
         this.carregandoNoticias = false;
+        this.cdr.markForCheck();
       }
     });
   }
+
 
   getTextoPuro(html: string): string {
     if (!html) return '';
