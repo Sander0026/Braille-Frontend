@@ -216,7 +216,7 @@ export class TurmasLista implements OnInit {
         this.arquivando = true;
         this.erroArquivamento = '';
 
-        this.turmasService.atualizar(this.turmaParaArquivar.id, { statusAtivo: false } as any).subscribe({
+        this.turmasService.arquivar(this.turmaParaArquivar.id).subscribe({
             next: () => {
                 this.arquivando = false;
                 this.fecharModalArquivar();
