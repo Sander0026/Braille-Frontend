@@ -1,0 +1,82 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { PaginatedResponse } from './beneficiarios.service';
+
+export interface Turma {
+    id: string;
+    nome: string;
+    descricao?: string;
+    horario?: string;
+    capacidadeMaxima?: number;
+    statusAtivo: boolean;
+    excluido: boolean;
+    professor?: { id: string; nome: string; email: string };
+    alunos?: { id: string; nomeCompleto: string }[];
+}
+
+export interface CreateTurmaDto {
+    nome: string;
+    descricao?: string;
+    horario?: string;
+    capacidadeMaxima?: number;
+    professorId: string;
+}
+
+@Injectable({ providedIn: 'root' })
+export class TurmasService {
+    private readonly url = '/api/turmas';
+
+    constructor(private http: HttpClient) { }
+
+    /** Lista turmas. statusAtivo=true (ativas, padrão) ou statusAtivo=false (arquivadas) */
+    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string): Observable<PaginatedResponse<Turma>> {
+        let params = new HttpParams().set('page', page).set('limit', limit);
+        if (nome) params = params.set('nome', nome);
+        if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
+        if (professorId) params = params.set('professorId', professorId);
+        // Sempre excluido=false — ocultas não aparecem em nenhuma aba
+        params = params.set('excluido', 'false');
+        return this.http.get<PaginatedResponse<Turma>>(this.url, { params });
+    }
+
+    buscarPorId(id: string): Observable<Turma> {
+        return this.http.get<Turma>(`${this.url}/${id}`);
+    }
+
+    criar(dados: CreateTurmaDto): Observable<Turma> {
+        return this.http.post<Turma>(this.url, dados);
+    }
+
+    atualizar(id: string, dados: Partial<CreateTurmaDto>): Observable<Turma> {
+        return this.http.patch<Turma>(`${this.url}/${id}`, dados);
+    }
+
+    /** Arquivar: turma vai para a aba Arquivadas (statusAtivo=false) */
+    arquivar(id: string): Observable<Turma> {
+        return this.http.delete<Turma>(`${this.url}/${id}`);
+    }
+
+    /** Atalho semântico — mantido para compatibilidade */
+    excluir(id: string): Observable<Turma> {
+        return this.arquivar(id);
+    }
+
+    /** Restaurar: turma volta para a aba Ativas (statusAtivo=true) */
+    restaurar(id: string): Observable<Turma> {
+        return this.http.patch<Turma>(`${this.url}/${id}/restaurar`, {});
+    }
+
+    /** Ocultar: turma some da aba Arquivadas. Dados 100% preservados no banco. */
+    ocultarDaAba(id: string): Observable<Turma> {
+        return this.http.patch<Turma>(`${this.url}/${id}/ocultar`, {});
+    }
+
+    matricularAluno(turmaId: string, alunoId: string): Observable<any> {
+        return this.http.post(`${this.url}/${turmaId}/alunos/${alunoId}`, {});
+    }
+
+    desmatricularAluno(turmaId: string, alunoId: string): Observable<any> {
+        return this.http.delete(`${this.url}/${turmaId}/alunos/${alunoId}`);
+    }
+}

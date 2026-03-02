@@ -1,0 +1,96 @@
+// ============================================================
+// _variables.scss — Sistema de Design ILBES
+// Instituto Luiz Braille — Paleta oficial: Amarelo e Preto
+// ============================================================
+
+// --- Cores Primárias (Identidade ILBES) ---
+$color-primary: #f5c800; // Amarelo ILBES
+$color-primary-dark: #d4a800; // Hover do amarelo
+$color-primary-light: #fff8d6; // Fundo de destaque suave
+$color-primary-text: #1a1a00; // Texto sobre amarelo (máximo contraste)
+
+// --- Neutros (Preto, Cinzas, Branco) ---
+$color-black: #111111; // Preto ILBES
+$color-gray-900: #1f1f1f;
+$color-gray-800: #2d2d2d;
+$color-gray-700: #3d3d3d;
+$color-gray-600: #5c5c5c;
+$color-gray-500: #737373;
+$color-gray-400: #a3a3a3;
+$color-gray-300: #d4d4d4;
+$color-gray-200: #e5e5e5;
+$color-gray-100: #f5f5f5;
+$color-gray-50: #fafafa;
+$color-white: #ffffff;
+
+// --- Cores Semânticas ---
+$color-success: #16a34a;
+$color-success-light: #dcfce7;
+$color-danger: #dc2626;
+$color-danger-light: #fee2e2;
+$color-warning: #d97706;
+$color-warning-light: #fef3c7;
+$color-info: #2563eb;
+$color-info-light: #dbeafe;
+
+// --- Acessibilidade ---
+$color-focus-ring: $color-primary;
+$focus-ring-width: 3px;
+$focus-ring-offset: 2px;
+
+// --- Tipografia ---
+$font-family-base: 'Inter', 'Segoe UI', Arial, sans-serif;
+$font-size-xs: 0.75rem; // 12px
+$font-size-sm: 0.875rem; // 14px
+$font-size-base: 1rem; // 16px
+$font-size-lg: 1.125rem; // 18px
+$font-size-xl: 1.25rem; // 20px
+$font-size-2xl: 1.5rem; // 24px
+$font-size-3xl: 1.875rem; // 30px
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// --- Espaçamento (escala 4px) ---
+$space-1: 0.25rem; //  4px
+$space-2: 0.5rem; //  8px
+$space-3: 0.75rem; // 12px
+$space-4: 1rem; // 16px
+$space-5: 1.25rem; // 20px
+$space-6: 1.5rem; // 24px
+$space-8: 2rem; // 32px
+$space-10: 2.5rem; // 40px
+$space-12: 3rem; // 48px
+$space-16: 4rem; // 64px
+
+// --- Bordas e Sombras ---
+$border-radius-sm: 0.25rem; // 4px
+$border-radius: 0.5rem; // 8px
+$border-radius-lg: 0.75rem; // 12px
+$border-radius-xl: 1rem; // 16px
+$border-radius-2xl: 1.5rem; // 24px
+$border-radius-full: 9999px;
+
+$shadow-sm: 0 1px 2px rgba(0, 0, 0, .08);
+$shadow: 0 2px 8px rgba(0, 0, 0, .10);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, .12);
+$shadow-lg: 0 8px 32px rgba(0, 0, 0, .14);
+
+// --- Layout Sidebar ---
+$sidebar-width: 260px;
+$header-height: 64px;
+
+// --- Breakpoints ---
+$bp-sm: 576px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+
+// --- Transições ---
+$transition-fast: 150ms ease;
+$transition-normal: 250ms ease;
+$transition-slow: 400ms ease;

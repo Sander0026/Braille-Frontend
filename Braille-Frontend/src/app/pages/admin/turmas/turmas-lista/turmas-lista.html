@@ -1,0 +1,485 @@
+<!-- ══════════ CABEÇALHO ══════════ -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Oficinas / Turmas</h1>
+    <p class="page-subtitle">Gerencie as oficinas e turmas do instituto</p>
+  </div>
+  @if (!isProfessor) {
+  <button class="btn btn-primary" (click)="abrirModalCriar()" aria-label="Criar nova oficina">
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <line x1="12" x2="12" y1="5" y2="19" />
+      <line x1="5" x2="19" y1="12" y2="12" />
+    </svg>
+    Nova Oficina
+  </button>
+  }
+</div>
+
+<!-- ══════════ ESTADOS ══════════ -->
+@if (isLoading) {
+<div class="loading-state" role="status" aria-busy="true" aria-label="Carregando turmas">
+  <div class="spinner" aria-hidden="true"></div>
+  <p>Carregando oficinas...</p>
+</div>
+} @else if (erro) {
+<div class="error-banner" role="alert">⚠️ {{ erro }}</div>
+} @else if (turmas.length === 0) {
+<div class="empty-state">
+  <span class="empty-icon" aria-hidden="true">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path
+        d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+      <path d="M18 14h-8" />
+      <path d="M15 18h-5" />
+      <path d="M10 6h8v4h-8V6Z" />
+    </svg>
+  </span>
+  <h3>Nenhuma oficina cadastrada</h3>
+  <p>Crie a primeira oficina clicando no botão "Nova Oficina".</p>
+  @if (!isProfessor) {
+  <button class="btn btn-primary" (click)="abrirModalCriar()">
+    + Nova Oficina
+  </button>
+  }
+</div>
+
+} @else {
+
+<!-- Tabs switcher -->
+<div class="abas-switcher" role="tablist">
+  <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'ativas'" [class.ativa]="abaAtual === 'ativas'"
+    (click)="alterarAba('ativas')">
+    Ativas
+  </button>
+  @if (!isProfessor) {
+  <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'arquivadas'"
+    [class.ativa]="abaAtual === 'arquivadas'" (click)="alterarAba('arquivadas')">
+    Arquivadas
+  </button>
+  }
+</div>
+
+@if (turmasFiltradas.length === 0) {
+<div class="empty-state empty-state--sm">
+  <p>Nenhuma oficina {{ abaAtual === 'ativas' ? 'ativa' : 'arquivada' }} encontrada.</p>
+</div>
+} @else {
+<!-- Grade de cards -->
+<div class="turmas-grid" role="list" aria-label="Lista de oficinas">
+  @for (turma of turmasFiltradas; track turma.id) {
+  <article class="turma-card" role="listitem">
+
+    <!-- Indicador de status -->
+    <div class="card-status-bar" [class.inativa]="!turma.statusAtivo" aria-hidden="true"></div>
+
+    <div class="card-body">
+      <div class="card-title-row">
+        <h2 class="turma-nome">{{ turma.nome }}</h2>
+        <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">{{
+          turma.statusAtivo ? 'Ativa' : 'Arquivada' }}</span>
+      </div>
+
+
+      @if (turma.descricao) {
+      <p class="turma-descricao">{{ turma.descricao }}</p>
+      }
+
+      <div class="turma-meta">
+        @if (turma.professor) {
+        <span class="meta-item">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          {{ turma.professor.nome }}
+        </span>
+        }
+        @if (turma.horario) {
+        <span class="meta-item">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+          </svg>
+          {{ turma.horario }}
+        </span>
+        }
+        <span class="meta-item meta-alunos">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          {{ turma.alunos?.length ?? 0 }} aluno(s)
+        </span>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      @if (abaAtual === 'ativas') {
+      <button class="btn btn-sm btn-ghost" (click)="verAlunos(turma)"
+        [attr.aria-label]="'Ver alunos da oficina ' + turma.nome">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Alunos
+      </button>
+      @if (!isProfessor) {
+      <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
+        [attr.aria-label]="'Editar oficina ' + turma.nome">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        Editar
+      </button>
+      <button class="btn btn-sm btn-warning" (click)="abrirModalArquivar(turma)"
+        [attr.aria-label]="'Arquivar oficina ' + turma.nome"
+        style="background:#f59e0b; color:white; border-color:#f59e0b;">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="4" width="20" height="5" rx="2"></rect>
+          <path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"></path>
+          <path d="M10 13h4"></path>
+        </svg>
+        Arquivar
+      </button>
+      }
+      } @else {
+      <button class="btn btn-sm btn-success" (click)="restaurarTurma(turma)"
+        [attr.aria-label]="'Restaurar oficina ' + turma.nome"
+        style="background:#16a34a; color:white; border-color:#16a34a;">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+          <path d="M3 3v5h5"></path>
+        </svg>
+        Restaurar
+      </button>
+      <button class="btn btn-sm btn-danger" (click)="ocultarTurma(turma)"
+        [attr.aria-label]="'Remover da lista a oficina ' + turma.nome">
+        <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="m6 6 12 12"></path>
+        </svg>
+        Remover da Lista
+      </button>
+      }
+    </div>
+
+  </article>
+  }
+</div>
+
+}
+
+<!-- Paginação -->
+@if (totalPaginas > 1) {
+<nav class="pagination" aria-label="Paginação de oficinas">
+  <button class="btn btn-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaAtual === 1"
+    aria-label="Página anterior">←</button>
+  <span class="pagination-info">
+    Página {{ paginaAtual }} de {{ totalPaginas }} ({{ totalTurmas }} oficinas)
+  </span>
+  <button class="btn btn-secondary btn-sm" (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas"
+    aria-label="Próxima página">→</button>
+</nav>
+}
+}
+
+<!-- ══════════ MODAL CRIAR / EDITAR ══════════ -->
+@if (modalAberto) {
+<div class="modal-overlay" role="dialog" [attr.aria-label]="modoEdicao ? 'Editar oficina' : 'Criar nova oficina'"
+  aria-modal="true" (click)="fecharModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        <svg *ngIf="modoEdicao" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right:0.5rem; margin-bottom:-2px;">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <svg *ngIf="!modoEdicao" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          style="margin-right:0.5rem; margin-bottom:-2px;">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+        {{ modoEdicao ? 'Editar Oficina' : 'Nova Oficina' }}
+      </h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">✕</button>
+    </div>
+
+    <form [formGroup]="turmaForm" (ngSubmit)="salvarModal()" class="modal-body" novalidate>
+
+      @if (erroModal) {
+      <div class="error-banner" role="alert">⚠️ {{ erroModal }}</div>
+      }
+
+      <div class="form-group">
+        <label for="modalNomeTurma">
+          Nome da Oficina <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input type="text" id="modalNomeTurma" formControlName="nome" class="form-input"
+          [class.is-invalid]="isCampoInvalido('nome')" placeholder="Ex: Oficina de Braille" aria-required="true"
+          [attr.aria-invalid]="isCampoInvalido('nome')" />
+        @if (isCampoInvalido('nome')) {
+        <span class="error-text" role="alert">Nome é obrigatório (mínimo 3 caracteres).</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="modalProfessor">
+          Professor Responsável <span class="required" aria-hidden="true">*</span>
+        </label>
+        <select id="modalProfessor" formControlName="professorId" class="form-input"
+          [class.is-invalid]="isCampoInvalido('professorId')" aria-required="true"
+          [attr.aria-invalid]="isCampoInvalido('professorId')">
+          <option value="">Selecione um professor...</option>
+          @for (prof of professores; track prof.id) {
+          <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
+          }
+        </select>
+        @if (isCampoInvalido('professorId')) {
+        <span class="error-text" role="alert">Selecione o professor responsável.</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="modalHorario">Horário</label>
+        <input type="text" id="modalHorario" formControlName="horario" class="form-input"
+          placeholder="Ex: Seg e Qua — 14h às 16h" />
+      </div>
+
+      <div class="form-group">
+        <label for="modalDescricao">Descrição</label>
+        <textarea id="modalDescricao" formControlName="descricao" class="form-input" rows="3"
+          placeholder="Descreva brevemente o conteúdo da oficina..."></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="turmaForm.invalid || salvandoModal"
+          [attr.aria-busy]="salvandoModal">
+          {{ salvandoModal ? '⏳ Salvando...' : (modoEdicao ? 'Atualizar' : 'Criar Oficina') }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+}
+
+<!-- ══════════ MODAL ARQUIVAR ══════════ -->
+@if (modalArquivarAberto && turmaParaArquivar) {
+<div class="modal-overlay" role="dialog" aria-label="Confirmar arquivamento de oficina" aria-modal="true"
+  (click)="fecharModalArquivar()">
+  <div class="modal modal--sm" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title" style="display:flex; align-items:center;">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;">
+          <rect x="2" y="4" width="20" height="5" rx="2"></rect>
+          <path d="M4 9v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9"></path>
+          <path d="M10 13h4"></path>
+        </svg>
+        Arquivar Oficina
+      </h2>
+      <button class="modal-close" (click)="fecharModalArquivar()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="excluir-texto">
+        Tem certeza que deseja arquivar a oficina
+        <strong>{{ turmaParaArquivar.nome }}</strong>?
+      </p>
+      <p class="excluir-aviso" style="border-color:#fbbf24; background:#fffbeb; color:#92400e;">
+        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:-3px; margin-right:4px;">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        Ela será movida para as turmas arquivadas e deixará de aparecer como ativa.
+      </p>
+      @if (erroArquivamento) {
+      <div class="error-banner" role="alert">{{ erroArquivamento }}</div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="fecharModalArquivar()">Cancelar</button>
+      <button class="btn" style="background:#f59e0b; color:white; border:none;" (click)="confirmarArquivamento()"
+        [disabled]="arquivando" [attr.aria-busy]="arquivando">
+        @if (arquivando) {
+        Arquivando...
+        } @else {
+        Sim, arquivar
+        }
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ══════════ MODAL ALUNOS ══════════ -->
+@if (modalAlunosAberto) {
+<div class="modal-overlay" role="dialog" aria-label="Alunos matriculados" aria-modal="true"
+  (click)="fecharModalAlunos()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title" style="display:flex; align-items:center;">
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        Alunos — {{ turmaDetalhes?.nome ?? '...' }}
+      </h2>
+      <button class="modal-close" (click)="fecharModalAlunos()" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Tabs Switcher para Modal -->
+      <div class="abas-switcher" role="tablist" style="margin-bottom: 1.5rem;">
+        @if (!isProfessor) {
+        <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'adicionar'"
+          [class.ativa]="modalAlunosAbaAtual === 'adicionar'" (click)="alterarAbaModalAlunos('adicionar')">
+          Adicionar Alunos
+        </button>
+        }
+        <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'remover'"
+          [class.ativa]="modalAlunosAbaAtual === 'remover'" (click)="alterarAbaModalAlunos('remover')">
+          Alunos Matriculados
+        </button>
+      </div>
+
+      @if (carregandoDetalhes) {
+      <div class="loading-state" aria-busy="true">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Carregando alunos...</p>
+      </div>
+      }
+
+      <!-- ABA: ADICIONAR ALUNOS -->
+      @if (modalAlunosAbaAtual === 'adicionar') {
+      <div class="busca-alunos-container" style="margin-bottom: 1.5rem;">
+        <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>
+        <input type="search" id="buscarAlunoInput" class="form-input" placeholder="Buscar aluno para adicionar..."
+          [formControl]="buscaAlunoCtrl" aria-label="Buscar aluno por nome para matricular" autocomplete="off"
+          [attr.aria-busy]="buscandoAlunos" />
+
+        @if (buscandoAlunos) {
+        <div class="loading-state empty-state--sm" aria-busy="true">
+          <div class="spinner" aria-hidden="true" style="width: 20px; height: 20px;"></div>
+        </div>
+        }
+
+        @if (alunosBuscaRestado.length > 0) {
+        <ul class="busca-resultados" role="listbox" aria-label="Resultados da busca de alunos"
+          style="position:static; max-height:220px; border-top:1px solid #e5e5e5; margin-top:0.5rem; box-shadow:none;">
+          @for (aluno of alunosBuscaRestado; track aluno.id) {
+          <li class="busca-resultado-item" role="option">
+            <label style="display:flex; align-items:center; gap:0.75rem; width:100%; cursor:pointer;">
+              <input type="checkbox" [checked]="alunosSelecionadosParaMatricula.includes(aluno.id)"
+                (change)="toggleSelecaoAluno(aluno.id)" class="custom-checkbox" />
+              <span style="font-size:0.9rem;">{{ aluno.nomeCompleto }}</span>
+            </label>
+          </li>
+          }
+        </ul>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+          <button class="btn btn-primary" (click)="salvarMatriculasEmLote()"
+            [disabled]="operacaoEmProgresso || alunosSelecionadosParaMatricula.length === 0"
+            style="display:flex; align-items:center; gap:0.5rem;">
+            @if (operacaoEmProgresso) {
+            <div class="spinner" aria-hidden="true"
+              style="width:14px; height:14px; border-width:2px; display:inline-block;"></div>
+            Salvando ({{"alunosSelecionadosParaMatricula.length"}})
+            } @else {
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M5 12h14" />
+              <path d="M12 5v14" />
+            </svg>
+            Salvar {{ alunosSelecionadosParaMatricula.length }} aluno(s)
+            }
+          </button>
+        </div>
+        } @else if (!buscandoAlunos && buscaAlunoCtrl.value) {
+        <div class="empty-state empty-state--sm" style="padding:1rem;">
+          <p>Nenhum aluno desmatriculado encontrado.</p>
+        </div>
+        }
+      </div>
+      }
+
+      <!-- ABA: REMOVER ALUNOS -->
+      @if (modalAlunosAbaAtual === 'remover') {
+      <div>
+        <h3
+          style="font-size: 1rem; margin-bottom: 0.5rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
+          Alunos Matriculados ({{ turmaDetalhes!.alunos?.length || 0 }})
+        </h3>
+
+        @if (!turmaDetalhes?.alunos || turmaDetalhes!.alunos!.length === 0) {
+        <div class="empty-state empty-state--sm">
+          <span class="empty-icon" aria-hidden="true">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+          </span>
+          <p>Nenhum aluno matriculado nesta oficina.</p>
+        </div>
+        } @else {
+        <ul class="alunos-list" aria-label="Lista de alunos matriculados">
+          @for (aluno of turmaDetalhes!.alunos; track aluno.id) {
+          <li class="aluno-item" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="aluno-avatar" aria-hidden="true">
+                {{ aluno.nomeCompleto.charAt(0) }}
+              </div>
+              <span>{{ aluno.nomeCompleto }}</span>
+            </div>
+            @if (!isProfessor) {
+            <button class="btn btn-danger btn-sm" (click)="removerAluno(aluno.id, aluno.nomeCompleto)"
+              [disabled]="operacaoEmProgresso" aria-label="Remover da turma" title="Remover aluno"
+              style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center;">
+              <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 6h18"></path>
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+              </svg>
+            </button>
+            }
+          </li>
+          }
+        </ul>
+        }
+      </div>
+      }
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="fecharModalAlunos()">Fechar</button>
+    </div>
+  </div>
+</div>
+}

@@ -1,0 +1,65 @@
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Visão geral do Instituto Luiz Braille</p>
+    </div>
+</div>
+
+@if (acessoNegado) {
+<div class="card card-body u-mb-lg" role="alert" aria-live="polite"
+    style="border-left: 4px solid #dc2626; background-color: #fef2f2; display: flex; align-items: center; gap: .75rem;">
+    <span class="material-symbols-rounded" style="color: #dc2626;" aria-hidden="true">block</span>
+    <p style="margin: 0; color: #991b1b; font-weight: 500;">Acesso negado: Você não tem permissão para acessar a área
+        solicitada.</p>
+</div>
+}
+
+<!-- Cards de Estatísticas -->
+@if (isLoading) {
+<div class="stats-grid" aria-busy="true" aria-label="Carregando estatísticas...">
+    @for (i of [1,2,3,4]; track i) {
+    <div class="stat-card stat-card--skeleton" aria-hidden="true">
+        <div class="skeleton-box"></div>
+        <div class="skeleton-line"></div>
+    </div>
+    }
+</div>
+} @else if (erro) {
+<div class="card card-body" role="alert" aria-live="assertive">
+    <p style="color: #dc2626">{{ erro }}</p>
+</div>
+} @else {
+<section class="stats-grid" role="region" aria-label="Resumo de estatísticas">
+    @for (card of cards; track card.label) {
+    <a [routerLink]="card.rota" class="stat-card stat-card--{{ card.cor }}" [attr.aria-label]="card.ariaLabel"
+        role="article">
+        <div class="stat-icon" aria-hidden="true">
+            <span class="material-symbols-rounded">{{ card.icon }}</span>
+        </div>
+        <div class="stat-info">
+            <span class="stat-valor">{{ card.valor }}</span>
+            <span class="stat-label">{{ card.label }}</span>
+        </div>
+        <div class="stat-arrow" aria-hidden="true">
+            <span class="material-symbols-rounded">arrow_forward</span>
+        </div>
+    </a>
+    }
+</section>
+
+<!-- Acesso Rápido -->
+@if (acoes.length > 0) {
+<section class="quick-actions" aria-label="Ações rápidas">
+    <h2 class="section-title">Ações rápidas</h2>
+    <div class="actions-grid">
+        @for (acao of acoes; track acao.label) {
+        <a [routerLink]="acao.rota" [queryParams]="acao.queryParams || null" class="action-btn"
+            [attr.aria-label]="acao.ariaLabel">
+            <span class="material-symbols-rounded" aria-hidden="true">{{ acao.icon }}</span>
+            <span>{{ acao.label }}</span>
+        </a>
+        }
+    </div>
+</section>
+}
+}
