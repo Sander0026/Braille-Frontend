@@ -29,9 +29,10 @@ export class UsuariosService {
 
     constructor(private http: HttpClient) { }
 
-    listar(page = 1, limit = 10, nome?: string): Observable<PaginatedResponse<Usuario>> {
+    listar(page = 1, limit = 10, nome?: string, inativos: boolean = false): Observable<PaginatedResponse<Usuario>> {
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (nome) params = params.set('nome', nome);
+        if (inativos) params = params.set('inativos', 'true');
         return this.http.get<PaginatedResponse<Usuario>>(this.url, { params });
     }
 
@@ -49,6 +50,14 @@ export class UsuariosService {
 
     resetarSenha(id: string): Observable<Usuario> {
         return this.http.patch<Usuario>(`${this.url}/${id}/reset-password`, {});
+    }
+
+    restaurar(id: string): Observable<Usuario> {
+        return this.http.patch<Usuario>(`${this.url}/${id}/restore`, {});
+    }
+
+    excluirDefinitivo(id: string): Observable<any> {
+        return this.http.delete(`${this.url}/${id}/hard`);
     }
 
     uploadFoto(file: File): Observable<{ url: string }> {

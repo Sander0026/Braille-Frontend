@@ -14,6 +14,7 @@
     </a>
 </div>
 
+
 <!-- Busca -->
 <div class="filter-bar" role="search">
     <div class="filter-search">
@@ -40,6 +41,20 @@
     <p>Adicione o primeiro usuário clicando em "Novo Usuário".</p>
 </div>
 } @else {
+<!-- Abas de Navegação -->
+<div class="tabs-container" role="navigation" aria-label="Filtro de status de usuário">
+    <div class="tabs">
+        <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
+            [attr.aria-selected]="abaAtiva === 'ativos'" role="tab">
+            Ativos
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'inativos'" (click)="setAba('inativos')"
+            [attr.aria-selected]="abaAtiva === 'inativos'" role="tab">
+            Inativos
+        </button>
+    </div>
+</div>
+
 <div class="data-table-wrapper">
     <table class="data-table" role="table" aria-label="Lista de usuários do sistema">
         <caption class="sr-only">{{ total }} usuários, página {{ paginaAtual }} de {{ totalPaginas }}</caption>
@@ -77,12 +92,21 @@
                     </span>
                 </td>
                 <td class="acoes-cell">
+                    @if (abaAtiva === 'ativos') {
                     <button class="btn btn-sm btn-ghost" (click)="abrirPerfil(usuario)"
                         [attr.aria-label]="'Ver perfil de ' + usuario.nome">Ver</button>
                     <button class="btn btn-sm btn-secondary" (click)="abrirModal(usuario)"
                         [attr.aria-label]="'Editar usuário ' + usuario.nome">Editar</button>
                     <button class="btn btn-sm btn-danger" (click)="excluir(usuario)"
                         [attr.aria-label]="'Excluir usuário ' + usuario.nome">Excluir</button>
+                    } @else {
+                    <button class="btn btn-sm"
+                        style="background-color: #10b981; color: white; border: none; margin-right: 0.5rem;"
+                        (click)="restaurarConta(usuario)"
+                        [attr.aria-label]="'Restaurar usuário ' + usuario.nome">Restaurar</button>
+                    <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(usuario)"
+                        [attr.aria-label]="'Excluir definitivamente usuário ' + usuario.nome">Excluir</button>
+                    }
                 </td>
             </tr>
             }
@@ -307,6 +331,68 @@
                 style="background-color: #fbbf24; color: #111827; border: none;">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Resetando... }
                 @else { Confirmar Ação }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Exclusão DEFINITIVA -->
+@if (usuarioParaExcluirDefinitivo) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Excluir definitivamente o usuário ' + usuarioParaExcluirDefinitivo.nome"
+    (click)="cancelarExclusaoDefinitiva()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDefinitiva()"
+                aria-label="Cancelar exclusão">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>Você está prestes a apagar <strong>permanentemente</strong> o usuário <strong>{{
+                    usuarioParaExcluirDefinitivo.nome }}</strong>.</p>
+            <p>Os conteúdos antigos dessa pessoa (notícias, turmas) <strong>serão preservados</strong>, mas o cadastro
+                sumirá do sistema.</p>
+            <p style="color: #ef4444; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDefinitiva()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDefinitiva()" [disabled]="salvando"
+                style="background-color: #991b1b; color: white; border: none;">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Apagando... }
+                @else { Excluir Permanente }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Restauração -->
+@if (usuarioParaRestaurar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Restaurar o usuário ' + usuarioParaRestaurar.nome" (click)="cancelarRestauracao()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Autorização</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarRestauracao()"
+                aria-label="Cancelar restauração">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>O usuário <strong>{{ usuarioParaRestaurar.nome }}</strong> será reativado.</p>
+            <p>Ele terá novamente <strong>acesso total ao painel do sistema</strong> utilizando sua senha atual.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarRestauracao()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-primary" type="button" (click)="confirmarRestauracao()" [disabled]="salvando"
+                style="background-color: #059669; color: white; border: none;">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Restaurando... }
+                @else { Restaurar Usuário }
             </button>
         </div>
     </div>

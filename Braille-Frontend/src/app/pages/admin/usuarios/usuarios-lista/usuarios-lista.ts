@@ -23,9 +23,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
     readonly limite = 10;
 
     buscaCtrl = new FormControl('');
+    abaAtiva: 'ativos' | 'inativos' = 'ativos';
     usuarioEmEdicao: Usuario | null = null;
     usuarioVisualizado: Usuario | null = null;
     usuarioParaExcluir: Usuario | null = null;
+    usuarioParaExcluirDefinitivo: Usuario | null = null;
+    usuarioParaRestaurar: Usuario | null = null;
     usuarioParaResetar: Usuario | null = null;
     editForm!: FormGroup;
     salvando = false;
@@ -64,10 +67,17 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
     ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
+    setAba(aba: 'ativos' | 'inativos'): void {
+        this.abaAtiva = aba;
+        this.paginaAtual = 1;
+        this.carregar();
+    }
+
     carregar(): void {
         this.isLoading = true;
         const nome = this.buscaCtrl.value?.trim() || undefined;
-        this.usuariosService.listar(this.paginaAtual, this.limite, nome).subscribe({
+        const inativos = this.abaAtiva === 'inativos';
+        this.usuariosService.listar(this.paginaAtual, this.limite, nome, inativos).subscribe({
             next: (res) => {
                 this.usuarios = res.data;
                 this.total = res.meta.total;
@@ -132,6 +142,56 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaExcluir = null;
+                this.carregar();
+            },
+            error: () => {
+                this.salvando = false;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    // --- Hard Delete ---
+    excluirDefinitivamente(usuario: Usuario): void {
+        this.usuarioParaExcluirDefinitivo = usuario;
+    }
+
+    cancelarExclusaoDefinitiva(): void {
+        this.usuarioParaExcluirDefinitivo = null;
+    }
+
+    confirmarExclusaoDefinitiva(): void {
+        if (!this.usuarioParaExcluirDefinitivo) return;
+        this.salvando = true;
+        this.usuariosService.excluirDefinitivo(this.usuarioParaExcluirDefinitivo.id).subscribe({
+            next: () => {
+                this.salvando = false;
+                this.usuarioParaExcluirDefinitivo = null;
+                this.carregar();
+            },
+            error: () => {
+                this.salvando = false;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    // --- Restauração ---
+    restaurarConta(usuario: Usuario): void {
+        this.usuarioParaRestaurar = usuario;
+    }
+
+    cancelarRestauracao(): void {
+        this.usuarioParaRestaurar = null;
+    }
+
+    confirmarRestauracao(): void {
+        if (!this.usuarioParaRestaurar) return;
+        this.salvando = true;
+        this.usuariosService.restaurar(this.usuarioParaRestaurar.id).subscribe({
+            next: () => {
+                this.salvando = false;
+                this.usuarioParaRestaurar = null;
                 this.carregar();
             },
             error: () => {
