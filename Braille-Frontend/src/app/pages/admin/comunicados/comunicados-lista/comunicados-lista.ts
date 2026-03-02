@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 
@@ -39,7 +40,8 @@ export class ComunicadosLista implements OnInit {
     private comunicadosService: ComunicadosService,
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
-    private http: HttpClient
+    private http: HttpClient,
+    private route: ActivatedRoute
   ) {
     this.form = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
@@ -49,7 +51,15 @@ export class ComunicadosLista implements OnInit {
     });
   }
 
-  ngOnInit(): void { this.carregar(); }
+  ngOnInit(): void {
+    this.carregar();
+    this.route.queryParams.subscribe(params => {
+      if (params['novo'] === 'true') {
+        // Usa setTimeout para garantir que o componente terminou de inicializar
+        setTimeout(() => this.novo(params['categoria']), 100);
+      }
+    });
+  }
 
   carregar(): void {
     this.isLoading = true;
@@ -63,9 +73,9 @@ export class ComunicadosLista implements OnInit {
     });
   }
 
-  novo(): void {
+  novo(categoriaDefault: string = 'GERAL'): void {
     this.editando = null;
-    this.form.reset({ categoria: 'GERAL', fixado: false });
+    this.form.reset({ categoria: categoriaDefault, fixado: false });
     this.fotoSelecionada = null;
     this.fotoPreview = null;
     this.mostrarModal = true;

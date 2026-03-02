@@ -7,6 +7,7 @@ import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { BeneficiariosService, Beneficiario } from '../../../../core/services/beneficiarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
     selector: 'app-turmas-lista',
@@ -53,6 +54,10 @@ export class TurmasLista implements OnInit {
     buscandoAlunos = false;
     operacaoEmProgresso = false;
 
+    // ── Permissões ─────────────────────────────────────────────
+    isProfessor = false;
+    userId = '';
+
     constructor(
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
@@ -60,9 +65,14 @@ export class TurmasLista implements OnInit {
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef,
         private confirmDialog: ConfirmDialogService,
+        private authService: AuthService,
     ) { }
 
     ngOnInit(): void {
+        const user = this.authService.getUser();
+        this.isProfessor = user?.role === 'PROFESSOR';
+        this.userId = user?.sub || '';
+
         this.iniciarFormulario();
         this.iniciarBuscaAlunos();
         this.carregarTurmas();
@@ -106,7 +116,10 @@ export class TurmasLista implements OnInit {
         // Passa statusAtivo baseado na aba: ativas=true, arquivadas=false
         const statusAtivo = this.abaAtual === 'ativas' ? true : false;
 
-        this.turmasService.listar(pagina, 100, undefined, statusAtivo).subscribe({
+        // Se for professor, passa o próprio ID para filtrar a pesquisa
+        const profId = this.isProfessor ? this.userId : undefined;
+
+        this.turmasService.listar(pagina, 100, undefined, statusAtivo, profId).subscribe({
             next: (res) => {
                 this.turmas = res.data;
                 this.totalTurmas = res.meta.total;
@@ -287,7 +300,7 @@ export class TurmasLista implements OnInit {
         this.turmaDetalhes = null;
         this.carregandoDetalhes = true;
         this.modalAlunosAberto = true;
-        this.modalAlunosAbaAtual = 'adicionar';
+        this.modalAlunosAbaAtual = this.isProfessor ? 'remover' : 'adicionar';
         this.buscaAlunoCtrl.setValue('', { emitEvent: false }); // Limpa a busca anterior
         this.alunosBuscaRestado = [];
         this.alunosSelecionadosParaMatricula = [];

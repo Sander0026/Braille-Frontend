@@ -4,6 +4,7 @@
     <h1 class="page-title">Oficinas / Turmas</h1>
     <p class="page-subtitle">Gerencie as oficinas e turmas do instituto</p>
   </div>
+  @if (!isProfessor) {
   <button class="btn btn-primary" (click)="abrirModalCriar()" aria-label="Criar nova oficina">
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
       stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -12,6 +13,7 @@
     </svg>
     Nova Oficina
   </button>
+  }
 </div>
 
 <!-- ══════════ ESTADOS ══════════ -->
@@ -36,9 +38,11 @@
   </span>
   <h3>Nenhuma oficina cadastrada</h3>
   <p>Crie a primeira oficina clicando no botão "Nova Oficina".</p>
+  @if (!isProfessor) {
   <button class="btn btn-primary" (click)="abrirModalCriar()">
     + Nova Oficina
   </button>
+  }
 </div>
 
 } @else {
@@ -49,10 +53,12 @@
     (click)="alterarAba('ativas')">
     Ativas
   </button>
+  @if (!isProfessor) {
   <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'arquivadas'"
     [class.ativa]="abaAtual === 'arquivadas'" (click)="alterarAba('arquivadas')">
     Arquivadas
   </button>
+  }
 </div>
 
 @if (turmasFiltradas.length === 0) {
@@ -127,6 +133,7 @@
         </svg>
         Alunos
       </button>
+      @if (!isProfessor) {
       <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
         [attr.aria-label]="'Editar oficina ' + turma.nome">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -147,6 +154,7 @@
         </svg>
         Arquivar
       </button>
+      }
       } @else {
       <button class="btn btn-sm btn-success" (click)="restaurarTurma(turma)"
         [attr.aria-label]="'Restaurar oficina ' + turma.nome"
@@ -348,10 +356,12 @@
 
       <!-- Tabs Switcher para Modal -->
       <div class="abas-switcher" role="tablist" style="margin-bottom: 1.5rem;">
+        @if (!isProfessor) {
         <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'adicionar'"
           [class.ativa]="modalAlunosAbaAtual === 'adicionar'" (click)="alterarAbaModalAlunos('adicionar')">
           Adicionar Alunos
         </button>
+        }
         <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'remover'"
           [class.ativa]="modalAlunosAbaAtual === 'remover'" (click)="alterarAbaModalAlunos('remover')">
           Alunos Matriculados
@@ -447,6 +457,7 @@
               </div>
               <span>{{ aluno.nomeCompleto }}</span>
             </div>
+            @if (!isProfessor) {
             <button class="btn btn-danger btn-sm" (click)="removerAluno(aluno.id, aluno.nomeCompleto)"
               [disabled]="operacaoEmProgresso" aria-label="Remover da turma" title="Remover aluno"
               style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center;">
@@ -457,6 +468,7 @@
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
               </svg>
             </button>
+            }
           </li>
           }
         </ul>

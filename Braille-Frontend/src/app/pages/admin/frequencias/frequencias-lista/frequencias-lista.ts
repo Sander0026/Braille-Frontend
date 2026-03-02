@@ -6,6 +6,7 @@ import { catchError } from 'rxjs/operators';
 
 import { FrequenciasService, Frequencia } from '../../../../core/services/frequencias.service';
 import { TurmasService, Turma } from '../../../../core/services/turmas.service';
+import { AuthService } from '../../../../core/services/auth.service';
 
 interface AlunoNaChamada {
   alunoId: string;
@@ -63,19 +64,29 @@ export class FrequenciasLista implements OnInit {
   carregandoRelatorio = false;
   erroRelatorio = '';
 
+  // ── Permissões ─────────────────────────────────────────────
+  isProfessor = false;
+  userId = '';
+
   constructor(
     private frequenciasService: FrequenciasService,
     private turmasService: TurmasService,
     private cdr: ChangeDetectorRef,
+    private authService: AuthService,
   ) { }
 
   ngOnInit(): void {
+    const user = this.authService.getUser();
+    this.isProfessor = user?.role === 'PROFESSOR';
+    this.userId = user?.sub || '';
+
     this.carregarTurmas();
   }
 
   // ── Turmas ─────────────────────────────────────────────────
   carregarTurmas(): void {
-    this.turmasService.listar(1, 100).subscribe({
+    const profId = this.isProfessor ? this.userId : undefined;
+    this.turmasService.listar(1, 100, undefined, true, profId).subscribe({
       next: (res) => {
         this.turmas = res.data.filter(t => t.statusAtivo);
         this.cdr.detectChanges();
@@ -109,7 +120,8 @@ export class FrequenciasLista implements OnInit {
         }
 
         // 2) busca chamadas já registradas para esse dia
-        this.frequenciasService.listar(1, 100, this.turmaSelecionadaId, this.dataAula).subscribe({
+        const profId = this.isProfessor ? this.userId : undefined;
+        this.frequenciasService.listar(1, 100, this.turmaSelecionadaId, this.dataAula, profId).subscribe({
           next: (res) => {
             const registrosExistentes = res.data;
 
@@ -229,8 +241,9 @@ export class FrequenciasLista implements OnInit {
     this.erroHistorico = '';
 
     const turmaId = this.turmaSelecionadaId || undefined;
+    const profId = this.isProfessor ? this.userId : undefined;
 
-    this.frequenciasService.listarResumo(this.paginaHistorico, 20, turmaId).subscribe({
+    this.frequenciasService.listarResumo(this.paginaHistorico, 20, turmaId, profId).subscribe({
       next: (res) => {
         this.historico = res.data;
         this.totalHistorico = res.meta.total;

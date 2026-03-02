@@ -5,6 +5,15 @@
     </div>
 </div>
 
+@if (acessoNegado) {
+<div class="card card-body u-mb-lg" role="alert" aria-live="polite"
+    style="border-left: 4px solid #dc2626; background-color: #fef2f2; display: flex; align-items: center; gap: .75rem;">
+    <span class="material-symbols-rounded" style="color: #dc2626;" aria-hidden="true">block</span>
+    <p style="margin: 0; color: #991b1b; font-weight: 500;">Acesso negado: Você não tem permissão para acessar a área
+        solicitada.</p>
+</div>
+}
+
 <!-- Cards de Estatísticas -->
 @if (isLoading) {
 <div class="stats-grid" aria-busy="true" aria-label="Carregando estatísticas...">
@@ -39,21 +48,18 @@
 </section>
 
 <!-- Acesso Rápido -->
+@if (acoes.length > 0) {
 <section class="quick-actions" aria-label="Ações rápidas">
     <h2 class="section-title">Ações rápidas</h2>
     <div class="actions-grid">
-        <a routerLink="/admin/alunos/cadastro" class="action-btn" aria-label="Cadastrar novo aluno">
-            <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
-            <span>Novo Aluno</span>
+        @for (acao of acoes; track acao.rota) {
+        <a [routerLink]="acao.rota" [queryParams]="acao.queryParams || null" class="action-btn"
+            [attr.aria-label]="acao.ariaLabel">
+            <span class="material-symbols-rounded" aria-hidden="true">{{ acao.icon }}</span>
+            <span>{{ acao.label }}</span>
         </a>
-        <a routerLink="/admin/turmas" class="action-btn" aria-label="Gerenciar turmas">
-            <span class="material-symbols-rounded" aria-hidden="true">school</span>
-            <span>Gerenciar Turmas</span>
-        </a>
-        <a routerLink="/admin/contatos" class="action-btn" aria-label="Ver mensagens de contato">
-            <span class="material-symbols-rounded" aria-hidden="true">mail</span>
-            <span>Fale Conosco</span>
-        </a>
+        }
     </div>
 </section>
+}
 }

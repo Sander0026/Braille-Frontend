@@ -63,12 +63,12 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   readonly navItems: NavItem[] = [
     { rota: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', aria: 'Ir para Dashboard' },
-    { rota: '/admin/alunos', label: 'Alunos', icon: 'people', aria: 'Ir para lista de alunos' },
-    { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas' },
-    { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências' },
-    { rota: '/admin/conteudo', label: 'Conteúdo do Site', icon: 'web', aria: 'Gerir conteúdo público', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
-    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['MASTER', 'COMUNICACAO', 'ADMIN', 'SECRETARIA'] },
-    { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários', role: ['MASTER', 'ADMIN'] },
+    { rota: '/admin/alunos', label: 'Alunos', icon: 'people', aria: 'Ir para lista de alunos', role: ['ADMIN', 'SECRETARIA'] },
+    { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas', role: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] },
+    { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências', role: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] },
+    { rota: '/admin/conteudo', label: 'Conteúdo do Site', icon: 'web', aria: 'Gerir conteúdo público', role: ['ADMIN', 'COMUNICACAO'] },
+    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['ADMIN', 'SECRETARIA'] },
+    { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários', role: ['ADMIN'] },
   ];
 
   get rotasPermitidas(): NavItem[] {

@@ -1,5 +1,6 @@
-import { Routes } from '@angular/router';
+﻿import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   // ── Área Pública ───────────────────────────────────────────────
@@ -39,7 +40,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () => import('./layouts/admin-layout/admin-layout').then(m => m.AdminLayout),
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
@@ -54,12 +55,14 @@ export const routes: Routes = [
       {
         path: 'alunos',
         loadComponent: () => import('./features/beneficiaries/beneficiary-list/beneficiary-list').then(m => m.BeneficiaryList),
-        title: 'Alunos — ILBES'
+        title: 'Alunos — ILBES',
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
       {
         path: 'alunos/cadastro',
         loadComponent: () => import('./pages/admin/beneficiarios/cadastro-wizard/cadastro-wizard').then(m => m.CadastroWizard),
-        title: 'Novo Aluno — ILBES'
+        title: 'Novo Aluno — ILBES',
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
       // Turmas
@@ -80,26 +83,30 @@ export const routes: Routes = [
       {
         path: 'conteudo',
         loadComponent: () => import('./pages/admin/conteudo-site/conteudo-site').then(m => m.ConteudoSite),
-        title: 'Conteúdo do Site — ILBES'
+        title: 'Conteúdo do Site — ILBES',
+        data: { roles: ['ADMIN', 'COMUNICACAO'] }
       },
 
       // Contatos / Fale Conosco
       {
         path: 'contatos',
         loadComponent: () => import('./pages/admin/contatos/contatos-lista/contatos-lista').then(m => m.ContatosLista),
-        title: 'Fale Conosco — ILBES'
+        title: 'Fale Conosco — ILBES',
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
       // Usuários
       {
         path: 'usuarios',
         loadComponent: () => import('./pages/admin/usuarios/usuarios-lista/usuarios-lista').then(m => m.UsuariosLista),
-        title: 'Usuários — ILBES'
+        title: 'Usuários — ILBES',
+        data: { roles: ['ADMIN'] }
       },
       {
         path: 'usuarios/cadastro',
         loadComponent: () => import('./pages/admin/usuarios/cadastro-usuario-wizard/cadastro-usuario-wizard').then(m => m.CadastroUsuarioWizard),
-        title: 'Novo Usuário — ILBES'
+        title: 'Novo Usuário — ILBES',
+        data: { roles: ['ADMIN'] }
       }
     ]
   },

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } fr
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
+import { ActivatedRoute } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { environment } from '../../../../environments/environment';
 import { ComunicadosLista } from '../comunicados/comunicados-lista/comunicados-lista';
@@ -56,12 +57,19 @@ export class ConteudoSite implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private siteConfig: SiteConfigService,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute
   ) { }
 
   ngOnInit() {
     this.initForms();
     this.carregarDados();
+
+    this.route.queryParams.pipe(take(1)).subscribe(params => {
+      if (params['aba']) {
+        this.setAba(params['aba']);
+      }
+    });
   }
 
   setAba(aba: string) {

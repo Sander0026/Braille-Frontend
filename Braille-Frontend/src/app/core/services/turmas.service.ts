@@ -30,10 +30,11 @@ export class TurmasService {
     constructor(private http: HttpClient) { }
 
     /** Lista turmas. statusAtivo=true (ativas, padrão) ou statusAtivo=false (arquivadas) */
-    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean): Observable<PaginatedResponse<Turma>> {
+    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string): Observable<PaginatedResponse<Turma>> {
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (nome) params = params.set('nome', nome);
         if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
+        if (professorId) params = params.set('professorId', professorId);
         // Sempre excluido=false — ocultas não aparecem em nenhuma aba
         params = params.set('excluido', 'false');
         return this.http.get<PaginatedResponse<Turma>>(this.url, { params });

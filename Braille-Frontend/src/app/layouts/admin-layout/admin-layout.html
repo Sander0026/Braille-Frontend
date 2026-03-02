@@ -16,7 +16,7 @@
     </div>
 
     <ul class="sidebar-nav" role="list">
-      @for (item of navItems; track item.rota) {
+      @for (item of rotasPermitidas; track item.rota) {
       <li role="listitem">
         <a [routerLink]="item.rota" routerLinkActive="active" [attr.aria-label]="item.aria" class="nav-link"
           [attr.title]="!showLabels ? item.label : null">

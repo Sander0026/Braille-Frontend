@@ -19,16 +19,18 @@ export class FrequenciasService {
 
     constructor(private http: HttpClient) { }
 
-    listar(page = 1, limit = 20, turmaId?: string, dataAula?: string): Observable<PaginatedResponse<Frequencia>> {
+    listar(page = 1, limit = 20, turmaId?: string, dataAula?: string, professorId?: string): Observable<PaginatedResponse<Frequencia>> {
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (turmaId) params = params.set('turmaId', turmaId);
         if (dataAula) params = params.set('dataAula', dataAula);
+        if (professorId) params = params.set('professorId', professorId);
         return this.http.get<PaginatedResponse<Frequencia>>(this.url, { params });
     }
 
-    listarResumo(page = 1, limit = 20, turmaId?: string): Observable<PaginatedResponse<any>> {
+    listarResumo(page = 1, limit = 20, turmaId?: string, professorId?: string): Observable<PaginatedResponse<any>> {
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (turmaId) params = params.set('turmaId', turmaId);
+        if (professorId) params = params.set('professorId', professorId);
         return this.http.get<PaginatedResponse<any>>(`${this.url}/resumo`, { params });
     }
 
