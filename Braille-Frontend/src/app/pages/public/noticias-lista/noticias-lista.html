@@ -1,0 +1,126 @@
+<a href="#main-content" class="sr-only sr-only-focusable" [attr.aria-label]="'Pular para o conteúdo principal'">Pular
+    para o conteúdo</a>
+
+<header class="page-header" aria-labelledby="page-title">
+    <div class="container">
+        <p class="eyebrow" aria-hidden="true">Mural de Avisos</p>
+        <h1 id="page-title" class="title">Notícias & Comunicados</h1>
+        <p class="subtitle">Acompanhe as últimas novidades, eventos, vagas para PCD e informações importantes do
+            Instituto Luiz Braille.</p>
+    </div>
+</header>
+
+<main id="main-content" class="container" aria-label="Conteúdo Principal">
+
+    <!-- ================= FERRAMENTAS (Busca e Filtros) ================= -->
+    <section class="toolbar" aria-label="Ferramentas de busca">
+        <div class="search-box">
+            <label for="busca-noticias" class="sr-only">Buscar por título</label>
+            <div class="search-input-wrapper">
+                <span class="material-symbols-rounded search-icon" aria-hidden="true">search</span>
+                <input id="busca-noticias" type="search" placeholder="O que você está procurando?" [(ngModel)]="busca"
+                    (keyup.enter)="buscar()" aria-label="Digite o título da notícia e aperte Enter" />
+                <button type="button" class="btn-buscar" (click)="buscar()" aria-label="Buscar">Buscar</button>
+            </div>
+        </div>
+
+        <!-- Chips de Categorias -->
+        <nav class="categories" aria-label="Filtro de categorias">
+            <ul class="chips-list">
+                @for (cat of categorias; track cat.valor) {
+                <li>
+                    <button type="button" class="chip" [class.active]="categoriaSelecionada === cat.valor"
+                        (click)="filtrarPorCategoria(cat.valor)"
+                        [attr.aria-pressed]="categoriaSelecionada === cat.valor">
+                        {{ cat.label }}
+                    </button>
+                </li>
+                }
+            </ul>
+        </nav>
+    </section>
+
+    <!-- ================= LISTAGEM DE CARDS ================= -->
+    <section aria-live="polite" aria-busy="carregando" class="feed">
+
+        @if (carregando && comunicados.length === 0) {
+        <div class="empty-state">
+            <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+            <p>Buscando informações...</p>
+        </div>
+        } @else if (comunicados.length === 0) {
+        <div class="empty-state">
+            <span class="material-symbols-rounded erro-icon" aria-hidden="true">search_off</span>
+            <p>Nenhum comunicado encontrado com os filtros selecionados.</p>
+            <button type="button" class="btn-link" (click)="filtrarPorCategoria(null); busca=''; buscar()">Limpar
+                filtros</button>
+        </div>
+        } @else {
+        <div class="grid-cards">
+            @for (item of comunicados; track item.id) {
+            <article class="card" [attr.aria-label]="'Ler notícia: ' + item.titulo">
+
+                <!-- Capa clicável -->
+                <a [routerLink]="['/noticias', item.id]" class="card-cover-link" tabindex="-1" aria-hidden="true">
+                    <figure class="card-cover">
+                        @if (item.imagemCapa) {
+                        <img [src]="item.imagemCapa" [alt]="'Imagem ilustrativa para: ' + item.titulo"
+                            loading="eager" />
+                        } @else {
+                        <div class="cover-placeholder" aria-hidden="true">
+                            <span class="material-symbols-rounded">article</span>
+                        </div>
+                        }
+                        <div class="badge-categoria" [attr.data-categoria]="item.categoria">
+                            {{ getLabelCategoria(item.categoria) }}
+                        </div>
+                    </figure>
+                </a>
+
+                <div class="card-content">
+                    @if (item.fixado) {
+                    <span class="pin-badge" title="Comunicado Importante Fixado" aria-label="Fixado no topo">
+                        <span class="material-symbols-rounded">push_pin</span> Importante
+                    </span>
+                    }
+
+                    <h2 class="card-title">{{ item.titulo }}</h2>
+
+                    <!-- Tira as tags HTML vindo do banco (Quill Editor) e mostra apenas texto limitado a 3 linhas -->
+                    <p class="card-excerpt">{{ getTextoPuro(item.conteudo) }}</p>
+
+                    <footer class="card-footer">
+                        <time [attr.datetime]="item.criadoEm" class="data">
+                            <span class="material-symbols-rounded" aria-hidden="true">calendar_today</span>
+                            {{ item.criadoEm | date:'dd/MM/yyyy' }}
+                        </time>
+                        <a [routerLink]="['/noticias', item.id]" class="btn-ler-mais"
+                            [attr.aria-label]="'Ler notícia completa: ' + item.titulo">
+                            Ler
+                            <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+                        </a>
+                    </footer>
+                </div>
+            </article>
+            }
+        </div>
+        }
+
+        <!-- ================= CARREGAR MAIS ================= -->
+        @if (temMais && !carregando) {
+        <div class="load-more-wrapper">
+            <button type="button" class="btn-outline" (click)="carregarMais()">
+                <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+                Carregar mais anteriores
+            </button>
+        </div>
+        } @else if (carregando && comunicados.length > 0) {
+        <div class="load-more-wrapper loading">
+            <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
+            <span>Carregando...</span>
+        </div>
+        }
+
+    </section>
+
+</main>

@@ -1,0 +1,440 @@
+<!-- Cabeçalho da página -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Alunos</h1>
+        <p class="page-subtitle">
+            @if (total > 0) { {{ total }} aluno(s) cadastrado(s) }
+        </p>
+    </div>
+    <a routerLink="/admin/alunos/cadastro" class="btn btn-primary" aria-label="Cadastrar novo aluno">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" x2="12" y1="5" y2="19" />
+            <line x1="5" x2="19" y1="12" y2="12" />
+        </svg>
+        Novo Aluno
+    </a>
+</div>
+
+<!-- Barra de busca -->
+<div class="filter-bar" role="search">
+    <div class="filter-search">
+        <label for="busca-aluno" class="sr-only">Buscar aluno por nome</label>
+        <input id="busca-aluno" type="search" class="form-input" placeholder="Buscar por nome..."
+            [formControl]="buscaCtrl" aria-label="Buscar aluno por nome" autocomplete="off" />
+    </div>
+</div>
+
+<!-- Tabela de Alunos -->
+@if (isLoading) {
+<div class="data-table-wrapper" aria-busy="true" aria-label="Carregando lista de alunos...">
+    <div class="loading-container">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p>Carregando alunos...</p>
+    </div>
+</div>
+} @else if (erro) {
+<div role="alert" aria-live="assertive" class="card card-body">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else if (alunos.length === 0) {
+<div class="empty-state" role="status">
+    <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.5" aria-hidden="true">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+    <h3>Nenhum aluno encontrado</h3>
+    <p>@if (buscaCtrl.value) { Nenhum resultado para "{{ buscaCtrl.value }}". } @else { Comece cadastrando o primeiro
+        aluno. }</p>
+</div>
+} @else {
+<!-- Abas de Navegação -->
+<div class="tabs-container" role="navigation" aria-label="Filtro de status de beneficiário">
+    <div class="tabs">
+        <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
+            [attr.aria-selected]="abaAtiva === 'ativos'" role="tab">
+            Ativos
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'inativos'" (click)="setAba('inativos')"
+            [attr.aria-selected]="abaAtiva === 'inativos'" role="tab">
+            Inativos
+        </button>
+    </div>
+</div>
+
+<div class="data-table-wrapper">
+    <table class="data-table" role="table" aria-label="Lista de alunos ativos">
+        <caption class="sr-only">{{ total }} alunos cadastrados, página {{ paginaAtual }} de {{ totalPaginas }}
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Nome Completo</th>
+                <th scope="col">CPF / RG</th>
+                <th scope="col">Nascimento</th>
+                <th scope="col">Tipo de Deficiência</th>
+                <th scope="col">Telefone</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (aluno of alunos; track aluno.id) {
+            <tr>
+                <td>
+                    <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
+                </td>
+                <td>{{ aluno.cpfRg || '—' }}</td>
+                <td>{{ formatarData(aluno.dataNascimento) }}</td>
+                <td>
+                    @if (aluno.tipoDeficiencia) {
+                    <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
+                    } @else { <span>—</span> }
+                </td>
+                <td>{{ aluno.telefoneContato || '—' }}</td>
+                <td class="acoes-cell">
+                    @if (abaAtiva === 'ativos') {
+                    <button class="btn btn-sm btn-ghost" (click)="abrirModal(aluno)"
+                        [attr.aria-label]="'Ver detalhes de ' + aluno.nomeCompleto">
+                        Ver
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="inativar(aluno)"
+                        [attr.aria-label]="'Inativar aluno ' + aluno.nomeCompleto">
+                        Inativar
+                    </button>
+                    } @else {
+                    <button class="btn btn-sm"
+                        style="background-color: #10b981; color: white; border: none; margin-right: 0.5rem;"
+                        (click)="restaurarConta(aluno)"
+                        [attr.aria-label]="'Restaurar aluno ' + aluno.nomeCompleto">Restaurar</button>
+                    <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(aluno)"
+                        [attr.aria-label]="'Excluir definitivamente o aluno ' + aluno.nomeCompleto">Excluir</button>
+                    }
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+@if (totalPaginas > 1) {
+<nav class="pagination" role="navigation" aria-label="Paginação dos alunos">
+    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+        aria-label="Página anterior">‹</button>
+
+    @for (p of paginas; track p) {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual" [attr.aria-label]="'Ir para página ' + p"
+        [attr.aria-current]="p === paginaAtual ? 'page' : null">{{ p }}</button>
+    }
+
+    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+        aria-label="Próxima página">›</button>
+
+    <span class="pagination-info" aria-live="polite">
+        Página {{ paginaAtual }} de {{ totalPaginas }}
+    </span>
+</nav>
+}
+}
+
+<!-- Modal Visualizar Aluno -->
+@if (modalAberto) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAlunoTitulo">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2 id="modalAlunoTitulo">Perfil do Aluno</h2>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar janela de perfil">×</button>
+        </div>
+
+        <div class="modal-body profile-body">
+            @if (carregandoDetalhes) {
+            <div class="loading-container p-4 text-center">
+                <div class="loading-spinner"></div>
+                <p>Buscando ficha completa...</p>
+            </div>
+            } @else if (alunoSelecionado) {
+
+            <div class="profile-header">
+                <div class="avatar-wrapper" style="position: relative; display: inline-block;">
+                    <div class="profile-avatar">
+                        <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}" />
+
+                        @if (uploadingImage || deletandoImage) {
+                        <div
+                            style="position: absolute; inset:0; background: rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; border-radius: 50%;">
+                            <div class="loading-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                        </div>
+                        }
+                    </div>
+
+                    @if (abaAtiva === 'ativos') {
+                    <div class="avatar-actions"
+                        style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px;">
+                        <label class="btn btn-sm btn-primary"
+                            style="padding: 4px 8px; font-size: 11px; cursor: pointer;" title="Alterar Foto"
+                            [class.opacity-50]="uploadingImage || deletandoImage">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">photo_camera</span>
+                            <input type="file" (change)="processarUploadArquivo($event, 'fotoPerfil')"
+                                accept=".jpg,.jpeg,.png,.webp" style="display: none;"
+                                [disabled]="uploadingImage || deletandoImage">
+                        </label>
+
+                        @if (alunoSelecionado.fotoPerfil) {
+                        <button class="btn btn-sm btn-danger" style="padding: 4px 8px; font-size: 11px;"
+                            title="Remover Foto" (click)="excluirDocumento('fotoPerfil')"
+                            [disabled]="uploadingImage || deletandoImage">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">delete</span>
+                        </button>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <div class="profile-title">
+                    <h3>{{ alunoSelecionado.nomeCompleto }}</h3>
+                    <div class="profile-badges">
+                        @if (alunoSelecionado.statusAtivo) {
+                        <span class="badge badge-success">Ativo</span>
+                        } @else {
+                        <span class="badge badge-danger">Inativo</span>
+                        }
+                        @if (alunoSelecionado.tipoDeficiencia) {
+                        <span class="badge badge-primary">{{ alunoSelecionado.tipoDeficiencia }}</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                <!-- Informações Pessoais -->
+                <div class="profile-section">
+                    <h4>Informações Pessoais</h4>
+                    <p><strong>CPF/RG:</strong> {{ alunoSelecionado.cpfRg || 'N/I' }}</p>
+                    <p><strong>Nascimento:</strong> {{ formatarData(alunoSelecionado.dataNascimento) }}</p>
+                    <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
+                    <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
+                    <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
+                    <p><strong>Contato Emergência:</strong> {{ alunoSelecionado.contatoEmergencia || 'N/I' }}</p>
+                </div>
+
+                <!-- Perfil da Deficiência -->
+                <div class="profile-section">
+                    <h4>Perfil Inclusivo</h4>
+                    <p><strong>Causa:</strong> {{ alunoSelecionado.causaDeficiencia || 'N/I' }}</p>
+                    <p><strong>Idade da Ocorrência:</strong> {{ alunoSelecionado.idadeOcorrencia || 'N/I' }}</p>
+                    <p><strong>Acessibilidade Preferida:</strong> {{ alunoSelecionado.prefAcessibilidade || 'N/I' }}</p>
+                    <p><strong>Tec. Assistivas:</strong> {{ alunoSelecionado.tecAssistivas || 'Nenhuma informada' }}</p>
+                    <p><strong>Precisa de acompanhante?</strong> {{ alunoSelecionado.precisaAcompanhante ? 'Sim' : 'Não'
+                        }}</p>
+
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                        <h5 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #6b7280;">Documento Médico (Laudo)
+                        </h5>
+
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            @if (alunoSelecionado.laudoUrl) {
+                            <a [href]="alunoSelecionado.laudoUrl" target="_blank" class="btn btn-primary btn-sm"
+                                title="Clique para visualizar o laudo original (abre em uma nova guia, você pode dar zoom ou baixar)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="margin-right: 6px;">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                Ver Arquivo Anexo
+                            </a>
+
+                            @if (abaAtiva === 'ativos') {
+                            <button class="btn btn-danger btn-sm" (click)="excluirDocumento('laudoUrl')"
+                                [disabled]="uploadingImage || deletandoImage">
+                                <span class="material-symbols-rounded"
+                                    style="font-size: 16px; margin-right: 6px; vertical-align: middle;">delete</span>
+                                Excluir Laudo
+                            </button>
+                            }
+                            } @else if (abaAtiva === 'ativos') {
+                            <label class="btn btn-secondary btn-sm" style="cursor: pointer;"
+                                [class.opacity-50]="uploadingImage || deletandoImage">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" style="margin-right: 6px;">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                Fazer Upload do Laudo
+                                <input type="file" (change)="processarUploadArquivo($event, 'laudoUrl')"
+                                    accept=".jpg,.jpeg,.png,.pdf" style="display: none;"
+                                    [disabled]="uploadingImage || deletandoImage">
+                            </label>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereço -->
+                <div class="profile-section full-width">
+                    <h4>Endereço</h4>
+                    <p>
+                        {{ alunoSelecionado.rua || 'Rua não informada' }}, {{ alunoSelecionado.numero || 'SN' }}
+                        @if (alunoSelecionado.complemento) { - {{ alunoSelecionado.complemento }} }
+                        <br>
+                        {{ alunoSelecionado.bairro || 'Bairro' }} - {{ alunoSelecionado.cidade || 'Cidade' }}/{{
+                        alunoSelecionado.uf || 'UF' }}
+                        <br>
+                        <strong>CEP:</strong> {{ alunoSelecionado.cep || 'N/I' }}
+                    </p>
+                </div>
+            </div>
+
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Inativação -->
+@if (alunoParaInativar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="(alunoParaInativar.statusAtivo !== false ? 'Inativar' : 'Reativar') + ' Aluno ' + alunoParaInativar.nomeCompleto"
+    (click)="cancelarInativacao()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-inativacao"
+                [style.color]="alunoParaInativar.statusAtivo !== false ? '#fbbf24' : '#3b82f6'">
+                {{ alunoParaInativar.statusAtivo !== false ? 'Inativar Aluno' : 'Reativar Aluno' }}
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarInativacao()" aria-label="Cancelar ação">✕</button>
+        </div>
+
+        <div class="modal-body">
+            @if (alunoParaInativar.statusAtivo !== false) {
+            <p>Deseja inativar <strong>{{ alunoParaInativar.nomeCompleto }}</strong>?</p>
+            <p>O registro será mantido, mas o aluno ficará inativo e não aparecerá em operações de nova matrícula.</p>
+            } @else {
+            <p>Deseja reativar <strong>{{ alunoParaInativar.nomeCompleto }}</strong>?</p>
+            <p>Ele passará a ficar disponível para novas matrículas.</p>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarInativacao()"
+                [disabled]="salvando">Cancelar</button>
+            <button [class]="alunoParaInativar.statusAtivo !== false ? 'btn btn-warning' : 'btn btn-primary'"
+                type="button" (click)="confirmarInativacao()" [disabled]="salvando"
+                [style]="alunoParaInativar.statusAtivo !== false ? 'background-color: #fbbf24; color: #111827; border: none;' : ''">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"
+                    style="width:14px; height:14px; border-width:2px;"></span> Verificando... }
+                @else { {{ alunoParaInativar.statusAtivo !== false ? 'Sim, inativar' : 'Sim, reativar' }} }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Excluir Documento -->
+@if (documentoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Documento"
+    (click)="cancelarExclusaoDocumento()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-documento" style="color: #ef4444;">Apagar Arquivo</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDocumento()"
+                aria-label="Cancelar exclusão de documento">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>
+                {{ documentoParaExcluir.tipo === 'fotoPerfil'
+                ? 'Deseja apagar a foto de perfil deste aluno definitivamente?'
+                : 'Deseja apagar o laudo/documento deste aluno definitivamente?'
+                }}
+            </p>
+            <p>Esta ação não pode ser desfeita.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDocumento()"
+                [disabled]="deletandoImage">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDocumento()"
+                [disabled]="deletandoImage" style="background-color: #ef4444; color: white; border: none;">
+                @if (deletandoImage) { <span class="loading-spinner" aria-hidden="true"
+                    style="width:14px; height:14px; border-width:2px;"></span> Apagando... }
+                @else { Sim, apagar }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Exclusão DEFINITIVA (Soft Delete Nvl 2) -->
+@if (alunoParaExcluirDefinitivo) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Excluir definitivamente o aluno ' + alunoParaExcluirDefinitivo.nomeCompleto"
+    (click)="cancelarExclusaoDefinitiva()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro do Aluno</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDefinitiva()"
+                aria-label="Cancelar exclusão">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>Você está prestes a apagar <strong>permanentemente</strong> o acesso do aluno <strong>{{
+                    alunoParaExcluirDefinitivo.nomeCompleto }}</strong> de todo o painel.</p>
+            <p>Por motivos da LGPD o cadastro e dados sensíveis serão fisicamente preservados mas ocultos.</p>
+            <p style="color: #ef4444; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDefinitiva()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDefinitiva()" [disabled]="salvando"
+                style="background-color: #991b1b; color: white; border: none;">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Apagando... }
+                @else { Excluir Permanente }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Restauração -->
+@if (alunoParaRestaurar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Restaurar o aluno ' + alunoParaRestaurar.nomeCompleto" (click)="cancelarRestauracao()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Inscrição</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarRestauracao()"
+                aria-label="Cancelar restauração">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>O aluno <strong>{{ alunoParaRestaurar.nomeCompleto }}</strong> será reativado.</p>
+            <p>Ele passará a aparecer novamente nos relatórios financeiros e para novas matrículas em turmas e cursos.
+            </p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarRestauracao()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-primary" type="button" (click)="confirmarRestauracao()" [disabled]="salvando"
+                style="background-color: #059669; color: white; border: none;">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Restaurando... }
+                @else { Restaurar Aluno }
+            </button>
+        </div>
+    </div>
+</div>
+}

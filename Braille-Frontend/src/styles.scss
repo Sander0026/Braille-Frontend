@@ -1,0 +1,23 @@
+// ============================================================
+// styles.scss — Entry Point do Design System ILBES
+// Instituto Luiz Braille — Sistema de Estilos Global
+// Ordem: variáveis → base → componentes
+// ============================================================
+
+// 1. Tokens de Design (cores, tipografia, espaçamento)
+@use 'styles/variables' as *;
+
+// 2. Reset, tipografia base e acessibilidade
+@use 'styles/base';
+
+// 3. Componentes reutilizáveis (.btn, .card, .badge, .form-input, etc.)
+@use 'styles/components';
+
+// Garante que o app propaga a altura corretamente para os layouts filhos
+app-root {
+    display: block;
+    height: 100%;
+    /* propaga a altura do body (100vh) para os layouts */
+    overflow: hidden;
+    /* cada layout gerencia seu próprio scroll internamente */
+}

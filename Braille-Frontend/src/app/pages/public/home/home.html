@@ -1,0 +1,231 @@
+<a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo</a>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero" aria-label="Seção de boas-vindas" id="main-content">
+    <div class="hero-content">
+        <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>
+        <h1 class="hero-title">
+            {{ heroConfig['tituloLinha1'] || 'Mais do que inclusão —' }}<br>
+            <span class="hero-highlight">{{ heroConfig['tituloDestaque'] || 'transformação' }}</span>
+        </h1>
+        <p class="hero-desc">
+            @if (heroConfig['descricao']) {
+            {{ heroConfig['descricao'] }}
+            } @else {
+            Há mais de 30 anos o <strong>Instituto Luiz Braille</strong> oferece educação, autonomia e oportunidades
+            para pessoas com deficiência visual em nossa comunidade.
+            }
+        </p>
+        <div class="hero-actions">
+            <a routerLink="/contato" class="btn-hero-primary">
+                {{ heroConfig['btnPrimario'] || 'Fale Conosco' }}
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.5" stroke-linecap="round">
+                    <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+            </a>
+            <a routerLink="/sobre" class="btn-hero-secondary">
+                {{ heroConfig['btnSecundario'] || 'Conheça o Instituto' }}
+            </a>
+        </div>
+
+        <div class="hero-stats" role="list" aria-label="Números do instituto">
+            <div class="stat-item" role="listitem">
+                <span class="stat-num">{{ heroConfig['stat1Num'] || '300+' }}</span>
+                <span class="stat-label">{{ heroConfig['stat1Desc'] || 'Alunos atendidos por ano' }}</span>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item" role="listitem">
+                <span class="stat-num">{{ heroConfig['stat2Num'] || '30+' }}</span>
+                <span class="stat-label">{{ heroConfig['stat2Desc'] || 'Anos de história' }}</span>
+            </div>
+            <div class="stat-divider" aria-hidden="true"></div>
+            <div class="stat-item" role="listitem">
+                <span class="stat-num">{{ heroConfig['stat3Num'] || '6' }}</span>
+                <span class="stat-label">{{ heroConfig['stat3Desc'] || 'Oficinas disponíveis' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-visual" aria-hidden="true">
+        <div class="braille-grid">
+            <!-- Pontos braille decorativos representando "ILBES" -->
+            @for (dot of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]; track dot) {
+            <div class="braille-dot" [style.animation-delay]="(dot * 0.05) + 's'"></div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ MISSÃO ══════════ -->
+<section class="sobre" aria-labelledby="sobre-titulo">
+    <div class="section-inner">
+        <div class="sobre-text">
+            <h2 id="sobre-titulo" class="section-title">{{ missaoConfig['titulo'] || 'Nossa Missão' }}</h2>
+            <p>
+                {{ missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos
+                dedicada à reabilitação, educação e inclusão social de pessoas com deficiência visual. Oferecemos
+                serviços gratuitos de qualidade, com profissionais especializados e compromisso com a dignidade de cada
+                pessoa que nos procura.' }}
+            </p>
+            <p>
+                {{ missaoConfig['descricaoLinha2'] || 'Acreditamos que toda pessoa, independentemente de sua condição
+                visual, tem o direito a uma vida plena, produtiva e com autonomia. Nosso trabalho é tornar esse direito
+                real.' }}
+            </p>
+            <a routerLink="/sobre" class="btn-link">
+                {{ missaoConfig['btnSaberMais'] || 'Saiba mais sobre nós →' }}
+            </a>
+        </div>
+
+        <div class="sobre-valores" role="list" aria-label="Valores do instituto">
+            <div class="valor-card" role="listitem">
+                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor1Icone'] || '♿' }}</div>
+                <h3>{{ missaoConfig['valor1Titulo'] || 'Inclusão' }}</h3>
+                <p>{{ missaoConfig['valor1Desc'] || 'Ambientes e materiais 100% acessíveis para todos.' }}</p>
+            </div>
+            <div class="valor-card" role="listitem">
+                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor2Icone'] || '🤝' }}</div>
+                <h3>{{ missaoConfig['valor2Titulo'] || 'Gratuidade' }}</h3>
+                <p>{{ missaoConfig['valor2Desc'] || 'Todos os serviços são totalmente gratuitos.' }}</p>
+            </div>
+            <div class="valor-card" role="listitem">
+                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor3Icone'] || '🎓' }}</div>
+                <h3>{{ missaoConfig['valor3Titulo'] || 'Qualidade' }}</h3>
+                <p>{{ missaoConfig['valor3Desc'] || 'Professores qualificados e metodologias modernas.' }}</p>
+            </div>
+            <div class="valor-card" role="listitem">
+                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor4Icone'] || '❤️' }}</div>
+                <h3>{{ missaoConfig['valor4Titulo'] || 'Humanização' }}</h3>
+                <p>{{ missaoConfig['valor4Desc'] || 'Atendimento individual, respeitando cada história de vida.' }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ OFICINAS ══════════ -->
+<section class="oficinas" aria-labelledby="oficinas-titulo">
+    <div class="section-inner">
+        <div class="section-header">
+            <h2 id="oficinas-titulo" class="section-title">Nossas Oficinas</h2>
+            <p class="section-subtitle">Atividades gratuitas para pessoas com deficiência visual de todas as idades.</p>
+        </div>
+
+        <div class="oficinas-grid" role="list" aria-label="Lista de oficinas">
+            @for (of of oficinas; track of.titulo) {
+            <article class="oficina-card" role="listitem">
+                <div class="oficina-icon" aria-hidden="true">{{ of.icon }}</div>
+                <h3 class="oficina-titulo">{{ of.titulo }}</h3>
+                <p class="oficina-desc">{{ of.descricao }}</p>
+            </article>
+            } @empty {
+            <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;">
+                <p>Nenhuma oficina cadastrada no momento.</p>
+            </div>
+            }
+        </div>
+
+        <div class="oficinas-cta">
+            <a routerLink="/contato" class="btn-primary-lg"
+                aria-label="Entre em contato para saber sobre nossas oficinas">
+                Quero Saber Mais
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ DEPOIMENTOS ══════════ -->
+<section class="depoimentos" aria-labelledby="dep-titulo">
+    <div class="section-inner">
+        <h2 id="dep-titulo" class="section-title section-title--light">O que nossos alunos dizem</h2>
+
+        <div class="dep-grid" role="list" aria-label="Depoimentos de alunos">
+            @for (dep of depoimentos; track dep.nome) {
+            <blockquote class="dep-card" role="listitem">
+                <p class="dep-texto">"{{ dep.texto }}"</p>
+                <footer class="dep-autor">
+                    <div class="dep-avatar" aria-hidden="true">{{ dep.nome.charAt(0) }}</div>
+                    <div>
+                        <cite class="dep-nome">{{ dep.nome }}</cite>
+                        <span class="dep-idade">{{ dep.idade > 0 ? dep.idade + ' anos' : '' }}</span>
+                    </div>
+                </footer>
+            </blockquote>
+            } @empty {
+            <div class="feed-vazio" style="grid-column: 1 / -1; color: white; min-height: 100px; text-align: center;">
+                <p>Nenhum depoimento cadastrado no momento.</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ ÚLTIMAS NOTÍCIAS ══════════ -->
+<section class="section-noticias" aria-labelledby="noticias-titulo">
+    <div class="section-inner">
+        <header class="section-header">
+            <h2 id="noticias-titulo" class="section-title">Últimas Novidades</h2>
+            <p class="section-desc">Acompanhe as notícias, vagas para PCD e comunicados mais recentes do Instituto.</p>
+        </header>
+
+        @if (carregandoNoticias) {
+        <div class="feed-carregando">
+            <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
+            <p>Buscando novidades...</p>
+        </div>
+        } @else if (ultimasNoticias.length > 0) {
+        <div class="grid-noticias">
+            @for (item of ultimasNoticias; track item.id) {
+            <article class="card-noticia">
+                <figure class="card-noticia-img">
+                    @if (item.imagemCapa) {
+                    <img [src]="item.imagemCapa" alt="Imagem: {{ item.titulo }}" loading="lazy" />
+                    } @else {
+                    <div class="placeholder"><span class="material-symbols-rounded">article</span></div>
+                    }
+                    <span class="badge" [attr.data-categoria]="item.categoria">{{ getLabelCategoria(item.categoria)
+                        }}</span>
+                </figure>
+                <div class="card-noticia-body">
+                    <h3>{{ item.titulo }}</h3>
+                    <p class="card-excerpt">{{ getTextoPuro(item.conteudo) }}</p>
+                    <footer>
+                        <time>{{ item.criadoEm | date:'dd/MM/yyyy' }}</time>
+                    </footer>
+                </div>
+                <a routerLink="/noticias" class="full-link"
+                    [attr.aria-label]="'Ler notícia completa: ' + item.titulo"></a>
+            </article>
+            }
+        </div>
+
+        <div class="noticias-footer">
+            <a routerLink="/noticias" class="btn-outline-primary">Todas as Notícias <span
+                    class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
+        </div>
+        } @else {
+        <div class="feed-vazio">
+            <p>Nenhuma novidade publicada recentemente.</p>
+        </div>
+        }
+    </div>
+</section>
+
+<!-- ══════════ CTA FINAL ══════════ -->
+<section class="cta-final" aria-labelledby="cta-titulo">
+    <div class="section-inner cta-inner">
+        <div class="cta-text">
+            <h2 id="cta-titulo">Pronto para começar?</h2>
+            <p>A inscrição é gratuita e pode ser feita online. Nossa equipe entrará em contato para agendar uma visita.
+            </p>
+        </div>
+        <div class="cta-actions">
+            <a routerLink="/contato" class="btn-hero-primary">
+                Fale com a Secretaria
+            </a>
+            <a routerLink="/sobre" class="btn-hero-secondary">
+                Saiba Mais
+            </a>
+        </div>
+    </div>
+</section>

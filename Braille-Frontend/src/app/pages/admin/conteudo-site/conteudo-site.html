@@ -1,0 +1,726 @@
+﻿<div class="page-header">
+    <div>
+        <h1 class="page-title">Gestão de Conteúdo</h1>
+        <p class="page-subtitle">Gerencie as informações e visual exibidos no portal público.</p>
+    </div>
+</div>
+
+<div class="content-wrapper">
+
+    @if (mensagemSucesso) {
+    <div class="alert success" role="alert">
+        <span class="material-symbols-rounded">check_circle</span>
+        {{ mensagemSucesso }}
+    </div>
+    }
+    @if (mensagemErro) {
+    <div class="alert danger" role="alert">
+        <span class="material-symbols-rounded">error</span>
+        {{ mensagemErro }}
+    </div>
+    }
+
+    <!-- TABS NAV -->
+    <nav class="tabs-nav" aria-label="Abas de Seções">
+        <button class="tab-btn" [class.active]="abaAtiva === 'config'" (click)="setAba('config')">
+            <span class="material-symbols-rounded">settings</span> Configurações
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'hero'" (click)="setAba('hero')">
+            <span class="material-symbols-rounded">web_asset</span> Apresentação Principal
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'missao'" (click)="setAba('missao')">
+            <span class="material-symbols-rounded">assignment</span> Missão & Valores
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'oficinas'" (click)="setAba('oficinas')">
+            <span class="material-symbols-rounded">school</span> Oficinas
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
+            <span class="material-symbols-rounded">reviews</span> Depoimentos
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'sobre'" (click)="setAba('sobre')">
+            <span class="material-symbols-rounded">info</span> Página Sobre
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
+            <span class="material-symbols-rounded">newspaper</span> Noticias
+        </button>
+    </nav>
+
+
+    <!-- LOADING -->
+    @if (carregando) {
+    <div class="loading-state">
+        <span class="material-symbols-rounded spinner">sync</span>
+        <p>Carregando dados...</p>
+    </div>
+    } @else {
+
+    <!-- ABA: CONFIGURAÃ‡Ã•ES -->
+    @if (abaAtiva === 'config') {
+    <div class="tab-pane active" id="pane-config">
+        <form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
+            <div class="form-header">
+                <h2>Configurações Globais</h2>
+                <p>Cores e marcação principal do portal aberto.</p>
+            </div>
+
+            <div class="form-section">
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="corPrimaria">Cor Primária (HEX)</label>
+                        <div class="color-picker-wrap">
+                            <input type="color" id="corPrimaria-color" class="form-input-color"
+                                formControlName="corPrimaria">
+                            <input type="text" id="corPrimaria" class="form-input" formControlName="corPrimaria"
+                                placeholder="#f5c800">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Logo do Instituto (Opcional)</label>
+
+                        <!-- Preview da logo atual -->
+                        @if (logoPreview) {
+                        <div class="logo-preview-wrapper">
+                            <img [src]="logoPreview" alt="Preview da logo" class="logo-preview-img">
+                            <button type="button" class="btn btn-secondary btn-sm btn-remover-logo"
+                                (click)="removerLogo()">
+                                <span class="material-symbols-rounded">delete</span> Remover
+                            </button>
+                        </div>
+                        }
+
+                        <!-- Upload -->
+                        <label class="upload-label" [class.uploading]="uploadandoLogo">
+                            <input type="file" accept="image/*" (change)="onLogoChange($event)"
+                                [disabled]="uploadandoLogo" style="display:none" #logoInput>
+                            <span class="material-symbols-rounded">{{ uploadandoLogo ? 'cloud_sync' : 'upload' }}</span>
+                            {{ uploadandoLogo ? 'Enviando...' : (logoPreview ? 'Substituir imagem' : 'Escolher imagem da
+                            logo') }}
+                            <!-- Trigger click -->
+                            <button type="button" class="upload-trigger" (click)="logoInput.click()"
+                                [disabled]="uploadandoLogo" aria-label="Selecionar arquivo de logo"></button>
+                        </label>
+                        <p class="form-hint">PNG ou SVG com fundo transparente. Recomendado: 200x60px.</p>
+                        <!-- Campo oculto que guarda a URL para o formGroup -->
+                        <input type="hidden" formControlName="logoUrl">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formConfig.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Configurações }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ABA: HERO -->
+    @if (abaAtiva === 'hero') {
+    <div class="tab-pane active" id="pane-hero">
+        <form [formGroup]="formHero" (ngSubmit)="salvarHero()" class="cms-form">
+            <div class="form-header">
+                <h2>Apresentação Principal</h2>
+                <p>Bem-vindo, títulos e destaques iniciais (primeira dobra do site).</p>
+            </div>
+
+            <div class="form-section">
+                <h3>Títulos e Textos</h3>
+                <div class="form-group">
+                    <label class="form-label" for="eyebrow">Pequeno Título Superior</label>
+                    <input type="text" id="eyebrow" class="form-input" formControlName="eyebrow"
+                        placeholder="Ex: Instituto de Educação Inclusiva">
+                </div>
+
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="tituloLinha1">Título Linha 1</label>
+                        <input type="text" id="tituloLinha1" class="form-input" formControlName="tituloLinha1"
+                            placeholder="Ex: Mais do que inclusão â€”">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="tituloDestaque">Palavra em Destaque (Linha 2)</label>
+                        <input type="text" id="tituloDestaque" class="form-input" formControlName="tituloDestaque"
+                            placeholder="Ex: transformação">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
+                    <textarea id="descricao" class="form-textarea" formControlName="descricao" rows="3"
+                        placeholder="Insira a descrição..."></textarea>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Botões Principais</h3>
+                <div class="form-row form-row-2">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="btnPrimario">Texto do Botão Primário</label>
+                        <input type="text" id="btnPrimario" class="form-input" formControlName="btnPrimario"
+                            placeholder="Ex: Fale Conosco">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="btnSecundario">Texto do Botão Secundário</label>
+                        <input type="text" id="btnSecundario" class="form-input" formControlName="btnSecundario"
+                            placeholder="Ex: Conheça o Instituto">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Estatísticas em Destaque</h3>
+                <div class="form-row form-row-3">
+                    <div class="form-group mb-0">
+                        <label class="form-label">Estatística 1</label>
+                        <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+">
+                        <input type="text" class="form-input mt-2" formControlName="stat1Desc"
+                            placeholder="Descrição (ex: Vidas impactadas)">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label">Estatística 2</label>
+                        <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+">
+                        <input type="text" class="form-input mt-2" formControlName="stat2Desc"
+                            placeholder="Descrição (ex: Profissionais)">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label">Estatística 3</label>
+                        <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6">
+                        <input type="text" class="form-input mt-2" formControlName="stat3Desc"
+                            placeholder="Descrição (ex: Oficinas)">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formHero.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Hero }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ABA: MISSÃƒO -->
+    @if (abaAtiva === 'missao') {
+    <div class="tab-pane active" id="pane-missao">
+        <form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
+            <div class="form-header">
+                <h2>Nossa Missão & Valores</h2>
+                <p>Textos da seção central e cards de princípios orientadores.</p>
+            </div>
+
+            <div class="form-section">
+                <h3>Texto de Apresentação</h3>
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="titulo-missao">Título da Seção</label>
+                        <input type="text" id="titulo-missao" class="form-input" formControlName="titulo"
+                            placeholder="Ex: Nossa Missão">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="btnSaberMais">Botão Link (Opcional)</label>
+                        <input type="text" id="btnSaberMais" class="form-input" formControlName="btnSaberMais"
+                            placeholder="Ex: Saiba mais sobre nós →">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="descricaoLinha1">Parágrafo de Introdução</label>
+                    <textarea id="descricaoLinha1" class="form-textarea" formControlName="descricaoLinha1"
+                        rows="3"></textarea>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label" for="descricaoLinha2">Parágrafo de Complemento (Opcional)</label>
+                    <textarea id="descricaoLinha2" class="form-textarea" formControlName="descricaoLinha2"
+                        rows="2"></textarea>
+                </div>
+            </div>
+
+            <div class="form-section bg-transparent border-0 px-0 shadow-none">
+                <h3 class="mb-3">Cards de Valores</h3>
+
+                <!-- Valor 1 & 2 -->
+                <div class="form-row form-row-2">
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Principal 1</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor1Icone"
+                                placeholder="Ícone ou Emoji (ex: ™)">
+                            <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
+                                placeholder="Título (ex: Inclusão)">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor1Desc"
+                            placeholder="Breve descrição do valor">
+                    </div>
+
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Principal 2</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor2Icone"
+                                placeholder="Ícone">
+                            <input type="text" class="form-input flex-3" formControlName="valor2Titulo"
+                                placeholder="Título">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor2Desc"
+                            placeholder="Breve descrição">
+                    </div>
+                </div>
+
+                <!-- Valor 3 & 4 -->
+                <div class="form-row form-row-2 mt-4">
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Complementar 3</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor3Icone"
+                                placeholder="Ícone">
+                            <input type="text" class="form-input flex-3" formControlName="valor3Titulo"
+                                placeholder="Título">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor3Desc"
+                            placeholder="Breve descrição">
+                    </div>
+
+                    <div class="form-card dynamic-card">
+                        <label class="form-label">Valor Complementar 4</label>
+                        <div class="flex-row">
+                            <input type="text" class="form-input flex-1" formControlName="valor4Icone"
+                                placeholder="Ícone">
+                            <input type="text" class="form-input flex-3" formControlName="valor4Titulo"
+                                placeholder="Título">
+                        </div>
+                        <input type="text" class="form-input mt-2" formControlName="valor4Desc"
+                            placeholder="Breve descrição">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formMissao.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Missão }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ABA: OFICINAS -->
+    @if (abaAtiva === 'oficinas') {
+    <div class="tab-pane active" id="pane-oficinas">
+        <form [formGroup]="formOficinas" (ngSubmit)="salvarOficinas()" class="cms-form">
+            <div class="form-header">
+                <h2>Oficinas e Cursos</h2>
+                <p>Gerencie os cards de oficinas (grade) ofertados na Home.</p>
+            </div>
+
+            <!-- Arrays de Oficinas -->
+            <div formArrayName="lista">
+                @for (card of oficinasArray.controls; track card; let i = $index) {
+                <div [formGroupName]="i" class="form-card dynamic-card">
+                    <div class="dynamic-card-header">
+                        <span class="card-badge">Card {{ i + 1 }}</span>
+                        <button type="button" class="btn-icon danger" (click)="removerOficina(i)" aria-label="Remover"
+                            title="Remover card">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+
+                    <div class="flex-row">
+                        <input type="text" class="form-input flex-1" formControlName="icon"
+                            placeholder="Ícone/Emoji (ex: ðŸ’»)">
+                        <input type="text" class="form-input flex-3" formControlName="titulo"
+                            placeholder="Título da Oficina">
+                    </div>
+                    <textarea class="form-textarea mt-2" formControlName="descricao" rows="2"
+                        placeholder="Breve descrição ou resumo..."></textarea>
+                </div>
+                }
+            </div>
+
+            <div class="add-row">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarOficina()">
+                    <span class="material-symbols-rounded">add</span> Adicionar Oficina
+                </button>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formOficinas.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Oficinas }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ABA: DEPOIMENTOS -->
+    @if (abaAtiva === 'depoimentos') {
+    <div class="tab-pane active" id="pane-depoimentos">
+        <form [formGroup]="formDepoimentos" (ngSubmit)="salvarDepoimentos()" class="cms-form">
+            <div class="form-header">
+                <h2>Depoimentos</h2>
+                <p>Gerencie os relatos exibidos no carrossel de depoimentos.</p>
+            </div>
+
+            <div formArrayName="lista">
+                @for (item of depoimentosArray.controls; track item; let i = $index) {
+                <div [formGroupName]="i" class="form-card dynamic-card">
+                    <div class="dynamic-card-header">
+                        <span class="card-badge">Depoimento {{ i + 1 }}</span>
+                        <button type="button" class="btn-icon danger" (click)="removerDepoimento(i)"
+                            aria-label="Remover" title="Remover depoimento">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+
+                    <textarea class="form-textarea mb-2" formControlName="texto" rows="2"
+                        placeholder="O que o aluno disse..."></textarea>
+                    <div class="flex-row">
+                        <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo">
+                        <input type="number" class="form-input flex-1" formControlName="idade"
+                            placeholder="Idade (opcional)">
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="add-row">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarDepoimento()">
+                    <span class="material-symbols-rounded">add</span> Adicionar Depoimento
+                </button>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formDepoimentos.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Depoimentos }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ABA: SOBRE -->
+    @if (abaAtiva === 'sobre') {
+    <div class="tab-pane active" id="pane-sobre">
+
+        <!-- Hero do Sobre -->
+        <form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form">
+            <div class="form-header">
+                <h2>Hero da Página Sobre</h2>
+                <p>Texto de destaque que aparece no topo da página /sobre.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="sobreEyebrow">Eyebrow (texto acima do título)</label>
+                    <input type="text" id="sobreEyebrow" formControlName="eyebrow" class="form-input"
+                        placeholder="Ex: Conheça o Instituto" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="sobreTitulo">Título Principal</label>
+                    <input type="text" id="sobreTitulo" formControlName="titulo" class="form-input"
+                        placeholder="Ex: Sobre o Instituto Luiz Braille" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="sobreDescricao">Descrição</label>
+                    <textarea id="sobreDescricao" formControlName="descricao" class="form-input" rows="3"
+                        placeholder="Breve descrição exibida abaixo do título…"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar Hero' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Nossa História -->
+        <form [formGroup]="formSobreHistoria" (ngSubmit)="salvarSobreHistoria()" class="cms-form">
+            <div class="form-header">
+                <h2>Nossa História</h2>
+                <p>Texto da seção de história do instituto.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="historiaTitulo">Título da Seção</label>
+                    <input type="text" id="historiaTitulo" formControlName="titulo" class="form-input"
+                        placeholder="Ex: Nossa História" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="historiaParagrafo1">Parágrafo 1</label>
+                    <textarea id="historiaParagrafo1" formControlName="paragrafo1" class="form-input" rows="4"
+                        placeholder="Primeiro parágrafo da história…"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label for="historiaParagrafo2">Parágrafo 2</label>
+                    <textarea id="historiaParagrafo2" formControlName="paragrafo2" class="form-input" rows="4"
+                        placeholder="Segundo parágrafo da história…"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label for="historiaParagrafo3">Parágrafo 3 (opcional)</label>
+                    <textarea id="historiaParagrafo3" formControlName="paragrafo3" class="form-input" rows="4"
+                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar História' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Linha do Tempo -->
+        <form [formGroup]="formSobreTimeline" (ngSubmit)="salvarSobreTimeline()" class="cms-form">
+            <div class="form-header">
+                <h2>Linha do Tempo</h2>
+                <p>Marcos históricos exibidos ao lado do texto "Nossa História".</p>
+            </div>
+            @for (item of timelineArray.controls; track $index) {
+            <div class="item-card" [formGroupName]="$index">
+                <div class="item-card-header">
+                    <span class="item-badge">{{ $index + 1 }}</span>
+                    <button type="button" class="btn btn-icon btn-ghost" (click)="removerItemTimeline($index)"
+                        aria-label="Remover marco">
+                        <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
+                    </button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label [for]="'tlAno' + $index">Ano / Período</label>
+                        <input type="text" [id]="'tlAno' + $index" formControlName="ano" class="form-input"
+                            placeholder="Ex: 1990 ou Hoje" />
+                    </div>
+                    <div class="form-group">
+                        <label [for]="'tlTitulo' + $index">Título</label>
+                        <input type="text" [id]="'tlTitulo' + $index" formControlName="titulo" class="form-input"
+                            placeholder="Ex: Fundação" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label [for]="'tlDesc' + $index">Descrição</label>
+                        <input type="text" [id]="'tlDesc' + $index" formControlName="descricao" class="form-input"
+                            placeholder="Breve descrição do marco…" />
+                    </div>
+                </div>
+            </div>
+            }
+            <button type="button" class="btn btn-secondary" (click)="adicionarItemTimeline()"
+                style="margin-bottom:1.5rem;">
+                <span class="material-symbols-rounded">add</span> Adicionar Marco
+            </button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formSobreTimeline.invalid">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar Linha do Tempo' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- Nossa Equipe -->
+        <form [formGroup]="formSobreEquipe" (ngSubmit)="salvarSobreEquipe()" class="cms-form">
+            <div class="form-header">
+                <h2>Nossa Equipe</h2>
+                <p>Cards de membros ou áreas da equipe exibidos na seção "Nossa Equipe".</p>
+            </div>
+            @for (membro of equipeArray.controls; track $index) {
+            <div class="item-card" [formGroupName]="$index">
+                <div class="item-card-header">
+                    <span class="item-badge">{{ $index + 1 }}</span>
+                    <button type="button" class="btn btn-icon btn-ghost" (click)="removerMembroEquipe($index)"
+                        aria-label="Remover membro">
+                        <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
+                    </button>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label [for]="'eqEmoji' + $index">Emoji / Ícone</label>
+                        <input type="text" [id]="'eqEmoji' + $index" formControlName="emoji" class="form-input"
+                            placeholder="Ex: 👩‍⚕️" maxlength="4" />
+                    </div>
+                    <div class="form-group">
+                        <label [for]="'eqCargo' + $index">Cargo / Área</label>
+                        <input type="text" [id]="'eqCargo' + $index" formControlName="cargo" class="form-input"
+                            placeholder="Ex: Coordenação Pedagógica" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label [for]="'eqDesc' + $index">Descrição</label>
+                        <input type="text" [id]="'eqDesc' + $index" formControlName="descricao" class="form-input"
+                            placeholder="Breve descrição da função…" />
+                    </div>
+                </div>
+            </div>
+            }
+            <button type="button" class="btn btn-secondary" (click)="adicionarMembroEquipe()"
+                style="margin-bottom:1.5rem;">
+                <span class="material-symbols-rounded">add</span> Adicionar Membro
+            </button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formSobreEquipe.invalid">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar Equipe' }}
+                </button>
+            </div>
+        </form>
+
+        <!-- CTA / Rodapé -->
+        <form [formGroup]="formSobreCta" (ngSubmit)="salvarSobreCta()" class="cms-form">
+            <div class="form-header">
+                <h2>Chamada para Ação (Rodapé)</h2>
+                <p>Texto do bloco de CTA exibido no final da página /sobre.</p>
+            </div>
+            <div class="form-grid">
+                <div class="form-group full-width">
+                    <label for="sobreCtaTitulo">Título</label>
+                    <input type="text" id="sobreCtaTitulo" formControlName="titulo" class="form-input"
+                        placeholder="Ex: Quer saber mais ou precisa de atendimento?" />
+                </div>
+                <div class="form-group full-width">
+                    <label for="sobreCtaDesc">Descrição</label>
+                    <textarea id="sobreCtaDesc" formControlName="descricao" class="form-input" rows="2"
+                        placeholder="Ex: Entre em contato com nossa secretaria…"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando">
+                    <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
+                    {{ salvando ? 'Salvando…' : 'Salvar CTA' }}
+                </button>
+            </div>
+        </form>
+
+    </div>
+    }
+
+    <!-- ABA: NOTÍCIAS / COMUNICADOS -->
+    @if (abaAtiva === 'comunicados') {
+    <div class="tab-pane active" id="pane-comunicados" role="tabpanel">
+        <div class="form-header">
+            <h2>Notícias e Comunicados</h2>
+            <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
+        </div>
+        <app-comunicados-lista></app-comunicados-lista>
+    </div>
+    }
+
+    } <!-- /else !carregando -->
+</div>
+
+<!-- Modais de Confirmação -->
+
+<!-- Modal Excluir Logo -->
+@if (logoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Logo" (click)="cancelarExclusaoLogo()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Remover Logo</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoLogo()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a remover a logo atual do painel.</p>
+            <p>Deseja continuar?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoLogo()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoLogo()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover Logo
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Oficina -->
+@if (oficinaParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Oficina"
+    (click)="cancelarExclusaoOficina()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Excluir Oficina</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoOficina()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a excluir este card de oficina.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar Oficinas</strong>. Deseja removê-la da lista?
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoOficina()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoOficina()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover Oficina
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Depoimento -->
+@if (depoimentoParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Depoimento"
+    (click)="cancelarExclusaoDepoimento()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Excluir Depoimento</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDepoimento()"
+                aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a excluir este depoimento.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar Depoimentos</strong>. Deseja removê-lo da lista?
+            </p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDepoimento()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDepoimento()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover Depoimento
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Marco da Timeline -->
+@if (timelineItemParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Marco"
+    (click)="cancelarExclusaoTimeline()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Remover Marco</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoTimeline()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Deseja remover este marco da linha do tempo?</p>
+            <p>A ação refletirá no site apenas após <strong>Salvar Linha do Tempo</strong>.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoTimeline()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoTimeline()"
+                style="background-color: #ef4444; color: white; border: none;">Remover</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir Membro da Equipe -->
+@if (equipeMemberParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Membro"
+    (click)="cancelarExclusaoEquipe()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Remover Membro</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoEquipe()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Deseja remover este membro da equipe?</p>
+            <p>A ação refletirá no site apenas após <strong>Salvar Equipe</strong>.</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoEquipe()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoEquipe()"
+                style="background-color: #ef4444; color: white; border: none;">Remover</button>
+        </div>
+    </div>
+</div>
+}

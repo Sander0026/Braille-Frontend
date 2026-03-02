@@ -1,0 +1,180 @@
+<!-- Cabeçalho -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Comunicados</h1>
+        <p class="page-subtitle">Mural de avisos e comunicações do instituto</p>
+    </div>
+    <button class="btn btn-primary" (click)="novo()" aria-label="Criar novo comunicado">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="12" x2="12" y1="5" y2="19" />
+            <line x1="5" x2="19" y1="12" y2="12" />
+        </svg>
+        Novo Comunicado
+    </button>
+</div>
+
+<!-- Lista -->
+@if (isLoading) {
+<div class="loading-container" role="status" aria-live="polite">
+    <div class="loading-spinner" aria-hidden="true"></div>
+    <span>Carregando comunicados...</span>
+</div>
+} @else if (erro) {
+<div role="alert" class="card card-body" aria-live="assertive">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else if (comunicados.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhum comunicado</h3>
+    <p>Crie o primeiro comunicado clicando em "Novo Comunicado".</p>
+</div>
+} @else {
+<div class="comunicados-lista" role="list" aria-label="Lista de comunicados">
+    @for (c of comunicados; track c.id) {
+    <article class="comunicado-card card" role="listitem">
+        @if (c.imagemCapa) {
+        <div class="card-img-wrapper">
+            <img [src]="c.imagemCapa" alt="Capa" class="card-img" />
+        </div>
+        }
+        <div class="card-body">
+            <div class="comunicado-header">
+                <div class="cabecalho-principal">
+                    <h2 class="comunicado-titulo">
+                        {{ c.titulo }}
+                        @if(c.fixado) { <span class="material-symbols-rounded icon-fixado"
+                            title="Fixado no topo">push_pin</span> }
+                    </h2>
+                    <span class="badge badge-default">{{ c.categoria || 'GERAL' }}</span>
+                </div>
+                <span class="comunicado-data">{{ formatarData(c.criadoEm) }}</span>
+            </div>
+            <p class="comunicado-preview">{{ preview(c.conteudo) }}</p>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-sm btn-secondary" (click)="editar(c)"
+                [attr.aria-label]="'Editar comunicado: ' + c.titulo">Editar</button>
+            <button class="btn btn-sm btn-danger" (click)="excluir(c)"
+                [attr.aria-label]="'Excluir comunicado: ' + c.titulo">Excluir</button>
+        </div>
+    </article>
+    }
+</div>
+}
+
+<!-- Modal criar / editar -->
+@if (mostrarModal) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="editando ? 'Editar comunicado' : 'Novo comunicado'" (click)="fecharModal()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2>{{ editando ? 'Editar Comunicado' : 'Novo Comunicado' }}</h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModal()" aria-label="Fechar">✕</button>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
+
+            <div class="form-row form-row-2">
+                <div class="form-group">
+                    <label for="com-titulo" class="form-label">Título <span class="required"
+                            aria-hidden="true">*</span></label>
+                    <input id="com-titulo" type="text" class="form-input"
+                        [class.is-invalid]="form.get('titulo')?.invalid && form.get('titulo')?.touched"
+                        formControlName="titulo" placeholder="Ex: Aviso sobre funcionamento no feriado" />
+                    @if (form.get('titulo')?.invalid && form.get('titulo')?.touched) {
+                    <span class="form-error" role="alert">Título obrigatório (mín. 5 caracteres)</span>
+                    }
+                </div>
+
+                <div class="form-group">
+                    <label for="com-categoria" class="form-label">Categoria</label>
+                    <select id="com-categoria" class="form-input" formControlName="categoria">
+                        @for (cat of CATEGORIAS; track cat.valor) {
+                        <option [value]="cat.valor">{{ cat.label }}</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <!-- Capa e Fixado -->
+            <div class="form-row form-row-2 mb-2">
+                <div class="form-group">
+                    <label class="form-label">Imagem de Capa (Recomendado: 800x600)</label>
+
+                    @if (fotoPreview) {
+                    <div class="foto-preview-wrapper mb-2">
+                        <img [src]="fotoPreview" alt="Pré-visualização da Capa" class="foto-preview" />
+                        <button type="button" class="btn btn-secondary btn-sm btn-remover"
+                            (click)="removerFotoDaPrevia()">
+                            Remover Capa
+                        </button>
+                    </div>
+                    } @else {
+                    <input type="file" id="foto-capa" class="form-input" accept="image/png, image/jpeg, image/webp"
+                        (change)="onFotoChange($event)" />
+                    }
+                </div>
+
+                <div class="form-group flex-center-y">
+                    <label class="switch">
+                        <input type="checkbox" formControlName="fixado">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="ml-2 form-label mb-0" style="margin-bottom: 0;">Fixar no topo do mural</span>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top:1rem">
+                <label for="com-conteudo" class="form-label">Conteúdo <span class="required"
+                        aria-hidden="true">*</span></label>
+                <textarea id="com-conteudo" class="form-textarea"
+                    [class.is-invalid]="form.get('conteudo')?.invalid && form.get('conteudo')?.touched"
+                    formControlName="conteudo" rows="6"
+                    placeholder="Escreva o comunicado aqui... Podem ser inseridas quebras de linhas para formar parágrafos."></textarea>
+                @if (form.get('conteudo')?.invalid && form.get('conteudo')?.touched) {
+                <span class="form-error" role="alert">Conteúdo obrigatório (mín. 10 caracteres)</span>
+                }
+            </div>
+        </form>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="fecharModal()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-primary" type="submit" (click)="salvar()" [disabled]="form.invalid || salvando">
+                @if (salvando) { <span class="loading-spinner" style="width:1rem;height:1rem" aria-hidden="true"></span>
+                }
+                {{ editando ? 'Salvar Alterações' : 'Publicar' }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Exclusão -->
+@if (comunicadoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Excluir comunicado ' + comunicadoParaExcluir.titulo" (click)="cancelarExclusao()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Comunicado</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()"
+                aria-label="Cancelar exclusão">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>Você está prestes a excluir o comunicado <strong>{{ comunicadoParaExcluir.titulo }}</strong>.</p>
+            <p>Esta ação não pode ser desfeita. Deseja continuar?</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusao()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusao()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Excluir Comunicado
+            </button>
+        </div>
+    </div>
+</div>
+}
