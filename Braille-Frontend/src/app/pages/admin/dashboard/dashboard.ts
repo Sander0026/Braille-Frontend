@@ -11,6 +11,7 @@ interface StatCard {
   cor: string;
   rota: string;
   ariaLabel: string;
+  queryParams?: Record<string, string>;
 }
 
 interface ActionLink {
@@ -90,6 +91,7 @@ export class Dashboard implements OnInit {
     const cardComunicados: StatCard = {
       label: 'Comunicados', valor: this.stats.comunicadosGerais || 0,
       icon: 'speaker_notes', cor: 'warning', rota: '/admin/conteudo',
+      queryParams: { aba: 'comunicados' },
       ariaLabel: `${this.stats.comunicadosGerais || 0} comunicados disponíveis. Gerenciar no site`
     };
 
