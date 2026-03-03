@@ -5,6 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-comunicados-lista',
@@ -41,7 +42,8 @@ export class ComunicadosLista implements OnInit {
     private fb: FormBuilder,
     private cdr: ChangeDetectorRef,
     private http: HttpClient,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private toast: ToastService
   ) {
     this.form = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
@@ -159,8 +161,10 @@ export class ComunicadosLista implements OnInit {
 
       if (this.editando) {
         await firstValueFrom(this.comunicadosService.atualizar(this.editando.id, payload));
+        this.toast.sucesso('Comunicado atualizado com sucesso!');
       } else {
         await firstValueFrom(this.comunicadosService.criar(payload));
+        this.toast.sucesso('Comunicado publicado com sucesso!');
       }
 
       this.salvando = false;
@@ -172,7 +176,7 @@ export class ComunicadosLista implements OnInit {
       this.salvando = false;
       const msg = err?.error?.message || 'Verifique os campos e tente novamente.';
       console.error('Erro ao salvar comunicado:', err?.error || err);
-      alert(`Erro ao salvar comunicado: ${msg}`);
+      this.toast.erro(`Erro ao salvar: ${msg}`);
       this.cdr.detectChanges();
     }
   }
@@ -189,12 +193,13 @@ export class ComunicadosLista implements OnInit {
     if (!this.comunicadoParaExcluir) return;
     this.comunicadosService.excluir(this.comunicadoParaExcluir.id).subscribe({
       next: () => {
+        this.toast.sucesso('Comunicado excluído com sucesso!');
         this.comunicadoParaExcluir = null;
         this.carregar();
       },
       error: () => {
+        this.toast.erro('Erro ao excluir comunicado.');
         this.comunicadoParaExcluir = null;
-        alert('Erro ao excluir comunicado.');
         this.cdr.detectChanges();
       }
     });

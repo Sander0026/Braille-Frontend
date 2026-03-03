@@ -7,6 +7,7 @@ import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { BeneficiariosService, Beneficiario } from '../../../../core/services/beneficiarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
@@ -66,6 +67,7 @@ export class TurmasLista implements OnInit {
         private cdr: ChangeDetectorRef,
         private confirmDialog: ConfirmDialogService,
         private authService: AuthService,
+        private toast: ToastService
     ) { }
 
     ngOnInit(): void {
@@ -196,16 +198,22 @@ export class TurmasLista implements OnInit {
 
         operacao$.subscribe({
             next: () => {
-                this.fecharModal();
-                this.salvandoModal = false;
-                this.carregarTurmas(this.paginaAtual);
+                setTimeout(() => {
+                    this.salvandoModal = false;
+                    this.fecharModal();
+                    this.toast.sucesso(this.modoEdicao ? 'Oficina atualizada com sucesso!' : 'Oficina criada com sucesso!');
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
             },
             error: (err: { status: number; error?: { message?: string } }) => {
-                this.salvandoModal = false;
-                this.erroModal = err.status === 409
-                    ? 'Já existe uma turma com este nome.'
-                    : (err.error?.message ?? 'Erro ao salvar. Tente novamente.');
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.salvandoModal = false;
+                    this.erroModal = err.status === 409
+                        ? 'Já existe uma turma com este nome.'
+                        : (err.error?.message ?? 'Erro ao salvar. Tente novamente.');
+                    this.toast.erro('Erro ao salvar os dados da oficina.');
+                    this.cdr.detectChanges();
+                }, 0);
             },
         });
     }
@@ -231,14 +239,20 @@ export class TurmasLista implements OnInit {
 
         this.turmasService.arquivar(this.turmaParaArquivar.id).subscribe({
             next: () => {
-                this.arquivando = false;
-                this.fecharModalArquivar();
-                this.carregarTurmas(this.paginaAtual);
+                setTimeout(() => {
+                    this.arquivando = false;
+                    this.fecharModalArquivar();
+                    this.toast.sucesso('Oficina arquivada com sucesso!');
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
             },
             error: (err: { error?: { message?: string } }) => {
-                this.arquivando = false;
-                this.erroArquivamento = err.error?.message ?? 'Não foi possível arquivar a turma.';
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.arquivando = false;
+                    this.erroArquivamento = err.error?.message ?? 'Não foi possível arquivar a turma.';
+                    this.toast.erro('Erro ao arquivar a oficina.');
+                    this.cdr.detectChanges();
+                }, 0);
             },
         });
     }
@@ -254,12 +268,17 @@ export class TurmasLista implements OnInit {
 
         this.turmasService.restaurar(turma.id).subscribe({
             next: () => {
-                this.carregarTurmas(this.paginaAtual);
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.toast.sucesso('Oficina restaurada com sucesso!');
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
             },
             error: (err: { error?: { message?: string } }) => {
-                this.erroArquivamento = err.error?.message ?? 'Não foi possível restaurar a oficina.';
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.erroArquivamento = err.error?.message ?? 'Não foi possível restaurar a oficina.';
+                    this.toast.erro('Erro ao restaurar a oficina.');
+                    this.cdr.detectChanges();
+                }, 0);
             }
         });
     }
@@ -275,12 +294,17 @@ export class TurmasLista implements OnInit {
 
         this.turmasService.ocultarDaAba(turma.id).subscribe({
             next: () => {
-                this.carregarTurmas(this.paginaAtual);
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.toast.sucesso('Oficina ocultada da lista!');
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
             },
             error: (err: { error?: { message?: string } }) => {
-                this.erroArquivamento = err.error?.message ?? 'Não foi possível ocultar a oficina.';
-                this.cdr.detectChanges();
+                setTimeout(() => {
+                    this.erroArquivamento = err.error?.message ?? 'Não foi possível ocultar a oficina.';
+                    this.toast.erro('Erro ao ocultar a oficina.');
+                    this.cdr.detectChanges();
+                }, 0);
             }
         });
     }
@@ -385,7 +409,9 @@ export class TurmasLista implements OnInit {
                     this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => !idsParaMatricular.includes(a.id));
 
                     if (erros > 0) {
-                        alert(`Processo concluído: ${concluidos} adicionados, ${erros} falharam.`);
+                        this.toast.aviso(`Processo concluído: ${concluidos} adicionados, ${erros} falharam.`);
+                    } else {
+                        this.toast.sucesso(`${concluidos} aluno(s) matriculado(s) com sucesso!`);
                     }
                     this.cdr.detectChanges();
                 });
@@ -443,10 +469,12 @@ export class TurmasLista implements OnInit {
             next: (turmaAtualizada) => {
                 this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
                 this.operacaoEmProgresso = false;
+                this.toast.sucesso('Aluno removido da oficina.');
                 this.cdr.detectChanges();
             },
             error: () => {
                 this.operacaoEmProgresso = false;
+                this.toast.erro('Erro ao remover aluno da oficina.');
                 this.cdr.detectChanges();
             }
         });

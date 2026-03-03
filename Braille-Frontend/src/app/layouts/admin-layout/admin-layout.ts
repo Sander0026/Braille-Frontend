@@ -6,6 +6,7 @@ import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.s
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
+import { ToastComponent } from '../../core/components/toast/toast.component';
 
 interface NavItem {
   rota: string;
@@ -20,7 +21,7 @@ type Modal = 'none' | 'foto' | 'senha' | 'perfil';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
