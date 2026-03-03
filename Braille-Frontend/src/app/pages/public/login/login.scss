@@ -3,7 +3,7 @@
 // ============================================================
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-$primary: #ff4700; // Tom da mock parece um laranja avermelhado, mas irei usar amarelo se for a diretriz. Wait, the print has an orange button #ff4700. Let's make it the prominent braille orange/yellow. The prompt says "botão de Acessar plataforma amarelo". OK, I will make it yellow, but the print shows orange. I will stick to yellow as in "botão de Acessar plataforma amarelo", maybe #ff9800 or #f5c800. Let's use #f5c800 for the yellow or #ff6c00 to be closer to the print. Actually, prompt explicitly says: "Deixe o fundo da tela de login branca e o botão de Acessar plataforma amarelo". I will use yellow/orange. Let's use #f5c800 as in the original code, maybe a bit more orange #ff8c00. Let's use #f9a000 (um tom de amarelo escuro). No, the screenshot button is truly orange (#f15a24). I'll use a very vibrant orange-yellow. Let's set $primary to #ff5722 just in case. Oh wait, "amarelo" usually means #f5c800 in this project.
+$primary: #f5c800; // Tom padrão de amarelo do projeto
 $black: #212529;
 $surface: #ffffff;
 $surface-2: #ffffff;
@@ -213,9 +213,9 @@ $transition: 250ms ease;
     justify-content: center;
     gap: 0.625rem;
     width: 100%;
-    background: #ffa846; // Tom amarelo/alaranjado do print recebido
-    color: #ffffff;
-    font-weight: 700;
+    background: $primary;
+    color: #111111; // Ajustei para texto escuro por conta do contraste com amarelo (#f5c800)
+    font-weight: 800;
     font-size: 1.05rem;
     font-family: inherit;
     padding: 1rem;
@@ -226,9 +226,9 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition, box-shadow $transition;
 
     &:hover:not(:disabled) {
-        background: #f59124;
+        background: darken(#f5c800, 8%);
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 168, 70, 0.3);
+        box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
     }
 
     &:active:not(:disabled) {
@@ -241,7 +241,7 @@ $transition: 250ms ease;
     }
 
     &:focus-visible {
-        outline: 3px solid #ffa846;
+        outline: 3px solid #f5c800;
         outline-offset: 2px;
     }
 }
