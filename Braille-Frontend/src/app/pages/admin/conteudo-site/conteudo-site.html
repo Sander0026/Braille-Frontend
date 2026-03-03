@@ -476,6 +476,7 @@
                 <h2>Linha do Tempo</h2>
                 <p>Marcos históricos exibidos ao lado do texto "Nossa História".</p>
             </div>
+            <div formArrayName="lista">
             @for (item of timelineArray.controls; track $index) {
             <div class="item-card" [formGroupName]="$index">
                 <div class="item-card-header">
@@ -504,6 +505,7 @@
                 </div>
             </div>
             }
+            </div>
             <button type="button" class="btn btn-secondary" (click)="adicionarItemTimeline()"
                 style="margin-bottom:1.5rem;">
                 <span class="material-symbols-rounded">add</span> Adicionar Marco
@@ -522,6 +524,7 @@
                 <h2>Nossa Equipe</h2>
                 <p>Cards de membros ou áreas da equipe exibidos na seção "Nossa Equipe".</p>
             </div>
+            <div formArrayName="lista">
             @for (membro of equipeArray.controls; track $index) {
             <div class="item-card" [formGroupName]="$index">
                 <div class="item-card-header">
@@ -550,6 +553,7 @@
                 </div>
             </div>
             }
+            </div>
             <button type="button" class="btn btn-secondary" (click)="adicionarMembroEquipe()"
                 style="margin-bottom:1.5rem;">
                 <span class="material-symbols-rounded">add</span> Adicionar Membro

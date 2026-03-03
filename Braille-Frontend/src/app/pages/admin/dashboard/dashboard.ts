@@ -113,7 +113,7 @@ export class Dashboard implements OnInit {
       this.acoes.push({ rota: '/admin/contatos', icon: 'mail', label: 'Fale Conosco', ariaLabel: 'Ver mensagens de contato' });
     }
     if (['ADMIN', 'PROFESSOR'].includes(this.userRole)) {
-      this.acoes.push({ rota: '/admin/freqencias', icon: 'checklist', label: 'Realizar Chamada', ariaLabel: 'Ir para chamadas e frequências' });
+      this.acoes.push({ rota: '/admin/frequencias', icon: 'checklist', label: 'Realizar Chamada', ariaLabel: 'Ir para chamadas e frequências' });
     }
     if (['ADMIN', 'SECRETARIA', 'PROFESSOR'].includes(this.userRole)) {
       const labelTurma = this.userRole === 'PROFESSOR' ? 'Minhas Turmas' : 'Gerenciar Turmas';
