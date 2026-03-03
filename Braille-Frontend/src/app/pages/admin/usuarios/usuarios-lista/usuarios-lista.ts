@@ -272,7 +272,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
-                this.toast.sucesso('Senha resetada com sucesso para Mudar@123!');
+                this.toast.sucesso('Senha resetada com sucesso para Ilbes@123');
                 this.cdr.detectChanges();
             },
             error: () => {
