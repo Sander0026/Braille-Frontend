@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
@@ -78,8 +79,36 @@ export class TurmasLista implements OnInit {
 
         this.iniciarFormulario();
         this.iniciarBuscaAlunos();
-        this.carregarTurmas();
-        this.carregarProfessores();
+        this.carregarDadosIniciais();
+    }
+
+    // Dispara turmas e professores em paralelo — tempo = max(A, B) em vez de A + B
+    carregarDadosIniciais(): void {
+        this.isLoading = true;
+        this.erro = '';
+
+        const statusAtivo = this.abaAtual === 'ativas';
+        const profId = this.isProfessor ? this.userId : undefined;
+
+        forkJoin({
+            turmas: this.turmasService.listar(this.paginaAtual, 100, undefined, statusAtivo, profId),
+            professores: this.usuariosService.listar(1, 100),
+        }).subscribe({
+            next: ({ turmas, professores }) => {
+                this.turmas = turmas.data;
+                this.totalTurmas = turmas.meta.total;
+                this.professores = professores.data.filter(u =>
+                    u.role === 'PROFESSOR' || u.role === 'ADMIN'
+                );
+                this.isLoading = false;
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.erro = 'Não foi possível carregar os dados. Verifique se o servidor está online.';
+                this.isLoading = false;
+                this.cdr.markForCheck();
+            },
+        });
     }
 
     // ── Formulário ─────────────────────────────────────────────
@@ -137,17 +166,7 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    carregarProfessores(): void {
-        this.usuariosService.listar(1, 100).subscribe({
-            next: (res) => {
-                // Só professores e admins podem ser responsáveis por turma
-                this.professores = res.data.filter(u =>
-                    u.role === 'PROFESSOR' || u.role === 'ADMIN'
-                );
-            },
-            error: () => { /* silencioso — dropdown mostrará vazio */ },
-        });
-    }
+    // carregarProfessores() foi absorvido pelo forkJoin em carregarDadosIniciais()
 
     // ── Modal Criar ────────────────────────────────────────────
     abrirModalCriar(): void {
