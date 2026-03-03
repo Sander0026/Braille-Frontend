@@ -357,7 +357,12 @@ export class FrequenciasLista implements OnInit {
 
   formatarData(iso: string): string {
     if (!iso) return '—';
-    return new Date(iso).toLocaleDateString('pt-BR');
+    // Extrai YYYY-MM-DD diretamente da string ISO para evitar deslocamento de UTC
+    // new Date('2026-03-03T00:00:00Z') em UTC-3 retornaria 02/03/2026 (errado)
+    const partes = iso.substring(0, 10).split('-'); // ['2026', '03', '03']
+    if (partes.length !== 3) return iso;
+    const [ano, mes, dia] = partes;
+    return `${dia}/${mes}/${ano}`;
   }
 
   get turmaSelecionadaNome(): string {
