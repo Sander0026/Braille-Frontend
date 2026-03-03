@@ -18,6 +18,11 @@ export class Login {
   carregando = false;
   precisaTrocarSenha = false;
   senhaAntigaTemp = '';
+  mostrarSenha = false;
+
+  toggleSenha() {
+    this.mostrarSenha = !this.mostrarSenha;
+  }
 
   constructor(
     private fb: FormBuilder,
