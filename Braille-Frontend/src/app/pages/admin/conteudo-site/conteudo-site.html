@@ -21,29 +21,31 @@
     }
 
     <!-- TABS NAV -->
-    <nav class="tabs-nav" aria-label="Abas de Seções">
-        <button class="tab-btn" [class.active]="abaAtiva === 'config'" (click)="setAba('config')">
-            <span class="material-symbols-rounded">settings</span> Configurações
-        </button>
-        <button class="tab-btn" [class.active]="abaAtiva === 'hero'" (click)="setAba('hero')">
-            <span class="material-symbols-rounded">web_asset</span> Apresentação Principal
-        </button>
-        <button class="tab-btn" [class.active]="abaAtiva === 'missao'" (click)="setAba('missao')">
-            <span class="material-symbols-rounded">assignment</span> Missão & Valores
-        </button>
-        <button class="tab-btn" [class.active]="abaAtiva === 'oficinas'" (click)="setAba('oficinas')">
-            <span class="material-symbols-rounded">school</span> Oficinas
-        </button>
-        <button class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
-            <span class="material-symbols-rounded">reviews</span> Depoimentos
-        </button>
-        <button class="tab-btn" [class.active]="abaAtiva === 'sobre'" (click)="setAba('sobre')">
-            <span class="material-symbols-rounded">info</span> Página Sobre
-        </button>
-        <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
-            <span class="material-symbols-rounded">newspaper</span> Noticias
-        </button>
-    </nav>
+    <div class="tabs-nav-wrapper">
+        <nav class="tabs-nav" aria-label="Abas de Seções">
+            <button class="tab-btn" [class.active]="abaAtiva === 'config'" (click)="setAba('config')">
+                <span class="material-symbols-rounded">settings</span> Configurações
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'hero'" (click)="setAba('hero')">
+                <span class="material-symbols-rounded">web_asset</span> Apresentação Principal
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'missao'" (click)="setAba('missao')">
+                <span class="material-symbols-rounded">assignment</span> Missão &amp; Valores
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'oficinas'" (click)="setAba('oficinas')">
+                <span class="material-symbols-rounded">school</span> Oficinas
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
+                <span class="material-symbols-rounded">reviews</span> Depoimentos
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'sobre'" (click)="setAba('sobre')">
+                <span class="material-symbols-rounded">info</span> Página Sobre
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
+                <span class="material-symbols-rounded">newspaper</span> Noticias
+            </button>
+        </nav>
+    </div>
 
 
     <!-- LOADING -->
@@ -54,7 +56,7 @@
     </div>
     } @else {
 
-    <!-- ABA: CONFIGURAÃ‡Ã•ES -->
+    <!-- ABA: CONFIGURAÇÕES -->
     @if (abaAtiva === 'config') {
     <div class="tab-pane active" id="pane-config">
         <form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
@@ -477,34 +479,34 @@
                 <p>Marcos históricos exibidos ao lado do texto "Nossa História".</p>
             </div>
             <div formArrayName="lista">
-            @for (item of timelineArray.controls; track $index) {
-            <div class="item-card" [formGroupName]="$index">
-                <div class="item-card-header">
-                    <span class="item-badge">{{ $index + 1 }}</span>
-                    <button type="button" class="btn btn-icon btn-ghost" (click)="removerItemTimeline($index)"
-                        aria-label="Remover marco">
-                        <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
-                    </button>
+                @for (item of timelineArray.controls; track $index) {
+                <div class="item-card" [formGroupName]="$index">
+                    <div class="item-card-header">
+                        <span class="item-badge">{{ $index + 1 }}</span>
+                        <button type="button" class="btn btn-icon btn-ghost" (click)="removerItemTimeline($index)"
+                            aria-label="Remover marco">
+                            <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
+                        </button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label [for]="'tlAno' + $index">Ano / Período</label>
+                            <input type="text" [id]="'tlAno' + $index" formControlName="ano" class="form-input"
+                                placeholder="Ex: 1990 ou Hoje" />
+                        </div>
+                        <div class="form-group">
+                            <label [for]="'tlTitulo' + $index">Título</label>
+                            <input type="text" [id]="'tlTitulo' + $index" formControlName="titulo" class="form-input"
+                                placeholder="Ex: Fundação" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label [for]="'tlDesc' + $index">Descrição</label>
+                            <input type="text" [id]="'tlDesc' + $index" formControlName="descricao" class="form-input"
+                                placeholder="Breve descrição do marco…" />
+                        </div>
+                    </div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label [for]="'tlAno' + $index">Ano / Período</label>
-                        <input type="text" [id]="'tlAno' + $index" formControlName="ano" class="form-input"
-                            placeholder="Ex: 1990 ou Hoje" />
-                    </div>
-                    <div class="form-group">
-                        <label [for]="'tlTitulo' + $index">Título</label>
-                        <input type="text" [id]="'tlTitulo' + $index" formControlName="titulo" class="form-input"
-                            placeholder="Ex: Fundação" />
-                    </div>
-                    <div class="form-group full-width">
-                        <label [for]="'tlDesc' + $index">Descrição</label>
-                        <input type="text" [id]="'tlDesc' + $index" formControlName="descricao" class="form-input"
-                            placeholder="Breve descrição do marco…" />
-                    </div>
-                </div>
-            </div>
-            }
+                }
             </div>
             <button type="button" class="btn btn-secondary" (click)="adicionarItemTimeline()"
                 style="margin-bottom:1.5rem;">
@@ -525,34 +527,34 @@
                 <p>Cards de membros ou áreas da equipe exibidos na seção "Nossa Equipe".</p>
             </div>
             <div formArrayName="lista">
-            @for (membro of equipeArray.controls; track $index) {
-            <div class="item-card" [formGroupName]="$index">
-                <div class="item-card-header">
-                    <span class="item-badge">{{ $index + 1 }}</span>
-                    <button type="button" class="btn btn-icon btn-ghost" (click)="removerMembroEquipe($index)"
-                        aria-label="Remover membro">
-                        <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
-                    </button>
+                @for (membro of equipeArray.controls; track $index) {
+                <div class="item-card" [formGroupName]="$index">
+                    <div class="item-card-header">
+                        <span class="item-badge">{{ $index + 1 }}</span>
+                        <button type="button" class="btn btn-icon btn-ghost" (click)="removerMembroEquipe($index)"
+                            aria-label="Remover membro">
+                            <span class="material-symbols-rounded" style="color: #ef4444;">delete</span>
+                        </button>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label [for]="'eqEmoji' + $index">Emoji / Ícone</label>
+                            <input type="text" [id]="'eqEmoji' + $index" formControlName="emoji" class="form-input"
+                                placeholder="Ex: 👩‍⚕️" maxlength="4" />
+                        </div>
+                        <div class="form-group">
+                            <label [for]="'eqCargo' + $index">Cargo / Área</label>
+                            <input type="text" [id]="'eqCargo' + $index" formControlName="cargo" class="form-input"
+                                placeholder="Ex: Coordenação Pedagógica" />
+                        </div>
+                        <div class="form-group full-width">
+                            <label [for]="'eqDesc' + $index">Descrição</label>
+                            <input type="text" [id]="'eqDesc' + $index" formControlName="descricao" class="form-input"
+                                placeholder="Breve descrição da função…" />
+                        </div>
+                    </div>
                 </div>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label [for]="'eqEmoji' + $index">Emoji / Ícone</label>
-                        <input type="text" [id]="'eqEmoji' + $index" formControlName="emoji" class="form-input"
-                            placeholder="Ex: 👩‍⚕️" maxlength="4" />
-                    </div>
-                    <div class="form-group">
-                        <label [for]="'eqCargo' + $index">Cargo / Área</label>
-                        <input type="text" [id]="'eqCargo' + $index" formControlName="cargo" class="form-input"
-                            placeholder="Ex: Coordenação Pedagógica" />
-                    </div>
-                    <div class="form-group full-width">
-                        <label [for]="'eqDesc' + $index">Descrição</label>
-                        <input type="text" [id]="'eqDesc' + $index" formControlName="descricao" class="form-input"
-                            placeholder="Breve descrição da função…" />
-                    </div>
-                </div>
-            </div>
-            }
+                }
             </div>
             <button type="button" class="btn btn-secondary" (click)="adicionarMembroEquipe()"
                 style="margin-bottom:1.5rem;">

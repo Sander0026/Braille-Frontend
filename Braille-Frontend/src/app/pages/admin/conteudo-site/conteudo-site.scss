@@ -68,17 +68,60 @@ $primary: var(--color-primary, #1e40af); // Consumindo a variável do sistema
 }
 
 /* ── ABAS ── */
+.tabs-nav-wrapper {
+    position: relative;
+
+    // Fade lateral direito — indica que há mais abas
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 1px; // acima da borda inferior
+        width: 3rem;
+        background: linear-gradient(to right, transparent, $gray-50);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    &.has-overflow::after {
+        opacity: 1;
+    }
+}
+
 .tabs-nav {
     display: flex;
     border-bottom: 1px solid $gray-200;
     background: $gray-50;
     overflow-x: auto;
 
+    // Mobile: scroll silencioso (dedo desliza naturalmente)
     &::-webkit-scrollbar {
         display: none;
     }
-
     scrollbar-width: none;
+
+    // PC com tela menor (≥ 768px e ≤ 1200px): exibe scrollbar discreta
+    @media (min-width: 768px) {
+        &::-webkit-scrollbar {
+            display: block;
+            height: 4px;
+        }
+        &::-webkit-scrollbar-track {
+            background: $gray-200;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: $gray-300;
+            border-radius: 2px;
+
+            &:hover {
+                background: $gray-400;
+            }
+        }
+        scrollbar-width: thin;
+        scrollbar-color: $gray-300 $gray-200;
+    }
 }
 
 .tab-btn {

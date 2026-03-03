@@ -5,6 +5,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } 
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
     selector: 'app-usuarios-lista',
@@ -46,6 +47,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef,
         private confirmDialog: ConfirmDialogService,
+        private toast: ToastService
     ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
@@ -122,8 +124,17 @@ export class UsuariosLista implements OnInit, OnDestroy {
         if (this.editForm.invalid || !this.usuarioEmEdicao) return;
         this.salvando = true;
         this.usuariosService.atualizar(this.usuarioEmEdicao.id, this.editForm.value).subscribe({
-            next: () => { this.salvando = false; this.fecharModal(); this.carregar(); },
-            error: () => { this.salvando = false; this.cdr.detectChanges(); }
+            next: () => {
+                this.salvando = false;
+                this.fecharModal();
+                this.toast.sucesso('Usuário editado com sucesso!');
+                setTimeout(() => this.carregar(), 0);
+            },
+            error: () => {
+                this.salvando = false;
+                this.toast.erro('Erro ao editar usuário.');
+                this.cdr.detectChanges();
+            }
         });
     }
 
@@ -142,10 +153,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaExcluir = null;
-                this.carregar();
+                this.toast.sucesso('Usuário inativado com sucesso!');
+                setTimeout(() => this.carregar(), 0);
             },
             error: () => {
                 this.salvando = false;
+                this.toast.erro('Erro ao inativar usuário.');
                 this.cdr.detectChanges();
             }
         });
@@ -167,10 +180,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaExcluirDefinitivo = null;
-                this.carregar();
+                this.toast.sucesso('Usuário excluído definitivamente.');
+                setTimeout(() => this.carregar(), 0);
             },
             error: () => {
                 this.salvando = false;
+                this.toast.erro('Erro ao excluir usuário definitivamente.');
                 this.cdr.detectChanges();
             }
         });
@@ -192,10 +207,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaRestaurar = null;
-                this.carregar();
+                this.toast.sucesso('Conta de usuário restaurada.');
+                setTimeout(() => this.carregar(), 0);
             },
             error: () => {
                 this.salvando = false;
+                this.toast.erro('Erro ao restaurar usuário.');
                 this.cdr.detectChanges();
             }
         });
@@ -228,7 +245,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.usuariosService.atualizar(this.usuarioVisualizado.id, { fotoPerfil: url }).subscribe({
                     next: () => {
                         if (this.usuarioVisualizado) this.usuarioVisualizado.fotoPerfil = url;
-                        this.carregar();
+                        setTimeout(() => this.carregar(), 0);
                         this.cdr.detectChanges();
                     },
                     error: () => { this.cdr.detectChanges(); }
@@ -255,11 +272,13 @@ export class UsuariosLista implements OnInit, OnDestroy {
             next: () => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
+                this.toast.sucesso('Senha resetada com sucesso para Mudar@123!');
                 this.cdr.detectChanges();
             },
             error: () => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
+                this.toast.erro('Erro ao resetar senha.');
                 this.cdr.detectChanges();
             }
         });
