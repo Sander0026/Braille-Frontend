@@ -51,10 +51,16 @@ $transition: 250ms ease;
     margin-bottom: 2rem;
     text-align: center;
 
-    .login-logo {
-        width: 60px;
-        height: 60px;
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin-bottom: 1.5rem;
+    }
+
+    .login-logo {
+        width: 140px; // Aumentado conforme a solicitação da imagem
+        height: auto;
         object-fit: contain;
     }
 
@@ -207,7 +213,7 @@ $transition: 250ms ease;
     justify-content: center;
     gap: 0.625rem;
     width: 100%;
-    background: #ff6c00; // Botão amarelo/laranja ("botão de Acessar plataforma amarelo")
+    background: #ffa846; // Tom amarelo/alaranjado do print recebido
     color: #ffffff;
     font-weight: 700;
     font-size: 1.05rem;
@@ -220,9 +226,9 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition, box-shadow $transition;
 
     &:hover:not(:disabled) {
-        background: #ff5722;
+        background: #f59124;
         transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(255, 108, 0, 0.3);
+        box-shadow: 0 4px 12px rgba(255, 168, 70, 0.3);
     }
 
     &:active:not(:disabled) {
@@ -235,7 +241,7 @@ $transition: 250ms ease;
     }
 
     &:focus-visible {
-        outline: 3px solid #ff9800;
+        outline: 3px solid #ffa846;
         outline-offset: 2px;
     }
 }
