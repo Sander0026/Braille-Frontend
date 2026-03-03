@@ -145,7 +145,11 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   formatarData(data: string): string {
     if (!data) return '—';
-    return new Date(data).toLocaleDateString('pt-BR');
+    // Evita problema de fuso horário: new Date('yyyy-MM-dd') é UTC meia-noite,
+    // que no Brasil (UTC-3) vira o dia anterior. Formatamos direto da string.
+    const partes = data.substring(0, 10).split('-');
+    if (partes.length !== 3) return '—';
+    return `${partes[2]}/${partes[1]}/${partes[0]}`;
   }
 
   // ── Modal de Edição ────────────────────────────────────────────
