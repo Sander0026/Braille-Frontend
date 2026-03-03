@@ -73,8 +73,7 @@ export class Login {
           this.erroLogin = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
         }
 
-        this.cdr.markForCheck(); // Força o Angular a re-renderizar
-        console.error('Erro no login:', err);
+        this.cdr.markForCheck();
       }
     });
   }
