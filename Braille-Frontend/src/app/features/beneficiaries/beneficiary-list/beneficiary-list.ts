@@ -1,14 +1,16 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { BeneficiariosService, Beneficiario } from '../../../core/services/beneficiarios.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-beneficiary-list',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
@@ -51,6 +53,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
     private confirmDialog: ConfirmDialogService,
+    private toast: ToastService
   ) { }
 
   ngOnInit(): void {
@@ -80,12 +83,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         this.total = res.meta.total;
         this.totalPaginas = res.meta.lastPage;
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.erro = 'Erro ao carregar alunos. Tente novamente.';
         this.isLoading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -119,13 +122,19 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
     this.beneficiariosService.inativar(this.alunoParaInativar.id).subscribe({
       next: () => {
-        this.carregar();
-        this.salvando = false;
-        this.alunoParaInativar = null;
+        setTimeout(() => {
+          this.salvando = false;
+          this.alunoParaInativar = null;
+          this.toast.sucesso('Aluno inativado com sucesso!');
+          this.carregar();
+        }, 0);
       },
       error: () => {
-        this.salvando = false;
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.salvando = false;
+          this.toast.erro('Erro ao inativar aluno.');
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -152,13 +161,19 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
     this.beneficiariosService.excluirDefinitivo(this.alunoParaExcluirDefinitivo.id).subscribe({
       next: () => {
-        this.carregar();
-        this.salvando = false;
-        this.alunoParaExcluirDefinitivo = null;
+        setTimeout(() => {
+          this.salvando = false;
+          this.alunoParaExcluirDefinitivo = null;
+          this.toast.sucesso('Aluno excluído definitivamente com sucesso!');
+          this.carregar();
+        }, 0);
       },
       error: () => {
-        this.salvando = false;
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.salvando = false;
+          this.toast.erro('Erro ao excluir aluno definitivamente.');
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -178,13 +193,19 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
     this.beneficiariosService.restaurar(this.alunoParaRestaurar.id).subscribe({
       next: () => {
-        this.carregar();
-        this.salvando = false;
-        this.alunoParaRestaurar = null;
+        setTimeout(() => {
+          this.salvando = false;
+          this.alunoParaRestaurar = null;
+          this.toast.sucesso('Aluno restaurado com sucesso!');
+          this.carregar();
+        }, 0);
       },
       error: () => {
-        this.salvando = false;
-        this.cdr.detectChanges();
+        setTimeout(() => {
+          this.salvando = false;
+          this.toast.erro('Erro ao restaurar aluno.');
+          this.cdr.detectChanges();
+        }, 0);
       }
     });
   }
@@ -199,12 +220,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
         this.carregandoDetalhes = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.carregandoDetalhes = false;
         this.modalAberto = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       }
     });
   }
@@ -237,19 +258,25 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
         this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
           next: (alunoAtualizado) => {
-            this.alunoSelecionado = alunoAtualizado;
-            this.carregar();
-            this.uploadingImage = false;
-            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.alunoSelecionado = alunoAtualizado;
+              this.uploadingImage = false;
+              this.toast.sucesso('Documento salvo com sucesso!');
+              this.carregar();
+            }, 0);
           },
           error: () => {
-            this.uploadingImage = false;
-            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.uploadingImage = false;
+              this.toast.erro('Erro ao vincular documento ao aluno.');
+              this.cdr.detectChanges();
+            }, 0);
           }
         });
       },
       error: () => {
         this.uploadingImage = false;
+        this.toast.erro('Erro ao enviar documento. Tente novamente.');
         this.cdr.detectChanges();
       }
     });
@@ -282,22 +309,28 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
         this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
           next: () => {
-            if (this.alunoSelecionado) {
-              this.alunoSelecionado[tipo] = '';
-            }
-            this.carregar();
-            this.deletandoImage = false;
-            this.documentoParaExcluir = null;
-            this.cdr.detectChanges();
+            setTimeout(() => {
+              if (this.alunoSelecionado) {
+                this.alunoSelecionado[tipo] = '';
+              }
+              this.deletandoImage = false;
+              this.documentoParaExcluir = null;
+              this.toast.sucesso('Documento excluído com sucesso!');
+              this.carregar();
+            }, 0);
           },
           error: () => {
-            this.deletandoImage = false;
-            this.cdr.detectChanges();
+            setTimeout(() => {
+              this.deletandoImage = false;
+              this.toast.erro('Erro ao desvincular documento do aluno.');
+              this.cdr.detectChanges();
+            }, 0);
           }
         });
       },
       error: () => {
         this.deletandoImage = false;
+        this.toast.erro('Erro ao excluir documento.');
         this.cdr.detectChanges();
       }
     });
