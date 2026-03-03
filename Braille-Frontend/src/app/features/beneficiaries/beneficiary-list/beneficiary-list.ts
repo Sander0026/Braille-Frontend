@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { BeneficiariosService, Beneficiario } from '../../../core/services/beneficiarios.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
@@ -49,12 +49,52 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
+  // Modal de Edição
+  modalEdicaoAberto = false;
+  alunoEmEdicao: Beneficiario | null = null;
+  salvandoEdicao = false;
+  editForm!: FormGroup;
+
   constructor(
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
     private confirmDialog: ConfirmDialogService,
-    private toast: ToastService
-  ) { }
+    private toast: ToastService,
+    private fb: FormBuilder
+  ) {
+    this.editForm = this.fb.group({
+      nomeCompleto: [''],
+      cpfRg: [''],
+      dataNascimento: [''],
+      genero: [''],
+      email: [''],
+      telefoneContato: [''],
+      // Endereço
+      cep: [''],
+      rua: [''],
+      numero: [''],
+      complemento: [''],
+      bairro: [''],
+      cidade: [''],
+      uf: [''],
+      // Deficiência
+      tipoDeficiencia: [''],
+      causaDeficiencia: [''],
+      idadeOcorrencia: [''],
+      tecAssistivas: [''],
+      prefAcessibilidade: [''],
+      outrasComorbidades: [''],
+      // Socioeconômico
+      escolaridade: [''],
+      profissao: [''],
+      rendaFamiliar: [''],
+      beneficiosGov: [''],
+      composicaoFamiliar: [''],
+      precisaAcompanhante: [false],
+      acompOftalmologico: [false],
+      contatoEmergencia: [''],
+    });
+  }
 
   ngOnInit(): void {
     this.buscaCtrl.valueChanges.pipe(
@@ -107,6 +147,54 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!data) return '—';
     return new Date(data).toLocaleDateString('pt-BR');
   }
+
+  // ── Modal de Edição ────────────────────────────────────────────
+  abrirModalEdicao(aluno: Beneficiario): void {
+    this.alunoEmEdicao = aluno;
+    this.modalEdicaoAberto = true;
+    // Carrega dados completos do aluno para preencher o form
+    this.beneficiariosService.buscarPorId(aluno.id).subscribe({
+      next: (dadosCompletos) => {
+        // Formata a data de nascimento para yyyy-MM-dd (formato do input[type=date])
+        const dataNasc = dadosCompletos.dataNascimento
+          ? dadosCompletos.dataNascimento.substring(0, 10)
+          : '';
+        this.editForm.patchValue({ ...dadosCompletos, dataNascimento: dataNasc });
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  fecharModalEdicao(): void {
+    this.modalEdicaoAberto = false;
+    this.alunoEmEdicao = null;
+    this.editForm.reset();
+  }
+
+  salvarEdicao(): void {
+    if (!this.alunoEmEdicao || this.salvandoEdicao) return;
+    this.salvandoEdicao = true;
+
+    const payload = this.editForm.value;
+    this.beneficiariosService.atualizar(this.alunoEmEdicao.id, payload).subscribe({
+      next: () => {
+        setTimeout(() => {
+          this.salvandoEdicao = false;
+          this.fecharModalEdicao();
+          this.toast.sucesso('Aluno atualizado com sucesso!');
+          this.carregar();
+        }, 0);
+      },
+      error: () => {
+        setTimeout(() => {
+          this.salvandoEdicao = false;
+          this.toast.erro('Erro ao atualizar os dados do aluno.');
+          this.cdr.markForCheck();
+        }, 0);
+      }
+    });
+  }
+
 
   inativar(aluno: Beneficiario): void {
     this.alunoParaInativar = aluno;
