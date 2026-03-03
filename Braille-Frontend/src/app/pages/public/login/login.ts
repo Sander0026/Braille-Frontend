@@ -62,8 +62,14 @@ export class Login {
       },
       error: (err: any) => {
         this.carregando = false;
-        this.erroLogin = 'Usuário ou senha incorretos. Tente novamente.';
-        console.error(err);
+        if (err.status === 401 || err.status === 403) {
+          this.erroLogin = 'Usuário ou senha incorretos. Verifique e tente novamente.';
+        } else if (err.status === 0 || err.name === 'HttpErrorResponse') {
+          this.erroLogin = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+        } else {
+          this.erroLogin = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
+        }
+        console.error('Erro no login:', err);
       }
     });
   }
