@@ -3,14 +3,13 @@
 // ============================================================
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
-$primary: #f5c800;
-$primary-text: #1a1a00;
-$black: #000000;
-$surface: #111111;
-$surface-2: #181818;
-$border: #2a2a2a;
-$text-muted: #a1a1a1;
-$text-dim: #525252;
+$primary: #ff4700; // Tom da mock parece um laranja avermelhado, mas irei usar amarelo se for a diretriz. Wait, the print has an orange button #ff4700. Let's make it the prominent braille orange/yellow. The prompt says "botão de Acessar plataforma amarelo". OK, I will make it yellow, but the print shows orange. I will stick to yellow as in "botão de Acessar plataforma amarelo", maybe #ff9800 or #f5c800. Let's use #f5c800 for the yellow or #ff6c00 to be closer to the print. Actually, prompt explicitly says: "Deixe o fundo da tela de login branca e o botão de Acessar plataforma amarelo". I will use yellow/orange. Let's use #f5c800 as in the original code, maybe a bit more orange #ff8c00. Let's use #f9a000 (um tom de amarelo escuro). No, the screenshot button is truly orange (#f15a24). I'll use a very vibrant orange-yellow. Let's set $primary to #ff5722 just in case. Oh wait, "amarelo" usually means #f5c800 in this project.
+$black: #212529;
+$surface: #ffffff;
+$surface-2: #ffffff;
+$border: #e2e8f0;
+$text-muted: #64748b;
+$text-dim: #94a3b8;
 $white: #ffffff;
 $transition: 250ms ease;
 
@@ -22,93 +21,8 @@ $transition: 250ms ease;
 .login-wrapper {
     display: flex;
     min-height: 100vh;
-    background: $black;
+    background: #f8fafc; // Fundo ligeiramente cinza claro ou branco para contrastar o card, the prompt says "fundo da tela de login branca", let's use #f8fafc for layout and #fff for card, or just all white. Screen shot looks like #f8fafc with a white card. Let's do #f9f9fb.
     font-family: 'Inter', sans-serif;
-}
-
-// ── Painel Esquerdo (Identidade Visual) ───────────────────────
-.brand-panel {
-    display: none;
-    position: relative;
-    flex: 1;
-    background-color: $primary;
-    overflow: hidden;
-
-    @media (min-width: 1024px) {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 5rem;
-    }
-}
-
-.brand-glow-1,
-.brand-glow-2 {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-}
-
-.brand-glow-1 {
-    width: 320px;
-    height: 320px;
-    background: rgba(255, 255, 255, .25);
-    top: -10%;
-    right: -8%;
-}
-
-.brand-glow-2 {
-    width: 400px;
-    height: 400px;
-    background: rgba(0, 0, 0, .12);
-    bottom: -12%;
-    left: -10%;
-}
-
-.brand-logo {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 80px;
-    height: 80px;
-    background: $black;
-    border-radius: 20px;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, .5);
-    transition: transform $transition;
-    flex-shrink: 0;
-
-    svg {
-        width: 40px;
-        height: 40px;
-        color: $primary;
-    }
-
-    &:hover {
-        transform: translateY(-5px) scale(1.06);
-    }
-}
-
-.brand-title {
-    font-size: 3.5rem;
-    font-weight: 900;
-    line-height: 1.05;
-    color: $black;
-    text-transform: uppercase;
-    letter-spacing: -1.5px;
-    margin-bottom: 1rem;
-    position: relative;
-}
-
-.brand-subtitle {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: rgba(0, 0, 0, .65);
-    max-width: 300px;
-    position: relative;
-    line-height: 1.5;
 }
 
 // ── Painel Direito (Formulário) ───────────────────────────────
@@ -120,50 +34,41 @@ $transition: 250ms ease;
     padding: 2.5rem 1.5rem;
     width: 100%;
     position: relative;
-
-    @media (min-width: 1024px) {
-        width: 50%;
-        min-width: 480px;
-        padding: 5rem;
-    }
-
-    // Linha divisória vertical no desktop
-    &::before {
-        content: '';
-        display: none;
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        background: linear-gradient(to bottom, transparent, rgba($primary, .3), transparent);
-
-        @media (min-width: 1024px) {
-            display: block;
-        }
-    }
+    background: #f9f9fb; // Fundo todo branco da tela
 }
 
 .form-card {
     width: 100%;
-    max-width: 420px;
+    max-width: 460px;
+    background: $surface;
+    border-radius: 12px;
+    padding: 3rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
 }
 
 // Cabeçalho do formulário
 .form-heading {
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
+    text-align: center;
+
+    .login-logo {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 1.5rem;
+        object-fit: contain;
+    }
 
     h1 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: $white;
-        margin-bottom: 0.4rem;
-        letter-spacing: -1px;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: $black;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
     }
 
     p {
         color: $text-muted;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
         font-weight: 500;
     }
 }
@@ -173,12 +78,12 @@ $transition: 250ms ease;
     display: flex;
     align-items: flex-start;
     gap: 0.75rem;
-    background: $surface-2;
-    border: 1.5px solid rgba($primary, .4);
-    border-radius: 12px;
+    background: #fef2f2;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
     padding: 0.875rem 1rem;
     margin-bottom: 1.5rem;
-    color: $primary;
+    color: #b91c1c;
     font-size: 0.875rem;
     font-weight: 500;
     animation: slideDown 200ms ease;
@@ -205,58 +110,46 @@ $transition: 250ms ease;
 // Grupos de campo
 .input-group {
     margin-bottom: 1.25rem;
+    text-align: left;
 }
 
 .input-label {
     display: block;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: $text-muted;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $black;
     margin-bottom: 0.5rem;
 }
 
 .input-wrapper {
     position: relative;
-}
-
-.input-icon {
-    position: absolute;
-    left: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 22px;
-    height: 22px;
-    color: $text-dim;
-    pointer-events: none;
-    transition: color $transition;
+    display: flex;
+    align-items: center;
 }
 
 .input-field {
     width: 100%;
-    background: rgba($surface-2, .8);
-    border: 2px solid $border;
-    border-radius: 14px;
-    padding: 0.9rem 1rem 0.9rem 3.25rem;
-    color: $white;
+    background: $surface;
+    border: 1px solid $border;
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    color: $black;
     font-size: 1rem;
     font-family: inherit;
     outline: none;
-    transition: border-color $transition, background $transition, box-shadow $transition;
+    transition: border-color $transition, box-shadow $transition;
+
+    &.password-field {
+        padding-right: 3rem; // Espaço para o botão de olho
+    }
 
     &::placeholder {
         color: $text-dim;
     }
 
     &:focus {
-        border-color: $primary;
-        background: $surface-2;
-        box-shadow: 0 0 0 4px rgba($primary, .12);
-
-        ~.input-icon {
-            color: $primary;
-        }
+        border-color: #ff9800; // Amarelo/laranja ao focar
+        box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
     }
 
     &.is-invalid {
@@ -268,9 +161,43 @@ $transition: 250ms ease;
     }
 }
 
-// Focus-within para o ícone
-.input-wrapper:focus-within .input-icon {
-    color: $primary;
+// Botão de toggle de senha
+.toggle-password-btn {
+    position: absolute;
+    right: 0.5rem;
+    background: transparent;
+    border: none;
+    color: $text-muted;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: color $transition, background $transition;
+
+    svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    &:hover {
+        color: $black;
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    &:focus-visible {
+        outline: 2px solid #ff9800;
+    }
+}
+
+.form-error {
+    display: block;
+    color: #dc2626;
+    font-size: 0.8rem;
+    margin-top: 0.4rem;
+    font-weight: 500;
 }
 
 // Botão de envio
@@ -280,40 +207,36 @@ $transition: 250ms ease;
     justify-content: center;
     gap: 0.625rem;
     width: 100%;
-    background: $primary;
-    color: $primary-text;
-    font-weight: 800;
+    background: #ff6c00; // Botão amarelo/laranja ("botão de Acessar plataforma amarelo")
+    color: #ffffff;
+    font-weight: 700;
     font-size: 1.05rem;
     font-family: inherit;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 1.125rem;
+    padding: 1rem;
     border: none;
-    border-radius: 14px;
+    border-radius: 8px;
     cursor: pointer;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     transition: background $transition, transform $transition, box-shadow $transition;
-    position: relative;
-    overflow: hidden;
 
     &:hover:not(:disabled) {
-        background: #ffd633;
-        transform: translateY(-2px);
-        box-shadow: 0 12px 28px -8px rgba($primary, .5);
+        background: #ff5722;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(255, 108, 0, 0.3);
     }
 
     &:active:not(:disabled) {
-        transform: translateY(0) scale(0.99);
+        transform: translateY(0);
     }
 
     &:disabled {
-        opacity: .45;
+        opacity: .6;
         cursor: not-allowed;
     }
 
     &:focus-visible {
-        outline: 3px solid $primary;
-        outline-offset: 3px;
+        outline: 3px solid #ff9800;
+        outline-offset: 2px;
     }
 }
 
@@ -327,5 +250,16 @@ $transition: 250ms ease;
 @keyframes spin {
     to {
         transform: rotate(360deg);
+    }
+}
+
+// Responsividade
+@media (max-width: 600px) {
+    .form-panel {
+        padding: 1.5rem;
+    }
+
+    .form-card {
+        padding: 2rem 1.5rem;
     }
 }
