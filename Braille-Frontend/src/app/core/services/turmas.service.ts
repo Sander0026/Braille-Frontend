@@ -12,7 +12,8 @@ export interface Turma {
     statusAtivo: boolean;
     excluido: boolean;
     professor?: { id: string; nome: string; email: string };
-    alunos?: { id: string; nomeCompleto: string }[];
+    alunos?: { id: string; nomeCompleto: string }[]; // Usado apenas no endpoint de detalhe /turmas/:id
+    _count?: { alunos: number };                      // Usado na listagem geral (mais eficiente)
 }
 
 export interface CreateTurmaDto {
