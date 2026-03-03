@@ -133,6 +133,20 @@ $transition: 250ms ease;
     align-items: center;
 }
 
+.input-icon-left {
+    position: absolute;
+    left: 1rem;
+    width: 20px;
+    height: 20px;
+    color: $text-dim;
+    pointer-events: none;
+    transition: color $transition;
+}
+
+.input-wrapper:focus-within .input-icon-left {
+    color: $primary;
+}
+
 .input-field {
     width: 100%;
     background: $surface;
@@ -144,6 +158,10 @@ $transition: 250ms ease;
     font-family: inherit;
     outline: none;
     transition: border-color $transition, box-shadow $transition;
+
+    &.has-icon-left {
+        padding-left: 2.8rem; // Espaço para o ícone no lado esquerdo
+    }
 
     &.password-field {
         padding-right: 3rem; // Espaço para o botão de olho
