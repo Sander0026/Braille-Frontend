@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
@@ -10,6 +10,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 @Component({
     selector: 'app-usuarios-lista',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CommonModule, RouterModule, ReactiveFormsModule],
     templateUrl: './usuarios-lista.html',
     styleUrl: './usuarios-lista.scss'
@@ -85,9 +86,9 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.total = res.meta.total;
                 this.totalPaginas = res.meta.lastPage;
                 this.isLoading = false;
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             },
-            error: () => { this.erro = 'Erro ao carregar usuários.'; this.isLoading = false; this.cdr.detectChanges(); }
+            error: () => { this.erro = 'Erro ao carregar usuários.'; this.isLoading = false; this.cdr.markForCheck(); }
         });
     }
 

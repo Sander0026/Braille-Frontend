@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -13,6 +13,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 @Component({
     selector: 'app-turmas-lista',
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CommonModule, FormsModule, ReactiveFormsModule],
     templateUrl: './turmas-lista.html',
     styleUrl: './turmas-lista.scss',
@@ -126,12 +127,12 @@ export class TurmasLista implements OnInit {
                 this.turmas = res.data;
                 this.totalTurmas = res.meta.total;
                 this.isLoading = false;
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             },
             error: () => {
                 this.erro = 'Não foi possível carregar as turmas. Verifique se o servidor está online.';
                 this.isLoading = false;
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             },
         });
     }
