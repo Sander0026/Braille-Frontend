@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../core/services/auth.service'; // 👈 Verifique se o caminho está certo
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -22,7 +22,8 @@ export class Login {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -55,20 +56,24 @@ export class Login {
 
         if (user?.precisaTrocarSenha) {
           this.precisaTrocarSenha = true;
-          this.senhaAntigaTemp = this.loginForm.value.senha; // Salva para enviar no Patch
+          this.senhaAntigaTemp = this.loginForm.value.senha;
         } else {
           this.router.navigate(['/admin']);
         }
+        this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.carregando = false;
+
         if (err.status === 401 || err.status === 403) {
           this.erroLogin = 'Usuário ou senha incorretos. Verifique e tente novamente.';
-        } else if (err.status === 0 || err.name === 'HttpErrorResponse') {
+        } else if (err.status === 0) {
           this.erroLogin = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
         } else {
           this.erroLogin = 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
         }
+
+        this.cdr.markForCheck(); // Força o Angular a re-renderizar
         console.error('Erro no login:', err);
       }
     });
@@ -93,10 +98,12 @@ export class Login {
         this.loginForm.reset();
         this.novaSenhaForm.reset();
         this.carregando = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
         this.carregando = false;
         this.erroLogin = 'Erro ao alterar a senha. A senha não atende aos requisitos ou expirou.';
+        this.cdr.markForCheck();
       }
     });
   }
