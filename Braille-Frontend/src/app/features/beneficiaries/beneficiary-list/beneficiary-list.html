@@ -26,14 +26,198 @@
     </div>
 </div>
 
-<!-- Barra de busca -->
+<!-- Barra de busca + Filtros -->
 <div class="filter-bar" role="search">
     <div class="filter-search">
         <label for="busca-aluno" class="sr-only">Buscar aluno por nome</label>
         <input id="busca-aluno" type="search" class="form-input" placeholder="Buscar por nome..."
             [formControl]="buscaCtrl" aria-label="Buscar aluno por nome" autocomplete="off" />
     </div>
+
+    <!-- Botão de Filtros Avançados -->
+    <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
+        [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Abrir filtros avançados">
+        <span class="material-symbols-rounded">tune</span>
+        Filtros
+        @if (quantidadeFiltrosAtivos > 0) {
+        <span class="filter-badge">{{ quantidadeFiltrosAtivos }}</span>
+        }
+    </button>
 </div>
+
+<!-- Aviso de filtros ativos -->
+@if (quantidadeFiltrosAtivos > 0) {
+<div class="filter-active-bar" role="status">
+    <span class="material-symbols-rounded" style="font-size:16px;">filter_alt</span>
+    <span>{{ quantidadeFiltrosAtivos }} filtro(s) ativo(s) — {{ total }} resultado(s)</span>
+    <button type="button" class="btn-link" (click)="limparFiltros()">Limpar todos</button>
+</div>
+}
+
+<!-- ═══ DRAWER: Filtros Avançados ═══ -->
+@if (drawerAberto) {
+<div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
+}
+<aside class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog" aria-modal="true"
+    aria-label="Filtros avançados" [formGroup]="filterForm">
+
+    <div class="filter-drawer__header">
+        <h2 class="filter-drawer__title">
+            <span class="material-symbols-rounded">tune</span>
+            Filtros Avançados
+        </h2>
+        <button type="button" class="btn btn-icon btn-ghost" (click)="drawerAberto = false"
+            aria-label="Fechar filtros">✕</button>
+    </div>
+
+    <div class="filter-drawer__body">
+
+        <!-- DEFICIÊNCIA -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Perfil da Deficiência</h3>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-tipo">Tipo de Deficiência</label>
+                <select id="f-tipo" class="form-input" formControlName="tipoDeficiencia">
+                    <option value="">Todas</option>
+                    <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
+                    <option value="BAIXA_VISAO">Baixa Visão</option>
+                    <option value="VISAO_MONOCULAR">Visão Monocular</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-causa">Causa da Deficiência</label>
+                <select id="f-causa" class="form-input" formControlName="causaDeficiencia">
+                    <option value="">Todas</option>
+                    <option value="CONGENITA">Congênita (de nascença)</option>
+                    <option value="ADQUIRIDA">Adquirida</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-pref">Preferência de Acessibilidade</label>
+                <select id="f-pref" class="form-input" formControlName="prefAcessibilidade">
+                    <option value="">Todas</option>
+                    <option value="BRAILLE">Braille</option>
+                    <option value="FONTE_AMPLIADA">Fonte Ampliada</option>
+                    <option value="ARQUIVO_DIGITAL">Arquivo Digital</option>
+                    <option value="AUDIO">Áudio</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-acomp">Precisa de Acompanhante</label>
+                <select id="f-acomp" class="form-input" formControlName="precisaAcompanhante">
+                    <option value="">Todos</option>
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- DADOS PESSOAIS -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Dados Pessoais</h3>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-genero">Gênero</label>
+                <select id="f-genero" class="form-input" formControlName="genero">
+                    <option value="">Todos</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Outro">Outro</option>
+                    <option value="Prefiro não informar">Prefiro não informar</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-estadocivil">Estado Civil</label>
+                <select id="f-estadocivil" class="form-input" formControlName="estadoCivil">
+                    <option value="">Todos</option>
+                    <option value="Solteiro(a)">Solteiro(a)</option>
+                    <option value="Casado(a)">Casado(a)</option>
+                    <option value="Divorciado(a)">Divorciado(a)</option>
+                    <option value="Viúvo(a)">Viúvo(a)</option>
+                    <option value="União estável">União estável</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- LOCALIZAÇÃO -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Localização</h3>
+            <div class="filter-field">
+                <label class="form-label" for="f-cidade">Cidade</label>
+                <input id="f-cidade" type="text" class="form-input" placeholder="Ex: São Paulo"
+                    formControlName="cidade" />
+            </div>
+            <div class="filter-field">
+                <label class="form-label" for="f-uf">Estado (UF)</label>
+                <input id="f-uf" type="text" class="form-input" placeholder="Ex: SP" maxlength="2"
+                    style="text-transform:uppercase" formControlName="uf" />
+            </div>
+        </section>
+
+        <!-- SOCIOECONÔMICO -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Socioeconômico</h3>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-escolaridade">Escolaridade</label>
+                <select id="f-escolaridade" class="form-input" formControlName="escolaridade">
+                    <option value="">Todas</option>
+                    <option value="Sem escolaridade">Sem escolaridade</option>
+                    <option value="Fundamental incompleto">Fundamental incompleto</option>
+                    <option value="Fundamental completo">Fundamental completo</option>
+                    <option value="Médio incompleto">Médio incompleto</option>
+                    <option value="Médio completo">Médio completo</option>
+                    <option value="Superior incompleto">Superior incompleto</option>
+                    <option value="Superior completo">Superior completo</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-renda">Renda Familiar</label>
+                <select id="f-renda" class="form-input" formControlName="rendaFamiliar">
+                    <option value="">Todas</option>
+                    <option value="Sem renda">Sem renda</option>
+                    <option value="Até 1 salário mínimo">Até 1 salário mínimo</option>
+                    <option value="1 a 3 salários mínimos">1 a 3 salários mínimos</option>
+                    <option value="3 a 5 salários mínimos">3 a 5 salários mínimos</option>
+                    <option value="Acima de 5 salários mínimos">Acima de 5 salários mínimos</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- DATA DE CADASTRO -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Data de Cadastro</h3>
+            <div class="filter-field-row">
+                <div class="filter-field">
+                    <label class="form-label" for="f-data-inicio">De</label>
+                    <input id="f-data-inicio" type="date" class="form-input" formControlName="dataCadastroInicio" />
+                </div>
+                <div class="filter-field">
+                    <label class="form-label" for="f-data-fim">Até</label>
+                    <input id="f-data-fim" type="date" class="form-input" formControlName="dataCadastroFim" />
+                </div>
+            </div>
+        </section>
+
+    </div><!-- /filter-drawer__body -->
+
+    <div class="filter-drawer__footer">
+        <button type="button" class="btn btn-secondary" (click)="limparFiltros()">
+            Limpar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">
+            <span class="material-symbols-rounded">check</span>
+            Aplicar Filtros
+            @if (quantidadeFiltrosAtivos > 0) { ({{ quantidadeFiltrosAtivos }}) }
+        </button>
+    </div>
+</aside>
 
 <!-- Tabela de Alunos -->
 @if (isLoading) {
@@ -132,20 +316,48 @@
 <!-- Paginação -->
 @if (totalPaginas > 1) {
 <nav class="pagination" role="navigation" aria-label="Paginação dos alunos">
+
+    <!-- Primeira página -->
+    <button (click)="irParaPagina(1)" [disabled]="paginaAtual === 1" aria-label="Primeira página"
+        title="Primeira página">«</button>
+
+    <!-- Anterior -->
     <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
         aria-label="Página anterior">‹</button>
 
-    @for (p of paginas; track p) {
+    <!-- Janela de páginas com reticências -->
+    @for (p of paginasVisiveis; track p + '_' + $index) {
+    @if (p === -1) {
+    <span class="pagination-ellipsis" aria-hidden="true">…</span>
+    } @else {
     <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual" [attr.aria-label]="'Ir para página ' + p"
-        [attr.aria-current]="p === paginaAtual ? 'page' : null">{{ p }}</button>
+        [attr.aria-current]="p === paginaAtual ? 'page' : null">
+        {{ p }}
+    </button>
+    }
     }
 
+    <!-- Próxima -->
     <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
         aria-label="Próxima página">›</button>
 
+    <!-- Última página -->
+    <button (click)="irParaPagina(totalPaginas)" [disabled]="paginaAtual === totalPaginas" aria-label="Última página"
+        title="Última página">»</button>
+
+    <!-- Info + ir para página -->
     <span class="pagination-info" aria-live="polite">
-        Página {{ paginaAtual }} de {{ totalPaginas }}
+        {{ paginaAtual }} / {{ totalPaginas }}
     </span>
+
+    <label class="pagination-goto" aria-label="Ir para a página:">
+        <span class="sr-only">Ir para a página:</span>
+        <input type="number" min="1" [max]="totalPaginas" [placeholder]="'Ir...'"
+            aria-label="Número da página para navegar"
+            (keydown.enter)="irParaPagina(+$any($event.target).value); $any($event.target).value=''"
+            (blur)="$any($event.target).value=''" class="pagination-input" />
+    </label>
+
 </nav>
 }
 }
@@ -311,6 +523,15 @@
 
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+            @if (alunoSelecionado && !carregandoDetalhes) {
+            <button class="btn btn-outline-primary" (click)="imprimirFicha()"
+                aria-label="Imprimir ou salvar a ficha como PDF"
+                title="Abre a tela de impressão — selecione 'Salvar como PDF' para exportar">
+                <span class="material-symbols-rounded"
+                    style="font-size:16px; vertical-align:middle; margin-right:4px;">print</span>
+                Imprimir Ficha
+            </button>
+            }
         </div>
     </div>
 </div>
