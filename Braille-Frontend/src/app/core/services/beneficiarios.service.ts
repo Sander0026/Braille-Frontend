@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 
 export interface Beneficiario {
     id: string;
@@ -45,14 +45,34 @@ export interface PaginatedResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
     private readonly url = '/api/beneficiaries';
+    private defaultCache$: Observable<PaginatedResponse<Beneficiario>> | null = null;
+    private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
     constructor(private http: HttpClient) { }
 
     listar(page = 1, limit = 10, nome?: string, inativos?: boolean): Observable<PaginatedResponse<Beneficiario>> {
+        const hasFilters = !!nome || inativos;
+        const isDefaultList = page === 1 && limit === 10 && !hasFilters;
+
+        if (isDefaultList) {
+            if (!this.defaultCache$) {
+                this.defaultCache$ = this.http.get<PaginatedResponse<Beneficiario>>(this.url, {
+                    params: new HttpParams().set('page', '1').set('limit', '10')
+                }).pipe(shareReplay(1));
+
+                setTimeout(() => this.limparCache(), this.cacheTimeMs);
+            }
+            return this.defaultCache$;
+        }
+
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (nome) params = params.set('nome', nome);
         if (inativos) params = params.set('inativos', 'true');
         return this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params });
+    }
+
+    limparCache(): void {
+        this.defaultCache$ = null;
     }
 
     buscarPorId(id: string): Observable<Beneficiario> {
@@ -60,22 +80,27 @@ export class BeneficiariosService {
     }
 
     atualizar(id: string, dados: Partial<Beneficiario>): Observable<Beneficiario> {
+        this.limparCache();
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);
     }
 
     inativar(id: string): Observable<any> {
+        this.limparCache();
         return this.http.delete(`${this.url}/${id}`);
     }
 
     restaurar(id: string): Observable<any> {
+        this.limparCache();
         return this.http.patch(`${this.url}/${id}/restore`, {});
     }
 
     excluirDefinitivo(id: string): Observable<any> {
+        this.limparCache();
         return this.http.delete(`${this.url}/${id}/hard`);
     }
 
     criarBeneficiario(dados: Record<string, unknown>): Observable<Beneficiario> {
+        this.limparCache();
         return this.http.post<Beneficiario>(this.url, dados);
     }
 

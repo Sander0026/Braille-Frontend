@@ -83,7 +83,7 @@
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>
                 <td>{{ aluno.cpfRg || '—' }}</td>
-                <td>{{ formatarData(aluno.dataNascimento) }}</td>
+                <td>{{ aluno.dataNascimento | dataBraille }}</td>
                 <td>
                     @if (aluno.tipoDeficiencia) {
                     <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
@@ -162,7 +162,8 @@
             <div class="profile-header">
                 <div class="avatar-wrapper" style="position: relative; display: inline-block;">
                     <div class="profile-avatar">
-                        <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}" />
+                        <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}"
+                            loading="lazy" />
 
                         @if (uploadingImage || deletandoImage) {
                         <div
@@ -215,7 +216,7 @@
                 <div class="profile-section">
                     <h4>Informações Pessoais</h4>
                     <p><strong>CPF/RG:</strong> {{ alunoSelecionado.cpfRg || 'N/I' }}</p>
-                    <p><strong>Nascimento:</strong> {{ formatarData(alunoSelecionado.dataNascimento) }}</p>
+                    <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
                     <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
                     <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
                     <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
