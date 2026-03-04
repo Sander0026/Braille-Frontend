@@ -52,7 +52,7 @@
         aluno. }</p>
 </div>
 } @else {
-<!-- Abas de Navegação -->
+<!-- Abas de Navegação — sempre visíveis após carregar -->
 <div class="tabs-container" role="navigation" aria-label="Filtro de status de beneficiário">
     <div class="tabs">
         <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
@@ -66,6 +66,15 @@
     </div>
 </div>
 
+@if (alunos.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhum aluno {{ abaAtiva === 'ativos' ? 'ativo' : 'inativo' }} encontrado</h3>
+    <p>
+        @if (buscaCtrl.value) { Nenhum resultado para "{{ buscaCtrl.value }}". }
+        @else if (abaAtiva === 'ativos') { Comece cadastrando o primeiro aluno. }
+    </p>
+</div>
+} @else {
 <div class="data-table-wrapper">
     <table class="data-table" role="table" aria-label="Lista de alunos ativos">
         <caption class="sr-only">{{ total }} alunos cadastrados, página {{ paginaAtual }} de {{ totalPaginas }}
@@ -143,6 +152,8 @@
 </nav>
 }
 }
+}
+
 
 <!-- Modal Visualizar Aluno -->
 @if (modalAberto) {

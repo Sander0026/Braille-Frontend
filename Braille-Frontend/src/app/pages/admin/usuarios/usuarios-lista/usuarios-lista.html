@@ -35,13 +35,8 @@
     <p class="form-error">{{ erro }}</p>
     <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
 </div>
-} @else if (usuarios.length === 0) {
-<div class="empty-state" role="status">
-    <h3>Nenhum usuário encontrado</h3>
-    <p>Adicione o primeiro usuário clicando em "Novo Usuário".</p>
-</div>
 } @else {
-<!-- Abas de Navegação -->
+<!-- Abas de Navegação — sempre visíveis após carregar -->
 <div class="tabs-container" role="navigation" aria-label="Filtro de status de usuário">
     <div class="tabs">
         <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
@@ -55,6 +50,12 @@
     </div>
 </div>
 
+@if (usuarios.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhum usuário {{ abaAtiva === 'ativos' ? 'ativo' : 'inativo' }} encontrado</h3>
+    <p>@if (abaAtiva === 'ativos') { Adicione o primeiro usuário clicando em "Novo Usuário". }</p>
+</div>
+} @else {
 <div class="data-table-wrapper">
     <table class="data-table" role="table" aria-label="Lista de usuários do sistema">
         <caption class="sr-only">{{ total }} usuários, página {{ paginaAtual }} de {{ totalPaginas }}</caption>
@@ -127,6 +128,7 @@
         aria-label="Próxima página">›</button>
     <span class="pagination-info" aria-live="polite">Página {{ paginaAtual }} de {{ totalPaginas }}</span>
 </nav>
+}
 }
 }
 

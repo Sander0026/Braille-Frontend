@@ -134,7 +134,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
             error: () => {
                 this.salvando = false;
                 this.toast.erro('Erro ao editar usuário.');
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             }
         });
     }
@@ -160,7 +160,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
             error: () => {
                 this.salvando = false;
                 this.toast.erro('Erro ao inativar usuário.');
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             }
         });
     }
@@ -187,7 +187,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
             error: () => {
                 this.salvando = false;
                 this.toast.erro('Erro ao excluir usuário definitivamente.');
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             }
         });
     }
@@ -214,7 +214,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
             error: () => {
                 this.salvando = false;
                 this.toast.erro('Erro ao restaurar usuário.');
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             }
         });
     }
@@ -247,7 +247,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
                     next: () => {
                         if (this.usuarioVisualizado) this.usuarioVisualizado.fotoPerfil = url;
                         setTimeout(() => this.carregar(), 0);
-                        this.cdr.detectChanges();
+                        this.cdr.markForCheck();
                     },
                     error: () => { this.cdr.detectChanges(); }
                 });
@@ -274,13 +274,13 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
                 this.toast.sucesso('Senha resetada com sucesso para Ilbes@123');
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             },
             error: () => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
                 this.toast.erro('Erro ao resetar senha.');
-                this.cdr.detectChanges();
+                this.cdr.markForCheck();
             }
         });
     }

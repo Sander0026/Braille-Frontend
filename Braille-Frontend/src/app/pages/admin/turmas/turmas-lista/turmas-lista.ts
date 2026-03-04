@@ -232,7 +232,7 @@ export class TurmasLista implements OnInit {
                         ? 'Já existe uma turma com este nome.'
                         : (err.error?.message ?? 'Erro ao salvar. Tente novamente.');
                     this.toast.erro('Erro ao salvar os dados da oficina.');
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
                 }, 0);
             },
         });
@@ -271,7 +271,7 @@ export class TurmasLista implements OnInit {
                     this.arquivando = false;
                     this.erroArquivamento = err.error?.message ?? 'Não foi possível arquivar a turma.';
                     this.toast.erro('Erro ao arquivar a oficina.');
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
                 }, 0);
             },
         });
@@ -297,7 +297,7 @@ export class TurmasLista implements OnInit {
                 setTimeout(() => {
                     this.erroArquivamento = err.error?.message ?? 'Não foi possível restaurar a oficina.';
                     this.toast.erro('Erro ao restaurar a oficina.');
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
                 }, 0);
             }
         });
@@ -323,7 +323,7 @@ export class TurmasLista implements OnInit {
                 setTimeout(() => {
                     this.erroArquivamento = err.error?.message ?? 'Não foi possível ocultar a oficina.';
                     this.toast.erro('Erro ao ocultar a oficina.');
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
                 }, 0);
             }
         });
@@ -433,7 +433,7 @@ export class TurmasLista implements OnInit {
                     } else {
                         this.toast.sucesso(`${concluidos} aluno(s) matriculado(s) com sucesso!`);
                     }
-                    this.cdr.detectChanges();
+                    this.cdr.markForCheck();
                 });
                 return;
             }
