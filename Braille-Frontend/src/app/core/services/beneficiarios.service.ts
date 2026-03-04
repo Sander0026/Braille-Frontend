@@ -55,17 +55,27 @@ export class BeneficiariosService {
         this.cache.clear();
     }
 
-    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean): string {
-        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}`;
+    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean, filtros?: Record<string, any>): string {
+        const filtrosStr = filtros ? JSON.stringify(filtros) : '';
+        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${filtrosStr}`;
     }
 
-    listar(page = 1, limit = 10, nome?: string, inativos?: boolean): Observable<PaginatedResponse<Beneficiario>> {
-        const key = this.buildCacheKey(page, limit, nome, inativos);
+    listar(page = 1, limit = 10, nome?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<PaginatedResponse<Beneficiario>> {
+        const key = this.buildCacheKey(page, limit, nome, inativos, filtros);
 
         if (!this.cache.has(key)) {
             let params = new HttpParams().set('page', page).set('limit', limit);
             if (nome) params = params.set('nome', nome);
             if (inativos) params = params.set('inativos', 'true');
+
+            // Adiciona todos os filtros extras dinamicamente
+            if (filtros) {
+                Object.entries(filtros).forEach(([k, v]) => {
+                    if (v !== null && v !== undefined && v !== '') {
+                        params = params.set(k, String(v));
+                    }
+                });
+            }
 
             const req$ = this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params }).pipe(shareReplay(1));
             this.cache.set(key, req$);

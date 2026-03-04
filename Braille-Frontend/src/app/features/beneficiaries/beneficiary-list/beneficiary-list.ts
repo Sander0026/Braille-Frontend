@@ -62,6 +62,10 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   modalImportAberto = false;
   isAdmin = false;
 
+  // ── Filtros Avançados (Drawer) ──────────────────────────────────
+  drawerAberto = false;
+  filterForm!: FormGroup;
+
   constructor(
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
@@ -102,6 +106,20 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       acompOftalmologico: [false],
       contatoEmergencia: [''],
     });
+    this.filterForm = this.fb.group({
+      tipoDeficiencia: [''],
+      causaDeficiencia: [''],
+      prefAcessibilidade: [''],
+      precisaAcompanhante: [''],
+      genero: [''],
+      estadoCivil: [''],
+      cidade: [''],
+      uf: [''],
+      escolaridade: [''],
+      rendaFamiliar: [''],
+      dataCadastroInicio: [''],
+      dataCadastroFim: [''],
+    });
   }
 
   ngOnInit(): void {
@@ -137,7 +155,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   carregar(): void {
     this.isLoading = true;
     const nome = this.buscaCtrl.value?.trim() || undefined;
-    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome, this.abaAtiva === 'inativos').subscribe({
+    const filtros = this.filtrosAtivos();
+    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome, this.abaAtiva === 'inativos', filtros).subscribe({
       next: (res) => {
         this.alunos = res.data;
         this.total = res.meta.total;
@@ -151,6 +170,39 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  // ── Filtros Avançados ────────────────────────────────────────────
+
+  /** Extrai do filterForm apenas os valores preenchidos (ignora vazios) */
+  filtrosAtivos(): Record<string, any> | undefined {
+    const val = this.filterForm.value;
+    const filtros: Record<string, any> = {};
+    Object.entries(val).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== '') filtros[k] = v;
+    });
+    return Object.keys(filtros).length > 0 ? filtros : undefined;
+  }
+
+  /** Conta quantos filtros estão ativos (exclui campos vazios) para o badge */
+  get quantidadeFiltrosAtivos(): number {
+    return Object.values(this.filterForm.value).filter(v => v !== null && v !== undefined && v !== '').length;
+  }
+
+  aplicarFiltros(): void {
+    this.drawerAberto = false;
+    this.paginaAtual = 1;
+    this.beneficiariosService.limparCache();
+    this.carregar();
+    this.cdr.markForCheck();
+  }
+
+  limparFiltros(): void {
+    this.filterForm.reset();
+    this.paginaAtual = 1;
+    this.beneficiariosService.limparCache();
+    this.carregar();
+    this.cdr.markForCheck();
   }
 
   irParaPagina(pagina: number): void {
