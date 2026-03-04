@@ -38,19 +38,6 @@
     <p class="form-error">{{ erro }}</p>
     <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
 </div>
-} @else if (alunos.length === 0) {
-<div class="empty-state" role="status">
-    <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="1.5" aria-hidden="true">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-        <circle cx="9" cy="7" r="4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </svg>
-    <h3>Nenhum aluno encontrado</h3>
-    <p>@if (buscaCtrl.value) { Nenhum resultado para "{{ buscaCtrl.value }}". } @else { Comece cadastrando o primeiro
-        aluno. }</p>
-</div>
 } @else {
 <!-- Abas de Navegação — sempre visíveis após carregar -->
 <div class="tabs-container" role="navigation" aria-label="Filtro de status de beneficiário">
@@ -96,7 +83,7 @@
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>
                 <td>{{ aluno.cpfRg || '—' }}</td>
-                <td>{{ formatarData(aluno.dataNascimento) }}</td>
+                <td>{{ aluno.dataNascimento | dataBraille }}</td>
                 <td>
                     @if (aluno.tipoDeficiencia) {
                     <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
@@ -175,7 +162,8 @@
             <div class="profile-header">
                 <div class="avatar-wrapper" style="position: relative; display: inline-block;">
                     <div class="profile-avatar">
-                        <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}" />
+                        <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}"
+                            loading="lazy" />
 
                         @if (uploadingImage || deletandoImage) {
                         <div
@@ -228,7 +216,7 @@
                 <div class="profile-section">
                     <h4>Informações Pessoais</h4>
                     <p><strong>CPF/RG:</strong> {{ alunoSelecionado.cpfRg || 'N/I' }}</p>
-                    <p><strong>Nascimento:</strong> {{ formatarData(alunoSelecionado.dataNascimento) }}</p>
+                    <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
                     <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
                     <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
                     <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
