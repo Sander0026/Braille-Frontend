@@ -159,8 +159,26 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.carregar();
   }
 
-  get paginas(): number[] {
-    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  /** Retorna a janela de páginas visíveis: até 5 ao redor da atual + reticências (-1).
+   *  Exemplo com 50 páginas na página 25: [1, -1, 23, 24, 25, 26, 27, -1, 50]
+   */
+  get paginasVisiveis(): number[] {
+    const total = this.totalPaginas;
+    const atual = this.paginaAtual;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const janela = 2; // páginas de cada lado da atual
+    const inicio = Math.max(2, atual - janela);
+    const fim = Math.min(total - 1, atual + janela);
+
+    const paginas: number[] = [1];
+    if (inicio > 2) paginas.push(-1); // reticências esquerda
+    for (let p = inicio; p <= fim; p++) paginas.push(p);
+    if (fim < total - 1) paginas.push(-1); // reticências direita
+    paginas.push(total);
+    return paginas;
   }
 
   // ── Modal de Edição ────────────────────────────────────────────

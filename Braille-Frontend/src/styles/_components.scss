@@ -358,15 +358,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: $space-2;
+    gap: $space-1 + 0.125rem;
     padding: $space-4 0;
+    flex-wrap: wrap;
+    overflow-x: auto;
 
     button {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 2rem;
+        min-width: 2rem;
         height: 2rem;
+        padding: 0 $space-2;
         border: 1px solid $color-gray-300;
         border-radius: $border-radius;
         background: $color-white;
@@ -374,6 +377,7 @@
         font-size: $font-size-sm;
         cursor: pointer;
         transition: all $transition-fast;
+        flex-shrink: 0;
 
         &:hover:not(:disabled) {
             background: $color-primary;
@@ -394,10 +398,55 @@
         }
     }
 
+    // Reticências (...)
+    .pagination-ellipsis {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.5rem;
+        height: 2rem;
+        color: $color-gray-400;
+        font-size: $font-size-sm;
+        user-select: none;
+        flex-shrink: 0;
+    }
+
     .pagination-info {
         font-size: $font-size-sm;
         color: $color-gray-500;
         padding: 0 $space-2;
+        white-space: nowrap;
+    }
+
+    // Campo "ir para página"
+    .pagination-goto {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .pagination-input {
+        width: 4.5rem;
+        height: 2rem;
+        padding: 0 $space-2;
+        border: 1px solid $color-gray-300;
+        border-radius: $border-radius;
+        font-size: $font-size-sm;
+        color: $color-gray-700;
+        text-align: center;
+
+        &:focus {
+            outline: none;
+            border-color: $color-primary;
+            box-shadow: 0 0 0 2px rgba($color-primary, 0.2);
+        }
+
+        // Remove as setas do input number
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            appearance: none;
+        }
+
+        -moz-appearance: textfield;
     }
 }
 

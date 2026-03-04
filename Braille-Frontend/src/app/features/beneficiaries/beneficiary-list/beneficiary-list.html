@@ -132,20 +132,48 @@
 <!-- Paginação -->
 @if (totalPaginas > 1) {
 <nav class="pagination" role="navigation" aria-label="Paginação dos alunos">
+
+    <!-- Primeira página -->
+    <button (click)="irParaPagina(1)" [disabled]="paginaAtual === 1" aria-label="Primeira página"
+        title="Primeira página">«</button>
+
+    <!-- Anterior -->
     <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
         aria-label="Página anterior">‹</button>
 
-    @for (p of paginas; track p) {
+    <!-- Janela de páginas com reticências -->
+    @for (p of paginasVisiveis; track p + '_' + $index) {
+    @if (p === -1) {
+    <span class="pagination-ellipsis" aria-hidden="true">…</span>
+    } @else {
     <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual" [attr.aria-label]="'Ir para página ' + p"
-        [attr.aria-current]="p === paginaAtual ? 'page' : null">{{ p }}</button>
+        [attr.aria-current]="p === paginaAtual ? 'page' : null">
+        {{ p }}
+    </button>
+    }
     }
 
+    <!-- Próxima -->
     <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
         aria-label="Próxima página">›</button>
 
+    <!-- Última página -->
+    <button (click)="irParaPagina(totalPaginas)" [disabled]="paginaAtual === totalPaginas" aria-label="Última página"
+        title="Última página">»</button>
+
+    <!-- Info + ir para página -->
     <span class="pagination-info" aria-live="polite">
-        Página {{ paginaAtual }} de {{ totalPaginas }}
+        {{ paginaAtual }} / {{ totalPaginas }}
     </span>
+
+    <label class="pagination-goto" aria-label="Ir para a página:">
+        <span class="sr-only">Ir para a página:</span>
+        <input type="number" min="1" [max]="totalPaginas" [placeholder]="'Ir...'"
+            aria-label="Número da página para navegar"
+            (keydown.enter)="irParaPagina(+$any($event.target).value); $any($event.target).value=''"
+            (blur)="$any($event.target).value=''" class="pagination-input" />
+    </label>
+
 </nav>
 }
 }
