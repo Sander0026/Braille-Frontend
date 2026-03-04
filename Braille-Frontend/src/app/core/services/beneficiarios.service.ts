@@ -8,6 +8,7 @@ export interface Beneficiario {
     cpfRg: string;
     dataNascimento: string;
     genero?: string;
+    estadoCivil?: string;
     telefoneContato?: string;
     email?: string;
     fotoPerfil?: string;
