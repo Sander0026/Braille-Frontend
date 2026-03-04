@@ -114,4 +114,17 @@ export class BeneficiariosService {
         let params = new HttpParams().set('url', urlArquivo);
         return this.http.delete('/api/upload', { params });
     }
+
+    importar(file: File): Observable<ImportResult> {
+        const formData = new FormData();
+        formData.append('file', file);
+        this.limparCache();
+        return this.http.post<ImportResult>(`${this.url}/import`, formData);
+    }
+}
+
+export interface ImportResult {
+    importados: number;
+    ignorados: number;
+    erros: { linha: number; cpfRg: string; motivo: string }[];
 }
