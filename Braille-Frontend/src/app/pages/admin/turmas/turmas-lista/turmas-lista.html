@@ -19,22 +19,9 @@
 </div>
 } @else if (erro) {
 <div class="error-banner" role="alert">{{ erro }}</div>
-} @else if (turmas.length === 0) {
-<div class="empty-state">
-  <span class="empty-icon" aria-hidden="true">
-  </span>
-  <h3>Nenhuma oficina cadastrada</h3>
-  <p>Crie a primeira oficina clicando no botão "Nova Oficina".</p>
-  @if (!isProfessor) {
-  <button class="btn btn-primary" (click)="abrirModalCriar()">
-    + Nova Oficina
-  </button>
-  }
-</div>
-
 } @else {
 
-<!-- Tabs switcher -->
+<!-- Tabs switcher — sempre visível após carregar -->
 <div class="abas-switcher" role="tablist">
   <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'ativas'" [class.ativa]="abaAtual === 'ativas'"
     (click)="alterarAba('ativas')">
@@ -49,8 +36,11 @@
 </div>
 
 @if (turmasFiltradas.length === 0) {
-<div class="empty-state empty-state--sm">
+<div class="empty-state empty-state--sm" role="status">
   <p>Nenhuma oficina {{ abaAtual === 'ativas' ? 'ativa' : 'arquivada' }} encontrada.</p>
+  @if (abaAtual === 'ativas' && !isProfessor) {
+  <button class="btn btn-primary" (click)="abrirModalCriar()">+ Nova Oficina</button>
+  }
 </div>
 } @else {
 <!-- Grade de cards -->
@@ -139,6 +129,7 @@
 </nav>
 }
 }
+
 
 <!-- ══════════ MODAL CRIAR / EDITAR ══════════ -->
 @if (modalAberto) {
