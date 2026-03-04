@@ -225,7 +225,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         setTimeout(() => {
           this.salvando = false;
           this.toast.erro('Erro ao inativar aluno.');
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }, 0);
       }
     });
