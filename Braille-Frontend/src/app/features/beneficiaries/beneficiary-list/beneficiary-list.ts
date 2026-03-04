@@ -174,19 +174,139 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Imprimir Ficha do Aluno ──────────────────────────────────────
   /**
-   * Aciona a impressão nativa do navegador.
-   * O CSS @media print esconde tudo menos o modal de perfil,
-   * dando ao usuário uma ficha limpa em A4. Pode salvar como PDF.
+   * Gera um HTML completo da ficha do aluno em uma nova janela
+   * e aciona a impressão nativa. Funciona mesmo com o encapsulamento
+   * de estilos do Angular.
    */
   imprimirFicha(): void {
-    document.body.classList.add('imprimindo-ficha');
-    window.print();
-    // Remove a classe depois que o diálogo de impressão fechar
-    const handler = () => {
-      document.body.classList.remove('imprimindo-ficha');
-      window.removeEventListener('afterprint', handler);
+    const a = this.alunoSelecionado;
+    if (!a) return;
+
+    const fmtData = (v?: string | null) => {
+      if (!v) return 'Não informado';
+      try { return new Date(v).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); }
+      catch { return v; }
     };
-    window.addEventListener('afterprint', handler);
+
+    const ni = (v: any) => v || 'Não informado';
+    const sim = (v: boolean | undefined) => v ? 'Sim' : 'Não';
+
+    const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ficha do Aluno – ${a.nomeCompleto}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 10pt; color: #111; background: #fff; padding: 16px; }
+    .ficha-header { display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 12px; }
+    .ficha-header h1 { font-size: 13pt; font-weight: bold; }
+    .ficha-header .meta { font-size: 8pt; color: #555; text-align: right; }
+    .aluno-nome { font-size: 14pt; font-weight: bold; margin-bottom: 4px; }
+    .badges { display: flex; gap: 6px; margin-bottom: 12px; }
+    .badge { font-size: 8pt; padding: 2px 8px; border-radius: 12px; border: 1px solid #ccc; }
+    .badge-ativo { background: #d1fae5; border-color: #059669; color: #065f46; }
+    .badge-inativo { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
+    .badge-tipo { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .secao { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; }
+    .secao h4 { font-size: 9pt; text-transform: uppercase; letter-spacing: .05em;
+      color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 6px; }
+    .secao p { font-size: 9pt; margin: 3px 0; color: #444; }
+    .secao p strong { color: #111; }
+    .full { grid-column: 1 / -1; }
+    .rodape { margin-top: 16px; border-top: 1px solid #ccc; padding-top: 6px;
+      font-size: 7.5pt; color: #777; text-align: right; }
+    @media print {
+      body { padding: 0; }
+      @page { size: A4; margin: 14mm 14mm 12mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ficha-header">
+    <div>
+      <h1>Instituto Louis Braille</h1>
+      <div style="font-size:9pt;color:#555;">Ficha de Cadastro do Aluno</div>
+    </div>
+    <div class="meta">
+      Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+    </div>
+  </div>
+
+  <div class="aluno-nome">${a.nomeCompleto}</div>
+  <div class="badges">
+    <span class="badge ${a.statusAtivo ? 'badge-ativo' : 'badge-inativo'}">${a.statusAtivo ? 'Ativo' : 'Inativo'}</span>
+    ${a.tipoDeficiencia ? `<span class="badge badge-tipo">${a.tipoDeficiencia.replace(/_/g, ' ')}</span>` : ''}
+  </div>
+
+  <div class="grid">
+    <div class="secao">
+      <h4>Informações Pessoais</h4>
+      <p><strong>CPF / RG:</strong> ${ni(a.cpfRg)}</p>
+      <p><strong>Nascimento:</strong> ${fmtData(a.dataNascimento)}</p>
+      <p><strong>Gênero:</strong> ${ni(a.genero)}</p>
+      <p><strong>Estado Civil:</strong> ${ni(a.estadoCivil)}</p>
+      <p><strong>Telefone:</strong> ${ni(a.telefoneContato)}</p>
+      <p><strong>E-mail:</strong> ${ni(a.email)}</p>
+      <p><strong>Contato Emergência:</strong> ${ni(a.contatoEmergencia)}</p>
+    </div>
+
+    <div class="secao">
+      <h4>Perfil Inclusivo</h4>
+      <p><strong>Causa:</strong> ${ni(a.causaDeficiencia)}</p>
+      <p><strong>Idade na Ocorrência:</strong> ${ni(a.idadeOcorrencia)}</p>
+      <p><strong>Acessibilidade Preferida:</strong> ${ni(a.prefAcessibilidade)}</p>
+      <p><strong>Tecnologias Assistivas:</strong> ${ni(a.tecAssistivas)}</p>
+      <p><strong>Acompanhante:</strong> ${sim(a.precisaAcompanhante)}</p>
+      <p><strong>Acomp. Oftalmológico:</strong> ${sim(a.acompOftalmologico)}</p>
+      ${a.outrasComorbidades ? `<p><strong>Outras Comorbidades:</strong> ${a.outrasComorbidades}</p>` : ''}
+    </div>
+
+    <div class="secao full">
+      <h4>Endereço</h4>
+      <p>${ni(a.rua)}${a.numero ? ', ' + a.numero : ''}${a.complemento ? ' — ' + a.complemento : ''}</p>
+      <p>${ni(a.bairro)} — ${ni(a.cidade)} / ${ni(a.uf)}</p>
+      <p><strong>CEP:</strong> ${ni(a.cep)}</p>
+    </div>
+
+    <div class="secao">
+      <h4>Socioeconômico</h4>
+      <p><strong>Escolaridade:</strong> ${ni(a.escolaridade)}</p>
+      <p><strong>Profissão:</strong> ${ni(a.profissao)}</p>
+      <p><strong>Renda Familiar:</strong> ${ni(a.rendaFamiliar)}</p>
+      <p><strong>Benefícios Gov.:</strong> ${ni(a.beneficiosGov)}</p>
+      <p><strong>Composição Familiar:</strong> ${ni(a.composicaoFamiliar)}</p>
+    </div>
+
+    <div class="secao">
+      <h4>Sistema</h4>
+      <p><strong>Cadastrado em:</strong> ${fmtData(a.criadoEm)}</p>
+      <p><strong>Possui Laudo:</strong> ${a.laudoUrl ? 'Sim (arquivo digital)' : 'Não'}</p>
+    </div>
+  </div>
+
+  <div class="rodape">Instituto Louis Braille &nbsp;|&nbsp; Documento gerado automaticamente pelo sistema</div>
+
+  <script>
+    window.onload = function() {
+      window.print();
+      window.onafterprint = function() { window.close(); };
+    };
+  </script>
+</body>
+</html>`;
+
+    const popup = window.open('', '_blank', 'width=820,height=700,scrollbars=yes');
+    if (popup) {
+      popup.document.open();
+      popup.document.write(html);
+      popup.document.close();
+    } else {
+      alert('O navegador bloqueou a janela de impressão. Permita pop-ups para este site e tente novamente.');
+    }
   }
 
   // ── Filtros Avançados ────────────────────────────────────────────
