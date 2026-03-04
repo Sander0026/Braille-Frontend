@@ -172,6 +172,23 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
+  // ── Imprimir Ficha do Aluno ──────────────────────────────────────
+  /**
+   * Aciona a impressão nativa do navegador.
+   * O CSS @media print esconde tudo menos o modal de perfil,
+   * dando ao usuário uma ficha limpa em A4. Pode salvar como PDF.
+   */
+  imprimirFicha(): void {
+    document.body.classList.add('imprimindo-ficha');
+    window.print();
+    // Remove a classe depois que o diálogo de impressão fechar
+    const handler = () => {
+      document.body.classList.remove('imprimindo-ficha');
+      window.removeEventListener('afterprint', handler);
+    };
+    window.addEventListener('afterprint', handler);
+  }
+
   // ── Filtros Avançados ────────────────────────────────────────────
 
   /** Extrai do filterForm apenas os valores preenchidos (ignora vazios) */
