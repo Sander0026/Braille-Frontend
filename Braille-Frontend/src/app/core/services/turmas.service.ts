@@ -27,33 +27,35 @@ export interface CreateTurmaDto {
 @Injectable({ providedIn: 'root' })
 export class TurmasService {
     private readonly url = '/api/turmas';
-    private defaultCache$: Observable<PaginatedResponse<Turma>> | null = null;
+    // Cache por chave de parâmetros — funciona para todas as abas (ativas/arquivadas) e paginações
+    private cache = new Map<string, Observable<PaginatedResponse<Turma>>>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
     constructor(private http: HttpClient) { }
 
     limparCache(): void {
-        this.defaultCache$ = null;
+        this.cache.clear();
+    }
+
+    private buildCacheKey(page: number, limit: number, nome?: string, statusAtivo?: boolean, professorId?: string): string {
+        return `${page}|${limit}|${nome ?? ''}|${statusAtivo ?? 'all'}|${professorId ?? ''}`;
     }
 
     listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string): Observable<PaginatedResponse<Turma>> {
-        const isDefaultList = page === 1 && limit === 10 && !nome && statusAtivo === undefined && !professorId;
+        const key = this.buildCacheKey(page, limit, nome, statusAtivo, professorId);
 
-        if (isDefaultList) {
-            if (!this.defaultCache$) {
-                const params = new HttpParams().set('page', '1').set('limit', '10').set('excluido', 'false');
-                this.defaultCache$ = this.http.get<PaginatedResponse<Turma>>(this.url, { params }).pipe(shareReplay(1));
-                setTimeout(() => this.limparCache(), this.cacheTimeMs);
-            }
-            return this.defaultCache$;
+        if (!this.cache.has(key)) {
+            let params = new HttpParams().set('page', page).set('limit', limit).set('excluido', 'false');
+            if (nome) params = params.set('nome', nome);
+            if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
+            if (professorId) params = params.set('professorId', professorId);
+
+            const req$ = this.http.get<PaginatedResponse<Turma>>(this.url, { params }).pipe(shareReplay(1));
+            this.cache.set(key, req$);
+            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
         }
 
-        let params = new HttpParams().set('page', page).set('limit', limit);
-        if (nome) params = params.set('nome', nome);
-        if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
-        if (professorId) params = params.set('professorId', professorId);
-        params = params.set('excluido', 'false');
-        return this.http.get<PaginatedResponse<Turma>>(this.url, { params });
+        return this.cache.get(key)!;
     }
 
     buscarPorId(id: string): Observable<Turma> {

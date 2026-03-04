@@ -17,31 +17,33 @@ export interface Contato {
 @Injectable({ providedIn: 'root' })
 export class ContatosService {
     private readonly url = '/api/contatos';
-    // Cache separado para não-lidas (aba padrão) e lidas
-    private cacheNaoLidas$: Observable<PaginatedResponse<Contato>> | null = null;
+    // Cache por chave — funciona para todos os filtros (todas, lidas, não-lidas) e paginações
+    private cache = new Map<string, Observable<PaginatedResponse<Contato>>>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
     constructor(private http: HttpClient) { }
 
     limparCache(): void {
-        this.cacheNaoLidas$ = null;
+        this.cache.clear();
+    }
+
+    private buildCacheKey(page: number, limit: number, lida?: boolean): string {
+        return `${page}|${limit}|${lida ?? 'all'}`;
     }
 
     listar(page = 1, limit = 20, lida?: boolean): Observable<PaginatedResponse<Contato>> {
-        const isDefaultList = page === 1 && limit === 20 && lida === undefined;
+        const key = this.buildCacheKey(page, limit, lida);
 
-        if (isDefaultList) {
-            if (!this.cacheNaoLidas$) {
-                const params = new HttpParams().set('page', '1').set('limit', '20');
-                this.cacheNaoLidas$ = this.http.get<PaginatedResponse<Contato>>(this.url, { params }).pipe(shareReplay(1));
-                setTimeout(() => this.limparCache(), this.cacheTimeMs);
-            }
-            return this.cacheNaoLidas$;
+        if (!this.cache.has(key)) {
+            let params = new HttpParams().set('page', page).set('limit', limit);
+            if (lida !== undefined) params = params.set('lida', String(lida));
+
+            const req$ = this.http.get<PaginatedResponse<Contato>>(this.url, { params }).pipe(shareReplay(1));
+            this.cache.set(key, req$);
+            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
         }
 
-        let params = new HttpParams().set('page', page).set('limit', limit);
-        if (lida !== undefined) params = params.set('lida', String(lida));
-        return this.http.get<PaginatedResponse<Contato>>(this.url, { params });
+        return this.cache.get(key)!;
     }
 
     buscarPorId(id: string): Observable<Contato> {

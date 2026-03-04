@@ -26,31 +26,34 @@ export interface CreateUsuarioDto {
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
     private readonly url = '/api/users';
-    private defaultCache$: Observable<PaginatedResponse<Usuario>> | null = null;
+    // Cache por chave — cobre ativos, inativos, busca por nome e qualquer paginação
+    private cache = new Map<string, Observable<PaginatedResponse<Usuario>>>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
     constructor(private http: HttpClient) { }
 
     limparCache(): void {
-        this.defaultCache$ = null;
+        this.cache.clear();
+    }
+
+    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean): string {
+        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}`;
     }
 
     listar(page = 1, limit = 10, nome?: string, inativos: boolean = false): Observable<PaginatedResponse<Usuario>> {
-        const isDefaultList = page === 1 && limit === 10 && !nome && !inativos;
+        const key = this.buildCacheKey(page, limit, nome, inativos);
 
-        if (isDefaultList) {
-            if (!this.defaultCache$) {
-                const params = new HttpParams().set('page', '1').set('limit', '10');
-                this.defaultCache$ = this.http.get<PaginatedResponse<Usuario>>(this.url, { params }).pipe(shareReplay(1));
-                setTimeout(() => this.limparCache(), this.cacheTimeMs);
-            }
-            return this.defaultCache$;
+        if (!this.cache.has(key)) {
+            let params = new HttpParams().set('page', page).set('limit', limit);
+            if (nome) params = params.set('nome', nome);
+            if (inativos) params = params.set('inativos', 'true');
+
+            const req$ = this.http.get<PaginatedResponse<Usuario>>(this.url, { params }).pipe(shareReplay(1));
+            this.cache.set(key, req$);
+            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
         }
 
-        let params = new HttpParams().set('page', page).set('limit', limit);
-        if (nome) params = params.set('nome', nome);
-        if (inativos) params = params.set('inativos', 'true');
-        return this.http.get<PaginatedResponse<Usuario>>(this.url, { params });
+        return this.cache.get(key)!;
     }
 
     criar(dados: CreateUsuarioDto): Observable<Usuario> {

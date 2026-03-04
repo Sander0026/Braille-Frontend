@@ -45,34 +45,34 @@ export interface PaginatedResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
     private readonly url = '/api/beneficiaries';
-    private defaultCache$: Observable<PaginatedResponse<Beneficiario>> | null = null;
+    // Cache por chave — cobre ativos, inativos, busca por nome e qualquer paginaçao
+    private cache = new Map<string, Observable<PaginatedResponse<Beneficiario>>>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
     constructor(private http: HttpClient) { }
 
-    listar(page = 1, limit = 10, nome?: string, inativos?: boolean): Observable<PaginatedResponse<Beneficiario>> {
-        const hasFilters = !!nome || inativos;
-        const isDefaultList = page === 1 && limit === 10 && !hasFilters;
-
-        if (isDefaultList) {
-            if (!this.defaultCache$) {
-                this.defaultCache$ = this.http.get<PaginatedResponse<Beneficiario>>(this.url, {
-                    params: new HttpParams().set('page', '1').set('limit', '10')
-                }).pipe(shareReplay(1));
-
-                setTimeout(() => this.limparCache(), this.cacheTimeMs);
-            }
-            return this.defaultCache$;
-        }
-
-        let params = new HttpParams().set('page', page).set('limit', limit);
-        if (nome) params = params.set('nome', nome);
-        if (inativos) params = params.set('inativos', 'true');
-        return this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params });
+    limparCache(): void {
+        this.cache.clear();
     }
 
-    limparCache(): void {
-        this.defaultCache$ = null;
+    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean): string {
+        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}`;
+    }
+
+    listar(page = 1, limit = 10, nome?: string, inativos?: boolean): Observable<PaginatedResponse<Beneficiario>> {
+        const key = this.buildCacheKey(page, limit, nome, inativos);
+
+        if (!this.cache.has(key)) {
+            let params = new HttpParams().set('page', page).set('limit', limit);
+            if (nome) params = params.set('nome', nome);
+            if (inativos) params = params.set('inativos', 'true');
+
+            const req$ = this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params }).pipe(shareReplay(1));
+            this.cache.set(key, req$);
+            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
+        }
+
+        return this.cache.get(key)!;
     }
 
     buscarPorId(id: string): Observable<Beneficiario> {
