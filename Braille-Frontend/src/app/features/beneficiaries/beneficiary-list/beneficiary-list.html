@@ -6,14 +6,24 @@
             @if (total > 0) { {{ total }} aluno(s) cadastrado(s) }
         </p>
     </div>
-    <a routerLink="/admin/alunos/cadastro" class="btn btn-primary" aria-label="Cadastrar novo aluno">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="12" x2="12" y1="5" y2="19" />
-            <line x1="5" x2="19" y1="12" y2="12" />
-        </svg>
-        Novo Aluno
-    </a>
+    <div class="header-actions">
+        @if (isAdmin) {
+        <button type="button" class="btn btn-outline-primary" (click)="modalImportAberto = true"
+            aria-label="Importar alunos via planilha">
+            <span class="material-symbols-rounded">table_view</span>
+            Importar Planilha
+        </button>
+        }
+        <a routerLink="/admin/alunos/cadastro" class="btn btn-primary" aria-label="Cadastrar novo aluno">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <line x1="12" x2="12" y1="5" y2="19" />
+                <line x1="5" x2="19" y1="12" y2="12" />
+            </svg>
+            Novo Aluno
+        </a>
+    </div>
 </div>
 
 <!-- Barra de busca -->
@@ -629,4 +639,9 @@
         </div>
     </div>
 </div>
+}
+
+<!-- Modal de Importação via Planilha -->
+@if (modalImportAberto) {
+<app-import-modal (fechou)="onImportFechou($event)" />
 }

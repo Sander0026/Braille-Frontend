@@ -1,0 +1,127 @@
+<div class="modal-overlay" (click)="fechar()">
+    <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
+        aria-labelledby="import-title">
+
+        <!-- Cabeçalho -->
+        <div class="modal-header">
+            <div class="modal-header-info">
+                <span class="material-symbols-rounded modal-icon">table_view</span>
+                <h2 id="import-title">Importar Alunos via Planilha</h2>
+            </div>
+            <button class="btn-icon" (click)="fechar()" aria-label="Fechar modal">
+                <span class="material-symbols-rounded">close</span>
+            </button>
+        </div>
+
+        <!-- Corpo -->
+        <div class="modal-body">
+
+            <!-- Instrução e Download do Modelo -->
+            <div class="instrucao">
+                <p>Baixe o arquivo modelo, preencha com os dados dos alunos e envie abaixo.</p>
+                <button class="btn btn-outline" (click)="baixarModelo()" type="button">
+                    <span class="material-symbols-rounded">download</span>
+                    Baixar Modelo .xlsx
+                </button>
+            </div>
+
+            <!-- Área de Upload -->
+            @if (!resultado) {
+            <div class="dropzone" [class.drag-over]="isDragOver" [class.has-file]="arquivoSelecionado"
+                (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
+                (click)="fileInput.click()" role="button" tabindex="0" (keydown.enter)="fileInput.click()"
+                aria-label="Área de upload. Arraste um arquivo ou clique para selecionar.">
+                <input #fileInput type="file" accept=".xlsx,.xls,.csv" (change)="onFileInput($event)" hidden />
+
+                @if (!arquivoSelecionado) {
+                <span class="material-symbols-rounded dropzone-icon">upload_file</span>
+                <p class="dropzone-text">Arraste o arquivo aqui ou <strong>clique para selecionar</strong></p>
+                <span class="dropzone-hint">Formatos aceitos: .xlsx, .xls, .csv · Máximo 5 MB</span>
+                } @else {
+                <span class="material-symbols-rounded dropzone-icon file-ok">check_circle</span>
+                <p class="dropzone-text file-name">{{ arquivoSelecionado.name }}</p>
+                <span class="dropzone-hint">{{ tamanhoFormatado }} · Clique para trocar o arquivo</span>
+                }
+            </div>
+
+            <!-- Erro de validação do arquivo -->
+            @if (erro) {
+            <div class="alert-erro">
+                <span class="material-symbols-rounded">error</span>
+                {{ erro }}
+            </div>
+            }
+            }
+
+            <!-- Relatório de resultado -->
+            @if (resultado) {
+            <div class="resultado">
+                <div class="resultado-resumo">
+                    <div class="resumo-item resumo-sucesso">
+                        <span class="material-symbols-rounded">check_circle</span>
+                        <span><strong>{{ resultado.importados }}</strong> aluno(s) importado(s)</span>
+                    </div>
+                    @if (resultado.ignorados > 0) {
+                    <div class="resumo-item resumo-aviso">
+                        <span class="material-symbols-rounded">warning</span>
+                        <span><strong>{{ resultado.ignorados }}</strong> ignorado(s) por já existirem</span>
+                    </div>
+                    }
+                </div>
+
+                @if (resultado.erros.length > 0) {
+                <div class="resultado-erros">
+                    <h4>Detalhes dos erros ({{ resultado.erros.length }})</h4>
+                    <div class="erros-tabela">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Linha</th>
+                                    <th>CPF/RG</th>
+                                    <th>Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (err of resultado.erros; track err.linha) {
+                                <tr>
+                                    <td>{{ err.linha > 0 ? err.linha : '—' }}</td>
+                                    <td>{{ err.cpfRg || '—' }}</td>
+                                    <td>{{ err.motivo }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- Loading -->
+            @if (processando) {
+            <div class="processando">
+                <div class="spinner"></div>
+                <p>Processando planilha, aguarde...</p>
+            </div>
+            }
+        </div>
+
+        <!-- Rodapé -->
+        <div class="modal-footer">
+            <button class="btn btn-ghost" (click)="fechar()" [disabled]="processando">Fechar</button>
+
+            @if (!resultado) {
+            <button class="btn btn-primary" (click)="importar()" [disabled]="!arquivoSelecionado || processando">
+                <span class="material-symbols-rounded">cloud_upload</span>
+                Processar Importação
+            </button>
+            } @else {
+            <button class="btn btn-primary" (click)="fechar()">
+                <span class="material-symbols-rounded">check</span>
+                Concluir
+            </button>
+            }
+        </div>
+
+    </div>
+</div>

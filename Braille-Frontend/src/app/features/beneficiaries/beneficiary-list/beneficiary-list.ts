@@ -7,12 +7,14 @@ import { BeneficiariosService, Beneficiario } from '../../../core/services/benef
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
+import { ImportModalComponent } from '../import-modal/import-modal';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -56,12 +58,17 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   salvandoEdicao = false;
   editForm!: FormGroup;
 
+  // Modal de Importação
+  modalImportAberto = false;
+  isAdmin = false;
+
   constructor(
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
     private confirmDialog: ConfirmDialogService,
     private toast: ToastService,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -107,12 +114,24 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       this.carregar();
     });
 
+    const user = this.authService.getUser();
+    this.isAdmin = user?.role === 'ADMIN' || user?.role === 'SECRETARIA';
     this.carregar();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // ── Modal de Importação ─────────────────────────────────────────────
+  onImportFechou(devRecarregar: boolean): void {
+    this.modalImportAberto = false;
+    if (devRecarregar) {
+      this.paginaAtual = 1;
+      this.carregar();
+    }
+    this.cdr.markForCheck();
   }
 
   carregar(): void {

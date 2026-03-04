@@ -80,6 +80,18 @@
         }
     }
 
+    // --- Contorno Primário: Borda colorida transparente ---
+    &.btn-outline-primary {
+        background-color: transparent;
+        border-color: $color-primary;
+        color: $color-primary;
+
+        &:hover:not(:disabled) {
+            background-color: $color-primary;
+            color: $color-primary-text;
+        }
+    }
+
     // --- Tamanhos ---
     &.btn-sm {
         padding: $space-1 + 0.125rem $space-3;
@@ -473,6 +485,13 @@
         font-size: $font-size-sm;
         color: $color-gray-500;
         margin-top: $space-1;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: $space-3;
+        flex-wrap: wrap;
     }
 }
 
