@@ -62,6 +62,10 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   modalImportAberto = false;
   isAdmin = false;
 
+  // ── Filtros Avançados (Drawer) ──────────────────────────────────
+  drawerAberto = false;
+  filterForm!: FormGroup;
+
   constructor(
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
@@ -102,6 +106,20 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       acompOftalmologico: [false],
       contatoEmergencia: [''],
     });
+    this.filterForm = this.fb.group({
+      tipoDeficiencia: [''],
+      causaDeficiencia: [''],
+      prefAcessibilidade: [''],
+      precisaAcompanhante: [''],
+      genero: [''],
+      estadoCivil: [''],
+      cidade: [''],
+      uf: [''],
+      escolaridade: [''],
+      rendaFamiliar: [''],
+      dataCadastroInicio: [''],
+      dataCadastroFim: [''],
+    });
   }
 
   ngOnInit(): void {
@@ -137,7 +155,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   carregar(): void {
     this.isLoading = true;
     const nome = this.buscaCtrl.value?.trim() || undefined;
-    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome, this.abaAtiva === 'inativos').subscribe({
+    const filtros = this.filtrosAtivos();
+    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome, this.abaAtiva === 'inativos', filtros).subscribe({
       next: (res) => {
         this.alunos = res.data;
         this.total = res.meta.total;
@@ -153,14 +172,82 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
+  // ── Imprimir Ficha do Aluno ──────────────────────────────────────
+  /**
+   * Aciona a impressão nativa do navegador.
+   * O CSS @media print esconde tudo menos o modal de perfil,
+   * dando ao usuário uma ficha limpa em A4. Pode salvar como PDF.
+   */
+  imprimirFicha(): void {
+    document.body.classList.add('imprimindo-ficha');
+    window.print();
+    // Remove a classe depois que o diálogo de impressão fechar
+    const handler = () => {
+      document.body.classList.remove('imprimindo-ficha');
+      window.removeEventListener('afterprint', handler);
+    };
+    window.addEventListener('afterprint', handler);
+  }
+
+  // ── Filtros Avançados ────────────────────────────────────────────
+
+  /** Extrai do filterForm apenas os valores preenchidos (ignora vazios) */
+  filtrosAtivos(): Record<string, any> | undefined {
+    const val = this.filterForm.value;
+    const filtros: Record<string, any> = {};
+    Object.entries(val).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== '') filtros[k] = v;
+    });
+    return Object.keys(filtros).length > 0 ? filtros : undefined;
+  }
+
+  /** Conta quantos filtros estão ativos (exclui campos vazios) para o badge */
+  get quantidadeFiltrosAtivos(): number {
+    return Object.values(this.filterForm.value).filter(v => v !== null && v !== undefined && v !== '').length;
+  }
+
+  aplicarFiltros(): void {
+    this.drawerAberto = false;
+    this.paginaAtual = 1;
+    this.beneficiariosService.limparCache();
+    this.carregar();
+    this.cdr.markForCheck();
+  }
+
+  limparFiltros(): void {
+    this.filterForm.reset();
+    this.paginaAtual = 1;
+    this.beneficiariosService.limparCache();
+    this.carregar();
+    this.cdr.markForCheck();
+  }
+
   irParaPagina(pagina: number): void {
     if (pagina < 1 || pagina > this.totalPaginas) return;
     this.paginaAtual = pagina;
     this.carregar();
   }
 
-  get paginas(): number[] {
-    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  /** Retorna a janela de páginas visíveis: até 5 ao redor da atual + reticências (-1).
+   *  Exemplo com 50 páginas na página 25: [1, -1, 23, 24, 25, 26, 27, -1, 50]
+   */
+  get paginasVisiveis(): number[] {
+    const total = this.totalPaginas;
+    const atual = this.paginaAtual;
+    if (total <= 7) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+
+    const janela = 2; // páginas de cada lado da atual
+    const inicio = Math.max(2, atual - janela);
+    const fim = Math.min(total - 1, atual + janela);
+
+    const paginas: number[] = [1];
+    if (inicio > 2) paginas.push(-1); // reticências esquerda
+    for (let p = inicio; p <= fim; p++) paginas.push(p);
+    if (fim < total - 1) paginas.push(-1); // reticências direita
+    paginas.push(total);
+    return paginas;
   }
 
   // ── Modal de Edição ────────────────────────────────────────────

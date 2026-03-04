@@ -153,4 +153,101 @@ h6 {
     .no-print {
         display: none !important;
     }
+
+    // ══════════════════════════════════════════
+    //  Impressão da Ficha do Aluno
+    //  Ativado pela classe .imprimindo-ficha no body
+    // ══════════════════════════════════════════
+    body.imprimindo-ficha {
+        background: #fff !important;
+        overflow: visible !important;
+        height: auto !important;
+    }
+
+    // Esconder TUDO na página quando imprimir a ficha
+    body.imprimindo-ficha>* {
+        display: none !important;
+    }
+
+    // Garantir que o app-root apareça
+    body.imprimindo-ficha>app-root {
+        display: block !important;
+    }
+
+    // Esconder sidebar, navbar, e o resto do app
+    body.imprimindo-ficha app-root>* {
+        display: none !important;
+    }
+
+    // Mostrar apenas o beneficiary-list (que contém o modal)
+    body.imprimindo-ficha app-root app-beneficiary-list {
+        display: block !important;
+        position: static !important;
+    }
+
+    // Esconder tudo dentro do beneficiary-list, menos o modal aberto
+    body.imprimindo-ficha app-root app-beneficiary-list>* {
+        display: none !important;
+    }
+
+    // Mostrar o overlay e o modal de perfil
+    body.imprimindo-ficha .modal-overlay {
+        display: flex !important;
+        position: static !important;
+        background: none !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+    }
+
+    body.imprimindo-ficha .modal-content {
+        display: flex !important;
+        box-shadow: none !important;
+        max-height: none !important;
+        border: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        page-break-inside: avoid;
+    }
+
+    // Esconder botões e controles no momento da impressão
+    body.imprimindo-ficha .modal-footer,
+    body.imprimindo-ficha .btn-close,
+    body.imprimindo-ficha .avatar-actions,
+    body.imprimindo-ficha .modal-header button {
+        display: none !important;
+    }
+
+    // Ajuste do cabeçalho do modal para impressão
+    body.imprimindo-ficha .modal-header {
+        display: flex !important;
+        border-bottom: 2px solid #111 !important;
+        padding: 0.5rem 1rem !important;
+    }
+
+    body.imprimindo-ficha .modal-header::after {
+        content: 'Instituto Louis Braille — Ficha do Aluno';
+        display: block;
+        font-size: 0.8rem;
+        color: #555;
+        margin-left: auto;
+    }
+
+    // Ajuste da grid do perfil para impressão (2 colunas side-by-side)
+    body.imprimindo-ficha .profile-grid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 1rem !important;
+    }
+
+    body.imprimindo-ficha .modal-body {
+        overflow: visible !important;
+        padding: 1rem !important;
+        display: block !important;
+    }
+
+    // Page setup
+    @page {
+        size: A4;
+        margin: 10mm 12mm;
+    }
 }
