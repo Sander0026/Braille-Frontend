@@ -2,7 +2,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { BeneficiariosService } from '../../../../core/services/beneficiarios.service';
+import { BeneficiariosService, ReativacaoAluno } from '../../../../core/services/beneficiarios.service';
+
 
 @Component({
   selector: 'app-cadastro-wizard',
@@ -18,6 +19,12 @@ export class CadastroWizard implements OnInit {
   isSalvando = false;
   mensagemFeedback = '';
   tipoFeedback: 'sucesso' | 'erro' | '' = '';
+
+  // Modal de Reativação de Aluno
+  modalReativacao = false;
+  dadosReativacao: ReativacaoAluno | null = null;
+  _payloadPendente: Record<string, unknown> | null = null; // guarda dados para re-usar após reativar
+
 
   constructor(
     private fb: FormBuilder,
@@ -257,7 +264,18 @@ export class CadastroWizard implements OnInit {
 
   private enviarDadosParaBanco(dados: Record<string, unknown>) {
     this.beneficiariosService.criarBeneficiario(dados).subscribe({
-      next: () => {
+      next: (resp) => {
+        // Backend retornou sinal de reativação (CPF/RG inativo)
+        if ('_reativacao' in resp && resp._reativacao) {
+          this.isSalvando = false;
+          this.dadosReativacao = resp as ReativacaoAluno;
+          this._payloadPendente = dados;
+          this.modalReativacao = true;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        // Criação normal bem-sucedida
         this.exibirFeedback('Aluno cadastrado com sucesso!', 'sucesso');
         this.cadastroForm.reset();
         this.passoAtual = 1;
@@ -266,16 +284,6 @@ export class CadastroWizard implements OnInit {
       },
       error: (err: { status: number; error?: { message?: string | string[] } }) => {
         console.error('Erro ao salvar beneficiário:', err);
-
-        // 409 = registro já existe no banco (CPF/RG ou e-mail duplicado)
-        if (err.status === 409) {
-          this.exibirFeedback(
-            'Este aluno já está cadastrado. Verifique se o CPF/RG ou e-mail informado já existe no sistema.',
-            'erro'
-          );
-          return;
-        }
-
         const mensagemErro = err?.error?.message ?? 'Erro ao salvar. Verifique os dados e tente novamente.';
         this.exibirFeedback(
           Array.isArray(mensagemErro) ? mensagemErro.join(', ') : mensagemErro,
@@ -284,6 +292,39 @@ export class CadastroWizard implements OnInit {
         this.cdr.detectChanges();
       },
     });
+  }
+
+  confirmarReativacao() {
+    if (!this.dadosReativacao) return;
+    this.isSalvando = true;
+
+    this.beneficiariosService.reativar(this.dadosReativacao.id).subscribe({
+      next: (aluno) => {
+        this.isSalvando = false;
+        this.modalReativacao = false;
+        this.dadosReativacao = null;
+        this._payloadPendente = null;
+        this.exibirFeedback(
+          `Aluno ${aluno.nomeCompleto} reativado com sucesso! (Matrícula: ${aluno.matricula ?? '—'})`,
+          'sucesso'
+        );
+        this.cadastroForm.reset();
+        this.passoAtual = 1;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isSalvando = false;
+        this.exibirFeedback('Erro ao reativar aluno. Tente novamente.', 'erro');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  cancelarReativacao() {
+    this.modalReativacao = false;
+    this.dadosReativacao = null;
+    this._payloadPendente = null;
   }
 
   private exibirFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {

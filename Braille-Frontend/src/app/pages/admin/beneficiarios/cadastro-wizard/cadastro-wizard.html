@@ -400,3 +400,44 @@
 
   </form>
 </div>
+
+<!-- ── Modal de Reativação de Aluno ──────────────────────────────── -->
+@if (modalReativacao && dadosReativacao) {
+<div class="modal-reativacao-overlay" (click)="cancelarReativacao()" role="dialog" aria-modal="true"
+  aria-labelledby="modal-reativ-titulo">
+  <div class="modal-reativacao-box" (click)="$event.stopPropagation()">
+
+    <div class="modal-reativ-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="12" cy="7" r="4" />
+        <path d="M18 8a2 2 0 0 1 0 4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      </svg>
+    </div>
+
+    <h2 id="modal-reativ-titulo">Aluno já cadastrado</h2>
+
+    <p>
+      O CPF/RG informado pertence a
+      <strong>{{ dadosReativacao.nomeCompleto }}</strong>
+      @if (dadosReativacao.matricula) { <span class="matricula-badge">(Matrícula: {{ dadosReativacao.matricula
+        }})</span> },
+      que está <strong>{{ dadosReativacao.excluido ? 'excluído' : 'inativo' }}</strong> no sistema.
+    </p>
+    <p>Deseja <strong>reativar</strong> o cadastro deste aluno?</p>
+
+    <div class="modal-reativ-actions">
+      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [disabled]="isSalvando">
+        Não, cancelar
+      </button>
+      <button class="btn-reativ-confirmar" (click)="confirmarReativacao()" [disabled]="isSalvando">
+        @if (isSalvando) { Reativando... }
+        @else { ✅ Sim, reativar aluno }
+      </button>
+    </div>
+
+  </div>
+</div>
+}

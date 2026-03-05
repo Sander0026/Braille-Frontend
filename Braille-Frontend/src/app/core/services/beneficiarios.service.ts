@@ -51,6 +51,18 @@ export interface PaginatedResponse<T> {
     meta: { total: number; page: number; lastPage: number };
 }
 
+/** Resposta quando o CPF/RG já existe inativo no sistema */
+export interface ReativacaoAluno {
+    _reativacao: true;
+    id: string;
+    nomeCompleto: string;
+    matricula?: string;
+    statusAtivo: boolean;
+    excluido: boolean;
+    message: string;
+}
+
+
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
     private readonly url = '/api/beneficiaries';
@@ -132,9 +144,14 @@ export class BeneficiariosService {
         return this.http.delete(`${this.url}/${id}/hard`);
     }
 
-    criarBeneficiario(dados: Record<string, unknown>): Observable<Beneficiario> {
+    criarBeneficiario(dados: Record<string, unknown>): Observable<Beneficiario | ReativacaoAluno> {
         this.limparCache();
-        return this.http.post<Beneficiario>(this.url, dados);
+        return this.http.post<Beneficiario | ReativacaoAluno>(this.url, dados);
+    }
+
+    reativar(id: string): Observable<Beneficiario> {
+        this.limparCache();
+        return this.http.post<Beneficiario>(`${this.url}/${id}/reactivate`, {});
     }
 
     uploadImagem(file: File): Observable<{ url: string }> {
