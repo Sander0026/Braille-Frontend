@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
@@ -31,7 +31,8 @@ export class CadastroUsuarioWizard implements OnInit {
         private fb: FormBuilder,
         private http: HttpClient,
         private router: Router,
-        private usuariosService: UsuariosService
+        private usuariosService: UsuariosService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -163,6 +164,7 @@ export class CadastroUsuarioWizard implements OnInit {
                 if ('_reativacao' in resp && resp._reativacao) {
                     this.dadosReativacao = resp as ReativacaoResponse;
                     this.modalReativacao = true;
+                    this.cdr.detectChanges();
                     return;
                 }
 
@@ -173,8 +175,10 @@ export class CadastroUsuarioWizard implements OnInit {
                     senha: criado._credenciais.senha,
                 };
                 this.exibirFeedback('Usuário cadastrado com sucesso! Anote as credenciais abaixo.', 'sucesso');
+                this.cdr.detectChanges();
             },
             error: (err: HttpErrorResponse) => {
+                this.isSalvando = false;
                 const msgs = Array.isArray(err.error?.message)
                     ? err.error.message.join(' | ')
                     : err.error?.message;
@@ -183,6 +187,7 @@ export class CadastroUsuarioWizard implements OnInit {
                     ? 'Já existe um funcionário ativo com este CPF.'
                     : `Erro na validação: ${msgs || 'Falha ao cadastrar. Tente novamente.'}`;
                 this.exibirFeedback(msg, 'erro');
+                this.cdr.detectChanges();
             },
         });
     }
@@ -201,10 +206,13 @@ export class CadastroUsuarioWizard implements OnInit {
                     senha: resp._credenciais.senha,
                 };
                 this.exibirFeedback(`Funcionário ${this.dadosReativacao!.nome} reativado com sucesso!`, 'sucesso');
+                this.dadosReativacao = null;
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.isSalvando = false;
                 this.exibirFeedback('Erro ao reativar. Tente novamente.', 'erro');
+                this.cdr.detectChanges();
             }
         });
     }
