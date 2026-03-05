@@ -52,6 +52,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
     ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
+            username: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.email]],
             role: ['', Validators.required]
         });
@@ -107,9 +108,11 @@ export class UsuariosLista implements OnInit, OnDestroy {
         Promise.resolve().then(() => {
             this.editForm.patchValue({
                 nome: usuario.nome,
+                username: usuario.username ?? '',
                 email: usuario.email ?? '',
                 role: usuario.role
             });
+
 
             this.cdr.markForCheck();
             this.cdr.detectChanges();
