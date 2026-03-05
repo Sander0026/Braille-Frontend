@@ -136,7 +136,7 @@
 @if (usuarioEmEdicao) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Editar usuário ' + usuarioEmEdicao.nome"
     (click)="fecharModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo">Editar Usuário</h2>
             <button class="btn btn-icon btn-ghost" (click)="fecharModal()"
@@ -144,6 +144,15 @@
         </div>
 
         <form [formGroup]="editForm" (ngSubmit)="salvar()" class="modal-body">
+
+            <!-- Linha: Login (somente leitura) -->
+            <div class="info-row-readonly">
+                <span class="info-label">Login (usuário do sistema)</span>
+                <span class="info-value info-badge">{{ usuarioEmEdicao.username }}</span>
+            </div>
+
+            <!-- Seção: Dados Básicos -->
+            <p class="section-label">Dados Básicos</p>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="edit-nome" class="form-label">Nome completo <span class="required"
@@ -157,19 +166,13 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="edit-username" class="form-label">Login <span class="required"
-                            aria-hidden="true">*</span></label>
-                    <input id="edit-username" type="text" class="form-input"
-                        [class.is-invalid]="editForm.get('username')?.invalid && editForm.get('username')?.touched"
-                        formControlName="username" autocomplete="username" />
-                </div>
-
-                <div class="form-group">
-                    <label for="edit-email" class="form-label">E-mail <span class="required"
-                            aria-hidden="true">*</span></label>
+                    <label for="edit-email" class="form-label">E-mail</label>
                     <input id="edit-email" type="email" class="form-input"
                         [class.is-invalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
                         formControlName="email" autocomplete="email" />
+                    @if (editForm.get('email')?.invalid && editForm.get('email')?.touched) {
+                    <span class="form-error" role="alert">E-mail inválido</span>
+                    }
                 </div>
 
                 <div class="form-group">
@@ -180,6 +183,56 @@
                         <option [value]="r.value">{{ r.label }}</option>
                         }
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-telefone" class="form-label">Telefone</label>
+                    <input id="edit-telefone" type="tel" class="form-input" formControlName="telefone"
+                        autocomplete="tel" placeholder="(00) 00000-0000" />
+                </div>
+            </div>
+
+            <!-- Seção: Endereço -->
+            <p class="section-label">Endereço</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="edit-cep" class="form-label">CEP</label>
+                    <input id="edit-cep" type="text" class="form-input" formControlName="cep" placeholder="00000-000"
+                        maxlength="9" />
+                </div>
+
+                <div class="form-group form-group--wide">
+                    <label for="edit-rua" class="form-label">Rua / Logradouro</label>
+                    <input id="edit-rua" type="text" class="form-input" formControlName="rua"
+                        autocomplete="address-line1" />
+                </div>
+
+                <div class="form-group form-group--narrow">
+                    <label for="edit-numero" class="form-label">Nº</label>
+                    <input id="edit-numero" type="text" class="form-input" formControlName="numero" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-complemento" class="form-label">Complemento</label>
+                    <input id="edit-complemento" type="text" class="form-input" formControlName="complemento"
+                        autocomplete="address-line2" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-bairro" class="form-label">Bairro</label>
+                    <input id="edit-bairro" type="text" class="form-input" formControlName="bairro" />
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-cidade" class="form-label">Cidade</label>
+                    <input id="edit-cidade" type="text" class="form-input" formControlName="cidade"
+                        autocomplete="address-level2" />
+                </div>
+
+                <div class="form-group form-group--narrow">
+                    <label for="edit-uf" class="form-label">UF</label>
+                    <input id="edit-uf" type="text" class="form-input" formControlName="uf" maxlength="2"
+                        placeholder="SP" style="text-transform:uppercase" />
                 </div>
             </div>
         </form>
@@ -218,7 +271,7 @@
                         aria-hidden="true">person</span>
                     }
 
-                    <!-- Botões de Trocar/Remover Foto sobrepostos -->
+                    <!-- Botão Trocar Foto -->
                     <div class="avatar-actions">
                         <label class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto"
                             aria-label="Atualizar Foto de Perfil" tabindex="0">
@@ -240,26 +293,53 @@
                         @if (usuarioVisualizado.precisaTrocarSenha) {
                         <span class="badge badge-warning">Senha Padrão Ativa</span>
                         }
+                        @if (usuarioVisualizado.matricula) {
+                        <span class="badge badge-neutral" title="Matrícula institucional">{{
+                            usuarioVisualizado.matricula }}</span>
+                        }
                     </div>
                 </div>
             </div>
 
             <!-- Grid de Informações -->
             <div class="profile-grid">
-                <!-- Informações do Sistema -->
+
+                <!-- Acesso -->
                 <div class="profile-section">
-                    <h4>Informações de Acesso</h4>
+                    <h4>Acesso ao Sistema</h4>
                     <p><strong>Login:</strong> {{ usuarioVisualizado.username }}</p>
                     <p><strong>E-mail:</strong> {{ usuarioVisualizado.email || 'Não informado' }}</p>
                     <p><strong>Nível de Acesso:</strong> {{ labelRole(usuarioVisualizado.role) }}</p>
+                    <p><strong>Matrícula:</strong> {{ usuarioVisualizado.matricula || 'Não gerada' }}</p>
                 </div>
 
-                <!-- Segurança (Ações Rápidas) -->
+                <!-- Contato -->
+                <div class="profile-section">
+                    <h4>Contato</h4>
+                    <p><strong>Telefone:</strong> {{ usuarioVisualizado.telefone || 'Não informado' }}</p>
+                    <p><strong>CPF:</strong> {{ usuarioVisualizado.cpf || 'Não informado' }}</p>
+                </div>
+
+                <!-- Endereço -->
+                <div class="profile-section profile-section--full">
+                    <h4>Endereço</h4>
+                    <p>
+                        {{ usuarioVisualizado.rua || '—' }}{{ usuarioVisualizado.numero ? ', ' +
+                        usuarioVisualizado.numero : '' }}
+                        {{ usuarioVisualizado.complemento ? '— ' + usuarioVisualizado.complemento : '' }}
+                    </p>
+                    <p>{{ usuarioVisualizado.bairro || '' }}{{ usuarioVisualizado.bairro && usuarioVisualizado.cidade ?
+                        ' · ' : '' }}{{ usuarioVisualizado.cidade || '' }}{{ usuarioVisualizado.uf ? ' / ' +
+                        usuarioVisualizado.uf : '' }}</p>
+                    <p><strong>CEP:</strong> {{ usuarioVisualizado.cep || 'Não informado' }}</p>
+                </div>
+
+                <!-- Segurança -->
                 <div class="profile-section">
                     <h4>Segurança</h4>
                     <p style="margin-bottom: 1rem; color: #4b5563;">
-                        Se o usuário esqueceu a senha, você pode resetá-la para o valor padrão do sistema.
-                        No próximo login, ele será forçado a cadastrar uma senha nova.
+                        Se o usuário esqueceu a senha, redefina para o valor padrão do sistema.
+                        No próximo login, ele será forçado a criar uma senha nova.
                     </p>
                     <button class="btn btn-warning" (click)="resetarSenhaAdmin()" [disabled]="salvando"
                         aria-label="Forçar Reset de Senha do Usuário">
@@ -267,6 +347,7 @@
                         Resetar Senha
                     </button>
                 </div>
+
             </div>
         </div>
 
@@ -280,6 +361,7 @@
     </div>
 </div>
 }
+
 
 <!-- Modal de Confirmação de Exclusão -->
 @if (usuarioParaExcluir) {
