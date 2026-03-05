@@ -107,9 +107,18 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/admin/usuarios/cadastro-usuario-wizard/cadastro-usuario-wizard').then(m => m.CadastroUsuarioWizard),
         title: 'Novo Usuário — ILBES',
         data: { roles: ['ADMIN'] }
+      },
+
+      // Auditoria — Fase 5
+      {
+        path: 'auditoria',
+        loadComponent: () => import('./pages/admin/audit-log/audit-log-lista/audit-log-lista').then(m => m.AuditLogLista),
+        title: 'Auditoria do Sistema — ILBES',
+        data: { roles: ['ADMIN'] }
       }
     ]
   },
+
 
   {
     path: 'login',

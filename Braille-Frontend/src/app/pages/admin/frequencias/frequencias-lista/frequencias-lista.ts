@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
-import { FrequenciasService, Frequencia } from '../../../../core/services/frequencias.service';
+import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
+
 import { TurmasService, Turma } from '../../../../core/services/turmas.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -44,11 +45,13 @@ export class FrequenciasLista implements OnInit {
 
   // ── Histórico (aba) ────────────────────────────────────────
   abaAtiva: 'chamada' | 'historico' | 'relatorio' = 'chamada';
-  historico: any[] = [];
+  historico: ResumoFrequencia[] = [];
   carregandoHistorico = false;
   totalHistorico = 0;
   paginaHistorico = 1;
   erroHistorico = '';
+  fechandoDiario = false;
+
 
   // ── Detalhes do Histórico (Modal) ──────────────────────────
   modalDetalhesAberto = false;
@@ -111,7 +114,8 @@ export class FrequenciasLista implements OnInit {
     // 1) busca alunos da turma
     this.turmasService.buscarPorId(this.turmaSelecionadaId).subscribe({
       next: (turma) => {
-        const alunos = turma.alunos ?? [];
+        // matriculasOficina tem os alunos ativos (include do backend)
+        const alunos = (turma.matriculasOficina ?? []).map((m: any) => m.aluno).filter(Boolean);
 
         if (alunos.length === 0) {
           this.carregandoChamada = false;
@@ -308,7 +312,8 @@ export class FrequenciasLista implements OnInit {
 
     this.turmasService.buscarPorId(this.turmaSelecionadaId).subscribe({
       next: (turma) => {
-        this.alunosRelatorio = turma.alunos ?? [];
+        this.alunosRelatorio = (turma.matriculasOficina ?? []).map((m: any) => m.aluno).filter(Boolean);
+
         this.cdr.detectChanges();
       }
     });
@@ -368,4 +373,45 @@ export class FrequenciasLista implements OnInit {
   get turmaSelecionadaNome(): string {
     return this.turmas.find(t => t.id === this.turmaSelecionadaId)?.nome ?? '';
   }
+
+  // ── Fechamento de Diário ────────────────────────────────────────────────
+
+  fecharDiario(turmaId: string, dataAula: string): void {
+    if (this.fechandoDiario) return;
+    this.fechandoDiario = true;
+    this.frequenciasService.fecharDiario(turmaId, dataAula).subscribe({
+      next: (res) => {
+        this.fechandoDiario = false;
+        this.feedbackSalvo = `📕 ${res.mensagem ?? 'Diário fechado com sucesso!'}`;
+        this.carregarHistorico();
+        this.cdr.detectChanges();
+        setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 6000);
+      },
+      error: (err) => {
+        this.fechandoDiario = false;
+        this.feedbackSalvo = `⚠️ Erro: ${err.error?.message ?? 'Não foi possível fechar o diário.'}`;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  reabrirDiario(turmaId: string, dataAula: string): void {
+    if (this.fechandoDiario) return;
+    this.fechandoDiario = true;
+    this.frequenciasService.reabrirDiario(turmaId, dataAula).subscribe({
+      next: () => {
+        this.fechandoDiario = false;
+        this.feedbackSalvo = '📗 Diário reaberto para retificação.';
+        this.carregarHistorico();
+        this.cdr.detectChanges();
+        setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 6000);
+      },
+      error: (err) => {
+        this.fechandoDiario = false;
+        this.feedbackSalvo = `⚠️ Erro: ${err.error?.message ?? 'Não foi possível reabrir o diário.'}`;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }
+

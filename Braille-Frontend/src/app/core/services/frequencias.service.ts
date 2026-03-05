@@ -9,26 +9,34 @@ export interface Frequencia {
     dataAula: string;
     alunoId: string;
     turmaId: string;
+    fechado?: boolean;
+    fechadoEm?: string;
     aluno?: { id: string; nomeCompleto: string };
     turma?: { id: string; nome: string };
+}
+
+export interface ResumoFrequencia {
+    dataAula: string;
+    turmaId: string;
+    turmaNome: string;
+    totalAlunos: number;
+    presentes: number;
+    faltas: number;
+    diarioFechado: boolean;
+    fechadoEm: string | null;
 }
 
 @Injectable({ providedIn: 'root' })
 export class FrequenciasService {
     private readonly url = '/api/frequencias';
-    // Para frequências, o cache é por turma+data — muito específico, não vale o padrão de "default"
-    // Usamos cache apenas no resumo, que é a listagem principal da tela de chamada
-    private resumoCache$: Observable<PaginatedResponse<any>> | null = null;
-    private readonly cacheTimeMs = 1 * 60 * 1000; // 1 minuto (chamada muda com frequência)
+    private resumoCache$: Observable<PaginatedResponse<ResumoFrequencia>> | null = null;
+    private readonly cacheTimeMs = 1 * 60 * 1000;
 
     constructor(private http: HttpClient) { }
 
-    limparCache(): void {
-        this.resumoCache$ = null;
-    }
+    limparCache(): void { this.resumoCache$ = null; }
 
     listar(page = 1, limit = 20, turmaId?: string, dataAula?: string, professorId?: string): Observable<PaginatedResponse<Frequencia>> {
-        // Frequências por data/turma não devem ser cacheadas pois variam muito
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (turmaId) params = params.set('turmaId', turmaId);
         if (dataAula) params = params.set('dataAula', dataAula);
@@ -36,13 +44,13 @@ export class FrequenciasService {
         return this.http.get<PaginatedResponse<Frequencia>>(this.url, { params });
     }
 
-    listarResumo(page = 1, limit = 20, turmaId?: string, professorId?: string): Observable<PaginatedResponse<any>> {
+    listarResumo(page = 1, limit = 20, turmaId?: string, professorId?: string): Observable<PaginatedResponse<ResumoFrequencia>> {
         const isDefaultList = page === 1 && limit === 20 && !turmaId && !professorId;
 
         if (isDefaultList) {
             if (!this.resumoCache$) {
                 const params = new HttpParams().set('page', '1').set('limit', '20');
-                this.resumoCache$ = this.http.get<PaginatedResponse<any>>(`${this.url}/resumo`, { params }).pipe(shareReplay(1));
+                this.resumoCache$ = this.http.get<PaginatedResponse<ResumoFrequencia>>(`${this.url}/resumo`, { params }).pipe(shareReplay(1));
                 setTimeout(() => this.limparCache(), this.cacheTimeMs);
             }
             return this.resumoCache$;
@@ -51,7 +59,7 @@ export class FrequenciasService {
         let params = new HttpParams().set('page', page).set('limit', limit);
         if (turmaId) params = params.set('turmaId', turmaId);
         if (professorId) params = params.set('professorId', professorId);
-        return this.http.get<PaginatedResponse<any>>(`${this.url}/resumo`, { params });
+        return this.http.get<PaginatedResponse<ResumoFrequencia>>(`${this.url}/resumo`, { params });
     }
 
     obterRelatorioAluno(turmaId: string, alunoId: string): Observable<any> {
@@ -71,5 +79,17 @@ export class FrequenciasService {
     excluir(id: string): Observable<any> {
         this.limparCache();
         return this.http.delete(`${this.url}/${id}`);
+    }
+
+    // ── Diário ──────────────────────────────────────────────────────────────
+
+    fecharDiario(turmaId: string, dataAula: string): Observable<any> {
+        this.limparCache();
+        return this.http.post(`${this.url}/diario/fechar/${turmaId}/${dataAula}`, {});
+    }
+
+    reabrirDiario(turmaId: string, dataAula: string): Observable<any> {
+        this.limparCache();
+        return this.http.post(`${this.url}/diario/reabrir/${turmaId}/${dataAula}`, {});
     }
 }
