@@ -380,8 +380,9 @@ export class TurmasLista implements OnInit {
 
         this.beneficiariosService.listar(1, 100, termo).subscribe({
             next: (res) => {
-                // Filtra os alunos que já estão matriculados
-                const IDsMatriculados = this.turmaDetalhes?.alunos?.map(a => a.id) || [];
+                // Filtra os alunos que já estão matriculados (usa matriculasOficina da nova interface)
+                const IDsMatriculados = (this.turmaDetalhes?.matriculasOficina ?? []).map(m => m.aluno.id);
+
                 this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
                 this.buscandoAlunos = false;
 
@@ -459,11 +460,14 @@ export class TurmasLista implements OnInit {
         this.operacaoEmProgresso = true;
 
         this.turmasService.matricularAluno(this.turmaDetalhes.id, aluno.id).subscribe({
-            next: (turmaAtualizada) => {
-                this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
-                this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => a.id !== aluno.id);
-                this.operacaoEmProgresso = false;
-                this.cdr.detectChanges();
+            next: () => {
+                // Re-carrega detalhes para atualizar lista de matriculasOficina
+                this.turmasService.buscarPorId(this.turmaDetalhes!.id).subscribe(t => {
+                    this.turmaDetalhes = t;
+                    this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => a.id !== aluno.id);
+                    this.operacaoEmProgresso = false;
+                    this.cdr.detectChanges();
+                });
             },
             error: () => {
                 this.operacaoEmProgresso = false;
@@ -486,11 +490,14 @@ export class TurmasLista implements OnInit {
         this.operacaoEmProgresso = true;
 
         this.turmasService.desmatricularAluno(this.turmaDetalhes.id, alunoId).subscribe({
-            next: (turmaAtualizada) => {
-                this.turmaDetalhes!.alunos = turmaAtualizada.alunos;
-                this.operacaoEmProgresso = false;
-                this.toast.sucesso('Aluno removido da oficina.');
-                this.cdr.detectChanges();
+            next: () => {
+                // Re-carrega detalhes para atualizar lista de matriculasOficina
+                this.turmasService.buscarPorId(this.turmaDetalhes!.id).subscribe(t => {
+                    this.turmaDetalhes = t;
+                    this.operacaoEmProgresso = false;
+                    this.toast.sucesso('Aluno removido da oficina.');
+                    this.cdr.detectChanges();
+                });
             },
             error: () => {
                 this.operacaoEmProgresso = false;
@@ -527,4 +534,35 @@ export class TurmasLista implements OnInit {
     trackById(_: number, item: { id: string }): string {
         return item.id;
     }
+
+    // ── Status Acadêmico (Fase 4) ──────────────────────────────
+
+    /** Labels e cores dos status para exibição na UI */
+    readonly statusConfig: Record<string, { label: string; cor: string }> = {
+        PREVISTA: { label: 'Prevista', cor: 'status-prevista' },
+        ANDAMENTO: { label: 'Em Andamento', cor: 'status-andamento' },
+        CONCLUIDA: { label: 'Concluída', cor: 'status-concluida' },
+        CANCELADA: { label: 'Cancelada', cor: 'status-cancelada' },
+    };
+
+    mudarStatusTurma(turma: Turma, event: Event): void {
+        const novoStatus = (event.target as HTMLSelectElement).value as any;
+        if (!novoStatus || novoStatus === turma.status) return;
+
+        this.turmasService.mudarStatus(turma.id, novoStatus).subscribe({
+            next: (res) => {
+                setTimeout(() => {
+                    this.toast.sucesso(`Status alterado para "${this.statusConfig[res.status]?.label ?? res.status}".`);
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
+            },
+            error: (err: { error?: { message?: string } }) => {
+                setTimeout(() => {
+                    this.toast.erro(err.error?.message ?? 'Não foi possível alterar o status.');
+                    this.cdr.markForCheck();
+                }, 0);
+            }
+        });
+    }
 }
+

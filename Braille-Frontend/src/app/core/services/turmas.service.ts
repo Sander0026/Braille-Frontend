@@ -3,6 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { PaginatedResponse } from './beneficiarios.service';
 
+export interface GradeHorariaDto {
+    dia: 'SEG' | 'TER' | 'QUA' | 'QUI' | 'SEX' | 'SAB' | 'DOM';
+    horaInicio: number; // minutos desde meia-noite
+    horaFim: number;
+}
+
+export type TurmaStatus = 'PREVISTA' | 'ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
+
 export interface Turma {
     id: string;
     nome: string;
@@ -11,10 +19,19 @@ export interface Turma {
     capacidadeMaxima?: number;
     statusAtivo: boolean;
     excluido: boolean;
+    status: TurmaStatus;         // Fase 4: ciclo de vida acadêmico
     professor?: { id: string; nome: string; email: string };
-    alunos?: { id: string; nomeCompleto: string }[];
-    _count?: { alunos: number };
+    gradeHoraria?: GradeHorariaDto[];
+    matriculasOficina?: {
+        id: string;
+        status: string;
+        dataEntrada: string;
+        aluno: { id: string; nomeCompleto: string; matricula?: string };
+    }[];
+    _count?: { matriculasOficina: number };
 }
+
+
 
 export interface CreateTurmaDto {
     nome: string;
@@ -22,7 +39,9 @@ export interface CreateTurmaDto {
     horario?: string;
     capacidadeMaxima?: number;
     professorId: string;
+    gradeHoraria?: GradeHorariaDto[];
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class TurmasService {
@@ -99,5 +118,10 @@ export class TurmasService {
     desmatricularAluno(turmaId: string, alunoId: string): Observable<any> {
         this.limparCache();
         return this.http.delete(`${this.url}/${turmaId}/alunos/${alunoId}`);
+    }
+
+    mudarStatus(id: string, status: TurmaStatus): Observable<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }> {
+        this.limparCache();
+        return this.http.patch<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }>(`${this.url}/${id}/status`, { status });
     }
 }

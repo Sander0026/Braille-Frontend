@@ -55,7 +55,9 @@ export interface CreateUsuarioDto {
     bairro?: string;
     cidade?: string;
     uf?: string;
+    fotoPerfil?: string;
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {

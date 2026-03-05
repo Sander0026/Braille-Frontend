@@ -52,10 +52,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
     ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
-            username: ['', [Validators.required, Validators.minLength(3)]],
-            email: ['', [Validators.required, Validators.email]],
+            email: ['', [Validators.email]],
             role: ['', Validators.required]
         });
+
     }
 
     ngOnInit(): void {
@@ -107,10 +107,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
         Promise.resolve().then(() => {
             this.editForm.patchValue({
                 nome: usuario.nome,
-                username: usuario.username,
-                email: usuario.email,
+                email: usuario.email ?? '',
                 role: usuario.role
             });
+
             this.cdr.markForCheck();
             this.cdr.detectChanges();
         });

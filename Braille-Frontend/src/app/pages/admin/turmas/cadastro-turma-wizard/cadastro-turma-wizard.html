@@ -1,29 +1,16 @@
 <div class="wizard-container">
-    <div *ngIf="mensagemFeedback" class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-        <strong *ngIf="tipoFeedback === 'sucesso'" style="display:inline-flex; align-items:center; gap:0.25rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            Sucesso:
-        </strong>
-        <strong *ngIf="tipoFeedback === 'erro'" style="display:inline-flex; align-items:center; gap:0.25rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
-                <line x1="12" y1="9" x2="12" y2="13"></line>
-                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-            </svg>
-            Erro:
-        </strong>
+
+    <!-- Feedback Banner -->
+    @if (mensagemFeedback) {
+    <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
+        <strong>{{ tipoFeedback === 'sucesso' ? '✅ Sucesso: ' : '⚠️ Erro: ' }}</strong>
         {{ mensagemFeedback }}
     </div>
+    }
 
     <header class="wizard-header">
-        <h1>Nova Turma</h1>
-        <p>Preencha os dados da nova turma no sistema. Passo {{ etapaAtual }} de {{ totalEtapas }}.</p>
-
+        <h1>Nova Turma / Oficina</h1>
+        <p>Etapa <strong>{{ etapaAtual }}</strong> de {{ totalEtapas }}</p>
         <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="etapaAtual" aria-valuemin="1"
             [attr.aria-valuemax]="totalEtapas">
             <div class="progress-fill" [style.width.%]="(etapaAtual / totalEtapas) * 100"></div>
@@ -32,105 +19,145 @@
 
     <form [formGroup]="formTurma" class="wizard-form">
 
-        <!-- ETAPA 1: Informações Básicas da Turma -->
-        <fieldset *ngIf="etapaAtual === 1" class="wizard-step">
-            <legend>Passo 1: Informações Básicas</legend>
+        <!-- ETAPA 1: Dados Básicos + Professor -->
+        @if (etapaAtual === 1) {
+        <fieldset class="wizard-step">
+            <legend>Passo 1: Dados Básicos</legend>
+
             <div class="row">
                 <div class="col-lg-6">
                     <div class="form-group">
-                        <label for="input-nome">Nome da Turma *</label>
-                        <input type="text" id="input-nome" placeholder="Ex: Informática Básica I" formControlName="nome"
-                            [class.input-error]="isFieldInvalid('nome')">
-                        <span class="error-text" *ngIf="isFieldInvalid('nome')">O nome da turma é obrigatório.</span>
+                        <label for="input-nome">Nome da Turma / Oficina *</label>
+                        <input type="text" id="input-nome" formControlName="nome"
+                            placeholder="Ex: Braille Básico — Turma A" [class.input-error]="isFieldInvalid('nome')">
+                        @if (isFieldInvalid('nome')) {
+                        <span class="error-text">O nome é obrigatório.</span>
+                        }
                     </div>
                 </div>
                 <div class="col-lg-6">
                     <div class="form-group">
                         <label for="input-professor">Professor Responsável *</label>
-                        <select id="input-professor" formControlName="professor"
-                            [class.input-error]="isFieldInvalid('professor')">
-                            <option value="">Selecione um Professor</option>
-                            <option *ngFor="let prof of professoresSistema" [value]="prof">{{ prof }}</option>
+                        @if (carregandoProfessores) {
+                        <p class="loading-hint">Carregando professores...</p>
+                        } @else {
+                        <select id="input-professor" formControlName="professorId"
+                            [class.input-error]="isFieldInvalid('professorId')">
+                            <option value="">Selecione um professor...</option>
+                            @for (prof of professores; track prof.id) {
+                            <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
+                            }
                         </select>
-                        <span class="error-text" *ngIf="isFieldInvalid('professor')">A escolha do professor é
-                            obrigatória.</span>
+                        @if (isFieldInvalid('professorId')) {
+                        <span class="error-text">Selecione o professor responsável.</span>
+                        }
+                        }
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-4">
                     <div class="form-group">
-                        <label for="input-mes">Mês de Início *</label>
-                        <select id="input-mes" formControlName="mes" [class.input-error]="isFieldInvalid('mes')">
+                        <label for="input-capacidade">Capacidade Máxima</label>
+                        <input type="number" id="input-capacidade" formControlName="capacidadeMaxima"
+                            placeholder="Ex: 20" min="1">
+                        <small class="field-hint">Deixe em branco para sem limite.</small>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <div class="form-group">
+                        <label for="input-descricao">Descrição <span class="badge-opt">opcional</span></label>
+                        <input type="text" id="input-descricao" formControlName="descricao"
+                            placeholder="Resumo ou observações sobre a turma">
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        }
+
+        <!-- ETAPA 2: Grade Horária -->
+        @if (etapaAtual === 2) {
+        <fieldset class="wizard-step">
+            <legend>Passo 2: Grade Horária <span class="badge-opt">opcional</span></legend>
+
+            <div class="grade-info">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                Registre os dias e horários da turma. O sistema usará esses dados para <strong>detectar choques de
+                    horário</strong> ao matricular alunos e ao alocar professores.
+            </div>
+
+            <!-- Formulário inline de novo turno -->
+            <div class="turno-form">
+                <div class="turno-fields">
+                    <div class="form-group">
+                        <label>Dia da Semana</label>
+                        <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}">
                             <option value="">Selecione...</option>
-                            <option value="Janeiro">Janeiro</option>
-                            <option value="Fevereiro">Fevereiro</option>
-                            <option value="Março">Março</option>
-                            <option value="Abril">Abril</option>
-                            <option value="Maio">Maio</option>
-                            <option value="Junho">Junho</option>
-                            <option value="Julho">Julho</option>
-                            <option value="Agosto">Agosto</option>
-                            <option value="Setembro">Setembro</option>
-                            <option value="Outubro">Outubro</option>
-                            <option value="Novembro">Novembro</option>
-                            <option value="Dezembro">Dezembro</option>
+                            @for (d of dias; track d.valor) {
+                            <option [value]="d.valor">{{ d.label }}</option>
+                            }
                         </select>
-                        <span class="error-text" *ngIf="isFieldInvalid('mes')">Mês de início é obrigatório.</span>
                     </div>
-                </div>
-                <div class="col-lg-6">
                     <div class="form-group">
-                        <label for="input-ano">Ano *</label>
-                        <input type="number" id="input-ano" placeholder="Ex: 2026" formControlName="ano"
-                            [class.input-error]="isFieldInvalid('ano')">
-                        <span class="error-text" *ngIf="isFieldInvalid('ano')">Ano inválido.</span>
+                        <label>Início</label>
+                        <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
+                            placeholder="14:00">
                     </div>
+                    <div class="form-group">
+                        <label>Fim</label>
+                        <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
+                            placeholder="16:00">
+                    </div>
+                    <button type="button" class="btn-add-turno" (click)="adicionarTurno()">
+                        + Adicionar
+                    </button>
                 </div>
+                @if (erroTurno) {
+                <span class="error-text">⚠️ {{ erroTurno }}</span>
+                }
             </div>
-        </fieldset>
 
-        <!-- ETAPA 2: Detalhes Adicionais -->
-        <fieldset *ngIf="etapaAtual === 2" class="wizard-step">
-            <legend>Passo 2: Detalhes Adicionais</legend>
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="form-group">
-                        <label for="input-capacidade">Capacidade Máxima de Alunos *</label>
-                        <input type="number" id="input-capacidade" placeholder="20" formControlName="capacidade"
-                            [class.input-error]="isFieldInvalid('capacidade')">
-                        <span class="error-text" *ngIf="isFieldInvalid('capacidade')">A capacidade deve ser maior que
-                            0.</span>
-                    </div>
-                </div>
+            <!-- Turnos adicionados -->
+            @if (gradeHoraria.length > 0) {
+            <div class="grade-lista">
+                <h4>Turnos cadastrados:</h4>
+                <ul>
+                    @for (turno of gradeHoraria; track turno.dia; let i = $index) {
+                    <li class="turno-item">
+                        <span class="turno-dia">{{ labelDia(turno.dia) }}</span>
+                        <span class="turno-hora">{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
+                        <button type="button" class="btn-remove-turno" (click)="removerTurno(i)"
+                            aria-label="Remover turno">
+                            ✕
+                        </button>
+                    </li>
+                    }
+                </ul>
             </div>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="input-descricao">Descrição ou Observação (Opcional)</label>
-                        <textarea id="input-descricao" rows="3"
-                            placeholder="Detalhes sobre a turma, sala de aula, professor responsável..."
-                            formControlName="descricao"></textarea>
-                    </div>
-                </div>
-            </div>
+            } @else {
+            <p class="grade-vazio">Nenhum turno adicionado. Você pode salvar sem horários se preferir.</p>
+            }
         </fieldset>
+        }
 
-        <!-- Controles do Assistente (Botões Voltar/Avançar/Salvar) -->
+        <!-- Rodapé de Navegação -->
         <footer class="wizard-actions">
-            <button type="button" class="btn btn-secondary" *ngIf="etapaAtual > 1" (click)="etapaAnterior()">
-                Voltar Etapa
-            </button>
-
-            <button *ngIf="etapaAtual < totalEtapas" type="button" class="btn btn-primary" (click)="proximaEtapa()">
-                Avançar Etapa
-            </button>
-
-            <button *ngIf="etapaAtual === totalEtapas" type="button" class="btn btn-success"
-                (click)="finalizarCadastro()">
-                Cadastrar Turma
-            </button>
+            @if (etapaAtual > 1) {
+            <button type="button" class="btn btn-secondary" (click)="etapaAnterior()">← Voltar</button>
+            }
+            @if (etapaAtual < totalEtapas) { <button type="button" class="btn btn-primary" (click)="proximaEtapa()">
+                Avançar →</button>
+                }
+                @if (etapaAtual === totalEtapas) {
+                <button type="button" class="btn btn-success" (click)="finalizarCadastro()" [disabled]="isSalvando">
+                    {{ isSalvando ? 'Salvando...' : '✅ Cadastrar Turma' }}
+                </button>
+                }
         </footer>
 
     </form>
