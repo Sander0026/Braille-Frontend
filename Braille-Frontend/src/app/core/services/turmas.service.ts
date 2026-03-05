@@ -3,6 +3,12 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { PaginatedResponse } from './beneficiarios.service';
 
+export interface GradeHorariaDto {
+    dia: 'SEG' | 'TER' | 'QUA' | 'QUI' | 'SEX' | 'SAB' | 'DOM';
+    horaInicio: number; // minutos desde meia-noite
+    horaFim: number;
+}
+
 export interface Turma {
     id: string;
     nome: string;
@@ -12,9 +18,16 @@ export interface Turma {
     statusAtivo: boolean;
     excluido: boolean;
     professor?: { id: string; nome: string; email: string };
-    alunos?: { id: string; nomeCompleto: string }[];
-    _count?: { alunos: number };
+    gradeHoraria?: GradeHorariaDto[];
+    matriculasOficina?: {
+        id: string;
+        status: string;
+        dataEntrada: string;
+        aluno: { id: string; nomeCompleto: string; matricula?: string };
+    }[];
+    _count?: { matriculasOficina: number };
 }
+
 
 export interface CreateTurmaDto {
     nome: string;
@@ -22,7 +35,9 @@ export interface CreateTurmaDto {
     horario?: string;
     capacidadeMaxima?: number;
     professorId: string;
+    gradeHoraria?: GradeHorariaDto[];
 }
+
 
 @Injectable({ providedIn: 'root' })
 export class TurmasService {

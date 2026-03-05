@@ -111,7 +111,8 @@ export class FrequenciasLista implements OnInit {
     // 1) busca alunos da turma
     this.turmasService.buscarPorId(this.turmaSelecionadaId).subscribe({
       next: (turma) => {
-        const alunos = turma.alunos ?? [];
+        // matriculasOficina tem os alunos ativos (include do backend)
+        const alunos = (turma.matriculasOficina ?? []).map((m: any) => m.aluno).filter(Boolean);
 
         if (alunos.length === 0) {
           this.carregandoChamada = false;
@@ -308,7 +309,8 @@ export class FrequenciasLista implements OnInit {
 
     this.turmasService.buscarPorId(this.turmaSelecionadaId).subscribe({
       next: (turma) => {
-        this.alunosRelatorio = turma.alunos ?? [];
+        this.alunosRelatorio = (turma.matriculasOficina ?? []).map((m: any) => m.aluno).filter(Boolean);
+
         this.cdr.detectChanges();
       }
     });
