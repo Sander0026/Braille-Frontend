@@ -157,9 +157,10 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   carregar(): void {
     this.isLoading = true;
-    const nome = this.buscaCtrl.value?.trim() || undefined;
+    const busca = this.buscaCtrl.value?.trim() || undefined;
     const filtros = this.filtrosAtivos();
-    this.beneficiariosService.listar(this.paginaAtual, this.limite, nome, this.abaAtiva === 'inativos', filtros).subscribe({
+    this.beneficiariosService.listar(this.paginaAtual, this.limite, busca, this.abaAtiva === 'inativos', filtros).subscribe({
+
       next: (res) => {
         this.alunos = res.data;
         this.total = res.meta.total;
@@ -426,10 +427,10 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.exportando = true;
     this.cdr.markForCheck();
 
-    const nome = this.buscaCtrl.value?.trim() || undefined;
+    const busca = this.buscaCtrl.value?.trim() || undefined;
     const filtros = this.filtrosAtivos();
 
-    this.beneficiariosService.exportarLista(nome, this.abaAtiva === 'inativos', filtros)
+    this.beneficiariosService.exportarLista(busca, this.abaAtiva === 'inativos', filtros)
       .subscribe({
         next: (buffer: ArrayBuffer) => {
           const blob = new Blob([buffer], {
