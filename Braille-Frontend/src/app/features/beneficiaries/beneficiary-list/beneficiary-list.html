@@ -43,6 +43,21 @@
         <span class="filter-badge">{{ quantidadeFiltrosAtivos }}</span>
         }
     </button>
+
+    <!-- Botão Exportar Lista -->
+    @if (isAdmin) {
+    <button type="button" class="btn btn-outline-primary filter-btn" (click)="exportarListaParaXlsx()"
+        [disabled]="exportando" aria-label="Exportar lista de alunos para planilha Excel"
+        [title]="exportando ? 'Gerando planilha...' : 'Exportar a lista atual (com filtros) para Excel'">
+        @if (exportando) {
+        <span class="loading-spinner" style="width:14px;height:14px;border-width:2px;" aria-hidden="true"></span>
+        Exportando...
+        } @else {
+        <span class="material-symbols-rounded">download</span>
+        Exportar Lista
+        }
+    </button>
+    }
 </div>
 
 <!-- Aviso de filtros ativos -->
