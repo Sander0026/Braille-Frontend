@@ -86,6 +86,20 @@ export class BeneficiariosService {
         return this.cache.get(key)!;
     }
 
+    exportarLista(nome?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<ArrayBuffer> {
+        let params = new HttpParams();
+        if (nome) params = params.set('nome', nome);
+        if (inativos) params = params.set('inativos', 'true');
+        if (filtros) {
+            Object.entries(filtros).forEach(([k, v]) => {
+                if (v !== null && v !== undefined && v !== '') {
+                    params = params.set(k, String(v));
+                }
+            });
+        }
+        return this.http.get(`${this.url}/export`, { params, responseType: 'arraybuffer' });
+    }
+
     buscarPorId(id: string): Observable<Beneficiario> {
         return this.http.get<Beneficiario>(`${this.url}/${id}`);
     }
