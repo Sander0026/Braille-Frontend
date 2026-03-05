@@ -7,58 +7,93 @@ export interface Usuario {
     id: string;
     nome: string;
     username: string;
-    email: string;
-    role: 'ADMIN' | 'SECRETARIA' | 'PROFESSOR';
+    email?: string;
+    cpf?: string;
+    matricula?: string;
+    role: 'ADMIN' | 'SECRETARIA' | 'PROFESSOR' | 'COMUNICACAO';
     fotoPerfil?: string;
     precisaTrocarSenha?: boolean;
+    telefone?: string;
+    cidade?: string;
+    uf?: string;
 }
 
-export interface CreateUsuarioDto {
+/** Resposta quando o CPF já existe inativo — o frontend deve perguntar se quer reativar */
+export interface ReativacaoResponse {
+    _reativacao: true;
+    id: string;
     nome: string;
     username: string;
-    email: string;
+    statusAtivo: boolean;
+    excluido: boolean;
+    message: string;
+}
+
+/** Credenciais geradas automaticamente pelo backend */
+export interface CredenciaisGeradas {
+    username: string;
     senha: string;
-    role: string;
-    fotoPerfil?: string;
-    precisaTrocarSenha?: boolean;
+    instrucao: string;
+}
+
+/** Resposta de criação bem-sucedida */
+export interface CreateUsuarioResponse extends Usuario {
+    _credenciais: CredenciaisGeradas;
+}
+
+/** DTO de criação — apenas nome, CPF e cargo. O backend gera tudo mais. */
+export interface CreateUsuarioDto {
+    nome: string;
+    cpf: string;
+    role?: string;
+    email?: string;
+    telefone?: string;
+    cep?: string;
+    rua?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
+    cidade?: string;
+    uf?: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
     private readonly url = '/api/users';
-    // Cache por chave — cobre ativos, inativos, busca por nome e qualquer paginação
     private cache = new Map<string, Observable<PaginatedResponse<Usuario>>>();
-    private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
+    private readonly cacheTimeMs = 2 * 60 * 1000;
 
     constructor(private http: HttpClient) { }
 
-    limparCache(): void {
-        this.cache.clear();
-    }
+    limparCache(): void { this.cache.clear(); }
 
     private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean): string {
         return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}`;
     }
 
-    listar(page = 1, limit = 10, nome?: string, inativos: boolean = false): Observable<PaginatedResponse<Usuario>> {
+    listar(page = 1, limit = 10, nome?: string, inativos = false): Observable<PaginatedResponse<Usuario>> {
         const key = this.buildCacheKey(page, limit, nome, inativos);
-
         if (!this.cache.has(key)) {
             let params = new HttpParams().set('page', page).set('limit', limit);
             if (nome) params = params.set('nome', nome);
             if (inativos) params = params.set('inativos', 'true');
-
             const req$ = this.http.get<PaginatedResponse<Usuario>>(this.url, { params }).pipe(shareReplay(1));
             this.cache.set(key, req$);
             setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
         }
-
         return this.cache.get(key)!;
     }
 
-    criar(dados: CreateUsuarioDto): Observable<Usuario> {
+    /** Cria um novo usuário. O backend retorna `_reativacao: true` se o CPF já existir inativo. */
+    criar(dados: CreateUsuarioDto): Observable<CreateUsuarioResponse | ReativacaoResponse> {
         this.limparCache();
-        return this.http.post<Usuario>(this.url, dados);
+        return this.http.post<CreateUsuarioResponse | ReativacaoResponse>(this.url, dados);
+    }
+
+    /** Reativa um usuário inativo pelo ID, gerando nova senha padrão. */
+    reativar(id: string): Observable<CreateUsuarioResponse> {
+        this.limparCache();
+        return this.http.post<CreateUsuarioResponse>(`${this.url}/${id}/reativar`, {});
     }
 
     atualizar(id: string, dados: Partial<CreateUsuarioDto>): Observable<Usuario> {
@@ -72,6 +107,7 @@ export class UsuariosService {
     }
 
     resetarSenha(id: string): Observable<Usuario> {
+        this.limparCache();
         return this.http.patch<Usuario>(`${this.url}/${id}/reset-password`, {});
     }
 

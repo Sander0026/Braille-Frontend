@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { UsuariosService } from '../../../../core/services/usuarios.service';
+import { UsuariosService, CreateUsuarioResponse, ReativacaoResponse } from '../../../../core/services/usuarios.service';
 
 @Component({
     selector: 'app-cadastro-usuario-wizard',
@@ -16,10 +16,16 @@ export class CadastroUsuarioWizard implements OnInit {
 
     passoAtual = 1;
     cadastroUsuarioForm!: FormGroup;
-    arquivoFotoSelecionado: File | null = null;
     isSalvando = false;
     mensagemFeedback = '';
     tipoFeedback: 'sucesso' | 'erro' | '' = '';
+
+    // Credenciais geradas após cadastro bem-sucedido
+    credenciaisGeradas: { username: string; senha: string } | null = null;
+
+    // Modal de Reativação
+    modalReativacao = false;
+    dadosReativacao: ReativacaoResponse | null = null;
 
     constructor(
         private fb: FormBuilder,
@@ -34,205 +40,180 @@ export class CadastroUsuarioWizard implements OnInit {
 
     iniciarFormulario() {
         this.cadastroUsuarioForm = this.fb.group({
+            // Passo 1 — Dados Essenciais (obrigatórios)
             dadosPessoais: this.fb.group({
                 nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
-                email: ['', [Validators.required, Validators.email]],
                 cpf: ['', [Validators.required, Validators.minLength(14)]],
-                idade: ['', [Validators.required, Validators.min(18)]],
-                fotoPerfil: ['']
-            }),
-
-            enderecoLocalizacao: this.fb.group({
-                cep: ['', [Validators.required, Validators.minLength(8)]],
-                rua: ['', Validators.required],
-                numero: ['', Validators.required],
-                bairro: ['', Validators.required],
-                cidade: ['', Validators.required],
-                uf: ['', Validators.required],
-                telefoneContato: ['', Validators.required]
-            }),
-
-            credenciais: this.fb.group({
                 funcao: ['', Validators.required],
-                login: ['', [Validators.required, Validators.minLength(4)]],
-                senha: ['', [Validators.required, Validators.minLength(6)]],
-                confirmarSenha: ['', [Validators.required]]
-            })
-        }, { validators: this.senhasIguaisValidator });
+                email: ['', [Validators.email]],
+            }),
+
+            // Passo 2 — Contato e Endereço (opcionais)
+            contato: this.fb.group({
+                telefone: [''],
+                cep: [''],
+                rua: [''],
+                numero: [''],
+                complemento: [''],
+                bairro: [''],
+                cidade: [''],
+                uf: [''],
+            }),
+        });
     }
 
-    // Validador customizado para confirmar a senha
-    senhasIguaisValidator(control: AbstractControl): ValidationErrors | null {
-        const senha = control.get('credenciais.senha')?.value;
-        const confirmarSenha = control.get('credenciais.confirmarSenha')?.value;
-
-        if (senha && confirmarSenha && senha !== confirmarSenha) {
-            return { 'senhasNaoCoincidem': true };
-        }
-        return null;
-    }
-
-    // ViaCEP integration
+    // ViaCEP
     buscarCep() {
-        let cep = this.cadastroUsuarioForm.get('enderecoLocalizacao.cep')?.value;
-        if (!cep) return;
-
+        let cep = this.cadastroUsuarioForm.get('contato.cep')?.value ?? '';
         cep = cep.replace(/\D/g, '');
+        if (cep.length !== 8) return;
 
-        if (cep.length === 8) {
-            this.anunciarParaLeitorDeTela('Buscando endereço pelo CEP...');
-
-            this.http.get(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
-                next: (dados: any) => {
-                    if (dados.erro) {
-                        this.anunciarParaLeitorDeTela('CEP não encontrado. Verifique a digitação.');
-                        return;
-                    }
-
-                    this.cadastroUsuarioForm.get('enderecoLocalizacao')?.patchValue({
-                        rua: dados.logradouro,
-                        bairro: dados.bairro,
-                        cidade: dados.localidade,
-                        uf: dados.uf
-                    });
-
-                    this.anunciarParaLeitorDeTela(`Endereço encontrado e preenchido: Rua ${dados.logradouro}, Bairro ${dados.bairro}.`);
-                },
-                error: () => this.anunciarParaLeitorDeTela('Erro ao conectar com o serviço de CEP.')
-            });
-        }
+        this.http.get<any>(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
+            next: (dados) => {
+                if (dados.erro) return;
+                this.cadastroUsuarioForm.get('contato')?.patchValue({
+                    rua: dados.logradouro,
+                    bairro: dados.bairro,
+                    cidade: dados.localidade,
+                    uf: dados.uf
+                });
+            }
+        });
     }
 
     formatarCpf(event: any) {
-        let input = event.target;
-        let valor = input.value.replace(/\D/g, '');
-
-        if (valor.length > 11) {
-            valor = valor.substring(0, 11);
-        }
-        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-        valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-
-        input.value = valor;
-        this.cadastroUsuarioForm.get('dadosPessoais.cpf')?.setValue(valor, { emitEvent: false });
+        let v = event.target.value.replace(/\D/g, '').substring(0, 11);
+        v = v.replace(/(\d{3})(\d)/, '$1.$2');
+        v = v.replace(/(\d{3})(\d)/, '$1.$2');
+        v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        event.target.value = v;
+        this.cadastroUsuarioForm.get('dadosPessoais.cpf')?.setValue(v, { emitEvent: false });
     }
 
     formatarTelefone(event: any) {
-        let input = event.target;
-        let valor = input.value.replace(/\D/g, '');
-
-        if (valor.length > 11) {
-            valor = valor.substring(0, 11);
-        }
-
-        if (valor.length <= 10) {
-            valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
-            valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
-        } else {
-            valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
-            valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
-        }
-
-        input.value = valor;
-        this.cadastroUsuarioForm.get('enderecoLocalizacao.telefoneContato')?.setValue(valor, { emitEvent: false });
+        let v = event.target.value.replace(/\D/g, '').substring(0, 11);
+        v = v.length <= 10
+            ? v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+            : v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+        event.target.value = v;
+        this.cadastroUsuarioForm.get('contato.telefone')?.setValue(v, { emitEvent: false });
     }
 
     isCampoInvalido(grupo: string, campo: string): boolean {
-        const controle = this.cadastroUsuarioForm.get(`${grupo}.${campo}`);
-        return !!(controle && controle.invalid && (controle.dirty || controle.touched));
-    }
-
-    getGroupName(passo: number): string {
-        const grupos = ['dadosPessoais', 'enderecoLocalizacao', 'credenciais'];
-        return grupos[passo - 1];
+        const c = this.cadastroUsuarioForm.get(`${grupo}.${campo}`);
+        return !!(c && c.invalid && (c.dirty || c.touched));
     }
 
     avancarPasso() {
-        const grupoAtual = this.getGroupName(this.passoAtual);
-        const formGrupo = this.cadastroUsuarioForm.get(grupoAtual);
-
-        if (formGrupo?.valid) {
+        const grupoNome = this.passoAtual === 1 ? 'dadosPessoais' : 'contato';
+        const grupo = this.cadastroUsuarioForm.get(grupoNome);
+        if (grupo?.valid) {
             this.passoAtual++;
-            this.anunciarParaLeitorDeTela(`Avançou para a etapa ${this.passoAtual}`);
         } else {
-            formGrupo?.markAllAsTouched();
-            this.anunciarParaLeitorDeTela('Existem campos obrigatórios não preenchidos nesta etapa.');
+            grupo?.markAllAsTouched();
         }
     }
 
     voltarPasso() {
-        if (this.passoAtual > 1) {
-            this.passoAtual--;
-            this.anunciarParaLeitorDeTela(`Voltou para a etapa ${this.passoAtual}`);
-        }
-    }
-
-    anunciarParaLeitorDeTela(mensagem: string) {
-        const anuncio = document.getElementById('leitor-tela-anuncio');
-        if (anuncio) anuncio.textContent = mensagem;
+        if (this.passoAtual > 1) this.passoAtual--;
     }
 
     salvarCadastro() {
         if (this.isSalvando) return;
 
-        if (this.cadastroUsuarioForm.invalid || this.cadastroUsuarioForm.hasError('senhasNaoCoincidem')) {
-            this.cadastroUsuarioForm.markAllAsTouched();
-            this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho ou senhas não coincidem.');
+        const dadosPessoais = this.cadastroUsuarioForm.get('dadosPessoais');
+        if (dadosPessoais?.invalid) {
+            dadosPessoais.markAllAsTouched();
+            this.passoAtual = 1;
             return;
         }
 
         this.isSalvando = true;
         this.mensagemFeedback = '';
-        this.anunciarParaLeitorDeTela('Salvando cadastro do usuário, por favor aguarde...');
-
         const v = this.cadastroUsuarioForm.value;
 
-        // Mapeamento: form -> CreateUsuarioDto do backend
+        const cpfSomenteNumeros = (v.dadosPessoais.cpf as string).replace(/\D/g, '');
+
         const payload = {
             nome: v.dadosPessoais.nomeCompleto,
-            email: v.dadosPessoais.email,
-            username: v.credenciais.login,
-            senha: v.credenciais.senha,
-            role: v.credenciais.funcao,
+            cpf: cpfSomenteNumeros,
+            role: v.dadosPessoais.funcao,
+            email: v.dadosPessoais.email || undefined,
+            telefone: v.contato.telefone || undefined,
+            cep: v.contato.cep || undefined,
+            rua: v.contato.rua || undefined,
+            numero: v.contato.numero || undefined,
+            complemento: v.contato.complemento || undefined,
+            bairro: v.contato.bairro || undefined,
+            cidade: v.contato.cidade || undefined,
+            uf: v.contato.uf || undefined,
         };
 
         this.usuariosService.criar(payload).subscribe({
-            next: () => {
-                this.exibirFeedback('Usuário cadastrado com sucesso!', 'sucesso');
-                this.cadastroUsuarioForm.reset();
-                this.passoAtual = 1;
-                this.arquivoFotoSelecionado = null;
+            next: (resp) => {
+                this.isSalvando = false;
 
-                setTimeout(() => {
-                    this.router.navigate(['/admin/usuarios']);
-                }, 2500);
+                // Backend retornou sinal de reativação (CPF inativo)
+                if ('_reativacao' in resp && resp._reativacao) {
+                    this.dadosReativacao = resp as ReativacaoResponse;
+                    this.modalReativacao = true;
+                    return;
+                }
+
+                // Criação bem-sucedida — exibir credenciais geradas
+                const criado = resp as CreateUsuarioResponse;
+                this.credenciaisGeradas = {
+                    username: criado._credenciais.username,
+                    senha: criado._credenciais.senha,
+                };
+                this.exibirFeedback('Usuário cadastrado com sucesso! Anote as credenciais abaixo.', 'sucesso');
             },
             error: (err: HttpErrorResponse) => {
                 const msg = err.status === 409
-                    ? 'Este login (username) já está em uso. Escolha outro.'
+                    ? 'Já existe um funcionário ativo com este CPF.'
                     : (err.error?.message ?? 'Erro ao cadastrar. Tente novamente.');
                 this.exibirFeedback(msg, 'erro');
             },
         });
     }
 
+    // ── Modal Reativação ─────────────────────────────────────────────
+    confirmarReativacao() {
+        if (!this.dadosReativacao) return;
+        this.isSalvando = true;
+
+        this.usuariosService.reativar(this.dadosReativacao.id).subscribe({
+            next: (resp) => {
+                this.isSalvando = false;
+                this.modalReativacao = false;
+                this.credenciaisGeradas = {
+                    username: resp._credenciais.username,
+                    senha: resp._credenciais.senha,
+                };
+                this.exibirFeedback(`Funcionário ${this.dadosReativacao!.nome} reativado com sucesso!`, 'sucesso');
+            },
+            error: () => {
+                this.isSalvando = false;
+                this.exibirFeedback('Erro ao reativar. Tente novamente.', 'erro');
+            }
+        });
+    }
+
+    cancelarReativacao() {
+        this.modalReativacao = false;
+        this.dadosReativacao = null;
+    }
+
+    irParaLista() {
+        this.router.navigate(['/admin/usuarios']);
+    }
+
     private exibirFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {
         this.isSalvando = false;
         this.mensagemFeedback = mensagem;
         this.tipoFeedback = tipo;
-        this.anunciarParaLeitorDeTela(mensagem);
-
         if (tipo === 'sucesso') {
-            setTimeout(() => this.mensagemFeedback = '', 5000);
-        }
-    }
-
-    onFileSelected(event: any) {
-        const file = event.target.files[0];
-        if (file) {
-            this.arquivoFotoSelecionado = file;
-            this.anunciarParaLeitorDeTela(`Foto de perfil selecionada: ${file.name}`);
+            setTimeout(() => this.mensagemFeedback = '', 10000);
         }
     }
 }
