@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+
 import { Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TurmasService, CreateTurmaDto, GradeHorariaDto } from '../../../../core/services/turmas.service';
@@ -20,7 +21,8 @@ const DIAS: { valor: string; label: string }[] = [
 @Component({
     selector: 'app-cadastro-turma-wizard',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterModule],
+    imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
+
     templateUrl: './cadastro-turma-wizard.html',
     styleUrls: ['./cadastro-turma-wizard.scss']
 })

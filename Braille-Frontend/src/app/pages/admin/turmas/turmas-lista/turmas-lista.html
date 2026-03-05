@@ -75,8 +75,9 @@
         </span>
         }
         <span class="meta-item meta-alunos">
-          {{ turma._count?.alunos ?? 0 }} aluno(s)
+          {{ turma._count?.matriculasOficina ?? 0 }} aluno(s)
         </span>
+
       </div>
     </div>
 
@@ -332,10 +333,10 @@
       <div>
         <h3
           style="font-size: 1rem; margin-bottom: 0.5rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
-          Alunos Matriculados ({{ turmaDetalhes!.alunos?.length || 0 }})
+          Alunos Matriculados ({{ (turmaDetalhes!.matriculasOficina?.length || 0) }})
         </h3>
 
-        @if (!turmaDetalhes?.alunos || turmaDetalhes!.alunos!.length === 0) {
+        @if (!turmaDetalhes?.matriculasOficina || turmaDetalhes!.matriculasOficina!.length === 0) {
         <div class="empty-state empty-state--sm">
           <span class="empty-icon" aria-hidden="true">
           </span>
@@ -343,23 +344,25 @@
         </div>
         } @else {
         <ul class="alunos-list" aria-label="Lista de alunos matriculados">
-          @for (aluno of turmaDetalhes!.alunos; track aluno.id) {
+          @for (matricula of turmaDetalhes!.matriculasOficina; track matricula.aluno.id) {
           <li class="aluno-item" style="display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 0.75rem;">
               <div class="aluno-avatar" aria-hidden="true">
-                {{ aluno.nomeCompleto.charAt(0) }}
+                {{ matricula.aluno.nomeCompleto.charAt(0) }}
               </div>
-              <span>{{ aluno.nomeCompleto }}</span>
+              <span>{{ matricula.aluno.nomeCompleto }}</span>
             </div>
             @if (!isProfessor) {
-            <button class="btn btn-danger btn-sm" (click)="removerAluno(aluno.id, aluno.nomeCompleto)"
-              [disabled]="operacaoEmProgresso" aria-label="Remover da turma" title="Remover aluno"
+            <button class="btn btn-danger btn-sm"
+              (click)="removerAluno(matricula.aluno.id, matricula.aluno.nomeCompleto)" [disabled]="operacaoEmProgresso"
+              aria-label="Remover da turma" title="Remover aluno"
               style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center;">
             </button>
             }
           </li>
           }
         </ul>
+
         }
       </div>
       }
