@@ -435,6 +435,13 @@
 
                 <div class="profile-title">
                     <h3>{{ alunoSelecionado.nomeCompleto }}</h3>
+                    @if (alunoSelecionado.matricula) {
+                    <div class="matricula-tag" title="Número de Matrícula Institucional">
+                        <span class="material-symbols-rounded"
+                            style="font-size:14px;vertical-align:middle;">badge</span>
+                        Mat. {{ alunoSelecionado.matricula }}
+                    </div>
+                    }
                     <div class="profile-badges">
                         @if (alunoSelecionado.statusAtivo) {
                         <span class="badge badge-success">Ativo</span>
@@ -530,6 +537,47 @@
                         <br>
                         <strong>CEP:</strong> {{ alunoSelecionado.cep || 'N/I' }}
                     </p>
+                </div>
+
+                <!-- Histórico de Oficinas -->
+                <div class="profile-section full-width historico-section">
+                    <h4>
+                        <span class="material-symbols-rounded"
+                            style="font-size:16px;vertical-align:middle;margin-right:4px;">school</span>
+                        Histórico de Oficinas
+                    </h4>
+                    @if (alunoSelecionado.matriculasOficina && alunoSelecionado.matriculasOficina.length > 0) {
+                    <table class="historico-table">
+                        <thead>
+                            <tr>
+                                <th>Oficina / Turma</th>
+                                <th>Entrada</th>
+                                <th>Saída</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (m of alunoSelecionado.matriculasOficina; track m.id) {
+                            <tr>
+                                <td>{{ m.turma.nome }}</td>
+                                <td>{{ m.dataEntrada | dataBraille }}</td>
+                                <td>{{ m.dataEncerramento ? (m.dataEncerramento | dataBraille) : '—' }}</td>
+                                <td>
+                                    <span class="badge-status badge-status--{{ m.status.toLowerCase() }}">
+                                        {{ m.status === 'ATIVA' ? 'Em Curso' :
+                                        m.status === 'CONCLUIDA' ? 'Concluída' :
+                                        m.status === 'EVADIDA' ? 'Evadido(a)' : 'Cancelada' }}
+                                    </span>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                    } @else {
+                    <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 4px;">
+                        Nenhuma oficina registrada.
+                    </p>
+                    }
                 </div>
             </div>
 

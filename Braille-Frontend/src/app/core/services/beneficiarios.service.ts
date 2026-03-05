@@ -36,6 +36,14 @@ export interface Beneficiario {
     contatoEmergencia?: string;
     statusAtivo: boolean;
     criadoEm: string;
+    matricula?: string;
+    matriculasOficina?: {
+        id: string;
+        status: 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA';
+        dataEntrada: string;
+        dataEncerramento?: string;
+        turma: { id: string; nome: string; horario?: string };
+    }[];
 }
 
 export interface PaginatedResponse<T> {
