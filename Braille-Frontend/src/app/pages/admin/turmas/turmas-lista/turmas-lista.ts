@@ -1,8 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
 
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
@@ -15,7 +17,8 @@ import { AuthService } from '../../../../core/services/auth.service';
     selector: 'app-turmas-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+
     templateUrl: './turmas-lista.html',
     styleUrl: './turmas-lista.scss',
 })
@@ -69,8 +72,10 @@ export class TurmasLista implements OnInit {
         private cdr: ChangeDetectorRef,
         private confirmDialog: ConfirmDialogService,
         private authService: AuthService,
-        private toast: ToastService
+        private toast: ToastService,
+        private router: Router,
     ) { }
+
 
     ngOnInit(): void {
         const user = this.authService.getUser();
@@ -168,15 +173,11 @@ export class TurmasLista implements OnInit {
 
     // carregarProfessores() foi absorvido pelo forkJoin em carregarDadosIniciais()
 
-    // ── Modal Criar ────────────────────────────────────────────
+    // ── Modal Criar → navega para o Wizard completo ─────────────
     abrirModalCriar(): void {
-        this.modoEdicao = false;
-        this.turmaEmEdicaoId = '';
-        this.erroModal = '';
-        this.turmaForm.reset();
-        this.modalAberto = true;
-        setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
+        this.router.navigate(['/admin/turmas/cadastro']);
     }
+
 
     // ── Modal Editar ───────────────────────────────────────────
     abrirModalEditar(turma: Turma): void {
