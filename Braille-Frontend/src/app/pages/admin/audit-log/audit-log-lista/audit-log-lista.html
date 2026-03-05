@@ -1,0 +1,165 @@
+<!-- ══ CABEÇALHO ══ -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Auditoria do Sistema</h1>
+        <p class="page-subtitle">Registro imutável de todas as ações críticas</p>
+    </div>
+</div>
+
+<!-- ══ STATS CARDS ══ -->
+@if (stats) {
+<div class="stats-grid">
+    <div class="stat-card stat-total">
+        <span class="stat-label">Total de Logs</span>
+        <span class="stat-value">{{ stats.totalLogs | number }}</span>
+    </div>
+    <div class="stat-card stat-hoje">
+        <span class="stat-label">Hoje</span>
+        <span class="stat-value">{{ stats.logsHoje | number }}</span>
+    </div>
+    @for (item of stats.topAcoes.slice(0,3); track item.acao) {
+    <div class="stat-card stat-acao">
+        <span class="stat-label">{{ item.acao }}</span>
+        <span class="stat-value">{{ item.total | number }}</span>
+    </div>
+    }
+</div>
+}
+
+<!-- ══ FILTROS ══ -->
+<div class="filtros-bar">
+    <select class="form-input form-input--sm" [(ngModel)]="filtroEntidade">
+        <option value="">Todas as entidades</option>
+        <option value="Turma">Turma</option>
+        <option value="Aluno">Aluno</option>
+        <option value="User">Usuário</option>
+        <option value="Frequencia">Frequência</option>
+        <option value="Auth">Autenticação</option>
+        <option value="Comunicado">Comunicado</option>
+    </select>
+
+    <select class="form-input form-input--sm" [(ngModel)]="filtroAcao">
+        <option value="">Todas as ações</option>
+        @for (a of acoes; track a) {
+        <option [value]="a">{{ a }}</option>
+        }
+    </select>
+
+    <input type="date" class="form-input form-input--sm" [(ngModel)]="filtroDe" placeholder="De" />
+    <input type="date" class="form-input form-input--sm" [(ngModel)]="filtroAte" placeholder="Até" />
+
+    <button class="btn btn-primary btn-sm" (click)="aplicarFiltros()">Filtrar</button>
+    <button class="btn btn-secondary btn-sm" (click)="limparFiltros()">Limpar</button>
+</div>
+
+<!-- ══ ESTADOS ══ -->
+@if (isLoading) {
+<div class="loading-state">
+    <div class="spinner"></div>
+    <p>Carregando logs...</p>
+</div>
+} @else if (erro) {
+<div class="error-banner">{{ erro }}</div>
+} @else if (logs.length === 0) {
+<div class="empty-state">
+    <p>Nenhum log encontrado para os filtros aplicados.</p>
+</div>
+} @else {
+
+<!-- ══ TABELA ══ -->
+<div class="table-wrapper">
+    <table class="audit-table" aria-label="Log de auditoria">
+        <thead>
+            <tr>
+                <th>Data/Hora</th>
+                <th>Ação</th>
+                <th>Entidade</th>
+                <th>Registro</th>
+                <th>Autor</th>
+                <th>Cargo</th>
+                <th>IP</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (log of logs; track log.id) {
+            <tr class="audit-row" (click)="abrirDetalhes(log)">
+                <td class="col-data">{{ formatarData(log.criadoEm) }}</td>
+                <td>
+                    <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
+                </td>
+                <td>{{ log.entidade }}</td>
+                <td class="col-id">{{ log.registroId ?? '—' }}</td>
+                <td>{{ log.autorNome ?? log.autorId ?? 'Sistema' }}</td>
+                <td><span class="badge-role">{{ log.autorRole ?? '—' }}</span></td>
+                <td class="col-ip">{{ log.ip ?? '—' }}</td>
+                <td><button class="btn btn-ghost btn-xs"
+                        (click)="abrirDetalhes(log); $event.stopPropagation()">Ver</button></td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ══ PAGINAÇÃO ══ -->
+@if (totalPaginas > 1) {
+<nav class="pagination">
+    <button class="btn btn-secondary btn-sm" (click)="anterior()" [disabled]="pagina === 1">←</button>
+    <span class="pagination-info">Página {{ pagina }} de {{ totalPaginas }} ({{ total }} logs)</span>
+    <button class="btn btn-secondary btn-sm" (click)="proximo()" [disabled]="pagina === totalPaginas">→</button>
+</nav>
+}
+
+}
+
+<!-- ══ MODAL DETALHES ══ -->
+@if (logSelecionado) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes do log" (click)="fecharDetalhes()">
+    <div class="modal modal--lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                <span class="badge-acao" [ngClass]="acaoCor[logSelecionado.acao]">{{ logSelecionado.acao }}</span>
+                &nbsp;{{ logSelecionado.entidade }}
+            </h2>
+            <button class="modal-close" (click)="fecharDetalhes()" aria-label="Fechar">✕</button>
+        </div>
+        <div class="modal-body">
+
+            <dl class="detail-grid">
+                <dt>ID do Log</dt>
+                <dd>{{ logSelecionado.id }}</dd>
+                <dt>Registro ID</dt>
+                <dd>{{ logSelecionado.registroId ?? '—' }}</dd>
+                <dt>Data/Hora</dt>
+                <dd>{{ formatarData(logSelecionado.criadoEm) }}</dd>
+                <dt>Autor</dt>
+                <dd>{{ logSelecionado.autorNome ?? logSelecionado.autorId ?? 'Sistema' }}</dd>
+                <dt>Cargo</dt>
+                <dd>{{ logSelecionado.autorRole ?? '—' }}</dd>
+                <dt>IP</dt>
+                <dd>{{ logSelecionado.ip ?? '—' }}</dd>
+                <dt>User Agent</dt>
+                <dd class="ua">{{ logSelecionado.userAgent ?? '—' }}</dd>
+            </dl>
+
+            @if (logSelecionado.oldValue) {
+            <div class="json-section">
+                <h3>Estado anterior (oldValue)</h3>
+                <pre class="json-block">{{ jsonPretty(logSelecionado.oldValue) }}</pre>
+            </div>
+            }
+
+            @if (logSelecionado.newValue) {
+            <div class="json-section">
+                <h3>Novo estado (newValue)</h3>
+                <pre class="json-block">{{ jsonPretty(logSelecionado.newValue) }}</pre>
+            </div>
+            }
+
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharDetalhes()">Fechar</button>
+        </div>
+    </div>
+</div>
+}
