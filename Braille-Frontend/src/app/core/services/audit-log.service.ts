@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { PaginatedResponse } from './beneficiarios.service';
 
 export type AuditAcao =
@@ -40,11 +41,31 @@ export interface QueryAuditDto {
     ate?: string;
 }
 
+// ─── Tipos internos de cache ────────────────────────────────────────────────
+interface CacheEntry<T> {
+    obs$: Observable<T>;
+    expiresAt: number;
+}
+
+const CACHE_TTL_MS = 60_000; // 1 minuto
+
 @Injectable({ providedIn: 'root' })
 export class AuditLogService {
     private readonly url = '/api/audit-log';
 
+    // Cache da listagem: chave = query serializada
+    private listarCache = new Map<string, CacheEntry<PaginatedResponse<AuditLog>>>();
+
+    // Cache das stats (única entrada)
+    private statsCache: CacheEntry<AuditStats> | null = null;
+
     constructor(private http: HttpClient) { }
+
+    /** Limpa todo o cache (chamar após operações que alteram logs). */
+    limparCache(): void {
+        this.listarCache.clear();
+        this.statsCache = null;
+    }
 
     listar(q: QueryAuditDto = {}): Observable<PaginatedResponse<AuditLog>> {
         let params = new HttpParams()
@@ -56,14 +77,37 @@ export class AuditLogService {
         if (q.acao) params = params.set('acao', q.acao);
         if (q.de) params = params.set('de', q.de);
         if (q.ate) params = params.set('ate', q.ate);
-        return this.http.get<PaginatedResponse<AuditLog>>(this.url, { params });
+
+        const key = params.toString();
+        const cached = this.listarCache.get(key);
+
+        if (cached && Date.now() < cached.expiresAt) {
+            return cached.obs$;
+        }
+
+        const obs$ = this.http
+            .get<PaginatedResponse<AuditLog>>(this.url, { params })
+            .pipe(shareReplay(1));
+
+        this.listarCache.set(key, { obs$, expiresAt: Date.now() + CACHE_TTL_MS });
+        return obs$;
     }
 
     stats(): Observable<AuditStats> {
-        return this.http.get<AuditStats>(`${this.url}/stats`);
+        if (this.statsCache && Date.now() < this.statsCache.expiresAt) {
+            return this.statsCache.obs$;
+        }
+
+        const obs$ = this.http
+            .get<AuditStats>(`${this.url}/stats`)
+            .pipe(shareReplay(1));
+
+        this.statsCache = { obs$, expiresAt: Date.now() + CACHE_TTL_MS };
+        return obs$;
     }
 
     historicoPorRegistro(entidade: string, registroId: string): Observable<AuditLog[]> {
+        // Histórico por registro não é cacheado — sempre fresco
         return this.http.get<AuditLog[]>(`${this.url}/${entidade}/${registroId}`);
     }
 }
