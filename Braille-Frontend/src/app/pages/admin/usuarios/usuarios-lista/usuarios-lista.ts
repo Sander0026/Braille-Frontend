@@ -52,9 +52,16 @@ export class UsuariosLista implements OnInit, OnDestroy {
     ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
-            username: ['', [Validators.required, Validators.minLength(3)]],
             email: ['', [Validators.email]],
-            role: ['', Validators.required]
+            role: ['', Validators.required],
+            telefone: [''],
+            cep: [''],
+            rua: [''],
+            numero: [''],
+            complemento: [''],
+            bairro: [''],
+            cidade: [''],
+            uf: ['', [Validators.maxLength(2)]],
         });
 
     }
@@ -108,10 +115,18 @@ export class UsuariosLista implements OnInit, OnDestroy {
         Promise.resolve().then(() => {
             this.editForm.patchValue({
                 nome: usuario.nome,
-                username: usuario.username ?? '',
                 email: usuario.email ?? '',
-                role: usuario.role
+                role: usuario.role,
+                telefone: usuario.telefone ?? '',
+                cep: usuario.cep ?? '',
+                rua: usuario.rua ?? '',
+                numero: usuario.numero ?? '',
+                complemento: usuario.complemento ?? '',
+                bairro: usuario.bairro ?? '',
+                cidade: usuario.cidade ?? '',
+                uf: usuario.uf ?? '',
             });
+
 
 
             this.cdr.markForCheck();
