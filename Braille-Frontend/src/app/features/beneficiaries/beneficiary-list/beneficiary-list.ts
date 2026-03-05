@@ -66,6 +66,9 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   drawerAberto = false;
   filterForm!: FormGroup;
 
+  // ── Exportação ──────────────────────────────────────────────────
+  exportando = false;
+
   constructor(
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
@@ -417,6 +420,41 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
+  // ── Exportar Lista para Excel ─────────────────────────────────────
+  exportarListaParaXlsx(): void {
+    if (this.exportando) return;
+    this.exportando = true;
+    this.cdr.markForCheck();
+
+    const nome = this.buscaCtrl.value?.trim() || undefined;
+    const filtros = this.filtrosAtivos();
+
+    this.beneficiariosService.exportarLista(nome, this.abaAtiva === 'inativos', filtros)
+      .subscribe({
+        next: (buffer: ArrayBuffer) => {
+          const blob = new Blob([buffer], {
+            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          const date = new Date().toISOString().slice(0, 10);
+          const status = this.abaAtiva === 'inativos' ? 'Inativos' : 'Ativos';
+          a.href = url;
+          a.download = `Alunos_${status}_${date}.xlsx`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          this.exportando = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.toast.erro('Erro ao exportar a lista. Tente novamente.');
+          this.exportando = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
 
   inativar(aluno: Beneficiario): void {
     this.alunoParaInativar = aluno;
