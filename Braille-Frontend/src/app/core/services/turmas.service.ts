@@ -9,6 +9,8 @@ export interface GradeHorariaDto {
     horaFim: number;
 }
 
+export type TurmaStatus = 'PREVISTA' | 'ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
+
 export interface Turma {
     id: string;
     nome: string;
@@ -17,6 +19,7 @@ export interface Turma {
     capacidadeMaxima?: number;
     statusAtivo: boolean;
     excluido: boolean;
+    status: TurmaStatus;         // Fase 4: ciclo de vida acadêmico
     professor?: { id: string; nome: string; email: string };
     gradeHoraria?: GradeHorariaDto[];
     matriculasOficina?: {
@@ -27,6 +30,7 @@ export interface Turma {
     }[];
     _count?: { matriculasOficina: number };
 }
+
 
 
 export interface CreateTurmaDto {
@@ -114,5 +118,10 @@ export class TurmasService {
     desmatricularAluno(turmaId: string, alunoId: string): Observable<any> {
         this.limparCache();
         return this.http.delete(`${this.url}/${turmaId}/alunos/${alunoId}`);
+    }
+
+    mudarStatus(id: string, status: TurmaStatus): Observable<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }> {
+        this.limparCache();
+        return this.http.patch<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }>(`${this.url}/${id}/status`, { status });
     }
 }

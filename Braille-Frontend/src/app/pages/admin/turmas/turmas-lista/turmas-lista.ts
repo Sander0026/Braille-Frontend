@@ -534,4 +534,35 @@ export class TurmasLista implements OnInit {
     trackById(_: number, item: { id: string }): string {
         return item.id;
     }
+
+    // ── Status Acadêmico (Fase 4) ──────────────────────────────
+
+    /** Labels e cores dos status para exibição na UI */
+    readonly statusConfig: Record<string, { label: string; cor: string }> = {
+        PREVISTA: { label: 'Prevista', cor: 'status-prevista' },
+        ANDAMENTO: { label: 'Em Andamento', cor: 'status-andamento' },
+        CONCLUIDA: { label: 'Concluída', cor: 'status-concluida' },
+        CANCELADA: { label: 'Cancelada', cor: 'status-cancelada' },
+    };
+
+    mudarStatusTurma(turma: Turma, event: Event): void {
+        const novoStatus = (event.target as HTMLSelectElement).value as any;
+        if (!novoStatus || novoStatus === turma.status) return;
+
+        this.turmasService.mudarStatus(turma.id, novoStatus).subscribe({
+            next: (res) => {
+                setTimeout(() => {
+                    this.toast.sucesso(`Status alterado para "${this.statusConfig[res.status]?.label ?? res.status}".`);
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
+            },
+            error: (err: { error?: { message?: string } }) => {
+                setTimeout(() => {
+                    this.toast.erro(err.error?.message ?? 'Não foi possível alterar o status.');
+                    this.cdr.markForCheck();
+                }, 0);
+            }
+        });
+    }
 }
+
