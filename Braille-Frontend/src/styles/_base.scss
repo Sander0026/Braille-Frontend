@@ -64,9 +64,13 @@ body {
 // --- Acessibilidade: Foco Visível Global ---
 // Garantir que TODOS elementos interativos mostrem foco claro (WCAG 2.1 AA)
 :focus-visible {
-    outline: $focus-ring-width solid $color-focus-ring;
-    outline-offset: $focus-ring-offset;
+    // Escudo Duplo de Foco: Outline Preto por fora e Anel Secundário
+    outline: $focus-ring-width solid $color-focus-ring !important;
+    outline-offset: $focus-ring-offset !important;
     border-radius: $border-radius-sm;
+    // Box Shadow extra branco para caso o fundo seja escuro, o foco ainda aparecer
+    box-shadow: 0 0 0 $focus-ring-offset rgba(255, 255, 255, 0.8) !important;
+    transition: outline-offset 0.1s ease-in-out;
 }
 
 // Remover outline padrão apenas quando há foco por mouse/touch
