@@ -13,6 +13,17 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { ToastService } from '../../../../core/services/toast.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
+/** Dias da semana para o seletor de grade horária */
+const DIAS: { valor: string; label: string }[] = [
+    { valor: 'SEG', label: 'Segunda' },
+    { valor: 'TER', label: 'Terça' },
+    { valor: 'QUA', label: 'Quarta' },
+    { valor: 'QUI', label: 'Quinta' },
+    { valor: 'SEX', label: 'Sexta' },
+    { valor: 'SAB', label: 'Sábado' },
+    { valor: 'DOM', label: 'Domingo' },
+];
+
 @Component({
     selector: 'app-turmas-lista',
     standalone: true,
@@ -43,6 +54,14 @@ export class TurmasLista implements OnInit {
     salvandoModal = false;
     erroModal = '';
     turmaForm!: FormGroup;
+
+    // ── Grade Horária Auxiliar ─────────────────────────────────
+    dias = DIAS;
+    gradeHoraria: { dia: string; horaInicio: string; horaFim: string }[] = [];
+    diaNovoTurno = '';
+    horaInicioNovoTurno = '';
+    horaFimNovoTurno = '';
+    erroTurno = '';
 
     // ── Modal Arquivar ──────────────────────────────────────────
     modalArquivarAberto = false;
@@ -145,7 +164,7 @@ export class TurmasLista implements OnInit {
         this.turmaForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
             descricao: [''],
-            horario: [''],
+            capacidadeMaxima: [null],
             professorId: ['', Validators.required],
         });
 
@@ -247,9 +266,19 @@ export class TurmasLista implements OnInit {
         this.turmaForm.patchValue({
             nome: turma.nome,
             descricao: turma.descricao ?? '',
-            horario: turma.horario ?? '',
+            capacidadeMaxima: turma.capacidadeMaxima ?? null,
             professorId: turma.professor?.id ?? '',
         });
+
+        // Preenche a Grade Horária formatando de minutos para texto
+        this.gradeHoraria = [];
+        if (turma.gradeHoraria && turma.gradeHoraria.length > 0) {
+            this.gradeHoraria = turma.gradeHoraria.map(turno => ({
+                dia: turno.dia,
+                horaInicio: this.minutosParaHm(turno.horaInicio),
+                horaFim: this.minutosParaHm(turno.horaFim)
+            }));
+        }
 
         this.modalAberto = true;
         setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
@@ -270,7 +299,17 @@ export class TurmasLista implements OnInit {
         this.salvandoModal = true;
         this.erroModal = '';
 
-        const dados: CreateTurmaDto = this.turmaForm.value;
+        const dados: CreateTurmaDto = {
+            nome: this.turmaForm.value.nome,
+            descricao: this.turmaForm.value.descricao,
+            capacidadeMaxima: this.turmaForm.value.capacidadeMaxima || undefined,
+            professorId: this.turmaForm.value.professorId,
+            gradeHoraria: this.gradeHoraria.map(h => ({
+                dia: h.dia as any,
+                horaInicio: this.hmParaMinutos(h.horaInicio),
+                horaFim: this.hmParaMinutos(h.horaFim)
+            })),
+        };
 
         const operacao$ = this.modoEdicao
             ? this.turmasService.atualizar(this.turmaEmEdicaoId, dados)
@@ -570,9 +609,60 @@ export class TurmasLista implements OnInit {
     fecharModalAlunos(): void {
         this.modalAlunosAberto = false;
         this.turmaDetalhes = null;
-        this.buscaAlunoCtrl.setValue('');
-        this.alunosBuscaRestado = [];
-        this.alunosSelecionadosParaMatricula = [];
+    }
+
+    // ─── Grade Horária (Métodos Auxiliares) ─────────────────────────
+    adicionarTurno() {
+        this.erroTurno = '';
+
+        if (!this.diaNovoTurno || !this.horaInicioNovoTurno || !this.horaFimNovoTurno) {
+            this.erroTurno = 'Preencha o dia, hora de início e hora de fim.';
+            return;
+        }
+
+        const inicioMin = this.hmParaMinutos(this.horaInicioNovoTurno);
+        const fimMin = this.hmParaMinutos(this.horaFimNovoTurno);
+
+        if (fimMin <= inicioMin) {
+            this.erroTurno = 'A hora de fim deve ser posterior à hora de início.';
+            return;
+        }
+
+        const conflito = this.gradeHoraria.some(t => t.dia === this.diaNovoTurno);
+        if (conflito) {
+            this.erroTurno = 'Já existe um turno neste dia. Remova o existente primeiro.';
+            return;
+        }
+
+        this.gradeHoraria.push({
+            dia: this.diaNovoTurno,
+            horaInicio: this.horaInicioNovoTurno,
+            horaFim: this.horaFimNovoTurno
+        });
+
+        this.diaNovoTurno = '';
+        this.horaInicioNovoTurno = '';
+        this.horaFimNovoTurno = '';
+    }
+
+    removerTurno(index: number) {
+        this.gradeHoraria.splice(index, 1);
+    }
+
+    labelDia(valor: string): string {
+        return this.dias.find(d => d.valor === valor)?.label || valor;
+    }
+
+    private hmParaMinutos(hm: string): number {
+        if (!hm) return 0;
+        const [h, m] = hm.split(':').map(Number);
+        return (h * 60) + (m || 0);
+    }
+
+    private minutosParaHm(minutos: number): string {
+        const h = Math.floor(minutos / 60);
+        const m = minutos % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
     }
 
     // ── Paginação ──────────────────────────────────────────────
