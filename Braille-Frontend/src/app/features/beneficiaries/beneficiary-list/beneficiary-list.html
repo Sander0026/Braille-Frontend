@@ -75,7 +75,7 @@
 <div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
 }
 <aside class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog" aria-modal="true"
-    aria-label="Filtros avançados" [formGroup]="filterForm">
+    aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus [cdkTrapFocusAutoCapture]="drawerAberto">
 
     <div class="filter-drawer__header">
         <h2 class="filter-drawer__title">
@@ -382,7 +382,8 @@
 
 <!-- Modal Visualizar Aluno -->
 @if (modalAberto) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAlunoTitulo">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAlunoTitulo" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content modal-lg">
         <div class="modal-header">
             <h2 id="modalAlunoTitulo">Perfil do Aluno</h2>
@@ -627,7 +628,7 @@
 @if (alunoParaInativar) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="(alunoParaInativar.statusAtivo !== false ? 'Inativar' : 'Reativar') + ' Aluno ' + alunoParaInativar.nomeCompleto"
-    (click)="cancelarInativacao()">
+    (click)="cancelarInativacao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-inativacao"
@@ -665,7 +666,7 @@
 <!-- Modal de Confirmação de Excluir Documento -->
 @if (documentoParaExcluir) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Documento"
-    (click)="cancelarExclusaoDocumento()">
+    (click)="cancelarExclusaoDocumento()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-documento" style="color: #ef4444;">Apagar Arquivo</h2>
@@ -701,7 +702,7 @@
 @if (alunoParaExcluirDefinitivo) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="'Excluir definitivamente o aluno ' + alunoParaExcluirDefinitivo.nomeCompleto"
-    (click)="cancelarExclusaoDefinitiva()">
+    (click)="cancelarExclusaoDefinitiva()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro do Aluno</h2>
@@ -732,7 +733,8 @@
 <!-- Modal de Confirmação de Restauração -->
 @if (alunoParaRestaurar) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Restaurar o aluno ' + alunoParaRestaurar.nomeCompleto" (click)="cancelarRestauracao()">
+    [attr.aria-label]="'Restaurar o aluno ' + alunoParaRestaurar.nomeCompleto" (click)="cancelarRestauracao()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Inscrição</h2>
