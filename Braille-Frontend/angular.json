@@ -25,7 +25,7 @@
                 "input": "public"
               },
               "src/assets",
-              "robots.txt"
+              "src/robots.txt"
             ],
             "styles": [
               "src/styles.scss"
