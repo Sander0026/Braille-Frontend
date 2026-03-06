@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
 import { ToastComponent } from '../../core/components/toast/toast.component';
+import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
 
 interface NavItem {
   rota: string;
@@ -70,7 +71,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas', role: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] },
     { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências', role: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] },
     { rota: '/admin/conteudo', label: 'Conteúdo do Site', icon: 'web', aria: 'Gerir conteúdo público', role: ['ADMIN', 'COMUNICACAO'] },
-    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['ADMIN', 'SECRETARIA'] },
+    { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] },
     { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários', role: ['ADMIN'] },
     { rota: '/admin/auditoria', label: 'Auditoria', icon: 'policy', aria: 'Ver logs de auditoria do sistema', role: ['ADMIN'] },
   ];
@@ -93,6 +94,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private elRef: ElementRef,
     private cdr: ChangeDetectorRef,
+    public a11y: AccessibilityService
   ) { }
 
   ngOnInit(): void {
@@ -379,5 +381,22 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   get showLabels(): boolean {
     return this.sidebarState === 'full';
+  }
+
+  // ── Acessibilidade ───────────────────────────────────
+  toggleAltoContraste(): void {
+    this.a11y.toggleAltoContraste();
+  }
+
+  setFonte(tamanho: FonteSize): void {
+    this.a11y.setFonte(tamanho);
+  }
+
+  get fonteAtual(): FonteSize {
+    return this.a11y.fonteAtual;
+  }
+
+  get altoContrasteAtivo(): boolean {
+    return this.a11y.isAltoContraste;
   }
 }

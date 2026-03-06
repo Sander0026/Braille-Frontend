@@ -48,6 +48,21 @@
       </button>
 
       <div class="header-right">
+
+        <!-- ── Controles de Acessibilidade ── -->
+        <div class="a11y-controls" role="group" aria-label="Controles de acessibilidade">
+          <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
+            aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
+          <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="fonteAtual === 'grande'"
+            aria-label="Aumentar fonte" title="Fonte grande">A+</button>
+          <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="fonteAtual === 'extragrande'"
+            aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
+          <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="altoContrasteAtivo"
+            aria-label="Ativar ou desativar alto contraste" title="Alto contraste">
+            <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
+          </button>
+        </div>
+
         <!-- ── Menu de Perfil ── -->
         <div class="user-menu-wrapper">
           <button class="user-menu-btn" (click)="toggleMenu($event)" [attr.aria-expanded]="menuAberto"

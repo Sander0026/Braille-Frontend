@@ -251,3 +251,109 @@ h6 {
         margin: 10mm 12mm;
     }
 }
+
+// ============================================================
+// ALTO CONTRASTE — Ativado via classe `alto-contraste` no <html>
+// Cores ideais para baixa visão, catarata e fotofobia
+// ============================================================
+html.alto-contraste {
+
+    // ── Inversão universal ────────────────────────────────────
+    // Garante que NENHUM elemento fica com fundo branco/cinza
+    *,
+    *::before,
+    *::after {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
+        border-color: #444400 !important;
+        box-shadow: none !important;
+    }
+
+    // ── Exceções: imagens mantêm fundo transparente ───────────
+    img {
+        background-color: transparent !important;
+        border: 1px solid #f5c800 !important;
+    }
+
+    svg,
+    svg * {
+        background-color: transparent !important;
+    }
+
+    // ── Inputs destacados ──────────────────────────────────────
+    input,
+    textarea,
+    select {
+        background-color: #0d0d00 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    // ── Botão primário: amarelo sobre preto ────────────────────
+    .btn-primary,
+    .btn.btn-primary,
+    .a11y-btn.active {
+        background-color: #f5c800 !important;
+        color: #111111 !important;
+        border-color: #c9a500 !important;
+    }
+
+    // ── Botão secundário ──────────────────────────────────────
+    .btn-secondary,
+    .btn.btn-secondary {
+        background-color: #2a2800 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    // ── Sidebar ───────────────────────────────────────────────
+    .sidebar {
+        background-color: #000000 !important;
+        border-right: 2px solid #f5c800 !important;
+    }
+
+    // ── Header ────────────────────────────────────────────────
+    .admin-header {
+        background-color: #000000 !important;
+        border-bottom: 1px solid #f5c800 !important;
+    }
+
+    // ── Nav links ativos ──────────────────────────────────────
+    .nav-link.active {
+        background-color: rgba(245, 200, 0, 0.25) !important;
+        color: #f5c800 !important;
+    }
+
+    // ── Links ─────────────────────────────────────────────────
+    a {
+        color: #fffb80 !important;
+        text-decoration: underline !important;
+    }
+
+    // ── Tabelas (alternância mínima p/ legibilidade) ───────────
+    th {
+        background-color: #1a1800 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #161400 !important;
+    }
+
+    // ── Foco super visível (WCAG AA) ──────────────────────────
+    :focus-visible {
+        outline: 3px solid #ffffff !important;
+        outline-offset: 3px !important;
+        background-color: #111111 !important;
+    }
+
+    // ── Badges e status (mantém contorno colorido) ────────────
+    .badge-ativo,
+    .badge-concluido,
+    .badge-cancelado,
+    .badge-prevista,
+    .badge-andamento {
+        border: 1px solid #f5c800 !important;
+    }
+}

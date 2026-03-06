@@ -441,16 +441,31 @@ export class ConteudoSite implements OnInit, OnDestroy {
     });
   }
 
+  private getNomeSecao(nome: string): string {
+    const mapa: Record<string, string> = {
+      'hero': 'Apresentação Principal',
+      'sobre_hero': 'Apresentação (Sobre)',
+      'sobre_historia': 'Nossa História (Sobre)',
+      'sobre_timeline': 'Linha do Tempo (Sobre)',
+      'sobre_equipe': 'Equipe (Sobre)',
+      'sobre_cta': 'Chamada para Ação (Sobre)',
+      'missao': 'Missão & Valores',
+      'oficinas': 'Oficinas',
+      'depoimentos': 'Depoimentos'
+    };
+    return mapa[nome] || nome.toUpperCase();
+  }
+
   private tratarSucesso(nome: string) {
     this.salvando = false;
-    this.mensagemSucesso = `Aba ${nome.toUpperCase()} salva com sucesso!`;
+    this.mensagemSucesso = `Seção "${this.getNomeSecao(nome)}" salva com sucesso!`;
     this.cdr.detectChanges();
     setTimeout(() => this.siteConfig.carregarSecoes().subscribe(), 0);
   }
 
   private tratarErro(nome: string) {
     this.salvando = false;
-    this.mensagemErro = `Erro ao salvar a aba ${nome.toUpperCase()}.`;
+    this.mensagemErro = `Erro ao salvar a seção "${this.getNomeSecao(nome)}".`;
     this.cdr.detectChanges();
   }
 }
