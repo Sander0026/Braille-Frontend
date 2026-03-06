@@ -34,6 +34,7 @@ export class TurmasLista implements OnInit {
 
     // ── Professores (para o dropdown) ──────────────────────────
     professores: Usuario[] = [];
+    professoresFiltro: { id: string; nome: string }[] = [];
 
     // ── Modal Criar/Editar ─────────────────────────────────────
     modalAberto = false;
@@ -119,13 +120,15 @@ export class TurmasLista implements OnInit {
         forkJoin({
             turmas: this.turmasService.listar(this.paginaAtual, 100, termoBusca, statusAtivo, profId || profIdFiltro, statusFiltro),
             professores: this.usuariosService.listar(1, 100),
+            professoresFiltro: this.turmasService.listarProfessoresAtivos(),
         }).subscribe({
-            next: ({ turmas, professores }) => {
+            next: ({ turmas, professores, professoresFiltro }) => {
                 this.turmas = turmas.data;
                 this.totalTurmas = turmas.meta.total;
                 this.professores = professores.data.filter(u =>
                     u.role === 'PROFESSOR' || u.role === 'ADMIN'
                 );
+                this.professoresFiltro = professoresFiltro;
                 this.isLoading = false;
                 this.cdr.markForCheck();
             },
