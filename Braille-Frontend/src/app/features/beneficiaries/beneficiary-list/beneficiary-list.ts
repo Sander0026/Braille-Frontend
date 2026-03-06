@@ -235,7 +235,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 <body>
   <div class="ficha-header">
     <div>
-      <h1>Instituto Louis Braille</h1>
+      <h1>Instituto Luiz Braille</h1>
       <div style="font-size:9pt;color:#555;">Ficha de Cadastro do Aluno</div>
     </div>
     <div class="meta">
@@ -333,7 +333,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     </div>
   </div>
 
-  <div class="rodape">Instituto Louis Braille &nbsp;|&nbsp; Documento gerado automaticamente pelo sistema</div>
+  <div class="rodape">Instituto Luiz Braille &nbsp;|&nbsp; Documento gerado automaticamente pelo sistema</div>
 
   <script>
     window.onload = function () {
