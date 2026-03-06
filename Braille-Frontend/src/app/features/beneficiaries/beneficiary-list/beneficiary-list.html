@@ -554,6 +554,9 @@
                                 <th>Oficina / Turma</th>
                                 <th>Entrada</th>
                                 <th>Saída</th>
+                                <th>Presenças</th>
+                                <th>Faltas</th>
+                                <th>Freq.%</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
@@ -563,6 +566,25 @@
                                 <td>{{ m.turma.nome }}</td>
                                 <td>{{ m.dataEntrada | dataBraille }}</td>
                                 <td>{{ m.dataEncerramento ? (m.dataEncerramento | dataBraille) : '—' }}</td>
+                                <!-- Frequência -->
+                                @if (frequenciasMap.has(m.turma.id)) {
+                                <td style="text-align: center;">{{ frequenciasMap.get(m.turma.id)?.presentes }}</td>
+                                <td style="text-align: center;">{{ frequenciasMap.get(m.turma.id)?.faltas }}</td>
+                                <td style="text-align: center; font-weight: 500;">
+                                    @let freq = frequenciasMap.get(m.turma.id)?.taxaPresenca || 0;
+                                    <span style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+                                        [style.color]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
+                                        <div style="width: 8px; height: 8px; border-radius: 50%;"
+                                            [style.backgroundColor]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
+                                        </div>
+                                        {{ freq }}%
+                                    </span>
+                                </td>
+                                } @else {
+                                <td style="text-align: center; color: #9ca3af;">—</td>
+                                <td style="text-align: center; color: #9ca3af;">—</td>
+                                <td style="text-align: center; color: #9ca3af;">—</td>
+                                }
                                 <td>
                                     <span class="badge-status badge-status--{{ m.status.toLowerCase() }}">
                                         {{ m.status === 'ATIVA' ? 'Em Curso' :
@@ -588,13 +610,22 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
             @if (alunoSelecionado && !carregandoDetalhes) {
-            <button class="btn btn-outline-primary" (click)="imprimirFicha()"
-                aria-label="Imprimir ou salvar a ficha como PDF"
-                title="Abre a tela de impressão — selecione 'Salvar como PDF' para exportar">
-                <span class="material-symbols-rounded"
-                    style="font-size:16px; vertical-align:middle; margin-right:4px;">print</span>
-                Imprimir Ficha
-            </button>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-outline-primary" (click)="exportarCSV()"
+                    aria-label="Exportar ficha completa do aluno para CSV/Excel"
+                    title="Baixa um arquivo .csv com os dados do aluno e oficinas">
+                    <span class="material-symbols-rounded"
+                        style="font-size:16px; vertical-align:middle; margin-right:4px;">download</span>
+                    Exportar CSV
+                </button>
+                <button class="btn btn-outline-primary" (click)="imprimirFicha()"
+                    aria-label="Imprimir ou salvar a ficha como PDF"
+                    title="Abre a tela de impressão — selecione 'Salvar como PDF' para exportar">
+                    <span class="material-symbols-rounded"
+                        style="font-size:16px; vertical-align:middle; margin-right:4px;">print</span>
+                    Imprimir Ficha
+                </button>
+            </div>
             }
         </div>
     </div>

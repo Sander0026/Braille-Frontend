@@ -92,4 +92,14 @@ export class FrequenciasService {
         this.limparCache();
         return this.http.post(`${this.url}/diario/reabrir/${turmaId}/${dataAula}`, {});
     }
+
+    getRelatorioAluno(turmaId: string, alunoId: string): Observable<{
+        estatisticas: { totalAulas: number; presentes: number; faltas: number; taxaPresenca: number };
+        historico: any[];
+    }> {
+        return this.http.get<{
+            estatisticas: { totalAulas: number; presentes: number; faltas: number; taxaPresenca: number };
+            historico: any[];
+        }>(`${this.url}/relatorio/turma/${turmaId}/aluno/${alunoId}`);
+    }
 }

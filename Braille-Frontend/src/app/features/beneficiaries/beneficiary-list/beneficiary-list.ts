@@ -2,8 +2,9 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrateg
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin } from 'rxjs';
 import { BeneficiariosService, Beneficiario } from '../../../core/services/beneficiarios.service';
+import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
@@ -37,6 +38,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   salvando = false;
 
   documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl'; url: string } | null = null;
+  frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
 
   // Abas
   abaAtiva: 'ativos' | 'inativos' = 'ativos';
@@ -75,7 +77,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private confirmDialog: ConfirmDialogService,
     private toast: ToastService,
     private fb: FormBuilder,
-    private authService: AuthService
+    private authService: AuthService,
+    private frequenciasService: FrequenciasService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -290,14 +293,52 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       <p><strong>Cadastrado em:</strong> ${fmtData(a.criadoEm)}</p>
       <p><strong>Possui Laudo:</strong> ${a.laudoUrl ? 'Sim (arquivo digital)' : 'Não'}</p>
     </div>
+    <div class="secao full">
+      <h4>Histórico de Oficinas</h4>
+      ${a.matriculasOficina && a.matriculasOficina.length > 0 ? `
+      <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 8.5pt;">
+        <thead>
+          <tr style="background: #e5e7eb; text-align: left;">
+            <th style="padding: 6px; border: 1px solid #d1d5db;">Oficina</th>
+            <th style="padding: 6px; border: 1px solid #d1d5db;">Entrada</th>
+            <th style="padding: 6px; border: 1px solid #d1d5db;">Saída</th>
+            <th style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">Pres.</th>
+            <th style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">Faltas</th>
+            <th style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">%</th>
+            <th style="padding: 6px; border: 1px solid #d1d5db;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${a.matriculasOficina.map(m => {
+      const stats = this.frequenciasMap.get(m.turma.id);
+      const pres = stats?.presentes?.toString() || '—';
+      const falt = stats?.faltas?.toString() || '—';
+      const taxa = stats?.taxaPresenca != null ? `${stats.taxaPresenca}%` : '—';
+      return `
+            <tr>
+               <td style="padding: 6px; border: 1px solid #d1d5db;">${m.turma.nome}</td>
+               <td style="padding: 6px; border: 1px solid #d1d5db;">${fmtData(m.dataEntrada)}</td>
+               <td style="padding: 6px; border: 1px solid #d1d5db;">${fmtData(m.dataEncerramento)}</td>
+               <td style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">${pres}</td>
+               <td style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">${falt}</td>
+               <td style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">${taxa}</td>
+               <td style="padding: 6px; border: 1px solid #d1d5db;">${m.status === 'ATIVA' ? 'Em Curso' : m.status}</td>
+            </tr>
+            `;
+    }).join('')}
+        </tbody>
+      </table>
+      ` : '<p style="color: #777; margin-top: 8px;">Nenhuma oficina registrada.</p>'
+      }
+    </div>
   </div>
 
   <div class="rodape">Instituto Louis Braille &nbsp;|&nbsp; Documento gerado automaticamente pelo sistema</div>
 
   <script>
-    window.onload = function() {
+    window.onload = function () {
       window.print();
-      window.onafterprint = function() { window.close(); };
+      window.onafterprint = function () { window.close(); };
     };
   </script>
 </body>
@@ -564,12 +605,39 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.modalAberto = true;
     this.carregandoDetalhes = true;
     this.alunoSelecionado = null;
+    this.frequenciasMap.clear();
 
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
-        this.carregandoDetalhes = false;
-        this.cdr.markForCheck();
+
+        // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
+        const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
+
+        if (matriculasAtivas.length > 0) {
+          const requests = matriculasAtivas.map(m =>
+            this.frequenciasService.getRelatorioAluno(m.turma.id, dadosCompletos.id)
+          );
+
+          forkJoin(requests).subscribe({
+            next: (resultados) => {
+              resultados.forEach((res, index) => {
+                const turmaId = matriculasAtivas[index].turma.id;
+                this.frequenciasMap.set(turmaId, res.estatisticas);
+              });
+              this.carregandoDetalhes = false;
+              this.cdr.markForCheck();
+            },
+            error: () => {
+              // Se falhar a frequência, pelo menos mostra o perfil
+              this.carregandoDetalhes = false;
+              this.cdr.markForCheck();
+            }
+          });
+        } else {
+          this.carregandoDetalhes = false;
+          this.cdr.markForCheck();
+        }
       },
       error: () => {
         this.carregandoDetalhes = false;
@@ -683,5 +751,87 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  exportarCSV(): void {
+    if (!this.alunoSelecionado) return;
+    const a = this.alunoSelecionado;
+
+    // Dados base
+    const nome = a.nomeCompleto.replace(/[^a-zA-Z0-9À-ú ]/g, '').trim().replace(/\s+/g, '_');
+    const nomeArquivo = `Ficha_${nome}.csv`;
+
+    const dadosPerfil = [
+      ['DADOS PESSOAIS'],
+      ['Nome Completo', a.nomeCompleto],
+      ['CPF/RG', a.cpfRg || 'N/I'],
+      ['Data Nascimento', a.dataNascimento ? new Date(a.dataNascimento).toLocaleDateString('pt-BR') : 'N/I'],
+      ['Gênero', a.genero || 'N/I'],
+      ['Telefone', a.telefoneContato || 'N/I'],
+      ['Email', a.email || 'N/I'],
+      [''],
+      ['ENDEREÇO'],
+      ['CEP', a.cep || 'N/I'],
+      ['Rua', a.rua || 'N/I'],
+      ['Número', a.numero || 'N/I'],
+      ['Complemento', a.complemento || 'N/I'],
+      ['Bairro', a.bairro || 'N/I'],
+      ['Cidade/UF', `${a.cidade || 'N/I'} / ${a.uf || 'N/I'}`],
+      [''],
+      ['INFORMAÇÕES MÉDICAS'],
+      ['Tipo Deficiência', a.tipoDeficiencia || 'Não especificada'],
+      ['Causa', a.causaDeficiencia || 'Não especificada'],
+      ['Idade Ocorrência', a.idadeOcorrencia || 'N/I'],
+      ['Outras Comorbidades', a.outrasComorbidades || 'N/A'],
+      ['Acompanhamento Oftalmológico', a.acompOftalmologico ? 'Sim' : 'Não'],
+      ['Precisa Acompanhante', a.precisaAcompanhante ? 'Sim' : 'Não'],
+      ['Contato Emergência', a.contatoEmergencia || 'N/I'],
+      [''],
+      ['HISTÓRICO DE OFICINAS'],
+      ['Oficina', 'Entrada', 'Saída', 'Presenças', 'Faltas', 'Freq.%', 'Status']
+    ];
+
+    const oficinas = a.matriculasOficina?.map(m => {
+      let presencas = '—';
+      let faltas = '—';
+      let freq = '—';
+
+      if (this.frequenciasMap.has(m.turma.id)) {
+        const stats = this.frequenciasMap.get(m.turma.id);
+        presencas = stats?.presentes.toString() || '0';
+        faltas = stats?.faltas.toString() || '0';
+        freq = `${stats?.taxaPresenca || 0}%`;
+      }
+
+      return [
+        m.turma.nome,
+        new Date(m.dataEntrada).toLocaleDateString('pt-BR'),
+        m.dataEncerramento ? new Date(m.dataEncerramento).toLocaleDateString('pt-BR') : '—',
+        presencas,
+        faltas,
+        freq,
+        m.status
+      ];
+    }) || [];
+
+    const csvRows = [...dadosPerfil, ...oficinas];
+
+    const csvConteudo = csvRows
+      .map(linha => linha.map(cel => `"${String(cel).replace(/"/g, '""')}"`).join(';'))
+      .join('\r\n');
+
+    const bom = '\uFEFF';
+    const blob = new Blob([bom + csvConteudo], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', nomeArquivo);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    this.toast.sucesso('Ficha exportada com sucesso!');
   }
 }
