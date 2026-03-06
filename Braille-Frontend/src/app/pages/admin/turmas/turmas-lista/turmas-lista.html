@@ -356,6 +356,29 @@
               }
             </div>
           </div>
+
+          <!-- CAPACIDADE -->
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <strong>Alunos:</strong>
+            @if (turmaDetalhes.capacidadeMaxima) {
+            <span>
+              {{ turmaDetalhes.matriculasOficina?.length || 0 }}/{{ turmaDetalhes.capacidadeMaxima }}
+              ({{ turmaDetalhes.matriculasOficina?.length || 0 }} de {{ turmaDetalhes.capacidadeMaxima }} vagas)
+            </span>
+            @if ((turmaDetalhes.matriculasOficina?.length || 0) >= turmaDetalhes.capacidadeMaxima) {
+            <span
+              style="background:#fee2e2; color:#dc2626; font-size:0.75rem; padding:0.1rem 0.5rem; border-radius:9999px; font-weight:600;">Lotada</span>
+            }
+            } @else {
+            <span>{{ turmaDetalhes.matriculasOficina?.length || 0 }} (sem limite definido)</span>
+            }
+          </div>
         </div>
       </div>
       }
