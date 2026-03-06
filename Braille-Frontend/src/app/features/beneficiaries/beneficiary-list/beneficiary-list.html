@@ -610,22 +610,13 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
             @if (alunoSelecionado && !carregandoDetalhes) {
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-outline-primary" (click)="exportarCSV()"
-                    aria-label="Exportar ficha completa do aluno para CSV/Excel"
-                    title="Baixa um arquivo .csv com os dados do aluno e oficinas">
-                    <span class="material-symbols-rounded"
-                        style="font-size:16px; vertical-align:middle; margin-right:4px;">download</span>
-                    Exportar CSV
-                </button>
-                <button class="btn btn-outline-primary" (click)="imprimirFicha()"
-                    aria-label="Imprimir ou salvar a ficha como PDF"
-                    title="Abre a tela de impressão — selecione 'Salvar como PDF' para exportar">
-                    <span class="material-symbols-rounded"
-                        style="font-size:16px; vertical-align:middle; margin-right:4px;">print</span>
-                    Imprimir Ficha
-                </button>
-            </div>
+            <button class="btn btn-outline-primary" (click)="imprimirFicha()"
+                aria-label="Imprimir ou salvar a ficha como PDF"
+                title="Abre a tela de impressão — selecione 'Salvar como PDF' para exportar">
+                <span class="material-symbols-rounded"
+                    style="font-size:16px; vertical-align:middle; margin-right:4px;">print</span>
+                Imprimir Ficha
+            </button>
             }
         </div>
     </div>
