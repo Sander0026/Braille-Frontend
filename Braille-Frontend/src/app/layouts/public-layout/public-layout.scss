@@ -26,23 +26,7 @@ $transition: 200ms ease;
     /* sem scroll horizontal */
 }
 
-// ── Skip link ──────────────────────────────────────────────
-.skip-link {
-    position: absolute;
-    left: -9999px;
-    top: 1rem;
-    background: $black;
-    color: $primary;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    font-weight: 600;
-    z-index: 9999;
-    text-decoration: none;
 
-    &:focus {
-        left: 1rem;
-    }
-}
 
 // ── Header ─────────────────────────────────────────────────
 .site-header {
