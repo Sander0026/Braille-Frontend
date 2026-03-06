@@ -258,51 +258,29 @@ h6 {
 // ============================================================
 html.alto-contraste {
 
-    // Inversão de fundo e texto
-    body {
+    // ── Inversão universal ────────────────────────────────────
+    // Garante que NENHUM elemento fica com fundo branco/cinza
+    *,
+    *::before,
+    *::after {
         background-color: #111111 !important;
-        color: #f5c800 !important; // Amarelo ILBES — cor oficial de acessibilidade visual
+        color: #f5c800 !important;
+        border-color: #444400 !important;
+        box-shadow: none !important;
     }
 
-    // Cabeçalhos e textos em amarelo/branco
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6,
-    p,
-    span,
-    label,
-    td,
-    th,
-    li,
-    dt,
-    dd {
-        color: #f0e060 !important;
+    // ── Exceções: imagens mantêm fundo transparente ───────────
+    img {
+        background-color: transparent !important;
+        border: 1px solid #f5c800 !important;
     }
 
-    // Links
-    a {
-        color: #fffb80 !important;
-        text-decoration: underline !important;
+    svg,
+    svg * {
+        background-color: transparent !important;
     }
 
-    // Painéis, cards e modais
-    .card,
-    .modal,
-    .modal-backdrop .modal,
-    .tab-pane,
-    .page-section,
-    .cms-form,
-    .form-section,
-    .form-card {
-        background-color: #1a1a00 !important;
-        border-color: #f5c800 !important;
-        color: #f0e060 !important;
-    }
-
-    // Inputs e campos de formulário
+    // ── Inputs destacados ──────────────────────────────────────
     input,
     textarea,
     select {
@@ -311,70 +289,71 @@ html.alto-contraste {
         border-color: #f5c800 !important;
     }
 
-    // Botões primários
+    // ── Botão primário: amarelo sobre preto ────────────────────
     .btn-primary,
-    .btn.btn-primary {
+    .btn.btn-primary,
+    .a11y-btn.active {
         background-color: #f5c800 !important;
         color: #111111 !important;
-        border-color: #f5c800 !important;
+        border-color: #c9a500 !important;
     }
 
-    // Botões secundários
+    // ── Botão secundário ──────────────────────────────────────
     .btn-secondary,
     .btn.btn-secondary {
-        background-color: #333300 !important;
+        background-color: #2a2800 !important;
         color: #f5c800 !important;
         border-color: #f5c800 !important;
     }
 
-    // Header admin
-    .admin-header {
-        background-color: #000000 !important;
-        border-bottom-color: #f5c800 !important;
-    }
-
-    // Sidebar
+    // ── Sidebar ───────────────────────────────────────────────
     .sidebar {
         background-color: #000000 !important;
         border-right: 2px solid #f5c800 !important;
     }
 
-    // Nav links
-    .nav-link {
-        color: #f0e060 !important;
-
-        &.active {
-            background-color: rgba(245, 200, 0, 0.3) !important;
-            color: #f5c800 !important;
-        }
-
-        &:hover {
-            background-color: rgba(245, 200, 0, 0.15) !important;
-        }
+    // ── Header ────────────────────────────────────────────────
+    .admin-header {
+        background-color: #000000 !important;
+        border-bottom: 1px solid #f5c800 !important;
     }
 
-    // Tabelas
-    table {
-        border-color: #f5c800 !important;
+    // ── Nav links ativos ──────────────────────────────────────
+    .nav-link.active {
+        background-color: rgba(245, 200, 0, 0.25) !important;
+        color: #f5c800 !important;
     }
 
+    // ── Links ─────────────────────────────────────────────────
+    a {
+        color: #fffb80 !important;
+        text-decoration: underline !important;
+    }
+
+    // ── Tabelas (alternância mínima p/ legibilidade) ───────────
     th {
-        background-color: #1a1a00 !important;
+        background-color: #1a1800 !important;
         color: #f5c800 !important;
         border-color: #f5c800 !important;
     }
 
-    td {
-        border-color: #333300 !important;
-    }
-
     tr:nth-child(even) td {
-        background-color: #0d0d00 !important;
+        background-color: #161400 !important;
     }
 
-    // Foco mais visível
+    // ── Foco super visível (WCAG AA) ──────────────────────────
     :focus-visible {
         outline: 3px solid #ffffff !important;
         outline-offset: 3px !important;
+        background-color: #111111 !important;
+    }
+
+    // ── Badges e status (mantém contorno colorido) ────────────
+    .badge-ativo,
+    .badge-concluido,
+    .badge-cancelado,
+    .badge-prevista,
+    .badge-andamento {
+        border: 1px solid #f5c800 !important;
     }
 }
