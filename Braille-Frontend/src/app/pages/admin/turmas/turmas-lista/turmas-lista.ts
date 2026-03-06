@@ -518,20 +518,30 @@ export class TurmasLista implements OnInit {
         const idsParaMatricular = [...this.alunosSelecionadosParaMatricula];
         let concluidos = 0;
         let erros = 0;
+        const mensagensErro: string[] = [];
 
-        // Requisições sequenciais para matricular os alunos usando a API atual que matricula um por um
         const processarProximo = () => {
             if (concluidos + erros === idsParaMatricular.length) {
                 this.operacaoEmProgresso = false;
                 this.alunosSelecionadosParaMatricula = [];
-                // Recarregar os detalhes da turma para pegar a lista atualizada do backend
                 this.turmasService.buscarPorId(this.turmaDetalhes!.id).subscribe((t) => {
                     this.turmaDetalhes = t;
-                    // Retira da listagem local de pesquisa os que acabaram de ser adicionados
                     this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => !idsParaMatricular.includes(a.id));
 
-                    if (erros > 0) {
-                        this.toast.aviso(`Processo concluído: ${concluidos} adicionados, ${erros} falharam.`);
+                    if (erros > 0 && concluidos === 0) {
+                        // Todos falharam — verifica se foi por lotação
+                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade'));
+                        if (ehLotada) {
+                            this.toast.erro('⚠️ Turma lotada! A capacidade máxima foi atingida. Edite a turma para aumentar o número de vagas.');
+                        } else {
+                            this.toast.erro(`Não foi possível matricular: ${mensagensErro[0] || 'Erro desconhecido'}.`);
+                        }
+                    } else if (erros > 0) {
+                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade'));
+                        const detalhe = ehLotada
+                            ? 'A turma atingiu a capacidade máxima. Edite a turma para aumentar as vagas.'
+                            : `${erros} falha(s).`;
+                        this.toast.aviso(`${concluidos} adicionado(s), ${erros} falhou — ${detalhe}`);
                     } else {
                         this.toast.sucesso(`${concluidos} aluno(s) matriculado(s) com sucesso!`);
                     }
@@ -546,8 +556,9 @@ export class TurmasLista implements OnInit {
                     concluidos++;
                     processarProximo();
                 },
-                error: () => {
+                error: (err: { error?: { message?: string } }) => {
                     erros++;
+                    mensagensErro.push(err.error?.message ?? 'Erro desconhecido');
                     processarProximo();
                 }
             });
