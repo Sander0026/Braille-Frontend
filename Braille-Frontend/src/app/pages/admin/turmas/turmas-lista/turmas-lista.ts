@@ -619,6 +619,45 @@ export class TurmasLista implements OnInit {
         });
     }
 
+    exportarListaCSV(): void {
+        if (!this.turmaDetalhes) return;
+
+        const nomeTurma = this.turmaDetalhes.nome.replace(/[^a-zA-Z0-9À-ú ]/g, '').trim().replace(/\s+/g, '_');
+        const data = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
+        const nomeArquivo = `Turma_${nomeTurma}_${data}.csv`;
+
+        // Cabeçalho das colunas
+        const cabecalho = ['Nome do Aluno', 'Matrícula', 'Status', 'Data de Ingresso'];
+
+        // Linhas de dados
+        const linhas = (this.turmaDetalhes.matriculasOficina ?? []).map(m => [
+            m.aluno.nomeCompleto,
+            m.aluno.matricula ?? '',
+            m.status ?? 'ATIVA',
+            m.dataEntrada ? new Date(m.dataEntrada).toLocaleDateString('pt-BR') : '',
+        ]);
+
+        // Monta o conteúdo CSV com separador ponto-e-vírgula (padrão Excel PT-BR)
+        const csvConteudo = [cabecalho, ...linhas]
+            .map(linha => linha.map(cel => `"${String(cel).replace(/"/g, '""')}"`).join(';'))
+            .join('\r\n');
+
+        // BOM UTF-8 garante que o Excel exiba acentos corretamente
+        const bom = '\uFEFF';
+        const blob = new Blob([bom + csvConteudo], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', nomeArquivo);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        this.toast.sucesso(`Arquivo "${nomeArquivo}" baixado com sucesso!`);
+    }
+
     fecharModalAlunos(): void {
         this.modalAlunosAberto = false;
         this.turmaDetalhes = null;
