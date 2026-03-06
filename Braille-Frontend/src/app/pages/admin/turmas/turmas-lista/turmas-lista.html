@@ -11,16 +11,6 @@
   }
 </div>
 
-<!-- ══════════ ESTADOS ══════════ -->
-@if (isLoading) {
-<div class="loading-state" role="status" aria-busy="true" aria-label="Carregando turmas">
-  <div class="spinner" aria-hidden="true"></div>
-  <p>Carregando oficinas...</p>
-</div>
-} @else if (erro) {
-<div class="error-banner" role="alert">{{ erro }}</div>
-} @else {
-
 <!-- ══════════ BUSCA E FILTROS ══════════ -->
 <div class="filter-bar" role="search">
   <div class="filter-search">
@@ -62,6 +52,16 @@
   </button>
   }
 </div>
+
+<!-- ══════════ ESTADOS ══════════ -->
+@if (isLoading) {
+<div class="loading-state" role="status" aria-busy="true" aria-label="Carregando turmas">
+  <div class="spinner" aria-hidden="true"></div>
+  <p>Carregando oficinas...</p>
+</div>
+} @else if (erro) {
+<div class="error-banner" role="alert">{{ erro }}</div>
+} @else {
 
 @if (turmasFiltradas.length === 0) {
 <div class="empty-state empty-state--sm" role="status">
