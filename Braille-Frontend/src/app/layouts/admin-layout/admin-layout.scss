@@ -752,6 +752,63 @@ $transition: 250ms ease;
     }
 }
 
+// ── Botões de Acessibilidade (A / A+ / Contraste) ─────────────
+.a11y-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: $gray-100;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+
+    @media (max-width: 480px) {
+        display: none; // em telas muito pequenas esconde — usuário provavelmente usa gestos
+    }
+}
+
+.a11y-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid transparent;
+    background: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: $gray-600;
+    transition: background $transition, color $transition, border-color $transition;
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.1rem;
+        line-height: 1;
+    }
+
+    &:hover {
+        background: $gray-200;
+        color: $gray-900;
+    }
+
+    &.active {
+        background: $primary;
+        color: $primary-text;
+        border-color: darken(#f5c800, 10%);
+    }
+
+    &:focus-visible {
+        outline: 2px solid $primary;
+        outline-offset: 2px;
+    }
+}
+
+.a11y-contraste span {
+    font-size: 1.1rem;
+}
+
 // ══════════════════════════════════════════════════════════════
 // MODAL DE PERFIL — estilos específicos
 // ══════════════════════════════════════════════════════════════

@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
 import { ToastComponent } from '../../core/components/toast/toast.component';
+import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
 
 interface NavItem {
   rota: string;
@@ -93,6 +94,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private elRef: ElementRef,
     private cdr: ChangeDetectorRef,
+    public a11y: AccessibilityService
   ) { }
 
   ngOnInit(): void {
@@ -379,5 +381,22 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   get showLabels(): boolean {
     return this.sidebarState === 'full';
+  }
+
+  // ── Acessibilidade ───────────────────────────────────
+  toggleAltoContraste(): void {
+    this.a11y.toggleAltoContraste();
+  }
+
+  setFonte(tamanho: FonteSize): void {
+    this.a11y.setFonte(tamanho);
+  }
+
+  get fonteAtual(): FonteSize {
+    return this.a11y.fonteAtual;
+  }
+
+  get altoContrasteAtivo(): boolean {
+    return this.a11y.isAltoContraste;
   }
 }

@@ -251,3 +251,130 @@ h6 {
         margin: 10mm 12mm;
     }
 }
+
+// ============================================================
+// ALTO CONTRASTE — Ativado via classe `alto-contraste` no <html>
+// Cores ideais para baixa visão, catarata e fotofobia
+// ============================================================
+html.alto-contraste {
+
+    // Inversão de fundo e texto
+    body {
+        background-color: #111111 !important;
+        color: #f5c800 !important; // Amarelo ILBES — cor oficial de acessibilidade visual
+    }
+
+    // Cabeçalhos e textos em amarelo/branco
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p,
+    span,
+    label,
+    td,
+    th,
+    li,
+    dt,
+    dd {
+        color: #f0e060 !important;
+    }
+
+    // Links
+    a {
+        color: #fffb80 !important;
+        text-decoration: underline !important;
+    }
+
+    // Painéis, cards e modais
+    .card,
+    .modal,
+    .modal-backdrop .modal,
+    .tab-pane,
+    .page-section,
+    .cms-form,
+    .form-section,
+    .form-card {
+        background-color: #1a1a00 !important;
+        border-color: #f5c800 !important;
+        color: #f0e060 !important;
+    }
+
+    // Inputs e campos de formulário
+    input,
+    textarea,
+    select {
+        background-color: #0d0d00 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    // Botões primários
+    .btn-primary,
+    .btn.btn-primary {
+        background-color: #f5c800 !important;
+        color: #111111 !important;
+        border-color: #f5c800 !important;
+    }
+
+    // Botões secundários
+    .btn-secondary,
+    .btn.btn-secondary {
+        background-color: #333300 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    // Header admin
+    .admin-header {
+        background-color: #000000 !important;
+        border-bottom-color: #f5c800 !important;
+    }
+
+    // Sidebar
+    .sidebar {
+        background-color: #000000 !important;
+        border-right: 2px solid #f5c800 !important;
+    }
+
+    // Nav links
+    .nav-link {
+        color: #f0e060 !important;
+
+        &.active {
+            background-color: rgba(245, 200, 0, 0.3) !important;
+            color: #f5c800 !important;
+        }
+
+        &:hover {
+            background-color: rgba(245, 200, 0, 0.15) !important;
+        }
+    }
+
+    // Tabelas
+    table {
+        border-color: #f5c800 !important;
+    }
+
+    th {
+        background-color: #1a1a00 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    td {
+        border-color: #333300 !important;
+    }
+
+    tr:nth-child(even) td {
+        background-color: #0d0d00 !important;
+    }
+
+    // Foco mais visível
+    :focus-visible {
+        outline: 3px solid #ffffff !important;
+        outline-offset: 3px !important;
+    }
+}
