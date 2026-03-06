@@ -445,7 +445,7 @@
         <label class="form-label" for="f-prof">Professor / Orientador</label>
         <select id="f-prof" class="form-input" formControlName="professorId">
           <option value="">Todos os professores</option>
-          @for (prof of professores; track prof.id) {
+          @for (prof of professoresFiltro; track prof.id) {
           <option [value]="prof.id">{{ prof.nome }}</option>
           }
         </select>

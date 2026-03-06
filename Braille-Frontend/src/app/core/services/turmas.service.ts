@@ -78,6 +78,10 @@ export class TurmasService {
         return this.cache.get(key)!;
     }
 
+    listarProfessoresAtivos(): Observable<{ id: string; nome: string }[]> {
+        return this.http.get<{ id: string; nome: string }[]>(`${this.url}/professores-ativos`);
+    }
+
     buscarPorId(id: string): Observable<Turma> {
         return this.http.get<Turma>(`${this.url}/${id}`);
     }
