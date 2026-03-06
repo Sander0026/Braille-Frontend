@@ -2,8 +2,8 @@ import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy } from '@
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { forkJoin, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
@@ -60,6 +60,12 @@ export class TurmasLista implements OnInit {
     buscandoAlunos = false;
     operacaoEmProgresso = false;
 
+    // ── Filtros e Busca ─────────────────────────────────────────
+    buscaCtrl = new FormControl('');
+    drawerAberto = false;
+    filterForm!: FormGroup;
+    private destroy$ = new Subject<void>();
+
     // ── Permissões ─────────────────────────────────────────────
     isProfessor = false;
     userId = '';
@@ -78,11 +84,22 @@ export class TurmasLista implements OnInit {
 
 
     ngOnInit(): void {
+        this.iniciarFormularios();
+
+        // Inscreve a barra de busca p/ ativar o filtro com debounce
+        this.buscaCtrl.valueChanges.pipe(
+            debounceTime(400),
+            distinctUntilChanged(),
+            takeUntil(this.destroy$)
+        ).subscribe(() => {
+            this.paginaAtual = 1;
+            this.carregarTurmas();
+        });
         const user = this.authService.getUser();
         this.isProfessor = user?.role === 'PROFESSOR';
         this.userId = user?.sub || '';
 
-        this.iniciarFormulario();
+        this.iniciarFormularios();
         this.iniciarBuscaAlunos();
         this.carregarDadosIniciais();
     }
@@ -95,8 +112,12 @@ export class TurmasLista implements OnInit {
         const statusAtivo = this.abaAtual === 'ativas';
         const profId = this.isProfessor ? this.userId : undefined;
 
+        const termoBusca = this.buscaCtrl.value?.trim() || undefined;
+        const profIdFiltro = this.filterForm?.value.professorId || undefined;
+        const statusFiltro = this.filterForm?.value.status || undefined;
+
         forkJoin({
-            turmas: this.turmasService.listar(this.paginaAtual, 100, undefined, statusAtivo, profId),
+            turmas: this.turmasService.listar(this.paginaAtual, 100, termoBusca, statusAtivo, profId || profIdFiltro, statusFiltro),
             professores: this.usuariosService.listar(1, 100),
         }).subscribe({
             next: ({ turmas, professores }) => {
@@ -116,13 +137,18 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    // ── Formulário ─────────────────────────────────────────────
-    iniciarFormulario(): void {
+    // ── Formulários ────────────────────────────────────────────
+    iniciarFormularios(): void {
         this.turmaForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
             descricao: [''],
             horario: [''],
             professorId: ['', Validators.required],
+        });
+
+        this.filterForm = this.fb.group({
+            professorId: [''],
+            status: [''],
         });
     }
 
@@ -144,7 +170,31 @@ export class TurmasLista implements OnInit {
         this.carregarTurmas(1);
     }
 
+    // ── Logica de Filtros Ativos ───────────────────────────────
+    get quantidadeFiltrosAtivos(): number {
+        if (!this.filterForm) return 0;
+        let count = 0;
+        const values = this.filterForm.value;
+        if (values.professorId) count++;
+        if (values.status) count++;
+        return count;
+    }
+
+    limparFiltros() {
+        this.filterForm.reset();
+        this.buscaCtrl.setValue('');
+        this.paginaAtual = 1;
+        this.carregarTurmas();
+    }
+
+    aplicarFiltros() {
+        this.drawerAberto = false;
+        this.paginaAtual = 1;
+        this.carregarTurmas();
+    }
+
     // ── Carregamentos ──────────────────────────────────────────
+
     carregarTurmas(pagina = 1): void {
         this.isLoading = true;
         this.erro = '';
@@ -153,10 +203,16 @@ export class TurmasLista implements OnInit {
         // Passa statusAtivo baseado na aba: ativas=true, arquivadas=false
         const statusAtivo = this.abaAtual === 'ativas' ? true : false;
 
-        // Se for professor, passa o próprio ID para filtrar a pesquisa
-        const profId = this.isProfessor ? this.userId : undefined;
+        // Se for professor, passa o próprio ID
+        const profIdOverride = this.isProfessor ? this.userId : undefined;
 
-        this.turmasService.listar(pagina, 100, undefined, statusAtivo, profId).subscribe({
+        const termoBusca = this.buscaCtrl.value?.trim() || undefined;
+        const profIdFiltro = this.filterForm?.value.professorId || undefined;
+        const statusFiltro = this.filterForm?.value.status || undefined;
+
+        const professorFinalId = profIdOverride || profIdFiltro;
+
+        this.turmasService.listar(pagina, 100, termoBusca, statusAtivo, professorFinalId, statusFiltro).subscribe({
             next: (res) => {
                 this.turmas = res.data;
                 this.totalTurmas = res.meta.total;

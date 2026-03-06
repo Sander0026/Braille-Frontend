@@ -21,6 +21,34 @@
 <div class="error-banner" role="alert">{{ erro }}</div>
 } @else {
 
+<!-- ══════════ BUSCA E FILTROS ══════════ -->
+<div class="filter-bar" role="search">
+  <div class="filter-search">
+    <label for="busca-turma" class="sr-only">Buscar turma ou oficina por nome</label>
+    <input id="busca-turma" type="search" class="form-input" placeholder="Buscar oficina por nome..."
+      [formControl]="buscaCtrl" aria-label="Buscar turma ou oficina por nome" autocomplete="off" />
+  </div>
+
+  <!-- Botão de Filtros Avançados -->
+  <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
+    [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Abrir filtros avançados">
+    <span class="material-symbols-rounded">tune</span>
+    Filtros
+    @if (quantidadeFiltrosAtivos > 0) {
+    <span class="filter-badge">{{ quantidadeFiltrosAtivos }}</span>
+    }
+  </button>
+</div>
+
+<!-- Aviso de filtros ativos -->
+@if (quantidadeFiltrosAtivos > 0) {
+<div class="filter-active-bar" role="status">
+  <span class="material-symbols-rounded" style="font-size:16px;">filter_alt</span>
+  <span>{{ quantidadeFiltrosAtivos }} filtro(s) ativo(s) — {{ totalTurmas }} resultado(s)</span>
+  <button type="button" class="btn-link" (click)="limparFiltros()">Limpar todos</button>
+</div>
+}
+
 <!-- Tabs switcher — sempre visível após carregar -->
 <div class="abas-switcher" role="tablist">
   <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'ativas'" [class.ativa]="abaAtual === 'ativas'"
@@ -374,3 +402,61 @@
   </div>
 </div>
 }
+
+<!-- ══════════ DRAWER: Filtros Avançados ══════════ -->
+@if (drawerAberto) {
+<div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
+}
+<aside class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog" aria-modal="true"
+  aria-label="Filtros avançados" [formGroup]="filterForm">
+
+  <div class="filter-drawer__header">
+    <h2 class="filter-drawer__title">
+      <span class="material-symbols-rounded">tune</span>
+      Filtros Avançados
+    </h2>
+    <button type="button" class="btn btn-icon btn-ghost" (click)="drawerAberto = false"
+      aria-label="Fechar filtros">✕</button>
+  </div>
+
+  <div class="filter-drawer__body">
+
+    <!-- FASE DA TURMA -->
+    <section class="filter-section">
+      <h3 class="filter-section__title">Situação / Ciclo</h3>
+
+      <div class="filter-field">
+        <label class="form-label" for="f-status">Fase da Execução</label>
+        <select id="f-status" class="form-input" formControlName="status">
+          <option value="">Todas</option>
+          <option value="PREVISTA">Prevista (Não Iniciada)</option>
+          <option value="ANDAMENTO">Em Andamento</option>
+          <option value="CONCLUIDA">Concluída (Histórico)</option>
+          <option value="CANCELADA">Cancelada / Suspensa</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- PROFESSOR -->
+    <section class="filter-section">
+      <h3 class="filter-section__title">Responsabilidade</h3>
+
+      <div class="filter-field">
+        <label class="form-label" for="f-prof">Professor / Orientador</label>
+        <select id="f-prof" class="form-input" formControlName="professorId">
+          <option value="">Todos os professores</option>
+          @for (prof of professores; track prof.id) {
+          <option [value]="prof.id">{{ prof.nome }}</option>
+          }
+        </select>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Rodapé do Drawer com botões de ação -->
+  <div class="filter-drawer__footer">
+    <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
+    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar Filtros</button>
+  </div>
+</aside>
