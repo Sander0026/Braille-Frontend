@@ -275,8 +275,8 @@ export class TurmasLista implements OnInit {
         if (turma.gradeHoraria && turma.gradeHoraria.length > 0) {
             this.gradeHoraria = turma.gradeHoraria.map(turno => ({
                 dia: turno.dia,
-                horaInicio: this.minutosParaHm(turno.horaInicio),
-                horaFim: this.minutosParaHm(turno.horaFim)
+                horaInicio: this.minutosParaHmTemplate(turno.horaInicio),
+                horaFim: this.minutosParaHmTemplate(turno.horaFim)
             }));
         }
 
@@ -659,7 +659,7 @@ export class TurmasLista implements OnInit {
         return (h * 60) + (m || 0);
     }
 
-    private minutosParaHm(minutos: number): string {
+    minutosParaHmTemplate(minutos: number): string {
         const h = Math.floor(minutos / 60);
         const m = minutos % 60;
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
