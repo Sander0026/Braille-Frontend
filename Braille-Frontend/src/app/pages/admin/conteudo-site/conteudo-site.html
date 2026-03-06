@@ -138,7 +138,7 @@
                     <div class="form-group">
                         <label class="form-label" for="tituloLinha1">Título Linha 1</label>
                         <input type="text" id="tituloLinha1" class="form-input" formControlName="tituloLinha1"
-                            placeholder="Ex: Mais do que inclusão â€”">
+                            placeholder="Ex: Mais do que inclusão —">
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="tituloDestaque">Palavra em Destaque (Linha 2)</label>
@@ -196,14 +196,14 @@
 
             <div class="form-footer">
                 <button type="submit" class="btn btn-primary" [disabled]="salvando || formHero.invalid">
-                    @if(salvando) { Salvando... } @else { Salvar Hero }
+                    @if(salvando) { Salvando... } @else { Salvar Apresentação }
                 </button>
             </div>
         </form>
     </div>
     }
 
-    <!-- ABA: MISSÃƒO -->
+    <!-- ABA: MISSÃO -->
     @if (abaAtiva === 'missao') {
     <div class="tab-pane active" id="pane-missao">
         <form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
@@ -249,7 +249,7 @@
                         <label class="form-label">Valor Principal 1</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor1Icone"
-                                placeholder="Ícone ou Emoji (ex: ™)">
+                                placeholder="Ícone ou Emoji (ex: ✨)">
                             <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
                                 placeholder="Título (ex: Inclusão)">
                         </div>
@@ -330,7 +330,7 @@
 
                     <div class="flex-row">
                         <input type="text" class="form-input flex-1" formControlName="icon"
-                            placeholder="Ícone/Emoji (ex: ðŸ’»)">
+                            placeholder="Ícone/Emoji (ex: 💻)">
                         <input type="text" class="form-input flex-3" formControlName="titulo"
                             placeholder="Título da Oficina">
                     </div>
@@ -408,12 +408,12 @@
         <!-- Hero do Sobre -->
         <form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form">
             <div class="form-header">
-                <h2>Hero da Página Sobre</h2>
+                <h2>Apresentação da Página Sobre</h2>
                 <p>Texto de destaque que aparece no topo da página /sobre.</p>
             </div>
             <div class="form-grid">
                 <div class="form-group full-width">
-                    <label for="sobreEyebrow">Eyebrow (texto acima do título)</label>
+                    <label for="sobreEyebrow">Pequeno Título Superior</label>
                     <input type="text" id="sobreEyebrow" formControlName="eyebrow" class="form-input"
                         placeholder="Ex: Conheça o Instituto" />
                 </div>
@@ -431,7 +431,7 @@
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" [disabled]="salvando">
                     <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
-                    {{ salvando ? 'Salvando…' : 'Salvar Hero' }}
+                    {{ salvando ? 'Salvando…' : 'Salvar Apresentação' }}
                 </button>
             </div>
         </form>
@@ -589,7 +589,7 @@
             <div class="form-actions">
                 <button type="submit" class="btn btn-primary" [disabled]="salvando">
                     <span class="material-symbols-rounded">{{ salvando ? 'sync' : 'save' }}</span>
-                    {{ salvando ? 'Salvando…' : 'Salvar CTA' }}
+                    {{ salvando ? 'Salvando…' : 'Salvar Chamada à Ação' }}
                 </button>
             </div>
         </form>
