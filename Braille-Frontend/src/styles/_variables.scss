@@ -34,9 +34,9 @@ $color-info: #2563eb;
 $color-info-light: #dbeafe;
 
 // --- Acessibilidade ---
-$color-focus-ring: $color-primary;
-$focus-ring-width: 3px;
-$focus-ring-offset: 2px;
+$color-focus-ring: $color-gray-900; // Alterado de primary(Amarelo) para 900(Preto) p/ Contraste WCAG AAA
+$focus-ring-width: 4px; // Bordas generosas para navegação por teclado
+$focus-ring-offset: 3px;
 
 // --- Tipografia ---
 $font-family-base: 'Inter', 'Segoe UI', Arial, sans-serif;
