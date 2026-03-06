@@ -295,6 +295,68 @@
     }
 }
 
+// Endereço ocupa linha inteira no perfil
+.profile-section--full {
+    grid-column: 1 / -1;
+}
+
+// Linha de leitura somente (Login) no modal de edição
+.info-row-readonly {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0.875rem;
+    background: #f3f4f6;
+    border-radius: 0.5rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #e5e7eb;
+
+    .info-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        white-space: nowrap;
+    }
+
+    .info-badge {
+        font-family: 'Courier New', monospace;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #111827;
+        background: #e5e7eb;
+        padding: 0.15rem 0.6rem;
+        border-radius: 0.35rem;
+    }
+}
+
+// Rótulo de seção dentro do formulário
+.section-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+    margin: 1.25rem 0 0.5rem 0;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+// Campos largos/estreitos na grade de endereço
+.form-group--wide {
+    grid-column: span 1;
+
+    @media (min-width: 576px) {
+        grid-column: span 2;
+    }
+}
+
+.form-group--narrow {
+    grid-column: span 1;
+}
+
+
 /* RESPONSIVIDADE MOBILE */
 @media (max-width: 640px) {
     .modal-overlay {

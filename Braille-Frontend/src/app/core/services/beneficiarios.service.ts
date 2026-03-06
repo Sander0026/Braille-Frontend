@@ -76,17 +76,17 @@ export class BeneficiariosService {
         this.cache.clear();
     }
 
-    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean, filtros?: Record<string, any>): string {
+    private buildCacheKey(page: number, limit: number, busca?: string, inativos?: boolean, filtros?: Record<string, any>): string {
         const filtrosStr = filtros ? JSON.stringify(filtros) : '';
-        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${filtrosStr}`;
+        return `${page}|${limit}|${busca ?? ''}|${inativos ?? false}|${filtrosStr}`;
     }
 
-    listar(page = 1, limit = 10, nome?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<PaginatedResponse<Beneficiario>> {
-        const key = this.buildCacheKey(page, limit, nome, inativos, filtros);
+    listar(page = 1, limit = 10, busca?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<PaginatedResponse<Beneficiario>> {
+        const key = this.buildCacheKey(page, limit, busca, inativos, filtros);
 
         if (!this.cache.has(key)) {
             let params = new HttpParams().set('page', page).set('limit', limit);
-            if (nome) params = params.set('nome', nome);
+            if (busca) params = params.set('busca', busca);
             if (inativos) params = params.set('inativos', 'true');
 
             // Adiciona todos os filtros extras dinamicamente
@@ -106,9 +106,9 @@ export class BeneficiariosService {
         return this.cache.get(key)!;
     }
 
-    exportarLista(nome?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<ArrayBuffer> {
+    exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<ArrayBuffer> {
         let params = new HttpParams();
-        if (nome) params = params.set('nome', nome);
+        if (busca) params = params.set('busca', busca);
         if (inativos) params = params.set('inativos', 'true');
         if (filtros) {
             Object.entries(filtros).forEach(([k, v]) => {

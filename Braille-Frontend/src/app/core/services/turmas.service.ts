@@ -56,18 +56,19 @@ export class TurmasService {
         this.cache.clear();
     }
 
-    private buildCacheKey(page: number, limit: number, nome?: string, statusAtivo?: boolean, professorId?: string): string {
-        return `${page}|${limit}|${nome ?? ''}|${statusAtivo ?? 'all'}|${professorId ?? ''}`;
+    private buildCacheKey(page: number, limit: number, nome?: string, statusAtivo?: boolean, professorId?: string, status?: string): string {
+        return `${page}|${limit}|${nome ?? ''}|${statusAtivo ?? 'all'}|${professorId ?? ''}|${status ?? ''}`;
     }
 
-    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string): Observable<PaginatedResponse<Turma>> {
-        const key = this.buildCacheKey(page, limit, nome, statusAtivo, professorId);
+    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string, status?: string): Observable<PaginatedResponse<Turma>> {
+        const key = this.buildCacheKey(page, limit, nome, statusAtivo, professorId, status);
 
         if (!this.cache.has(key)) {
             let params = new HttpParams().set('page', page).set('limit', limit).set('excluido', 'false');
             if (nome) params = params.set('nome', nome);
             if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
             if (professorId) params = params.set('professorId', professorId);
+            if (status) params = params.set('status', status);
 
             const req$ = this.http.get<PaginatedResponse<Turma>>(this.url, { params }).pipe(shareReplay(1));
             this.cache.set(key, req$);
@@ -75,6 +76,10 @@ export class TurmasService {
         }
 
         return this.cache.get(key)!;
+    }
+
+    listarProfessoresAtivos(): Observable<{ id: string; nome: string }[]> {
+        return this.http.get<{ id: string; nome: string }[]>(`${this.url}/professores-ativos`);
     }
 
     buscarPorId(id: string): Observable<Turma> {

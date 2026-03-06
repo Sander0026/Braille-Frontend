@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
@@ -31,7 +31,8 @@ export class CadastroUsuarioWizard implements OnInit {
         private fb: FormBuilder,
         private http: HttpClient,
         private router: Router,
-        private usuariosService: UsuariosService
+        private usuariosService: UsuariosService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -134,19 +135,25 @@ export class CadastroUsuarioWizard implements OnInit {
 
         const cpfSomenteNumeros = (v.dadosPessoais.cpf as string).replace(/\D/g, '');
 
+        const sanitize = (str: any) => {
+            if (typeof str !== 'string') return str || undefined;
+            const trimmed = str.trim();
+            return trimmed === '' ? undefined : trimmed;
+        };
+
         const payload = {
-            nome: v.dadosPessoais.nomeCompleto,
+            nome: sanitize(v.dadosPessoais.nomeCompleto)!,
             cpf: cpfSomenteNumeros,
-            role: v.dadosPessoais.funcao,
-            email: v.dadosPessoais.email || undefined,
-            telefone: v.contato.telefone || undefined,
-            cep: v.contato.cep || undefined,
-            rua: v.contato.rua || undefined,
-            numero: v.contato.numero || undefined,
-            complemento: v.contato.complemento || undefined,
-            bairro: v.contato.bairro || undefined,
-            cidade: v.contato.cidade || undefined,
-            uf: v.contato.uf || undefined,
+            role: sanitize(v.dadosPessoais.funcao)!,
+            email: sanitize(v.dadosPessoais.email),
+            telefone: sanitize(v.contato.telefone),
+            cep: sanitize(v.contato.cep),
+            rua: sanitize(v.contato.rua),
+            numero: sanitize(v.contato.numero),
+            complemento: sanitize(v.contato.complemento),
+            bairro: sanitize(v.contato.bairro),
+            cidade: sanitize(v.contato.cidade),
+            uf: sanitize(v.contato.uf),
         };
 
         this.usuariosService.criar(payload).subscribe({
@@ -157,6 +164,7 @@ export class CadastroUsuarioWizard implements OnInit {
                 if ('_reativacao' in resp && resp._reativacao) {
                     this.dadosReativacao = resp as ReativacaoResponse;
                     this.modalReativacao = true;
+                    this.cdr.detectChanges();
                     return;
                 }
 
@@ -167,12 +175,19 @@ export class CadastroUsuarioWizard implements OnInit {
                     senha: criado._credenciais.senha,
                 };
                 this.exibirFeedback('Usuário cadastrado com sucesso! Anote as credenciais abaixo.', 'sucesso');
+                this.cdr.detectChanges();
             },
             error: (err: HttpErrorResponse) => {
+                this.isSalvando = false;
+                const msgs = Array.isArray(err.error?.message)
+                    ? err.error.message.join(' | ')
+                    : err.error?.message;
+
                 const msg = err.status === 409
                     ? 'Já existe um funcionário ativo com este CPF.'
-                    : (err.error?.message ?? 'Erro ao cadastrar. Tente novamente.');
+                    : `Erro na validação: ${msgs || 'Falha ao cadastrar. Tente novamente.'}`;
                 this.exibirFeedback(msg, 'erro');
+                this.cdr.detectChanges();
             },
         });
     }
@@ -191,10 +206,13 @@ export class CadastroUsuarioWizard implements OnInit {
                     senha: resp._credenciais.senha,
                 };
                 this.exibirFeedback(`Funcionário ${this.dadosReativacao!.nome} reativado com sucesso!`, 'sucesso');
+                this.dadosReativacao = null;
+                this.cdr.detectChanges();
             },
             error: () => {
                 this.isSalvando = false;
                 this.exibirFeedback('Erro ao reativar. Tente novamente.', 'erro');
+                this.cdr.detectChanges();
             }
         });
     }

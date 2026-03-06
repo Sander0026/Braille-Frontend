@@ -13,9 +13,16 @@ export interface Usuario {
     role: 'ADMIN' | 'SECRETARIA' | 'PROFESSOR' | 'COMUNICACAO';
     fotoPerfil?: string;
     precisaTrocarSenha?: boolean;
+    statusAtivo?: boolean;
     telefone?: string;
+    cep?: string;
+    rua?: string;
+    numero?: string;
+    complemento?: string;
+    bairro?: string;
     cidade?: string;
     uf?: string;
+    criadoEm?: string;
 }
 
 /** Resposta quando o CPF já existe inativo — o frontend deve perguntar se quer reativar */
