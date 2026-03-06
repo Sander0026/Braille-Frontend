@@ -111,9 +111,9 @@
 
     <div class="card-footer">
       @if (abaAtual === 'ativas') {
-      <button class="btn btn-sm btn-ghost" (click)="verAlunos(turma)"
-        [attr.aria-label]="'Ver alunos da oficina ' + turma.nome">
-        Alunos
+      <button class="btn-icon" (click)="abrirModalAlunos(turma)" aria-label="Perfil da Oficina e Alunos"
+        title="Perfil da Oficina / Alunos Matriculados">
+        <span class="material-symbols-rounded">group</span>
       </button>
       @if (!isProfessor) {
       <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
@@ -208,17 +208,51 @@
         }
       </div>
 
-      <div class="form-group">
-        <label for="modalHorario">Horário</label>
-        <input type="text" id="modalHorario" formControlName="horario" class="form-input"
-          placeholder="Ex: Seg e Qua — 14h às 16h" />
+      <div class="row" style="display:flex; gap:1rem;">
+        <div class="form-group" style="flex:1;">
+          <label for="modalCapacidade">Capacidade <span class="badge-opt">opcional</span></label>
+          <input type="number" id="modalCapacidade" formControlName="capacidadeMaxima" class="form-input"
+            placeholder="Ex: 20" min="1" />
+        </div>
+        <div class="form-group" style="flex:2;">
+          <label for="modalDescricao">Descrição <span class="badge-opt">opcional</span></label>
+          <input type="text" id="modalDescricao" formControlName="descricao" class="form-input"
+            placeholder="Resumo, sala, observações..." />
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="modalDescricao">Descrição</label>
-        <textarea id="modalDescricao" formControlName="descricao" class="form-input" rows="3"
-          placeholder="Descreva brevemente o conteúdo da oficina..."></textarea>
-      </div>
+      <fieldset class="grade-horaria-fieldset">
+        <legend>Grade Horária <span class="badge-opt">opcional</span></legend>
+        <p class="grade-helper">Adicione os dias e horas para evitar conflitos (ex: Seg 14:00 às 16:00).</p>
+
+        <div class="turno-form">
+          <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}" class="form-input flex-1"
+            aria-label="Dia da Semana">
+            <option value="">Dia...</option>
+            @for (d of dias; track d.valor) {
+            <option [value]="d.valor">{{ d.label }}</option>
+            }
+          </select>
+          <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
+            class="form-input flex-1" aria-label="Início" />
+          <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
+            class="form-input flex-1" aria-label="Fim" />
+          <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarTurno()">+ Incluir</button>
+        </div>
+        @if (erroTurno) { <span class="error-text">⚠️ {{ erroTurno }}</span> }
+
+        @if (gradeHoraria.length > 0) {
+        <ul class="grade-list">
+          @for (turno of gradeHoraria; track turno.dia; let i = $index) {
+          <li class="grade-item">
+            <span class="dia-label">{{ labelDia(turno.dia) }}</span>
+            <span>{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
+            <button type="button" class="btn-remove" (click)="removerTurno(i)" aria-label="Remover">✕</button>
+          </li>
+          }
+        </ul>
+        }
+      </fieldset>
 
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" (click)="fecharModal()">
@@ -278,13 +312,53 @@
 <div class="modal-overlay" role="dialog" aria-label="Alunos matriculados" aria-modal="true"
   (click)="fecharModalAlunos()">
   <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title" style="display:flex; align-items:center;">
-        Alunos — {{ turmaDetalhes?.nome ?? '...' }}
+    <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+      <h2 class="modal-title" style="display:flex; align-items:center; font-size: 1.25rem;">
+        Perfil da Oficina
       </h2>
       <button class="modal-close" (click)="fecharModalAlunos()" aria-label="Fechar">✕</button>
     </div>
-    <div class="modal-body">
+
+    <div class="modal-body" style="padding-top: 0.5rem;">
+
+      <!-- INFO CARD DA TURMA -->
+      @if (turmaDetalhes) {
+      <div class="info-card"
+        style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; color: #1e293b; margin: 0 0 0.5rem 0;">{{ turmaDetalhes.nome }}</h3>
+
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: #475569;">
+          <!-- PROFESSOR -->
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <strong>Professor:</strong> {{ turmaDetalhes.professor?.nome || 'Não atribuído' }}
+          </div>
+
+          <!-- HORÁRIOS -->
+          <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+              style="margin-top: 2px;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <strong>Horários:</strong>
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              @if (turmaDetalhes.gradeHoraria && turmaDetalhes.gradeHoraria.length > 0) {
+              @for (turno of turmaDetalhes.gradeHoraria; track turno.dia) {
+              <span>{{ labelDia(turno.dia) }} — {{ minutosParaHmTemplate(turno.horaInicio) }} às {{
+                minutosParaHmTemplate(turno.horaFim) }}</span>
+              }
+              } @else {
+              <span>{{ turmaDetalhes.horario || 'Não definido' }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
 
       <!-- Tabs Switcher para Modal -->
       <div class="abas-switcher" role="tablist" style="margin-bottom: 1.5rem;">
@@ -378,7 +452,12 @@
               <div class="aluno-avatar" aria-hidden="true">
                 {{ matricula.aluno.nomeCompleto.charAt(0) }}
               </div>
-              <span>{{ matricula.aluno.nomeCompleto }}</span>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500; color: #1e293b;">{{ matricula.aluno.nomeCompleto }}</span>
+                <span style="font-size: 0.8rem; color: #64748b;">
+                  Matrícula: {{ matricula.aluno.matricula || 'Gerando pendente...' }}
+                </span>
+              </div>
             </div>
             @if (!isProfessor) {
             <button class="btn btn-danger btn-sm"
