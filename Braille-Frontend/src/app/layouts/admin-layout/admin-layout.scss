@@ -761,8 +761,11 @@ $transition: 250ms ease;
     border-radius: 0.5rem;
     padding: 0.25rem;
 
+    // Em telas pequenas: reduz o padding mas MANTÉM visível.
+    // Controles de acessibilidade devem estar sempre disponíveis.
     @media (max-width: 480px) {
-        display: none; // em telas muito pequenas esconde — usuário provavelmente usa gestos
+        padding: 0.15rem;
+        gap: 0.15rem;
     }
 }
 
