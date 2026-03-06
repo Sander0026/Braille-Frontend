@@ -1,4 +1,5 @@
 import { Injectable, signal, computed, inject, NgZone } from '@angular/core';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 export type ToastTipo = 'sucesso' | 'erro' | 'aviso' | 'info';
 
@@ -11,6 +12,7 @@ export interface Toast {
 @Injectable({ providedIn: 'root' })
 export class ToastService {
     private ngZone = inject(NgZone);
+    private liveAnnouncer = inject(LiveAnnouncer);
     private _toasts = signal<Toast[]>([]);
     readonly toasts = computed(() => this._toasts());
 
@@ -19,10 +21,14 @@ export class ToastService {
     mostrar(mensagem: string, tipo: ToastTipo = 'sucesso', duracaoMs = 3500): void {
         const id = ++this.nextId;
 
+        // Narrar via ARIA Live Region para leitores de tela (NVDA, VoiceOver, JAWS)
+        // 'assertive' para erros: interrompe o leitor de tela imediatamente
+        // 'polite' para o restante: narra quando o leitor terminar a sentença atual
+        const politeness = tipo === 'erro' ? 'assertive' : 'polite';
+        this.liveAnnouncer.announce(mensagem, politeness);
+
         // Isola completamente do Change Detection do Angular (Zone.js)
         this.ngZone.runOutsideAngular(() => {
-            // Atualiza o signal (vai engatilhar o componente Toast de qualquer forma, 
-            // mas sem explodir a verificação síncrona do componente pai)
             this._toasts.update(lista => [...lista, { id, mensagem, tipo }]);
 
             setTimeout(() => {
