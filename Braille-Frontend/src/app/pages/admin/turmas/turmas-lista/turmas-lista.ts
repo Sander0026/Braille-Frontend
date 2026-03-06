@@ -439,6 +439,8 @@ export class TurmasLista implements OnInit {
         }
     }
 
+    abrirModalAlunos(turma: Turma): void { this.verAlunos(turma); }
+
     verAlunos(turma: Turma): void {
         this.turmaDetalhes = null;
         this.carregandoDetalhes = true;
