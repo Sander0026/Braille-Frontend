@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
 
 @Component({
   selector: 'app-public-layout',
@@ -9,4 +10,24 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class PublicLayout {
   readonly currentYear = new Date().getFullYear();
+
+  // Acessibilidade Global (Herdado do service)
+  public a11y = inject(AccessibilityService);
+
+  get fonteAtual(): FonteSize {
+    return this.a11y.fonteAtual;
+  }
+
+  get altoContrasteAtivo(): boolean {
+    return this.a11y.isAltoContraste;
+  }
+
+  setFonte(tamanho: FonteSize) {
+    this.a11y.setFonte(tamanho);
+  }
+
+  toggleAltoContraste() {
+    this.a11y.toggleAltoContraste();
+  }
 }
+
