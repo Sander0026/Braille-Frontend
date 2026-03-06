@@ -456,10 +456,23 @@
       <!-- ABA: REMOVER ALUNOS -->
       @if (modalAlunosAbaAtual === 'remover') {
       <div>
-        <h3
-          style="font-size: 1rem; margin-bottom: 0.5rem; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
-          Alunos Matriculados ({{ (turmaDetalhes?.matriculasOficina?.length || 0) }})
-        </h3>
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
+          <h3 style="font-size: 1rem; margin: 0; color: #4b5563;">
+            Alunos Matriculados ({{ (turmaDetalhes?.matriculasOficina?.length || 0) }})
+          </h3>
+          @if ((turmaDetalhes?.matriculasOficina?.length || 0) > 0) {
+          <button class="btn btn-primary btn-sm" (click)="exportarListaCSV()" title="Exportar lista para Excel/CSV"
+            style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem;">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Exportar CSV
+          </button>
+          }
+        </div>
 
         @if (!turmaDetalhes?.matriculasOficina || turmaDetalhes?.matriculasOficina?.length === 0) {
         <div class="empty-state empty-state--sm">
