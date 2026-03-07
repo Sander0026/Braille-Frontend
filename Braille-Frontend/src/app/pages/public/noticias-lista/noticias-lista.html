@@ -44,9 +44,22 @@
     <section aria-live="polite" aria-busy="carregando" class="feed">
 
         @if (carregando && comunicados.length === 0) {
-        <div class="empty-state">
-            <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
-            <p>Buscando informações...</p>
+        <div class="grid-cards" aria-busy="true">
+            <!-- Povoaremos a tela com 9 Ghost Cards (Estrutura Completa de Leitura) -->
+            @for (i of [1, 2, 3, 4, 5, 6, 7, 8, 9]; track i) {
+            <div class="card-comunicado skeleton-wrapper" style="border: none; box-shadow: none">
+                <div class="skeleton skeleton-img" style="height: 180px; border-radius: 1rem 1rem 0 0;"></div>
+                <div class="card-body">
+                    <div class="skeleton skeleton-title" style="width: 80%"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%"></div>
+                    <div class="skeleton skeleton-text" style="width: 60%"></div>
+                    <footer style="margin-top: 1rem">
+                        <div class="skeleton skeleton-text" style="width: 30%;"></div>
+                    </footer>
+                </div>
+            </div>
+            }
         </div>
         } @else if (comunicados.length === 0) {
         <div class="empty-state">
@@ -64,7 +77,8 @@
                 <a [routerLink]="['/noticias', item.id]" class="card-cover-link" tabindex="-1" aria-hidden="true">
                     <figure class="card-cover">
                         @if (item.imagemCapa) {
-                        <img [src]="item.imagemCapa" [alt]="'Imagem ilustrativa para: ' + item.titulo" loading="lazy" />
+                        <img [src]="item.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa para: ' + item.titulo"
+                            loading="lazy" />
                         } @else {
                         <div class="cover-placeholder" aria-hidden="true">
                             <span class="material-symbols-rounded">article</span>

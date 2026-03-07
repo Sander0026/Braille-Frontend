@@ -5,10 +5,22 @@
 
 <!-- ESTADO: CARREGANDO -->
 @if (carregando) {
-<div class="loading-state" role="status" aria-live="polite">
-    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
-    <p>Carregando notícia...</p>
-</div>
+<article class="artigo ghost-article" aria-busy="true" aria-label="Carregando o corpo da notícia...">
+    <!-- Capa Fantasma -->
+    <div class="skeleton skeleton-img capa-fantasma"
+        style="height: 400px; width: 100%; border-radius: 12px; margin-bottom: 2rem;"></div>
+    <!-- Bloco de Texto (Editorial) -->
+    <div class="container-artigo">
+        <div class="skeleton skeleton-title" style="width: 85%; height: 3rem; margin-bottom: 2rem;"></div>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 80%"></div>
+        <br>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 70%"></div>
+    </div>
+</article>
 }
 
 <!-- ESTADO: ERRO -->
@@ -27,9 +39,10 @@
 
     <!-- CAPA -->
     @if (noticia.imagemCapa) {
-    <div class="capa-wrapper" aria-hidden="true">
-        <img [src]="noticia.imagemCapa" [alt]="'Imagem de capa: ' + noticia.titulo" class="capa-img" loading="eager" />
-    </div>
+    <figure class="artigo-capa">
+        <img [src]="noticia.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa do artigo: ' + noticia.titulo"
+            loading="lazy">
+    </figure>
     }
 
     <!-- CONTEÚDO EDITORIAL -->
