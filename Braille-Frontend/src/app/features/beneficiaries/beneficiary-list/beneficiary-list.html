@@ -812,8 +812,8 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-tel">Telefone</label>
-                        <input id="edit-tel" type="tel" class="form-input" formControlName="telefoneContato"
-                            placeholder="(00) 00000-0000" />
+                        <input id="edit-tel" type="tel" inputmode="numeric" class="form-input"
+                            formControlName="telefoneContato" placeholder="(00) 00000-0000" />
                     </div>
                 </div>
             </fieldset>
@@ -827,7 +827,7 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem;">
                     <div class="form-group">
                         <label class="form-label" for="edit-cep">CEP</label>
-                        <input id="edit-cep" type="text" class="form-input" formControlName="cep"
+                        <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep"
                             placeholder="00000-000" />
                     </div>
                     <div class="form-group" style="grid-column:2 / -1;">
