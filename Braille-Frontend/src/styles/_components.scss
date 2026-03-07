@@ -1,6 +1,7 @@
 // ============================================================
 // _components.scss — Componentes Globais Reutilizáveis ILBES
 // ============================================================
+@use "sass:color";
 @use 'variables' as *;
 
 // ============================================================
@@ -474,6 +475,7 @@
             appearance: none;
         }
 
+        appearance: textfield;
         -moz-appearance: textfield;
     }
 }
@@ -735,7 +737,7 @@
     &.active {
         background: $color-primary;
         color: $color-primary-text;
-        border-color: mix(black, #f5c800, 10%);
+        border-color: color.mix(black, #f5c800, 10%);
     }
 
     &:focus-visible {
