@@ -1,16 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommonModule, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { SiteConfigService } from '../../../core/services/site-config';
-import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, NgClass, CommonModule, SafeHtmlPipe, CloudinaryPipe],
+  imports: [RouterLink, CommonModule, CloudinaryPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

@@ -209,12 +209,12 @@ $error-text: #991b1b;
     &.sucesso {
         background-color: $success-bg;
         color: $success-text;
-        border: 1px solid mix(black, $success-bg, 10%);
+        border: 1px solid color.mix(black, $success-bg, 10%);
     }
 
     &.erro {
         background-color: $error-bg;
         color: $error-text;
-        border: 1px solid mix(black, $error-bg, 10%);
+        border: 1px solid color.mix(black, $error-bg, 10%);
     }
 }
