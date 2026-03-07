@@ -128,7 +128,7 @@ $transition: 200ms ease;
     white-space: nowrap;
 
     &:hover {
-        background: mix(white, $primary, 8%);
+        background: color.mix(white, $primary, 8%);
         transform: translateY(-1px);
     }
 
