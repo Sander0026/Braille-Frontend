@@ -148,7 +148,7 @@ $transition: 250ms ease;
     box-shadow: 0 4px 16px rgba($primary, .35);
 
     &:hover {
-        background: mix(white, $primary, 8%);
+        background: color.mix(white, $primary, 8%);
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba($primary, .45);
     }
@@ -425,7 +425,7 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition;
 
     &:hover {
-        background: mix(white, $black, 10%);
+        background: color.mix(white, $black, 10%);
         transform: translateY(-2px);
     }
 }
