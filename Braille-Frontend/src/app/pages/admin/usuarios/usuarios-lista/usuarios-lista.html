@@ -62,9 +62,9 @@
         <thead>
             <tr>
                 <th scope="col">Usuário</th>
-                <th scope="col">Login</th>
-                <th scope="col">E-mail</th>
-                <th scope="col">Função</th>
+                <th scope="col" class="hide-on-mobile">Login</th>
+                <th scope="col" class="hide-on-tablet">E-mail</th>
+                <th scope="col" class="hide-on-mobile">Função</th>
                 <th scope="col"><span class="sr-only">Ações</span></th>
             </tr>
         </thead>
@@ -84,9 +84,9 @@
                         <span class="user-nome">{{ usuario.nome }}</span>
                     </div>
                 </td>
-                <td>{{ usuario.username }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>
+                <td class="hide-on-mobile">{{ usuario.username }}</td>
+                <td class="hide-on-tablet">{{ usuario.email }}</td>
+                <td class="hide-on-mobile">
                     <span class="badge" [class.badge-primary]="usuario.role === 'ADMIN'"
                         [class.badge-info]="usuario.role === 'SECRETARIA'"
                         [class.badge-neutral]="usuario.role === 'PROFESSOR'">
@@ -188,8 +188,8 @@
 
                 <div class="form-group">
                     <label for="edit-telefone" class="form-label">Telefone</label>
-                    <input id="edit-telefone" type="tel" class="form-input" formControlName="telefone"
-                        autocomplete="tel" placeholder="(00) 00000-0000" />
+                    <input id="edit-telefone" type="tel" inputmode="numeric" class="form-input"
+                        formControlName="telefone" autocomplete="tel" placeholder="(00) 00000-0000" />
                 </div>
             </div>
 
@@ -198,8 +198,8 @@
             <div class="form-grid">
                 <div class="form-group">
                     <label for="edit-cep" class="form-label">CEP</label>
-                    <input id="edit-cep" type="text" class="form-input" formControlName="cep" placeholder="00000-000"
-                        maxlength="9" />
+                    <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep"
+                        placeholder="00000-000" maxlength="9" />
                 </div>
 
                 <div class="form-group form-group--wide">

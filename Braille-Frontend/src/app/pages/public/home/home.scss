@@ -668,28 +668,13 @@ $transition: 250ms ease;
     margin-top: 3rem;
 }
 
-.btn-outline-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.875rem 2rem;
-    background: transparent;
-    border: 2px solid $primary;
-    border-radius: 2rem;
-    color: mix(black, $primary, 20%);
-    font-weight: 700;
-    font-size: 1rem;
-    text-decoration: none;
-    transition: all $transition;
-
-    &:hover {
-        background: $primary;
-        color: $black;
-        gap: 0.75rem;
-    }
+.skeleton-grid-home {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
 }
 
-.feed-carregando,
 .feed-vazio {
     text-align: center;
     padding: 4rem 1rem;
@@ -697,24 +682,10 @@ $transition: 250ms ease;
     border-radius: 1rem;
     margin-top: 3rem;
 
-    .spinner {
-        font-size: 3rem;
-        color: $primary;
-        animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
-        display: inline-block;
-    }
-
     p {
         color: rgba($black, 0.6);
         font-size: 1.125rem;
         margin: 0;
-    }
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
     }
 }
 

@@ -8,6 +8,7 @@ import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -16,7 +17,7 @@ import { A11yModule } from '@angular/cdk/a11y';
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent, A11yModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CloudinaryPipe, ImportModalComponent, A11yModule],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
