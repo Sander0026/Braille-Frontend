@@ -142,7 +142,15 @@ export class UsuariosLista implements OnInit, OnDestroy {
     salvar(): void {
         if (this.editForm.invalid || !this.usuarioEmEdicao) return;
         this.salvando = true;
-        this.usuariosService.atualizar(this.usuarioEmEdicao.id, this.editForm.value).subscribe({
+
+        const rawVal = this.editForm.value;
+        const payload = {
+            ...rawVal,
+            telefone: rawVal.telefone ? rawVal.telefone.replace(/\D/g, '') : rawVal.telefone,
+            cep: rawVal.cep ? rawVal.cep.replace(/\D/g, '') : rawVal.cep
+        };
+
+        this.usuariosService.atualizar(this.usuarioEmEdicao.id, payload).subscribe({
             next: () => {
                 this.salvando = false;
                 this.fecharModal();

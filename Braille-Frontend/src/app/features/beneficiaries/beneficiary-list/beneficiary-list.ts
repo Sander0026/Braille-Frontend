@@ -443,7 +443,13 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!this.alunoEmEdicao || this.salvandoEdicao) return;
     this.salvandoEdicao = true;
 
-    const payload = this.editForm.value;
+    const rawVal = this.editForm.value;
+    const payload = {
+      ...rawVal,
+      cpfRg: rawVal.cpfRg ? rawVal.cpfRg.replace(/\D/g, '') : rawVal.cpfRg,
+      telefoneContato: rawVal.telefoneContato ? rawVal.telefoneContato.replace(/\D/g, '') : rawVal.telefoneContato,
+      cep: rawVal.cep ? rawVal.cep.replace(/\D/g, '') : rawVal.cep
+    };
     this.beneficiariosService.atualizar(this.alunoEmEdicao.id, payload).subscribe({
       next: () => {
         setTimeout(() => {
