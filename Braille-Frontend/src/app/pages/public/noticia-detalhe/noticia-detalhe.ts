@@ -2,13 +2,14 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../core/services/comunicados.service';
+import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 
 @Component({
     selector: 'app-noticia-detalhe',
-    imports: [CommonModule, DatePipe],
+    imports: [CommonModule, DatePipe, SafeHtmlPipe],
     templateUrl: './noticia-detalhe.html',
     styleUrl: './noticia-detalhe.scss',
 })
@@ -18,7 +19,6 @@ export class NoticiaDetalhe implements OnInit, OnDestroy {
     noticia: Comunicado | null = null;
     carregando = true;
     erro: string | null = null;
-    conteudoSeguro: SafeHtml | null = null;
 
     readonly labelCategoria: Record<string, string> = {
         NOTICIA: 'Notícia',
@@ -57,19 +57,14 @@ export class NoticiaDetalhe implements OnInit, OnDestroy {
         this.carregando = true;
         this.erro = null;
         this.noticia = null;
-        this.conteudoSeguro = null;
         this.cdr.detectChanges();
 
         this.comunicadosService.buscarPorId(id)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (noticia) => {
-                    // Prepara o HTML sanitizado ANTES de mudar o estado
-                    const htmlSeguro = this.sanitizer.bypassSecurityTrustHtml(noticia.conteudo ?? '');
-
                     // Atualiza TUDO de uma só vez para o Angular sincronizar
                     this.noticia = noticia;
-                    this.conteudoSeguro = htmlSeguro;
                     this.carregando = false;
 
                     // Força o ciclo de detecção para garantir que o withFetch() não "pule" a atualização

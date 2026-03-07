@@ -108,11 +108,10 @@ export class NoticiasLista implements OnInit {
     this.carregarComunicados(false);
   }
 
-  // Helper para mostrar apenas texto puro nos cards (remove tags HTML do editor rico)
+  // Helper Seguro (Anti XSS) para extrair o Resumo na Pré-visualização do Card
   getTextoPuro(html: string): string {
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    return tempDiv.textContent || tempDiv.innerText || '';
+    if (!html) return '';
+    return html.replace(/<\/?[^>]+(>|$)/g, '').replace(/&nbsp;/g, ' ');
   }
 
   getLabelCategoria(cat: string): string {
