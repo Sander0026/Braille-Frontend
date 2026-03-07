@@ -361,3 +361,66 @@ html.alto-contraste {
         border: 1px solid #f5c800 !important;
     }
 }
+
+// ============================================================================
+// UX PREMIUM: SKELETON LOADERS (FASE 15)
+// ============================================================================
+// Animação Cíclica da Luz
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+// Esqueleto Global
+.skeleton {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    background-color: #e2e8f0; // Cinza sólido de base
+    border-radius: 0.5rem; // Curvatura global (8px)
+
+    // Efeito varredura (Sweep) com aceleração de HW
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        // Feixe esbranquiçado e difuso
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.4) 50%,
+                rgba(255, 255, 255, 0) 100%);
+        transform: translateX(-100%);
+        animation: shimmer 1.5s infinite linear; // Loop contínuo a 60fps
+    }
+
+    // Variações de forma amigáveis aos Cards
+    &.skeleton-text {
+        width: 100%;
+        height: 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 4px;
+    }
+
+    &.skeleton-title {
+        width: 70%;
+        height: 1.5rem;
+        margin-bottom: 1rem;
+        border-radius: 4px;
+    }
+
+    &.skeleton-img {
+        width: 100%;
+        height: 100%;
+        border-radius: 0.75rem; // 12px
+    }
+
+    &.skeleton-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+    }
+}

@@ -169,9 +169,22 @@
         </header>
 
         @if (carregandoNoticias) {
-        <div class="feed-carregando">
-            <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
-            <p>Buscando novidades...</p>
+        <div class="skeleton-grid-home" aria-busy="true">
+            <!-- 3 Blocos de Skeletons Imersivos simulando Notícias Reais -->
+            @for (i of [1, 2, 3]; track i) {
+            <div class="card-noticia skeleton-wrapper" style="border: none; box-shadow: none">
+                <div class="skeleton skeleton-img" style="height: 200px; border-radius: 1rem 1rem 0 0;"></div>
+                <div class="card-noticia-body">
+                    <div class="skeleton skeleton-title" style="width: 80%"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%"></div>
+                    <div class="skeleton skeleton-text" style="width: 60%"></div>
+                    <footer style="margin-top: auto">
+                        <div class="skeleton skeleton-text" style="width: 30%; margin-top: 1rem;"></div>
+                    </footer>
+                </div>
+            </div>
+            }
         </div>
         } @else if (ultimasNoticias.length > 0) {
         <div class="grid-noticias">
