@@ -351,6 +351,21 @@
     }
 }
 
+// ────────────────────────────────────────────────────────────
+// UX RESPONSIVA: TESOURA DE COLUNAS (Fase 17 - Tabelas Mobile)
+// ────────────────────────────────────────────────────────────
+@media (max-width: 1024px) {
+    .hide-on-tablet {
+        display: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .hide-on-mobile {
+        display: none !important;
+    }
+}
+
 // ============================================================
 // PAGINAÇÃO
 // ============================================================

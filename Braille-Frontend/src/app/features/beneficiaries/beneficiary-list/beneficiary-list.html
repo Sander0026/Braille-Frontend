@@ -279,9 +279,9 @@
         <thead>
             <tr>
                 <th scope="col">Nome Completo</th>
-                <th scope="col">CPF / RG</th>
-                <th scope="col">Nascimento</th>
-                <th scope="col">Tipo de Deficiência</th>
+                <th scope="col" class="hide-on-mobile">CPF / RG</th>
+                <th scope="col" class="hide-on-tablet">Nascimento</th>
+                <th scope="col" class="hide-on-mobile">Tipo de Deficiência</th>
                 <th scope="col">Telefone</th>
                 <th scope="col"><span class="sr-only">Ações</span></th>
             </tr>
@@ -292,9 +292,9 @@
                 <td>
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>
-                <td>{{ aluno.cpfRg || '—' }}</td>
-                <td>{{ aluno.dataNascimento | dataBraille }}</td>
-                <td>
+                <td class="hide-on-mobile">{{ aluno.cpfRg || '—' }}</td>
+                <td class="hide-on-tablet">{{ aluno.dataNascimento | dataBraille }}</td>
+                <td class="hide-on-mobile">
                     @if (aluno.tipoDeficiencia) {
                     <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
                     } @else { <span>—</span> }
