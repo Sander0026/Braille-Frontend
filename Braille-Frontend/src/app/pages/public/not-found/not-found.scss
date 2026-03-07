@@ -1,0 +1,99 @@
+// Not Found Component SASS
+
+.not-found-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 8rem);
+    /* Altura da tela descontando Header e Footer */
+    padding: 2rem;
+    text-align: center;
+    background-color: var(--bg-primary);
+
+    .not-found-content {
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    font-size: 8rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--color-primary, #1e40af);
+    text-shadow: 0px 4px 20px color-mix(in srgb, #1e40af 20%, transparent);
+    margin-bottom: -1rem;
+
+    @media (max-width: 768px) {
+        font-size: 6rem;
+    }
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-color, #111827);
+    margin: 0;
+
+    @media (max-width: 768px) {
+        font-size: 2rem;
+    }
+}
+
+.subtitle {
+    font-size: 1.125rem;
+    color: #6b7280; // $color-gray-500
+    line-height: 1.6;
+    margin: 0;
+    max-width: 80%;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        text-decoration: none;
+        border: none;
+
+        &-primary {
+            background-color: var(--color-primary, #1e40af);
+            color: #ffffff;
+
+            &:hover {
+                background-color: #1e3a8a;
+                /* bg-blue-900 hardcode */
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px color-mix(in srgb, #1e40af 30%, transparent);
+            }
+        }
+
+        &-secondary {
+            background-color: transparent;
+            color: var(--color-primary, #1e40af);
+            border: 2px solid var(--color-primary, #1e40af);
+
+            &:hover {
+                background-color: color-mix(in srgb, #1e40af 5%, transparent);
+            }
+        }
+
+        .material-symbols-rounded {
+            font-size: 1.25rem;
+        }
+    }
+}

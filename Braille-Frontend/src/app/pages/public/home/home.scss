@@ -148,7 +148,7 @@ $transition: 250ms ease;
     box-shadow: 0 4px 16px rgba($primary, .35);
 
     &:hover {
-        background: color.adjust($primary, $lightness: 8%);
+        background: mix(white, $primary, 8%);
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba($primary, .45);
     }
@@ -425,7 +425,7 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition;
 
     &:hover {
-        background: color.adjust($black, $lightness: 10%);
+        background: mix(white, $black, 10%);
         transform: translateY(-2px);
     }
 }
@@ -676,7 +676,7 @@ $transition: 250ms ease;
     background: transparent;
     border: 2px solid $primary;
     border-radius: 2rem;
-    color: color.adjust($primary, $lightness: -20%);
+    color: mix(black, $primary, 20%);
     font-weight: 700;
     font-size: 1rem;
     text-decoration: none;

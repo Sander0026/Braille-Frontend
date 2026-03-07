@@ -263,7 +263,7 @@
     &:focus {
         outline: none;
         border-color: $color-primary;
-        box-shadow: 0 0 0 3px rgba($color-primary, 0.25);
+        box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
     }
 
     &:disabled {
@@ -276,7 +276,7 @@
         border-color: $color-danger;
 
         &:focus {
-            box-shadow: 0 0 0 3px rgba($color-danger, 0.20);
+            box-shadow: 0 0 0 3px color-mix(in srgb, $color-danger 20%, transparent);
         }
     }
 }
@@ -437,7 +437,7 @@
         &:focus {
             outline: none;
             border-color: $color-primary;
-            box-shadow: 0 0 0 2px rgba($color-primary, 0.2);
+            box-shadow: 0 0 0 2px color-mix(in srgb, $color-primary 20%, transparent);
         }
 
         // Remove as setas do input number
@@ -456,7 +456,7 @@
 .modal-backdrop {
     position: fixed;
     inset: 0;
-    background-color: rgba($color-black, 0.55);
+    background-color: color-mix(in srgb, $color-black 55%, transparent);
     z-index: 1000;
     display: flex;
     align-items: center;
@@ -707,7 +707,7 @@
     &.active {
         background: $color-primary;
         color: $color-primary-text;
-        border-color: darken(#f5c800, 10%);
+        border-color: mix(black, #f5c800, 10%);
     }
 
     &:focus-visible {
