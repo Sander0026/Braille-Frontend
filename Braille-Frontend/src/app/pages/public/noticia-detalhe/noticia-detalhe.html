@@ -39,9 +39,10 @@
 
     <!-- CAPA -->
     @if (noticia.imagemCapa) {
-    <div class="capa-wrapper" aria-hidden="true">
-        <img [src]="noticia.imagemCapa" [alt]="'Imagem de capa: ' + noticia.titulo" class="capa-img" loading="eager" />
-    </div>
+    <figure class="artigo-capa">
+        <img [src]="noticia.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa do artigo: ' + noticia.titulo"
+            loading="lazy">
+    </figure>
     }
 
     <!-- CONTEÚDO EDITORIAL -->
