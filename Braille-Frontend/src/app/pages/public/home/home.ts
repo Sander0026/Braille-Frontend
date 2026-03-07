@@ -80,9 +80,8 @@ export class Home implements OnInit {
 
   getTextoPuro(html: string): string {
     if (!html) return '';
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    return tempDiv.textContent || tempDiv.innerText || '';
+    // Proteção XSS (Fase 13): Regex Estrita extirpando 100% das Tags HTML sem instanciar/executar Nodes na Memória Angular
+    return html.replace(/<\/?[^>]+(>|$)/g, '').replace(/&nbsp;/g, ' ');
   }
 
   getLabelCategoria(cat: string): string {

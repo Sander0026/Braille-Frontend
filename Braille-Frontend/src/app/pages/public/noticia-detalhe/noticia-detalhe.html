@@ -61,8 +61,9 @@
         <!-- DIVISOR DECORATIVO -->
         <hr class="divisor" aria-hidden="true" />
 
-        <!-- CONTEÚDO RICO (Quill HTML renderizado de forma segura) -->
-        <div class="corpo-noticia ql-content" [innerHTML]="conteudoSeguro" aria-label="Conteúdo completo da notícia">
+        <!-- CONTEÚDO RICO (Quill HTML renderizado de forma segura via DOMPurify PIPE) -->
+        <div class="corpo-noticia ql-content" [innerHTML]="noticia.conteudo | safeHtml"
+            aria-label="Conteúdo completo da notícia">
         </div>
 
         <!-- RODAPÉ DO ARTIGO -->
