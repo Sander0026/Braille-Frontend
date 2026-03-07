@@ -324,7 +324,7 @@ html.alto-contraste {
 
     // ── Nav links ativos ──────────────────────────────────────
     .nav-link.active {
-        background-color: rgba(245, 200, 0, 0.25) !important;
+        background-color: color-mix(in srgb, #f5c800 25%, transparent) !important;
         color: #f5c800 !important;
     }
 
