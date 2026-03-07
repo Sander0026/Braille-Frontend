@@ -192,7 +192,7 @@
             <article class="card-noticia">
                 <figure class="card-noticia-img">
                     @if (item.imagemCapa) {
-                    <img [src]="item.imagemCapa" alt="Imagem: {{ item.titulo }}" loading="lazy" />
+                    <img [src]="item.imagemCapa | cloudinary" alt="Imagem: {{ item.titulo }}" loading="lazy" />
                     } @else {
                     <div class="placeholder"><span class="material-symbols-rounded">article</span></div>
                     }

@@ -77,7 +77,8 @@
                 <a [routerLink]="['/noticias', item.id]" class="card-cover-link" tabindex="-1" aria-hidden="true">
                     <figure class="card-cover">
                         @if (item.imagemCapa) {
-                        <img [src]="item.imagemCapa" [alt]="'Imagem ilustrativa para: ' + item.titulo" loading="lazy" />
+                        <img [src]="item.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa para: ' + item.titulo"
+                            loading="lazy" />
                         } @else {
                         <div class="cover-placeholder" aria-hidden="true">
                             <span class="material-symbols-rounded">article</span>

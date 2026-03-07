@@ -6,10 +6,11 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Subject, takeUntil } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../core/services/comunicados.service';
 import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 @Component({
     selector: 'app-noticia-detalhe',
-    imports: [CommonModule, DatePipe, SafeHtmlPipe],
+    imports: [CommonModule, DatePipe, SafeHtmlPipe, CloudinaryPipe],
     templateUrl: './noticia-detalhe.html',
     styleUrl: './noticia-detalhe.scss',
 })

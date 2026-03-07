@@ -1,24 +1,26 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterModule, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 export interface ComunicadoPublico {
   id: string;
   titulo: string;
-  conteudo: string; // Vem com HTML do editor rico
+  conteudo: string;
   categoria: string;
   imagemCapa?: string;
   fixado: boolean;
   criadoEm: string;
+  atualizadoEm: string;
 }
 
 @Component({
   selector: 'app-noticias-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, RouterModule, CloudinaryPipe],
   templateUrl: './noticias-lista.html',
   styleUrl: './noticias-lista.scss'
 })
