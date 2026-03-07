@@ -80,22 +80,30 @@
 
         <div class="sobre-valores" role="list" aria-label="Valores do instituto">
             <div class="valor-card" role="listitem">
-                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor1Icone'] || '♿' }}</div>
+                <div class="valor-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">accessibility_new</span>
+                </div>
                 <h3>{{ missaoConfig['valor1Titulo'] || 'Inclusão' }}</h3>
                 <p>{{ missaoConfig['valor1Desc'] || 'Ambientes e materiais 100% acessíveis para todos.' }}</p>
             </div>
             <div class="valor-card" role="listitem">
-                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor2Icone'] || '🤝' }}</div>
+                <div class="valor-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">handshake</span>
+                </div>
                 <h3>{{ missaoConfig['valor2Titulo'] || 'Gratuidade' }}</h3>
                 <p>{{ missaoConfig['valor2Desc'] || 'Todos os serviços são totalmente gratuitos.' }}</p>
             </div>
             <div class="valor-card" role="listitem">
-                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor3Icone'] || '🎓' }}</div>
+                <div class="valor-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">school</span>
+                </div>
                 <h3>{{ missaoConfig['valor3Titulo'] || 'Qualidade' }}</h3>
                 <p>{{ missaoConfig['valor3Desc'] || 'Professores qualificados e metodologias modernas.' }}</p>
             </div>
             <div class="valor-card" role="listitem">
-                <div class="valor-icon" aria-hidden="true">{{ missaoConfig['valor4Icone'] || '❤️' }}</div>
+                <div class="valor-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">favorite</span>
+                </div>
                 <h3>{{ missaoConfig['valor4Titulo'] || 'Humanização' }}</h3>
                 <p>{{ missaoConfig['valor4Desc'] || 'Atendimento individual, respeitando cada história de vida.' }}</p>
             </div>
@@ -114,7 +122,9 @@
         <div class="oficinas-grid" role="list" aria-label="Lista de oficinas">
             @for (of of oficinas; track of.titulo) {
             <article class="oficina-card" role="listitem">
-                <div class="oficina-icon" aria-hidden="true">{{ of.icon }}</div>
+                <div class="oficina-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
+                </div>
                 <h3 class="oficina-titulo">{{ of.titulo }}</h3>
                 <p class="oficina-desc">{{ of.descricao }}</p>
             </article>
