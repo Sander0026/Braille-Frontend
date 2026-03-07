@@ -10,12 +10,13 @@ import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
+import { A11yModule } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent, A11yModule],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -442,7 +443,13 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!this.alunoEmEdicao || this.salvandoEdicao) return;
     this.salvandoEdicao = true;
 
-    const payload = this.editForm.value;
+    const rawVal = this.editForm.value;
+    const payload = {
+      ...rawVal,
+      cpfRg: rawVal.cpfRg ? rawVal.cpfRg.replace(/\D/g, '') : rawVal.cpfRg,
+      telefoneContato: rawVal.telefoneContato ? rawVal.telefoneContato.replace(/\D/g, '') : rawVal.telefoneContato,
+      cep: rawVal.cep ? rawVal.cep.replace(/\D/g, '') : rawVal.cep
+    };
     this.beneficiariosService.atualizar(this.alunoEmEdicao.id, payload).subscribe({
       next: () => {
         setTimeout(() => {

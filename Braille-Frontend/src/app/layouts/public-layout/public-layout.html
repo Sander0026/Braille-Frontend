@@ -1,5 +1,5 @@
 <div class="public-shell">
-  <a href="#conteudo-principal" class="skip-link">Ir para o conteúdo principal</a>
+  <a href="#conteudo-principal" class="skip-to-content">Ir para o conteúdo principal</a>
 
   <header class="site-header" role="banner">
     <div class="header-inner">
@@ -15,13 +15,27 @@
         <a routerLink="/contato" routerLinkActive="active" class="nav-link">Contato</a>
       </nav>
 
+      <!-- ── Controles de Acessibilidade ── -->
+      <div class="a11y-controls" role="group" aria-label="Controles de acessibilidade">
+        <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
+          aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
+        <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="fonteAtual === 'grande'"
+          aria-label="Aumentar fonte" title="Fonte grande">A+</button>
+        <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="fonteAtual === 'extragrande'"
+          aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
+        <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="altoContrasteAtivo"
+          aria-label="Alternar alto contraste" title="Alto contraste">
+          <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
+        </button>
+      </div>
+
       <a routerLink="/contato" class="btn-inscricao" aria-label="Entre em contato conosco">
         Fale Conosco
       </a>
     </div>
   </header>
 
-  <main id="conteudo-principal">
+  <main id="conteudo-principal" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
 

@@ -217,9 +217,14 @@ export class CadastroWizard implements OnInit {
     // e SEM campos de endereço que não existem no grupo correto
     const { laudoArquivo, ...perfilDeficienciaSemArquivo } = formValues.perfilDeficiencia;
 
+    const limparSinais = (val: string | null | undefined) => val ? val.replace(/\D/g, '') : val;
+
     const payloadBackend = {
       ...formValues.dadosPessoais,
+      cpfRg: limparSinais(formValues.dadosPessoais.cpfRg),
       ...formValues.enderecoLocalizacao,
+      cep: limparSinais(formValues.enderecoLocalizacao.cep),
+      telefoneContato: limparSinais(formValues.enderecoLocalizacao.telefoneContato),
       ...perfilDeficienciaSemArquivo,
       ...formValues.socioeconomico,
     };

@@ -26,23 +26,7 @@ $transition: 200ms ease;
     /* sem scroll horizontal */
 }
 
-// ── Skip link ──────────────────────────────────────────────
-.skip-link {
-    position: absolute;
-    left: -9999px;
-    top: 1rem;
-    background: $black;
-    color: $primary;
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    font-weight: 600;
-    z-index: 9999;
-    text-decoration: none;
 
-    &:focus {
-        left: 1rem;
-    }
-}
 
 // ── Header ─────────────────────────────────────────────────
 .site-header {
@@ -144,7 +128,7 @@ $transition: 200ms ease;
     white-space: nowrap;
 
     &:hover {
-        background: color.adjust($primary, $lightness: 8%);
+        background: mix(white, $primary, 8%);
         transform: translateY(-1px);
     }
 

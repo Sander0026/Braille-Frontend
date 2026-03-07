@@ -244,7 +244,7 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition, box-shadow $transition;
 
     &:hover:not(:disabled) {
-        background: darken(#f5c800, 8%);
+        background: mix(black, #f5c800, 8%);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
     }

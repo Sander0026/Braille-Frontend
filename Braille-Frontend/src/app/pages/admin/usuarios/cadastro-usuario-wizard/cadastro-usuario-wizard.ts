@@ -141,13 +141,18 @@ export class CadastroUsuarioWizard implements OnInit {
             return trimmed === '' ? undefined : trimmed;
         };
 
+        const limparSinais = (str: any) => {
+            const limpo = sanitize(str);
+            return limpo ? limpo.replace(/\D/g, '') : limpo;
+        };
+
         const payload = {
             nome: sanitize(v.dadosPessoais.nomeCompleto)!,
             cpf: cpfSomenteNumeros,
             role: sanitize(v.dadosPessoais.funcao)!,
             email: sanitize(v.dadosPessoais.email),
-            telefone: sanitize(v.contato.telefone),
-            cep: sanitize(v.contato.cep),
+            telefone: limparSinais(v.contato.telefone),
+            cep: limparSinais(v.contato.cep),
             rua: sanitize(v.contato.rua),
             numero: sanitize(v.contato.numero),
             complemento: sanitize(v.contato.complemento),

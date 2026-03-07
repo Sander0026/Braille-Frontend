@@ -133,5 +133,9 @@ export const routes: Routes = [
   },
 
   // ── 404 ───────────────────────────────────────────────────────
-  { path: '**', redirectTo: '' }
+  {
+    path: '**',
+    loadComponent: () => import('./pages/public/not-found/not-found').then(m => m.NotFound),
+    title: 'Página Não Encontrada — ILBES'
+  }
 ];

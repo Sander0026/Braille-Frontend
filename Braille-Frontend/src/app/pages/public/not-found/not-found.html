@@ -1,0 +1,22 @@
+<main class="not-found-container" aria-labelledby="error-title">
+    <div class="not-found-content">
+        <span class="error-code" aria-hidden="true">404</span>
+        <h1 id="error-title" class="title">Página Não Encontrada</h1>
+        <p class="subtitle">Desculpe, a página que você está procurando não existe, foi movida ou está temporariamente
+            indisponível.</p>
+
+        <div class="actions">
+            <a routerLink="/" class="btn btn-primary" aria-label="Voltar para a página inicial">
+                <span class="material-symbols-rounded" aria-hidden="true">home</span>
+                Ir para o Início
+            </a>
+
+            <!-- Somente mostra botão Voltar se houver histórico do próprio site -->
+            <button class="btn btn-secondary" (click)="voltarPaginaAnterior()"
+                aria-label="Voltar para a página de onde vim">
+                <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+                Voltar
+            </button>
+        </div>
+    </div>
+</main>
