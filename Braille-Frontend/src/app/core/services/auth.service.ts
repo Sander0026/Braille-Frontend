@@ -27,6 +27,7 @@ export interface PerfilUsuario {
 export class AuthService {
   private readonly apiUrl = '/api/auth';
   private readonly TOKEN_KEY = 'token_braille';
+  private readonly REFRESH_KEY = 'refresh_braille';
 
   constructor(private http: HttpClient) { }
 
@@ -36,16 +37,37 @@ export class AuthService {
         if (resposta.access_token) {
           localStorage.setItem(this.TOKEN_KEY, resposta.access_token);
         }
+        if (resposta.refresh_token) {
+          localStorage.setItem(this.REFRESH_KEY, resposta.refresh_token);
+        }
       })
     );
   }
 
   logout(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_KEY);
   }
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_KEY);
+  }
+
+  renovarToken(): Observable<any> {
+    const refreshToken = this.getRefreshToken();
+    const subId = this.getUser()?.sub;
+
+    return this.http.post(`${this.apiUrl}/refresh`, { userId: subId, refreshToken }).pipe(
+      tap((resposta: any) => {
+        if (resposta.access_token) {
+          localStorage.setItem(this.TOKEN_KEY, resposta.access_token);
+        }
+      })
+    );
   }
 
   isLoggedIn(): boolean {
