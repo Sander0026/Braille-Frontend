@@ -74,7 +74,8 @@
                 <td>
                     <div class="user-cell">
                         @if (usuario.fotoPerfil) {
-                        <img [src]="usuario.fotoPerfil" alt="Foto de {{ usuario.nome }}" class="user-avatar-sm-img" />
+                        <img [src]="usuario.fotoPerfil" alt="Foto de {{ usuario.nome }}" class="user-avatar-sm-img"
+                            loading="lazy" />
                         } @else {
                         <div class="user-avatar-sm" aria-hidden="true">
                             {{ usuario.nome.slice(0, 2).toUpperCase() }}
@@ -265,7 +266,8 @@
             <div class="profile-header">
                 <div class="profile-avatar avatar-wrapper">
                     @if (usuarioVisualizado.fotoPerfil) {
-                    <img [src]="usuarioVisualizado.fotoPerfil" alt="Foto de Perfil de {{ usuarioVisualizado.nome }}" />
+                    <img [src]="usuarioVisualizado.fotoPerfil" alt="Foto de Perfil de {{ usuarioVisualizado.nome }}"
+                        loading="lazy" />
                     } @else {
                     <span class="material-symbols-rounded" style="font-size: 3rem; color: #9ca3af;"
                         aria-hidden="true">person</span>
