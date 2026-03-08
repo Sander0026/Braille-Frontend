@@ -441,7 +441,7 @@ $transition: 250ms ease;
     position: relative;
     z-index: 2;
     background: #111111; // Preto intenso
-    padding: 0 0 2rem;
+    padding: 0;
 }
 
 .wave-transition-double {
@@ -466,6 +466,7 @@ $transition: 250ms ease;
     width: 100%;
     margin-bottom: -1px;
     line-height: 0;
+    background: $white;
 
     svg {
         position: relative;
@@ -484,6 +485,11 @@ $transition: 250ms ease;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 2rem;
     margin-top: 3rem;
+    margin-bottom: 6rem; // Aumenta o espaço na parte de baixo antes da onda
+
+    @media (max-width: 768px) {
+        margin-bottom: 4rem; // Responsividade
+    }
 }
 
 .dep-card {
@@ -595,11 +601,11 @@ $transition: 250ms ease;
     position: relative;
     z-index: 1;
     background: $white;
-    padding: 9rem 0 5rem;
+    padding: 6rem 0 5rem; // Reduzido o topo, compensando a nova cor da onda
     border-top: none;
 
     @media (max-width: 768px) {
-        padding: 7rem 0 4rem;
+        padding: 4rem 0 4rem;
     }
 }
 
