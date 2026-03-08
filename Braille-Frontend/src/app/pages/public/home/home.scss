@@ -82,6 +82,10 @@ $transition: 250ms ease;
 // ─────────────────────────────────────────────────────────────
 .hero {
     background: $black;
+    width: 100%;
+}
+
+.hero-inner {
     min-height: 86vh;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -271,108 +275,88 @@ $transition: 250ms ease;
 }
 
 // ─────────────────────────────────────────────────────────────
-// MISSÃO  —  fundo branco, borda topo amarela
+// MISSÃO, VISÃO E VALORES  —  fundo branco, 3 colunas baseadas em relfe
 // ─────────────────────────────────────────────────────────────
 .sobre {
     background: $white;
-    border-top: 3px solid $primary;
-    padding: 5rem 0;
+    padding: 7rem 0 5rem;
 
-    .section-inner {
+    .mvv-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4rem 2rem;
         align-items: start;
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             grid-template-columns: 1fr;
+            max-width: 450px;
+            margin: 0 auto;
         }
     }
 }
 
-.sobre-text {
-    p {
-        font-size: 0.95rem;
-        color: $gray-600;
-        line-height: 1.75;
-        margin-bottom: 1rem;
-    }
-}
-
-.btn-link {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: $black;
-    text-decoration: none;
-    border-bottom: 2px solid $primary;
-    padding-bottom: 1px;
-    transition: color $transition;
-
-    &:hover {
-        color: $primary-dk;
-    }
-}
-
-.sobre-valores {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.valor-card {
-    background: $gray-50;
-    border: 1px solid $gray-200;
-    border-radius: 0.75rem;
-    padding: 1.5rem 1.25rem;
+.mvv-card {
     text-align: center;
-    transition: transform $transition, box-shadow $transition, border-color $transition;
-
-    &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
-        border-color: $primary;
-    }
-
-    h3 {
-        font-size: 0.9rem;
-        font-weight: 700;
-        margin: 0 0 0.25rem;
-        color: $gray-900;
-    }
-
-    p {
-        font-size: 0.78rem;
-        color: $gray-600;
-        margin: 0;
-        line-height: 1.5;
-    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-// Container circular para ícone Material nos valor-cards
-.valor-icon {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 50%;
-    background: rgba($primary, 0.12);
+.mvv-icon {
+    width: auto;
+    height: auto;
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 0.75rem;
+    margin-bottom: 2rem;
 
     .material-symbols-rounded {
-        font-size: 1.5rem;
+        font-size: 5.5rem;
         color: $primary-dk;
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 48; // Traçado fino super elegante
     }
 }
 
+.mvv-titulo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #122b3e; // Tom escuro azulado requintado (referência empresarial padrão real)
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+.mvv-desc {
+    font-size: 1.05rem;
+    color: $gray-600;
+    line-height: 1.7;
+    margin: 0;
+}
+
 // ─────────────────────────────────────────────────────────────
-// OFICINAS  —  fundo cinza escuro (tom admin), borda amarela
+// OFICINAS  —  fundo cinza sutil sem borda grossa e novo top fluid
 // ─────────────────────────────────────────────────────────────
 .oficinas {
-    background: $gray-100;
-    border-top: 3px solid $primary;
-    padding: 5rem 0;
+    background: #e8e8e8; // Cinza levemente mais palpável que o original
+    position: relative;
+    padding: 0 0 5rem;
+}
+
+.wave-transition {
+    width: 100%;
+    margin-bottom: 4rem; // Espaçamento abaixo da onda antes de iniciar os grids
+    line-height: 0; // Previne bordas invisíveis/fantasma 
+
+    svg {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 60px; // Altura expressa da onda
+
+        @media (max-width: 768px) {
+            height: 40px;
+        }
+    }
 }
 
 .oficinas-grid {
