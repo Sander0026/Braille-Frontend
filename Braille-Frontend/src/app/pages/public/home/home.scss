@@ -454,70 +454,117 @@ $transition: 250ms ease;
 // DEPOIMENTOS  —  preto profundo, sem borda (contraste natural)
 // ─────────────────────────────────────────────────────────────
 .depoimentos {
-    background: $black;
-    padding: 5rem 0;
+    background: #111111; // Preto intenso
+    padding: 6rem 0;
 }
 
 .dep-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-    margin-top: 2.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
 }
 
 .dep-card {
-    background: rgba($white, .05);
-    border: 1px solid rgba($white, .1);
+    background: $white;
     border-radius: 1rem;
-    padding: 1.75rem;
+    padding: 2.5rem 2rem;
     margin: 0;
-    transition: border-color $transition, background $transition;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform $transition, box-shadow $transition;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    &::before {
+        content: 'format_quote';
+        font-family: 'Material Symbols Rounded';
+        font-size: 3rem;
+        color: rgba($primary, 0.3);
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-variation-settings: 'FILL' 1;
+    }
 
     &:hover {
-        border-color: $primary;
-        background: rgba($white, .08);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
     }
 }
 
 .dep-texto {
-    font-size: 0.9rem;
-    color: rgba($white, .8);
-    line-height: 1.75;
-    margin: 0 0 1.25rem;
+    font-size: 1rem;
+    color: $gray-700;
+    line-height: 1.8;
+    margin: 0 0 2rem;
     font-style: italic;
+    flex-grow: 1;
+    position: relative;
+    z-index: 1;
 }
 
 .dep-autor {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    border-top: 1px solid $gray-200;
+    padding-top: 1.5rem;
 }
 
 .dep-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     background: $primary;
-    color: $black;
-    font-weight: 700;
-    font-size: 0.95rem;
+    color: #111111;
+    font-weight: 800;
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba($primary, 0.4);
 }
 
 .dep-nome {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: $white;
+    font-size: 1rem;
+    font-weight: 800;
+    color: $gray-900;
     font-style: normal;
 }
 
 .dep-idade {
-    font-size: 0.75rem;
-    color: rgba($white, .5);
+    font-size: 0.85rem;
+    color: $gray-600;
+}
+
+// ── Animações de Scroll ────────────────────────────────────
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+
+    &.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    // Delays encadeados
+    &.delay-100 {
+        transition-delay: 100ms;
+    }
+
+    &.delay-200 {
+        transition-delay: 200ms;
+    }
+
+    &.delay-300 {
+        transition-delay: 300ms;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────

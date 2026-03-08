@@ -2,7 +2,7 @@
 
 <!-- ══════════ HERO ══════════ -->
 <section class="hero" aria-label="Seção de boas-vindas" id="main-content">
-    <div class="hero-content">
+    <div class="hero-content animate-on-scroll">
         <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>
         <h1 class="hero-title">
             {{ heroConfig['tituloLinha1'] || 'Mais do que inclusão —' }}<br>
@@ -60,7 +60,7 @@
 <!-- ══════════ MISSÃO ══════════ -->
 <section class="sobre" aria-labelledby="sobre-titulo">
     <div class="section-inner">
-        <div class="sobre-text">
+        <div class="sobre-text animate-on-scroll">
             <h2 id="sobre-titulo" class="section-title">{{ missaoConfig['titulo'] || 'Nossa Missão' }}</h2>
             <p>
                 {{ missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos
@@ -79,28 +79,28 @@
         </div>
 
         <div class="sobre-valores" role="list" aria-label="Valores do instituto">
-            <div class="valor-card" role="listitem">
+            <div class="valor-card animate-on-scroll" role="listitem">
                 <div class="valor-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">accessibility_new</span>
                 </div>
                 <h3>{{ missaoConfig['valor1Titulo'] || 'Inclusão' }}</h3>
                 <p>{{ missaoConfig['valor1Desc'] || 'Ambientes e materiais 100% acessíveis para todos.' }}</p>
             </div>
-            <div class="valor-card" role="listitem">
+            <div class="valor-card animate-on-scroll delay-100" role="listitem">
                 <div class="valor-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">handshake</span>
                 </div>
                 <h3>{{ missaoConfig['valor2Titulo'] || 'Gratuidade' }}</h3>
                 <p>{{ missaoConfig['valor2Desc'] || 'Todos os serviços são totalmente gratuitos.' }}</p>
             </div>
-            <div class="valor-card" role="listitem">
+            <div class="valor-card animate-on-scroll delay-200" role="listitem">
                 <div class="valor-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">school</span>
                 </div>
                 <h3>{{ missaoConfig['valor3Titulo'] || 'Qualidade' }}</h3>
                 <p>{{ missaoConfig['valor3Desc'] || 'Professores qualificados e metodologias modernas.' }}</p>
             </div>
-            <div class="valor-card" role="listitem">
+            <div class="valor-card animate-on-scroll delay-300" role="listitem">
                 <div class="valor-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">favorite</span>
                 </div>
@@ -114,14 +114,15 @@
 <!-- ══════════ OFICINAS ══════════ -->
 <section class="oficinas" aria-labelledby="oficinas-titulo">
     <div class="section-inner">
-        <div class="section-header">
+        <div class="section-header animate-on-scroll">
             <h2 id="oficinas-titulo" class="section-title">Nossas Oficinas</h2>
             <p class="section-subtitle">Atividades gratuitas para pessoas com deficiência visual de todas as idades.</p>
         </div>
 
         <div class="oficinas-grid" role="list" aria-label="Lista de oficinas">
             @for (of of oficinas; track of.titulo) {
-            <article class="oficina-card" role="listitem">
+            <article class="oficina-card animate-on-scroll" role="listitem" [class.delay-100]="$index % 3 === 1"
+                [class.delay-200]="$index % 3 === 2">
                 <div class="oficina-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
                 </div>
@@ -147,11 +148,12 @@
 <!-- ══════════ DEPOIMENTOS ══════════ -->
 <section class="depoimentos" aria-labelledby="dep-titulo">
     <div class="section-inner">
-        <h2 id="dep-titulo" class="section-title section-title--light">O que nossos alunos dizem</h2>
+        <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll">O que nossos alunos dizem</h2>
 
         <div class="dep-grid" role="list" aria-label="Depoimentos de alunos">
             @for (dep of depoimentos; track dep.nome) {
-            <blockquote class="dep-card" role="listitem">
+            <blockquote class="dep-card animate-on-scroll" role="listitem" [class.delay-100]="$index % 3 === 1"
+                [class.delay-200]="$index % 3 === 2">
                 <p class="dep-texto">"{{ dep.texto }}"</p>
                 <footer class="dep-autor">
                     <div class="dep-avatar" aria-hidden="true">{{ dep.nome.charAt(0) }}</div>
@@ -173,7 +175,7 @@
 <!-- ══════════ ÚLTIMAS NOTÍCIAS ══════════ -->
 <section class="section-noticias" aria-labelledby="noticias-titulo">
     <div class="section-inner">
-        <header class="section-header">
+        <header class="section-header animate-on-scroll">
             <h2 id="noticias-titulo" class="section-title">Últimas Novidades</h2>
             <p class="section-desc">Acompanhe as notícias, vagas para PCD e comunicados mais recentes do Instituto.</p>
         </header>
@@ -186,7 +188,8 @@
         } @else if (ultimasNoticias.length > 0) {
         <div class="grid-noticias">
             @for (item of ultimasNoticias; track item.id) {
-            <article class="card-noticia">
+            <article class="card-noticia animate-on-scroll" [class.delay-100]="$index === 1"
+                [class.delay-200]="$index === 2">
                 <figure class="card-noticia-img">
                     @if (item.imagemCapa) {
                     <img [src]="item.imagemCapa" alt="Imagem: {{ item.titulo }}" loading="lazy" />
@@ -223,7 +226,7 @@
 
 <!-- ══════════ CTA FINAL ══════════ -->
 <section class="cta-final" aria-labelledby="cta-titulo">
-    <div class="section-inner cta-inner">
+    <div class="section-inner cta-inner animate-on-scroll">
         <div class="cta-text">
             <h2 id="cta-titulo">Pronto para começar?</h2>
             <p>A inscrição é gratuita e pode ser feita online. Nossa equipe entrará em contato para agendar uma visita.
