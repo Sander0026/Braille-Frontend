@@ -1,3 +1,4 @@
+@use 'sass:color';
 // ============================================================
 // contato.scss
 // ============================================================
@@ -42,7 +43,7 @@ $gray-900: #1a1a1a;
 
 .page-hero-desc {
     font-size: 1rem;
-    color: rgba(#fff, .7);
+    color: color.change(#fff, $alpha: .7);
     line-height: 1.7;
     margin: 0;
 }
@@ -103,7 +104,7 @@ $gray-900: #1a1a1a;
 
     p {
         font-size: 0.8rem;
-        color: rgba(#fff, .75);
+        color: color.change(#fff, $alpha: .75);
         margin: 0;
         line-height: 1.5;
     }
@@ -121,15 +122,15 @@ $gray-900: #1a1a1a;
 }
 
 .info-aviso {
-    background: rgba($primary, .1);
-    border: 1px solid rgba($primary, .25);
+    background: color.change($primary, $alpha: .1);
+    border: 1px solid color.change($primary, $alpha: .25);
     border-radius: 0.5rem;
     padding: 0.875rem 1rem;
     margin-top: 1.5rem;
 
     p {
         font-size: 0.78rem;
-        color: rgba(#fff, .8);
+        color: color.change(#fff, $alpha: .8);
         line-height: 1.55;
         margin: 0;
     }
@@ -215,7 +216,7 @@ $gray-900: #1a1a1a;
     &:focus {
         outline: none;
         border-color: $primary;
-        box-shadow: 0 0 0 3px rgba($primary, .2);
+        box-shadow: 0 0 0 3px color.change($primary, $alpha: .2);
     }
 
     &.invalid {

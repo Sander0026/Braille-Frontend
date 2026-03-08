@@ -1,4 +1,5 @@
-﻿// Dashboard Styles — ILBES Admin
+@use 'sass:color';
+// Dashboard Styles — ILBES Admin
 $primary: #f5c800;
 $primary-text: #1a1a00;
 $info: #2563eb;
@@ -46,22 +47,22 @@ $transition: 250ms ease;
 
     // Variantes de cor (borda esquerda)
     &--primary .stat-icon {
-        background: rgba($primary, .15);
+        background: color.change($primary, $alpha: .15);
         color: #c9a500;
     }
 
     &--info .stat-icon {
-        background: rgba($info, .1);
+        background: color.change($info, $alpha: .1);
         color: $info;
     }
 
     &--success .stat-icon {
-        background: rgba($success, .1);
+        background: color.change($success, $alpha: .1);
         color: $success;
     }
 
     &--warning .stat-icon {
-        background: rgba($warning, .1);
+        background: color.change($warning, $alpha: .1);
         color: $warning;
     }
 
@@ -205,7 +206,7 @@ $transition: 250ms ease;
 
     &:hover {
         border-color: $primary;
-        background: rgba($primary, .06);
+        background: color.change($primary, $alpha: .06);
         transform: translateY(-2px);
     }
 }

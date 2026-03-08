@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // public-layout.scss
 // ============================================================
 
@@ -95,7 +95,7 @@ $transition: 200ms ease;
 
     &:hover {
         color: $primary-dk;
-        background: rgba($primary, 0.05);
+        background: color.change($primary, $alpha: 0.05);
     }
 
     &.active {
@@ -190,13 +190,13 @@ main {
 
 .footer-tagline {
     font-size: 0.825rem;
-    color: rgba($white, 0.6);
+    color: color.change($white, $alpha: 0.6);
     margin: 0;
 }
 
 .footer-copy {
     font-size: 0.75rem;
-    color: rgba($white, 0.4);
+    color: color.change($white, $alpha: 0.4);
     margin: 0;
 }
 
