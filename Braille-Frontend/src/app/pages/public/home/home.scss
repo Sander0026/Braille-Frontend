@@ -438,8 +438,45 @@ $transition: 250ms ease;
 // DEPOIMENTOS  —  preto profundo, sem borda (contraste natural)
 // ─────────────────────────────────────────────────────────────
 .depoimentos {
+    position: relative;
+    z-index: 2;
     background: #111111; // Preto intenso
-    padding: 6rem 0;
+    padding: 0 0 2rem;
+}
+
+.wave-transition-double {
+    width: 100%;
+    margin-top: -1px;
+    margin-bottom: 3rem;
+    line-height: 0;
+
+    svg {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 80px;
+
+        @media (max-width: 768px) {
+            height: 50px;
+        }
+    }
+}
+
+.wave-transition-concave {
+    width: 100%;
+    margin-bottom: -1px;
+    line-height: 0;
+
+    svg {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 80px;
+
+        @media (max-width: 768px) {
+            height: 50px;
+        }
+    }
 }
 
 .dep-grid {
@@ -552,12 +589,18 @@ $transition: 250ms ease;
 }
 
 // ─────────────────────────────────────────────────────────────
-// ÚLTIMAS NOTÍCIAS  —  fundo branco, borda topo amarela
+// ÚLTIMAS NOTÍCIAS  —  fundo branco, transição arredondada
 // ─────────────────────────────────────────────────────────────
 .section-noticias {
+    position: relative;
+    z-index: 1;
     background: $white;
-    border-top: 3px solid $primary;
-    padding: 5rem 0;
+    padding: 9rem 0 5rem;
+    border-top: none;
+
+    @media (max-width: 768px) {
+        padding: 7rem 0 4rem;
+    }
 }
 
 .section-desc {
