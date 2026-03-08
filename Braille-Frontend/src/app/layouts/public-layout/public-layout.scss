@@ -10,6 +10,7 @@ $black: #1a1a00;
 $white: #ffffff;
 $gray-100: #f7f7f7;
 $gray-600: #5c5c5c;
+$gray-700: #3d3d3d;
 $gray-900: #1a1a1a;
 $transition: 200ms ease;
 
@@ -33,16 +34,17 @@ $transition: 200ms ease;
     position: sticky;
     top: 0;
     z-index: 100;
-    background: #111111;
-    border-bottom: 3px solid $primary;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, .4);
+    background: $white;
+    // Removida border-bottom amarela forte para dar lugar a um box-shadow elegante e leve
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06); // Contraste suave tipo Relfe
 }
 
 .header-inner {
     max-width: 1100px;
     margin: 0 auto;
     padding: 0 1.5rem;
-    height: 72px;
+    height: 120px; // Aumentado bastante
     display: flex;
     align-items: center;
     gap: 2rem;
@@ -52,7 +54,6 @@ $transition: 200ms ease;
 .logo {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
     text-decoration: none;
     flex-shrink: 0;
 
@@ -63,19 +64,14 @@ $transition: 200ms ease;
     }
 }
 
-.logo-icon {
-    font-size: 1.6rem;
-    color: $primary;
-    line-height: 1;
-}
+.logo-img {
+    height: 90px; // Logo maior acompanhando o height do container
+    width: auto;
+    object-fit: contain;
+    transition: transform $transition;
 
-.logo-text {
-    font-size: 1rem;
-    color: $white;
-    font-family: 'Segoe UI', sans-serif;
-
-    strong {
-        color: $primary;
+    &:hover {
+        transform: scale(1.05);
     }
 }
 
@@ -92,18 +88,18 @@ $transition: 200ms ease;
     padding: 0.5rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 600;
-    color: rgba($white, 0.75);
+    color: $gray-700; // Cor escura para contrastar com branco
     text-decoration: none;
     border-radius: 0.5rem;
-    transition: color $transition, background $transition;
+    transition: color $transition, background $transition, opacity $transition;
 
     &:hover {
-        color: $white;
-        background: rgba($white, 0.08);
+        color: $primary-dk;
+        background: rgba($primary, 0.05);
     }
 
     &.active {
-        color: $primary;
+        color: $primary-dk;
         font-weight: 700;
         background: transparent;
         position: relative;
@@ -132,25 +128,25 @@ $transition: 200ms ease;
     display: inline-flex;
     align-items: center;
     padding: 0.6rem 1.5rem;
-    background: transparent;
+    background: $primary;
     border: 2px solid $primary;
-    color: $primary;
+    color: #111111;
     font-size: 0.9rem;
-    font-weight: 700;
+    font-weight: 800;
     border-radius: 9999px;
     text-decoration: none;
     transition: all $transition;
     white-space: nowrap;
 
     &:hover {
-        background: $primary;
-        color: #111111;
+        background: $primary-dk;
+        border-color: $primary-dk;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
     }
 
     &:focus-visible {
-        outline: 2px solid $white;
+        outline: 2px solid $gray-700;
         outline-offset: 2px;
     }
 }

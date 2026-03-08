@@ -1,6 +1,7 @@
 ﻿// ============================================================
 // login.scss — Tela de Login ILBES
 // ============================================================
+@use 'sass:color';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 $primary: #f5c800; // Tom padrão de amarelo do projeto
@@ -244,7 +245,7 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition, box-shadow $transition;
 
     &:hover:not(:disabled) {
-        background: darken(#f5c800, 8%);
+        background: color.adjust(#f5c800, $lightness: -8%);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
     }

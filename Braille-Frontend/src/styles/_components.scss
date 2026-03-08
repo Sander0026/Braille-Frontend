@@ -2,6 +2,7 @@
 // _components.scss — Componentes Globais Reutilizáveis ILBES
 // ============================================================
 @use 'variables' as *;
+@use 'sass:color';
 
 // ============================================================
 // BOTÕES
@@ -707,7 +708,7 @@
     &.active {
         background: $color-primary;
         color: $color-primary-text;
-        border-color: darken(#f5c800, 10%);
+        border-color: color.adjust(#f5c800, $lightness: -10%);
     }
 
     &:focus-visible {
