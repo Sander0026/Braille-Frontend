@@ -73,10 +73,9 @@
 } @else {
 <!-- Grade de cards -->
 <div class="turmas-grid" role="list" aria-label="Lista de oficinas">
+  <!-- Indicador de status -->
   @for (turma of turmasFiltradas; track turma.id) {
-  <article class="turma-card" role="listitem">
-
-    <!-- Indicador de status -->
+  <article class="turma-card focavel-card" role="listitem" tabindex="0" appTabelaTrFocavel>
     <div class="card-status-bar" [class.inativa]="!turma.statusAtivo" aria-hidden="true"></div>
 
     <div class="card-body">
@@ -414,7 +413,7 @@
         <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>
         <input type="search" id="buscarAlunoInput" class="form-input" placeholder="Buscar aluno para adicionar..."
           [formControl]="buscaAlunoCtrl" aria-label="Buscar aluno por nome para matricular" autocomplete="off"
-          [attr.aria-busy]="buscandoAlunos" />
+          [attr.aria-busy]="buscandoAlunos" (keydown)="onBuscaKeydown($event)" />
 
         @if (buscandoAlunos) {
         <div class="loading-state empty-state--sm" aria-busy="true">
@@ -426,7 +425,7 @@
         <ul class="busca-resultados" role="listbox" aria-label="Resultados da busca de alunos"
           style="position:static; max-height:220px; border-top:1px solid #e5e5e5; margin-top:0.5rem; box-shadow:none;">
           @for (aluno of alunosBuscaRestado; track aluno.id) {
-          <li class="busca-resultado-item" role="option">
+          <li class="busca-resultado-item" role="option" appBuscaItem [itemData]="aluno" [id]="'aluno-op-' + aluno.id">
             <label style="display:flex; align-items:center; gap:0.75rem; width:100%; cursor:pointer;">
               <input type="checkbox" [checked]="alunosSelecionadosParaMatricula.includes(aluno.id)"
                 (change)="toggleSelecaoAluno(aluno.id)" class="custom-checkbox" />

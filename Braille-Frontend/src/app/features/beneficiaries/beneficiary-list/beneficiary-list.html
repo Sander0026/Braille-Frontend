@@ -288,7 +288,7 @@
         </thead>
         <tbody>
             @for (aluno of alunos; track aluno.id) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
                 <td>
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>

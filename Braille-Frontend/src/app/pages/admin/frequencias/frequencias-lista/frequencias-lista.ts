@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { of, from } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
+import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
 
@@ -18,10 +20,24 @@ interface AlunoNaChamada {
   salvo: boolean;
 }
 
+@Directive({
+  selector: '[appTabelaTrFocavel]',
+  standalone: true
+})
+export class TabelaTrFocavelDirective implements FocusableOption {
+  @Input() disabled = false;
+
+  constructor(public element: ElementRef<HTMLElement>) { }
+
+  focus(): void {
+    this.element.nativeElement.focus();
+  }
+}
+
 @Component({
   selector: 'app-frequencias-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TabelaTrFocavelDirective],
   templateUrl: './frequencias-lista.html',
   styleUrl: './frequencias-lista.scss',
 })
@@ -39,6 +55,10 @@ export class FrequenciasLista implements OnInit {
   chamadaCarregada = false;
   erroCarregamento = '';
   feedbackSalvo = '';
+
+  // ── KeyManager ─────────────────────────────────────────────
+  @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
+  public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
   // Expõe Math para o template Angular
   readonly Math = Math;
@@ -84,6 +104,23 @@ export class FrequenciasLista implements OnInit {
     this.userId = user?.sub || '';
 
     this.carregarTurmas();
+  }
+
+  ngAfterViewInit(): void {
+    this.keyManager = new FocusKeyManager(this.linhasTabela).withWrap();
+    this.linhasTabela.changes.subscribe(() => {
+      this.keyManager.withWrap();
+    });
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    if (this.keyManager) {
+      if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+        this.keyManager.onKeydown(event);
+        event.preventDefault();
+      }
+    }
   }
 
   // ── Turmas ─────────────────────────────────────────────────

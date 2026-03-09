@@ -10,13 +10,28 @@ import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
+import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
+
+@Directive({
+  selector: '[appTabelaTrFocavel]',
+  standalone: true
+})
+export class TabelaTrFocavelDirective implements FocusableOption {
+  @Input() disabled = false;
+
+  constructor(public element: ElementRef<HTMLElement>) { }
+
+  focus(): void {
+    this.element.nativeElement.focus();
+  }
+}
 
 @Component({
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent, A11yModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -40,6 +55,10 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl'; url: string } | null = null;
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
+
+  // KeyManager
+  @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
+  public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
   // Abas
   abaAtiva: 'ativos' | 'inativos' = 'ativos';
@@ -147,6 +166,23 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewInit(): void {
+    this.keyManager = new FocusKeyManager(this.linhasTabela).withWrap();
+    this.linhasTabela.changes.subscribe(() => {
+      this.keyManager.withWrap();
+    });
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    if (this.keyManager && !this.modalAberto && !this.modalEdicaoAberto && !this.drawerAberto && !this.modalImportAberto && !this.alunoParaInativar && !this.alunoParaRestaurar && !this.alunoParaExcluirDefinitivo && !this.documentoParaExcluir) {
+      if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+        this.keyManager.onKeydown(event);
+        event.preventDefault();
+      }
+    }
   }
 
   // ── Modal de Importação ─────────────────────────────────────────────

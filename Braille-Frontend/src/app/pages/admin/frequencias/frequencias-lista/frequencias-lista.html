@@ -132,7 +132,8 @@
         </thead>
         <tbody>
             @for (aluno of alunosNaChamada; track aluno.alunoId) {
-            <tr [class.linha-presente]="aluno.presente" [class.linha-falta]="!aluno.presente">
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr" [class.linha-presente]="aluno.presente"
+                [class.linha-falta]="!aluno.presente">
                 <td>
                     <div class="aluno-nome">
                         <!-- Icone salvo antes do nome -->
@@ -259,7 +260,7 @@
         </thead>
         <tbody>
             @for (resumo of historico; track resumo.dataAula + resumo.turmaId) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
                 <td>{{ formatarData(resumo.dataAula) }}</td>
                 <td>{{ resumo.turmaNome }}</td>
                 <td class="text-center">{{ resumo.totalAlunos }}</td>
@@ -370,7 +371,7 @@
         </thead>
         <tbody>
             @for (historico of relatorioHistorico; track historico.id) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
                 <td>{{ formatarData(historico.dataAula) }}</td>
                 <td class="text-center">
                     <span class="badge" [class.badge-success]="historico.presente"

@@ -3,15 +3,31 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
+import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
+
+@Directive({
+    selector: '[appTabelaTrFocavel]',
+    standalone: true
+})
+export class TabelaTrFocavelDirective implements FocusableOption {
+    @Input() disabled = false;
+
+    constructor(public element: ElementRef<HTMLElement>) { }
+
+    focus(): void {
+        this.element.nativeElement.focus();
+    }
+}
 
 @Component({
     selector: 'app-usuarios-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule],
+    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective],
     templateUrl: './usuarios-lista.html',
     styleUrl: './usuarios-lista.scss'
 })
@@ -34,6 +50,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
     usuarioParaResetar: Usuario | null = null;
     editForm!: FormGroup;
     salvando = false;
+
+    // ── KeyManager ─────────────────────────────────────────────
+    @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
+    public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
     private destroy$ = new Subject<void>();
 
@@ -74,6 +94,23 @@ export class UsuariosLista implements OnInit, OnDestroy {
         ).subscribe(() => { this.paginaAtual = 1; this.carregar(); });
 
         this.carregar();
+    }
+
+    ngAfterViewInit(): void {
+        this.keyManager = new FocusKeyManager(this.linhasTabela).withWrap();
+        this.linhasTabela.changes.subscribe(() => {
+            this.keyManager.withWrap();
+        });
+    }
+
+    @HostListener('keydown', ['$event'])
+    onKeydown(event: KeyboardEvent) {
+        if (this.keyManager && !this.usuarioEmEdicao && !this.usuarioVisualizado && !this.usuarioParaExcluir && !this.usuarioParaExcluirDefinitivo && !this.usuarioParaRestaurar && !this.usuarioParaResetar) {
+            if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+                this.keyManager.onKeydown(event);
+                event.preventDefault();
+            }
+        }
     }
 
     ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }

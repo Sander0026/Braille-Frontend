@@ -70,7 +70,7 @@
         </thead>
         <tbody>
             @for (usuario of usuarios; track usuario.id) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr" [class.linha-inativa]="!usuario.statusAtivo">
                 <td>
                     <div class="user-cell">
                         @if (usuario.fotoPerfil) {
