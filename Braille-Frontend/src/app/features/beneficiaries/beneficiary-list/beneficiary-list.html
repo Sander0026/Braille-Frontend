@@ -446,9 +446,17 @@
                     }
                     <div class="profile-badges">
                         @if (alunoSelecionado.statusAtivo) {
-                        <span class="badge badge-success">Ativo</span>
+                        <span class="badge badge-success">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                                aria-hidden="true">check_circle</span>
+                            Ativo
+                        </span>
                         } @else {
-                        <span class="badge badge-danger">Inativo</span>
+                        <span class="badge badge-danger">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                                aria-hidden="true">cancel</span>
+                            Inativo
+                        </span>
                         }
                         @if (alunoSelecionado.tipoDeficiencia) {
                         <span class="badge badge-primary">{{ alunoSelecionado.tipoDeficiencia }}</span>
@@ -575,9 +583,11 @@
                                     @let freq = frequenciasMap.get(m.turma.id)?.taxaPresenca || 0;
                                     <span style="display: flex; align-items: center; justify-content: center; gap: 4px;"
                                         [style.color]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
-                                        <div style="width: 8px; height: 8px; border-radius: 50%;"
-                                            [style.backgroundColor]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
-                                        </div>
+                                        <span class="material-symbols-rounded" style="font-size: 16px;"
+                                            aria-hidden="true"
+                                            [style.color]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
+                                            {{ freq >= 75 ? 'check_circle' : (freq >= 50 ? 'warning' : 'cancel') }}
+                                        </span>
                                         {{ freq }}%
                                     </span>
                                 </td>
