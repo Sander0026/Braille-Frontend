@@ -1,3 +1,4 @@
+@use 'sass:color';
 // ══════════════════════════════════════════════════════════════
 // NOTICIA-DETALHE — Layout editorial tipo blog
 // ══════════════════════════════════════════════════════════════
@@ -153,36 +154,36 @@ $transition: 0.2s ease-in-out;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background: rgba(#1d4ed8, 0.12);
+    background: color.change(#1d4ed8, $alpha: 0.12);
     color: #1d4ed8;
 
     &[data-categoria="VAGA_EMPREGO"] {
-        background: rgba(#16a34a, 0.12);
+        background: color.change(#16a34a, $alpha: 0.12);
         color: #16a34a;
     }
 
     &[data-categoria="SERVICO"] {
-        background: rgba(#ca8a04, 0.12);
+        background: color.change(#ca8a04, $alpha: 0.12);
         color: #ca8a04;
     }
 
     &[data-categoria="EVENTO_CULTURAL"] {
-        background: rgba(#9333ea, 0.12);
+        background: color.change(#9333ea, $alpha: 0.12);
         color: #9333ea;
     }
 
     &[data-categoria="LEGISLACAO"] {
-        background: rgba(#475569, 0.12);
+        background: color.change(#475569, $alpha: 0.12);
         color: #475569;
     }
 
     &[data-categoria="TRABALHO_PCD"] {
-        background: rgba(#0ea5e9, 0.12);
+        background: color.change(#0ea5e9, $alpha: 0.12);
         color: #0ea5e9;
     }
 
     &[data-categoria="AVISO"] {
-        background: rgba(#dc2626, 0.12);
+        background: color.change(#dc2626, $alpha: 0.12);
         color: #dc2626;
     }
 }
@@ -302,7 +303,7 @@ $transition: 0.2s ease-in-out;
     a {
         color: #1740b4; // Equivalente a darken(#1d4ed8, 5%)
         text-decoration: underline;
-        text-decoration-color: rgba(#1d4ed8, 0.4);
+        text-decoration-color: color.change(#1d4ed8, $alpha: 0.4);
         transition: text-decoration-color $transition;
 
         &:hover {

@@ -3,6 +3,7 @@
 // ============================================================
 @use "sass:color";
 @use 'variables' as *;
+@use 'sass:color';
 
 // ============================================================
 // BOTÕES
@@ -477,6 +478,7 @@
 
         appearance: textfield;
         -moz-appearance: textfield;
+        appearance: textfield;
     }
 }
 
