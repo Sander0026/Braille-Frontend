@@ -8,6 +8,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
+import { HotkeysService, HotkeyAction } from '../../core/services/hotkeys.service';
 
 interface NavItem {
   rota: string;
@@ -18,7 +19,7 @@ interface NavItem {
 }
 
 type SidebarState = 'full' | 'icons' | 'hidden';
-type Modal = 'none' | 'foto' | 'senha' | 'perfil';
+type Modal = 'none' | 'foto' | 'senha' | 'perfil' | 'hotkeys';
 
 @Component({
   selector: 'app-admin-layout',
@@ -43,6 +44,7 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   // ── Modais ───────────────────────────────────────────
   modalAtivo: Modal = 'none';
+  hotkeysDisponiveis: HotkeyAction[] = [];
 
   // ── Form: Trocar Senha ───────────────────────────────
   formSenha!: FormGroup;
@@ -94,7 +96,8 @@ export class AdminLayout implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private elRef: ElementRef,
     private cdr: ChangeDetectorRef,
-    public a11y: AccessibilityService
+    public a11y: AccessibilityService,
+    private hotkeysService: HotkeysService
   ) { }
 
   ngOnInit(): void {
@@ -103,6 +106,13 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.inicializarFormSenha();
     this.inicializarFormPerfil();
     this.carregarPerfil();
+
+    this.hotkeysDisponiveis = this.hotkeysService.getRegisteredHotkeys();
+    this.hotkeysService.onHelpRequested$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.abrirModalHotkeys();
+      });
   }
 
   ngOnDestroy(): void {
@@ -205,6 +215,12 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.perfilSucesso = false;
     if (this.perfil) this.atualizarFormPerfil(this.perfil);
     this.modalAtivo = 'perfil';
+  }
+
+  abrirModalHotkeys(): void {
+    this.menuAberto = false;
+    this.modalAtivo = 'hotkeys';
+    this.cdr.detectChanges();
   }
 
   fecharModal(): void {
