@@ -377,6 +377,117 @@
     overflow-y: auto;
 }
 
+// ── Tabela de Diferenças (Humanização) ───────────────────────────────────────
+.diff-section {
+    margin-top: 1.5rem;
+
+    h3 {
+        font-size: 0.95rem;
+        color: #374151;
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    &.empty-diff {
+        background: #f9fafb;
+        border: 1px dashed #d1d5db;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        text-align: center;
+
+        p {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+    }
+}
+
+.diff-table-wrapper {
+    overflow-x: auto;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.diff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+
+    thead {
+        background: #f9fafb;
+    }
+
+    th {
+        text-align: left;
+        padding: 0.6rem 1rem;
+        font-weight: 600;
+        color: #4b5563;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    td {
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        vertical-align: top;
+        word-break: break-word;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    .diff-campo {
+        font-weight: 600;
+        color: #374151;
+        width: 25%;
+    }
+
+    .diff-old {
+        color: #b91c1c; // Vermelho suave
+        width: 37.5%;
+        background-color: #fef2f2; // Fundo avermelhado super leve
+        text-decoration: line-through;
+        text-decoration-color: rgba(185, 28, 28, 0.4);
+
+        &.empty {
+            color: #9ca3af;
+            text-decoration: none;
+            background-color: transparent;
+        }
+    }
+
+    .diff-new {
+        color: #047857; // Verde esmeralda suave
+        width: 37.5%;
+        background-color: #ecfdf5; // Fundo esverdeado leve
+        font-weight: 500;
+
+        &.empty {
+            color: #9ca3af;
+            font-weight: normal;
+            background-color: transparent;
+        }
+
+        .text-muted {
+            color: #9ca3af;
+            font-style: italic;
+            font-weight: normal;
+        }
+    }
+
+    // Sublinha levemente a linha caso tenha havido alteração de fato
+    tr.is-changed {
+
+        .diff-old,
+        .diff-new {
+            border-left: 1px solid #e5e7eb;
+        }
+    }
+}
+
 // ── Botões ───────────────────────────────────────────────────────────────────
 .btn {
     padding: 0.5rem 1rem;

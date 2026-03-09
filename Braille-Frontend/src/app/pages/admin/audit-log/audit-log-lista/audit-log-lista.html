@@ -142,18 +142,41 @@
                 <dd class="ua">{{ logSelecionado.userAgent ?? '—' }}</dd>
             </dl>
 
-            @if (logSelecionado.oldValue) {
-            <div class="json-section">
-                <h3>Estado anterior (oldValue)</h3>
-                <pre class="json-block">{{ jsonPretty(logSelecionado.oldValue) }}</pre>
+            @if (diferencas.length > 0) {
+            <div class="diff-section">
+                <h3>Alterações</h3>
+                <div class="diff-table-wrapper">
+                    <table class="diff-table">
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Valor Anterior</th>
+                                <th>Novo Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (diff of diferencas; track diff.campo) {
+                            <tr [class.is-changed]="diff.alterado">
+                                <td class="diff-campo">{{ diff.campo }}</td>
+                                <td class="diff-old" [class.empty]="diff.de === '—'">{{ diff.de }}</td>
+                                <td class="diff-new" [class.empty]="diff.para === '—'">
+                                    <!-- Se não foi alterado (ex: numa exclusão ou qdo o valor manteve) -->
+                                    @if(diff.alterado) {
+                                        {{ diff.para }}
+                                    } @else {
+                                        <span class="text-muted">Mantido</span>
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            }
-
-            @if (logSelecionado.newValue) {
-            <div class="json-section">
-                <h3>Novo estado (newValue)</h3>
-                <pre class="json-block">{{ jsonPretty(logSelecionado.newValue) }}</pre>
-            </div>
+            } @else {
+                <div class="diff-section empty-diff">
+                    <p>Nenhuma alteração visível nos campos mapeados.</p>
+                </div>
             }
 
         </div>
