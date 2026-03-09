@@ -167,8 +167,9 @@ export class AuditLogLista implements OnInit {
             // Se for CRIAR e o valor for null/vazio, pula pra não poluir.
             if (!oldVal && (valNovo === null || valNovo === undefined || valNovo === '')) continue;
 
-            // Só mostra se houve mudança
-            if (valAntigo === valNovo && oldVal && newVal) continue;
+            // Removido: as regras antigamente escondiam campos inalterados. 
+            // Agora, a pedido, manteremos todos visíveis na UI (onde será marcado como 'Mantido').
+            // if (valAntigo === valNovo && oldVal && newVal) continue;
 
             const labelAmigavel = this.dicionarioCampos[key] || key.charAt(0).toUpperCase() + key.slice(1);
             const strAntigo = this.formatarValorAmigavel(key, valAntigo);
