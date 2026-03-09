@@ -737,7 +737,7 @@
     &.active {
         background: $color-primary;
         color: $color-primary-text;
-        border-color: color.mix(black, #f5c800, 10%);
+        border-color: color-mix(in srgb, black 10%, #f5c800);
     }
 
     &:focus-visible {
