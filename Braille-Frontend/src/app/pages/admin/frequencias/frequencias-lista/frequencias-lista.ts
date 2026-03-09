@@ -214,10 +214,16 @@ export class FrequenciasLista implements OnInit {
 
           setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
         },
-        error: () => {
+        error: (err) => {
           this.salvandoTudo = false;
           this.alunosNaChamada.forEach(a => a.salvando = false);
-          this.feedbackSalvo = 'Erro crítico ao processar Lote. Tente novamente.';
+
+          let det = 'Falha de comunicação com o servidor.';
+          if (err?.error?.message) {
+            det = Array.isArray(err.error.message) ? err.error.message[0] : err.error.message;
+          }
+
+          this.feedbackSalvo = `⚠️ Erro Crítico: ${det}`;
           this.cdr.detectChanges();
         }
       });
