@@ -1,0 +1,4 @@
+﻿Braille-Frontend/src/app/layouts/public-layout/public-layout.scss
+Braille-Frontend/src/app/pages/public/home/home.scss
+Braille-Frontend/src/app/pages/public/login/login.scss
+Braille-Frontend/src/styles/_components.scss
