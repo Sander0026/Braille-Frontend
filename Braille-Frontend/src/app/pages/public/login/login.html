@@ -1,18 +1,20 @@
 <!-- Skip link de acessibilidade -->
-<a href="#login-form" class="skip-to-content">Pular para o formulário de login</a>
+<nav aria-label="Acesso Rápido">
+  <a href="#login-form" class="skip-to-content" style="z-index: 9999;">Pular para o formulário de login</a>
+</nav>
 
-<div class="login-wrapper" role="main">
+<main class="login-wrapper">
 
   <div class="form-panel">
     <div class="form-card">
 
-      <header class="form-heading">
+      <div class="form-heading">
         <div class="logo-container">
           <img src="favicon.ico" alt="Logo Instituto Luiz Braille" class="login-logo" />
         </div>
         <h1>Sistema Administrativo</h1>
         <p>Acesso restrito ao painel institucional</p>
-      </header>
+      </div>
 
       <!-- Alerta de erro -->
       @if (erroLogin) {
@@ -163,4 +165,4 @@
     </div>
   </div>
 
-</div>
+</main>
