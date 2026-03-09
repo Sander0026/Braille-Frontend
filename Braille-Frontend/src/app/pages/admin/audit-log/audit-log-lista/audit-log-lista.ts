@@ -112,12 +112,85 @@ export class AuditLogLista implements OnInit {
         this.carregarLogs(1);
     }
 
+    // ── Humanização do Log ─────────────────────────────────────
+    diferencas: { campo: string, de: string, para: string, alterado: boolean }[] = [];
+
+    private dicionarioCampos: Record<string, string> = {
+        'presente': 'Presença',
+        'dataAula': 'Data da Aula',
+        'fechado': 'Diário Fechado',
+        'fechadoEm': 'Data de Fechamento',
+        'fechadoPor': 'Fechado por',
+        'observacao': 'Observação',
+        'nome': 'Nome',
+        'nomeCompleto': 'Nome Completo',
+        'dataNascimento': 'Data de Nascimento',
+        'email': 'E-mail',
+        'telefone': 'Telefone',
+        'status': 'Situação',
+        'cpf': 'CPF',
+        'rg': 'RG',
+    };
+
+    private camposIgnorados = ['id', 'alunoId', 'turmaId', 'criadoEm', 'atualizadoEm', 'senhaHash', 'professorId'];
+
+    private formatarValorAmigavel(chave: string, valor: any): string {
+        if (valor === null || valor === undefined) return '—';
+        if (typeof valor === 'boolean') return valor ? 'Sim' : 'Não';
+        if (typeof valor === 'string' && valor.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/)) {
+            // Se for string de data ISO
+            const d = new Date(valor);
+            if (chave.toLowerCase().includes('data')) {
+                // Se for data pura (ex: dataAula) mostra só a data se a hora for meia noite no UTC
+                if (valor.includes('T00:00:00')) return d.toLocaleDateString('pt-BR');
+            }
+            return d.toLocaleString('pt-BR');
+        }
+        if (valor === '') return 'Vazio';
+        return String(valor);
+    }
+
+    private gerarDiferencas(oldVal: any, newVal: any): void {
+        this.diferencas = [];
+        const oldObj = oldVal || {};
+        const newObj = newVal || {};
+
+        // Pegar todas as chaves (união das antigas e novas)
+        const allKeys = Array.from(new Set([...Object.keys(oldObj), ...Object.keys(newObj)]));
+
+        for (const key of allKeys) {
+            if (this.camposIgnorados.includes(key)) continue;
+
+            const valAntigo = oldObj[key];
+            const valNovo = newObj[key];
+
+            // Se for CRIAR e o valor for null/vazio, pula pra não poluir.
+            if (!oldVal && (valNovo === null || valNovo === undefined || valNovo === '')) continue;
+
+            // Só mostra se houve mudança
+            if (valAntigo === valNovo && oldVal && newVal) continue;
+
+            const labelAmigavel = this.dicionarioCampos[key] || key.charAt(0).toUpperCase() + key.slice(1);
+            const strAntigo = this.formatarValorAmigavel(key, valAntigo);
+            const strNovo = this.formatarValorAmigavel(key, valNovo);
+
+            this.diferencas.push({
+                campo: labelAmigavel,
+                de: strAntigo,
+                para: strNovo,
+                alterado: (strAntigo !== strNovo)
+            });
+        }
+    }
+
     abrirDetalhes(log: AuditLog): void {
         this.logSelecionado = log;
+        this.gerarDiferencas(log.oldValue, log.newValue);
         this.cdr.markForCheck();
     }
     fecharDetalhes(): void {
         this.logSelecionado = null;
+        this.diferencas = [];
         this.cdr.markForCheck();
     }
 
@@ -130,12 +203,6 @@ export class AuditLogLista implements OnInit {
     formatarData(iso: string): string {
         if (!iso) return '—';
         return new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
-    }
-
-    jsonPretty(val: any): string {
-        if (!val) return '—';
-        try { return JSON.stringify(val, null, 2); }
-        catch { return String(val); }
     }
 
     trackById(_: number, item: AuditLog): string { return item.id; }
