@@ -32,7 +32,7 @@
 <section class="stats-grid" role="region" aria-label="Resumo de estatísticas">
     @for (card of cards; track card.label) {
     <a [routerLink]="card.rota" [queryParams]="card.queryParams" class="stat-card stat-card--{{ card.cor }}"
-        [attr.aria-label]="card.ariaLabel" role="article">
+        [attr.aria-label]="card.ariaLabel">
         <div class="stat-icon" aria-hidden="true">
             <span class="material-symbols-rounded">{{ card.icon }}</span>
         </div>
