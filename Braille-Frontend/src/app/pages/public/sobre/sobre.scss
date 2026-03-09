@@ -1,3 +1,4 @@
+@use 'sass:color';
 // Shared public page variables
 $primary: #f5c800;
 $black: #1a1a00;
@@ -37,7 +38,7 @@ $gray-900: #1a1a1a;
 
 .page-hero-desc {
     font-size: 1rem;
-    color: rgba(#fff, .7);
+    color: color.change(#fff, $alpha: .7);
     line-height: 1.7;
     margin: 0;
 }
@@ -217,7 +218,7 @@ $gray-900: #1a1a1a;
 
     p {
         font-size: 0.9rem;
-        color: rgba($black, .7);
+        color: color.change($black, $alpha: .7);
         margin: 0 0 1.5rem;
     }
 }
