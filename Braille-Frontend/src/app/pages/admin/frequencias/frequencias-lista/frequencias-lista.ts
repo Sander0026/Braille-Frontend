@@ -1,8 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of, from } from 'rxjs';
+import { catchError, concatMap, toArray } from 'rxjs/operators';
 
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
 
@@ -184,7 +184,8 @@ export class FrequenciasLista implements OnInit {
     if (this.salvandoTudo || this.alunosNaChamada.length === 0) return;
 
     this.salvandoTudo = true;
-    this.feedbackSalvo = '';
+    this.feedbackSalvo = 'Salvando chamada (processando fila para evitar sobrecarga)...';
+    this.cdr.detectChanges();
 
     const requisicoes = this.alunosNaChamada.map(aluno => {
       aluno.salvando = true;
@@ -202,34 +203,49 @@ export class FrequenciasLista implements OnInit {
           dataAula: this.dataAula,
           presente: aluno.presente,
         }).pipe(
-          catchError(() => of(null)) // 409 ignorado (já existe)
+          catchError(() => of(null)) // ignorado
         );
       }
     });
 
-    forkJoin(requisicoes).subscribe({
-      next: (resultados) => {
-        resultados.forEach((res, i) => {
-          const aluno = this.alunosNaChamada[i];
-          aluno.salvando = false;
-          if (res !== null) {
-            aluno.salvo = true;
-            if (!aluno.frequenciaId && (res as Frequencia).id) {
-              aluno.frequenciaId = (res as Frequencia).id;
+    // Transforma o envio em fuzilaria em Fila Indiana Segura (via concatMap)
+    // Impede o erro 500 (Prisma Connection Pool Timeout) do Servidor Nuvem Neon.tech
+    from(requisicoes)
+      .pipe(
+        concatMap(req => req),
+        toArray()
+      )
+      .subscribe({
+        next: (resultados) => {
+          let houveErro = false;
+          resultados.forEach((res, i) => {
+            const aluno = this.alunosNaChamada[i];
+            aluno.salvando = false;
+            if (res !== null) {
+              aluno.salvo = true;
+              if (!aluno.frequenciaId && (res as Frequencia).id) {
+                aluno.frequenciaId = (res as Frequencia).id;
+              }
+            } else {
+              houveErro = true;
             }
+          });
+
+          this.salvandoTudo = false;
+          if (houveErro) {
+            this.feedbackSalvo = '⚠️ Concluído. Alguns alunos não foram salvos. Verifique e tente salvar novamente.';
+          } else {
+            this.feedbackSalvo = 'Chamada salva com sucesso!';
+            setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
           }
-        });
-        this.salvandoTudo = false;
-        this.feedbackSalvo = 'Chamada salva com sucesso!';
-        this.cdr.detectChanges();
-        setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
-      },
-      error: () => {
-        this.salvandoTudo = false;
-        this.feedbackSalvo = 'Erro ao salvar chamada. Tente novamente.';
-        this.cdr.detectChanges();
-      },
-    });
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.salvandoTudo = false;
+          this.feedbackSalvo = 'Erro crítico ao salvar chamada. Tente novamente.';
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   // ── Histórico ──────────────────────────────────────────────
