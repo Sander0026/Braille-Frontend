@@ -412,8 +412,11 @@ $transition: 200ms ease;
         border-bottom: none;
     }
 
-    &:hover {
+    &:hover,
+    &.active-item {
         background: $gray-100;
+        border-left: 3px solid $primary;
+        padding-left: calc(1rem - 3px);
     }
 }
 
@@ -676,4 +679,3 @@ $transition: 200ms ease;
         flex: 1;
     }
 }
-
