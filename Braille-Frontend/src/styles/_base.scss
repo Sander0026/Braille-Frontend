@@ -424,3 +424,24 @@ html.alto-contraste {
         border-radius: 50%;
     }
 }
+
+// ============================================================================
+// ACESSIBILIDADE: REDUÇÃO DE MOVIMENTO (LABIRINTITE / TONTURA)
+// Respeita a preferência do SO do usuário para desativar animações e transitions
+// ============================================================================
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    // Desativar scroll suave globalmente caso configurado
+    html {
+        scroll-behavior: auto !important;
+    }
+}
