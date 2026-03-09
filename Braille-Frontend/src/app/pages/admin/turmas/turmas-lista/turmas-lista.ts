@@ -4,6 +4,8 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, F
 import { Router, RouterModule } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
+import { ActiveDescendantKeyManager, FocusKeyManager, Highlightable, FocusableOption } from '@angular/cdk/a11y';
+import { Directive, ElementRef, HostBinding, Input, HostListener, QueryList, ViewChildren } from '@angular/core';
 
 
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
@@ -24,11 +26,50 @@ const DIAS: { valor: string; label: string }[] = [
     { valor: 'DOM', label: 'Domingo' },
 ];
 
+@Directive({
+    selector: '[appTabelaTrFocavel]',
+    standalone: true
+})
+export class TabelaTrFocavelDirective implements FocusableOption {
+    @Input() disabled = false;
+
+    constructor(public element: ElementRef<HTMLElement>) { }
+
+    focus(): void {
+        this.element.nativeElement.focus();
+    }
+}
+
+@Directive({
+    selector: '[appBuscaItem]',
+    standalone: true
+})
+export class BuscaResultadoItemDirective implements Highlightable {
+    @Input() disabled = false;
+    @Input() itemData: any; // Beneficiário ID data etc
+    @HostBinding('class.active-item') isActive = false;
+
+    constructor(private element: ElementRef<HTMLElement>) { }
+
+    setActiveStyles(): void {
+        this.isActive = true;
+        this.element.nativeElement.scrollIntoView({ block: 'nearest' });
+    }
+
+    setInactiveStyles(): void {
+        this.isActive = false;
+    }
+
+    getLabel?(): string {
+        return this.itemData?.nomeCompleto || '';
+    }
+}
+
 @Component({
     selector: 'app-turmas-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BuscaResultadoItemDirective, TabelaTrFocavelDirective],
 
     templateUrl: './turmas-lista.html',
     styleUrl: './turmas-lista.scss',
@@ -80,11 +121,19 @@ export class TurmasLista implements OnInit {
     buscandoAlunos = false;
     operacaoEmProgresso = false;
 
+    // ── KeyManager para Autocomplete ───────────────────────────
+    @ViewChildren(BuscaResultadoItemDirective) buscaItems!: QueryList<BuscaResultadoItemDirective>;
+    private keyManager!: ActiveDescendantKeyManager<BuscaResultadoItemDirective>;
+
     // ── Filtros e Busca ─────────────────────────────────────────
     buscaCtrl = new FormControl('');
     drawerAberto = false;
     filterForm!: FormGroup;
     private destroy$ = new Subject<void>();
+
+    // ── KeyManager para Grid de Turmas ─────────────────────────
+    @ViewChildren(TabelaTrFocavelDirective) gridItems!: QueryList<TabelaTrFocavelDirective>;
+    private gridKeyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
     // ── Permissões ─────────────────────────────────────────────
     isProfessor = false;
@@ -122,6 +171,23 @@ export class TurmasLista implements OnInit {
         this.iniciarFormularios();
         this.iniciarBuscaAlunos();
         this.carregarDadosIniciais();
+    }
+
+    ngAfterViewInit(): void {
+        this.gridKeyManager = new FocusKeyManager(this.gridItems).withWrap();
+        this.gridItems.changes.subscribe(() => {
+            this.gridKeyManager.withWrap();
+        });
+    }
+
+    @HostListener('keydown', ['$event'])
+    onKeydown(event: KeyboardEvent) {
+        if (this.gridKeyManager && !this.modalAberto && !this.modalAlunosAberto && !this.modalArquivarAberto) {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+                this.gridKeyManager.onKeydown(event);
+                event.preventDefault();
+            }
+        }
     }
 
     // Dispara turmas e professores em paralelo — tempo = max(A, B) em vez de A + B
@@ -494,12 +560,31 @@ export class TurmasLista implements OnInit {
                 );
 
                 this.cdr.detectChanges();
+
+                // Reinicia KeyManager quando busca volta os dados
+                setTimeout(() => {
+                    this.keyManager = new ActiveDescendantKeyManager(this.buscaItems).withWrap().withTypeAhead();
+                });
             },
             error: () => {
                 this.buscandoAlunos = false;
                 this.cdr.detectChanges();
             }
         });
+    }
+
+    onBuscaKeydown(event: KeyboardEvent): void {
+        if (!this.keyManager) return;
+
+        if (event.key === 'Enter' || event.key === ' ') {
+            const activeItem = this.keyManager.activeItem;
+            if (activeItem) {
+                event.preventDefault(); // Evita scroll do espaço
+                this.toggleSelecaoAluno(activeItem.itemData.id);
+            }
+        } else {
+            this.keyManager.onKeydown(event);
+        }
     }
 
     toggleSelecaoAluno(alunoId: string): void {
