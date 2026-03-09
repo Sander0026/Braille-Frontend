@@ -37,7 +37,8 @@
 
     <!-- Botão de Filtros Avançados -->
     <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
-        [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Abrir filtros avançados">
+        [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Filtros avançados"
+        [attr.aria-expanded]="drawerAberto ? 'true' : 'false'" aria-controls="filter-drawer-panel">
         <span class="material-symbols-rounded">tune</span>
         Filtros
         @if (quantidadeFiltrosAtivos > 0) {
@@ -74,8 +75,9 @@
 @if (drawerAberto) {
 <div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
 }
-<aside class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog" aria-modal="true"
-    aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus [cdkTrapFocusAutoCapture]="drawerAberto">
+<aside id="filter-drawer-panel" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
+    aria-modal="true" aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="drawerAberto">
 
     <div class="filter-drawer__header">
         <h2 class="filter-drawer__title">

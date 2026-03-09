@@ -43,7 +43,8 @@
 
     <!-- Header -->
     <header class="admin-header" role="banner">
-      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel">
+      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel"
+        [attr.aria-expanded]="sidebarState !== 'hidden' ? 'true' : 'false'" aria-controls="sidebar-nav">
         <span class="material-symbols-rounded" aria-hidden="true">{{ toggleIcon }}</span>
       </button>
 
@@ -65,8 +66,8 @@
 
         <!-- ── Menu de Perfil ── -->
         <div class="user-menu-wrapper">
-          <button class="user-menu-btn" (click)="toggleMenu($event)" [attr.aria-expanded]="menuAberto"
-            aria-haspopup="menu" aria-label="Abrir menu de perfil">
+          <button class="user-menu-btn" (click)="toggleMenu($event)"
+            [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu" aria-label="Abrir menu de perfil">
 
             <!-- Avatar: foto ou iniciais -->
             @if (fotoPerfil) {
