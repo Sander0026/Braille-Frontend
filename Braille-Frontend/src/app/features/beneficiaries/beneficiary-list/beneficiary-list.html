@@ -239,8 +239,8 @@
 
 <!-- Tabela de Alunos -->
 @if (isLoading) {
-<div class="data-table-wrapper" aria-busy="true" aria-label="Carregando lista de alunos...">
-    <div class="loading-container">
+<div class="data-table-wrapper" aria-busy="true" aria-live="polite" aria-label="Carregando lista de alunos...">
+    <div class="loading-container" role="status">
         <div class="loading-spinner" aria-hidden="true"></div>
         <p>Carregando alunos...</p>
     </div>
