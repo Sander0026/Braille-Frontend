@@ -1,0 +1,212 @@
+﻿
+> braille-frontend@0.0.0 build
+> ng build
+
+[33mÔØ»[39m Building...
+[32mÔ£ö[39m Building...
+Application bundle generation failed. [10.358 seconds] - 2026-03-09T03:23:30.405Z
+
+node.exe : [1m[31m[31mX [4
+1;31m[[41;97mERROR[41;31m][
+0m [1mTS2307: Cannot find 
+module '@sentry/angular' or 
+its corresponding type 
+declarations.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+No linha:1 caractere:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          : 
+    NotSpecified: ([1m[31m  
+  [31mX...r-compiler][0m:   
+ String) [], RemoteExcepti    
+on
+    + FullyQualifiedErrorId : 
+    NativeCommandError
+ 
+
+    
+src/app/app.config.ts:5:24:
+[37m      5 Ôöé import * as 
+Sentry from 
+[32m'@sentry/angular'[37m;
+        ÔòÁ                   
+      
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mTS2307: 
+Cannot find module 
+'@angular/service-worker' or 
+its corresponding type 
+declarations.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    
+src/app/app.config.ts:10:37:
+[37m      10 Ôöé import { 
+provideServiceWorker } from [
+32m'@angular/service-worker'[
+37m;
+         ÔòÁ                  
+                    [32m~~~~~
+~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mTS2307: 
+Cannot find module 
+'dompurify' or its 
+corresponding type 
+declarations.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/app/core/pipes/safe-ht
+ml.pipe.ts:3:22:
+[37m      3 Ôöé import 
+DOMPurify from 
+[32m'dompurify'[37m;
+        ÔòÁ                   
+    [32m~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mTS2307: 
+Cannot find module 
+'@sentry/angular' or its 
+corresponding type 
+declarations.[0m 
+[1m[35m[plugin 
+angular-compiler][0m
+
+    src/main.ts:2:24:
+[37m      2 Ôöé import * as 
+Sentry from 
+[32m'@sentry/angular'[37m;
+        ÔòÁ                   
+      
+[32m~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mCould not 
+resolve "@sentry/angular"[0m
+
+    
+src/app/app.config.ts:5:24:
+[37m      5 Ôöé import * as 
+Sentry from 
+[32m'@sentry/angular'[37m;
+        ÔòÁ                   
+      
+[32m~~~~~~~~~~~~~~~~~[0m
+
+  You can mark the path 
+"@sentry/angular" as external 
+to exclude it from the 
+bundle, which will remove 
+this error and leave the 
+unresolved path in the bundle.
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mCould not 
+resolve 
+"@angular/service-worker"[0m
+
+    
+src/app/app.config.ts:10:37:
+[37m      10 Ôöé import { 
+provideServiceWorker } from [
+32m'@angular/service-worker'[
+37m;
+         ÔòÁ                  
+                    [32m~~~~~
+~~~~~~~~~~~~~~~~~~~~[0m
+
+  You can mark the path 
+"@angular/service-worker" as 
+external to exclude it from 
+the bundle, which will remove 
+this error and leave the 
+unresolved path in the bundle.
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mCould not 
+resolve "dompurify"[0m
+
+    src/app/core/pipes/safe-ht
+ml.pipe.ts:3:22:
+[37m      3 Ôöé import 
+DOMPurify from 
+[32m'dompurify'[37m;
+        ÔòÁ                   
+    [32m~~~~~~~~~~~[0m
+
+  You can mark the path 
+"dompurify" as external to 
+exclude it from the bundle, 
+which will remove this error 
+and leave the unresolved path 
+in the bundle.
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mCould not 
+resolve "@sentry/angular"[0m
+
+    src/main.ts:2:24:
+[37m      2 Ôöé import * as 
+Sentry from 
+[32m'@sentry/angular'[37m;
+        ÔòÁ                   
+      
+[32m~~~~~~~~~~~~~~~~~[0m
+
+  You can mark the path 
+"@sentry/angular" as external 
+to exclude it from the 
+bundle, which will remove 
+this error and leave the 
+unresolved path in the bundle.
+
+
+[31mX [41;31m[[41;97mERROR
+[41;31m][0m [1mThere's 
+already a module with 
+namespace "color".
+    ÔòÀ
+4   Ôöé @use "sass:color";
+    Ôöé ÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔ
+öüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöüÔöü 
+original @use
+... Ôöé
+6   Ôöé @use 'sass:color';
+    Ôöé ^^^^^^^^^^^^^^^^^ new 
+@use
+    ÔòÁ
+  src\styles\_components.scss 
+6:1  @use
+  src\styles.scss 14:1        
+     root stylesheet[0m 
+[1m[35m[plugin 
+angular-sass][0m
+
+    angular:styles/global:styl
+es:1:8:
+[37m      1 Ôöé @import 
+[32m'src/styles.scss'[37m;
+        ÔòÁ         
+[32m~~~~~~~~~~~~~~~~~[0m
+
+[39m[22m

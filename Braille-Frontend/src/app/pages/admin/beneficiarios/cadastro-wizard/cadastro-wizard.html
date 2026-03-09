@@ -109,7 +109,7 @@
       <div class="form-row">
         <div class="form-group form-group--small">
           <label for="cep" class="form-label">CEP <span class="required" aria-hidden="true">*</span></label>
-          <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
+          <input type="tel" inputmode="numeric" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
             [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9"
             autocomplete="postal-code">
           @if (isCampoInvalido('enderecoLocalizacao', 'cep')) {
@@ -189,8 +189,8 @@
         <div class="form-group">
           <label for="telefoneContato" class="form-label">Telefone de Contato <span class="required"
               aria-hidden="true">*</span></label>
-          <input type="tel" id="telefoneContato" class="form-input" formControlName="telefoneContato"
-            (input)="formatarTelefone($event)" maxlength="15"
+          <input type="tel" inputmode="numeric" id="telefoneContato" class="form-input"
+            formControlName="telefoneContato" (input)="formatarTelefone($event)" maxlength="15"
             [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')"
             placeholder="(00) 00000-0000" aria-required="true" autocomplete="tel">
           @if (isCampoInvalido('enderecoLocalizacao', 'telefoneContato')) {

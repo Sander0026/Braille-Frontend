@@ -1,20 +1,23 @@
-﻿// ============================================================
+// ============================================================
 // home.scss
 // ============================================================
 
 @use 'sass:color';
 
+// ── Variáveis (alinhadas ao design system do admin) ─────────
 $primary: #f5c800;
 $primary-dk: #c9a300;
-$black: #1a1a00;
-$white: #ffffff;
-$gray-50: #fafafa;
-$gray-100: #f7f7f7;
-$gray-200: #e8e8e8;
-$gray-400: #a3a3a3;
+$primary-bg: #fff8d6; // fundo accent suave
+$black: #111111; // preto ILBES (igual ao admin)
+$gray-900: #1f1f1f;
+$gray-800: #2d2d2d;
+$gray-700: #3d3d3d;
 $gray-600: #5c5c5c;
-$gray-900: #1a1a1a;
-$dark-bg: #111111;
+$gray-400: #a3a3a3;
+$gray-200: #e5e5e5;
+$gray-100: #f5f5f5; // fundo claro (igual ao admin)
+$gray-50: #fafafa; // fundo mais suave (igual ao admin)
+$white: #ffffff;
 $transition: 250ms ease;
 
 // ── Acessibilidade ─────────────────────────────────────────
@@ -55,7 +58,7 @@ $transition: 250ms ease;
     font-size: clamp(1.6rem, 4vw, 2.2rem);
     font-weight: 800;
     color: $gray-900;
-    margin: 0 0 1rem;
+    margin: 0 0 0.75rem;
     line-height: 1.2;
 
     &--light {
@@ -75,33 +78,59 @@ $transition: 250ms ease;
 }
 
 // ─────────────────────────────────────────────────────────────
-// HERO
+// HERO  —  preto, sem borda top (abre direto do header)
 // ─────────────────────────────────────────────────────────────
 .hero {
     background: $black;
+    width: 100%;
+    position: relative; // Para o pseudo-elemento do fundo
+    overflow: hidden;
+
+    // Imagem de fundo com a fachada
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('/fachada_ilbes.png'); // Caminho a partir da pasta public do Angular
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        opacity: 0.25; // Opacidade clara para ficar legal com as letras por cima
+        z-index: 0;
+    }
+}
+
+.hero-inner {
+    position: relative; // Garante que o conteúdo fique acima do fundo
+    z-index: 1;
     min-height: 86vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column; // Muda de grid de lado a lado para tudo central
     align-items: center;
+    justify-content: center;
+    text-align: center; // Centraliza os textos todos
     gap: 3rem;
-    padding: 4rem 1.5rem 3rem;
+    padding: 10rem 1.5rem 3rem; // Aumentado padding top de 4rem para 10rem
     max-width: 1100px;
     margin: 0 auto;
 
     @media (max-width: 768px) {
-        grid-template-columns: 1fr;
         min-height: auto;
-        padding: 3rem 1.5rem;
+        padding: 8rem 1.5rem 5rem; // Espaço também aumentado no mobile
     }
 }
 
 .hero-eyebrow {
     font-size: 0.75rem;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: $primary;
     margin: 0 0 0.75rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); // Sombra para cor clara
 }
 
 .hero-title {
@@ -110,27 +139,31 @@ $transition: 250ms ease;
     color: $white;
     line-height: 1.15;
     margin: 0 0 1.25rem;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.8), 0 2px 4px rgba(0, 0, 0, 0.9); // Sombra forte para saltar do fundo
 }
 
 .hero-highlight {
     color: $primary;
     display: block;
+    text-shadow: 0 4px 16px rgba(0, 0, 0, 0.9); // Um pouco mais forte na cor amarela
 }
 
 .hero-desc {
-    font-size: 1rem;
-    color: rgba($white, .75);
+    font-size: 1.1rem;
+    color: color.change($white, $alpha: .9); // Aumentei um pouco a opacidade da cor
     line-height: 1.7;
-    margin: 0 0 2rem;
-    max-width: 480px;
+    margin: 0 auto 2.5rem; // Auto centraliza além de dar o espaçamento de fundo
+    max-width: 600px; // Deixa o texto com um enquadramento mais largo na linha
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8); // Sombra de leitura
 }
 
 .hero-actions {
     display: flex;
     align-items: center;
+    justify-content: center; // Alinha os botões ao centro
     gap: 1rem;
     flex-wrap: wrap;
-    margin-bottom: 2.5rem;
+    margin-bottom: 3.5rem;
 }
 
 .btn-hero-primary {
@@ -145,12 +178,12 @@ $transition: 250ms ease;
     border-radius: 9999px;
     text-decoration: none;
     transition: background $transition, transform $transition, box-shadow $transition;
-    box-shadow: 0 4px 16px rgba($primary, .35);
+    box-shadow: 0 4px 16px color.change($primary, $alpha: .35);
 
     &:hover {
-        background: mix(white, $primary, 8%);
+        background: color.adjust($primary, $lightness: 8%);
         transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba($primary, .45);
+        box-shadow: 0 8px 24px color.change($primary, $alpha: .45);
     }
 
     &:focus-visible {
@@ -162,26 +195,21 @@ $transition: 250ms ease;
 .btn-hero-secondary {
     padding: 0.75rem 1.5rem;
     background: transparent;
-    color: rgba($white, .85);
+    color: color.change($white, $alpha: .95);
     font-weight: 600;
     font-size: 0.875rem;
     border-radius: 9999px;
     text-decoration: none;
-    border: 1.5px solid rgba($white, .3);
-    transition: border-color $transition, color $transition;
+    border: 1.5px solid color.change($white, $alpha: .6); // Borda mais visível
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); // Sombra sutil no botão transparente
+    transition: border-color $transition, color $transition, box-shadow $transition, background $transition;
 
     &:hover {
         border-color: $white;
         color: $white;
-    }
-
-    &--light {
-        color: $gray-900;
-        border-color: rgba($gray-900, .3);
-
-        &:hover {
-            border-color: $gray-900;
-        }
+        background: rgba(255, 255, 255, 0.1); // Leve fundo no hover
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
     }
 }
 
@@ -189,14 +217,18 @@ $transition: 250ms ease;
 .hero-stats {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    justify-content: center; // Centraliza rodapé de status
+    gap: 2rem;
     flex-wrap: wrap;
+    padding-top: 2rem;
+    border-top: 1px solid color.change($white, $alpha: 0.15); // Divisor fino ligando todo o bloco
 }
 
 .stat-item {
     display: flex;
     flex-direction: column;
     gap: 0.1rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .stat-num {
@@ -204,11 +236,12 @@ $transition: 250ms ease;
     font-weight: 900;
     color: $primary;
     line-height: 1;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.9);
 }
 
 .stat-label {
     font-size: 0.7rem;
-    color: rgba($white, .6);
+    color: color.change($white, $alpha: .8);
     max-width: 80px;
     line-height: 1.3;
 }
@@ -216,7 +249,7 @@ $transition: 250ms ease;
 .stat-divider {
     width: 1px;
     height: 3rem;
-    background: rgba($white, .15);
+    background: color.change($white, $alpha: .15);
 }
 
 // ── Visual Braille dots ───────────────────────────────────
@@ -224,10 +257,11 @@ $transition: 250ms ease;
     display: flex;
     align-items: center;
     justify-content: center;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6)); // Sombra nos pontos braille
 
-    @media (max-width: 768px) {
-        display: none;
-    }
+    // Esconde a div dos pontos totalmente, pois visualmente quebra o alinhamento
+    // e o pulse foi solicitado ser removido, sendo que a imagem que faz mais sentido agora.
+    display: none;
 }
 
 .braille-grid {
@@ -264,105 +298,87 @@ $transition: 250ms ease;
     }
 }
 
-@keyframes pulseDot {
-    0% {
-        transform: scale(1);
-        opacity: 0.2;
-    }
 
-    100% {
-        transform: scale(1.4);
-        opacity: 0.8;
-    }
-}
-
-// ─────────────────────────────────────────────────────────────
-// SOBRE
-// ─────────────────────────────────────────────────────────────
 .sobre {
-    background: $gray-100;
-    padding: 5rem 0;
+    background: $white;
+    padding: 7rem 0 5rem;
 
-    .section-inner {
+    .mvv-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 3rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4rem 2rem;
         align-items: start;
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             grid-template-columns: 1fr;
+            max-width: 450px;
+            margin: 0 auto;
         }
     }
 }
 
-.sobre-text {
-    p {
-        font-size: 0.95rem;
-        color: $gray-600;
-        line-height: 1.75;
-        margin-bottom: 1rem;
-    }
-}
-
-.btn-link {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: $black;
-    text-decoration: none;
-    border-bottom: 2px solid $primary;
-    padding-bottom: 1px;
-    transition: color $transition;
-
-    &:hover {
-        color: $primary-dk;
-    }
-}
-
-.sobre-valores {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-}
-
-.valor-card {
-    background: $white;
-    border: 1px solid $gray-200;
-    border-radius: 0.75rem;
-    padding: 1.25rem;
+.mvv-card {
     text-align: center;
-    transition: transform $transition, box-shadow $transition;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, .08);
-    }
+.mvv-icon {
+    width: auto;
+    height: auto;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
 
-    h3 {
-        font-size: 0.9rem;
-        font-weight: 700;
-        margin: 0.5rem 0 0.25rem;
-        color: $gray-900;
-    }
-
-    p {
-        font-size: 0.78rem;
-        color: $gray-600;
-        margin: 0;
-        line-height: 1.5;
+    .material-symbols-rounded {
+        font-size: 5.5rem;
+        color: $primary-dk;
+        font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 48; // Traçado fino super elegante
     }
 }
 
-.valor-icon {
-    font-size: 1.75rem;
-    line-height: 1;
+.mvv-titulo {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #122b3e; // Tom escuro azulado requintado (referência empresarial padrão real)
+    margin: 0 0 1.25rem;
+    letter-spacing: -0.01em;
+}
+
+.mvv-desc {
+    font-size: 1.05rem;
+    color: $gray-600;
+    line-height: 1.7;
+    margin: 0;
 }
 
 // ─────────────────────────────────────────────────────────────
-// OFICINAS
+// OFICINAS  —  fundo cinza sutil sem borda grossa e novo top fluid
 // ─────────────────────────────────────────────────────────────
 .oficinas {
-    background: $white;
-    padding: 5rem 0;
+    background: #e8e8e8; // Cinza levemente mais palpável que o original
+    position: relative;
+    padding: 0 0 5rem;
+}
+
+.wave-transition {
+    width: 100%;
+    margin-bottom: 4rem; // Espaçamento abaixo da onda antes de iniciar os grids
+    line-height: 0; // Previne bordas invisíveis/fantasma 
+
+    svg {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 60px; // Altura expressa da onda
+
+        @media (max-width: 768px) {
+            height: 40px;
+        }
+    }
 }
 
 .oficinas-grid {
@@ -373,7 +389,7 @@ $transition: 250ms ease;
 }
 
 .oficina-card {
-    background: $gray-100;
+    background: $white;
     border: 1px solid $gray-200;
     border-radius: 1rem;
     padding: 1.75rem 1.5rem;
@@ -386,12 +402,22 @@ $transition: 250ms ease;
     }
 }
 
+// Container rounded-square para ícone Material nas oficinas
 .oficina-icon {
-    font-size: 2.25rem;
-    margin-bottom: 0.75rem;
-    line-height: 1;
-    display: block;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .15));
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 0.875rem;
+    background: color.change($primary, $alpha: 0.10);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+
+    .material-symbols-rounded {
+        font-size: 1.75rem;
+        color: $primary-dk;
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
 }
 
 .oficina-titulo {
@@ -425,93 +451,215 @@ $transition: 250ms ease;
     transition: background $transition, transform $transition;
 
     &:hover {
-        background: mix(white, $black, 10%);
+        background: color.adjust($black, $lightness: 10%);
         transform: translateY(-2px);
     }
 }
 
 // ─────────────────────────────────────────────────────────────
-// DEPOIMENTOS
+// DEPOIMENTOS  —  preto profundo, sem borda (contraste natural)
 // ─────────────────────────────────────────────────────────────
 .depoimentos {
-    background: $dark-bg;
-    padding: 5rem 0;
+    position: relative;
+    z-index: 2;
+    background: #111111; // Preto intenso
+    padding: 0;
+
+    .section-title {
+        text-align: center;
+    }
+}
+
+.wave-transition-double {
+    width: 100%;
+    margin-top: -1px;
+    margin-bottom: 3rem;
+    line-height: 0;
+
+    svg {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 80px;
+
+        @media (max-width: 768px) {
+            height: 50px;
+        }
+    }
+}
+
+.wave-transition-concave {
+    width: 100%;
+    margin-bottom: -1px;
+    line-height: 0;
+    background: $white;
+
+    svg {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 80px;
+
+        @media (max-width: 768px) {
+            height: 50px;
+        }
+    }
 }
 
 .dep-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-    margin-top: 2.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    margin-bottom: 15rem; // Espaço exta grande na parte de baixo antes da onda
+
+    @media (max-width: 768px) {
+        margin-bottom: 9rem; // Responsividade
+    }
+
+    >* {
+        flex: 1 1 320px;
+        max-width: 400px; // Limita o tamanho máximo para não ficar estranho se tiver poucos
+    }
 }
 
 .dep-card {
-    background: rgba($white, .05);
-    border: 1px solid rgba($white, .1);
+    background: $white;
     border-radius: 1rem;
-    padding: 1.75rem;
+    padding: 2.5rem 2rem;
     margin: 0;
-    transition: border-color $transition;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    transition: transform $transition, box-shadow $transition;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%; // Adicionado para esticar o card completo junto dos outros no grid/flex
+
+    &::before {
+        content: 'format_quote';
+        font-family: 'Material Symbols Rounded';
+        font-size: 3rem;
+        color: color.change($primary, $alpha: 0.3);
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        font-variation-settings: 'FILL' 1;
+    }
 
     &:hover {
-        border-color: $primary;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
     }
 }
 
 .dep-texto {
-    font-size: 0.9rem;
-    color: rgba($white, .8);
-    line-height: 1.75;
-    margin: 0 0 1.25rem;
+    font-size: 1rem;
+    color: $gray-700;
+    line-height: 1.8;
+    margin: 0 0 2rem;
     font-style: italic;
+    flex-grow: 1;
+    position: relative;
+    z-index: 1;
+    // Removendo text-align ou qualquer overflow para permitir que o card cresça com o texto
 }
 
 .dep-autor {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    border-top: 1px solid $gray-200;
+    padding-top: 1.5rem;
 }
 
 .dep-avatar {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     background: $primary;
-    color: $black;
-    font-weight: 700;
-    font-size: 0.95rem;
+    color: #111111;
+    font-weight: 800;
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 10px color.change($primary, $alpha: 0.4);
 }
 
 .dep-nome {
     display: block;
-    font-size: 0.875rem;
-    font-weight: 700;
-    color: $white;
+    font-size: 1rem;
+    font-weight: 800;
+    color: $gray-900;
     font-style: normal;
 }
 
 .dep-idade {
-    font-size: 0.75rem;
-    color: rgba($white, .5);
+    font-size: 0.85rem;
+    color: $gray-600;
+}
+
+// ── Animações de Scroll ────────────────────────────────────
+.animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+    will-change: opacity, transform;
+
+    &.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    // Delays encadeados
+    &.delay-100 {
+        transition-delay: 100ms;
+    }
+
+    &.delay-200 {
+        transition-delay: 200ms;
+    }
+
+    &.delay-300 {
+        transition-delay: 300ms;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
-// ÚLTIMAS NOTÍCIAS
+// ÚLTIMAS NOTÍCIAS  —  fundo branco, transição arredondada
 // ─────────────────────────────────────────────────────────────
 .section-noticias {
-    background: #fff;
-    padding: 5rem 0;
+    position: relative;
+    z-index: 1;
+    background: $white;
+    padding: 6rem 0 12rem; // Reduzido o topo, enorme espaçamento no fundo
+    border-top: none;
+
+    @media (max-width: 768px) {
+        padding: 4rem 0 8rem;
+    }
+}
+
+.section-desc {
+    font-size: 1rem;
+    color: $gray-600;
+    margin: 0.25rem 0 0;
 }
 
 .grid-noticias {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 2rem;
     margin-top: 3rem;
+
+    >* {
+        flex: 1 1 300px;
+        max-width: 380px; // Limita o tamanho máximo para manter boa leitura
+    }
 }
 
 .card-noticia {
@@ -519,12 +667,12 @@ $transition: 250ms ease;
     border-radius: 1rem;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid $gray-200;
     transition: transform $transition, box-shadow $transition;
     display: flex;
     flex-direction: column;
     height: 100%;
-    position: relative; // Para o link cobrir o card
+    position: relative;
 
     &:hover {
         transform: translateY(-4px);
@@ -576,31 +724,31 @@ $transition: 250ms ease;
         text-transform: uppercase;
         letter-spacing: 0.05em;
         backdrop-filter: blur(4px);
-        background: rgba($black, 0.8);
+        background: color.change($black, $alpha: 0.8);
         color: white;
 
         &[data-categoria="NOTICIA"] {
-            background: rgba(#1d4ed8, 0.9);
+            background: color.change(#1d4ed8, $alpha: 0.9);
         }
 
         &[data-categoria="VAGA_EMPREGO"] {
-            background: rgba(#16a34a, 0.9);
+            background: color.change(#16a34a, $alpha: 0.9);
         }
 
         &[data-categoria="SERVICO"] {
-            background: rgba(#ca8a04, 0.9);
+            background: color.change(#ca8a04, $alpha: 0.9);
         }
 
         &[data-categoria="EVENTO_CULTURAL"] {
-            background: rgba(#9333ea, 0.9);
+            background: color.change(#9333ea, $alpha: 0.9);
         }
 
         &[data-categoria="LEGISLACAO"] {
-            background: rgba(#475569, 0.9);
+            background: color.change(#475569, $alpha: 0.9);
         }
 
         &[data-categoria="TRABALHO_PCD"] {
-            background: rgba(#0ea5e9, 0.9);
+            background: color.change(#0ea5e9, $alpha: 0.9);
         }
     }
 }
@@ -612,36 +760,28 @@ $transition: 250ms ease;
     flex-grow: 1;
 
     h3 {
-        font-family: 'Outfit', sans-serif;
-        font-size: 1.25rem;
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem;
         font-weight: 700;
-        color: $black;
+        color: $gray-900;
         margin: 0 0 0.75rem;
         line-height: 1.3;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        // Removida a limitação de exibição em 2 linhas (line-clamp)
     }
 
     .card-excerpt {
-        color: rgba($black, 0.7);
-        font-size: 0.9375rem;
+        color: $gray-600;
+        font-size: 0.9rem;
         line-height: 1.6;
         margin: 0 0 1.5rem;
         flex-grow: 1;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        // Removidas as limitações de linha para o texto crescer o card
     }
 
     footer {
         time {
             font-size: 0.8125rem;
-            color: rgba($black, 0.5);
+            color: $gray-400;
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -665,36 +805,67 @@ $transition: 250ms ease;
 .noticias-footer {
     display: flex;
     justify-content: center;
-    margin-top: 3rem;
+    margin-top: 6rem; // Muito mais respiro antes do botão de ver todas
 }
 
-.skeleton-grid-home {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
+.btn-outline-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: transparent;
+    border: 2px solid $primary;
+    border-radius: 2rem;
+    color: $primary-dk;
+    font-weight: 700;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all $transition;
+
+    &:hover {
+        background: $primary;
+        color: $black;
+        gap: 0.75rem;
+    }
 }
 
+.feed-carregando,
 .feed-vazio {
     text-align: center;
     padding: 4rem 1rem;
     background: $gray-50;
     border-radius: 1rem;
+    border: 1px solid $gray-200;
     margin-top: 3rem;
 
+    .spinner {
+        font-size: 3rem;
+        color: $primary;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+
     p {
-        color: rgba($black, 0.6);
-        font-size: 1.125rem;
+        color: $gray-600;
+        font-size: 1rem;
         margin: 0;
     }
 }
 
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 // ─────────────────────────────────────────────────────────────
-// CTA FINAL
+// CTA FINAL  —  amarelo ILBES, borda topo preta
 // ─────────────────────────────────────────────────────────────
 .cta-final {
     background: $primary;
-    padding: 4rem 0;
+    border-top: 3px solid $black;
+    padding: 8rem 0; // Padding gigante
 }
 
 .cta-inner {
@@ -720,7 +891,7 @@ $transition: 250ms ease;
 
     p {
         font-size: 0.9rem;
-        color: rgba($black, .7);
+        color: color.change($black, $alpha: .7);
         margin: 0;
         max-width: 440px;
     }
@@ -734,5 +905,28 @@ $transition: 250ms ease;
 
     @media (max-width: 640px) {
         justify-content: center;
+    }
+
+    // Botão primário sobre o fundo amarelo
+    .btn-hero-primary {
+        background: $black;
+        color: $primary;
+        box-shadow: 0 4px 16px color.change($black, $alpha: .25);
+
+        &:hover {
+            background: $gray-900;
+            box-shadow: 0 8px 24px color.change($black, $alpha: .35);
+        }
+    }
+
+    // Botão secundário sobre o fundo amarelo
+    .btn-hero-secondary {
+        color: $black;
+        border-color: color.change($black, $alpha: .4);
+
+        &:hover {
+            border-color: $black;
+            color: $black;
+        }
     }
 }

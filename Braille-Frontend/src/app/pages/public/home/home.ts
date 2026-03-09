@@ -1,16 +1,15 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { CommonModule, NgClass } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { SiteConfigService } from '../../../core/services/site-config';
-import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, NgClass, CommonModule, SafeHtmlPipe, CloudinaryPipe],
+  imports: [RouterLink, CommonModule, CloudinaryPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -36,6 +35,33 @@ export class Home implements OnInit {
   ngOnInit() {
     this.carregarUltimasNoticias();
     this.carregarConteudoCMS();
+  }
+
+  ngAfterViewInit() {
+    this.initScrollAnimations();
+  }
+
+  initScrollAnimations() {
+    if (typeof window === 'undefined' || !window.IntersectionObserver) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target); // Animar apenas uma vez
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.15 // Dispara quando 15% do elemento estiver visível
+    });
+
+    // Pega todos os elementos com a classe
+    setTimeout(() => {
+      const elements = document.querySelectorAll('.animate-on-scroll');
+      elements.forEach(el => observer.observe(el));
+    }, 100);
   }
 
   carregarConteudoCMS() {

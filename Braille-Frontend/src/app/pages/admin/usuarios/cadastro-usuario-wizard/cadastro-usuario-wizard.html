@@ -125,15 +125,15 @@
                 <div class="col-lg-4">
                     <div class="form-group">
                         <label for="telefone">Telefone</label>
-                        <input type="tel" id="telefone" formControlName="telefone" (input)="formatarTelefone($event)"
-                            maxlength="15" placeholder="(00) 00000-0000">
+                        <input type="tel" inputmode="numeric" id="telefone" formControlName="telefone"
+                            (input)="formatarTelefone($event)" maxlength="15" placeholder="(00) 00000-0000">
                     </div>
                 </div>
                 <div class="col-lg-4">
                     <div class="form-group">
                         <label for="cep">CEP</label>
-                        <input type="text" id="cep" formControlName="cep" (blur)="buscarCep()" placeholder="00000-000"
-                            maxlength="9">
+                        <input type="tel" inputmode="numeric" id="cep" formControlName="cep" (blur)="buscarCep()"
+                            placeholder="00000-000" maxlength="9">
                     </div>
                 </div>
                 <div class="col-lg-4">

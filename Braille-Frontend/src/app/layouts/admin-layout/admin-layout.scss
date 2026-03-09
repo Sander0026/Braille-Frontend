@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // admin-layout.scss — Layout do Painel Administrativo ILBES
 // Abordagem: position:fixed para o sidebar (imune ao tamanho do conteudo)
 // ============================================================
@@ -98,7 +98,7 @@ $transition: 250ms ease;
     gap: 0.75rem;
     padding: 0 1rem;
     height: $header-h;
-    border-bottom: 1px solid rgba($white, 0.08);
+    border-bottom: 1px solid color.change($white, $alpha: 0.08);
     flex-shrink: 0;
 
     .logo-mark {
@@ -145,7 +145,7 @@ $transition: 250ms ease;
     gap: 0.75rem;
     padding: 0.625rem 0.75rem;
     border-radius: 0.5rem;
-    color: rgba($white, 0.7);
+    color: color.change($white, $alpha: 0.7);
     text-decoration: none;
     font-size: 0.875rem;
     font-weight: 500;
@@ -158,12 +158,12 @@ $transition: 250ms ease;
     text-align: left;
 
     &:hover {
-        background-color: rgba($white, 0.08);
+        background-color: color.change($white, $alpha: 0.08);
         color: $white;
     }
 
     &.active {
-        background-color: rgba($primary, 0.15);
+        background-color: color.change($primary, $alpha: 0.15);
         color: $primary;
         font-weight: 700;
 
@@ -194,11 +194,11 @@ $transition: 250ms ease;
 // Footer do sidebar (botao sair)
 .sidebar-footer {
     padding: 0.5rem;
-    border-top: 1px solid rgba($white, 0.08);
+    border-top: 1px solid color.change($white, $alpha: 0.08);
     flex-shrink: 0;
 
     .nav-link {
-        color: rgba($white, 0.5);
+        color: color.change($white, $alpha: 0.5);
 
         &:hover {
             color: #ff6b6b;
@@ -872,7 +872,7 @@ $transition: 250ms ease;
     &:focus {
         outline: none;
         border-color: $primary;
-        box-shadow: 0 0 0 3px rgba($primary, 0.2);
+        box-shadow: 0 0 0 3px color.change($primary, $alpha: 0.2);
     }
 }
 
