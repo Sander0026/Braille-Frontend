@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
+import { of, from } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
@@ -184,52 +184,43 @@ export class FrequenciasLista implements OnInit {
     if (this.salvandoTudo || this.alunosNaChamada.length === 0) return;
 
     this.salvandoTudo = true;
-    this.feedbackSalvo = '';
+    this.feedbackSalvo = 'Salvando Lote de Frequências...';
+    this.cdr.detectChanges();
 
-    const requisicoes = this.alunosNaChamada.map(aluno => {
-      aluno.salvando = true;
-
-      if (aluno.frequenciaId) {
-        // Já existe — atualiza
-        return this.frequenciasService.atualizar(aluno.frequenciaId, { presente: aluno.presente }).pipe(
-          catchError(() => of(null))
-        );
-      } else {
-        // Novo — cria
-        return this.frequenciasService.registrar({
-          alunoId: aluno.alunoId,
-          turmaId: this.turmaSelecionadaId,
-          dataAula: this.dataAula,
-          presente: aluno.presente,
-        }).pipe(
-          catchError(() => of(null)) // 409 ignorado (já existe)
-        );
-      }
+    const payloadAlunos = this.alunosNaChamada.map(aluno => {
+      aluno.salvando = true; // Feedback individual
+      return {
+        alunoId: aluno.alunoId,
+        presente: aluno.presente,
+        frequenciaId: aluno.frequenciaId
+      };
     });
 
-    forkJoin(requisicoes).subscribe({
-      next: (resultados) => {
-        resultados.forEach((res, i) => {
-          const aluno = this.alunosNaChamada[i];
-          aluno.salvando = false;
-          if (res !== null) {
-            aluno.salvo = true;
-            if (!aluno.frequenciaId && (res as Frequencia).id) {
-              aluno.frequenciaId = (res as Frequencia).id;
-            }
-          }
-        });
-        this.salvandoTudo = false;
-        this.feedbackSalvo = 'Chamada salva com sucesso!';
-        this.cdr.detectChanges();
-        setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
-      },
-      error: () => {
-        this.salvandoTudo = false;
-        this.feedbackSalvo = 'Erro ao salvar chamada. Tente novamente.';
-        this.cdr.detectChanges();
-      },
-    });
+    this.frequenciasService.salvarLote(this.turmaSelecionadaId, this.dataAula, payloadAlunos)
+      .subscribe({
+        next: () => {
+          this.salvandoTudo = false;
+
+          this.alunosNaChamada.forEach(a => {
+            a.salvando = false;
+            a.salvo = true;
+          });
+
+          this.feedbackSalvo = 'Chamada em Lote salva com sucesso!';
+          this.cdr.detectChanges();
+
+          // Recarrega os alunos para atualizar as UUIDs das frequências salvas no banco
+          this.carregarChamada();
+
+          setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
+        },
+        error: () => {
+          this.salvandoTudo = false;
+          this.alunosNaChamada.forEach(a => a.salvando = false);
+          this.feedbackSalvo = 'Erro crítico ao processar Lote. Tente novamente.';
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   // ── Histórico ──────────────────────────────────────────────
