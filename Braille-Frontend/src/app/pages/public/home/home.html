@@ -46,15 +46,7 @@
                     <span class="stat-label">{{ heroConfig['stat3Desc'] || 'Oficinas disponíveis' }}</span>
                 </div>
             </div>
-        </div>
 
-        <div class="hero-visual" aria-hidden="true">
-            <div class="braille-grid">
-                <!-- Pontos braille decorativos representando "ILBES" -->
-                @for (dot of [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24]; track dot) {
-                <div class="braille-dot" [style.animation-delay]="(dot * 0.05) + 's'"></div>
-                }
-            </div>
         </div>
     </div>
 </section>
