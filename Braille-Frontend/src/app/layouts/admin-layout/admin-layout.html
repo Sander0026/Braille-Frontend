@@ -221,9 +221,11 @@
         <div class="form-group">
           <label class="form-label" for="senha-atual">Senha atual</label>
           <input id="senha-atual" type="password" class="form-input" formControlName="senhaAtual"
-            autocomplete="current-password" placeholder="Digite sua senha atual" />
+            autocomplete="current-password" placeholder="Digite sua senha atual"
+            [attr.aria-invalid]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched"
+            [attr.aria-describedby]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched ? 'erro-senha-atual' : null" />
           @if (formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched) {
-          <p class="form-error">Campo obrigatório.</p>
+          <p id="erro-senha-atual" class="form-error">Campo obrigatório.</p>
           }
         </div>
 
@@ -231,9 +233,11 @@
         <div class="form-group">
           <label class="form-label" for="nova-senha">Nova senha</label>
           <input id="nova-senha" type="password" class="form-input" formControlName="novaSenha"
-            autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
+            autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+            [attr.aria-invalid]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched"
+            [attr.aria-describedby]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched ? 'erro-nova-senha' : null" />
           @if (formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched) {
-          <p class="form-error">Mínimo de 8 caracteres.</p>
+          <p id="erro-nova-senha" class="form-error">Mínimo de 8 caracteres.</p>
           }
         </div>
 
@@ -241,9 +245,10 @@
         <div class="form-group">
           <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
           <input id="confirmar-senha" type="password" class="form-input" formControlName="confirmarSenha"
-            autocomplete="new-password" placeholder="Repita a nova senha" />
+            autocomplete="new-password" placeholder="Repita a nova senha" [attr.aria-invalid]="confirmacaoInvalida"
+            [attr.aria-describedby]="confirmacaoInvalida ? 'erro-confirmar-senha' : null" />
           @if (confirmacaoInvalida) {
-          <p class="form-error">As senhas não coincidem.</p>
+          <p id="erro-confirmar-senha" class="form-error" role="alert">As senhas não coincidem.</p>
           }
         </div>
 
