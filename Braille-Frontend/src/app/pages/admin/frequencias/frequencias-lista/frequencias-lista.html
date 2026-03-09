@@ -156,6 +156,10 @@
                 <td class="text-center">
                     <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente"
                         [attr.aria-label]="aluno.presente ? 'Presente' : 'Falta'">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">
+                            {{ aluno.presente ? 'check_circle' : 'cancel' }}
+                        </span>
                         {{ aluno.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </td>
@@ -371,6 +375,10 @@
                 <td class="text-center">
                     <span class="badge" [class.badge-success]="historico.presente"
                         [class.badge-danger]="!historico.presente">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">
+                            {{ historico.presente ? 'check_circle' : 'cancel' }}
+                        </span>
                         {{ historico.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </td>

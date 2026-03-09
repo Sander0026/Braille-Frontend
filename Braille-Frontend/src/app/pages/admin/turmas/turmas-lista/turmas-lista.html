@@ -82,8 +82,12 @@
     <div class="card-body">
       <div class="card-title-row">
         <h2 class="turma-nome">{{ turma.nome }}</h2>
-        <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">{{
-          turma.statusAtivo ? 'Ativa' : 'Arquivada' }}</span>
+        <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">
+          <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;" aria-hidden="true">
+            {{ turma.statusAtivo ? 'check_circle' : 'inventory_2' }}
+          </span>
+          {{ turma.statusAtivo ? 'Ativa' : 'Arquivada' }}
+        </span>
       </div>
 
 
