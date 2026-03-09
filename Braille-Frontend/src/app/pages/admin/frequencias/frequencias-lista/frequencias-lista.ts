@@ -189,11 +189,18 @@ export class FrequenciasLista implements OnInit {
 
     const payloadAlunos = this.alunosNaChamada.map(aluno => {
       aluno.salvando = true; // Feedback individual
-      return {
+
+      // Monta objeto dinâmico omitindo chaves falsy para satisfazer o @IsUUID NestJS
+      const base: any = {
         alunoId: aluno.alunoId,
-        presente: aluno.presente,
-        frequenciaId: aluno.frequenciaId
+        presente: aluno.presente
       };
+
+      if (aluno.frequenciaId) {
+        base.frequenciaId = aluno.frequenciaId;
+      }
+
+      return base;
     });
 
     this.frequenciasService.salvarLote(this.turmaSelecionadaId, this.dataAula, payloadAlunos)
