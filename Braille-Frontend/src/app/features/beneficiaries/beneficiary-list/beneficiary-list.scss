@@ -662,6 +662,12 @@
     border-radius: 12px;
     letter-spacing: 0.03em;
 
+    &.badge-success {
+        background-color: #dcfce7;
+        color: #15803d; // improved contrast from #16a34a
+        border: 1px solid #86efac;
+    }
+
     &--ativa {
         background: #d1fae5;
         color: #065f46;

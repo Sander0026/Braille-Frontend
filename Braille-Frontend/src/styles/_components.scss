@@ -198,7 +198,7 @@
 
     &.badge-success {
         background-color: $color-success-light;
-        color: $color-success;
+        color: #15803d; // improved contrast from $color-success (#16a34a)
     }
 
     &.badge-danger {
@@ -875,10 +875,12 @@
 }
 
 // -- Focus Indicator para Navegação por Teclado (ListKeyManager) --
-.focavel-tr, .focavel-card {
+.focavel-tr,
+.focavel-card {
     transition: background-color 0.2s, outline 0.2s, box-shadow 0.2s;
 
-    &:focus, &.active-item {
+    &:focus,
+    &.active-item {
         outline: 2px solid #ed8936;
         outline-offset: -2px;
         background-color: #ffecd6;
@@ -888,9 +890,3 @@
         cursor: pointer;
     }
 }
-
-
-
-
-
-
