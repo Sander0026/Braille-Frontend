@@ -39,8 +39,8 @@
         <h1>Cadastro de Funcionário</h1>
         <p>Passo {{ passoAtual }} de 2 — {{ passoAtual === 1 ? 'Dados Essenciais' : 'Contato e Endereço (opcional)' }}
         </p>
-        <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1"
-            aria-valuemax="2">
+        <div class="progress-bar" role="progressbar" aria-label="Progresso do cadastro"
+            [attr.aria-valuenow]="passoAtual" aria-valuemin="1" aria-valuemax="2">
             <div class="progress-fill" [style.width.%]="(passoAtual / 2) * 100"></div>
         </div>
     </header>

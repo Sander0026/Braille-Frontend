@@ -11,8 +11,8 @@
     <header class="wizard-header">
         <h1>Nova Turma / Oficina</h1>
         <p>Etapa <strong>{{ etapaAtual }}</strong> de {{ totalEtapas }}</p>
-        <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="etapaAtual" aria-valuemin="1"
-            [attr.aria-valuemax]="totalEtapas">
+        <div class="progress-bar" role="progressbar" aria-label="Progresso do cadastro"
+            [attr.aria-valuenow]="etapaAtual" aria-valuemin="1" [attr.aria-valuemax]="totalEtapas">
             <div class="progress-fill" [style.width.%]="(etapaAtual / totalEtapas) * 100"></div>
         </div>
     </header>

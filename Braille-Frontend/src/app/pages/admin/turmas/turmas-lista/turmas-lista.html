@@ -73,10 +73,10 @@
 </div>
 } @else {
 <!-- Grade de cards -->
-<div class="turmas-grid" role="list" aria-label="Lista de oficinas">
+<div class="turmas-grid" role="region" aria-label="Lista de oficinas">
   <!-- Indicador de status -->
   @for (turma of turmasFiltradas; track turma.id) {
-  <article class="turma-card focavel-card" role="listitem" tabindex="0" appTabelaTrFocavel>
+  <article class="turma-card focavel-card" tabindex="0" appTabelaTrFocavel>
     <div class="card-status-bar" [class.inativa]="!turma.statusAtivo" aria-hidden="true"></div>
 
     <div class="card-body">
@@ -526,7 +526,7 @@
 @if (drawerAberto) {
 <div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
 }
-<aside id="turmas-filter-drawer" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
+<div id="turmas-filter-drawer" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
   aria-modal="true" aria-label="Filtros avançados" [formGroup]="filterForm">
 
   <div class="filter-drawer__header">
@@ -578,4 +578,4 @@
     <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
     <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar Filtros</button>
   </div>
-</aside>
+</div>
