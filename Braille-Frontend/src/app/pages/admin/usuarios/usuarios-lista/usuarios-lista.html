@@ -38,7 +38,7 @@
 } @else {
 <!-- Abas de Navegação — sempre visíveis após carregar -->
 <div class="tabs-container" role="navigation" aria-label="Filtro de status de usuário">
-    <div class="tabs">
+    <div class="tabs" role="tablist">
         <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
             [attr.aria-selected]="abaAtiva === 'ativos'" role="tab">
             Ativos
@@ -373,7 +373,7 @@
     [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Usuário</h2>
+            <h2 id="modal-titulo-exclusao" style="color: #b91c1c;">Excluir Usuário</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()"
                 aria-label="Cancelar exclusão">✕</button>
         </div>
@@ -387,7 +387,7 @@
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusao()"
                 [disabled]="salvando">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusao()" [disabled]="salvando"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Excluindo... }
                 @else { Excluir Usuário }
             </button>
@@ -443,7 +443,7 @@
                     usuarioParaExcluirDefinitivo.nome }}</strong>.</p>
             <p>Os conteúdos antigos dessa pessoa (notícias, turmas) <strong>serão preservados</strong>, mas o cadastro
                 sumirá do sistema.</p>
-            <p style="color: #ef4444; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
+            <p style="color: #b91c1c; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
         </div>
 
         <div class="modal-footer">
@@ -466,7 +466,7 @@
     [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Autorização</h2>
+            <h2 id="modal-titulo-restaurar" style="color: #15803d;">Restaurar Autorização</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarRestauracao()"
                 aria-label="Cancelar restauração">✕</button>
         </div>
@@ -480,7 +480,7 @@
             <button class="btn btn-secondary" type="button" (click)="cancelarRestauracao()"
                 [disabled]="salvando">Cancelar</button>
             <button class="btn btn-primary" type="button" (click)="confirmarRestauracao()" [disabled]="salvando"
-                style="background-color: #059669; color: white; border: none;">
+                style="background-color: #15803d; color: white; border: none;">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Restaurando... }
                 @else { Restaurar Usuário }
             </button>

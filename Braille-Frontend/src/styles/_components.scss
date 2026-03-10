@@ -213,7 +213,7 @@
 
     &.badge-info {
         background-color: $color-info-light;
-        color: $color-info;
+        color: #1d4ed8; // improved contrast from $color-info (#2563eb)
     }
 
     &.badge-neutral {
