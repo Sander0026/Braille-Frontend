@@ -94,12 +94,12 @@ $transition: 200ms ease;
     transition: color $transition, background $transition, opacity $transition;
 
     &:hover {
-        color: $primary-dk;
+        color: #7a6000;
         background: color.change($primary, $alpha: 0.05);
     }
 
     &.active {
-        color: $primary-dk;
+        color: #7a6000;
         font-weight: 700;
         background: transparent;
         position: relative;

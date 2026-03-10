@@ -111,9 +111,9 @@
             <p class="section-subtitle">Atividades gratuitas para pessoas com deficiência visual de todas as idades.</p>
         </div>
 
-        <div class="oficinas-grid" role="list" aria-label="Lista de oficinas">
+        <div class="oficinas-grid" role="region" aria-label="Lista de oficinas">
             @for (of of oficinas; track of.titulo) {
-            <article class="oficina-card animate-on-scroll" role="listitem" [class.delay-100]="$index % 3 === 1"
+            <article class="oficina-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
                 <div class="oficina-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
@@ -149,9 +149,9 @@
     <div class="section-inner">
         <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll">O que nossos alunos dizem</h2>
 
-        <div class="dep-grid" role="list" aria-label="Depoimentos de alunos">
+        <div class="dep-grid" role="region" aria-label="Depoimentos de alunos">
             @for (dep of depoimentos; track dep.nome) {
-            <blockquote class="dep-card animate-on-scroll" role="listitem" [class.delay-100]="$index % 3 === 1"
+            <blockquote class="dep-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
                 <p class="dep-texto">"{{ dep.texto }}"</p>
                 <footer class="dep-autor">

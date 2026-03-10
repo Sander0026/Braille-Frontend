@@ -75,7 +75,7 @@
 @if (drawerAberto) {
 <div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
 }
-<aside id="filter-drawer-panel" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
+<div id="filter-drawer-panel" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
     aria-modal="true" aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus
     [cdkTrapFocusAutoCapture]="drawerAberto">
 
@@ -235,7 +235,7 @@
             @if (quantidadeFiltrosAtivos > 0) { ({{ quantidadeFiltrosAtivos }}) }
         </button>
     </div>
-</aside>
+</div>
 
 <!-- Tabela de Alunos -->
 @if (isLoading) {
