@@ -52,7 +52,7 @@
         border-left: 4px solid #6366f1;
 
         .stat-value {
-            color: #6366f1;
+            color: #4338ca; // Darkened from #6366f1
         }
     }
 
@@ -60,7 +60,7 @@
         border-left: 4px solid #10b981;
 
         .stat-value {
-            color: #10b981;
+            color: #059669; // Darkened from #10b981
         }
     }
 
@@ -68,7 +68,7 @@
         border-left: 4px solid #f59e0b;
 
         .stat-value {
-            color: #f59e0b;
+            color: #d97706; // Darkened from #f59e0b
         }
     }
 }
@@ -157,7 +157,7 @@
     .col-ip {
         font-family: monospace;
         font-size: 0.75rem;
-        color: #9ca3af;
+        color: #6b7280; // Darkened from #9ca3af
     }
 }
 
@@ -531,7 +531,7 @@
 
 .btn-ghost {
     background: transparent;
-    color: #6366f1;
+    color: #4338ca; // Darkened from #6366f1
     border-color: transparent;
 
     &:hover {
