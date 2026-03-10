@@ -198,8 +198,28 @@ export class AuditLogLista implements OnInit {
 
     // ── Paginação ──────────────────────────────────────────────
     get totalPaginas(): number { return Math.ceil(this.total / this.limit); }
-    anterior(): void { if (this.pagina > 1) this.carregarLogs(this.pagina - 1); }
-    proximo(): void { if (this.pagina < this.totalPaginas) this.carregarLogs(this.pagina + 1); }
+    irParaPagina(pagina: number): void {
+        if (pagina < 1 || pagina > this.totalPaginas) return;
+        this.pagina = pagina;
+        this.carregarLogs(this.pagina);
+    }
+
+    get paginasVisiveis(): number[] {
+        const total = this.totalPaginas;
+        const atual = this.pagina;
+        if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+
+        const janela = 2; // páginas de cada lado
+        const inicio = Math.max(2, atual - janela);
+        const fim = Math.min(total - 1, atual + janela);
+
+        const paginas: number[] = [1];
+        if (inicio > 2) paginas.push(-1); // reticências
+        for (let p = inicio; p <= fim; p++) paginas.push(p);
+        if (fim < total - 1) paginas.push(-1); // reticências
+        paginas.push(total);
+        return paginas;
+    }
 
     // ── Utilitários ────────────────────────────────────────────
     formatarData(iso: string): string {
