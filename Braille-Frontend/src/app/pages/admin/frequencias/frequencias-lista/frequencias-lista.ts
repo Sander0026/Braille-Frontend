@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { of, from } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
+import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
@@ -37,7 +37,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
 @Component({
   selector: 'app-frequencias-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule, TabelaTrFocavelDirective],
+  imports: [CommonModule, FormsModule, TabelaTrFocavelDirective, A11yModule],
   templateUrl: './frequencias-lista.html',
   styleUrl: './frequencias-lista.scss',
 })

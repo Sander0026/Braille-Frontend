@@ -210,7 +210,7 @@
 <!-- ── Modal de Reativação ─────────────────────────────────────── -->
 @if (modalReativacao && dadosReativacao) {
 <div class="modal-overlay" (click)="cancelarReativacao()" role="dialog" aria-modal="true"
-    aria-labelledby="modal-reativacao-titulo">
+    aria-labelledby="modal-reativacao-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-box" (click)="$event.stopPropagation()">
         <div class="modal-icon-warn">
             <span class="material-symbols-rounded">person_alert</span>

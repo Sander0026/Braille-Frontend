@@ -167,7 +167,7 @@
 <!-- ══════════ MODAL CRIAR / EDITAR ══════════ -->
 @if (modalAberto) {
 <div class="modal-overlay" role="dialog" [attr.aria-label]="modoEdicao ? 'Editar oficina' : 'Criar nova oficina'"
-  aria-modal="true" (click)="fecharModal()">
+  aria-modal="true" (click)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2 class="modal-title">
@@ -276,7 +276,7 @@
 <!-- ══════════ MODAL ARQUIVAR ══════════ -->
 @if (modalArquivarAberto && turmaParaArquivar) {
 <div class="modal-overlay" role="dialog" aria-label="Confirmar arquivamento de oficina" aria-modal="true"
-  (click)="fecharModalArquivar()">
+  (click)="fecharModalArquivar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal modal--sm" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2 class="modal-title" style="display:flex; align-items:center;">
@@ -314,7 +314,7 @@
 <!-- ══════════ MODAL ALUNOS ══════════ -->
 @if (modalAlunosAberto) {
 <div class="modal-overlay" role="dialog" aria-label="Alunos matriculados" aria-modal="true"
-  (click)="fecharModalAlunos()">
+  (click)="fecharModalAlunos()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal" (click)="$event.stopPropagation()">
     <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
       <h2 class="modal-title" style="display:flex; align-items:center; font-size: 1.25rem;">

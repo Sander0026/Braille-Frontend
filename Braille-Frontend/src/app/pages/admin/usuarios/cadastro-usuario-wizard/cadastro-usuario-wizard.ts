@@ -3,12 +3,13 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { A11yModule } from '@angular/cdk/a11y';
 import { UsuariosService, CreateUsuarioResponse, ReativacaoResponse } from '../../../../core/services/usuarios.service';
 
 @Component({
     selector: 'app-cadastro-usuario-wizard',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+    imports: [CommonModule, ReactiveFormsModule, HttpClientModule, A11yModule],
     templateUrl: './cadastro-usuario-wizard.html',
     styleUrl: './cadastro-usuario-wizard.scss'
 })

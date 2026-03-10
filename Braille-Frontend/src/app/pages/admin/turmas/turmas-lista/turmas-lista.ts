@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, F
 import { Router, RouterModule } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { ActiveDescendantKeyManager, FocusKeyManager, Highlightable, FocusableOption } from '@angular/cdk/a11y';
+import { ActiveDescendantKeyManager, FocusKeyManager, Highlightable, FocusableOption, A11yModule } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostBinding, Input, HostListener, QueryList, ViewChildren } from '@angular/core';
 
 
@@ -69,7 +69,7 @@ export class BuscaResultadoItemDirective implements Highlightable {
     selector: 'app-turmas-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BuscaResultadoItemDirective, TabelaTrFocavelDirective],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BuscaResultadoItemDirective, TabelaTrFocavelDirective, A11yModule],
 
     templateUrl: './turmas-lista.html',
     styleUrl: './turmas-lista.scss',

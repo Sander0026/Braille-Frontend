@@ -3,12 +3,13 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { BeneficiariosService, ReativacaoAluno } from '../../../../core/services/beneficiarios.service';
+import { A11yModule } from '@angular/cdk/a11y';
 
 
 @Component({
   selector: 'app-cadastro-wizard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, A11yModule],
   templateUrl: './cadastro-wizard.html',
   styleUrl: './cadastro-wizard.scss',
 })

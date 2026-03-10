@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
+import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -27,7 +27,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
     selector: 'app-usuarios-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective],
+    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective, A11yModule],
     templateUrl: './usuarios-lista.html',
     styleUrl: './usuarios-lista.scss'
 })

@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { A11yModule } from '@angular/cdk/a11y';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
@@ -23,7 +24,7 @@ type Modal = 'none' | 'foto' | 'senha' | 'perfil' | 'hotkeys';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent, A11yModule],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })

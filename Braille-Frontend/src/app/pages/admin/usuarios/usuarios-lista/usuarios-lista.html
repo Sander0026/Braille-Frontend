@@ -136,7 +136,7 @@
 <!-- Modal de edição -->
 @if (usuarioEmEdicao) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Editar usuário ' + usuarioEmEdicao.nome"
-    (click)="fecharModal()">
+    (click)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo">Editar Usuário</h2>
@@ -252,7 +252,8 @@
 
 <!-- Modal de Perfil do Usuário -->
 @if (usuarioVisualizado) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" (click)="fecharPerfil()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" (click)="fecharPerfil()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="perfil-titulo">Perfil do Usuário</h2>
@@ -368,7 +369,8 @@
 <!-- Modal de Confirmação de Exclusão -->
 @if (usuarioParaExcluir) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Excluir usuário ' + usuarioParaExcluir.nome" (click)="cancelarExclusao()">
+    [attr.aria-label]="'Excluir usuário ' + usuarioParaExcluir.nome" (click)="cancelarExclusao()" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Usuário</h2>
@@ -397,7 +399,8 @@
 <!-- Modal de Confirmação de Reset de Senha -->
 @if (usuarioParaResetar) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Resetar senha do usuário ' + usuarioParaResetar.nome" (click)="cancelarReset()">
+    [attr.aria-label]="'Resetar senha do usuário ' + usuarioParaResetar.nome" (click)="cancelarReset()" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-reset" style="color: #fbbf24;">Resetar Senha</h2>
@@ -427,7 +430,7 @@
 @if (usuarioParaExcluirDefinitivo) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="'Excluir definitivamente o usuário ' + usuarioParaExcluirDefinitivo.nome"
-    (click)="cancelarExclusaoDefinitiva()">
+    (click)="cancelarExclusaoDefinitiva()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro</h2>
@@ -459,7 +462,8 @@
 <!-- Modal de Confirmação de Restauração -->
 @if (usuarioParaRestaurar) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Restaurar o usuário ' + usuarioParaRestaurar.nome" (click)="cancelarRestauracao()">
+    [attr.aria-label]="'Restaurar o usuário ' + usuarioParaRestaurar.nome" (click)="cancelarRestauracao()" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Autorização</h2>

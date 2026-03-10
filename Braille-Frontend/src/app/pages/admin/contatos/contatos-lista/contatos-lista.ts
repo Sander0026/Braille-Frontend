@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { ContatosService, Contato } from '../../../../core/services/contatos.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
+import { A11yModule } from '@angular/cdk/a11y';
 
 type FiltroLida = 'todas' | 'nao-lidas' | 'lidas';
 
 @Component({
   selector: 'app-contatos-lista',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, A11yModule],
   templateUrl: './contatos-lista.html',
   styleUrl: './contatos-lista.scss'
 })

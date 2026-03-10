@@ -404,7 +404,7 @@
 <!-- ── Modal de Reativação de Aluno ──────────────────────────────── -->
 @if (modalReativacao && dadosReativacao) {
 <div class="modal-reativacao-overlay" (click)="cancelarReativacao()" role="dialog" aria-modal="true"
-  aria-labelledby="modal-reativ-titulo">
+  aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-reativacao-box" (click)="$event.stopPropagation()">
 
     <div class="modal-reativ-icon">

@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { A11yModule } from '@angular/cdk/a11y';
 import { BeneficiariosService, ImportResult } from '../../../core/services/beneficiarios.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -7,7 +8,7 @@ import { ToastService } from '../../../core/services/toast.service';
     selector: 'app-import-modal',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule],
+    imports: [CommonModule, A11yModule],
     templateUrl: './import-modal.html',
     styleUrl: './import-modal.scss',
 })

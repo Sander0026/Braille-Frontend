@@ -144,7 +144,8 @@
 
 <!-- ══ MODAL: TROCAR FOTO ═══════════════════════════════════════ -->
 @if (modalAtivo === 'foto') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -196,7 +197,8 @@
 
 <!-- ══ MODAL: TROCAR SENHA ══════════════════════════════════════ -->
 @if (modalAtivo === 'senha') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -277,8 +279,8 @@
 
 <!-- ══ MODAL: MEU PERFIL ═══════════════════════════════════════ -->
 @if (modalAtivo === 'perfil') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-titulo"
-  (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -394,7 +396,8 @@
 
 <!-- Modal Ajuda Atalhos (Alt+H) -->
 @if (modalAtivo === 'hotkeys') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-content modal-md" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2 id="modalHotkeysTitulo" style="display:flex; align-items:center; gap:0.5rem">

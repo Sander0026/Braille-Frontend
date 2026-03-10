@@ -397,7 +397,7 @@
 <!-- ══════════ MODAL DE DETALHES DE FREQUENCIA ══════════ -->
 @if (modalDetalhesAberto) {
 <div class="modal-overlay" role="dialog" aria-label="Detalhes da chamada da turma" aria-modal="true"
-    (click)="fecharDetalhes()">
+    (click)="fecharDetalhes()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 class="modal-title">

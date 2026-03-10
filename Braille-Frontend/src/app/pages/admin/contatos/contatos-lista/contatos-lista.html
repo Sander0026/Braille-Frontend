@@ -94,7 +94,7 @@
 <!-- Modal leitura completa -->
 @if (contatoSelecionado) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Mensagem de ' + contatoSelecionado.nome"
-    (click)="fecharMensagem()">
+    (click)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div>

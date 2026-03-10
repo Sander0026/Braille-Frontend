@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { A11yModule } from '@angular/cdk/a11y';
 import { FormsModule } from '@angular/forms';
 import { AuditLogService, AuditLog, AuditStats, AuditAcao, QueryAuditDto } from '../../../../core/services/audit-log.service';
 
@@ -7,7 +8,7 @@ import { AuditLogService, AuditLog, AuditStats, AuditAcao, QueryAuditDto } from 
     selector: 'app-audit-log-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, A11yModule],
     templateUrl: './audit-log-lista.html',
     styleUrl: './audit-log-lista.scss',
 })
