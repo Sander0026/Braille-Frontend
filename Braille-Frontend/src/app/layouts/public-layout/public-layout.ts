@@ -11,6 +11,8 @@ import { AccessibilityService, FonteSize } from '../../core/services/accessibili
 export class PublicLayout {
   readonly currentYear = new Date().getFullYear();
 
+  isMobileMenuOpen = false;
+
   // Acessibilidade Global (Herdado do service)
   public a11y = inject(AccessibilityService);
 
@@ -28,6 +30,14 @@ export class PublicLayout {
 
   toggleAltoContraste() {
     this.a11y.toggleAltoContraste();
+  }
+
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
   }
 }
 

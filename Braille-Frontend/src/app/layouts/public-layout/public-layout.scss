@@ -151,6 +151,29 @@ $transition: 200ms ease;
     }
 }
 
+.mobile-only-cta {
+    display: none;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: $gray-700;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-left: auto; // empurra o hambúrguer pra direita junto dos contrroles de acessibilidade caso não haja espaço
+
+    &:focus-visible {
+        outline: 2px solid $primary;
+    }
+
+    .material-symbols-rounded {
+        font-size: 2rem;
+    }
+}
+
 // ── Main ───────────────────────────────────────────────────
 main {
     flex: 1;
@@ -201,16 +224,94 @@ main {
 }
 
 // ── Responsivo ─────────────────────────────────────────────
-@media (max-width: 640px) {
-    .main-nav {
-        display: none;
-    }
-
+@media (max-width: 850px) {
     .header-inner {
+        height: 80px;
+        gap: 1rem;
         justify-content: space-between;
     }
 
+    // Esconde o botão grande para dar espaço aos controles de A11y e ao logo
+    .desktop-only-cta {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo-img {
+        height: 60px;
+    }
+
+    .main-nav {
+        display: none; // Escondido por default no mobile
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: $white;
+        border-bottom: 3px solid $primary;
+        padding: 1rem 1.5rem 2rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 99;
+
+        &.is-open {
+            display: flex;
+            animation: slideDown 0.2s ease-out forwards;
+        }
+
+        .nav-link {
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.1rem;
+
+            &.active {
+                background: color.change($primary, $alpha: 0.1);
+                border-radius: 8px;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        .mobile-only-cta {
+            display: inline-flex;
+            margin-top: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
     .logo-text {
         font-size: 0.875rem;
+    }
+
+    .a11y-controls {
+        gap: 0.15rem;
+
+        .a11y-btn {
+            padding: 0.4rem;
+            font-size: 0.8rem;
+        }
     }
 }

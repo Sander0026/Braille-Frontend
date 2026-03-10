@@ -7,11 +7,17 @@
         <img src="favicon.ico" alt="Logotipo do Instituto Luiz Braille" class="logo-img" />
       </a>
 
-      <nav class="main-nav" role="navigation" aria-label="Navegação principal">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">Início</a>
-        <a routerLink="/sobre" routerLinkActive="active" class="nav-link">Sobre</a>
-        <a routerLink="/noticias" routerLinkActive="active" class="nav-link">Notícias</a>
-        <a routerLink="/contato" routerLinkActive="active" class="nav-link">Contato</a>
+      <nav class="main-nav" [class.is-open]="isMobileMenuOpen" role="navigation" aria-label="Navegação principal">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link"
+          (click)="closeMobileMenu()">Início</a>
+        <a routerLink="/sobre" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Sobre</a>
+        <a routerLink="/noticias" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Notícias</a>
+        <a routerLink="/contato" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Contato</a>
+        <!-- CTA botão no menu apenas no mobile para facilitar acesso -->
+        <a routerLink="/contato" class="btn-inscricao mobile-only-cta" (click)="closeMobileMenu()"
+          aria-label="Entre em contato conosco">
+          Fale Conosco
+        </a>
       </nav>
 
       <!-- ── Controles de Acessibilidade ── -->
@@ -28,9 +34,15 @@
         </button>
       </div>
 
-      <a routerLink="/contato" class="btn-inscricao" aria-label="Entre em contato conosco">
+      <a routerLink="/contato" class="btn-inscricao desktop-only-cta" aria-label="Entre em contato conosco">
         Fale Conosco
       </a>
+
+      <!-- ── Botão Hamburger Mobile ── -->
+      <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen"
+        aria-label="Menu de navegação">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ isMobileMenuOpen ? 'close' : 'menu' }}</span>
+      </button>
     </div>
   </header>
 

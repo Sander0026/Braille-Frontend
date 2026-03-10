@@ -1,6 +1,3 @@
-<a href="#main-content" class="sr-only sr-only-focusable" [attr.aria-label]="'Pular para o conteúdo principal'">Pular
-    para o conteúdo</a>
-
 <header class="page-header" aria-labelledby="page-title">
     <div class="container">
         <p class="eyebrow" aria-hidden="true">Mural de Avisos</p>
@@ -10,7 +7,7 @@
     </div>
 </header>
 
-<main id="main-content" class="container" aria-label="Conteúdo Principal">
+<div id="main-content" class="container">
 
     <!-- ================= FERRAMENTAS (Busca e Filtros) ================= -->
     <section class="toolbar" aria-label="Ferramentas de busca">
@@ -41,7 +38,7 @@
     </section>
 
     <!-- ================= LISTAGEM DE CARDS ================= -->
-    <section aria-live="polite" aria-busy="carregando" class="feed">
+    <section aria-live="polite" [attr.aria-busy]="carregando ? 'true' : 'false'" class="feed">
 
         @if (carregando && comunicados.length === 0) {
         <div class="grid-cards" aria-busy="true">
@@ -136,4 +133,4 @@
 
     </section>
 
-</main>
+</div>
