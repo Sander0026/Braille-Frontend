@@ -71,7 +71,7 @@
                         <label class="form-label" for="corPrimaria">Cor Primária (HEX)</label>
                         <div class="color-picker-wrap">
                             <input type="color" id="corPrimaria-color" class="form-input-color"
-                                formControlName="corPrimaria">
+                                formControlName="corPrimaria" aria-label="Seletor de cor primária">
                             <input type="text" id="corPrimaria" class="form-input" formControlName="corPrimaria"
                                 placeholder="#f5c800">
                         </div>
@@ -175,21 +175,24 @@
                 <div class="form-row form-row-3">
                     <div class="form-group mb-0">
                         <label class="form-label">Estatística 1</label>
-                        <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+">
+                        <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+"
+                            aria-label="Número estatística 1">
                         <input type="text" class="form-input mt-2" formControlName="stat1Desc"
-                            placeholder="Descrição (ex: Vidas impactadas)">
+                            placeholder="Descrição (ex: Vidas impactadas)" aria-label="Descrição estatística 1">
                     </div>
                     <div class="form-group mb-0">
                         <label class="form-label">Estatística 2</label>
-                        <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+">
+                        <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+"
+                            aria-label="Número estatística 2">
                         <input type="text" class="form-input mt-2" formControlName="stat2Desc"
-                            placeholder="Descrição (ex: Profissionais)">
+                            placeholder="Descrição (ex: Profissionais)" aria-label="Descrição estatística 2">
                     </div>
                     <div class="form-group mb-0">
                         <label class="form-label">Estatística 3</label>
-                        <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6">
+                        <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6"
+                            aria-label="Número estatística 3">
                         <input type="text" class="form-input mt-2" formControlName="stat3Desc"
-                            placeholder="Descrição (ex: Oficinas)">
+                            placeholder="Descrição (ex: Oficinas)" aria-label="Descrição estatística 3">
                     </div>
                 </div>
             </div>
@@ -249,24 +252,24 @@
                         <label class="form-label">Valor Principal 1</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor1Icone"
-                                placeholder="Ícone ou Emoji (ex: ✨)">
+                                placeholder="Ícone ou Emoji (ex: ✨)" aria-label="Ícone do valor 1">
                             <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
-                                placeholder="Título (ex: Inclusão)">
+                                placeholder="Título (ex: Inclusão)" aria-label="Título do valor 1">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor1Desc"
-                            placeholder="Breve descrição do valor">
+                            placeholder="Breve descrição do valor" aria-label="Descrição do valor 1">
                     </div>
 
                     <div class="form-card dynamic-card">
                         <label class="form-label">Valor Principal 2</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor2Icone"
-                                placeholder="Ícone">
+                                placeholder="Ícone" aria-label="Ícone do valor 2">
                             <input type="text" class="form-input flex-3" formControlName="valor2Titulo"
-                                placeholder="Título">
+                                placeholder="Título" aria-label="Título do valor 2">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor2Desc"
-                            placeholder="Breve descrição">
+                            placeholder="Breve descrição" aria-label="Descrição do valor 2">
                     </div>
                 </div>
 
@@ -276,24 +279,24 @@
                         <label class="form-label">Valor Complementar 3</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor3Icone"
-                                placeholder="Ícone">
+                                placeholder="Ícone" aria-label="Ícone do valor 3">
                             <input type="text" class="form-input flex-3" formControlName="valor3Titulo"
-                                placeholder="Título">
+                                placeholder="Título" aria-label="Título do valor 3">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor3Desc"
-                            placeholder="Breve descrição">
+                            placeholder="Breve descrição" aria-label="Descrição do valor 3">
                     </div>
 
                     <div class="form-card dynamic-card">
                         <label class="form-label">Valor Complementar 4</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor4Icone"
-                                placeholder="Ícone">
+                                placeholder="Ícone" aria-label="Ícone do valor 4">
                             <input type="text" class="form-input flex-3" formControlName="valor4Titulo"
-                                placeholder="Título">
+                                placeholder="Título" aria-label="Título do valor 4">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor4Desc"
-                            placeholder="Breve descrição">
+                            placeholder="Breve descrição" aria-label="Descrição do valor 4">
                     </div>
                 </div>
             </div>
@@ -330,12 +333,12 @@
 
                     <div class="flex-row">
                         <input type="text" class="form-input flex-1" formControlName="icon"
-                            placeholder="Ícone/Emoji (ex: 💻)">
+                            placeholder="Ícone/Emoji (ex: 💻)" aria-label="Ícone da oficina">
                         <input type="text" class="form-input flex-3" formControlName="titulo"
-                            placeholder="Título da Oficina">
+                            placeholder="Título da Oficina" aria-label="Título da oficina">
                     </div>
                     <textarea class="form-textarea mt-2" formControlName="descricao" rows="2"
-                        placeholder="Breve descrição ou resumo..."></textarea>
+                        placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></textarea>
                 </div>
                 }
             </div>
@@ -376,11 +379,12 @@
                     </div>
 
                     <textarea class="form-textarea mb-2" formControlName="texto" rows="2"
-                        placeholder="O que o aluno disse..."></textarea>
+                        placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></textarea>
                     <div class="flex-row">
-                        <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo">
+                        <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo"
+                            aria-label="Nome do depoente">
                         <input type="number" class="form-input flex-1" formControlName="idade"
-                            placeholder="Idade (opcional)">
+                            placeholder="Idade (opcional)" aria-label="Idade do depoente">
                     </div>
                 </div>
                 }
