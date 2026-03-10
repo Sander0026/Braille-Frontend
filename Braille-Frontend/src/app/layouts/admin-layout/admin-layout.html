@@ -325,9 +325,9 @@
 
           <!-- Username readonly -->
           <div class="form-group">
-            <label class="form-label">Nome de usuário</label>
+            <span class="form-label">Nome de usuário</span>
             <input type="text" class="form-input form-input-readonly"
-              [value]="perfil?.username ?? usuario?.username ?? ''" readonly />
+              [value]="perfil?.username ?? usuario?.username ?? ''" aria-label="Nome de usuário" readonly />
             <p class="form-hint">O nome de usuário não pode ser alterado.</p>
           </div>
 
@@ -343,16 +343,17 @@
 
           <!-- Cargo readonly -->
           <div class="form-group">
-            <label class="form-label">Cargo / Perfil</label>
-            <input type="text" class="form-input form-input-readonly" [value]="labelCargo" readonly />
+            <span class="form-label">Cargo / Perfil</span>
+            <input type="text" class="form-input form-input-readonly" [value]="labelCargo" aria-label="Cargo ou Perfil"
+              readonly />
           </div>
 
           <!-- Membro desde -->
           @if (perfil?.criadoEm) {
           <div class="form-group">
-            <label class="form-label">Membro desde</label>
+            <span class="form-label">Membro desde</span>
             <input type="text" class="form-input form-input-readonly" [value]="perfil?.criadoEm | date:'dd/MM/yyyy'"
-              readonly />
+              aria-label="Membro desde a data" readonly />
           </div>
           }
 

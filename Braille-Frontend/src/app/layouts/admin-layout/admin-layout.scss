@@ -816,9 +816,9 @@ $transition: 250ms ease;
     gap: 0.25rem;
     background: none;
     border: none;
-    color: $primary;
+    color: #0b5e40; // improved contrast from $primary (#f5c800) against white
     font-size: 0.75rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     padding: 0;
     margin-top: 0.25rem;
@@ -904,10 +904,10 @@ $transition: 250ms ease;
     }
 
     &.ativo {
-        color: #16a34a;
+        color: #15803d; // improved contrast from #16a34a
 
         span {
-            color: #16a34a;
+            color: #15803d;
         }
     }
 }
