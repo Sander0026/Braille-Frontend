@@ -23,19 +23,64 @@ if (environment.sentryDsn) {
 bootstrapApplication(App, appConfig)
   .then(() => {
     if (isDevMode()) {
-      // Injeta auditoria automática de Acessibilidade no devTools
       import('axe-core').then((axe) => {
         setTimeout(() => {
           axe.default.run().then((results) => {
             if (results.violations.length > 0) {
-              console.groupCollapsed('%c[A11Y] ' + results.violations.length + ' Violações de Acessibilidade Encontradas', 'color: red; font-weight: bold;');
-              console.table(results.violations);
-              console.groupEnd();
+              
+              // Título Principal
+              console.log(
+                `%c🚨 [A11Y] ${results.violations.length} REGRA(S) DE ACESSIBILIDADE VIOLADA(S)`,
+                'color: white; background: #d32f2f; font-weight: bold; font-size: 14px; padding: 6px 12px; border-radius: 4px;'
+              );
+
+              results.violations.forEach((violation, index) => {
+                // Nome do Erro
+                console.log(
+                  `%c${index + 1}. ❌ ${violation.help} (${violation.id})`,
+                  'color: #d32f2f; font-weight: bold; font-size: 13px; margin-top: 10px;'
+                );
+                console.log(`📖 Como resolver: ${violation.helpUrl}`);
+
+                violation.nodes.forEach((node) => {
+                  const targetPath = node.target[0];
+                  const selectorString = Array.isArray(targetPath) ? targetPath.join(' ') : (targetPath as string);
+                  
+                  // Blindagem: Tenta achar o elemento, se falhar, não quebra o log
+                  let domElement: Element | null = null;
+                  try {
+                    domElement = document.querySelector(selectorString);
+                  } catch (e) {
+                    // Ignora erro de seletor complexo
+                  }
+
+                  // Descobre o componente Angular
+                  let angularComponent = 'index.html / Raiz';
+                  let curr = domElement;
+                  while (curr) {
+                    if (curr.tagName && curr.tagName.toLowerCase().startsWith('app-')) {
+                      angularComponent = curr.tagName.toLowerCase();
+                      break;
+                    }
+                    curr = curr.parentElement;
+                  }
+
+                  // Imprime os detalhes do elemento com erro
+                  console.log(`   📍 Componente: <%c${angularComponent}%c>`, 'color: #e65100; font-weight: bold;', 'color: inherit;');
+                  console.log(`   📝 Problema: ${node.failureSummary}`);
+                  console.log('   🔍 Elemento HTML afetado:', domElement || selectorString);
+                  console.log('   --------------------------------------------------');
+                });
+              });
+
             } else {
-              console.log('%c[A11Y] Axe-core: Nenhuma violação na carga inicial.', 'color: green;');
+              console.log(
+                '%c✅ [A11Y] Axe-core: Nenhuma violação de acessibilidade nesta tela!',
+                'color: white; background: #2e7d32; font-weight: bold; padding: 4px 8px; border-radius: 4px;'
+              );
             }
           });
-        }, 2000); // aguarda animações
+        }, 2000); 
       });
     }
   })

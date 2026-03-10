@@ -5,8 +5,7 @@
   [class.sidebar-hidden]="sidebarState === 'hidden'">
 
   <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
-  <aside class="sidebar" role="navigation" aria-label="Menu principal de administração"
-    [attr.aria-hidden]="sidebarState === 'hidden'">
+  <nav class="sidebar" aria-label="Menu principal de administração" [attr.aria-hidden]="sidebarState === 'hidden'">
 
     <div class="sidebar-logo" aria-hidden="true">
       <div class="logo-mark">IB</div>
@@ -36,7 +35,7 @@
         @if (showLabels) { <span class="nav-label">Sair</span> }
       </button>
     </div>
-  </aside>
+  </nav>
 
   <!-- ══ ÁREA PRINCIPAL ════════════════════════════════════════ -->
   <div class="main-area">

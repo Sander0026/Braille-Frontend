@@ -28,7 +28,7 @@
 
 <!-- ══ FILTROS ══ -->
 <div class="filtros-bar">
-    <select class="form-input form-input--sm" [(ngModel)]="filtroEntidade">
+    <select class="form-input form-input--sm" [(ngModel)]="filtroEntidade" aria-label="Filtrar por entidade">
         <option value="">Todas as entidades</option>
         <option value="Turma">Turma</option>
         <option value="Aluno">Aluno</option>
@@ -38,7 +38,7 @@
         <option value="Comunicado">Comunicado</option>
     </select>
 
-    <select class="form-input form-input--sm" [(ngModel)]="filtroAcao">
+    <select class="form-input form-input--sm" [(ngModel)]="filtroAcao" aria-label="Filtrar por ação">
         <option value="">Todas as ações</option>
         @for (a of acoes; track a) {
         <option [value]="a">{{ a }}</option>
@@ -162,9 +162,9 @@
                                 <td class="diff-new" [class.empty]="diff.para === '—'">
                                     <!-- Se não foi alterado (ex: numa exclusão ou qdo o valor manteve) -->
                                     @if(diff.alterado) {
-                                        {{ diff.para }}
+                                    {{ diff.para }}
                                     } @else {
-                                        <span class="text-muted">Mantido</span>
+                                    <span class="text-muted">Mantido</span>
                                     }
                                 </td>
                             </tr>
@@ -174,9 +174,9 @@
                 </div>
             </div>
             } @else {
-                <div class="diff-section empty-diff">
-                    <p>Nenhuma alteração visível nos campos mapeados.</p>
-                </div>
+            <div class="diff-section empty-diff">
+                <p>Nenhuma alteração visível nos campos mapeados.</p>
+            </div>
             }
 
         </div>

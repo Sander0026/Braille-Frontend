@@ -31,9 +31,9 @@
     <p>Crie o primeiro comunicado clicando em "Novo Comunicado".</p>
 </div>
 } @else {
-<div class="comunicados-lista" role="list" aria-label="Lista de comunicados">
+<div class="comunicados-lista" role="region" aria-label="Lista de comunicados">
     @for (c of comunicados; track c.id) {
-    <article class="comunicado-card card" role="listitem">
+    <article class="comunicado-card card">
         @if (c.imagemCapa) {
         <div class="card-img-wrapper">
             <img [src]="c.imagemCapa" alt="Capa" class="card-img" loading="lazy" />
