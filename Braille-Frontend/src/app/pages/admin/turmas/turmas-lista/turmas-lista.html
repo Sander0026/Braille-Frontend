@@ -126,14 +126,14 @@
       </button>
       <button class="btn btn-sm btn-warning" (click)="abrirModalArquivar(turma)"
         [attr.aria-label]="'Arquivar oficina ' + turma.nome"
-        style="background:#f59e0b; color:white; border-color:#f59e0b;">
+        style="background:#b45309; color:white; border-color:#b45309;">
         Arquivar
       </button>
       }
       } @else {
       <button class="btn btn-sm btn-success" (click)="restaurarTurma(turma)"
         [attr.aria-label]="'Restaurar oficina ' + turma.nome"
-        style="background:#16a34a; color:white; border-color:#16a34a;">
+        style="background:#15803d; color:white; border-color:#15803d;">
         Restaurar
       </button>
       <button class="btn btn-sm btn-danger" (click)="ocultarTurma(turma)"
@@ -298,7 +298,7 @@
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="fecharModalArquivar()">Cancelar</button>
-      <button class="btn" style="background:#f59e0b; color:white; border:none;" (click)="confirmarArquivamento()"
+      <button class="btn" style="background:#b45309; color:white; border:none;" (click)="confirmarArquivamento()"
         [disabled]="arquivando" [attr.aria-busy]="arquivando">
         @if (arquivando) {
         Arquivando...
@@ -377,7 +377,7 @@
             </span>
             @if ((turmaDetalhes.matriculasOficina?.length || 0) >= turmaDetalhes.capacidadeMaxima) {
             <span
-              style="background:#fee2e2; color:#dc2626; font-size:0.75rem; padding:0.1rem 0.5rem; border-radius:9999px; font-weight:600;">Lotada</span>
+              style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; padding:0.1rem 0.5rem; border-radius:9999px; font-weight:600;">Lotada</span>
             }
             } @else {
             <span>{{ turmaDetalhes.matriculasOficina?.length || 0 }} (sem limite definido)</span>
@@ -423,10 +423,10 @@
         }
 
         @if (alunosBuscaRestado.length > 0) {
-        <ul class="busca-resultados" role="listbox" aria-label="Resultados da busca de alunos"
+        <ul class="busca-resultados" aria-label="Resultados da busca de alunos"
           style="position:static; max-height:220px; border-top:1px solid #e5e5e5; margin-top:0.5rem; box-shadow:none;">
           @for (aluno of alunosBuscaRestado; track aluno.id) {
-          <li class="busca-resultado-item" role="option" appBuscaItem [itemData]="aluno" [id]="'aluno-op-' + aluno.id">
+          <li class="busca-resultado-item" appBuscaItem [itemData]="aluno" [id]="'aluno-op-' + aluno.id">
             <label style="display:flex; align-items:center; gap:0.75rem; width:100%; cursor:pointer;">
               <input type="checkbox" [checked]="alunosSelecionadosParaMatricula.includes(aluno.id)"
                 (change)="toggleSelecaoAluno(aluno.id)" class="custom-checkbox" />
@@ -494,7 +494,7 @@
               </div>
               <div style="display: flex; flex-direction: column;">
                 <span style="font-weight: 500; color: #1e293b;">{{ matricula.aluno.nomeCompleto }}</span>
-                <span style="font-size: 0.8rem; color: #64748b;">
+                <span style="font-size: 0.8rem; color: #475569;">
                   Matrícula: {{ matricula.aluno.matricula || 'Gerando pendente...' }}
                 </span>
               </div>
