@@ -545,6 +545,7 @@ export class TurmasLista implements OnInit {
         this.buscandoAlunos = true;
         this.cdr.detectChanges();
 
+        this.beneficiariosService.limparCache();
         this.beneficiariosService.listar(1, 100, termo).subscribe({
             next: (res) => {
                 // Filtra os alunos que já estão matriculados (usa matriculasOficina da nova interface)
