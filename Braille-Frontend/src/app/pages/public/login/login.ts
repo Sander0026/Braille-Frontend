@@ -71,7 +71,10 @@ export class Login {
         this.carregando = false;
 
         if (err.status === 401 || err.status === 403) {
-          this.erroLogin = 'Usuário ou senha incorretos. Verifique e tente novamente.';
+          const apiMsg = err.error?.message;
+          this.erroLogin = (typeof apiMsg === 'string') 
+            ? apiMsg 
+            : (Array.isArray(apiMsg) ? apiMsg[0] : 'Usuário ou senha incorretos. Verifique e tente novamente.');
         } else if (err.status === 0) {
           this.erroLogin = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
         } else {
