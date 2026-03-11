@@ -430,7 +430,12 @@
             <label style="display:flex; align-items:center; gap:0.75rem; width:100%; cursor:pointer;">
               <input type="checkbox" [checked]="alunosSelecionadosParaMatricula.includes(aluno.id)"
                 (change)="toggleSelecaoAluno(aluno.id)" class="custom-checkbox" />
-              <span style="font-size:0.9rem;">{{ aluno.nomeCompleto }}</span>
+              <div style="display:flex; flex-direction:column; justify-content:center;">
+                  <span style="font-size:0.9rem;">{{ aluno.nomeCompleto }}</span>
+                  <span style="font-size: 0.8rem; color: #6b7280; margin-top: 0.1rem;">
+                      Matrícula: {{ aluno.matricula || 'Gerando pendente...' }}
+                  </span>
+              </div>
             </label>
           </li>
           }
