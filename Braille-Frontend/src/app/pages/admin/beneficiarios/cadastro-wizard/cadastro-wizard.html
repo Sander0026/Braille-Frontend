@@ -63,13 +63,27 @@
 
         <div class="form-group">
           <label for="cpfRg" class="form-label">CPF ou RG <span class="required" aria-hidden="true">*</span></label>
-          <input type="text" id="cpfRg" class="form-input" formControlName="cpfRg" (input)="formatarDocumento($event)"
-            maxlength="14" [class.input-error]="isCampoInvalido('dadosPessoais', 'cpfRg')" placeholder="000.000.000-00"
-            aria-required="true" autocomplete="off">
+          <input type="text" id="cpfRg" class="form-input" formControlName="cpfRg"
+            (input)="formatarDocumento($event)" (blur)="verificarCpfRg()"
+            maxlength="14"
+            [class.input-error]="isCampoInvalido('dadosPessoais', 'cpfRg') || cpfRgStatus === 'ativo'"
+            placeholder="000.000.000-00" aria-required="true" autocomplete="off">
+
           @if (isCampoInvalido('dadosPessoais', 'cpfRg')) {
           <span class="error-text" role="alert">O CPF ou RG é obrigatório.</span>
           }
+          @if (cpfRgStatus === 'verificando') {
+          <span class="helper-text" role="status" aria-live="polite">🔍 Verificando CPF/RG...</span>
+          }
+          @if (cpfRgStatus === 'ativo' && cpfRgConflito) {
+          <span class="error-text" role="alert" aria-live="assertive">
+            ⛔ Já existe um aluno <strong>ativo</strong> com este CPF/RG:
+            <strong>{{ cpfRgConflito.nomeCompleto }}</strong>
+            @if (cpfRgConflito.matricula) { — Matrícula: {{ cpfRgConflito.matricula }} }
+          </span>
+          }
         </div>
+
       </div>
 
       <div class="form-row">
@@ -249,9 +263,14 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="idadeOcorrencia" class="form-label">Idade em que ocorreu (se adquirida)</label>
+          <label for="idadeOcorrencia" class="form-label">
+            Idade em que ocorreu (se adquirida)
+          </label>
           <input type="text" id="idadeOcorrencia" formControlName="idadeOcorrencia" class="form-input"
-            placeholder="Ex: Aos 15 anos">
+            placeholder="Ex: Aos 15 anos"
+            [style.opacity]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled ? '0.45' : '1'"
+            [style.cursor]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled ? 'not-allowed' : 'text'"
+            [attr.aria-disabled]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled || null">
         </div>
 
         <div class="form-group">

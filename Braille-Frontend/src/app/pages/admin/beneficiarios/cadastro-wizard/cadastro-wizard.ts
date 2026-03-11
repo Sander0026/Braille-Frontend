@@ -21,10 +21,14 @@ export class CadastroWizard implements OnInit {
   mensagemFeedback = '';
   tipoFeedback: 'sucesso' | 'erro' | '' = '';
 
-  // Modal de Reativação de Aluno
+  // Modal de Reativoão de Aluno
   modalReativacao = false;
   dadosReativacao: ReativacaoAluno | null = null;
   _payloadPendente: Record<string, unknown> | null = null; // guarda dados para re-usar após reativar
+
+  // Validação CPF/RG em tempo real (blur)
+  cpfRgStatus: 'livre' | 'ativo' | 'inativo' | 'verificando' | '' = '';
+  cpfRgConflito: { nomeCompleto: string; matricula: string | null } | null = null;
 
 
   constructor(
@@ -36,6 +40,27 @@ export class CadastroWizard implements OnInit {
 
   ngOnInit(): void {
     this.iniciarFormulario();
+    this.monitorarCausaDeficiencia();
+  }
+
+  /** Desabilita "Idade em que ocorreu" quando a causa for CONGENITA */
+  private monitorarCausaDeficiencia(): void {
+    const causaCtrl = this.cadastroForm.get('perfilDeficiencia.causaDeficiencia');
+    const idadeCtrl = this.cadastroForm.get('perfilDeficiencia.idadeOcorrencia');
+    if (!causaCtrl || !idadeCtrl) return;
+
+    // Estado inicial (desabilitado se não for ADQUIRIDA)
+    const aplicar = (valor: string) => {
+      if (valor === 'ADQUIRIDA') {
+        idadeCtrl.enable();
+      } else {
+        idadeCtrl.disable();
+        idadeCtrl.setValue('');
+      }
+    };
+
+    aplicar(causaCtrl.value);
+    causaCtrl.valueChanges.subscribe(aplicar);
   }
 
   iniciarFormulario() {
@@ -120,6 +145,42 @@ export class CadastroWizard implements OnInit {
     }
   }
 
+  // Verifica CPF/RG ao sair do campo (blur)
+  verificarCpfRg() {
+    const valor = this.cadastroForm.get('dadosPessoais.cpfRg')?.value ?? '';
+    const limpo = valor.replace(/\D/g, '');
+    if (!limpo) { this.cpfRgStatus = ''; this.cpfRgConflito = null; return; }
+
+    this.cpfRgStatus = 'verificando';
+    this.cpfRgConflito = null;
+    this.cdr.detectChanges();
+
+    this.http.get<any>(`/api/beneficiaries/check-cpf?cpfRg=${limpo}`).subscribe({
+      next: (res) => {
+        this.cpfRgStatus = res.status;
+        if (res.status === 'ativo') {
+          this.cpfRgConflito = { nomeCompleto: res.nomeCompleto, matricula: res.matricula };
+          this.anunciarParaLeitorDeTela(`CPF/RG já pertence ao aluno ativo: ${res.nomeCompleto}.`);
+        } else if (res.status === 'inativo') {
+          // Abre modal de reativação imediatamente
+          this.dadosReativacao = {
+            _reativacao: true,
+            id: res.id,
+            nomeCompleto: res.nomeCompleto,
+            matricula: res.matricula,
+            statusAtivo: false,
+            excluido: res.excluido,
+            message: 'Aluno inativo/excluido encontrado',
+          };
+          this.modalReativacao = true;
+          this.anunciarParaLeitorDeTela(`Aluno inativo encontrado: ${res.nomeCompleto}. Deseja reativar?`);
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => { this.cpfRgStatus = ''; this.cdr.detectChanges(); },
+    });
+  }
+
   // Máscara de CPF / RG
   formatarDocumento(event: any) {
     const input = event.target;
@@ -176,6 +237,12 @@ export class CadastroWizard implements OnInit {
   avancarPasso() {
     const grupoAtual = this.getGroupName(this.passoAtual);
     const formGrupo = this.cadastroForm.get(grupoAtual);
+
+    // Bloqueia avanço se CPF/RG conflitou com aluno ativo
+    if (this.passoAtual === 1 && this.cpfRgStatus === 'ativo') {
+      this.anunciarParaLeitorDeTela('Não é possível avançar. Já existe um aluno ativo com este CPF/RG.');
+      return;
+    }
 
     if (formGrupo?.valid) {
       this.passoAtual++;
