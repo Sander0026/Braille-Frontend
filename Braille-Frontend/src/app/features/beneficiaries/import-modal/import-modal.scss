@@ -149,7 +149,7 @@
 
 .btn-primary {
     background: var(--color-primary, #2563eb);
-    color: #fff;
+    color: #111827; // Modificado de #fff para garantir contraste com o amarelo (#f5c800)
 }
 
 .btn-primary:hover:not(:disabled) {
