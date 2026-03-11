@@ -124,6 +124,15 @@ export class BeneficiariosService {
         return this.http.get<Beneficiario>(`${this.url}/${id}`);
     }
 
+    checkCpfRg(cpfRg: string): Observable<
+        | { status: 'livre' }
+        | { status: 'ativo'; id: string; nomeCompleto: string; matricula: string | null }
+        | { status: 'inativo'; id: string; nomeCompleto: string; matricula: string | null; excluido: boolean }
+    > {
+        const params = new HttpParams().set('cpfRg', cpfRg);
+        return this.http.get<any>(`${this.url}/check-cpf`, { params });
+    }
+
     atualizar(id: string, dados: Partial<Beneficiario>): Observable<Beneficiario> {
         this.limparCache();
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);

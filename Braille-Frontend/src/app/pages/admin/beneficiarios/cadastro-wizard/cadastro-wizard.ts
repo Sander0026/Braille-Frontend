@@ -155,7 +155,7 @@ export class CadastroWizard implements OnInit {
     this.cpfRgConflito = null;
     this.cdr.detectChanges();
 
-    this.http.get<any>(`/api/beneficiaries/check-cpf?cpfRg=${limpo}`).subscribe({
+    this.beneficiariosService.checkCpfRg(limpo).subscribe({
       next: (res) => {
         this.cpfRgStatus = res.status;
         if (res.status === 'ativo') {
@@ -167,7 +167,7 @@ export class CadastroWizard implements OnInit {
             _reativacao: true,
             id: res.id,
             nomeCompleto: res.nomeCompleto,
-            matricula: res.matricula,
+            matricula: res.matricula ?? undefined,
             statusAtivo: false,
             excluido: res.excluido,
             message: 'Aluno inativo/excluido encontrado',
