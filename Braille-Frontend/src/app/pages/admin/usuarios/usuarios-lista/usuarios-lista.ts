@@ -194,9 +194,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Usuário editado com sucesso!');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao editar usuário.');
+                const msg = err.error?.message || 'Erro ao editar usuário.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -220,9 +221,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Usuário inativado com sucesso!');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao inativar usuário.');
+                const msg = err.error?.message || 'Erro ao inativar usuário.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -247,9 +249,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Usuário excluído definitivamente.');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao excluir usuário definitivamente.');
+                const msg = err.error?.message || 'Erro ao excluir usuário definitivamente.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -274,9 +277,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Conta de usuário restaurada.');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao restaurar usuário.');
+                const msg = err.error?.message || 'Erro ao restaurar usuário.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -339,10 +343,11 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Senha resetada com sucesso para Ilbes@123');
                 this.cdr.markForCheck();
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
-                this.toast.erro('Erro ao resetar senha.');
+                const msg = err.error?.message || 'Erro ao resetar senha.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
