@@ -2,6 +2,9 @@ import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { SiteConfigService } from '../../../core/services/site-config';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 interface ContatoPayload {
     nome: string;
@@ -35,7 +38,14 @@ export class Contato {
     // Campos tocados (para validação visual)
     tocado: Record<string, boolean> = {};
 
-    constructor(private http: HttpClient, private cdr: ChangeDetectorRef) { }
+    // Dados Dinâmicos do CMS (Aba Contato)
+    contatoConfig$: Observable<any>;
+
+    constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private siteConfig: SiteConfigService) {
+        this.contatoConfig$ = this.siteConfig.secoes$.pipe(
+            map(secoes => secoes['contato_global'] || {})
+        );
+    }
 
     marcarTocado(campo: string): void {
         this.tocado[campo] = true;

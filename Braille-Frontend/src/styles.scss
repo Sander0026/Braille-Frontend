@@ -13,6 +13,9 @@
 // 3. Componentes reutilizáveis (.btn, .card, .badge, .form-input, etc.)
 @use 'styles/components';
 
+// Importações de Bibliotecas Externas
+@import 'quill/dist/quill.snow.css';
+
 // Garante que o app propaga a altura corretamente para os layouts filhos
 app-root {
     display: block;

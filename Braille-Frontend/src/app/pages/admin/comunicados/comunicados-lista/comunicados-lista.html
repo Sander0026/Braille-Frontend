@@ -129,10 +129,10 @@
             <div class="form-group" style="margin-top:1rem">
                 <label for="com-conteudo" class="form-label">Conteúdo <span class="required"
                         aria-hidden="true">*</span></label>
-                <textarea id="com-conteudo" class="form-textarea"
+                <quill-editor id="com-conteudo"
                     [class.is-invalid]="form.get('conteudo')?.invalid && form.get('conteudo')?.touched"
-                    formControlName="conteudo" rows="6"
-                    placeholder="Escreva o comunicado aqui... Podem ser inseridas quebras de linhas para formar parágrafos."></textarea>
+                    formControlName="conteudo" [styles]="{height: '250px'}"
+                    placeholder="Escreva o comunicado aqui..."></quill-editor>
                 @if (form.get('conteudo')?.invalid && form.get('conteudo')?.touched) {
                 <span class="form-error" role="alert">Conteúdo obrigatório (mín. 10 caracteres)</span>
                 }
