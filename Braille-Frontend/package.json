@@ -35,7 +35,10 @@
     "@angular/service-worker": "^21.1.0",
     "@sentry/angular": "^10.42.0",
     "@types/dompurify": "^3.0.5",
+    "@types/quill": "^2.0.14",
     "dompurify": "^3.3.2",
+    "ngx-quill": "^30.0.1",
+    "quill": "^2.0.3",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "xlsx": "^0.18.5"

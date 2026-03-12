@@ -8,10 +8,11 @@ import { ActivatedRoute } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { environment } from '../../../../environments/environment';
 import { ComunicadosLista } from '../comunicados/comunicados-lista/comunicados-lista';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-conteudo-site',
-  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista],
+  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista, QuillModule],
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })

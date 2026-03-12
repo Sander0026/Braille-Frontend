@@ -1,4 +1,4 @@
-﻿<div class="page-header">
+<div class="page-header">
     <div>
         <h1 class="page-title">Gestão de Conteúdo</h1>
         <p class="page-subtitle">Gerencie as informações e visual exibidos no portal público.</p>
@@ -149,8 +149,8 @@
 
                 <div class="form-group">
                     <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
-                    <textarea id="descricao" class="form-textarea" formControlName="descricao" rows="3"
-                        placeholder="Insira a descrição..."></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Insira a descrição..."></quill-editor>
                 </div>
             </div>
 
@@ -232,14 +232,12 @@
 
                 <div class="form-group">
                     <label class="form-label" for="descricaoLinha1">Parágrafo de Introdução</label>
-                    <textarea id="descricaoLinha1" class="form-textarea" formControlName="descricaoLinha1"
-                        rows="3"></textarea>
+                    <quill-editor formControlName="descricaoLinha1" [styles]="{height: '150px'}"></quill-editor>
                 </div>
 
                 <div class="form-group mb-0">
                     <label class="form-label" for="descricaoLinha2">Parágrafo de Complemento (Opcional)</label>
-                    <textarea id="descricaoLinha2" class="form-textarea" formControlName="descricaoLinha2"
-                        rows="2"></textarea>
+                    <quill-editor formControlName="descricaoLinha2" [styles]="{height: '150px'}"></quill-editor>
                 </div>
             </div>
 
@@ -337,8 +335,8 @@
                         <input type="text" class="form-input flex-3" formControlName="titulo"
                             placeholder="Título da Oficina" aria-label="Título da oficina">
                     </div>
-                    <textarea class="form-textarea mt-2" formControlName="descricao" rows="2"
-                        placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '100px'}"
+                        placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></quill-editor>
                 </div>
                 }
             </div>
@@ -378,8 +376,8 @@
                         </button>
                     </div>
 
-                    <textarea class="form-textarea mb-2" formControlName="texto" rows="2"
-                        placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></textarea>
+                    <quill-editor formControlName="texto" [styles]="{height: '100px', marginBottom: '1rem'}"
+                        placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></quill-editor>
                     <div class="flex-row">
                         <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo"
                             aria-label="Nome do depoente">
@@ -428,8 +426,8 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="sobreDescricao">Descrição</label>
-                    <textarea id="sobreDescricao" formControlName="descricao" class="form-input" rows="3"
-                        placeholder="Breve descrição exibida abaixo do título…"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Breve descrição exibida abaixo do título…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -454,18 +452,18 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo1">Parágrafo 1</label>
-                    <textarea id="historiaParagrafo1" formControlName="paragrafo1" class="form-input" rows="4"
-                        placeholder="Primeiro parágrafo da história…"></textarea>
+                    <quill-editor formControlName="paragrafo1" [styles]="{height: '200px'}"
+                        placeholder="Primeiro parágrafo da história…"></quill-editor>
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo2">Parágrafo 2</label>
-                    <textarea id="historiaParagrafo2" formControlName="paragrafo2" class="form-input" rows="4"
-                        placeholder="Segundo parágrafo da história…"></textarea>
+                    <quill-editor formControlName="paragrafo2" [styles]="{height: '200px'}"
+                        placeholder="Segundo parágrafo da história…"></quill-editor>
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo3">Parágrafo 3 (opcional)</label>
-                    <textarea id="historiaParagrafo3" formControlName="paragrafo3" class="form-input" rows="4"
-                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></textarea>
+                    <quill-editor formControlName="paragrafo3" [styles]="{height: '200px'}"
+                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -586,8 +584,8 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="sobreCtaDesc">Descrição</label>
-                    <textarea id="sobreCtaDesc" formControlName="descricao" class="form-input" rows="2"
-                        placeholder="Ex: Entre em contato com nossa secretaria…"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Ex: Entre em contato com nossa secretaria…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
