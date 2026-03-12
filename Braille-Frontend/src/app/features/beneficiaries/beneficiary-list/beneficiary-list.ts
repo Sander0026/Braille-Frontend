@@ -8,6 +8,7 @@ import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
+import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
@@ -31,7 +32,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CpfRgPipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })

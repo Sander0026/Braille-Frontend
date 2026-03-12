@@ -320,7 +320,7 @@
                 <div class="profile-section">
                     <h4>Contato</h4>
                     <p><strong>Telefone:</strong> {{ usuarioVisualizado.telefone || 'Não informado' }}</p>
-                    <p><strong>CPF:</strong> {{ usuarioVisualizado.cpf || 'Não informado' }}</p>
+                    <p><strong>CPF:</strong> {{ (usuarioVisualizado.cpf | cpfRg) || 'Não informado' }}</p>
                 </div>
 
                 <!-- Endereço -->
