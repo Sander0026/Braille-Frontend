@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -16,8 +16,9 @@ import { QuillModule } from 'ngx-quill';
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })
-export class ConteudoSite implements OnInit, OnDestroy, AfterViewChecked {
+export class ConteudoSite implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private observer!: MutationObserver;
   abaAtiva = 'config';
 
   // ── Forms existentes ──────────────────────────────────────
@@ -64,7 +65,8 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewChecked {
     private siteConfig: SiteConfigService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private el: ElementRef
   ) { }
 
   ngOnInit() {
@@ -76,6 +78,10 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewChecked {
         this.setAba(params['aba']);
       }
     });
+
+    // Acessibilidade: Intercepta a renderização assíncrona do QuillJS para injetar ARIA e TITLE nas ferramentas
+    this.observer = new MutationObserver(() => this.corrigirAcessibilidadeQuill());
+    this.observer.observe(this.el.nativeElement, { childList: true, subtree: true });
   }
 
   setAba(aba: string) {
@@ -366,12 +372,9 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   ngOnDestroy() {
+    if (this.observer) this.observer.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
-  }
-
-  ngAfterViewChecked() {
-    this.corrigirAcessibilidadeQuill();
   }
 
   // ── Acessibilidade ────────────────────────────────────────
