@@ -8,6 +8,7 @@ import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, Af
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { CpfRgPipe } from '../../../../shared/pipes/cpf-rg.pipe';
 
 @Directive({
     selector: '[appTabelaTrFocavel]',
@@ -27,7 +28,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
     selector: 'app-usuarios-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective, A11yModule],
+    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective, A11yModule, CpfRgPipe],
     templateUrl: './usuarios-lista.html',
     styleUrl: './usuarios-lista.scss'
 })

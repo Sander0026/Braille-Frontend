@@ -189,9 +189,11 @@ export class CadastroWizard implements OnInit {
     if (valor.length > 11) valor = valor.substring(0, 11);
 
     if (valor.length <= 9) {
-      valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
-      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-      valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      if (valor.length === 9) {
+        valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
+      } else {
+        valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+      }
     } else {
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');

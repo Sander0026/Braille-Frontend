@@ -18,6 +18,7 @@ export class Home implements OnInit {
 
   oficinas: any[] = [];
   depoimentos: any[] = [];
+  faq: any[] = [];
 
   ultimasNoticias: any[] = [];
   carregandoNoticias = true;
@@ -89,6 +90,14 @@ export class Home implements OnInit {
         }
       },
       error: (e) => console.error('Erro CMS depoimentos', e)
+    });
+    this.siteConfig.getSecao('faq').subscribe({
+      next: (dados) => {
+        if (dados && dados['lista']) {
+          try { this.faq = JSON.parse(dados['lista']); } catch (e) { }
+        }
+      },
+      error: (e) => console.error('Erro CMS faq', e)
     });
   }
 

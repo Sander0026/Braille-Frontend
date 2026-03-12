@@ -44,6 +44,9 @@
             <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
                 <span class="material-symbols-rounded">newspaper</span> Noticias
             </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'faq'" (click)="setAba('faq')">
+                <span class="material-symbols-rounded">quiz</span> Perguntas Frequentes
+            </button>
             <button class="tab-btn" [class.active]="abaAtiva === 'contato'" (click)="setAba('contato')">
                 <span class="material-symbols-rounded">contact_page</span> Global (Contato/Redes)
             </button>
@@ -612,6 +615,56 @@
     </div>
     }
 
+    <!-- ABA: FAQ -->
+    @if (abaAtiva === 'faq') {
+    <div class="tab-pane active" id="pane-faq">
+        <form [formGroup]="formFaq" (ngSubmit)="salvarFaq()" class="cms-form">
+            <div class="form-header">
+                <h2>Perguntas Frequentes (FAQ)</h2>
+                <p>Gerencie as perguntas e respostas exibidas no modo sanfona (acordeon) da Página Inicial.</p>
+            </div>
+
+            <div formArrayName="lista">
+                @for (item of faqArray.controls; track item; let i = $index) {
+                <div [formGroupName]="i" class="form-card dynamic-card">
+                    <div class="dynamic-card-header">
+                        <span class="card-badge">Pergunta {{ i + 1 }}</span>
+                        <button type="button" class="btn-icon danger" (click)="removerFaq(i)" aria-label="Remover"
+                            title="Remover pergunta">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label" [for]="'faq-pergunta-' + i">Pergunta</label>
+                        <input type="text" [id]="'faq-pergunta-' + i" class="form-input" formControlName="pergunta"
+                            placeholder="Ex: Como posso me matricular?">
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label class="form-label" [for]="'faq-resposta-' + i">Resposta (Detalhada)</label>
+                        <quill-editor [id]="'faq-resposta-' + i" formControlName="resposta" [styles]="{height: '100px'}"
+                            placeholder="Escreva a resposta de forma clara..."></quill-editor>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="add-row">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarFaq()">
+                    <span class="material-symbols-rounded">add</span> Adicionar Pergunta
+                </button>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formFaq.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar FAQ }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
     <!-- ABA: CONTATO E DADOS GLOBAIS -->
     @if (abaAtiva === 'contato') {
     <div class="tab-pane active" id="pane-contato" role="tabpanel">
@@ -768,6 +821,31 @@
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDepoimento()"
                 style="background-color: #ef4444; color: white; border: none;">
                 Remover Depoimento
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir FAQ -->
+@if (faqParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Pergunta"
+    (click)="cancelarExclusaoFaq()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Excluir Pergunta</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoFaq()"
+                aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a excluir esta pergunta.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar FAQ</strong>. Deseja removê-la da lista?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoFaq()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoFaq()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover
             </button>
         </div>
     </div>
