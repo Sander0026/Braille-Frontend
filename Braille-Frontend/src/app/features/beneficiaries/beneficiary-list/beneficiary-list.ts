@@ -13,6 +13,7 @@ import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
+import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 
 @Directive({
   selector: '[appTabelaTrFocavel]',
@@ -32,7 +33,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CpfRgPipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CpfRgPipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective, TabEscapeDirective],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -103,7 +104,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
-      cpfRg: [''],
+      cpf: [''],
+      rg: [''],
       dataNascimento: [''],
       genero: [''],
       email: [''],
@@ -290,7 +292,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   <div class="grid">
     <div class="secao">
       <h4>Informações Pessoais</h4>
-      <p><strong>CPF / RG:</strong> ${ni(a.cpfRg)}</p>
+      <p><strong>CPF:</strong> ${ni(a.cpf)} / <strong>RG:</strong> ${ni(a.rg)}</p>
       <p><strong>Nascimento:</strong> ${fmtData(a.dataNascimento)}</p>
       <p><strong>Gênero:</strong> ${ni(a.genero)}</p>
       <p><strong>Estado Civil:</strong> ${ni(a.estadoCivil)}</p>
@@ -483,7 +485,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     const rawVal = this.editForm.value;
     const payload = {
       ...rawVal,
-      cpfRg: rawVal.cpfRg ? rawVal.cpfRg.replace(/\D/g, '') : rawVal.cpfRg,
+      cpf: rawVal.cpf ? String(rawVal.cpf).replace(/\D/g, '') : rawVal.cpf,
+      rg: rawVal.rg ? String(rawVal.rg).replace(/\D/g, '') : rawVal.rg,
       telefoneContato: rawVal.telefoneContato ? rawVal.telefoneContato.replace(/\D/g, '') : rawVal.telefoneContato,
       cep: rawVal.cep ? rawVal.cep.replace(/\D/g, '') : rawVal.cep
     };

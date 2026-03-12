@@ -153,7 +153,7 @@
                         (blur)="marcarTocado('mensagem')" class="form-input"
                         [class.invalid]="isCampoInvalido('mensagem')" rows="5"
                         placeholder="Descreva sua dúvida, solicitação ou comentário..." aria-required="true"
-                        [attr.aria-invalid]="isCampoInvalido('mensagem')"></textarea>
+                        [attr.aria-invalid]="isCampoInvalido('mensagem')" tabEscape></textarea>
                     @if (isCampoInvalido('mensagem')) {
                     <span class="field-error" role="alert">Mensagem muito curta (mínimo 10 caracteres).</span>
                     }

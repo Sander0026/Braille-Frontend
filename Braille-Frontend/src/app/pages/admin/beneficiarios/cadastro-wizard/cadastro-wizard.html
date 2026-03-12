@@ -62,25 +62,50 @@
         </div>
 
         <div class="form-group">
-          <label for="cpfRg" class="form-label">CPF ou RG <span class="required" aria-hidden="true">*</span></label>
-          <input type="text" id="cpfRg" class="form-input" formControlName="cpfRg"
-            (input)="formatarDocumento($event)" (blur)="verificarCpfRg()"
+          <label for="cpf" class="form-label">
+            CPF <span class="required" aria-hidden="true" title="Preencha o CPF ou o RG" *ngIf="isCampoInvalido('dadosPessoais', 'cpf')">*</span>
+          </label>
+          <input type="text" id="cpf" class="form-input" formControlName="cpf"
+            (input)="formatarDocumento($event)" (blur)="verificarCampoUnico('cpf')"
             maxlength="14"
-            [class.input-error]="isCampoInvalido('dadosPessoais', 'cpfRg') || cpfRgStatus === 'ativo'"
-            placeholder="000.000.000-00" aria-required="true" autocomplete="off">
+            [class.input-error]="isCampoInvalido('dadosPessoais', 'cpf') || cpfStatus === 'ativo'"
+            placeholder="000.000.000-00" autocomplete="off">
+        </div>
 
-          @if (isCampoInvalido('dadosPessoais', 'cpfRg')) {
-          <span class="error-text" role="alert">O CPF ou RG é obrigatório.</span>
+        <div class="form-group">
+          <label for="rg" class="form-label">
+            RG <span class="required" aria-hidden="true" title="Preencha o CPF ou o RG" *ngIf="isCampoInvalido('dadosPessoais', 'rg')">*</span>
+          </label>
+          <input type="text" id="rg" class="form-input" formControlName="rg"
+            (input)="formatarRg($event)" (blur)="verificarCampoUnico('rg')"
+            maxlength="14"
+            [class.input-error]="isCampoInvalido('dadosPessoais', 'rg') || rgStatus === 'ativo'"
+            placeholder="11.111.111-1" autocomplete="off">
+        </div>
+      </div>
+
+      <!-- Feedbacks CPF / RG centralizados após os campos -->
+      <div class="form-row">
+        <div class="form-group" style="width: 100%;">
+          @if (isCampoInvalido('dadosPessoais', 'cpf') && isCampoInvalido('dadosPessoais', 'rg')) {
+            <span class="error-text" role="alert">Preencha pelo menos o CPF ou o RG.</span>
           }
-          @if (cpfRgStatus === 'verificando') {
-          <span class="helper-text" role="status" aria-live="polite">🔍 Verificando CPF/RG...</span>
+          @if (cpfStatus === 'verificando' || rgStatus === 'verificando') {
+            <span class="helper-text" role="status" aria-live="polite">🔍 Verificando documentos...</span>
           }
-          @if (cpfRgStatus === 'ativo' && cpfRgConflito) {
-          <span class="error-text" role="alert" aria-live="assertive">
-            ⛔ Já existe um aluno <strong>ativo</strong> com este CPF/RG:
-            <strong>{{ cpfRgConflito.nomeCompleto }}</strong>
-            @if (cpfRgConflito.matricula) { — Matrícula: {{ cpfRgConflito.matricula }} }
-          </span>
+          @if (cpfStatus === 'ativo' && cpfConflito) {
+            <span class="error-text" role="alert" aria-live="assertive">
+              ⛔ Já existe um aluno <strong>ativo</strong> com este CPF:
+              <strong>{{ cpfConflito.nomeCompleto }}</strong>
+              @if (cpfConflito.matricula) { — Matrícula: {{ cpfConflito.matricula }} }
+            </span>
+          }
+          @else if (rgStatus === 'ativo' && rgConflito) {
+            <span class="error-text" role="alert" aria-live="assertive">
+              ⛔ Já existe um aluno <strong>ativo</strong> com este RG:
+              <strong>{{ rgConflito.nomeCompleto }}</strong>
+              @if (rgConflito.matricula) { — Matrícula: {{ rgConflito.matricula }} }
+            </span>
           }
         </div>
 
@@ -385,7 +410,7 @@
       <div class="form-group">
         <label for="outrasComorbidades" class="form-label">Outras Comorbidades ou Deficiências Associadas</label>
         <textarea id="outrasComorbidades" formControlName="outrasComorbidades" rows="3" class="form-textarea"
-          placeholder="Descreva se houver outras condições de saúde relevantes..."></textarea>
+          placeholder="Descreva se houver outras condições de saúde relevantes..." tabEscape></textarea>
       </div>
 
     </fieldset>
