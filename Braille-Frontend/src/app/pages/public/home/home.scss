@@ -860,6 +860,72 @@ $transition: 250ms ease;
 }
 
 // ─────────────────────────────────────────────────────────────
+// FAQ  —  accordion minimalista e acessível
+// ─────────────────────────────────────────────────────────────
+.faq {
+    background: $gray-50;
+    padding: 6rem 0;
+}
+
+.faq-list {
+    max-width: 800px;
+    margin: 3rem auto 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.faq-item {
+    background: $white;
+    border: 1px solid $gray-200;
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: box-shadow $transition;
+
+    &[open] {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-color: color.change($primary, $alpha: 0.5);
+
+        .faq-icon {
+            transform: rotate(180deg);
+        }
+    }
+}
+
+.faq-pergunta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $gray-900;
+    cursor: pointer;
+    list-style: none; /* oculta o icone padrao de details no chrome */
+    transition: background $transition;
+
+    &::-webkit-details-marker {
+        display: none; /* oculta o icone padrao de details no safari */
+    }
+
+    &:hover {
+        background: $gray-50;
+    }
+}
+
+.faq-icon {
+    color: $gray-400;
+    transition: transform 0.3s ease;
+}
+
+.faq-resposta {
+    padding: 0 1.5rem 1.5rem;
+    color: $gray-700;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+// ─────────────────────────────────────────────────────────────
 // CTA FINAL  —  amarelo ILBES, borda topo preta
 // ─────────────────────────────────────────────────────────────
 .cta-final {

@@ -234,6 +234,32 @@
     </div>
 </section>
 
+<!-- ══════════ FAQ (PERGUNTAS FREQUENTES) ══════════ -->
+<section class="faq" aria-labelledby="faq-titulo">
+    <div class="section-inner">
+        <header class="section-header animate-on-scroll">
+            <h2 id="faq-titulo" class="section-title">Perguntas Frequentes</h2>
+            <p class="section-desc">Tire suas dúvidas sobre matrículas, horários e funcionamento do Instituto.</p>
+        </header>
+
+        <div class="faq-list">
+            @for (item of faq; track item.pergunta) {
+            <details class="faq-item animate-on-scroll" [class.delay-100]="$index === 1" [class.delay-200]="$index === 2">
+                <summary class="faq-pergunta">
+                    <span>{{ item.pergunta }}</span>
+                    <span class="material-symbols-rounded faq-icon" aria-hidden="true">expand_more</span>
+                </summary>
+                <div class="faq-resposta ql-content" [innerHTML]="item.resposta | safeHtml"></div>
+            </details>
+            } @empty {
+            <div class="feed-vazio">
+                <p>Nenhuma pergunta cadastrada no momento.</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
 <!-- ══════════ CTA FINAL ══════════ -->
 <section class="cta-final" aria-labelledby="cta-titulo">
     <div class="section-inner cta-inner animate-on-scroll">
