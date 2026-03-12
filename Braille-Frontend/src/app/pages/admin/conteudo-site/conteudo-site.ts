@@ -34,6 +34,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
   formSobreEquipe!: FormGroup;
   formSobreCta!: FormGroup;
 
+  // ── Forms de Contato / Dados Globais ──────────────────────
+  formContato!: FormGroup;
+
   // ── Estado ────────────────────────────────────────────────
   carregando = false;
   salvando = false;
@@ -146,6 +149,18 @@ export class ConteudoSite implements OnInit, OnDestroy {
     this.formSobreCta = this.fb.group({
       titulo: [''],
       descricao: [''],
+    });
+
+    this.formContato = this.fb.group({
+      telefoneCentral: [''],
+      emailOficial: [''],
+      enderecoCompleto: [''],
+      heroDescricaoContato: [''],
+      instagram: [''],
+      facebook: [''],
+      youtube: [''],
+      linkedin: [''],
+      footerDireitos: [''],
     });
   }
 
@@ -311,6 +326,10 @@ export class ConteudoSite implements OnInit, OnDestroy {
       // Sobre — CTA
       const sobreCta = secoes['sobre_cta'];
       if (sobreCta && Object.keys(sobreCta).length > 0) this.formSobreCta.patchValue(sobreCta);
+
+      // Contato e Dados Globais
+      const contatoConfig = secoes['contato_global'];
+      if (contatoConfig && Object.keys(contatoConfig).length > 0) this.formContato.patchValue(contatoConfig);
     });
   }
 
@@ -345,6 +364,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
   salvarSobreHero() { this.salvarSecaoValorUnico('sobre_hero', this.formSobreHero.value); }
   salvarSobreHistoria() { this.salvarSecaoValorUnico('sobre_historia', this.formSobreHistoria.value); }
   salvarSobreCta() { this.salvarSecaoValorUnico('sobre_cta', this.formSobreCta.value); }
+
+  // Contato / Global
+  salvarContato() { this.salvarSecaoValorUnico('contato_global', this.formContato.value); }
 
   salvarSobreTimeline() {
     if (this.formSobreTimeline.invalid) return;
@@ -452,7 +474,8 @@ export class ConteudoSite implements OnInit, OnDestroy {
       'sobre_cta': 'Chamada para Ação (Sobre)',
       'missao': 'Missão & Valores',
       'oficinas': 'Oficinas',
-      'depoimentos': 'Depoimentos'
+      'depoimentos': 'Depoimentos',
+      'contato_global': 'Contato e Redes Sociais'
     };
     return mapa[nome] || nome.toUpperCase();
   }
