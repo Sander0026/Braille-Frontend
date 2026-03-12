@@ -295,7 +295,7 @@
                 <td>
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>
-                <td class="hide-on-mobile">{{ aluno.cpfRg || '—' }}</td>
+                <td class="hide-on-mobile">{{ (aluno.cpfRg | cpfRg) || '—' }}</td>
                 <td class="hide-on-tablet">{{ aluno.dataNascimento | dataBraille }}</td>
                 <td class="hide-on-mobile">
                     @if (aluno.tipoDeficiencia) {
@@ -472,7 +472,7 @@
                 <!-- Informações Pessoais -->
                 <div class="profile-section">
                     <h4>Informações Pessoais</h4>
-                    <p><strong>CPF/RG:</strong> {{ alunoSelecionado.cpfRg || 'N/I' }}</p>
+                    <p><strong>CPF/RG:</strong> {{ (alunoSelecionado.cpfRg | cpfRg) || 'N/I' }}</p>
                     <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
                     <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
                     <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
