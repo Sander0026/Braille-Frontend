@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, AfterViewChecked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -16,7 +16,7 @@ import { QuillModule } from 'ngx-quill';
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })
-export class ConteudoSite implements OnInit, OnDestroy {
+export class ConteudoSite implements OnInit, OnDestroy, AfterViewChecked {
   private destroy$ = new Subject<void>();
   abaAtiva = 'config';
 
@@ -336,6 +336,31 @@ export class ConteudoSite implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewChecked() {
+    this.corrigirAcessibilidadeQuill();
+  }
+
+  // ── Acessibilidade ────────────────────────────────────────
+  private corrigirAcessibilidadeQuill() {
+    // Procura todos os seletores dropdown do Quill que não tenham aria-label
+    const pickers = document.querySelectorAll('.ql-picker-label:not([aria-label])');
+    pickers.forEach((picker) => {
+      const parent = picker.parentElement;
+      const type = parent?.className.match(/ql-(header|size|font|color|background|align)/)?.[1];
+      const labels: Record<string, string> = {
+        'header': 'Nível do Título',
+        'size': 'Tamanho da fonte',
+        'font': 'Família da fonte',
+        'color': 'Cor do texto',
+        'background': 'Cor de fundo do texto',
+        'align': 'Alinhamento do texto'
+      };
+      const label = type ? labels[type] : 'Opções de formatação do editor';
+      picker.setAttribute('aria-label', label);
+      picker.setAttribute('title', label);
+    });
   }
 
   // ── Salvar ────────────────────────────────────────────────
