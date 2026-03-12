@@ -505,3 +505,8 @@ html.alto-contraste {
         margin-bottom: 0;
     }
 }
+// m-03: TOOLBAR DO QUILL — foco silencioso (teclado flui pelo editor, nao pela toolbar)
+.ql-toolbar button:focus:not(:focus-visible),
+.ql-toolbar .ql-picker-label:focus:not(:focus-visible) {
+    outline: none;
+}

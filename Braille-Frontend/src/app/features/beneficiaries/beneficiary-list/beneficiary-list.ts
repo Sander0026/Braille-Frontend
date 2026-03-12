@@ -180,10 +180,31 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   @HostListener('keydown', ['$event'])
   onKeydown(event: KeyboardEvent) {
-    if (this.keyManager && !this.modalAberto && !this.modalEdicaoAberto && !this.drawerAberto && !this.modalImportAberto && !this.alunoParaInativar && !this.alunoParaRestaurar && !this.alunoParaExcluirDefinitivo && !this.documentoParaExcluir) {
+    const algumModalAberto = this.modalAberto || this.modalEdicaoAberto || this.drawerAberto ||
+      this.modalImportAberto || !!this.alunoParaInativar || !!this.alunoParaRestaurar ||
+      !!this.alunoParaExcluirDefinitivo || !!this.documentoParaExcluir;
+
+    // C-05: Escape fecha qualquer modal aberto (WCAG 2.1.2)
+    if (event.key === 'Escape') {
+      if (this.modalEdicaoAberto) { this.fecharModalEdicao(); event.preventDefault(); }
+      else if (this.modalAberto) { this.fecharModal(); event.preventDefault(); }
+      else if (this.drawerAberto) { this.drawerAberto = false; this.cdr.markForCheck(); event.preventDefault(); }
+      return;
+    }
+
+    if (this.keyManager && !algumModalAberto) {
       if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
         this.keyManager.onKeydown(event);
         event.preventDefault();
+      }
+      // C-03: Enter na linha focada abre o modal de edição (WCAG 2.1.1)
+      if (event.key === 'Enter') {
+        const activeIndex = this.keyManager.activeItemIndex ?? -1;
+        if (activeIndex >= 0 && activeIndex < this.alunos.length) {
+          const aluno = this.alunos[activeIndex];
+          this.abrirModalEdicao(aluno);
+          event.preventDefault();
+        }
       }
     }
   }
@@ -459,6 +480,16 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   abrirModalEdicao(aluno: Beneficiario): void {
     this.alunoEmEdicao = aluno;
     this.modalEdicaoAberto = true;
+    this.cdr.markForCheck();
+
+    // C-06: Mover foco para o primeiro campo do modal ao abrir (WCAG 2.4.3)
+    setTimeout(() => {
+      const primeiroFocavel = document.querySelector<HTMLElement>(
+        '.modal-edicao input:not([disabled]), .modal-edicao select:not([disabled]), .modal-edicao textarea:not([disabled]), .modal-edicao button'
+      );
+      primeiroFocavel?.focus();
+    }, 80);
+
     // Carrega dados completos do aluno para preencher o form
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {

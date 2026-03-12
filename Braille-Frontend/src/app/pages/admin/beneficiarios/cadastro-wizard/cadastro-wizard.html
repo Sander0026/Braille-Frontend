@@ -425,21 +425,30 @@
       </button>
       }
 
-      @if (passoAtual < 4) { <button type="button" class="btn btn-primary" (click)="avancarPasso()"
-        [disabled]="!cadastroForm.get(getGroupName(passoAtual))?.valid"
+      @if (passoAtual < 4) {
+      <!-- M-02: aria-disabled em vez de [disabled] para não bloquear foco/Enter via teclado (WCAG 2.1.1) -->
+      <button type="button" class="btn btn-primary" (click)="avancarPasso()"
+        [attr.aria-disabled]="!cadastroForm.get(getGroupName(passoAtual))?.valid"
+        [attr.aria-describedby]="!cadastroForm.get(getGroupName(passoAtual))?.valid ? 'wizard-validacao-hint' : null"
         [attr.aria-label]="'Avançar para etapa ' + (passoAtual + 1)">
         Avançar →
-        </button>
+      </button>
+      <!-- Anúncio ao leitor de tela quando o passo tem erros -->
+      <span id="wizard-validacao-hint" class="sr-only" aria-live="polite" role="status">
+        @if (!cadastroForm.get(getGroupName(passoAtual))?.valid) {
+          Preencha todos os campos obrigatórios desta etapa para continuar.
         }
+      </span>
+      }
 
-        @if (passoAtual === 4) {
-        <button type="submit" class="btn btn-primary" [disabled]="cadastroForm.invalid || isSalvando"
-          aria-label="Salvar cadastro do aluno">
-          @if (isSalvando) { <span class="loading-spinner" aria-hidden="true"
-            style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> Salvando... }
-          @else { Salvar Cadastro }
-        </button>
-        }
+      @if (passoAtual === 4) {
+      <button type="submit" class="btn btn-primary" [disabled]="cadastroForm.invalid || isSalvando"
+        aria-label="Salvar cadastro do aluno">
+        @if (isSalvando) { <span class="loading-spinner" aria-hidden="true"
+          style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> Salvando... }
+        @else { Salvar Cadastro }
+      </button>
+      }
     </footer>
 
   </form>
