@@ -8,10 +8,11 @@ import { ActivatedRoute } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { environment } from '../../../../environments/environment';
 import { ComunicadosLista } from '../comunicados/comunicados-lista/comunicados-lista';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-conteudo-site',
-  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista],
+  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista, QuillModule],
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })
@@ -32,6 +33,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
   formSobreTimeline!: FormGroup;
   formSobreEquipe!: FormGroup;
   formSobreCta!: FormGroup;
+
+  // ── Forms de Contato / Dados Globais ──────────────────────
+  formContato!: FormGroup;
 
   // ── Estado ────────────────────────────────────────────────
   carregando = false;
@@ -145,6 +149,18 @@ export class ConteudoSite implements OnInit, OnDestroy {
     this.formSobreCta = this.fb.group({
       titulo: [''],
       descricao: [''],
+    });
+
+    this.formContato = this.fb.group({
+      telefoneCentral: [''],
+      emailOficial: [''],
+      enderecoCompleto: [''],
+      heroDescricaoContato: [''],
+      instagram: [''],
+      facebook: [''],
+      youtube: [''],
+      linkedin: [''],
+      footerDireitos: [''],
     });
   }
 
@@ -310,6 +326,10 @@ export class ConteudoSite implements OnInit, OnDestroy {
       // Sobre — CTA
       const sobreCta = secoes['sobre_cta'];
       if (sobreCta && Object.keys(sobreCta).length > 0) this.formSobreCta.patchValue(sobreCta);
+
+      // Contato e Dados Globais
+      const contatoConfig = secoes['contato_global'];
+      if (contatoConfig && Object.keys(contatoConfig).length > 0) this.formContato.patchValue(contatoConfig);
     });
   }
 
@@ -344,6 +364,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
   salvarSobreHero() { this.salvarSecaoValorUnico('sobre_hero', this.formSobreHero.value); }
   salvarSobreHistoria() { this.salvarSecaoValorUnico('sobre_historia', this.formSobreHistoria.value); }
   salvarSobreCta() { this.salvarSecaoValorUnico('sobre_cta', this.formSobreCta.value); }
+
+  // Contato / Global
+  salvarContato() { this.salvarSecaoValorUnico('contato_global', this.formContato.value); }
 
   salvarSobreTimeline() {
     if (this.formSobreTimeline.invalid) return;
@@ -451,7 +474,8 @@ export class ConteudoSite implements OnInit, OnDestroy {
       'sobre_cta': 'Chamada para Ação (Sobre)',
       'missao': 'Missão & Valores',
       'oficinas': 'Oficinas',
-      'depoimentos': 'Depoimentos'
+      'depoimentos': 'Depoimentos',
+      'contato_global': 'Contato e Redes Sociais'
     };
     return mapa[nome] || nome.toUpperCase();
   }

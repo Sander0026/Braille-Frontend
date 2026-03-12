@@ -184,7 +184,7 @@ main {
 .site-footer {
     background: $gray-900;
     border-top: 3px solid $primary;
-    padding: 2rem 1.5rem;
+    padding: 3rem 1.5rem 2rem;
 }
 
 .footer-inner {
@@ -193,33 +193,73 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 2rem;
     text-align: center;
+}
+
+.footer-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .footer-brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: $white;
 
     .logo-icon {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
         color: $primary;
     }
 }
 
 .footer-tagline {
-    font-size: 0.825rem;
-    color: color.change($white, $alpha: 0.6);
+    font-size: 0.9rem;
+    color: color.change($white, $alpha: 0.7);
     margin: 0;
 }
 
+.footer-social {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    a {
+        text-decoration: none;
+        color: $primary;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: color $transition, transform $transition;
+
+        &:hover {
+            color: $white;
+            transform: translateY(-2px);
+        }
+
+        &:focus-visible {
+            outline: 2px dashed $primary;
+            outline-offset: 4px;
+        }
+    }
+}
+
+.footer-bottom {
+    margin-top: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid color.change($white, $alpha: 0.1);
+    width: 100%;
+}
+
 .footer-copy {
-    font-size: 0.75rem;
-    color: color.change($white, $alpha: 0.4);
+    font-size: 0.8rem;
+    color: color.change($white, $alpha: 0.5);
     margin: 0;
 }
 

@@ -3,7 +3,7 @@
     <div class="page-hero-inner">
         <p class="page-eyebrow">{{ hero.eyebrow }}</p>
         <h1 id="sobre-titulo" class="page-hero-title">{{ hero.titulo }}</h1>
-        <p class="page-hero-desc" style="white-space: pre-line;">{{ hero.descricao }}</p>
+        <div class="page-hero-desc" [innerHTML]="hero.descricao | safeHtml"></div>
     </div>
 </section>
 
@@ -13,12 +13,12 @@
         <div class="content-grid">
             <div class="content-text">
                 <h2 id="historia-titulo" class="content-title">{{ historia.titulo }}</h2>
-                <p>{{ historia.paragrafo1 }}</p>
+                <div [innerHTML]="historia.paragrafo1 | safeHtml"></div>
                 @if (historia.paragrafo2) {
-                <p>{{ historia.paragrafo2 }}</p>
+                <div [innerHTML]="historia.paragrafo2 | safeHtml"></div>
                 }
                 @if (historia.paragrafo3) {
-                <p>{{ historia.paragrafo3 }}</p>
+                <div [innerHTML]="historia.paragrafo3 | safeHtml"></div>
                 }
             </div>
 
@@ -28,7 +28,7 @@
                     <div class="timeline-year">{{ item.ano }}</div>
                     <div class="timeline-content">
                         <strong>{{ item.titulo }}</strong>
-                        <p>{{ item.descricao }}</p>
+                        <div [innerHTML]="item.descricao | safeHtml"></div>
                     </div>
                 </div>
                 }
@@ -50,7 +50,7 @@
             <div class="equipe-card" role="listitem">
                 <div class="equipe-avatar" aria-hidden="true">{{ membro.emoji }}</div>
                 <h3>{{ membro.cargo }}</h3>
-                <p>{{ membro.descricao }}</p>
+                <div [innerHTML]="membro.descricao | safeHtml"></div>
             </div>
             }
         </div>
@@ -61,7 +61,7 @@
 <section class="sobre-cta" aria-labelledby="cta-sobre-titulo">
     <div class="content-inner sobre-cta-inner">
         <h2 id="cta-sobre-titulo">{{ cta.titulo }}</h2>
-        <p>{{ cta.descricao }}</p>
+        <div [innerHTML]="cta.descricao | safeHtml"></div>
         <a routerLink="/contato" class="btn-cta">Fale Conosco →</a>
     </div>
 </section>

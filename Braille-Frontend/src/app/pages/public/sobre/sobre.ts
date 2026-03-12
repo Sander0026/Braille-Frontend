@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { filter, take } from 'rxjs/operators';
+import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 
 interface TimelineItem { ano: string; titulo: string; descricao: string; }
 interface EquipeMembro { emoji: string; cargo: string; descricao: string; }
@@ -41,7 +42,7 @@ const DEFAULTS = {
 @Component({
     selector: 'app-sobre',
     standalone: true,
-    imports: [CommonModule, RouterLink],
+    imports: [CommonModule, RouterLink, SafeHtmlPipe],
     templateUrl: './sobre.html',
     styleUrl: './sobre.scss',
 })

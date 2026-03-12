@@ -6,11 +6,12 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-comunicados-lista',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, QuillModule],
   templateUrl: './comunicados-lista.html',
   styleUrl: './comunicados-lista.scss'
 })

@@ -1,4 +1,4 @@
-﻿<div class="page-header">
+<div class="page-header">
     <div>
         <h1 class="page-title">Gestão de Conteúdo</h1>
         <p class="page-subtitle">Gerencie as informações e visual exibidos no portal público.</p>
@@ -43,6 +43,9 @@
             </button>
             <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
                 <span class="material-symbols-rounded">newspaper</span> Noticias
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'contato'" (click)="setAba('contato')">
+                <span class="material-symbols-rounded">contact_page</span> Global (Contato/Redes)
             </button>
         </nav>
     </div>
@@ -149,8 +152,8 @@
 
                 <div class="form-group">
                     <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
-                    <textarea id="descricao" class="form-textarea" formControlName="descricao" rows="3"
-                        placeholder="Insira a descrição..."></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Insira a descrição..."></quill-editor>
                 </div>
             </div>
 
@@ -232,14 +235,12 @@
 
                 <div class="form-group">
                     <label class="form-label" for="descricaoLinha1">Parágrafo de Introdução</label>
-                    <textarea id="descricaoLinha1" class="form-textarea" formControlName="descricaoLinha1"
-                        rows="3"></textarea>
+                    <quill-editor formControlName="descricaoLinha1" [styles]="{height: '150px'}"></quill-editor>
                 </div>
 
                 <div class="form-group mb-0">
                     <label class="form-label" for="descricaoLinha2">Parágrafo de Complemento (Opcional)</label>
-                    <textarea id="descricaoLinha2" class="form-textarea" formControlName="descricaoLinha2"
-                        rows="2"></textarea>
+                    <quill-editor formControlName="descricaoLinha2" [styles]="{height: '150px'}"></quill-editor>
                 </div>
             </div>
 
@@ -337,8 +338,8 @@
                         <input type="text" class="form-input flex-3" formControlName="titulo"
                             placeholder="Título da Oficina" aria-label="Título da oficina">
                     </div>
-                    <textarea class="form-textarea mt-2" formControlName="descricao" rows="2"
-                        placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '100px'}"
+                        placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></quill-editor>
                 </div>
                 }
             </div>
@@ -378,8 +379,8 @@
                         </button>
                     </div>
 
-                    <textarea class="form-textarea mb-2" formControlName="texto" rows="2"
-                        placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></textarea>
+                    <quill-editor formControlName="texto" [styles]="{height: '100px', marginBottom: '1rem'}"
+                        placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></quill-editor>
                     <div class="flex-row">
                         <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo"
                             aria-label="Nome do depoente">
@@ -428,8 +429,8 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="sobreDescricao">Descrição</label>
-                    <textarea id="sobreDescricao" formControlName="descricao" class="form-input" rows="3"
-                        placeholder="Breve descrição exibida abaixo do título…"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Breve descrição exibida abaixo do título…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -454,18 +455,18 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo1">Parágrafo 1</label>
-                    <textarea id="historiaParagrafo1" formControlName="paragrafo1" class="form-input" rows="4"
-                        placeholder="Primeiro parágrafo da história…"></textarea>
+                    <quill-editor formControlName="paragrafo1" [styles]="{height: '200px'}"
+                        placeholder="Primeiro parágrafo da história…"></quill-editor>
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo2">Parágrafo 2</label>
-                    <textarea id="historiaParagrafo2" formControlName="paragrafo2" class="form-input" rows="4"
-                        placeholder="Segundo parágrafo da história…"></textarea>
+                    <quill-editor formControlName="paragrafo2" [styles]="{height: '200px'}"
+                        placeholder="Segundo parágrafo da história…"></quill-editor>
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo3">Parágrafo 3 (opcional)</label>
-                    <textarea id="historiaParagrafo3" formControlName="paragrafo3" class="form-input" rows="4"
-                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></textarea>
+                    <quill-editor formControlName="paragrafo3" [styles]="{height: '200px'}"
+                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -586,8 +587,8 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="sobreCtaDesc">Descrição</label>
-                    <textarea id="sobreCtaDesc" formControlName="descricao" class="form-input" rows="2"
-                        placeholder="Ex: Entre em contato com nossa secretaria…"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Ex: Entre em contato com nossa secretaria…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -601,7 +602,6 @@
     </div>
     }
 
-    <!-- ABA: NOTÍCIAS / COMUNICADOS -->
     @if (abaAtiva === 'comunicados') {
     <div class="tab-pane active" id="pane-comunicados" role="tabpanel">
         <div class="form-header">
@@ -609,6 +609,89 @@
             <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
         </div>
         <app-comunicados-lista></app-comunicados-lista>
+    </div>
+    }
+
+    <!-- ABA: CONTATO E DADOS GLOBAIS -->
+    @if (abaAtiva === 'contato') {
+    <div class="tab-pane active" id="pane-contato" role="tabpanel">
+        <form [formGroup]="formContato" (ngSubmit)="salvarContato()" class="cms-form">
+            <div class="form-header">
+                <h2>Contato e Redes Sociais</h2>
+                <p>Informações globais exibidas no Rodapé e na Página de Fale Conosco (<a href="/contato" target="_blank">/contato</a>).</p>
+            </div>
+
+            <div class="form-section">
+                <h3>Dados de Contato Principais</h3>
+                <div class="form-row form-row-2">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="telefoneCentral">Telefone Oficial</label>
+                        <input type="text" id="telefoneCentral" class="form-input" formControlName="telefoneCentral"
+                            placeholder="Ex: (00) 0000-0000">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="emailOficial">E-mail Oficial</label>
+                        <input type="email" id="emailOficial" class="form-input" formControlName="emailOficial"
+                            placeholder="Ex: contato@instituto.org.br">
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="form-label" for="enderecoCompleto">Endereço Completo</label>
+                    <input type="text" id="enderecoCompleto" class="form-input" formControlName="enderecoCompleto"
+                        placeholder="Ex: Rua Exemplo, 120 - Bairro, Cidade - SP, 00000-000">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Redes Sociais</h3>
+                <p class="form-hint mb-3">Se o campo for preenchido, o ícone respectivo aparecerá no rodapé do site.</p>
+                <div class="form-row form-row-2">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="instagram">Link Instagram</label>
+                        <input type="url" id="instagram" class="form-input" formControlName="instagram"
+                            placeholder="https://instagram.com/instituto">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="facebook">Link Facebook</label>
+                        <input type="url" id="facebook" class="form-input" formControlName="facebook"
+                            placeholder="https://facebook.com/instituto">
+                    </div>
+                    <div class="form-group mb-0 mt-3">
+                        <label class="form-label" for="youtube">Link YouTube</label>
+                        <input type="url" id="youtube" class="form-input" formControlName="youtube"
+                            placeholder="https://youtube.com/c/instituto">
+                    </div>
+                    <div class="form-group mb-0 mt-3">
+                        <label class="form-label" for="linkedin">Link LinkedIn</label>
+                        <input type="url" id="linkedin" class="form-input" formControlName="linkedin"
+                            placeholder="https://linkedin.com/company/instituto">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Opções da Página de Contato / Rodapé</h3>
+                
+                <div class="form-group">
+                    <label class="form-label" for="heroDescricaoContato">Texto Descritivo Principal (Página Fale Conosco)</label>
+                    <quill-editor id="heroDescricaoContato" formControlName="heroDescricaoContato" [styles]="{height: '100px'}"
+                        placeholder="Ex: Estamos abertos para voluntariado e parcerias. Envie uma mensagem..."></quill-editor>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label" for="footerDireitos">Texto de Copyright (Rodapé)</label>
+                    <input type="text" id="footerDireitos" class="form-input" formControlName="footerDireitos"
+                        placeholder="Ex: © 2026 Instituto Luiz Braille - CNPJ: 00.000.000/0001-00">
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formContato.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Contato e Redes }
+                </button>
+            </div>
+        </form>
     </div>
     }
 
