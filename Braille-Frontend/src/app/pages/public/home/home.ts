@@ -5,11 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
+import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, CommonModule, CloudinaryPipe],
+  imports: [RouterLink, CommonModule, CloudinaryPipe, SafeHtmlPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })

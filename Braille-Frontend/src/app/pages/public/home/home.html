@@ -9,14 +9,14 @@
                 {{ heroConfig['tituloLinha1'] || 'Mais do que inclusão' }}<br>
                 <span class="hero-highlight">{{ heroConfig['tituloDestaque'] || 'transformação' }}</span>
             </h1>
-            <p class="hero-desc">
+            <div class="hero-desc">
                 @if (heroConfig['descricao']) {
-                {{ heroConfig['descricao'] }}
+                <div [innerHTML]="heroConfig['descricao'] | safeHtml"></div>
                 } @else {
                 Há mais de 30 anos o <strong>Instituto Luiz Braille</strong> oferece educação, autonomia e oportunidades
                 para pessoas com deficiência visual em nossa comunidade.
                 }
-            </p>
+            </div>
             <div class="hero-actions">
                 <a routerLink="/contato" class="btn-hero-primary">
                     {{ heroConfig['btnPrimario'] || 'Fale Conosco' }}
@@ -61,11 +61,7 @@
                 <span class="material-symbols-rounded">flag</span>
             </div>
             <h2 class="mvv-titulo">Missão</h2>
-            <p class="mvv-desc">
-                {{ missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos
-                dedicada à reabilitação, educação e inclusão social de pessoas com deficiência visual. Oferecemos
-                serviços gratuitos de qualidade e compromisso com a dignidade.' }}
-            </p>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos dedicada à reabilitação, educação e inclusão social de pessoas com deficiência visual. Oferecemos serviços gratuitos de qualidade e compromisso com a dignidade.') | safeHtml"></div>
         </article>
 
         <!-- VISÃO -->
@@ -74,11 +70,7 @@
                 <span class="material-symbols-rounded">wb_sunny</span>
             </div>
             <h2 class="mvv-titulo">Visão</h2>
-            <p class="mvv-desc">
-                {{ missaoConfig['descricaoLinha2'] || 'Acreditamos que toda pessoa, independentemente de sua condição
-                visual, tem o direito a uma vida plena, produtiva e com autonomia. Nosso trabalho é tornar esse direito
-                real e presente no dia-a-dia de todos.' }}
-            </p>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha2'] || 'Acreditamos que toda pessoa, independentemente de sua condição visual, tem o direito a uma vida plena, produtiva e com autonomia. Nosso trabalho é tornar esse direito real e presente no dia-a-dia de todos.') | safeHtml"></div>
         </article>
 
         <!-- VALORES -->
@@ -119,7 +111,7 @@
                     <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
                 </div>
                 <h3 class="oficina-titulo">{{ of.titulo }}</h3>
-                <p class="oficina-desc">{{ of.descricao }}</p>
+                <div class="oficina-desc" [innerHTML]="of.descricao | safeHtml"></div>
             </article>
             } @empty {
             <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;">
@@ -153,7 +145,7 @@
             @for (dep of depoimentos; track dep.nome) {
             <blockquote class="dep-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
-                <p class="dep-texto">"{{ dep.texto }}"</p>
+                <div class="dep-texto" [innerHTML]="dep.texto | safeHtml"></div>
                 <footer class="dep-autor">
                     <div class="dep-avatar" aria-hidden="true">{{ dep.nome.charAt(0) }}</div>
                     <div>
