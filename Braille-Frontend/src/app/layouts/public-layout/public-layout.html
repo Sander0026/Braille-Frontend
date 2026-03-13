@@ -4,7 +4,7 @@
   <header class="site-header" role="banner">
     <div class="header-inner">
       <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
-        <img src="favicon.ico" alt="Logotipo do Instituto Luiz Braille" class="logo-img" />
+        <img src="favicon.ico" alt="" class="logo-img" role="presentation" />
       </a>
 
       <nav class="main-nav" [class.is-open]="isMobileMenuOpen" role="navigation" aria-label="Navegação principal">
@@ -14,8 +14,7 @@
         <a routerLink="/noticias" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Notícias</a>
         <a routerLink="/contato" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Contato</a>
         <!-- CTA botão no menu apenas no mobile para facilitar acesso -->
-        <a routerLink="/contato" class="btn-inscricao mobile-only-cta" (click)="closeMobileMenu()"
-          aria-label="Entre em contato conosco">
+        <a routerLink="/contato" class="btn-inscricao mobile-only-cta" (click)="closeMobileMenu()">
           Fale Conosco
         </a>
       </nav>
@@ -34,7 +33,7 @@
         </button>
       </nav>
 
-      <a routerLink="/contato" class="btn-inscricao desktop-only-cta" aria-label="Entre em contato conosco">
+      <a routerLink="/contato" class="btn-inscricao desktop-only-cta">
         Fale Conosco
       </a>
 

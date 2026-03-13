@@ -7,18 +7,24 @@
     </div>
 </header>
 
-<div id="main-content" class="container">
+<div class="container">
 
     <!-- ================= FERRAMENTAS (Busca e Filtros) ================= -->
     <section class="toolbar" aria-label="Ferramentas de busca">
         <div class="search-box">
-            <label for="busca-noticias" class="sr-only">Buscar por título</label>
+            <label for="busca-noticias" class="search-label">Buscar notícias</label>
             <div class="search-input-wrapper">
                 <span class="material-symbols-rounded search-icon" aria-hidden="true">search</span>
-                <input id="busca-noticias" type="search" placeholder="O que você está procurando?" [(ngModel)]="busca"
-                    (keyup.enter)="buscar()" aria-label="Digite o título da notícia e aperte Enter" />
-                <button type="button" class="btn-buscar" (click)="buscar()" aria-label="Buscar">Buscar</button>
+                <input
+                    id="busca-noticias"
+                    type="search"
+                    placeholder="O que você está procurando?"
+                    [(ngModel)]="busca"
+                    (keyup.enter)="buscar()"
+                    aria-describedby="busca-hint" />
+                <button type="button" class="btn-buscar" (click)="buscar()">Buscar</button>
             </div>
+            <span id="busca-hint" class="sr-only">Pressione Enter ou clique em Buscar para pesquisar</span>
         </div>
 
         <!-- Chips de Categorias -->
@@ -74,7 +80,7 @@
                 <a [routerLink]="['/noticias', item.id]" class="card-cover-link" tabindex="-1" aria-hidden="true">
                     <figure class="card-cover">
                         @if (item.imagemCapa) {
-                        <img [src]="item.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa para: ' + item.titulo"
+                        <img [src]="item.imagemCapa | cloudinary" [alt]="'Ilustração para: ' + item.titulo"
                             loading="lazy" />
                         } @else {
                         <div class="cover-placeholder" aria-hidden="true">

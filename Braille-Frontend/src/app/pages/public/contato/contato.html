@@ -61,7 +61,7 @@
 
             <!-- Estado: sucesso -->
             @if (enviado) {
-            <div class="success-state" role="region" aria-label="Mensagem enviada com sucesso">
+            <section class="success-state" aria-label="Mensagem enviada com sucesso" aria-live="polite">
                 <div class="success-icon" aria-hidden="true">✅</div>
                 <h2>Mensagem enviada!</h2>
                 <p>
@@ -71,7 +71,7 @@
                 <button class="btn-primary" (click)="novoContato()">
                     Enviar outra mensagem
                 </button>
-            </div>
+            </section>
 
             } @else {
 
@@ -107,7 +107,9 @@
                         <input type="email" id="cEmail" name="email" [(ngModel)]="form.email"
                             (blur)="marcarTocado('email')" class="form-input" [class.invalid]="isCampoInvalido('email')"
                             placeholder="seu@email.com" autocomplete="email"
-                            [attr.aria-invalid]="isCampoInvalido('email')" aria-describedby="contato-hint" />
+                            aria-required="true"
+                            aria-describedby="contato-hint"
+                            [attr.aria-invalid]="isCampoInvalido('email')" />
                     </div>
 
                     <div class="form-group">
@@ -115,6 +117,8 @@
                         <input type="tel" id="cTelefone" name="telefone" [value]="form.telefone"
                             (input)="aplicarMascaraTelefone($event)" (blur)="marcarTocado('telefone')"
                             class="form-input" placeholder="(XX) XXXXX-XXXX" autocomplete="tel" inputmode="numeric"
+                            aria-required="true"
+                            aria-describedby="contato-hint"
                             maxlength="15" />
                     </div>
                 </div>
@@ -160,9 +164,8 @@
                 </div>
 
                 <!-- Submit -->
-                <button type="submit" class="btn-primary btn-full" [disabled]="enviando" [attr.aria-busy]="enviando"
-                    aria-label="Enviar mensagem para o instituto">
-                    @if (enviando) { ⏳ Enviando... }
+                <button type="submit" class="btn-primary btn-full" [disabled]="enviando" [attr.aria-busy]="enviando">
+                    @if (enviando) { <span aria-live="polite" aria-atomic="true">⏳ Enviando...</span> }
                     @else { 📨 Enviar Mensagem }
                 </button>
 
