@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
@@ -28,10 +28,10 @@ const DEFAULTS = {
         { ano: 'Hoje', titulo: '300+ alunos por ano', descricao: 'Referência regional em educação inclusiva e autonomia visual.' },
     ] as TimelineItem[],
     equipe: [
-        { emoji: '👩‍⚕️', cargo: 'Coordenação Pedagógica', descricao: 'Planejamento e acompanhamento de todos os programas educacionais.' },
-        { emoji: '👩‍🏫', cargo: 'Professores Especialistas', descricao: 'Professores com formação em educação especial e reabilitação visual.' },
-        { emoji: '🤝', cargo: 'Assistência Social', descricao: 'Acompanhamento socioeconômico e encaminhamento para políticas públicas.' },
-        { emoji: '🖥️', cargo: 'Tecnologia Assistiva', descricao: 'Equipe de suporte para leitores de tela e recursos digitais acessíveis.' },
+        { emoji: 'manage_accounts', cargo: 'Coordenação Pedagógica', descricao: 'Planejamento e acompanhamento de todos os programas educacionais.' },
+        { emoji: 'school', cargo: 'Professores Especialistas', descricao: 'Professores com formação em educação especial e reabilitação visual.' },
+        { emoji: 'people', cargo: 'Assistência Social', descricao: 'Acompanhamento socioeconômico e encaminhamento para políticas públicas.' },
+        { emoji: 'devices', cargo: 'Tecnologia Assistiva', descricao: 'Equipe de suporte para leitores de tela e recursos digitais acessíveis.' },
     ] as EquipeMembro[],
     cta: {
         titulo: 'Quer saber mais ou precisa de atendimento?',
@@ -46,14 +46,23 @@ const DEFAULTS = {
     templateUrl: './sobre.html',
     styleUrl: './sobre.scss',
 })
-export class Sobre implements OnInit {
+export class Sobre implements OnInit, AfterViewInit {
     hero = { ...DEFAULTS.hero };
     historia = { ...DEFAULTS.historia };
     timeline: TimelineItem[] = [...DEFAULTS.timeline];
     equipe: EquipeMembro[] = [...DEFAULTS.equipe];
     cta = { ...DEFAULTS.cta };
 
-    constructor(private siteConfig: SiteConfigService) { }
+    constructor(private siteConfig: SiteConfigService, private el: ElementRef) { }
+
+    ngAfterViewInit(): void {
+        const observer = new IntersectionObserver(
+            (entries) => entries.forEach(e => e.target.classList.toggle('is-visible', e.isIntersecting)),
+            { threshold: 0.12 }
+        );
+        this.el.nativeElement.querySelectorAll('.animate-on-scroll')
+            .forEach((el: Element) => observer.observe(el));
+    }
 
     ngOnInit(): void {
         this.siteConfig.secoes$.pipe(

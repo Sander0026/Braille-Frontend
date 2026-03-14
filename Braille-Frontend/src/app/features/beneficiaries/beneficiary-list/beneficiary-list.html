@@ -291,11 +291,12 @@
         </thead>
         <tbody>
             @for (aluno of alunos; track aluno.id) {
-            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr"
+                [attr.aria-label]="'Linha: ' + aluno.nomeCompleto + '. Pressione Enter para editar.'">
                 <td>
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>
-                <td class="hide-on-mobile">{{ (aluno.cpfRg | cpfRg) || '—' }}</td>
+                <td class="hide-on-mobile">{{ (aluno.cpf | cpfRg) || (aluno.rg | cpfRg) || '—' }}</td>
                 <td class="hide-on-tablet">{{ aluno.dataNascimento | dataBraille }}</td>
                 <td class="hide-on-mobile">
                     @if (aluno.tipoDeficiencia) {
@@ -472,7 +473,7 @@
                 <!-- Informações Pessoais -->
                 <div class="profile-section">
                     <h4>Informações Pessoais</h4>
-                    <p><strong>CPF/RG:</strong> {{ (alunoSelecionado.cpfRg | cpfRg) || 'N/I' }}</p>
+                    <p><strong>CPF:</strong> {{ (alunoSelecionado.cpf | cpfRg) || 'N/I' }} &nbsp;|&nbsp; <strong>RG:</strong> {{ (alunoSelecionado.rg | cpfRg) || 'N/I' }}</p>
                     <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
                     <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
                     <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
@@ -775,10 +776,12 @@
 
 <!-- ══════════ MODAL DE EDIÇÃO ══════════ -->
 @if (modalEdicaoAberto && alunoEmEdicao) {
-<div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="fecharModalEdicao()">
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="fecharModalEdicao()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal modal--large" (click)="$event.stopPropagation()" style="max-width: 780px; width: 95%;"
-        tabindex="0">
+        tabindex="-1">
+
 
         <div class="modal-header">
             <h2 style="color: #2563eb;">Editar Aluno</h2>
@@ -801,9 +804,14 @@
                             placeholder="Nome completo" />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="edit-cpf">CPF / RG</label>
-                        <input id="edit-cpf" type="text" class="form-input" formControlName="cpfRg"
-                            placeholder="CPF ou RG" />
+                        <label class="form-label" for="edit-cpf">CPF</label>
+                        <input id="edit-cpf" type="text" class="form-input" formControlName="cpf"
+                            placeholder="000.000.000-00" mask="000.000.000-00" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-rg">RG</label>
+                        <input id="edit-rg" type="text" class="form-input" formControlName="rg"
+                            placeholder="0.000.000" />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-nascimento">Data de Nascimento</label>
@@ -902,7 +910,7 @@
                     <div class="form-group" style="grid-column:1 / -1;">
                         <label class="form-label" for="edit-comorbidades">Outras Comorbidades</label>
                         <textarea id="edit-comorbidades" class="form-input" formControlName="outrasComorbidades"
-                            rows="2"></textarea>
+                            rows="2" tabEscape></textarea>
                     </div>
                     <div class="form-group" style="display:flex; align-items:center; gap:.5rem;">
                         <input id="edit-acomp" type="checkbox" formControlName="precisaAcompanhante" />

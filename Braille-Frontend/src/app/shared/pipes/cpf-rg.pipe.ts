@@ -10,18 +10,12 @@ export class CpfRgPipe implements PipeTransform {
     let doc = String(value).replace(/\D/g, '');
     if (!doc) return '—';
 
-    if (doc.length <= 9) {
-      if (doc.length === 9) {
-        return doc.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
-      } else {
-        return doc.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-      }
+    if (doc.length === 11) {
+      // CPF: 000.000.000-00
+      return doc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
     } else {
-      let val = doc;
-      val = val.replace(/(\d{3})(\d)/, '$1.$2');
-      val = val.replace(/(\d{3})(\d)/, '$1.$2');
-      val = val.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-      return val;
+      // RG: 1.111.111 ou 11.111.111 (apenas pontuação de milhares, sem traço)
+      return doc.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
   }
 }
