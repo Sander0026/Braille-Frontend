@@ -1,6 +1,6 @@
 <!-- ══════════ SOBRE — HERO ══════════ -->
 <section class="page-hero" aria-labelledby="sobre-titulo">
-    <div class="page-hero-inner">
+    <div class="page-hero-inner animate-on-scroll">
         <p class="page-eyebrow">{{ hero.eyebrow }}</p>
         <h1 id="sobre-titulo" class="page-hero-title">{{ hero.titulo }}</h1>
         <p class="page-hero-desc" style="white-space: pre-line;">{{ hero.descricao }}</p>
@@ -11,7 +11,11 @@
 <section class="content-section" aria-labelledby="historia-titulo">
     <div class="content-inner">
         <div class="content-grid">
-            <div class="content-text">
+            <div class="content-text animate-on-scroll">
+                <div class="section-label" aria-hidden="true">
+                    <span class="material-symbols-rounded">history</span>
+                    Nossa Trajetória
+                </div>
                 <h2 id="historia-titulo" class="content-title">{{ historia.titulo }}</h2>
                 <p>{{ historia.paragrafo1 }}</p>
                 @if (historia.paragrafo2) {
@@ -22,7 +26,7 @@
                 }
             </div>
 
-            <div class="timeline" role="list" aria-label="Linha do tempo do instituto">
+            <div class="timeline animate-on-scroll delay-100" role="list" aria-label="Linha do tempo do instituto">
                 @for (item of timeline; track item.ano) {
                 <div class="timeline-item" role="listitem">
                     <div class="timeline-year">{{ item.ano }}</div>
@@ -37,18 +41,32 @@
     </div>
 </section>
 
+<!-- ══════════ SEPARADOR ══════════ -->
+<div class="wave-sep" aria-hidden="true">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,0 C360,80 1080,80 1440,0 L1440,80 L0,80 Z" fill="#ffffff" />
+    </svg>
+</div>
+
 <!-- ══════════ EQUIPE ══════════ -->
 <section class="equipe-section" aria-labelledby="equipe-titulo">
     <div class="content-inner">
-        <h2 id="equipe-titulo" class="content-title text-center">Nossa Equipe</h2>
-        <p class="equipe-desc">
-            Profissionais qualificados e apaixonados pela causa da inclusão visual.
-        </p>
+        <div class="section-header animate-on-scroll">
+            <h2 id="equipe-titulo" class="section-title">Nossa Equipe</h2>
+            <p class="section-subtitle">
+                Profissionais qualificados e apaixonados pela causa da inclusão visual.
+            </p>
+        </div>
 
         <div class="equipe-grid" role="list" aria-label="Equipe do instituto">
             @for (membro of equipe; track membro.cargo) {
-            <div class="equipe-card" role="listitem">
-                <div class="equipe-avatar" aria-hidden="true">{{ membro.emoji }}</div>
+            <div class="equipe-card animate-on-scroll" role="listitem"
+                [class.delay-100]="$index % 4 === 1"
+                [class.delay-200]="$index % 4 === 2"
+                [class.delay-300]="$index % 4 === 3">
+                <div class="equipe-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">{{ membro.emoji }}</span>
+                </div>
                 <h3>{{ membro.cargo }}</h3>
                 <p>{{ membro.descricao }}</p>
             </div>
@@ -59,9 +77,13 @@
 
 <!-- ══════════ CTA ══════════ -->
 <section class="sobre-cta" aria-labelledby="cta-sobre-titulo">
-    <div class="content-inner sobre-cta-inner">
+    <div class="content-inner sobre-cta-inner animate-on-scroll">
+        <span class="material-symbols-rounded cta-icon" aria-hidden="true">contact_support</span>
         <h2 id="cta-sobre-titulo">{{ cta.titulo }}</h2>
         <p>{{ cta.descricao }}</p>
-        <a routerLink="/contato" class="btn-cta">Fale Conosco →</a>
+        <a routerLink="/contato" class="btn-cta">
+            Fale Conosco
+            <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
+        </a>
     </div>
 </section>
