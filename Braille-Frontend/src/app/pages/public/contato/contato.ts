@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 
 interface ContatoPayload {
     nome: string;
@@ -17,7 +18,7 @@ interface ContatoPayload {
 @Component({
     selector: 'app-contato',
     standalone: true,
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, TabEscapeDirective],
     templateUrl: './contato.html',
     styleUrl: './contato.scss',
 })

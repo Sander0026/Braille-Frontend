@@ -13,6 +13,7 @@ import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
+import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 
 @Directive({
   selector: '[appTabelaTrFocavel]',
@@ -32,7 +33,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CpfRgPipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CpfRgPipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective, TabEscapeDirective],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -103,7 +104,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
-      cpfRg: [''],
+      cpf: [''],
+      rg: [''],
       dataNascimento: [''],
       genero: [''],
       email: [''],
@@ -178,10 +180,31 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   @HostListener('keydown', ['$event'])
   onKeydown(event: KeyboardEvent) {
-    if (this.keyManager && !this.modalAberto && !this.modalEdicaoAberto && !this.drawerAberto && !this.modalImportAberto && !this.alunoParaInativar && !this.alunoParaRestaurar && !this.alunoParaExcluirDefinitivo && !this.documentoParaExcluir) {
+    const algumModalAberto = this.modalAberto || this.modalEdicaoAberto || this.drawerAberto ||
+      this.modalImportAberto || !!this.alunoParaInativar || !!this.alunoParaRestaurar ||
+      !!this.alunoParaExcluirDefinitivo || !!this.documentoParaExcluir;
+
+    // C-05: Escape fecha qualquer modal aberto (WCAG 2.1.2)
+    if (event.key === 'Escape') {
+      if (this.modalEdicaoAberto) { this.fecharModalEdicao(); event.preventDefault(); }
+      else if (this.modalAberto) { this.fecharModal(); event.preventDefault(); }
+      else if (this.drawerAberto) { this.drawerAberto = false; this.cdr.markForCheck(); event.preventDefault(); }
+      return;
+    }
+
+    if (this.keyManager && !algumModalAberto) {
       if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
         this.keyManager.onKeydown(event);
         event.preventDefault();
+      }
+      // C-03: Enter na linha focada abre o modal de edição (WCAG 2.1.1)
+      if (event.key === 'Enter') {
+        const activeIndex = this.keyManager.activeItemIndex ?? -1;
+        if (activeIndex >= 0 && activeIndex < this.alunos.length) {
+          const aluno = this.alunos[activeIndex];
+          this.abrirModalEdicao(aluno);
+          event.preventDefault();
+        }
       }
     }
   }
@@ -290,7 +313,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   <div class="grid">
     <div class="secao">
       <h4>Informações Pessoais</h4>
-      <p><strong>CPF / RG:</strong> ${ni(a.cpfRg)}</p>
+      <p><strong>CPF:</strong> ${ni(a.cpf)} / <strong>RG:</strong> ${ni(a.rg)}</p>
       <p><strong>Nascimento:</strong> ${fmtData(a.dataNascimento)}</p>
       <p><strong>Gênero:</strong> ${ni(a.genero)}</p>
       <p><strong>Estado Civil:</strong> ${ni(a.estadoCivil)}</p>
@@ -457,6 +480,16 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   abrirModalEdicao(aluno: Beneficiario): void {
     this.alunoEmEdicao = aluno;
     this.modalEdicaoAberto = true;
+    this.cdr.markForCheck();
+
+    // C-06: Mover foco para o primeiro campo do modal ao abrir (WCAG 2.4.3)
+    setTimeout(() => {
+      const primeiroFocavel = document.querySelector<HTMLElement>(
+        '.modal-edicao input:not([disabled]), .modal-edicao select:not([disabled]), .modal-edicao textarea:not([disabled]), .modal-edicao button'
+      );
+      primeiroFocavel?.focus();
+    }, 80);
+
     // Carrega dados completos do aluno para preencher o form
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
@@ -483,7 +516,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     const rawVal = this.editForm.value;
     const payload = {
       ...rawVal,
-      cpfRg: rawVal.cpfRg ? rawVal.cpfRg.replace(/\D/g, '') : rawVal.cpfRg,
+      cpf: rawVal.cpf ? String(rawVal.cpf).replace(/\D/g, '') : rawVal.cpf,
+      rg: rawVal.rg ? String(rawVal.rg).replace(/\D/g, '') : rawVal.rg,
       telefoneContato: rawVal.telefoneContato ? rawVal.telefoneContato.replace(/\D/g, '') : rawVal.telefoneContato,
       cep: rawVal.cep ? rawVal.cep.replace(/\D/g, '') : rawVal.cep
     };

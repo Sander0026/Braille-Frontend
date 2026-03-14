@@ -244,17 +244,19 @@ $transition: 250ms ease;
     margin-top: 1.5rem;
     transition: background $transition, transform $transition, box-shadow $transition;
 
-    &:hover:not(:disabled) {
+    // Hover e active só quando não está desabilitado
+    &:hover:not([aria-disabled="true"]) {
         background: color.adjust(#f5c800, $lightness: -8%);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
     }
 
-    &:active:not(:disabled) {
+    &:active:not([aria-disabled="true"]) {
         transform: translateY(0);
     }
 
-    &:disabled {
+    // Estado desabilitado via aria (não usa :disabled para não bloquear foco)
+    &[aria-disabled="true"] {
         opacity: .6;
         cursor: not-allowed;
     }

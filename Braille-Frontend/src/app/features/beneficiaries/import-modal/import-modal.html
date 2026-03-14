@@ -85,7 +85,7 @@
                                 @for (err of resultado.erros; track err.linha) {
                                 <tr>
                                     <td>{{ err.linha > 0 ? err.linha : '—' }}</td>
-                                    <td>{{ err.cpfRg || '—' }}</td>
+                                    <td>{{ err.documento || '—' }}</td>
                                     <td>{{ err.motivo }}</td>
                                 </tr>
                                 }

@@ -90,8 +90,14 @@
         </div>
 
         <!-- Botão Submit -->
-        <button type="submit" class="submit-btn" [disabled]="loginForm.invalid || carregando"
-          [attr.aria-busy]="carregando" aria-label="Acessar o painel administrativo">
+        <!-- [disabled] removido: impedia foco via Tab e ativação por Enter (WCAG 2.1.1) -->
+        <!-- aria-disabled comunica o estado sem bloquear a interação por teclado -->
+        <button type="submit" class="submit-btn"
+          [class.is-loading]="carregando"
+          [attr.aria-disabled]="loginForm.invalid || carregando"
+          [attr.aria-busy]="carregando"
+          [attr.aria-describedby]="loginForm.invalid ? 'login-hint-validacao' : null"
+          aria-label="Acessar o painel administrativo">
           @if (carregando) {
           <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -103,6 +109,9 @@
           <span>Acessar plataforma</span>
           }
         </button>
+        <span id="login-hint-validacao" class="sr-only" role="status">
+          Preencha os campos de login e senha para continuar.
+        </span>
 
       </form>
       } @else {

@@ -9,6 +9,7 @@ import { routes } from './app.routes';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
 import { provideServiceWorker } from '@angular/service-worker';
+import { provideTabEscapeForTextareas } from './shared/providers/tab-escape.provider';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
     provideServiceWorker('ngsw-worker.js', {
         enabled: !isDevMode(),
         registrationStrategy: 'registerWhenStable:30000'
-    })
+    }),
+    ...provideTabEscapeForTextareas(),
 ]
 };
