@@ -5,11 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
+import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, CommonModule, CloudinaryPipe],
+  imports: [RouterLink, CommonModule, CloudinaryPipe, SafeHtmlPipe],
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
@@ -17,6 +18,7 @@ export class Home implements OnInit {
 
   oficinas: any[] = [];
   depoimentos: any[] = [];
+  faq: any[] = [];
 
   ultimasNoticias: any[] = [];
   carregandoNoticias = true;
@@ -88,6 +90,14 @@ export class Home implements OnInit {
         }
       },
       error: (e) => console.error('Erro CMS depoimentos', e)
+    });
+    this.siteConfig.getSecao('faq').subscribe({
+      next: (dados) => {
+        if (dados && dados['lista']) {
+          try { this.faq = JSON.parse(dados['lista']); } catch (e) { }
+        }
+      },
+      error: (e) => console.error('Erro CMS faq', e)
     });
   }
 

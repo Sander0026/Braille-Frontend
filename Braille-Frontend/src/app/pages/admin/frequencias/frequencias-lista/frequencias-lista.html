@@ -8,17 +8,17 @@
 </div>
 
 <!-- ── Abas ──────────────────────────────────────────────── -->
-<nav class="tabs-nav" aria-label="Seções de frequência">
-    <button class="tab-btn" [class.active]="abaAtiva === 'chamada'" [attr.aria-selected]="abaAtiva === 'chamada'"
-        (click)="mudarAba('chamada')">
+<nav class="tabs-nav" role="tablist" aria-label="Seções de frequência">
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'chamada'"
+        [attr.aria-selected]="abaAtiva === 'chamada'" (click)="mudarAba('chamada')">
         <span class="material-symbols-rounded" aria-hidden="true">fact_check</span> Fazer Chamada
     </button>
-    <button class="tab-btn" [class.active]="abaAtiva === 'historico'" [attr.aria-selected]="abaAtiva === 'historico'"
-        (click)="mudarAba('historico')">
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'historico'"
+        [attr.aria-selected]="abaAtiva === 'historico'" (click)="mudarAba('historico')">
         <span class="material-symbols-rounded" aria-hidden="true">history</span> Histórico
     </button>
-    <button class="tab-btn" [class.active]="abaAtiva === 'relatorio'" [attr.aria-selected]="abaAtiva === 'relatorio'"
-        (click)="mudarAba('relatorio')">
+    <button role="tab" class="tab-btn" [class.active]="abaAtiva === 'relatorio'"
+        [attr.aria-selected]="abaAtiva === 'relatorio'" (click)="mudarAba('relatorio')">
         <span class="material-symbols-rounded" aria-hidden="true">monitoring</span> Relatório Individual
     </button>
 </nav>
@@ -83,7 +83,7 @@
 <div class="empty-state">
     <span class="material-symbols-rounded empty-icon" aria-hidden="true"
         style="font-size: 3rem; color: #9ca3af;">group_off</span>
-    <h3>Nenhum aluno matriculado</h3>
+    <h2>Nenhum aluno matriculado</h2>
     <p>Esta oficina ainda não tem alunos matriculados.</p>
 </div>
 
@@ -132,7 +132,8 @@
         </thead>
         <tbody>
             @for (aluno of alunosNaChamada; track aluno.alunoId) {
-            <tr [class.linha-presente]="aluno.presente" [class.linha-falta]="!aluno.presente">
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr" [class.linha-presente]="aluno.presente"
+                [class.linha-falta]="!aluno.presente">
                 <td>
                     <div class="aluno-nome">
                         <!-- Icone salvo antes do nome -->
@@ -156,6 +157,10 @@
                 <td class="text-center">
                     <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente"
                         [attr.aria-label]="aluno.presente ? 'Presente' : 'Falta'">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">
+                            {{ aluno.presente ? 'check_circle' : 'cancel' }}
+                        </span>
                         {{ aluno.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </td>
@@ -237,7 +242,7 @@
 <div class="empty-state">
     <span class="material-symbols-rounded empty-icon" aria-hidden="true"
         style="font-size: 3rem; color: #9ca3af;">bar_chart</span>
-    <h3>Nenhum registro encontrado</h3>
+    <h2>Nenhum registro encontrado</h2>
     <p>Ainda não há chamadas registradas para os filtros selecionados.</p>
 </div>
 } @else {
@@ -255,7 +260,7 @@
         </thead>
         <tbody>
             @for (resumo of historico; track resumo.dataAula + resumo.turmaId) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
                 <td>{{ formatarData(resumo.dataAula) }}</td>
                 <td>{{ resumo.turmaNome }}</td>
                 <td class="text-center">{{ resumo.totalAlunos }}</td>
@@ -349,7 +354,7 @@
     </div>
 </div>
 
-<h3 style="font-size: 1.1rem; color: #1f1f1f; margin-bottom: 1rem;">Extrato de Aulas</h3>
+<h2 style="font-size: 1.1rem; color: #1f1f1f; margin-bottom: 1rem;">Extrato de Aulas</h2>
 
 @if (relatorioHistorico.length === 0) {
 <div class="empty-state empty-state--sm">
@@ -366,11 +371,15 @@
         </thead>
         <tbody>
             @for (historico of relatorioHistorico; track historico.id) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
                 <td>{{ formatarData(historico.dataAula) }}</td>
                 <td class="text-center">
                     <span class="badge" [class.badge-success]="historico.presente"
                         [class.badge-danger]="!historico.presente">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">
+                            {{ historico.presente ? 'check_circle' : 'cancel' }}
+                        </span>
                         {{ historico.presente ? 'Presente' : 'Falta' }}
                     </span>
                 </td>
@@ -388,7 +397,7 @@
 <!-- ══════════ MODAL DE DETALHES DE FREQUENCIA ══════════ -->
 @if (modalDetalhesAberto) {
 <div class="modal-overlay" role="dialog" aria-label="Detalhes da chamada da turma" aria-modal="true"
-    (click)="fecharDetalhes()">
+    (click)="fecharDetalhes()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 class="modal-title">

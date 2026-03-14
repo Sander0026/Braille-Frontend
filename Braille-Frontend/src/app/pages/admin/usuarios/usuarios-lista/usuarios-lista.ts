@@ -3,15 +3,32 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
+import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { CpfRgPipe } from '../../../../shared/pipes/cpf-rg.pipe';
+
+@Directive({
+    selector: '[appTabelaTrFocavel]',
+    standalone: true
+})
+export class TabelaTrFocavelDirective implements FocusableOption {
+    @Input() disabled = false;
+
+    constructor(public element: ElementRef<HTMLElement>) { }
+
+    focus(): void {
+        this.element.nativeElement.focus();
+    }
+}
 
 @Component({
     selector: 'app-usuarios-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule],
+    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective, A11yModule, CpfRgPipe],
     templateUrl: './usuarios-lista.html',
     styleUrl: './usuarios-lista.scss'
 })
@@ -34,6 +51,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
     usuarioParaResetar: Usuario | null = null;
     editForm!: FormGroup;
     salvando = false;
+
+    // ── KeyManager ─────────────────────────────────────────────
+    @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
+    public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
     private destroy$ = new Subject<void>();
 
@@ -74,6 +95,23 @@ export class UsuariosLista implements OnInit, OnDestroy {
         ).subscribe(() => { this.paginaAtual = 1; this.carregar(); });
 
         this.carregar();
+    }
+
+    ngAfterViewInit(): void {
+        this.keyManager = new FocusKeyManager(this.linhasTabela).withWrap();
+        this.linhasTabela.changes.subscribe(() => {
+            this.keyManager.withWrap();
+        });
+    }
+
+    @HostListener('keydown', ['$event'])
+    onKeydown(event: KeyboardEvent) {
+        if (this.keyManager && !this.usuarioEmEdicao && !this.usuarioVisualizado && !this.usuarioParaExcluir && !this.usuarioParaExcluirDefinitivo && !this.usuarioParaRestaurar && !this.usuarioParaResetar) {
+            if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+                this.keyManager.onKeydown(event);
+                event.preventDefault();
+            }
+        }
     }
 
     ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -157,9 +195,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Usuário editado com sucesso!');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao editar usuário.');
+                const msg = err.error?.message || 'Erro ao editar usuário.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -183,9 +222,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Usuário inativado com sucesso!');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao inativar usuário.');
+                const msg = err.error?.message || 'Erro ao inativar usuário.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -210,9 +250,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Usuário excluído definitivamente.');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao excluir usuário definitivamente.');
+                const msg = err.error?.message || 'Erro ao excluir usuário definitivamente.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -237,9 +278,10 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Conta de usuário restaurada.');
                 setTimeout(() => this.carregar(), 0);
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
-                this.toast.erro('Erro ao restaurar usuário.');
+                const msg = err.error?.message || 'Erro ao restaurar usuário.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });
@@ -302,10 +344,11 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.toast.sucesso('Senha resetada com sucesso para Ilbes@123');
                 this.cdr.markForCheck();
             },
-            error: () => {
+            error: (err) => {
                 this.salvando = false;
                 this.usuarioParaResetar = null;
-                this.toast.erro('Erro ao resetar senha.');
+                const msg = err.error?.message || 'Erro ao resetar senha.';
+                this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
                 this.cdr.markForCheck();
             }
         });

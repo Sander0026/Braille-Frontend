@@ -1,4 +1,4 @@
-﻿<div class="page-header">
+<div class="page-header">
     <div>
         <h1 class="page-title">Gestão de Conteúdo</h1>
         <p class="page-subtitle">Gerencie as informações e visual exibidos no portal público.</p>
@@ -44,6 +44,12 @@
             <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
                 <span class="material-symbols-rounded">newspaper</span> Noticias
             </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'faq'" (click)="setAba('faq')">
+                <span class="material-symbols-rounded">quiz</span> Perguntas Frequentes
+            </button>
+            <button class="tab-btn" [class.active]="abaAtiva === 'contato'" (click)="setAba('contato')">
+                <span class="material-symbols-rounded">contact_page</span> Global (Contato/Redes)
+            </button>
         </nav>
     </div>
 
@@ -71,7 +77,7 @@
                         <label class="form-label" for="corPrimaria">Cor Primária (HEX)</label>
                         <div class="color-picker-wrap">
                             <input type="color" id="corPrimaria-color" class="form-input-color"
-                                formControlName="corPrimaria">
+                                formControlName="corPrimaria" aria-label="Seletor de cor primária">
                             <input type="text" id="corPrimaria" class="form-input" formControlName="corPrimaria"
                                 placeholder="#f5c800">
                         </div>
@@ -149,8 +155,8 @@
 
                 <div class="form-group">
                     <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
-                    <textarea id="descricao" class="form-textarea" formControlName="descricao" rows="3"
-                        placeholder="Insira a descrição..."></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Insira a descrição..."></quill-editor>
                 </div>
             </div>
 
@@ -175,21 +181,24 @@
                 <div class="form-row form-row-3">
                     <div class="form-group mb-0">
                         <label class="form-label">Estatística 1</label>
-                        <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+">
+                        <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+"
+                            aria-label="Número estatística 1">
                         <input type="text" class="form-input mt-2" formControlName="stat1Desc"
-                            placeholder="Descrição (ex: Vidas impactadas)">
+                            placeholder="Descrição (ex: Vidas impactadas)" aria-label="Descrição estatística 1">
                     </div>
                     <div class="form-group mb-0">
                         <label class="form-label">Estatística 2</label>
-                        <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+">
+                        <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+"
+                            aria-label="Número estatística 2">
                         <input type="text" class="form-input mt-2" formControlName="stat2Desc"
-                            placeholder="Descrição (ex: Profissionais)">
+                            placeholder="Descrição (ex: Profissionais)" aria-label="Descrição estatística 2">
                     </div>
                     <div class="form-group mb-0">
                         <label class="form-label">Estatística 3</label>
-                        <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6">
+                        <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6"
+                            aria-label="Número estatística 3">
                         <input type="text" class="form-input mt-2" formControlName="stat3Desc"
-                            placeholder="Descrição (ex: Oficinas)">
+                            placeholder="Descrição (ex: Oficinas)" aria-label="Descrição estatística 3">
                     </div>
                 </div>
             </div>
@@ -229,14 +238,12 @@
 
                 <div class="form-group">
                     <label class="form-label" for="descricaoLinha1">Parágrafo de Introdução</label>
-                    <textarea id="descricaoLinha1" class="form-textarea" formControlName="descricaoLinha1"
-                        rows="3"></textarea>
+                    <quill-editor formControlName="descricaoLinha1" [styles]="{height: '150px'}"></quill-editor>
                 </div>
 
                 <div class="form-group mb-0">
                     <label class="form-label" for="descricaoLinha2">Parágrafo de Complemento (Opcional)</label>
-                    <textarea id="descricaoLinha2" class="form-textarea" formControlName="descricaoLinha2"
-                        rows="2"></textarea>
+                    <quill-editor formControlName="descricaoLinha2" [styles]="{height: '150px'}"></quill-editor>
                 </div>
             </div>
 
@@ -249,24 +256,24 @@
                         <label class="form-label">Valor Principal 1</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor1Icone"
-                                placeholder="Ícone ou Emoji (ex: ✨)">
+                                placeholder="Ícone ou Emoji (ex: ✨)" aria-label="Ícone do valor 1">
                             <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
-                                placeholder="Título (ex: Inclusão)">
+                                placeholder="Título (ex: Inclusão)" aria-label="Título do valor 1">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor1Desc"
-                            placeholder="Breve descrição do valor">
+                            placeholder="Breve descrição do valor" aria-label="Descrição do valor 1">
                     </div>
 
                     <div class="form-card dynamic-card">
                         <label class="form-label">Valor Principal 2</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor2Icone"
-                                placeholder="Ícone">
+                                placeholder="Ícone" aria-label="Ícone do valor 2">
                             <input type="text" class="form-input flex-3" formControlName="valor2Titulo"
-                                placeholder="Título">
+                                placeholder="Título" aria-label="Título do valor 2">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor2Desc"
-                            placeholder="Breve descrição">
+                            placeholder="Breve descrição" aria-label="Descrição do valor 2">
                     </div>
                 </div>
 
@@ -276,24 +283,24 @@
                         <label class="form-label">Valor Complementar 3</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor3Icone"
-                                placeholder="Ícone">
+                                placeholder="Ícone" aria-label="Ícone do valor 3">
                             <input type="text" class="form-input flex-3" formControlName="valor3Titulo"
-                                placeholder="Título">
+                                placeholder="Título" aria-label="Título do valor 3">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor3Desc"
-                            placeholder="Breve descrição">
+                            placeholder="Breve descrição" aria-label="Descrição do valor 3">
                     </div>
 
                     <div class="form-card dynamic-card">
                         <label class="form-label">Valor Complementar 4</label>
                         <div class="flex-row">
                             <input type="text" class="form-input flex-1" formControlName="valor4Icone"
-                                placeholder="Ícone">
+                                placeholder="Ícone" aria-label="Ícone do valor 4">
                             <input type="text" class="form-input flex-3" formControlName="valor4Titulo"
-                                placeholder="Título">
+                                placeholder="Título" aria-label="Título do valor 4">
                         </div>
                         <input type="text" class="form-input mt-2" formControlName="valor4Desc"
-                            placeholder="Breve descrição">
+                            placeholder="Breve descrição" aria-label="Descrição do valor 4">
                     </div>
                 </div>
             </div>
@@ -330,12 +337,12 @@
 
                     <div class="flex-row">
                         <input type="text" class="form-input flex-1" formControlName="icon"
-                            placeholder="Ícone/Emoji (ex: 💻)">
+                            placeholder="Ícone/Emoji (ex: 💻)" aria-label="Ícone da oficina">
                         <input type="text" class="form-input flex-3" formControlName="titulo"
-                            placeholder="Título da Oficina">
+                            placeholder="Título da Oficina" aria-label="Título da oficina">
                     </div>
-                    <textarea class="form-textarea mt-2" formControlName="descricao" rows="2"
-                        placeholder="Breve descrição ou resumo..."></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '100px'}"
+                        placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></quill-editor>
                 </div>
                 }
             </div>
@@ -375,12 +382,13 @@
                         </button>
                     </div>
 
-                    <textarea class="form-textarea mb-2" formControlName="texto" rows="2"
-                        placeholder="O que o aluno disse..."></textarea>
+                    <quill-editor formControlName="texto" [styles]="{height: '100px', marginBottom: '1rem'}"
+                        placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></quill-editor>
                     <div class="flex-row">
-                        <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo">
+                        <input type="text" class="form-input flex-3" formControlName="nome" placeholder="Nome Completo"
+                            aria-label="Nome do depoente">
                         <input type="number" class="form-input flex-1" formControlName="idade"
-                            placeholder="Idade (opcional)">
+                            placeholder="Idade (opcional)" aria-label="Idade do depoente">
                     </div>
                 </div>
                 }
@@ -424,8 +432,8 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="sobreDescricao">Descrição</label>
-                    <textarea id="sobreDescricao" formControlName="descricao" class="form-input" rows="3"
-                        placeholder="Breve descrição exibida abaixo do título…"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Breve descrição exibida abaixo do título…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -450,18 +458,18 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo1">Parágrafo 1</label>
-                    <textarea id="historiaParagrafo1" formControlName="paragrafo1" class="form-input" rows="4"
-                        placeholder="Primeiro parágrafo da história…"></textarea>
+                    <quill-editor formControlName="paragrafo1" [styles]="{height: '200px'}"
+                        placeholder="Primeiro parágrafo da história…"></quill-editor>
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo2">Parágrafo 2</label>
-                    <textarea id="historiaParagrafo2" formControlName="paragrafo2" class="form-input" rows="4"
-                        placeholder="Segundo parágrafo da história…"></textarea>
+                    <quill-editor formControlName="paragrafo2" [styles]="{height: '200px'}"
+                        placeholder="Segundo parágrafo da história…"></quill-editor>
                 </div>
                 <div class="form-group full-width">
                     <label for="historiaParagrafo3">Parágrafo 3 (opcional)</label>
-                    <textarea id="historiaParagrafo3" formControlName="paragrafo3" class="form-input" rows="4"
-                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></textarea>
+                    <quill-editor formControlName="paragrafo3" [styles]="{height: '200px'}"
+                        placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -582,8 +590,8 @@
                 </div>
                 <div class="form-group full-width">
                     <label for="sobreCtaDesc">Descrição</label>
-                    <textarea id="sobreCtaDesc" formControlName="descricao" class="form-input" rows="2"
-                        placeholder="Ex: Entre em contato com nossa secretaria…"></textarea>
+                    <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                        placeholder="Ex: Entre em contato com nossa secretaria…"></quill-editor>
                 </div>
             </div>
             <div class="form-actions">
@@ -597,7 +605,6 @@
     </div>
     }
 
-    <!-- ABA: NOTÍCIAS / COMUNICADOS -->
     @if (abaAtiva === 'comunicados') {
     <div class="tab-pane active" id="pane-comunicados" role="tabpanel">
         <div class="form-header">
@@ -605,6 +612,139 @@
             <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
         </div>
         <app-comunicados-lista></app-comunicados-lista>
+    </div>
+    }
+
+    <!-- ABA: FAQ -->
+    @if (abaAtiva === 'faq') {
+    <div class="tab-pane active" id="pane-faq">
+        <form [formGroup]="formFaq" (ngSubmit)="salvarFaq()" class="cms-form">
+            <div class="form-header">
+                <h2>Perguntas Frequentes (FAQ)</h2>
+                <p>Gerencie as perguntas e respostas exibidas no modo sanfona (acordeon) da Página Inicial.</p>
+            </div>
+
+            <div formArrayName="lista">
+                @for (item of faqArray.controls; track item; let i = $index) {
+                <div [formGroupName]="i" class="form-card dynamic-card">
+                    <div class="dynamic-card-header">
+                        <span class="card-badge">Pergunta {{ i + 1 }}</span>
+                        <button type="button" class="btn-icon danger" (click)="removerFaq(i)" aria-label="Remover"
+                            title="Remover pergunta">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label" [for]="'faq-pergunta-' + i">Pergunta</label>
+                        <input type="text" [id]="'faq-pergunta-' + i" class="form-input" formControlName="pergunta"
+                            placeholder="Ex: Como posso me matricular?">
+                    </div>
+                    
+                    <div class="form-group mb-0">
+                        <label class="form-label" [for]="'faq-resposta-' + i">Resposta (Detalhada)</label>
+                        <quill-editor [id]="'faq-resposta-' + i" formControlName="resposta" [styles]="{height: '100px'}"
+                            placeholder="Escreva a resposta de forma clara..."></quill-editor>
+                    </div>
+                </div>
+                }
+            </div>
+
+            <div class="add-row">
+                <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarFaq()">
+                    <span class="material-symbols-rounded">add</span> Adicionar Pergunta
+                </button>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formFaq.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar FAQ }
+                </button>
+            </div>
+        </form>
+    </div>
+    }
+
+    <!-- ABA: CONTATO E DADOS GLOBAIS -->
+    @if (abaAtiva === 'contato') {
+    <div class="tab-pane active" id="pane-contato" role="tabpanel">
+        <form [formGroup]="formContato" (ngSubmit)="salvarContato()" class="cms-form">
+            <div class="form-header">
+                <h2>Contato e Redes Sociais</h2>
+                <p>Informações globais exibidas no Rodapé e na Página de Fale Conosco (<a href="/contato" target="_blank">/contato</a>).</p>
+            </div>
+
+            <div class="form-section">
+                <h3>Dados de Contato Principais</h3>
+                <div class="form-row form-row-2">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="telefoneCentral">Telefone Oficial</label>
+                        <input type="text" id="telefoneCentral" class="form-input" formControlName="telefoneCentral"
+                            placeholder="Ex: (00) 0000-0000">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="emailOficial">E-mail Oficial</label>
+                        <input type="email" id="emailOficial" class="form-input" formControlName="emailOficial"
+                            placeholder="Ex: contato@instituto.org.br">
+                    </div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="form-label" for="enderecoCompleto">Endereço Completo</label>
+                    <input type="text" id="enderecoCompleto" class="form-input" formControlName="enderecoCompleto"
+                        placeholder="Ex: Rua Exemplo, 120 - Bairro, Cidade - SP, 00000-000">
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Redes Sociais</h3>
+                <p class="form-hint mb-3">Se o campo for preenchido, o ícone respectivo aparecerá no rodapé do site.</p>
+                <div class="form-row form-row-2">
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="instagram">Link Instagram</label>
+                        <input type="url" id="instagram" class="form-input" formControlName="instagram"
+                            placeholder="https://instagram.com/instituto">
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="form-label" for="facebook">Link Facebook</label>
+                        <input type="url" id="facebook" class="form-input" formControlName="facebook"
+                            placeholder="https://facebook.com/instituto">
+                    </div>
+                    <div class="form-group mb-0 mt-3">
+                        <label class="form-label" for="youtube">Link YouTube</label>
+                        <input type="url" id="youtube" class="form-input" formControlName="youtube"
+                            placeholder="https://youtube.com/c/instituto">
+                    </div>
+                    <div class="form-group mb-0 mt-3">
+                        <label class="form-label" for="linkedin">Link LinkedIn</label>
+                        <input type="url" id="linkedin" class="form-input" formControlName="linkedin"
+                            placeholder="https://linkedin.com/company/instituto">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Opções da Página de Contato / Rodapé</h3>
+                
+                <div class="form-group">
+                    <label class="form-label" for="heroDescricaoContato">Texto Descritivo Principal (Página Fale Conosco)</label>
+                    <quill-editor id="heroDescricaoContato" formControlName="heroDescricaoContato" [styles]="{height: '100px'}"
+                        placeholder="Ex: Estamos abertos para voluntariado e parcerias. Envie uma mensagem..."></quill-editor>
+                </div>
+
+                <div class="form-group mb-0">
+                    <label class="form-label" for="footerDireitos">Texto de Copyright (Rodapé)</label>
+                    <input type="text" id="footerDireitos" class="form-input" formControlName="footerDireitos"
+                        placeholder="Ex: © 2026 Instituto Luiz Braille - CNPJ: 00.000.000/0001-00">
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary" [disabled]="salvando || formContato.invalid">
+                    @if(salvando) { Salvando... } @else { Salvar Contato e Redes }
+                </button>
+            </div>
+        </form>
     </div>
     }
 
@@ -681,6 +821,31 @@
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDepoimento()"
                 style="background-color: #ef4444; color: white; border: none;">
                 Remover Depoimento
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal Excluir FAQ -->
+@if (faqParaExcluir !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Pergunta"
+    (click)="cancelarExclusaoFaq()">
+    <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #ef4444;">Excluir Pergunta</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoFaq()"
+                aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a excluir esta pergunta.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar FAQ</strong>. Deseja removê-la da lista?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoFaq()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoFaq()"
+                style="background-color: #ef4444; color: white; border: none;">
+                Remover
             </button>
         </div>
     </div>

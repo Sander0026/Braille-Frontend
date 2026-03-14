@@ -27,13 +27,13 @@
 </div>
 } @else if (comunicados.length === 0) {
 <div class="empty-state" role="status">
-    <h3>Nenhum comunicado</h3>
-    <p>Crie o primeiro comunicado clicando em "Novo Comunicado".</p>
+    <h2>Nenhum comunicado</h2>
+    <p class="empty-state-text">Crie o primeiro comunicado clicando em "Novo Comunicado".</p>
 </div>
 } @else {
-<div class="comunicados-lista" role="list" aria-label="Lista de comunicados">
+<div class="comunicados-lista" role="region" aria-label="Lista de comunicados">
     @for (c of comunicados; track c.id) {
-    <article class="comunicado-card card" role="listitem">
+    <article class="comunicado-card card">
         @if (c.imagemCapa) {
         <div class="card-img-wrapper">
             <img [src]="c.imagemCapa" alt="Capa" class="card-img" loading="lazy" />
@@ -129,10 +129,10 @@
             <div class="form-group" style="margin-top:1rem">
                 <label for="com-conteudo" class="form-label">Conteúdo <span class="required"
                         aria-hidden="true">*</span></label>
-                <textarea id="com-conteudo" class="form-textarea"
+                <quill-editor id="com-conteudo"
                     [class.is-invalid]="form.get('conteudo')?.invalid && form.get('conteudo')?.touched"
-                    formControlName="conteudo" rows="6"
-                    placeholder="Escreva o comunicado aqui... Podem ser inseridas quebras de linhas para formar parágrafos."></textarea>
+                    formControlName="conteudo" [styles]="{height: '250px'}"
+                    placeholder="Escreva o comunicado aqui..."></quill-editor>
                 @if (form.get('conteudo')?.invalid && form.get('conteudo')?.touched) {
                 <span class="form-error" role="alert">Conteúdo obrigatório (mín. 10 caracteres)</span>
                 }

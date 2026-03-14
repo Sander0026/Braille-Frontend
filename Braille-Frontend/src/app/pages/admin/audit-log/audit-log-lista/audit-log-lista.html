@@ -28,7 +28,7 @@
 
 <!-- ══ FILTROS ══ -->
 <div class="filtros-bar">
-    <select class="form-input form-input--sm" [(ngModel)]="filtroEntidade">
+    <select class="form-input form-input--sm" [(ngModel)]="filtroEntidade" aria-label="Filtrar por entidade">
         <option value="">Todas as entidades</option>
         <option value="Turma">Turma</option>
         <option value="Aluno">Aluno</option>
@@ -38,7 +38,7 @@
         <option value="Comunicado">Comunicado</option>
     </select>
 
-    <select class="form-input form-input--sm" [(ngModel)]="filtroAcao">
+    <select class="form-input form-input--sm" [(ngModel)]="filtroAcao" aria-label="Filtrar por ação">
         <option value="">Todas as ações</option>
         @for (a of acoes; track a) {
         <option [value]="a">{{ a }}</option>
@@ -67,7 +67,7 @@
 } @else {
 
 <!-- ══ TABELA ══ -->
-<div class="table-wrapper">
+<div class="table-wrapper" tabindex="0">
     <table class="audit-table" aria-label="Log de auditoria">
         <thead>
             <tr>
@@ -78,7 +78,7 @@
                 <th>Autor</th>
                 <th>Cargo</th>
                 <th>IP</th>
-                <th></th>
+                <th><span class="sr-only">Ações</span></th>
             </tr>
         </thead>
         <tbody>
@@ -103,10 +103,45 @@
 
 <!-- ══ PAGINAÇÃO ══ -->
 @if (totalPaginas > 1) {
-<nav class="pagination">
-    <button class="btn btn-secondary btn-sm" (click)="anterior()" [disabled]="pagina === 1">←</button>
-    <span class="pagination-info">Página {{ pagina }} de {{ totalPaginas }} ({{ total }} logs)</span>
-    <button class="btn btn-secondary btn-sm" (click)="proximo()" [disabled]="pagina === totalPaginas">→</button>
+<nav class="pagination" role="navigation" aria-label="Paginação do log de auditoria">
+
+    <!-- Primeira página -->
+    <button (click)="irParaPagina(1)" [disabled]="pagina === 1" aria-label="Primeira página"
+        title="Primeira página">«</button>
+
+    <!-- Anterior -->
+    <button (click)="irParaPagina(pagina - 1)" [disabled]="pagina === 1" aria-label="Página anterior">‹</button>
+
+    <!-- Janela de páginas com reticências -->
+    @for (p of paginasVisiveis; track p + '_' + $index) {
+    @if (p === -1) {
+    <span class="pagination-ellipsis" aria-hidden="true">…</span>
+    } @else {
+    <button (click)="irParaPagina(p)" [class.active]="p === pagina" [attr.aria-label]="'Ir para página ' + p"
+        [attr.aria-current]="p === pagina ? 'page' : null">
+        {{ p }}
+    </button>
+    }
+    }
+
+    <!-- Próxima -->
+    <button (click)="irParaPagina(pagina + 1)" [disabled]="pagina === totalPaginas"
+        aria-label="Próxima página">›</button>
+
+    <!-- Última página -->
+    <button (click)="irParaPagina(totalPaginas)" [disabled]="pagina === totalPaginas" aria-label="Última página"
+        title="Última página">»</button>
+
+    <!-- Info + ir para página -->
+    <span class="pagination-info" aria-live="polite">
+        {{ pagina }} / {{ totalPaginas }}
+    </span>
+
+    <label class="pagination-goto" aria-label="Ir para a página:">
+        <span class="sr-only">Ir para a página:</span>
+        <input type="number" min="1" [max]="totalPaginas" placeholder="Ir p/"
+            (keydown.enter)="irParaPagina(+$any($event.target).value); $any($event.target).value=''" />
+    </label>
 </nav>
 }
 
@@ -114,7 +149,8 @@
 
 <!-- ══ MODAL DETALHES ══ -->
 @if (logSelecionado) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes do log" (click)="fecharDetalhes()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes do log" (click)="fecharDetalhes()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal modal--lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 class="modal-title">
@@ -142,17 +178,40 @@
                 <dd class="ua">{{ logSelecionado.userAgent ?? '—' }}</dd>
             </dl>
 
-            @if (logSelecionado.oldValue) {
-            <div class="json-section">
-                <h3>Estado anterior (oldValue)</h3>
-                <pre class="json-block">{{ jsonPretty(logSelecionado.oldValue) }}</pre>
+            @if (diferencas.length > 0) {
+            <div class="diff-section">
+                <h3>Alterações</h3>
+                <div class="diff-table-wrapper" tabindex="0">
+                    <table class="diff-table">
+                        <thead>
+                            <tr>
+                                <th>Campo</th>
+                                <th>Valor Anterior</th>
+                                <th>Novo Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (diff of diferencas; track diff.campo) {
+                            <tr [class.is-changed]="diff.alterado">
+                                <td class="diff-campo">{{ diff.campo }}</td>
+                                <td class="diff-old" [class.empty]="diff.de === '—'">{{ diff.de }}</td>
+                                <td class="diff-new" [class.empty]="diff.para === '—'">
+                                    <!-- Se não foi alterado (ex: numa exclusão ou qdo o valor manteve) -->
+                                    @if(diff.alterado) {
+                                    {{ diff.para }}
+                                    } @else {
+                                    <span class="text-muted">Mantido</span>
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            }
-
-            @if (logSelecionado.newValue) {
-            <div class="json-section">
-                <h3>Novo estado (newValue)</h3>
-                <pre class="json-block">{{ jsonPretty(logSelecionado.newValue) }}</pre>
+            } @else {
+            <div class="diff-section empty-diff">
+                <p>Nenhuma alteração visível nos campos mapeados.</p>
             </div>
             }
 

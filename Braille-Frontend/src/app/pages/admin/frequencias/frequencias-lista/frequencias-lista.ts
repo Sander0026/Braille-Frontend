@@ -1,8 +1,10 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
+import { of, from } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
+import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
 
@@ -18,10 +20,24 @@ interface AlunoNaChamada {
   salvo: boolean;
 }
 
+@Directive({
+  selector: '[appTabelaTrFocavel]',
+  standalone: true
+})
+export class TabelaTrFocavelDirective implements FocusableOption {
+  @Input() disabled = false;
+
+  constructor(public element: ElementRef<HTMLElement>) { }
+
+  focus(): void {
+    this.element.nativeElement.focus();
+  }
+}
+
 @Component({
   selector: 'app-frequencias-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TabelaTrFocavelDirective, A11yModule],
   templateUrl: './frequencias-lista.html',
   styleUrl: './frequencias-lista.scss',
 })
@@ -39,6 +55,10 @@ export class FrequenciasLista implements OnInit {
   chamadaCarregada = false;
   erroCarregamento = '';
   feedbackSalvo = '';
+
+  // ── KeyManager ─────────────────────────────────────────────
+  @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
+  public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
   // Expõe Math para o template Angular
   readonly Math = Math;
@@ -84,6 +104,23 @@ export class FrequenciasLista implements OnInit {
     this.userId = user?.sub || '';
 
     this.carregarTurmas();
+  }
+
+  ngAfterViewInit(): void {
+    this.keyManager = new FocusKeyManager(this.linhasTabela).withWrap();
+    this.linhasTabela.changes.subscribe(() => {
+      this.keyManager.withWrap();
+    });
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent) {
+    if (this.keyManager) {
+      if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
+        this.keyManager.onKeydown(event);
+        event.preventDefault();
+      }
+    }
   }
 
   // ── Turmas ─────────────────────────────────────────────────
@@ -184,52 +221,56 @@ export class FrequenciasLista implements OnInit {
     if (this.salvandoTudo || this.alunosNaChamada.length === 0) return;
 
     this.salvandoTudo = true;
-    this.feedbackSalvo = '';
+    this.feedbackSalvo = 'Salvando Lote de Frequências...';
+    this.cdr.detectChanges();
 
-    const requisicoes = this.alunosNaChamada.map(aluno => {
-      aluno.salvando = true;
+    const payloadAlunos = this.alunosNaChamada.map(aluno => {
+      aluno.salvando = true; // Feedback individual
+
+      // Monta objeto dinâmico omitindo chaves falsy para satisfazer o @IsUUID NestJS
+      const base: any = {
+        alunoId: aluno.alunoId,
+        presente: aluno.presente
+      };
 
       if (aluno.frequenciaId) {
-        // Já existe — atualiza
-        return this.frequenciasService.atualizar(aluno.frequenciaId, { presente: aluno.presente }).pipe(
-          catchError(() => of(null))
-        );
-      } else {
-        // Novo — cria
-        return this.frequenciasService.registrar({
-          alunoId: aluno.alunoId,
-          turmaId: this.turmaSelecionadaId,
-          dataAula: this.dataAula,
-          presente: aluno.presente,
-        }).pipe(
-          catchError(() => of(null)) // 409 ignorado (já existe)
-        );
+        base.frequenciaId = aluno.frequenciaId;
       }
+
+      return base;
     });
 
-    forkJoin(requisicoes).subscribe({
-      next: (resultados) => {
-        resultados.forEach((res, i) => {
-          const aluno = this.alunosNaChamada[i];
-          aluno.salvando = false;
-          if (res !== null) {
-            aluno.salvo = true;
-            if (!aluno.frequenciaId && (res as Frequencia).id) {
-              aluno.frequenciaId = (res as Frequencia).id;
-            }
+    this.frequenciasService.salvarLote(this.turmaSelecionadaId, this.dataAula, payloadAlunos)
+      .subscribe({
+        next: () => {
+          this.salvandoTudo = false;
+
+          this.alunosNaChamada.forEach(a => {
+            a.salvando = false;
+            a.salvo = true;
+          });
+
+          this.feedbackSalvo = 'Chamada em Lote salva com sucesso!';
+          this.cdr.detectChanges();
+
+          // Recarrega os alunos para atualizar as UUIDs das frequências salvas no banco
+          this.carregarChamada();
+
+          setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
+        },
+        error: (err) => {
+          this.salvandoTudo = false;
+          this.alunosNaChamada.forEach(a => a.salvando = false);
+
+          let det = 'Falha de comunicação com o servidor.';
+          if (err?.error?.message) {
+            det = Array.isArray(err.error.message) ? err.error.message[0] : err.error.message;
           }
-        });
-        this.salvandoTudo = false;
-        this.feedbackSalvo = 'Chamada salva com sucesso!';
-        this.cdr.detectChanges();
-        setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
-      },
-      error: () => {
-        this.salvandoTudo = false;
-        this.feedbackSalvo = 'Erro ao salvar chamada. Tente novamente.';
-        this.cdr.detectChanges();
-      },
-    });
+
+          this.feedbackSalvo = `⚠️ Erro Crítico: ${det}`;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
   // ── Histórico ──────────────────────────────────────────────

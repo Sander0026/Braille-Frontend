@@ -63,7 +63,7 @@ $transition: 200ms ease;
     }
 
     &.active {
-        color: $primary;
+        color: $gray-900;
         border-bottom-color: $primary;
         background: $white;
         font-weight: 600;

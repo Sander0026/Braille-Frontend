@@ -37,7 +37,8 @@
 
     <!-- Botão de Filtros Avançados -->
     <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
-        [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Abrir filtros avançados">
+        [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Filtros avançados"
+        [attr.aria-expanded]="drawerAberto ? 'true' : 'false'" aria-controls="filter-drawer-panel">
         <span class="material-symbols-rounded">tune</span>
         Filtros
         @if (quantidadeFiltrosAtivos > 0) {
@@ -74,8 +75,9 @@
 @if (drawerAberto) {
 <div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
 }
-<aside class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog" aria-modal="true"
-    aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus [cdkTrapFocusAutoCapture]="drawerAberto">
+<div id="filter-drawer-panel" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
+    aria-modal="true" aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="drawerAberto">
 
     <div class="filter-drawer__header">
         <h2 class="filter-drawer__title">
@@ -86,7 +88,7 @@
             aria-label="Fechar filtros">✕</button>
     </div>
 
-    <div class="filter-drawer__body">
+    <div class="filter-drawer__body" tabindex="0">
 
         <!-- DEFICIÊNCIA -->
         <section class="filter-section">
@@ -233,12 +235,13 @@
             @if (quantidadeFiltrosAtivos > 0) { ({{ quantidadeFiltrosAtivos }}) }
         </button>
     </div>
-</aside>
+</div>
 
 <!-- Tabela de Alunos -->
 @if (isLoading) {
-<div class="data-table-wrapper" aria-busy="true" aria-label="Carregando lista de alunos...">
-    <div class="loading-container">
+<div class="data-table-wrapper" aria-busy="true" aria-live="polite" aria-label="Carregando lista de alunos..."
+    tabindex="0">
+    <div class="loading-container" role="status">
         <div class="loading-spinner" aria-hidden="true"></div>
         <p>Carregando alunos...</p>
     </div>
@@ -250,8 +253,8 @@
 </div>
 } @else {
 <!-- Abas de Navegação — sempre visíveis após carregar -->
-<div class="tabs-container" role="navigation" aria-label="Filtro de status de beneficiário">
-    <div class="tabs">
+<div class="tabs-container">
+    <div class="tabs" role="tablist" aria-label="Filtro de status de beneficiário">
         <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
             [attr.aria-selected]="abaAtiva === 'ativos'" role="tab">
             Ativos
@@ -272,7 +275,7 @@
     </p>
 </div>
 } @else {
-<div class="data-table-wrapper">
+<div class="data-table-wrapper" tabindex="0">
     <table class="data-table" role="table" aria-label="Lista de alunos ativos">
         <caption class="sr-only">{{ total }} alunos cadastrados, página {{ paginaAtual }} de {{ totalPaginas }}
         </caption>
@@ -288,11 +291,12 @@
         </thead>
         <tbody>
             @for (aluno of alunos; track aluno.id) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr"
+                [attr.aria-label]="'Linha: ' + aluno.nomeCompleto + '. Pressione Enter para editar.'">
                 <td>
                     <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
                 </td>
-                <td class="hide-on-mobile">{{ aluno.cpfRg || '—' }}</td>
+                <td class="hide-on-mobile">{{ (aluno.cpf | cpfRg) || (aluno.rg | cpfRg) || '—' }}</td>
                 <td class="hide-on-tablet">{{ aluno.dataNascimento | dataBraille }}</td>
                 <td class="hide-on-mobile">
                     @if (aluno.tipoDeficiencia) {
@@ -316,7 +320,7 @@
                     </button>
                     } @else {
                     <button class="btn btn-sm"
-                        style="background-color: #10b981; color: white; border: none; margin-right: 0.5rem;"
+                        style="background-color: #047857; color: white; border: none; margin-right: 0.5rem;"
                         (click)="restaurarConta(aluno)"
                         [attr.aria-label]="'Restaurar aluno ' + aluno.nomeCompleto">Restaurar</button>
                     <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(aluno)"
@@ -390,7 +394,7 @@
             <button class="btn-close" (click)="fecharModal()" aria-label="Fechar janela de perfil">×</button>
         </div>
 
-        <div class="modal-body profile-body">
+        <div class="modal-body profile-body" tabindex="0">
             @if (carregandoDetalhes) {
             <div class="loading-container p-4 text-center">
                 <div class="loading-spinner"></div>
@@ -446,9 +450,17 @@
                     }
                     <div class="profile-badges">
                         @if (alunoSelecionado.statusAtivo) {
-                        <span class="badge badge-success">Ativo</span>
+                        <span class="badge badge-success">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                                aria-hidden="true">check_circle</span>
+                            Ativo
+                        </span>
                         } @else {
-                        <span class="badge badge-danger">Inativo</span>
+                        <span class="badge badge-danger">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                                aria-hidden="true">cancel</span>
+                            Inativo
+                        </span>
                         }
                         @if (alunoSelecionado.tipoDeficiencia) {
                         <span class="badge badge-primary">{{ alunoSelecionado.tipoDeficiencia }}</span>
@@ -461,7 +473,7 @@
                 <!-- Informações Pessoais -->
                 <div class="profile-section">
                     <h4>Informações Pessoais</h4>
-                    <p><strong>CPF/RG:</strong> {{ alunoSelecionado.cpfRg || 'N/I' }}</p>
+                    <p><strong>CPF:</strong> {{ (alunoSelecionado.cpf | cpfRg) || 'N/I' }} &nbsp;|&nbsp; <strong>RG:</strong> {{ (alunoSelecionado.rg | cpfRg) || 'N/I' }}</p>
                     <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
                     <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
                     <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
@@ -574,17 +586,18 @@
                                 <td style="text-align: center; font-weight: 500;">
                                     @let freq = frequenciasMap.get(m.turma.id)?.taxaPresenca || 0;
                                     <span style="display: flex; align-items: center; justify-content: center; gap: 4px;"
-                                        [style.color]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
-                                        <div style="width: 8px; height: 8px; border-radius: 50%;"
-                                            [style.backgroundColor]="freq >= 75 ? '#10b981' : (freq >= 50 ? '#f59e0b' : '#ef4444')">
-                                        </div>
+                                        [style.color]="freq >= 75 ? '#047857' : (freq >= 50 ? '#b45309' : '#b91c1c')">
+                                        <span class="material-symbols-rounded" style="font-size: 16px;"
+                                            aria-hidden="true"
+                                            [style.color]="freq >= 75 ? '#047857' : (freq >= 50 ? '#b45309' : '#b91c1c')">
+                                            {{ freq >= 75 ? 'check_circle' : (freq >= 50 ? 'warning' : 'cancel') }}
+                                        </span>
                                         {{ freq }}%
                                     </span>
                                 </td>
-                                } @else {
-                                <td style="text-align: center; color: #9ca3af;">—</td>
-                                <td style="text-align: center; color: #9ca3af;">—</td>
-                                <td style="text-align: center; color: #9ca3af;">—</td>
+                                <td style="text-align: center; color: #6b7280;">—</td>
+                                <td style="text-align: center; color: #6b7280;">—</td>
+                                <td style="text-align: center; color: #6b7280;">—</td>
                                 }
                                 <td>
                                     <span class="badge-status badge-status--{{ m.status.toLowerCase() }}">
@@ -598,7 +611,7 @@
                         </tbody>
                     </table>
                     } @else {
-                    <p style="color: #9ca3af; font-size: 0.875rem; margin-top: 4px;">
+                    <p style="color: #4b5563; font-size: 0.875rem; margin-top: 4px;">
                         Nenhuma oficina registrada.
                     </p>
                     }
@@ -629,10 +642,10 @@
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="(alunoParaInativar.statusAtivo !== false ? 'Inativar' : 'Reativar') + ' Aluno ' + alunoParaInativar.nomeCompleto"
     (click)="cancelarInativacao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
         <div class="modal-header">
             <h2 id="modal-titulo-inativacao"
-                [style.color]="alunoParaInativar.statusAtivo !== false ? '#fbbf24' : '#3b82f6'">
+                [style.color]="alunoParaInativar.statusAtivo !== false ? '#b45309' : '#2563eb'">
                 {{ alunoParaInativar.statusAtivo !== false ? 'Inativar Aluno' : 'Reativar Aluno' }}
             </h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarInativacao()" aria-label="Cancelar ação">✕</button>
@@ -667,9 +680,9 @@
 @if (documentoParaExcluir) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Documento"
     (click)="cancelarExclusaoDocumento()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
         <div class="modal-header">
-            <h2 id="modal-titulo-documento" style="color: #ef4444;">Apagar Arquivo</h2>
+            <h2 id="modal-titulo-documento" style="color: #b91c1c;">Apagar Arquivo</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDocumento()"
                 aria-label="Cancelar exclusão de documento">✕</button>
         </div>
@@ -688,7 +701,7 @@
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDocumento()"
                 [disabled]="deletandoImage">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDocumento()"
-                [disabled]="deletandoImage" style="background-color: #ef4444; color: white; border: none;">
+                [disabled]="deletandoImage" style="background-color: #b91c1c; color: white; border: none;">
                 @if (deletandoImage) { <span class="loading-spinner" aria-hidden="true"
                     style="width:14px; height:14px; border-width:2px;"></span> Apagando... }
                 @else { Sim, apagar }
@@ -703,7 +716,7 @@
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="'Excluir definitivamente o aluno ' + alunoParaExcluirDefinitivo.nomeCompleto"
     (click)="cancelarExclusaoDefinitiva()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro do Aluno</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDefinitiva()"
@@ -714,7 +727,7 @@
             <p>Você está prestes a apagar <strong>permanentemente</strong> o acesso do aluno <strong>{{
                     alunoParaExcluirDefinitivo.nomeCompleto }}</strong> de todo o painel.</p>
             <p>Por motivos da LGPD o cadastro e dados sensíveis serão fisicamente preservados mas ocultos.</p>
-            <p style="color: #ef4444; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
+            <p style="color: #b91c1c; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
         </div>
 
         <div class="modal-footer">
@@ -735,9 +748,9 @@
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="'Restaurar o aluno ' + alunoParaRestaurar.nomeCompleto" (click)="cancelarRestauracao()"
     cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
         <div class="modal-header">
-            <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Inscrição</h2>
+            <h2 id="modal-titulo-restaurar" style="color: #047857;">Restaurar Inscrição</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarRestauracao()"
                 aria-label="Cancelar restauração">✕</button>
         </div>
@@ -752,7 +765,7 @@
             <button class="btn btn-secondary" type="button" (click)="cancelarRestauracao()"
                 [disabled]="salvando">Cancelar</button>
             <button class="btn btn-primary" type="button" (click)="confirmarRestauracao()" [disabled]="salvando"
-                style="background-color: #059669; color: white; border: none;">
+                style="background-color: #047857; color: white; border: none;">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Restaurando... }
                 @else { Restaurar Aluno }
             </button>
@@ -763,21 +776,25 @@
 
 <!-- ══════════ MODAL DE EDIÇÃO ══════════ -->
 @if (modalEdicaoAberto && alunoEmEdicao) {
-<div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="fecharModalEdicao()">
-    <div class="modal modal--large" (click)="$event.stopPropagation()" style="max-width: 780px; width: 95%;">
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="fecharModalEdicao()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal modal--large" (click)="$event.stopPropagation()" style="max-width: 780px; width: 95%;"
+        tabindex="-1">
+
 
         <div class="modal-header">
-            <h2 style="color: #3b82f6;">Editar Aluno</h2>
+            <h2 style="color: #2563eb;">Editar Aluno</h2>
             <button class="btn btn-icon btn-ghost" (click)="fecharModalEdicao()" aria-label="Fechar">✕</button>
         </div>
 
-        <div class="modal-body" style="max-height: 72vh; overflow-y: auto; padding: 1.5rem;" [formGroup]="editForm">
+        <div class="modal-body" style="max-height: 72vh; overflow-y: auto; padding: 1.5rem;" [formGroup]="editForm"
+            tabindex="0">
 
             <!-- DADOS PESSOAIS -->
             <fieldset style="border:none; padding:0; margin-bottom:1.5rem;">
                 <legend
-                    style="font-weight:600; color:#3b82f6; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
+                    style="font-weight:600; color:#2563eb; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
                     Dados Pessoais
                 </legend>
                 <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">
@@ -787,9 +804,14 @@
                             placeholder="Nome completo" />
                     </div>
                     <div class="form-group">
-                        <label class="form-label" for="edit-cpf">CPF / RG</label>
-                        <input id="edit-cpf" type="text" class="form-input" formControlName="cpfRg"
-                            placeholder="CPF ou RG" />
+                        <label class="form-label" for="edit-cpf">CPF</label>
+                        <input id="edit-cpf" type="text" class="form-input" formControlName="cpf"
+                            placeholder="000.000.000-00" mask="000.000.000-00" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-rg">RG</label>
+                        <input id="edit-rg" type="text" class="form-input" formControlName="rg"
+                            placeholder="0.000.000" />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-nascimento">Data de Nascimento</label>
@@ -821,7 +843,7 @@
             <!-- ENDEREÇO -->
             <fieldset style="border:none; padding:0; margin-bottom:1.5rem;">
                 <legend
-                    style="font-weight:600; color:#3b82f6; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
+                    style="font-weight:600; color:#2563eb; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
                     Endereço
                 </legend>
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem;">
@@ -861,7 +883,7 @@
             <!-- DEFICIÊNCIA -->
             <fieldset style="border:none; padding:0; margin-bottom:1.5rem;">
                 <legend
-                    style="font-weight:600; color:#3b82f6; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
+                    style="font-weight:600; color:#2563eb; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
                     Deficiência &amp; Acessibilidade
                 </legend>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">
@@ -888,7 +910,7 @@
                     <div class="form-group" style="grid-column:1 / -1;">
                         <label class="form-label" for="edit-comorbidades">Outras Comorbidades</label>
                         <textarea id="edit-comorbidades" class="form-input" formControlName="outrasComorbidades"
-                            rows="2"></textarea>
+                            rows="2" tabEscape></textarea>
                     </div>
                     <div class="form-group" style="display:flex; align-items:center; gap:.5rem;">
                         <input id="edit-acomp" type="checkbox" formControlName="precisaAcompanhante" />
@@ -904,9 +926,9 @@
             <!-- SOCIOECONÔMICO -->
             <fieldset style="border:none; padding:0;">
                 <legend
-                    style="font-weight:600; color:#3b82f6; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
+                    style="font-weight:600; color:#2563eb; margin-bottom:.75rem; font-size:.9rem; text-transform:uppercase; letter-spacing:.05em;">
                     Socioeconômico &amp; Emergência
-                </legend>
+                 </legend>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem;">
                     <div class="form-group">
                         <label class="form-label" for="edit-escolaridade">Escolaridade</label>

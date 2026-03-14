@@ -94,12 +94,12 @@ $transition: 200ms ease;
     transition: color $transition, background $transition, opacity $transition;
 
     &:hover {
-        color: $primary-dk;
+        color: #7a6000;
         background: color.change($primary, $alpha: 0.05);
     }
 
     &.active {
-        color: $primary-dk;
+        color: #7a6000;
         font-weight: 700;
         background: transparent;
         position: relative;
@@ -151,6 +151,29 @@ $transition: 200ms ease;
     }
 }
 
+.mobile-only-cta {
+    display: none;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: $gray-700;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-left: auto; // empurra o hambúrguer pra direita junto dos contrroles de acessibilidade caso não haja espaço
+
+    &:focus-visible {
+        outline: 2px solid $primary;
+    }
+
+    .material-symbols-rounded {
+        font-size: 2rem;
+    }
+}
+
 // ── Main ───────────────────────────────────────────────────
 main {
     flex: 1;
@@ -161,7 +184,7 @@ main {
 .site-footer {
     background: $gray-900;
     border-top: 3px solid $primary;
-    padding: 2rem 1.5rem;
+    padding: 3rem 1.5rem 2rem;
 }
 
 .footer-inner {
@@ -170,47 +193,165 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.5rem;
+    gap: 2rem;
     text-align: center;
+}
+
+.footer-top {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .footer-brand {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 1rem;
+    font-size: 1.125rem;
     font-weight: 700;
     color: $white;
 
     .logo-icon {
-        font-size: 1.3rem;
+        font-size: 1.5rem;
         color: $primary;
     }
 }
 
 .footer-tagline {
-    font-size: 0.825rem;
-    color: color.change($white, $alpha: 0.6);
+    font-size: 0.9rem;
+    color: color.change($white, $alpha: 0.7);
     margin: 0;
 }
 
+.footer-social {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    a {
+        text-decoration: none;
+        color: $primary;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: color $transition, transform $transition;
+
+        &:hover {
+            color: $white;
+            transform: translateY(-2px);
+        }
+
+        &:focus-visible {
+            outline: 2px dashed $primary;
+            outline-offset: 4px;
+        }
+    }
+}
+
+.footer-bottom {
+    margin-top: 1rem;
+    padding-top: 2rem;
+    border-top: 1px solid color.change($white, $alpha: 0.1);
+    width: 100%;
+}
+
 .footer-copy {
-    font-size: 0.75rem;
-    color: color.change($white, $alpha: 0.4);
+    font-size: 0.8rem;
+    color: color.change($white, $alpha: 0.5);
     margin: 0;
 }
 
 // ── Responsivo ─────────────────────────────────────────────
-@media (max-width: 640px) {
-    .main-nav {
-        display: none;
-    }
-
+@media (max-width: 850px) {
     .header-inner {
+        height: 80px;
+        gap: 1rem;
         justify-content: space-between;
     }
 
+    // Esconde o botão grande para dar espaço aos controles de A11y e ao logo
+    .desktop-only-cta {
+        display: none;
+    }
+
+    .mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .logo-img {
+        height: 60px;
+    }
+
+    .main-nav {
+        display: none; // Escondido por default no mobile
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: $white;
+        border-bottom: 3px solid $primary;
+        padding: 1rem 1.5rem 2rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        z-index: 99;
+
+        &.is-open {
+            display: flex;
+            animation: slideDown 0.2s ease-out forwards;
+        }
+
+        .nav-link {
+            width: 100%;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.1rem;
+
+            &.active {
+                background: color.change($primary, $alpha: 0.1);
+                border-radius: 8px;
+
+                &::after {
+                    display: none;
+                }
+            }
+        }
+
+        .mobile-only-cta {
+            display: inline-flex;
+            margin-top: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 640px) {
     .logo-text {
         font-size: 0.875rem;
+    }
+
+    .a11y-controls {
+        gap: 0.15rem;
+
+        .a11y-btn {
+            padding: 0.4rem;
+            font-size: 0.8rem;
+        }
     }
 }

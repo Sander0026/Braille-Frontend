@@ -1,18 +1,20 @@
 <!-- Skip link de acessibilidade -->
-<a href="#login-form" class="skip-to-content">Pular para o formulário de login</a>
+<nav aria-label="Acesso Rápido">
+  <a href="#login-form" class="skip-to-content" style="z-index: 9999;">Pular para o formulário de login</a>
+</nav>
 
-<div class="login-wrapper" role="main">
+<main class="login-wrapper">
 
   <div class="form-panel">
     <div class="form-card">
 
-      <header class="form-heading">
+      <div class="form-heading">
         <div class="logo-container">
           <img src="favicon.ico" alt="Logo Instituto Luiz Braille" class="login-logo" />
         </div>
         <h1>Sistema Administrativo</h1>
         <p>Acesso restrito ao painel institucional</p>
-      </header>
+      </div>
 
       <!-- Alerta de erro -->
       @if (erroLogin) {
@@ -41,10 +43,11 @@
             <input id="username" type="text" class="input-field has-icon-left"
               [class.is-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
               formControlName="username" placeholder="" autocomplete="username" aria-required="true"
-              [attr.aria-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" />
+              [attr.aria-invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+              [attr.aria-describedby]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched ? 'erro-login-username' : null" />
           </div>
           @if (loginForm.get('username')?.invalid && loginForm.get('username')?.touched) {
-          <span class="form-error" role="alert">Campo obrigatório</span>
+          <span id="erro-login-username" class="form-error" role="alert">Campo obrigatório</span>
           }
         </div>
 
@@ -60,7 +63,8 @@
               class="input-field password-field has-icon-left"
               [class.is-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched"
               formControlName="senha" placeholder="" autocomplete="current-password" aria-required="true"
-              [attr.aria-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched" />
+              [attr.aria-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched"
+              [attr.aria-describedby]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched ? 'erro-login-senha' : null" />
             <button type="button" class="toggle-password-btn" (click)="toggleSenha()"
               aria-label="Alternar visibilidade da senha">
               @if (mostrarSenha) {
@@ -81,13 +85,19 @@
             </button>
           </div>
           @if (loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched) {
-          <span class="form-error" role="alert">Campo obrigatório</span>
+          <span id="erro-login-senha" class="form-error" role="alert">Campo obrigatório</span>
           }
         </div>
 
         <!-- Botão Submit -->
-        <button type="submit" class="submit-btn" [disabled]="loginForm.invalid || carregando"
-          [attr.aria-busy]="carregando" aria-label="Acessar o painel administrativo">
+        <!-- [disabled] removido: impedia foco via Tab e ativação por Enter (WCAG 2.1.1) -->
+        <!-- aria-disabled comunica o estado sem bloquear a interação por teclado -->
+        <button type="submit" class="submit-btn"
+          [class.is-loading]="carregando"
+          [attr.aria-disabled]="loginForm.invalid || carregando"
+          [attr.aria-busy]="carregando"
+          [attr.aria-describedby]="loginForm.invalid ? 'login-hint-validacao' : null"
+          aria-label="Acessar o painel administrativo">
           @if (carregando) {
           <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
@@ -99,6 +109,9 @@
           <span>Acessar plataforma</span>
           }
         </button>
+        <span id="login-hint-validacao" class="sr-only" role="status">
+          Preencha os campos de login e senha para continuar.
+        </span>
 
       </form>
       } @else {
@@ -118,10 +131,13 @@
           <div class="input-wrapper">
             <input id="novaSenha" type="password" class="input-field"
               [class.is-invalid]="novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched"
-              formControlName="novaSenha" placeholder="Mínimo 8 caracteres" aria-required="true" />
+              formControlName="novaSenha" placeholder="Mínimo 8 caracteres" aria-required="true"
+              [attr.aria-invalid]="novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched"
+              [attr.aria-describedby]="novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched ? 'erro-reset-senha' : 'hint-nova-senha'" />
           </div>
+          <span id="hint-nova-senha" class="sr-only">A senha precisa ter pelo menos 8 caracteres.</span>
           @if (novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched) {
-          <span class="form-error" role="alert">A senha precisa ter pelo menos 8 caracteres</span>
+          <span id="erro-reset-senha" class="form-error" role="alert">A senha precisa ter pelo menos 8 caracteres</span>
           }
         </div>
 
@@ -131,10 +147,12 @@
           <div class="input-wrapper">
             <input id="confirmarSenha" type="password" class="input-field"
               [class.is-invalid]="(novaSenhaForm.get('confirmarSenha')?.invalid || novaSenhaForm.errors?.['mismatch']) && novaSenhaForm.get('confirmarSenha')?.touched"
-              formControlName="confirmarSenha" placeholder="Repita a senha" aria-required="true" />
+              formControlName="confirmarSenha" placeholder="Repita a senha" aria-required="true"
+              [attr.aria-invalid]="novaSenhaForm.errors?.['mismatch'] && novaSenhaForm.get('confirmarSenha')?.touched"
+              [attr.aria-describedby]="novaSenhaForm.errors?.['mismatch'] && novaSenhaForm.get('confirmarSenha')?.touched ? 'erro-reset-confirmar' : null" />
           </div>
           @if (novaSenhaForm.errors?.['mismatch'] && novaSenhaForm.get('confirmarSenha')?.touched) {
-          <span class="form-error" role="alert">As senhas não coincidem</span>
+          <span id="erro-reset-confirmar" class="form-error" role="alert">As senhas não coincidem</span>
           }
         </div>
 
@@ -156,4 +174,4 @@
     </div>
   </div>
 
-</div>
+</main>

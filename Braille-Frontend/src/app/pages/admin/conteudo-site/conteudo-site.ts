@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -8,15 +8,17 @@ import { ActivatedRoute } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { environment } from '../../../../environments/environment';
 import { ComunicadosLista } from '../comunicados/comunicados-lista/comunicados-lista';
+import { QuillModule } from 'ngx-quill';
 
 @Component({
   selector: 'app-conteudo-site',
-  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista],
+  imports: [CommonModule, ReactiveFormsModule, ComunicadosLista, QuillModule],
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })
 export class ConteudoSite implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
+  private observer!: MutationObserver;
   abaAtiva = 'config';
 
   // ── Forms existentes ──────────────────────────────────────
@@ -25,6 +27,7 @@ export class ConteudoSite implements OnInit, OnDestroy {
   formMissao!: FormGroup;
   formOficinas!: FormGroup;
   formDepoimentos!: FormGroup;
+  formFaq!: FormGroup;
 
   // ── Forms da aba Sobre ────────────────────────────────────
   formSobreHero!: FormGroup;
@@ -32,6 +35,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
   formSobreTimeline!: FormGroup;
   formSobreEquipe!: FormGroup;
   formSobreCta!: FormGroup;
+
+  // ── Forms de Contato / Dados Globais ──────────────────────
+  formContato!: FormGroup;
 
   // ── Estado ────────────────────────────────────────────────
   carregando = false;
@@ -47,6 +53,7 @@ export class ConteudoSite implements OnInit, OnDestroy {
   // Modais de Exclusão — existentes
   oficinaParaExcluir: number | null = null;
   depoimentoParaExcluir: number | null = null;
+  faqParaExcluir: number | null = null;
   logoParaExcluir: boolean = false;
 
   // Modais de Exclusão — Sobre
@@ -58,7 +65,8 @@ export class ConteudoSite implements OnInit, OnDestroy {
     private siteConfig: SiteConfigService,
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private el: ElementRef
   ) { }
 
   ngOnInit() {
@@ -70,6 +78,10 @@ export class ConteudoSite implements OnInit, OnDestroy {
         this.setAba(params['aba']);
       }
     });
+
+    // Acessibilidade: Intercepta a renderização assíncrona do QuillJS para injetar ARIA e TITLE nas ferramentas
+    this.observer = new MutationObserver(() => this.corrigirAcessibilidadeQuill());
+    this.observer.observe(this.el.nativeElement, { childList: true, subtree: true });
   }
 
   setAba(aba: string) {
@@ -124,6 +136,7 @@ export class ConteudoSite implements OnInit, OnDestroy {
 
     this.formOficinas = this.fb.group({ lista: this.fb.array([]) });
     this.formDepoimentos = this.fb.group({ lista: this.fb.array([]) });
+    this.formFaq = this.fb.group({ lista: this.fb.array([]) });
 
     // ── Sobre ─────────────────────────────────────────────────
     this.formSobreHero = this.fb.group({
@@ -146,11 +159,24 @@ export class ConteudoSite implements OnInit, OnDestroy {
       titulo: [''],
       descricao: [''],
     });
+
+    this.formContato = this.fb.group({
+      telefoneCentral: [''],
+      emailOficial: [''],
+      enderecoCompleto: [''],
+      heroDescricaoContato: [''],
+      instagram: [''],
+      facebook: [''],
+      youtube: [''],
+      linkedin: [''],
+      footerDireitos: [''],
+    });
   }
 
   // ── Getters FormArray ─────────────────────────────────────
   get oficinasArray(): FormArray { return this.formOficinas.get('lista') as FormArray; }
   get depoimentosArray(): FormArray { return this.formDepoimentos.get('lista') as FormArray; }
+  get faqArray(): FormArray { return this.formFaq.get('lista') as FormArray; }
   get timelineArray(): FormArray { return this.formSobreTimeline.get('lista') as FormArray; }
   get equipeArray(): FormArray { return this.formSobreEquipe.get('lista') as FormArray; }
 
@@ -187,6 +213,23 @@ export class ConteudoSite implements OnInit, OnDestroy {
     if (this.depoimentoParaExcluir !== null) {
       this.depoimentosArray.removeAt(this.depoimentoParaExcluir);
       this.depoimentoParaExcluir = null;
+    }
+  }
+
+  // ── FAQ ───────────────────────────────────────────
+  adicionarFaq(pergunta = '', resposta = '') {
+    this.faqArray.push(this.fb.group({
+      pergunta: [pergunta, Validators.required],
+      resposta: [resposta, Validators.required],
+    }));
+  }
+
+  removerFaq(index: number) { this.faqParaExcluir = index; }
+  cancelarExclusaoFaq() { this.faqParaExcluir = null; }
+  confirmarExclusaoFaq() {
+    if (this.faqParaExcluir !== null) {
+      this.faqArray.removeAt(this.faqParaExcluir);
+      this.faqParaExcluir = null;
     }
   }
 
@@ -277,6 +320,17 @@ export class ConteudoSite implements OnInit, OnDestroy {
         } catch { this.adicionarDepoimento(); }
       } else { this.adicionarDepoimento(); }
 
+      // FAQ
+      const faq = secoes['faq'];
+      if (faq?.['lista']) {
+        try {
+          const lista = JSON.parse(faq['lista']);
+          lista.length > 0
+            ? lista.forEach((item: any) => this.adicionarFaq(item.pergunta, item.resposta))
+            : this.adicionarFaq();
+        } catch { this.adicionarFaq(); }
+      } else { this.adicionarFaq(); }
+
       // Sobre — Hero
       const sobreHero = secoes['sobre_hero'];
       if (sobreHero && Object.keys(sobreHero).length > 0) this.formSobreHero.patchValue(sobreHero);
@@ -310,12 +364,38 @@ export class ConteudoSite implements OnInit, OnDestroy {
       // Sobre — CTA
       const sobreCta = secoes['sobre_cta'];
       if (sobreCta && Object.keys(sobreCta).length > 0) this.formSobreCta.patchValue(sobreCta);
+
+      // Contato e Dados Globais
+      const contatoConfig = secoes['contato_global'];
+      if (contatoConfig && Object.keys(contatoConfig).length > 0) this.formContato.patchValue(contatoConfig);
     });
   }
 
   ngOnDestroy() {
+    if (this.observer) this.observer.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  // ── Acessibilidade ────────────────────────────────────────
+  private corrigirAcessibilidadeQuill() {
+    // Procura todos os seletores dropdown do Quill que não tenham aria-label
+    const pickers = document.querySelectorAll('.ql-picker-label:not([aria-label])');
+    pickers.forEach((picker) => {
+      const parent = picker.parentElement;
+      const type = parent?.className.match(/ql-(header|size|font|color|background|align)/)?.[1];
+      const labels: Record<string, string> = {
+        'header': 'Nível do Título',
+        'size': 'Tamanho da fonte',
+        'font': 'Família da fonte',
+        'color': 'Cor do texto',
+        'background': 'Cor de fundo do texto',
+        'align': 'Alinhamento do texto'
+      };
+      const label = type ? labels[type] : 'Opções de formatação do editor';
+      picker.setAttribute('aria-label', label);
+      picker.setAttribute('title', label);
+    });
   }
 
   // ── Salvar ────────────────────────────────────────────────
@@ -344,6 +424,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
   salvarSobreHero() { this.salvarSecaoValorUnico('sobre_hero', this.formSobreHero.value); }
   salvarSobreHistoria() { this.salvarSecaoValorUnico('sobre_historia', this.formSobreHistoria.value); }
   salvarSobreCta() { this.salvarSecaoValorUnico('sobre_cta', this.formSobreCta.value); }
+
+  // Contato / Global
+  salvarContato() { this.salvarSecaoValorUnico('contato_global', this.formContato.value); }
 
   salvarSobreTimeline() {
     if (this.formSobreTimeline.invalid) return;
@@ -427,6 +510,17 @@ export class ConteudoSite implements OnInit, OnDestroy {
     });
   }
 
+  salvarFaq() {
+    if (this.formFaq.invalid) return;
+    this.salvando = true;
+    this.limparMensagens();
+    const lista = this.formFaq.value.lista;
+    this.siteConfig.salvarSecao('faq', [{ chave: 'lista', valor: JSON.stringify(lista) }]).subscribe({
+      next: () => this.tratarSucesso('faq'),
+      error: () => this.tratarErro('faq'),
+    });
+  }
+
   // ── Helpers privados ──────────────────────────────────────
   private salvarSecaoValorUnico(secao: string, values: any) {
     this.salvando = true;
@@ -451,7 +545,9 @@ export class ConteudoSite implements OnInit, OnDestroy {
       'sobre_cta': 'Chamada para Ação (Sobre)',
       'missao': 'Missão & Valores',
       'oficinas': 'Oficinas',
-      'depoimentos': 'Depoimentos'
+      'depoimentos': 'Depoimentos',
+      'faq': 'Perguntas Frequentes (FAQ)',
+      'contato_global': 'Contato e Redes Sociais'
     };
     return mapa[nome] || nome.toUpperCase();
   }

@@ -1,12 +1,16 @@
 <!-- ══════════ CONTATO — HERO ══════════ -->
 <section class="page-hero" aria-labelledby="contato-titulo">
-    <div class="page-hero-inner">
+    <div class="page-hero-inner" *ngIf="contatoConfig$ | async as config">
         <p class="page-eyebrow">Fale Conosco</p>
         <h1 id="contato-titulo" class="page-hero-title">Entre em contato</h1>
+        @if (config?.heroDescricaoContato) {
+        <div class="page-hero-desc" [innerHTML]="config.heroDescricaoContato"></div>
+        } @else {
         <p class="page-hero-desc">
             Preencha o formulário e nossa secretaria entrará em contato com você
             para oferecer orientações e agendamentos.
         </p>
+        }
     </div>
 </section>
 
@@ -15,14 +19,14 @@
     <div class="contato-inner">
 
         <!-- Infos de contato direto -->
-        <aside class="contato-info" aria-label="Informações de contato">
+        <aside class="contato-info" aria-label="Informações de contato" *ngIf="contatoConfig$ | async as config">
             <h2 class="info-titulo">Outras formas de contato</h2>
 
             <div class="info-item">
                 <span class="info-icon" aria-hidden="true">📍</span>
                 <div>
                     <strong>Endereço</strong>
-                    <p>Rua Exemplo, 123 — Centro<br>Cidade — Estado</p>
+                    <p>{{ config?.enderecoCompleto || 'Rua Exemplo, 123 — Centro, Cidade — Estado' }}</p>
                 </div>
             </div>
 
@@ -30,8 +34,8 @@
                 <span class="info-icon" aria-hidden="true">📞</span>
                 <div>
                     <strong>Telefone</strong>
-                    <p>(XX) XXXX-XXXX</p>
-                    <p class="info-hint">Seg a Sex — 8h às 17h</p>
+                    <p>{{ config?.telefoneCentral || '(XX) XXXX-XXXX' }}</p>
+                    <p class="info-hint">Atendimento em horário comercial</p>
                 </div>
             </div>
 
@@ -39,7 +43,7 @@
                 <span class="info-icon" aria-hidden="true">✉️</span>
                 <div>
                     <strong>E-mail</strong>
-                    <p>contato&#64;institutobraille.org.br</p>
+                    <p>{{ config?.emailOficial || 'contato@institutobraille.org.br' }}</p>
                 </div>
             </div>
 
@@ -53,11 +57,11 @@
         </aside>
 
         <!-- Formulário -->
-        <div class="contato-form-wrap" role="main">
+        <div class="contato-form-wrap">
 
             <!-- Estado: sucesso -->
             @if (enviado) {
-            <div class="success-state" role="region" aria-label="Mensagem enviada com sucesso">
+            <section class="success-state" aria-label="Mensagem enviada com sucesso" aria-live="polite">
                 <div class="success-icon" aria-hidden="true">✅</div>
                 <h2>Mensagem enviada!</h2>
                 <p>
@@ -67,7 +71,7 @@
                 <button class="btn-primary" (click)="novoContato()">
                     Enviar outra mensagem
                 </button>
-            </div>
+            </section>
 
             } @else {
 
@@ -103,7 +107,9 @@
                         <input type="email" id="cEmail" name="email" [(ngModel)]="form.email"
                             (blur)="marcarTocado('email')" class="form-input" [class.invalid]="isCampoInvalido('email')"
                             placeholder="seu@email.com" autocomplete="email"
-                            [attr.aria-invalid]="isCampoInvalido('email')" aria-describedby="contato-hint" />
+                            aria-required="true"
+                            aria-describedby="contato-hint"
+                            [attr.aria-invalid]="isCampoInvalido('email')" />
                     </div>
 
                     <div class="form-group">
@@ -111,6 +117,8 @@
                         <input type="tel" id="cTelefone" name="telefone" [value]="form.telefone"
                             (input)="aplicarMascaraTelefone($event)" (blur)="marcarTocado('telefone')"
                             class="form-input" placeholder="(XX) XXXXX-XXXX" autocomplete="tel" inputmode="numeric"
+                            aria-required="true"
+                            aria-describedby="contato-hint"
                             maxlength="15" />
                     </div>
                 </div>
@@ -149,16 +157,15 @@
                         (blur)="marcarTocado('mensagem')" class="form-input"
                         [class.invalid]="isCampoInvalido('mensagem')" rows="5"
                         placeholder="Descreva sua dúvida, solicitação ou comentário..." aria-required="true"
-                        [attr.aria-invalid]="isCampoInvalido('mensagem')"></textarea>
+                        [attr.aria-invalid]="isCampoInvalido('mensagem')" tabEscape></textarea>
                     @if (isCampoInvalido('mensagem')) {
                     <span class="field-error" role="alert">Mensagem muito curta (mínimo 10 caracteres).</span>
                     }
                 </div>
 
                 <!-- Submit -->
-                <button type="submit" class="btn-primary btn-full" [disabled]="enviando" [attr.aria-busy]="enviando"
-                    aria-label="Enviar mensagem para o instituto">
-                    @if (enviando) { ⏳ Enviando... }
+                <button type="submit" class="btn-primary btn-full" [disabled]="enviando" [attr.aria-busy]="enviando">
+                    @if (enviando) { <span aria-live="polite" aria-atomic="true">⏳ Enviando...</span> }
                     @else { 📨 Enviar Mensagem }
                 </button>
 

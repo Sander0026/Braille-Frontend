@@ -4,18 +4,23 @@
   <header class="site-header" role="banner">
     <div class="header-inner">
       <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
-        <img src="favicon.ico" alt="Logotipo do Instituto Luiz Braille" class="logo-img" />
+        <img src="favicon.ico" alt="" class="logo-img" role="presentation" />
       </a>
 
-      <nav class="main-nav" role="navigation" aria-label="Navegação principal">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link">Início</a>
-        <a routerLink="/sobre" routerLinkActive="active" class="nav-link">Sobre</a>
-        <a routerLink="/noticias" routerLinkActive="active" class="nav-link">Notícias</a>
-        <a routerLink="/contato" routerLinkActive="active" class="nav-link">Contato</a>
+      <nav class="main-nav" [class.is-open]="isMobileMenuOpen" role="navigation" aria-label="Navegação principal">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link"
+          (click)="closeMobileMenu()">Início</a>
+        <a routerLink="/sobre" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Sobre</a>
+        <a routerLink="/noticias" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Notícias</a>
+        <a routerLink="/contato" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Contato</a>
+        <!-- CTA botão no menu apenas no mobile para facilitar acesso -->
+        <a routerLink="/contato" class="btn-inscricao mobile-only-cta" (click)="closeMobileMenu()">
+          Fale Conosco
+        </a>
       </nav>
 
       <!-- ── Controles de Acessibilidade ── -->
-      <div class="a11y-controls" role="group" aria-label="Controles de acessibilidade">
+      <nav class="a11y-controls" aria-label="Controles de acessibilidade">
         <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
           aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
         <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="fonteAtual === 'grande'"
@@ -26,11 +31,17 @@
           aria-label="Alternar alto contraste" title="Alto contraste">
           <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
         </button>
-      </div>
+      </nav>
 
-      <a routerLink="/contato" class="btn-inscricao" aria-label="Entre em contato conosco">
+      <a routerLink="/contato" class="btn-inscricao desktop-only-cta">
         Fale Conosco
       </a>
+
+      <!-- ── Botão Hamburger Mobile ── -->
+      <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen"
+        aria-label="Menu de navegação">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ isMobileMenuOpen ? 'close' : 'menu' }}</span>
+      </button>
     </div>
   </header>
 
@@ -38,18 +49,47 @@
     <router-outlet></router-outlet>
   </main>
 
-  <footer class="site-footer" role="contentinfo">
+  <footer class="site-footer" role="contentinfo" *ngIf="contatoConfig$ | async as config">
     <div class="footer-inner">
-      <div class="footer-brand">
-        <span class="logo-icon" aria-hidden="true">⬡</span>
-        <span>Instituto Luiz Braille</span>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo-icon" aria-hidden="true">⬡</span>
+          <span>Instituto Luiz Braille</span>
+        </div>
+        <p class="footer-tagline">
+          Inclusão, educação e autonomia para pessoas com deficiência visual.
+        </p>
       </div>
-      <p class="footer-tagline">
-        Inclusão, educação e autonomia para pessoas com deficiência visual.
-      </p>
-      <p class="footer-copy">
-        &copy; {{ currentYear }} Instituto Luiz Braille. Todos os direitos reservados.
-      </p>
+
+      <!-- Redes Sociais -->
+      <nav class="footer-social" aria-label="Redes sociais" role="navigation">
+        @if (config?.instagram) {
+          <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram">
+            <span class="social-icon">Instagram</span>
+          </a>
+        }
+        @if (config?.facebook) {
+          <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook">
+            <span class="social-icon">Facebook</span>
+          </a>
+        }
+        @if (config?.youtube) {
+          <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube">
+            <span class="social-icon">YouTube</span>
+          </a>
+        }
+        @if (config?.linkedin) {
+          <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <span class="social-icon">LinkedIn</span>
+          </a>
+        }
+      </nav>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          {{ config?.footerDireitos || '&copy; ' + currentYear + ' Instituto Luiz Braille. Todos os direitos reservados.' }}
+        </p>
+      </div>
     </div>
   </footer>
 </div><!-- /.public-shell -->

@@ -314,7 +314,7 @@
     .info-label {
         font-size: 0.8rem;
         font-weight: 600;
-        color: #6b7280;
+        color: #4b5563;
         text-transform: uppercase;
         letter-spacing: 0.04em;
         white-space: nowrap;
@@ -337,7 +337,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    color: #6b7280;
+    color: #4b5563;
     margin: 1.25rem 0 0.5rem 0;
     padding-bottom: 0.25rem;
     border-bottom: 1px solid #e5e7eb;
@@ -461,7 +461,7 @@
     padding: 0.75rem 1rem;
     font-size: 0.95rem;
     font-weight: 500;
-    color: #6b7280;
+    color: #4b5563;
     cursor: pointer;
     border-bottom: 2px solid transparent;
     transition: all 0.2s ease;
@@ -473,7 +473,7 @@
     }
 
     &.active {
-        color: #f5c800;
-        border-bottom-color: #f5c800;
+        color: #7a6000;
+        border-bottom-color: #7a6000;
     }
 }

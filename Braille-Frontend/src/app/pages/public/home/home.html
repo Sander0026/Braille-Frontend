@@ -1,7 +1,5 @@
-<a href="#main-content" class="sr-only sr-only-focusable">Pular para o conteúdo</a>
-
 <!-- ══════════ HERO ══════════ -->
-<section class="hero" aria-label="Seção de boas-vindas" id="main-content">
+<section class="hero" aria-label="Seção de boas-vindas">
     <div class="hero-inner">
         <div class="hero-content animate-on-scroll">
             <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>
@@ -9,14 +7,14 @@
                 {{ heroConfig['tituloLinha1'] || 'Mais do que inclusão' }}<br>
                 <span class="hero-highlight">{{ heroConfig['tituloDestaque'] || 'transformação' }}</span>
             </h1>
-            <p class="hero-desc">
+            <div class="hero-desc">
                 @if (heroConfig['descricao']) {
-                {{ heroConfig['descricao'] }}
+                <div [innerHTML]="heroConfig['descricao'] | safeHtml"></div>
                 } @else {
                 Há mais de 30 anos o <strong>Instituto Luiz Braille</strong> oferece educação, autonomia e oportunidades
                 para pessoas com deficiência visual em nossa comunidade.
                 }
-            </p>
+            </div>
             <div class="hero-actions">
                 <a routerLink="/contato" class="btn-hero-primary">
                     {{ heroConfig['btnPrimario'] || 'Fale Conosco' }}
@@ -61,11 +59,7 @@
                 <span class="material-symbols-rounded">flag</span>
             </div>
             <h2 class="mvv-titulo">Missão</h2>
-            <p class="mvv-desc">
-                {{ missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos
-                dedicada à reabilitação, educação e inclusão social de pessoas com deficiência visual. Oferecemos
-                serviços gratuitos de qualidade e compromisso com a dignidade.' }}
-            </p>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos dedicada à reabilitação, educação e inclusão social de pessoas com deficiência visual. Oferecemos serviços gratuitos de qualidade e compromisso com a dignidade.') | safeHtml"></div>
         </article>
 
         <!-- VISÃO -->
@@ -74,11 +68,7 @@
                 <span class="material-symbols-rounded">wb_sunny</span>
             </div>
             <h2 class="mvv-titulo">Visão</h2>
-            <p class="mvv-desc">
-                {{ missaoConfig['descricaoLinha2'] || 'Acreditamos que toda pessoa, independentemente de sua condição
-                visual, tem o direito a uma vida plena, produtiva e com autonomia. Nosso trabalho é tornar esse direito
-                real e presente no dia-a-dia de todos.' }}
-            </p>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha2'] || 'Acreditamos que toda pessoa, independentemente de sua condição visual, tem o direito a uma vida plena, produtiva e com autonomia. Nosso trabalho é tornar esse direito real e presente no dia-a-dia de todos.') | safeHtml"></div>
         </article>
 
         <!-- VALORES -->
@@ -111,15 +101,15 @@
             <p class="section-subtitle">Atividades gratuitas para pessoas com deficiência visual de todas as idades.</p>
         </div>
 
-        <div class="oficinas-grid" role="list" aria-label="Lista de oficinas">
+        <div class="oficinas-grid" role="region" aria-label="Lista de oficinas">
             @for (of of oficinas; track of.titulo) {
-            <article class="oficina-card animate-on-scroll" role="listitem" [class.delay-100]="$index % 3 === 1"
+            <article class="oficina-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
                 <div class="oficina-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
                 </div>
                 <h3 class="oficina-titulo">{{ of.titulo }}</h3>
-                <p class="oficina-desc">{{ of.descricao }}</p>
+                <div class="oficina-desc" [innerHTML]="of.descricao | safeHtml"></div>
             </article>
             } @empty {
             <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;">
@@ -149,11 +139,11 @@
     <div class="section-inner">
         <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll">O que nossos alunos dizem</h2>
 
-        <div class="dep-grid" role="list" aria-label="Depoimentos de alunos">
+        <div class="dep-grid" role="region" aria-label="Depoimentos de alunos">
             @for (dep of depoimentos; track dep.nome) {
-            <blockquote class="dep-card animate-on-scroll" role="listitem" [class.delay-100]="$index % 3 === 1"
+            <blockquote class="dep-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
-                <p class="dep-texto">"{{ dep.texto }}"</p>
+                <div class="dep-texto" [innerHTML]="dep.texto | safeHtml"></div>
                 <footer class="dep-autor">
                     <div class="dep-avatar" aria-hidden="true">{{ dep.nome.charAt(0) }}</div>
                     <div>
@@ -210,7 +200,7 @@
                 [class.delay-200]="$index === 2">
                 <figure class="card-noticia-img">
                     @if (item.imagemCapa) {
-                    <img [src]="item.imagemCapa | cloudinary" alt="Imagem: {{ item.titulo }}" loading="lazy" />
+                    <img [src]="item.imagemCapa | cloudinary" alt="{{ item.titulo }}" loading="lazy" />
                     } @else {
                     <div class="placeholder"><span class="material-symbols-rounded">article</span></div>
                     }
@@ -239,6 +229,32 @@
             <p>Nenhuma novidade publicada recentemente.</p>
         </div>
         }
+    </div>
+</section>
+
+<!-- ══════════ FAQ (PERGUNTAS FREQUENTES) ══════════ -->
+<section class="faq" aria-labelledby="faq-titulo">
+    <div class="section-inner">
+        <header class="section-header animate-on-scroll">
+            <h2 id="faq-titulo" class="section-title">Perguntas Frequentes</h2>
+            <p class="section-desc">Tire suas dúvidas sobre matrículas, horários e funcionamento do Instituto.</p>
+        </header>
+
+        <div class="faq-list">
+            @for (item of faq; track item.pergunta) {
+            <details class="faq-item animate-on-scroll" [class.delay-100]="$index === 1" [class.delay-200]="$index === 2">
+                <summary class="faq-pergunta">
+                    <span>{{ item.pergunta }}</span>
+                    <span class="material-symbols-rounded faq-icon" aria-hidden="true">expand_more</span>
+                </summary>
+                <div class="faq-resposta ql-content" [innerHTML]="item.resposta | safeHtml"></div>
+            </details>
+            } @empty {
+            <div class="feed-vazio">
+                <p>Nenhuma pergunta cadastrada no momento.</p>
+            </div>
+            }
+        </div>
     </div>
 </section>
 

@@ -5,8 +5,7 @@
   [class.sidebar-hidden]="sidebarState === 'hidden'">
 
   <!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
-  <aside class="sidebar" role="navigation" aria-label="Menu principal de administração"
-    [attr.aria-hidden]="sidebarState === 'hidden'">
+  <nav class="sidebar" aria-label="Menu principal de administração" [attr.aria-hidden]="sidebarState === 'hidden'">
 
     <div class="sidebar-logo" aria-hidden="true">
       <div class="logo-mark">IB</div>
@@ -15,9 +14,9 @@
       }
     </div>
 
-    <ul class="sidebar-nav" role="list">
+    <ul id="sidebar-nav" class="sidebar-nav">
       @for (item of rotasPermitidas; track item.rota) {
-      <li role="listitem">
+      <li>
         <a [routerLink]="item.rota" routerLinkActive="active" [attr.aria-label]="item.aria" class="nav-link"
           [attr.title]="!showLabels ? item.label : null">
           <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
@@ -36,14 +35,15 @@
         @if (showLabels) { <span class="nav-label">Sair</span> }
       </button>
     </div>
-  </aside>
+  </nav>
 
   <!-- ══ ÁREA PRINCIPAL ════════════════════════════════════════ -->
   <div class="main-area">
 
     <!-- Header -->
     <header class="admin-header" role="banner">
-      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel">
+      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel"
+        [attr.aria-expanded]="sidebarState !== 'hidden' ? 'true' : 'false'" aria-controls="sidebar-nav">
         <span class="material-symbols-rounded" aria-hidden="true">{{ toggleIcon }}</span>
       </button>
 
@@ -65,8 +65,8 @@
 
         <!-- ── Menu de Perfil ── -->
         <div class="user-menu-wrapper">
-          <button class="user-menu-btn" (click)="toggleMenu($event)" [attr.aria-expanded]="menuAberto"
-            aria-haspopup="menu" aria-label="Abrir menu de perfil">
+          <button class="user-menu-btn" (click)="toggleMenu($event)"
+            [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu" aria-label="Abrir menu de perfil">
 
             <!-- Avatar: foto ou iniciais -->
             @if (fotoPerfil) {
@@ -144,7 +144,8 @@
 
 <!-- ══ MODAL: TROCAR FOTO ═══════════════════════════════════════ -->
 @if (modalAtivo === 'foto') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -196,7 +197,8 @@
 
 <!-- ══ MODAL: TROCAR SENHA ══════════════════════════════════════ -->
 @if (modalAtivo === 'senha') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -221,9 +223,11 @@
         <div class="form-group">
           <label class="form-label" for="senha-atual">Senha atual</label>
           <input id="senha-atual" type="password" class="form-input" formControlName="senhaAtual"
-            autocomplete="current-password" placeholder="Digite sua senha atual" />
+            autocomplete="current-password" placeholder="Digite sua senha atual"
+            [attr.aria-invalid]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched"
+            [attr.aria-describedby]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched ? 'erro-senha-atual' : null" />
           @if (formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched) {
-          <p class="form-error">Campo obrigatório.</p>
+          <p id="erro-senha-atual" class="form-error">Campo obrigatório.</p>
           }
         </div>
 
@@ -231,9 +235,11 @@
         <div class="form-group">
           <label class="form-label" for="nova-senha">Nova senha</label>
           <input id="nova-senha" type="password" class="form-input" formControlName="novaSenha"
-            autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
+            autocomplete="new-password" placeholder="Mínimo 8 caracteres"
+            [attr.aria-invalid]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched"
+            [attr.aria-describedby]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched ? 'erro-nova-senha' : null" />
           @if (formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched) {
-          <p class="form-error">Mínimo de 8 caracteres.</p>
+          <p id="erro-nova-senha" class="form-error">Mínimo de 8 caracteres.</p>
           }
         </div>
 
@@ -241,9 +247,10 @@
         <div class="form-group">
           <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
           <input id="confirmar-senha" type="password" class="form-input" formControlName="confirmarSenha"
-            autocomplete="new-password" placeholder="Repita a nova senha" />
+            autocomplete="new-password" placeholder="Repita a nova senha" [attr.aria-invalid]="confirmacaoInvalida"
+            [attr.aria-describedby]="confirmacaoInvalida ? 'erro-confirmar-senha' : null" />
           @if (confirmacaoInvalida) {
-          <p class="form-error">As senhas não coincidem.</p>
+          <p id="erro-confirmar-senha" class="form-error" role="alert">As senhas não coincidem.</p>
           }
         </div>
 
@@ -272,8 +279,8 @@
 
 <!-- ══ MODAL: MEU PERFIL ═══════════════════════════════════════ -->
 @if (modalAtivo === 'perfil') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-titulo"
-  (click)="fecharModal()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -318,9 +325,9 @@
 
           <!-- Username readonly -->
           <div class="form-group">
-            <label class="form-label">Nome de usuário</label>
+            <span class="form-label">Nome de usuário</span>
             <input type="text" class="form-input form-input-readonly"
-              [value]="perfil?.username ?? usuario?.username ?? ''" readonly />
+              [value]="perfil?.username ?? usuario?.username ?? ''" aria-label="Nome de usuário" readonly />
             <p class="form-hint">O nome de usuário não pode ser alterado.</p>
           </div>
 
@@ -336,16 +343,17 @@
 
           <!-- Cargo readonly -->
           <div class="form-group">
-            <label class="form-label">Cargo / Perfil</label>
-            <input type="text" class="form-input form-input-readonly" [value]="labelCargo" readonly />
+            <span class="form-label">Cargo / Perfil</span>
+            <input type="text" class="form-input form-input-readonly" [value]="labelCargo" aria-label="Cargo ou Perfil"
+              readonly />
           </div>
 
           <!-- Membro desde -->
           @if (perfil?.criadoEm) {
           <div class="form-group">
-            <label class="form-label">Membro desde</label>
+            <span class="form-label">Membro desde</span>
             <input type="text" class="form-input form-input-readonly" [value]="perfil?.criadoEm | date:'dd/MM/yyyy'"
-              readonly />
+              aria-label="Membro desde a data" readonly />
           </div>
           }
 
@@ -383,6 +391,43 @@
       </button>
     </div>
 
+  </div>
+</div>
+}
+
+<!-- Modal Ajuda Atalhos (Alt+H) -->
+@if (modalAtivo === 'hotkeys') {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-content modal-md" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="modalHotkeysTitulo" style="display:flex; align-items:center; gap:0.5rem">
+        <span class="material-symbols-rounded">keyboard</span>
+        Atalhos de Teclado
+      </h2>
+      <button class="btn-close" (click)="fecharModal()" aria-label="Fechar atalhos">×</button>
+    </div>
+
+    <div class="modal-body" style="padding: 1.5rem">
+      <p style="margin-bottom: 1.5rem; color: #4b5563;">Use as seguintes combinações para navegar rapidamente pelo
+        sistema de qualquer tela.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 1rem;">
+        @for (hotkey of hotkeysDisponiveis; track hotkey.combo) {
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+          <strong style="color: #1f2937;">{{ hotkey.description }}</strong>
+          <kbd
+            style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.2rem 0.6rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; font-weight: bold; color: #111827;">{{
+            hotkey.combo.toUpperCase().replace('.', ' + ') }}</kbd>
+        </div>
+        }
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="fecharModal()">Entendi</button>
+    </div>
   </div>
 </div>
 }

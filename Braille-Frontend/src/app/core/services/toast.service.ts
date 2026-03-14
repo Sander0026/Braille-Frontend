@@ -18,7 +18,7 @@ export class ToastService {
 
     private nextId = 0;
 
-    mostrar(mensagem: string, tipo: ToastTipo = 'sucesso', duracaoMs = 3500): void {
+    mostrar(mensagem: string, tipo: ToastTipo = 'sucesso', duracaoMs = 6000): void {
         const id = ++this.nextId;
 
         // Narrar via ARIA Live Region para leitores de tela (NVDA, VoiceOver, JAWS)
@@ -38,7 +38,7 @@ export class ToastService {
     }
 
     sucesso(mensagem: string): void { this.mostrar(mensagem, 'sucesso'); }
-    erro(mensagem: string): void { this.mostrar(mensagem, 'erro', 5000); }
+    erro(mensagem: string): void { this.mostrar(mensagem, 'erro', 8000); }
     aviso(mensagem: string): void { this.mostrar(mensagem, 'aviso'); }
     info(mensagem: string): void { this.mostrar(mensagem, 'info'); }
 

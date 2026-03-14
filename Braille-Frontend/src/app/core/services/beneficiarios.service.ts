@@ -5,7 +5,8 @@ import { Observable, shareReplay } from 'rxjs';
 export interface Beneficiario {
     id: string;
     nomeCompleto: string;
-    cpfRg: string;
+    cpf: string | null;
+  rg: string | null;
     dataNascimento: string;
     genero?: string;
     estadoCivil?: string;
@@ -124,6 +125,17 @@ export class BeneficiariosService {
         return this.http.get<Beneficiario>(`${this.url}/${id}`);
     }
 
+    checkCpfRg(cpf?: string, rg?: string): Observable<
+        | { status: 'livre' }
+        | { status: 'ativo'; id: string; nomeCompleto: string; matricula: string | null }
+        | { status: 'inativo'; id: string; nomeCompleto: string; matricula: string | null; excluido: boolean }
+    > {
+        let params = new HttpParams();
+        if (cpf) params = params.set('cpf', cpf);
+        if (rg) params = params.set('rg', rg);
+        return this.http.get<any>(`${this.url}/check-cpf-rg`, { params });
+    }
+
     atualizar(id: string, dados: Partial<Beneficiario>): Observable<Beneficiario> {
         this.limparCache();
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);
@@ -176,5 +188,5 @@ export class BeneficiariosService {
 export interface ImportResult {
     importados: number;
     ignorados: number;
-    erros: { linha: number; cpfRg: string; motivo: string }[];
+    erros: { linha: number; documento: string; motivo: string }[];
 }

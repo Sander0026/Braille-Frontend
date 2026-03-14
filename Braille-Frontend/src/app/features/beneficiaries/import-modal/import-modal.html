@@ -1,6 +1,6 @@
 <div class="modal-overlay" (click)="fechar()">
     <div class="modal-box" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
-        aria-labelledby="import-title">
+        aria-labelledby="import-title" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
 
         <!-- Cabeçalho -->
         <div class="modal-header">
@@ -85,7 +85,7 @@
                                 @for (err of resultado.erros; track err.linha) {
                                 <tr>
                                     <td>{{ err.linha > 0 ? err.linha : '—' }}</td>
-                                    <td>{{ err.cpfRg || '—' }}</td>
+                                    <td>{{ err.documento || '—' }}</td>
                                     <td>{{ err.motivo }}</td>
                                 </tr>
                                 }

@@ -3,12 +3,14 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { BeneficiariosService, ReativacaoAluno } from '../../../../core/services/beneficiarios.service';
+import { A11yModule } from '@angular/cdk/a11y';
+import { TabEscapeDirective } from '../../../../shared/directives/tab-escape.directive';
 
 
 @Component({
   selector: 'app-cadastro-wizard',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule, ReactiveFormsModule, HttpClientModule, A11yModule, TabEscapeDirective],
   templateUrl: './cadastro-wizard.html',
   styleUrl: './cadastro-wizard.scss',
 })
@@ -20,10 +22,16 @@ export class CadastroWizard implements OnInit {
   mensagemFeedback = '';
   tipoFeedback: 'sucesso' | 'erro' | '' = '';
 
-  // Modal de Reativação de Aluno
+  // Modal de Reativoão de Aluno
   modalReativacao = false;
   dadosReativacao: ReativacaoAluno | null = null;
   _payloadPendente: Record<string, unknown> | null = null; // guarda dados para re-usar após reativar
+
+  // Validação CPF/RG em tempo real (blur)
+  cpfStatus: 'livre' | 'ativo' | 'inativo' | 'verificando' | '' = '';
+  cpfConflito: { nomeCompleto: string; matricula: string | null } | null = null;
+  rgStatus: 'livre' | 'ativo' | 'inativo' | 'verificando' | '' = '';
+  rgConflito: { nomeCompleto: string; matricula: string | null } | null = null;
 
 
   constructor(
@@ -35,6 +43,27 @@ export class CadastroWizard implements OnInit {
 
   ngOnInit(): void {
     this.iniciarFormulario();
+    this.monitorarCausaDeficiencia();
+  }
+
+  /** Desabilita "Idade em que ocorreu" quando a causa for CONGENITA */
+  private monitorarCausaDeficiencia(): void {
+    const causaCtrl = this.cadastroForm.get('perfilDeficiencia.causaDeficiencia');
+    const idadeCtrl = this.cadastroForm.get('perfilDeficiencia.idadeOcorrencia');
+    if (!causaCtrl || !idadeCtrl) return;
+
+    // Estado inicial (desabilitado se não for ADQUIRIDA)
+    const aplicar = (valor: string) => {
+      if (valor === 'ADQUIRIDA') {
+        idadeCtrl.enable();
+      } else {
+        idadeCtrl.disable();
+        idadeCtrl.setValue('');
+      }
+    };
+
+    aplicar(causaCtrl.value);
+    causaCtrl.valueChanges.subscribe(aplicar);
   }
 
   iniciarFormulario() {
@@ -42,7 +71,8 @@ export class CadastroWizard implements OnInit {
       dadosPessoais: this.fb.group({
         nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
         dataNascimento: ['', Validators.required],
-        cpfRg: ['', Validators.required],
+        cpf: [''],
+        rg: [''],
         genero: [''],
         estadoCivil: [''],
       }),
@@ -119,6 +149,76 @@ export class CadastroWizard implements OnInit {
     }
   }
 
+  // Validação dinâmica: um dos dois é obrigatório
+  verificarObrigatoriedadeCpfRg() {
+    const cpf = this.cadastroForm.get('dadosPessoais.cpf')?.value;
+    const rg = this.cadastroForm.get('dadosPessoais.rg')?.value;
+    
+    if (!cpf && !rg) {
+       this.cadastroForm.get('dadosPessoais.cpf')?.setErrors({ required: true });
+       this.cadastroForm.get('dadosPessoais.rg')?.setErrors({ required: true });
+    } else {
+       if (this.cadastroForm.get('dadosPessoais.cpf')?.hasError('required')) {
+         this.cadastroForm.get('dadosPessoais.cpf')?.setErrors(null);
+       }
+       if (this.cadastroForm.get('dadosPessoais.rg')?.hasError('required')) {
+         this.cadastroForm.get('dadosPessoais.rg')?.setErrors(null);
+       }
+    }
+  }
+
+  // Verifica CPF ou RG ao sair do campo (blur)
+  verificarCampoUnico(tipo: 'cpf' | 'rg') {
+    this.verificarObrigatoriedadeCpfRg();
+
+    const valor = this.cadastroForm.get(`dadosPessoais.${tipo}`)?.value ?? '';
+    const limpo = tipo === 'cpf' ? valor.replace(/\D/g, '') : valor.trim();
+    
+    if (!limpo) { 
+        if (tipo === 'cpf') { this.cpfStatus = ''; this.cpfConflito = null; }
+        else { this.rgStatus = ''; this.rgConflito = null; }
+        return; 
+    }
+
+    if (tipo === 'cpf') { this.cpfStatus = 'verificando'; this.cpfConflito = null; }
+    else { this.rgStatus = 'verificando'; this.rgConflito = null; }
+    this.cdr.detectChanges();
+
+    const request = tipo === 'cpf' 
+      ? this.beneficiariosService.checkCpfRg(limpo, undefined)
+      : this.beneficiariosService.checkCpfRg(undefined, limpo);
+
+    request.subscribe({
+      next: (res) => {
+        if (tipo === 'cpf') this.cpfStatus = res.status;
+        else this.rgStatus = res.status;
+
+        if (res.status === 'ativo') {
+          const conflito = { nomeCompleto: res.nomeCompleto, matricula: res.matricula };
+          if (tipo === 'cpf') this.cpfConflito = conflito; else this.rgConflito = conflito;
+          this.anunciarParaLeitorDeTela(`${tipo.toUpperCase()} já pertence ao aluno ativo: ${res.nomeCompleto}.`);
+        } else if (res.status === 'inativo') {
+          this.dadosReativacao = {
+            _reativacao: true,
+            id: res.id,
+            nomeCompleto: res.nomeCompleto,
+            matricula: res.matricula ?? undefined,
+            statusAtivo: false,
+            excluido: res.excluido,
+            message: 'Aluno inativo/excluído encontrado',
+          };
+          this.modalReativacao = true;
+          this.anunciarParaLeitorDeTela(`Aluno inativo encontrado: ${res.nomeCompleto}. Deseja reativar?`);
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => { 
+        if (tipo === 'cpf') this.cpfStatus = ''; else this.rgStatus = '';
+        this.cdr.detectChanges(); 
+      },
+    });
+  }
+
   // Máscara de CPF / RG
   formatarDocumento(event: any) {
     const input = event.target;
@@ -127,9 +227,11 @@ export class CadastroWizard implements OnInit {
     if (valor.length > 11) valor = valor.substring(0, 11);
 
     if (valor.length <= 9) {
-      valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
-      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-      valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      if (valor.length === 9) {
+        valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1})/, '$1.$2.$3-$4');
+      } else {
+        valor = valor.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+      }
     } else {
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
       valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
@@ -137,7 +239,16 @@ export class CadastroWizard implements OnInit {
     }
 
     input.value = valor;
-    this.cadastroForm.get('dadosPessoais.cpfRg')?.setValue(valor, { emitEvent: false });
+    this.cadastroForm.get('dadosPessoais.cpf')?.setValue(valor, { emitEvent: false });
+    this.verificarObrigatoriedadeCpfRg();
+  }
+
+  // Permite digitar o RG, formatando apenas bloqueando caracteres bizarros ou com máscara definida se desejar
+  formatarRg(event: any) {
+     const input = event.target;
+     // Deixa livre por enquanto mas atualiza o form
+     this.cadastroForm.get('dadosPessoais.rg')?.setValue(input.value, { emitEvent: false });
+     this.verificarObrigatoriedadeCpfRg();
   }
 
   // Máscara de Telefone
@@ -175,6 +286,16 @@ export class CadastroWizard implements OnInit {
   avancarPasso() {
     const grupoAtual = this.getGroupName(this.passoAtual);
     const formGrupo = this.cadastroForm.get(grupoAtual);
+
+    // Bloqueia avanço se CPF ou RG conflitou com aluno ativo
+    if (this.passoAtual === 1 && (this.cpfStatus === 'ativo' || this.rgStatus === 'ativo')) {
+      this.anunciarParaLeitorDeTela('Não é possível avançar. Já existe um aluno ativo com este documento.');
+      return;
+    }
+
+    if (this.passoAtual === 1) {
+       this.verificarObrigatoriedadeCpfRg();
+    }
 
     if (formGrupo?.valid) {
       this.passoAtual++;
@@ -221,7 +342,8 @@ export class CadastroWizard implements OnInit {
 
     const payloadBackend = {
       ...formValues.dadosPessoais,
-      cpfRg: limparSinais(formValues.dadosPessoais.cpfRg),
+      cpf: limparSinais(formValues.dadosPessoais.cpf),
+      rg: formValues.dadosPessoais.rg?.trim(),
       ...formValues.enderecoLocalizacao,
       cep: limparSinais(formValues.enderecoLocalizacao.cep),
       telefoneContato: limparSinais(formValues.enderecoLocalizacao.telefoneContato),

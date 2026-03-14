@@ -6,7 +6,7 @@ $primary: #f5c800;
 $black: #1a1a00;
 $success: #16a34a;
 $danger: #dc2626;
-$neutral: #737373;
+$neutral: #525252;
 $gray-100: #f5f5f5;
 $gray-200: #e5e5e5;
 $gray-400: #a3a3a3;
@@ -315,7 +315,7 @@ $transition: 200ms ease;
     border: none;
     cursor: pointer;
     font-size: 1.1rem;
-    color: $gray-400;
+    color: $gray-600;
     padding: 0.25rem;
     border-radius: 0.25rem;
     transition: color $transition;
@@ -412,8 +412,11 @@ $transition: 200ms ease;
         border-bottom: none;
     }
 
-    &:hover {
+    &:hover,
+    &.active-item {
         background: $gray-100;
+        border-left: 3px solid $primary;
+        padding-left: calc(1rem - 3px);
     }
 }
 
@@ -645,7 +648,7 @@ $transition: 200ms ease;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        color: #6b7280;
+        color: #4b5563;
         margin: 0 0 0.875rem;
     }
 }
@@ -676,4 +679,3 @@ $transition: 200ms ease;
         flex: 1;
     }
 }
-

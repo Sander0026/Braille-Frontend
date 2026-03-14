@@ -76,6 +76,11 @@ export class FrequenciasService {
         return this.http.patch<Frequencia>(`${this.url}/${id}`, dados);
     }
 
+    salvarLote(turmaId: string, dataAula: string, alunos: { alunoId: string; presente: boolean, frequenciaId?: string }[]): Observable<any> {
+        this.limparCache();
+        return this.http.post<any>(`${this.url}/lote`, { turmaId, dataAula, alunos });
+    }
+
     excluir(id: string): Observable<any> {
         this.limparCache();
         return this.http.delete(`${this.url}/${id}`);

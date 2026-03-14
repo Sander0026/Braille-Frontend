@@ -26,7 +26,7 @@
 
 <!-- Estado de carregamento -->
 @if (isLoading) {
-<div class="table-loading" role="status" aria-live="polite">
+<div class="table-loading" role="status" aria-live="polite" aria-busy="true">
     <div class="loading-spinner" aria-hidden="true"></div>
     <span>Carregando usuários...</span>
 </div>
@@ -38,7 +38,7 @@
 } @else {
 <!-- Abas de Navegação — sempre visíveis após carregar -->
 <div class="tabs-container" role="navigation" aria-label="Filtro de status de usuário">
-    <div class="tabs">
+    <div class="tabs" role="tablist">
         <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
             [attr.aria-selected]="abaAtiva === 'ativos'" role="tab">
             Ativos
@@ -70,7 +70,7 @@
         </thead>
         <tbody>
             @for (usuario of usuarios; track usuario.id) {
-            <tr>
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr" [class.linha-inativa]="!usuario.statusAtivo">
                 <td>
                     <div class="user-cell">
                         @if (usuario.fotoPerfil) {
@@ -103,7 +103,7 @@
                         [attr.aria-label]="'Excluir usuário ' + usuario.nome">Excluir</button>
                     } @else {
                     <button class="btn btn-sm"
-                        style="background-color: #10b981; color: white; border: none; margin-right: 0.5rem;"
+                        style="background-color: #047857; color: white; border: none; margin-right: 0.5rem;"
                         (click)="restaurarConta(usuario)"
                         [attr.aria-label]="'Restaurar usuário ' + usuario.nome">Restaurar</button>
                     <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(usuario)"
@@ -136,7 +136,7 @@
 <!-- Modal de edição -->
 @if (usuarioEmEdicao) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Editar usuário ' + usuarioEmEdicao.nome"
-    (click)="fecharModal()">
+    (click)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo">Editar Usuário</h2>
@@ -252,7 +252,8 @@
 
 <!-- Modal de Perfil do Usuário -->
 @if (usuarioVisualizado) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" (click)="fecharPerfil()">
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="perfil-titulo" (click)="fecharPerfil()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="perfil-titulo">Perfil do Usuário</h2>
@@ -319,7 +320,7 @@
                 <div class="profile-section">
                     <h4>Contato</h4>
                     <p><strong>Telefone:</strong> {{ usuarioVisualizado.telefone || 'Não informado' }}</p>
-                    <p><strong>CPF:</strong> {{ usuarioVisualizado.cpf || 'Não informado' }}</p>
+                    <p><strong>CPF:</strong> {{ (usuarioVisualizado.cpf | cpfRg) || 'Não informado' }}</p>
                 </div>
 
                 <!-- Endereço -->
@@ -368,10 +369,11 @@
 <!-- Modal de Confirmação de Exclusão -->
 @if (usuarioParaExcluir) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Excluir usuário ' + usuarioParaExcluir.nome" (click)="cancelarExclusao()">
+    [attr.aria-label]="'Excluir usuário ' + usuarioParaExcluir.nome" (click)="cancelarExclusao()" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Usuário</h2>
+            <h2 id="modal-titulo-exclusao" style="color: #b91c1c;">Excluir Usuário</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()"
                 aria-label="Cancelar exclusão">✕</button>
         </div>
@@ -385,7 +387,7 @@
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusao()"
                 [disabled]="salvando">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusao()" [disabled]="salvando"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Excluindo... }
                 @else { Excluir Usuário }
             </button>
@@ -397,7 +399,8 @@
 <!-- Modal de Confirmação de Reset de Senha -->
 @if (usuarioParaResetar) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Resetar senha do usuário ' + usuarioParaResetar.nome" (click)="cancelarReset()">
+    [attr.aria-label]="'Resetar senha do usuário ' + usuarioParaResetar.nome" (click)="cancelarReset()" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-reset" style="color: #fbbf24;">Resetar Senha</h2>
@@ -427,7 +430,7 @@
 @if (usuarioParaExcluirDefinitivo) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
     [attr.aria-label]="'Excluir definitivamente o usuário ' + usuarioParaExcluirDefinitivo.nome"
-    (click)="cancelarExclusaoDefinitiva()">
+    (click)="cancelarExclusaoDefinitiva()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro</h2>
@@ -440,7 +443,7 @@
                     usuarioParaExcluirDefinitivo.nome }}</strong>.</p>
             <p>Os conteúdos antigos dessa pessoa (notícias, turmas) <strong>serão preservados</strong>, mas o cadastro
                 sumirá do sistema.</p>
-            <p style="color: #ef4444; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
+            <p style="color: #b91c1c; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
         </div>
 
         <div class="modal-footer">
@@ -459,10 +462,11 @@
 <!-- Modal de Confirmação de Restauração -->
 @if (usuarioParaRestaurar) {
 <div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Restaurar o usuário ' + usuarioParaRestaurar.nome" (click)="cancelarRestauracao()">
+    [attr.aria-label]="'Restaurar o usuário ' + usuarioParaRestaurar.nome" (click)="cancelarRestauracao()" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 id="modal-titulo-restaurar" style="color: #059669;">Restaurar Autorização</h2>
+            <h2 id="modal-titulo-restaurar" style="color: #15803d;">Restaurar Autorização</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarRestauracao()"
                 aria-label="Cancelar restauração">✕</button>
         </div>
@@ -476,7 +480,7 @@
             <button class="btn btn-secondary" type="button" (click)="cancelarRestauracao()"
                 [disabled]="salvando">Cancelar</button>
             <button class="btn btn-primary" type="button" (click)="confirmarRestauracao()" [disabled]="salvando"
-                style="background-color: #059669; color: white; border: none;">
+                style="background-color: #15803d; color: white; border: none;">
                 @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Restaurando... }
                 @else { Restaurar Usuário }
             </button>

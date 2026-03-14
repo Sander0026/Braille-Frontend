@@ -3,7 +3,7 @@
     <div class="page-hero-inner animate-on-scroll">
         <p class="page-eyebrow">{{ hero.eyebrow }}</p>
         <h1 id="sobre-titulo" class="page-hero-title">{{ hero.titulo }}</h1>
-        <p class="page-hero-desc" style="white-space: pre-line;">{{ hero.descricao }}</p>
+        <div class="page-hero-desc" [innerHTML]="hero.descricao | safeHtml"></div>
     </div>
 </section>
 
@@ -17,12 +17,12 @@
                     Nossa Trajetória
                 </div>
                 <h2 id="historia-titulo" class="content-title">{{ historia.titulo }}</h2>
-                <p>{{ historia.paragrafo1 }}</p>
+                <div [innerHTML]="historia.paragrafo1 | safeHtml"></div>
                 @if (historia.paragrafo2) {
-                <p>{{ historia.paragrafo2 }}</p>
+                <div [innerHTML]="historia.paragrafo2 | safeHtml"></div>
                 }
                 @if (historia.paragrafo3) {
-                <p>{{ historia.paragrafo3 }}</p>
+                <div [innerHTML]="historia.paragrafo3 | safeHtml"></div>
                 }
             </div>
 
@@ -32,7 +32,7 @@
                     <div class="timeline-year">{{ item.ano }}</div>
                     <div class="timeline-content">
                         <strong>{{ item.titulo }}</strong>
-                        <p>{{ item.descricao }}</p>
+                        <div [innerHTML]="item.descricao | safeHtml"></div>
                     </div>
                 </div>
                 }
@@ -68,7 +68,7 @@
                     <span class="material-symbols-rounded">{{ membro.emoji }}</span>
                 </div>
                 <h3>{{ membro.cargo }}</h3>
-                <p>{{ membro.descricao }}</p>
+                <div [innerHTML]="membro.descricao | safeHtml"></div>
             </div>
             }
         </div>
@@ -80,10 +80,15 @@
     <div class="content-inner sobre-cta-inner animate-on-scroll">
         <span class="material-symbols-rounded cta-icon" aria-hidden="true">contact_support</span>
         <h2 id="cta-sobre-titulo">{{ cta.titulo }}</h2>
+<<<<<<< HEAD
         <p>{{ cta.descricao }}</p>
         <a routerLink="/contato" class="btn-cta">
             Fale Conosco
             <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
         </a>
+=======
+        <div [innerHTML]="cta.descricao | safeHtml"></div>
+        <a routerLink="/contato" class="btn-cta">Fale Conosco →</a>
+>>>>>>> 71cf070a4712be1965d34d05d592f4f6cf691c8b
     </div>
 </section>

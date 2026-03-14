@@ -1,6 +1,3 @@
-<a href="#main-content" class="sr-only sr-only-focusable" [attr.aria-label]="'Pular para o conteúdo principal'">Pular
-    para o conteúdo</a>
-
 <header class="page-header" aria-labelledby="page-title">
     <div class="container">
         <p class="eyebrow" aria-hidden="true">Mural de Avisos</p>
@@ -10,18 +7,24 @@
     </div>
 </header>
 
-<main id="main-content" class="container" aria-label="Conteúdo Principal">
+<div class="container">
 
     <!-- ================= FERRAMENTAS (Busca e Filtros) ================= -->
     <section class="toolbar" aria-label="Ferramentas de busca">
         <div class="search-box">
-            <label for="busca-noticias" class="sr-only">Buscar por título</label>
+            <label for="busca-noticias" class="search-label">Buscar notícias</label>
             <div class="search-input-wrapper">
                 <span class="material-symbols-rounded search-icon" aria-hidden="true">search</span>
-                <input id="busca-noticias" type="search" placeholder="O que você está procurando?" [(ngModel)]="busca"
-                    (keyup.enter)="buscar()" aria-label="Digite o título da notícia e aperte Enter" />
-                <button type="button" class="btn-buscar" (click)="buscar()" aria-label="Buscar">Buscar</button>
+                <input
+                    id="busca-noticias"
+                    type="search"
+                    placeholder="O que você está procurando?"
+                    [(ngModel)]="busca"
+                    (keyup.enter)="buscar()"
+                    aria-describedby="busca-hint" />
+                <button type="button" class="btn-buscar" (click)="buscar()">Buscar</button>
             </div>
+            <span id="busca-hint" class="sr-only">Pressione Enter ou clique em Buscar para pesquisar</span>
         </div>
 
         <!-- Chips de Categorias -->
@@ -41,7 +44,7 @@
     </section>
 
     <!-- ================= LISTAGEM DE CARDS ================= -->
-    <section aria-live="polite" aria-busy="carregando" class="feed">
+    <section aria-live="polite" [attr.aria-busy]="carregando ? 'true' : 'false'" class="feed">
 
         @if (carregando && comunicados.length === 0) {
         <div class="grid-cards" aria-busy="true">
@@ -77,7 +80,7 @@
                 <a [routerLink]="['/noticias', item.id]" class="card-cover-link" tabindex="-1" aria-hidden="true">
                     <figure class="card-cover">
                         @if (item.imagemCapa) {
-                        <img [src]="item.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa para: ' + item.titulo"
+                        <img [src]="item.imagemCapa | cloudinary" [alt]="'Ilustração para: ' + item.titulo"
                             loading="lazy" />
                         } @else {
                         <div class="cover-placeholder" aria-hidden="true">
@@ -136,4 +139,4 @@
 
     </section>
 
-</main>
+</div>

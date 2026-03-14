@@ -37,9 +37,9 @@
     <p>Quando alguém preencher o formulário de contato, aparecerá aqui.</p>
 </div>
 } @else {
-<div class="mensagens-lista" role="list" aria-label="Lista de mensagens de contato">
+<div class="mensagens-lista" role="region" aria-label="Lista de mensagens de contato">
     @for (contato of contatos; track contato.id) {
-    <article class="mensagem-item" [class.nao-lida]="!contato.lida" role="listitem">
+    <article class="mensagem-item" [class.nao-lida]="!contato.lida">
         <div class="mensagem-header">
             <div class="mensagem-remetente">
                 <div class="remetente-avatar" aria-hidden="true">
@@ -94,7 +94,7 @@
 <!-- Modal leitura completa -->
 @if (contatoSelecionado) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Mensagem de ' + contatoSelecionado.nome"
-    (click)="fecharMensagem()">
+    (click)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <div>
