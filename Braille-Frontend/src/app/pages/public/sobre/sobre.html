@@ -80,15 +80,10 @@
     <div class="content-inner sobre-cta-inner animate-on-scroll">
         <span class="material-symbols-rounded cta-icon" aria-hidden="true">contact_support</span>
         <h2 id="cta-sobre-titulo">{{ cta.titulo }}</h2>
-<<<<<<< HEAD
-        <p>{{ cta.descricao }}</p>
+        <div [innerHTML]="cta.descricao | safeHtml" class="cta-desc"></div>
         <a routerLink="/contato" class="btn-cta">
             Fale Conosco
             <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>
         </a>
-=======
-        <div [innerHTML]="cta.descricao | safeHtml"></div>
-        <a routerLink="/contato" class="btn-cta">Fale Conosco →</a>
->>>>>>> 71cf070a4712be1965d34d05d592f4f6cf691c8b
     </div>
 </section>
