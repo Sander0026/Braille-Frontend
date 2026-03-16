@@ -38,7 +38,7 @@
     <fieldset formGroupName="dadosPessoais">
       <legend>Passo 1: Dados Identificadores</legend>
 
-      <div class="form-group">
+      <div class="form-group" style="margin-bottom: 1.5rem">
         <label for="nomeCompleto" class="form-label">Nome Completo <span class="required"
             aria-hidden="true">*</span></label>
         <input type="text" id="nomeCompleto" class="form-input" formControlName="nomeCompleto"
@@ -49,18 +49,8 @@
         }
       </div>
 
-      <div class="form-row">
-        <div class="form-group">
-          <label for="dataNascimento" class="form-label">Data de Nascimento <span class="required"
-              aria-hidden="true">*</span></label>
-          <input type="date" id="dataNascimento" class="form-input" formControlName="dataNascimento"
-            [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true"
-            autocomplete="bday">
-          @if (isCampoInvalido('dadosPessoais', 'dataNascimento')) {
-          <span class="error-text" role="alert">A data de nascimento é obrigatória.</span>
-          }
-        </div>
-
+      <!-- Primeiras 2 colunas: Documentos Básicos -->
+      <div class="form-grid" style="margin-bottom: 1rem">
         <div class="form-group">
           <label for="cpf" class="form-label">
             CPF <span class="required" aria-hidden="true" title="Preencha o CPF ou o RG" *ngIf="isCampoInvalido('dadosPessoais', 'cpf')">*</span>
@@ -85,32 +75,42 @@
       </div>
 
       <!-- Feedbacks CPF / RG centralizados após os campos -->
-      <div class="form-row">
-        <div class="form-group" style="width: 100%;">
-          @if (isCampoInvalido('dadosPessoais', 'cpf') && isCampoInvalido('dadosPessoais', 'rg')) {
-            <span class="error-text" role="alert">Preencha pelo menos o CPF ou o RG.</span>
-          }
-          @if (cpfStatus === 'verificando' || rgStatus === 'verificando') {
-            <span class="helper-text" role="status" aria-live="polite">🔍 Verificando documentos...</span>
-          }
-          @if (cpfStatus === 'ativo' && cpfConflito) {
-            <span class="error-text" role="alert" aria-live="assertive">
-              ⛔ Já existe um aluno <strong>ativo</strong> com este CPF:
-              <strong>{{ cpfConflito.nomeCompleto }}</strong>
-              @if (cpfConflito.matricula) { — Matrícula: {{ cpfConflito.matricula }} }
-            </span>
-          }
-          @else if (rgStatus === 'ativo' && rgConflito) {
-            <span class="error-text" role="alert" aria-live="assertive">
-              ⛔ Já existe um aluno <strong>ativo</strong> com este RG:
-              <strong>{{ rgConflito.nomeCompleto }}</strong>
-              @if (rgConflito.matricula) { — Matrícula: {{ rgConflito.matricula }} }
-            </span>
-          }
-        </div>
+      <div class="form-group full-width" style="margin-bottom: 1rem;">
+        @if (isCampoInvalido('dadosPessoais', 'cpf') && isCampoInvalido('dadosPessoais', 'rg')) {
+          <span class="error-text" role="alert">Preencha pelo menos o CPF ou o RG.</span>
+        }
+        @if (cpfStatus === 'verificando' || rgStatus === 'verificando') {
+          <span class="helper-text" role="status" aria-live="polite">🔍 Verificando documentos...</span>
+        }
+        @if (cpfStatus === 'ativo' && cpfConflito) {
+          <span class="error-text" role="alert" aria-live="assertive">
+            ⛔ Já existe um aluno <strong>ativo</strong> com este CPF:
+            <strong>{{ cpfConflito.nomeCompleto }}</strong>
+            @if (cpfConflito.matricula) { — Matrícula: {{ cpfConflito.matricula }} }
+          </span>
+        }
+        @else if (rgStatus === 'ativo' && rgConflito) {
+          <span class="error-text" role="alert" aria-live="assertive">
+            ⛔ Já existe um aluno <strong>ativo</strong> com este RG:
+            <strong>{{ rgConflito.nomeCompleto }}</strong>
+            @if (rgConflito.matricula) { — Matrícula: {{ rgConflito.matricula }} }
+          </span>
+        }
       </div>
 
-      <div class="form-row">
+      <!-- Outras 2 colunas: Dados Demográficos 1 -->
+      <div class="form-grid" style="margin-bottom: 1rem">
+        <div class="form-group">
+          <label for="dataNascimento" class="form-label">Data de Nascimento <span class="required"
+              aria-hidden="true">*</span></label>
+          <input type="date" id="dataNascimento" class="form-input" formControlName="dataNascimento"
+            [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true"
+            autocomplete="bday">
+          @if (isCampoInvalido('dadosPessoais', 'dataNascimento')) {
+          <span class="error-text" role="alert">A data de nascimento é obrigatória.</span>
+          }
+        </div>
+
         <div class="form-group">
           <label for="genero" class="form-label">Gênero</label>
           <select id="genero" formControlName="genero" class="form-select" autocomplete="sex">
@@ -121,9 +121,12 @@
             <option value="Prefiro não informar">Prefiro não informar</option>
           </select>
         </div>
+      </div>
 
+      <!-- Outras 2 colunas: Dados Demográficos 2 -->
+      <div class="form-grid" style="margin-bottom: 1rem">
         <div class="form-group">
-          <label for="corRaca" class="form-label">Como você se considera em relação à sua cor ou raça?</label>
+          <label for="corRaca" class="form-label">Cor / Raça</label>
           <select id="corRaca" formControlName="corRaca" class="form-select" autocomplete="off">
             <option value="">Selecione...</option>
             <option value="BRANCA">Branca</option>
