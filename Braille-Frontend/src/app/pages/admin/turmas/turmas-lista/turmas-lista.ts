@@ -6,8 +6,7 @@ import { forkJoin, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { ActiveDescendantKeyManager, FocusKeyManager, Highlightable, FocusableOption, A11yModule } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostBinding, Input, HostListener, QueryList, ViewChildren } from '@angular/core';
-
-
+import { HttpErrorResponse } from '@angular/common/http';
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { BeneficiariosService, Beneficiario } from '../../../../core/services/beneficiarios.service';
@@ -204,15 +203,13 @@ export class TurmasLista implements OnInit {
 
         forkJoin({
             turmas: this.turmasService.listar(this.paginaAtual, 100, termoBusca, statusAtivo, profId || profIdFiltro, statusFiltro),
-            professores: this.usuariosService.listar(1, 100),
+            professores: this.usuariosService.listar(1, 100, undefined, false, 'PROFESSOR'),
             professoresFiltro: this.turmasService.listarProfessoresAtivos(),
         }).subscribe({
             next: ({ turmas, professores, professoresFiltro }) => {
                 this.turmas = turmas.data;
                 this.totalTurmas = turmas.meta.total;
-                this.professores = professores.data.filter(u =>
-                    u.role === 'PROFESSOR' || u.role === 'ADMIN'
-                );
+                this.professores = professores.data;
                 this.professoresFiltro = professoresFiltro;
                 this.isLoading = false;
                 this.cdr.markForCheck();
@@ -390,12 +387,19 @@ export class TurmasLista implements OnInit {
                     this.carregarTurmas(this.paginaAtual);
                 }, 0);
             },
-            error: (err: { status: number; error?: { message?: string } }) => {
+            error: (err: HttpErrorResponse) => {
                 setTimeout(() => {
                     this.salvandoModal = false;
-                    this.erroModal = err.status === 409
+                    
+                    let msg = err.status === 409
                         ? 'Já existe uma turma com este nome.'
-                        : (err.error?.message ?? 'Erro ao salvar. Tente novamente.');
+                        : 'Erro ao salvar. Tente novamente.';
+
+                    if (err.status === 400 && err.error?.message) {
+                        msg = Array.isArray(err.error.message) ? err.error.message.join(', ') : err.error.message;
+                    }
+
+                    this.erroModal = msg;
                     this.toast.erro('Erro ao salvar os dados da oficina.');
                     this.cdr.markForCheck();
                 }, 0);

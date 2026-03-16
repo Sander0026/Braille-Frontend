@@ -76,16 +76,18 @@ export class UsuariosService {
 
     limparCache(): void { this.cache.clear(); }
 
-    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean): string {
-        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}`;
+    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean, role?: string): string {
+        return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${role ?? ''}`;
     }
 
-    listar(page = 1, limit = 10, nome?: string, inativos = false): Observable<PaginatedResponse<Usuario>> {
-        const key = this.buildCacheKey(page, limit, nome, inativos);
+    listar(page = 1, limit = 10, nome?: string, inativos = false, role?: string): Observable<PaginatedResponse<Usuario>> {
+        const key = this.buildCacheKey(page, limit, nome, inativos, role);
         if (!this.cache.has(key)) {
             let params = new HttpParams().set('page', page).set('limit', limit);
             if (nome) params = params.set('nome', nome);
             if (inativos) params = params.set('inativos', 'true');
+            if (role) params = params.set('role', role);
+            
             const req$ = this.http.get<PaginatedResponse<Usuario>>(this.url, { params }).pipe(shareReplay(1));
             this.cache.set(key, req$);
             setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
