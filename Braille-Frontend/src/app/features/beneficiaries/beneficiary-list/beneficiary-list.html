@@ -150,6 +150,19 @@
             </div>
 
             <div class="filter-field">
+                <label class="form-label" for="f-corraca">Cor/Raça</label>
+                <select id="f-corraca" class="form-input" formControlName="corRaca">
+                    <option value="">Todas</option>
+                    <option value="BRANCA">Branca</option>
+                    <option value="PRETA">Preta</option>
+                    <option value="PARDA">Parda</option>
+                    <option value="AMARELA">Amarela</option>
+                    <option value="INDIGENA">Indígena</option>
+                    <option value="NAO_DECLARADO">Prefiro não responder / Não declarado</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
                 <label class="form-label" for="f-estadocivil">Estado Civil</label>
                 <select id="f-estadocivil" class="form-input" formControlName="estadoCivil">
                     <option value="">Todos</option>
@@ -476,6 +489,10 @@
                     <p><strong>CPF:</strong> {{ (alunoSelecionado.cpf | cpfRg) || 'N/I' }} &nbsp;|&nbsp; <strong>RG:</strong> {{ (alunoSelecionado.rg | cpfRg) || 'N/I' }}</p>
                     <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
                     <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
+                    <p><strong>Cor/Raça:</strong> {{ 
+                        alunoSelecionado.corRaca === 'NAO_DECLARADO' ? 'Não Declarado' : 
+                        (alunoSelecionado.corRaca | titlecase) || 'Não informado' 
+                    }}</p>
                     <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
                     <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
                     <p><strong>Contato Emergência:</strong> {{ alunoSelecionado.contatoEmergencia || 'N/I' }}</p>
@@ -825,6 +842,18 @@
                             <option value="Feminino">Feminino</option>
                             <option value="Outro">Outro</option>
                             <option value="Prefiro não informar">Prefiro não informar</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="edit-corraca">Cor/Raça</label>
+                        <select id="edit-corraca" class="form-input" formControlName="corRaca">
+                            <option value="">Selecione</option>
+                            <option value="BRANCA">Branca</option>
+                            <option value="PRETA">Preta</option>
+                            <option value="PARDA">Parda</option>
+                            <option value="AMARELA">Amarela</option>
+                            <option value="INDIGENA">Indígena</option>
+                            <option value="NAO_DECLARADO">Prefiro não responder / Não declarado</option>
                         </select>
                     </div>
                     <div class="form-group">

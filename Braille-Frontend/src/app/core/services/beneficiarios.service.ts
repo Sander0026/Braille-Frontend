@@ -9,6 +9,7 @@ export interface Beneficiario {
   rg: string | null;
     dataNascimento: string;
     genero?: string;
+    corRaca?: string;
     estadoCivil?: string;
     telefoneContato?: string;
     email?: string;
