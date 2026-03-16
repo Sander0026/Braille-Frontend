@@ -33,7 +33,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormatDatePipe, CpfRgPipe, ImportModalComponent, A11yModule, TabelaTrFocavelDirective, TabEscapeDirective],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, ImportModalComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })

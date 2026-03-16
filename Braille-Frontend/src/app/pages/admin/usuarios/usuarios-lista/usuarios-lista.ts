@@ -1,14 +1,14 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormControl } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { CpfRgPipe } from '../../../../shared/pipes/cpf-rg.pipe';
+
 
 @Directive({
     selector: '[appTabelaTrFocavel]',
@@ -28,7 +28,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
     selector: 'app-usuarios-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, RouterModule, ReactiveFormsModule, TabelaTrFocavelDirective, A11yModule, CpfRgPipe],
+    imports: [CommonModule, RouterModule, FormsModule, ReactiveFormsModule, A11yModule],
     templateUrl: './usuarios-lista.html',
     styleUrl: './usuarios-lista.scss'
 })
