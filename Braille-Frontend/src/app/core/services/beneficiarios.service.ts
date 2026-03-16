@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
+import { DashboardService } from './dashboard.service';
 
 export interface Beneficiario {
     id: string;
@@ -72,10 +73,11 @@ export class BeneficiariosService {
     private cache = new Map<string, Observable<PaginatedResponse<Beneficiario>>>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
-    constructor(private http: HttpClient) { }
+    constructor(private readonly http: HttpClient, private readonly dashboardService: DashboardService) { }
 
     limparCache(): void {
         this.cache.clear();
+        this.dashboardService.limparCache();
     }
 
     private buildCacheKey(page: number, limit: number, busca?: string, inativos?: boolean, filtros?: Record<string, any>): string {

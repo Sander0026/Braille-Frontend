@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 
@@ -56,6 +56,7 @@ export class CadastroTurmaWizard implements OnInit {
         private router: Router,
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
+        private cdr: ChangeDetectorRef
     ) { }
 
     ngOnInit(): void {
@@ -71,7 +72,8 @@ export class CadastroTurmaWizard implements OnInit {
 
     carregarProfessores() {
         this.carregandoProfessores = true;
-        this.usuariosService.listar(1, 100).subscribe({
+        // Puxa toda a base (até 100), porém filtrando apenas quem tem o ROLE 'PROFESSOR'
+        this.usuariosService.listar(1, 100, undefined, false, 'PROFESSOR').subscribe({
             next: (resp) => {
                 this.professores = resp.data;
                 this.carregandoProfessores = false;
@@ -185,10 +187,14 @@ export class CadastroTurmaWizard implements OnInit {
             },
             error: (err: HttpErrorResponse) => {
                 this.isSalvando = false;
-                const msg = err.status === 400
-                    ? (err.error?.message ?? 'Verifique os dados.')
-                    : 'Erro ao salvar. Tente novamente.';
-                this.mostrarFeedback(Array.isArray(msg) ? msg.join(', ') : msg, 'erro');
+                
+                // O backend pode retornar um array (validação de schema) ou string simples (regra de colisão)
+                let msg = 'Erro ao salvar. Tente novamente.';
+                if (err.status === 400 && err.error?.message) {
+                    msg = Array.isArray(err.error.message) ? err.error.message.join(', ') : err.error.message;
+                }
+                
+                this.mostrarFeedback(msg, 'erro');
             },
         });
     }
@@ -196,6 +202,17 @@ export class CadastroTurmaWizard implements OnInit {
     mostrarFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {
         this.mensagemFeedback = mensagem;
         this.tipoFeedback = tipo;
-        setTimeout(() => { this.mensagemFeedback = null; this.tipoFeedback = null; }, 6000);
+        
+        // Força a atualização da tela, vital quando chamadas saem fora da zona do Angular.
+        this.cdr.detectChanges();
+        
+        // Rola a tela para garantir que o usuário veja a faixa de erro/sucesso.
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        setTimeout(() => { 
+            this.mensagemFeedback = null; 
+            this.tipoFeedback = null; 
+            this.cdr.detectChanges();
+        }, 6000);
     }
 }
