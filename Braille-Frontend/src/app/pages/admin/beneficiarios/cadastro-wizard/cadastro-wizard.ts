@@ -75,6 +75,7 @@ export class CadastroWizard implements OnInit {
         rg: [''],
         genero: [''],
         estadoCivil: [''],
+        corRaca: [''],
       }),
 
       enderecoLocalizacao: this.fb.group({
@@ -362,7 +363,7 @@ export class CadastroWizard implements OnInit {
 
     // ✅ FIX: Remove strings vazias de campos opcionais para manter o banco limpo
     const optionalStringFields = [
-      'genero', 'estadoCivil', 'complemento', 'pontoReferencia', 'email',
+      'genero', 'estadoCivil', 'corRaca', 'complemento', 'pontoReferencia', 'email',
       'contatoEmergencia', 'idadeOcorrencia', 'tecAssistivas', 'escolaridade',
       'profissao', 'rendaFamiliar', 'beneficiosGov', 'composicaoFamiliar', 'outrasComorbidades',
     ];

@@ -108,6 +108,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       rg: [''],
       dataNascimento: [''],
       genero: [''],
+      corRaca: [''],
       email: [''],
       telefoneContato: [''],
       // Endereço
@@ -141,6 +142,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       prefAcessibilidade: [''],
       precisaAcompanhante: [''],
       genero: [''],
+      corRaca: [''],
       estadoCivil: [''],
       cidade: [''],
       uf: [''],
