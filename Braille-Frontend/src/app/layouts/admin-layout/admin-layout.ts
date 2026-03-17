@@ -47,6 +47,9 @@ export class AdminLayout implements OnInit, OnDestroy {
   modalAtivo: Modal = 'none';
   hotkeysDisponiveis: HotkeyAction[] = [];
 
+  // ── Acessibilidade: WCAG 2.4.3 ────────────────────────
+  lastFocusBeforeModal: HTMLElement | null = null;
+
   // ── Form: Trocar Senha ───────────────────────────────
   formSenha!: FormGroup;
   senhaErro: string | null = null;
@@ -195,6 +198,7 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   // ── Modais ───────────────────────────────────────────
   abrirModalFoto(): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.menuAberto = false;
     this.fotoPreview = null;
     this.fotoSelecionada = null;
@@ -203,6 +207,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   }
 
   abrirModalSenha(): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.menuAberto = false;
     this.formSenha.reset();
     this.senhaErro = null;
@@ -211,6 +216,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   }
 
   abrirModalPerfil(): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.menuAberto = false;
     this.perfilErro = null;
     this.perfilSucesso = false;
@@ -219,6 +225,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   }
 
   abrirModalHotkeys(): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.menuAberto = false;
     this.modalAtivo = 'hotkeys';
     this.cdr.detectChanges();
@@ -226,6 +233,7 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   fecharModal(): void {
     this.modalAtivo = 'none';
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 
   // ── Foto ─────────────────────────────────────────────

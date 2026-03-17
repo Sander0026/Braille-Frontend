@@ -505,8 +505,37 @@ html.alto-contraste {
         margin-bottom: 0;
     }
 }
-// m-03: TOOLBAR DO QUILL — foco silencioso (teclado flui pelo editor, nao pela toolbar)
+// m-03: TOOLBAR DO QUILL ï¿½ foco silencioso (teclado flui pelo editor, nao pela toolbar)
 .ql-toolbar button:focus:not(:focus-visible),
 .ql-toolbar .ql-picker-label:focus:not(:focus-visible) {
     outline: none;
+}
+
+// ============================================================
+// ACESSIBILIDADE WCAG AAA (SugestÃ£o 5: OS Auto-Detect)
+// ============================================================
+@media (prefers-contrast: more) {
+    body {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
+    }
+    h1, h2, h3, h4, h5, h6, p, span, label, div {
+        color: #f5c800 !important;
+    }
+    a {
+        color: #f5c800 !important;
+        text-decoration: underline !important;
+    }
+    .card, .form-input, .mat-mdc-card, .mat-mdc-dialog-surface {
+        background-color: #000000 !important;
+        border: 1px solid #f5c800 !important;
+        color: #f5c800 !important;
+    }
+    button {
+        border: 1px solid #f5c800 !important;
+    }
+    :focus-visible {
+        outline: 3px solid #ffffff !important;
+        outline-offset: 3px !important;
+    }
 }
