@@ -230,20 +230,31 @@
         <p class="grade-helper">Adicione os dias e horas para evitar conflitos (ex: Seg 14:00 às 16:00).</p>
 
         <div class="turno-form">
-          <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}" class="form-input flex-1"
-            aria-label="Dia da Semana">
-            <option value="">Dia...</option>
-            @for (d of dias; track d.valor) {
-            <option [value]="d.valor">{{ d.label }}</option>
-            }
-          </select>
-          <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
-            class="form-input flex-1" aria-label="Início" />
-          <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
-            class="form-input flex-1" aria-label="Fim" />
-          <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarTurno()">+ Incluir</button>
+          <div class="form-group-inline">
+            <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}" class="form-input"
+              aria-label="Dia da Semana">
+              <option value="">Dia...</option>
+              @for (d of dias; track d.valor) {
+              <option [value]="d.valor">{{ d.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group-inline">
+            <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
+              class="form-input" aria-label="Início" required />
+          </div>
+          <div class="form-group-inline">
+            <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
+              class="form-input" aria-label="Fim" required />
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm btn-incluir-turno" (click)="adicionarTurno()">+ Incluir</button>
         </div>
-        @if (erroTurno) { <span class="error-text">⚠️ {{ erroTurno }}</span> }
+        @if (erroTurno) { 
+          <span class="error-text error-with-icon">
+            <span class="material-symbols-rounded">error</span> 
+            {{ erroTurno }}
+          </span> 
+        }
 
         @if (gradeHoraria.length > 0) {
         <ul class="grade-list">
@@ -508,7 +519,8 @@
             <button class="btn btn-danger btn-sm"
               (click)="removerAluno(matricula.aluno.id, matricula.aluno.nomeCompleto)" [disabled]="operacaoEmProgresso"
               aria-label="Remover da turma" title="Remover aluno"
-              style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center;">
+              style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+              Remover
             </button>
             }
           </li>
