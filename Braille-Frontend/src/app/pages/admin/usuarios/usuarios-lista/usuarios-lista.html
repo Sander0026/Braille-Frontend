@@ -40,15 +40,21 @@
 <div class="tabs-container" role="navigation" aria-label="Filtro de status de usuário">
     <div class="tabs" role="tablist">
         <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
-            [attr.aria-selected]="abaAtiva === 'ativos'" role="tab">
+            [attr.aria-selected]="abaAtiva === 'ativos' ? 'true' : 'false'" 
+            [attr.tabindex]="abaAtiva === 'ativos' ? 0 : -1" 
+            aria-controls="painel-usuarios" id="tab-ativos" role="tab">
             Ativos
         </button>
         <button class="tab-btn" [class.active]="abaAtiva === 'inativos'" (click)="setAba('inativos')"
-            [attr.aria-selected]="abaAtiva === 'inativos'" role="tab">
+            [attr.aria-selected]="abaAtiva === 'inativos' ? 'true' : 'false'" 
+            [attr.tabindex]="abaAtiva === 'inativos' ? 0 : -1" 
+            aria-controls="painel-usuarios" id="tab-inativos" role="tab">
             Inativos
         </button>
     </div>
 </div>
+
+<div id="painel-usuarios" role="tabpanel" [attr.aria-labelledby]="abaAtiva === 'ativos' ? 'tab-ativos' : 'tab-inativos'">
 
 @if (usuarios.length === 0) {
 <div class="empty-state" role="status">
@@ -131,6 +137,7 @@
 </nav>
 }
 }
+</div>
 }
 
 <!-- Modal de edição -->
@@ -320,7 +327,7 @@
                 <div class="profile-section">
                     <h4>Contato</h4>
                     <p><strong>Telefone:</strong> {{ usuarioVisualizado.telefone || 'Não informado' }}</p>
-                    <p><strong>CPF:</strong> {{ (usuarioVisualizado.cpf | cpfRg) || 'Não informado' }}</p>
+                    <p><strong>CPF:</strong> {{ usuarioVisualizado.cpf || 'Não informado' }}</p>
                 </div>
 
                 <!-- Endereço -->

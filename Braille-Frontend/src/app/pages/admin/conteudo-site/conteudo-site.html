@@ -22,32 +22,32 @@
 
     <!-- TABS NAV -->
     <div class="tabs-nav-wrapper">
-        <nav class="tabs-nav" aria-label="Abas de Seções">
-            <button class="tab-btn" [class.active]="abaAtiva === 'config'" (click)="setAba('config')">
+        <nav class="tabs-nav" role="tablist" aria-label="Abas de Seções" (keydown)="handleKeydown($event)">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'config'" [attr.tabindex]="abaAtiva === 'config' ? 0 : -1" id="tab-config" aria-controls="pane-config" class="tab-btn" [class.active]="abaAtiva === 'config'" (click)="setAba('config')">
                 <span class="material-symbols-rounded">settings</span> Configurações
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'hero'" (click)="setAba('hero')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'hero'" [attr.tabindex]="abaAtiva === 'hero' ? 0 : -1" id="tab-hero" aria-controls="pane-hero" class="tab-btn" [class.active]="abaAtiva === 'hero'" (click)="setAba('hero')">
                 <span class="material-symbols-rounded">web_asset</span> Apresentação Principal
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'missao'" (click)="setAba('missao')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'missao'" [attr.tabindex]="abaAtiva === 'missao' ? 0 : -1" id="tab-missao" aria-controls="pane-missao" class="tab-btn" [class.active]="abaAtiva === 'missao'" (click)="setAba('missao')">
                 <span class="material-symbols-rounded">assignment</span> Missão &amp; Valores
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'oficinas'" (click)="setAba('oficinas')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'oficinas'" [attr.tabindex]="abaAtiva === 'oficinas' ? 0 : -1" id="tab-oficinas" aria-controls="pane-oficinas" class="tab-btn" [class.active]="abaAtiva === 'oficinas'" (click)="setAba('oficinas')">
                 <span class="material-symbols-rounded">school</span> Oficinas
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'depoimentos'" [attr.tabindex]="abaAtiva === 'depoimentos' ? 0 : -1" id="tab-depoimentos" aria-controls="pane-depoimentos" class="tab-btn" [class.active]="abaAtiva === 'depoimentos'" (click)="setAba('depoimentos')">
                 <span class="material-symbols-rounded">reviews</span> Depoimentos
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'sobre'" (click)="setAba('sobre')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'sobre'" [attr.tabindex]="abaAtiva === 'sobre' ? 0 : -1" id="tab-sobre" aria-controls="pane-sobre" class="tab-btn" [class.active]="abaAtiva === 'sobre'" (click)="setAba('sobre')">
                 <span class="material-symbols-rounded">info</span> Página Sobre
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'comunicados'" [attr.tabindex]="abaAtiva === 'comunicados' ? 0 : -1" id="tab-comunicados" aria-controls="pane-comunicados" class="tab-btn" [class.active]="abaAtiva === 'comunicados'" (click)="setAba('comunicados')">
                 <span class="material-symbols-rounded">newspaper</span> Noticias
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'faq'" (click)="setAba('faq')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'faq'" [attr.tabindex]="abaAtiva === 'faq' ? 0 : -1" id="tab-faq" aria-controls="pane-faq" class="tab-btn" [class.active]="abaAtiva === 'faq'" (click)="setAba('faq')">
                 <span class="material-symbols-rounded">quiz</span> Perguntas Frequentes
             </button>
-            <button class="tab-btn" [class.active]="abaAtiva === 'contato'" (click)="setAba('contato')">
+            <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'contato'" [attr.tabindex]="abaAtiva === 'contato' ? 0 : -1" id="tab-contato" aria-controls="pane-contato" class="tab-btn" [class.active]="abaAtiva === 'contato'" (click)="setAba('contato')">
                 <span class="material-symbols-rounded">contact_page</span> Global (Contato/Redes)
             </button>
         </nav>
@@ -64,7 +64,7 @@
 
     <!-- ABA: CONFIGURAÇÕES -->
     @if (abaAtiva === 'config') {
-    <div class="tab-pane active" id="pane-config">
+    <div class="tab-pane active" id="pane-config" role="tabpanel" aria-labelledby="tab-config" tabindex="0">
         <form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
             <div class="form-header">
                 <h2>Configurações Globais</h2>
@@ -125,7 +125,7 @@
 
     <!-- ABA: HERO -->
     @if (abaAtiva === 'hero') {
-    <div class="tab-pane active" id="pane-hero">
+    <div class="tab-pane active" id="pane-hero" role="tabpanel" aria-labelledby="tab-hero" tabindex="0">
         <form [formGroup]="formHero" (ngSubmit)="salvarHero()" class="cms-form">
             <div class="form-header">
                 <h2>Apresentação Principal</h2>
@@ -214,7 +214,7 @@
 
     <!-- ABA: MISSÃO -->
     @if (abaAtiva === 'missao') {
-    <div class="tab-pane active" id="pane-missao">
+    <div class="tab-pane active" id="pane-missao" role="tabpanel" aria-labelledby="tab-missao" tabindex="0">
         <form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
             <div class="form-header">
                 <h2>Nossa Missão & Valores</h2>
@@ -316,7 +316,7 @@
 
     <!-- ABA: OFICINAS -->
     @if (abaAtiva === 'oficinas') {
-    <div class="tab-pane active" id="pane-oficinas">
+    <div class="tab-pane active" id="pane-oficinas" role="tabpanel" aria-labelledby="tab-oficinas" tabindex="0">
         <form [formGroup]="formOficinas" (ngSubmit)="salvarOficinas()" class="cms-form">
             <div class="form-header">
                 <h2>Oficinas e Cursos</h2>
@@ -364,7 +364,7 @@
 
     <!-- ABA: DEPOIMENTOS -->
     @if (abaAtiva === 'depoimentos') {
-    <div class="tab-pane active" id="pane-depoimentos">
+    <div class="tab-pane active" id="pane-depoimentos" role="tabpanel" aria-labelledby="tab-depoimentos" tabindex="0">
         <form [formGroup]="formDepoimentos" (ngSubmit)="salvarDepoimentos()" class="cms-form">
             <div class="form-header">
                 <h2>Depoimentos</h2>
@@ -411,7 +411,7 @@
 
     <!-- ABA: SOBRE -->
     @if (abaAtiva === 'sobre') {
-    <div class="tab-pane active" id="pane-sobre">
+    <div class="tab-pane active" id="pane-sobre" role="tabpanel" aria-labelledby="tab-sobre" tabindex="0">
 
         <!-- Hero do Sobre -->
         <form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form">
@@ -606,7 +606,7 @@
     }
 
     @if (abaAtiva === 'comunicados') {
-    <div class="tab-pane active" id="pane-comunicados" role="tabpanel">
+    <div class="tab-pane active" id="pane-comunicados" role="tabpanel" aria-labelledby="tab-comunicados" tabindex="0">
         <div class="form-header">
             <h2>Notícias e Comunicados</h2>
             <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
@@ -617,7 +617,7 @@
 
     <!-- ABA: FAQ -->
     @if (abaAtiva === 'faq') {
-    <div class="tab-pane active" id="pane-faq">
+    <div class="tab-pane active" id="pane-faq" role="tabpanel" aria-labelledby="tab-faq" tabindex="0">
         <form [formGroup]="formFaq" (ngSubmit)="salvarFaq()" class="cms-form">
             <div class="form-header">
                 <h2>Perguntas Frequentes (FAQ)</h2>
@@ -667,7 +667,7 @@
 
     <!-- ABA: CONTATO E DADOS GLOBAIS -->
     @if (abaAtiva === 'contato') {
-    <div class="tab-pane active" id="pane-contato" role="tabpanel">
+    <div class="tab-pane active" id="pane-contato" role="tabpanel" aria-labelledby="tab-contato" tabindex="0">
         <form [formGroup]="formContato" (ngSubmit)="salvarContato()" class="cms-form">
             <div class="form-header">
                 <h2>Contato e Redes Sociais</h2>

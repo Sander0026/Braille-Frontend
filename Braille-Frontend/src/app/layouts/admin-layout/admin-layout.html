@@ -17,7 +17,8 @@
     <ul id="sidebar-nav" class="sidebar-nav">
       @for (item of rotasPermitidas; track item.rota) {
       <li>
-        <a [routerLink]="item.rota" routerLinkActive="active" [attr.aria-label]="item.aria" class="nav-link"
+        <a [routerLink]="item.rota" routerLinkActive="active" 
+          [attr.aria-label]="!showLabels ? item.aria : null" class="nav-link"
           [attr.title]="!showLabels ? item.label : null">
           <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
           @if (showLabels) {

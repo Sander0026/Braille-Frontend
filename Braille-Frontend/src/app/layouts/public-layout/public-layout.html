@@ -19,7 +19,6 @@
         </a>
       </nav>
 
-      <!-- ── Controles de Acessibilidade ── -->
       <nav class="a11y-controls" aria-label="Controles de acessibilidade">
         <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
           aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
@@ -33,10 +32,6 @@
         </button>
       </nav>
 
-      <a routerLink="/contato" class="btn-inscricao desktop-only-cta">
-        Fale Conosco
-      </a>
-
       <!-- ── Botão Hamburger Mobile ── -->
       <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen"
         aria-label="Menu de navegação">
@@ -48,6 +43,11 @@
   <main id="conteudo-principal" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
+
+  <!-- ── Botão Flutuante "Fale Conosco" ── -->
+  <a routerLink="/contato" class="floating-cta" aria-label="Fale Conosco">
+    <span class="floating-cta-text">Fale Conosco</span>
+  </a>
 
   <footer class="site-footer" role="contentinfo" *ngIf="contatoConfig$ | async as config">
     <div class="footer-inner">

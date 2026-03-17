@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormArray, Validators } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -16,10 +16,12 @@ import { QuillModule } from 'ngx-quill';
   templateUrl: './conteudo-site.html',
   styleUrl: './conteudo-site.scss',
 })
-export class ConteudoSite implements OnInit, OnDestroy {
+export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
   private observer!: MutationObserver;
   abaAtiva = 'config';
+
+  @ViewChildren('btnAba') botoesAbas!: QueryList<ElementRef<HTMLButtonElement>>;
 
   // ── Forms existentes ──────────────────────────────────────
   formConfig!: FormGroup;
@@ -82,6 +84,40 @@ export class ConteudoSite implements OnInit, OnDestroy {
     // Acessibilidade: Intercepta a renderização assíncrona do QuillJS para injetar ARIA e TITLE nas ferramentas
     this.observer = new MutationObserver(() => this.corrigirAcessibilidadeQuill());
     this.observer.observe(this.el.nativeElement, { childList: true, subtree: true });
+  }
+
+  ngAfterViewInit() {
+    // FocusKeyManager substituído por navegação manual para simplificar os tipos do TypeScript
+  }
+
+  handleKeydown(event: KeyboardEvent) {
+    const tabs = this.botoesAbas.toArray().map(t => t.nativeElement);
+    const currentIndex = tabs.indexOf(event.target as HTMLButtonElement);
+    
+    if (currentIndex === -1) return;
+
+    let nextIndex = currentIndex;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = (currentIndex + 1) % tabs.length;
+      event.preventDefault();
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      event.preventDefault();
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+      event.preventDefault();
+    } else if (event.key === 'End') {
+      nextIndex = tabs.length - 1;
+      event.preventDefault();
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      tabs[currentIndex].click();
+      event.preventDefault();
+      return;
+    }
+
+    if (nextIndex !== currentIndex) {
+      tabs[nextIndex].focus();
+    }
   }
 
   setAba(aba: string) {
