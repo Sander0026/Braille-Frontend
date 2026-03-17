@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
+import { FocusKeyManager, FocusableOption, A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
@@ -52,6 +52,9 @@ export class UsuariosLista implements OnInit, OnDestroy {
     editForm!: FormGroup;
     salvando = false;
 
+    // Acessibilidade: WCAG 2.4.3
+    lastFocusBeforeModal: HTMLElement | null = null;
+
     // ── KeyManager ─────────────────────────────────────────────
     @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
     public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
@@ -69,7 +72,8 @@ export class UsuariosLista implements OnInit, OnDestroy {
         private fb: FormBuilder,
         private cdr: ChangeDetectorRef,
         private confirmDialog: ConfirmDialogService,
-        private toast: ToastService
+        private toast: ToastService,
+        private liveAnnouncer: LiveAnnouncer
     ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
@@ -133,20 +137,24 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.totalPaginas = res.meta.lastPage;
                 this.isLoading = false;
                 this.cdr.markForCheck();
+                this.liveAnnouncer.announce(`Lista de usuários atualizada: ${this.total} encontrados.`);
             },
             error: () => { this.erro = 'Erro ao carregar usuários.'; this.isLoading = false; this.cdr.markForCheck(); }
         });
     }
 
     abrirPerfil(usuario: Usuario): void {
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.usuarioVisualizado = usuario;
     }
 
     fecharPerfil(): void {
         this.usuarioVisualizado = null;
+        setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
     abrirModal(usuario: Usuario): void {
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.usuarioEmEdicao = usuario;
         // Primeiro define o usuario, depois popula o form e força detecção de mudanças
         // (necessário por conta do withFetch() que roda fora do Zone.js)
@@ -175,6 +183,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
     fecharModal(): void {
         this.usuarioEmEdicao = null;
         this.editForm.reset();
+        setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
     salvar(): void {

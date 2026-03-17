@@ -23,6 +23,9 @@ export class ComunicadosLista implements OnInit {
   editando: Comunicado | null = null;
   salvando = false;
 
+  // Acessibilidade: WCAG 2.4.3
+  lastFocusBeforeModal: HTMLElement | null = null;
+
   form!: FormGroup;
   fotoSelecionada: File | null = null;
   fotoPreview: string | null = null;
@@ -77,6 +80,7 @@ export class ComunicadosLista implements OnInit {
   }
 
   novo(categoriaDefault: string = 'GERAL'): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.editando = null;
     this.form.reset({ categoria: categoriaDefault, fixado: false });
     this.fotoSelecionada = null;
@@ -85,6 +89,7 @@ export class ComunicadosLista implements OnInit {
   }
 
   editar(c: Comunicado): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.editando = c;
     this.form.patchValue({
       titulo: c.titulo,
@@ -117,6 +122,7 @@ export class ComunicadosLista implements OnInit {
     this.mostrarModal = false;
     this.editando = null;
     this.form.reset();
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 
   /**
@@ -183,11 +189,13 @@ export class ComunicadosLista implements OnInit {
   }
 
   excluir(c: Comunicado): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.comunicadoParaExcluir = c;
   }
 
   cancelarExclusao(): void {
     this.comunicadoParaExcluir = null;
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 
   confirmarExclusao(): void {
