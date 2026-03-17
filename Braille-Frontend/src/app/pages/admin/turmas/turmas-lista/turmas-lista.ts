@@ -613,6 +613,22 @@ export class TurmasLista implements OnInit {
 
     salvarMatriculasEmLote(): void {
         if (!this.turmaDetalhes || this.operacaoEmProgresso || this.alunosSelecionadosParaMatricula.length === 0) return;
+        
+        // Verifica capacidade antes de qualquer matrícula
+        const capacidade = this.turmaDetalhes.capacidadeMaxima;
+        const matriculadosAtuais = this.turmaDetalhes.matriculasOficina?.length || 0;
+        const selecionados = this.alunosSelecionadosParaMatricula.length;
+
+        if (capacidade && (matriculadosAtuais + selecionados) > capacidade) {
+            const vagas = capacidade - matriculadosAtuais;
+            if (vagas <= 0) {
+                this.toast.erro('Não foi possível matricular. A turma já está lotada.');
+            } else {
+                this.toast.erro(`Não foi possível matricular. Você selecionou ${selecionados} alunos, mas restam apenas ${vagas} vagas na turma.`);
+            }
+            return; // Impede que qualquer matrícula seja feita (mesmo parcialmente)
+        }
+
         this.operacaoEmProgresso = true;
 
         const idsParaMatricular = [...this.alunosSelecionadosParaMatricula];
@@ -629,15 +645,15 @@ export class TurmasLista implements OnInit {
                     this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => !idsParaMatricular.includes(a.id));
 
                     if (erros > 0 && concluidos === 0) {
-                        // Todos falharam — verifica se foi por lotação
-                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade'));
+                        // Todos falharam
+                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade') || m.toLowerCase().includes('lotada'));
                         if (ehLotada) {
-                            this.toast.erro('⚠️ Turma lotada! A capacidade máxima foi atingida. Edite a turma para aumentar o número de vagas.');
+                            this.toast.erro('Turma lotada! A capacidade máxima foi atingida.');
                         } else {
                             this.toast.erro(`Não foi possível matricular: ${mensagensErro[0] || 'Erro desconhecido'}.`);
                         }
                     } else if (erros > 0) {
-                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade'));
+                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade') || m.toLowerCase().includes('lotada'));
                         const detalhe = ehLotada
                             ? 'A turma atingiu a capacidade máxima. Edite a turma para aumentar as vagas.'
                             : `${erros} falha(s).`;
