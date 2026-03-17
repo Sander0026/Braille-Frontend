@@ -24,3 +24,13 @@ app-root {
     overflow: hidden;
     /* cada layout gerencia seu próprio scroll internamente */
 }
+
+// ============================================================
+// ACESSIBILIDADE WCAG AAA (Sugestão 3 - Focus de Alto Contraste)
+// ============================================================
+:focus-visible {
+    outline: 3px solid #FFD700 !important; /* Amarelo dourado - alta visibilidade */
+    outline-offset: 3px !important;
+    border-radius: 2px !important;
+    box-shadow: 0 0 0 5px rgba(255, 215, 0, 0.3) !important;
+}

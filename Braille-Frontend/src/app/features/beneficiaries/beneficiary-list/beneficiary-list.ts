@@ -11,7 +11,7 @@ import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
 import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
-import { A11yModule, FocusKeyManager, FocusableOption } from '@angular/cdk/a11y';
+import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 
@@ -86,6 +86,9 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   modalImportAberto = false;
   isAdmin = false;
 
+  // Acessibilidade: WCAG 2.4.3
+  lastFocusBeforeModal: HTMLElement | null = null;
+
   // ── Filtros Avançados (Drawer) ──────────────────────────────────
   drawerAberto = false;
   filterForm!: FormGroup;
@@ -100,7 +103,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private toast: ToastService,
     private fb: FormBuilder,
     private authService: AuthService,
-    private frequenciasService: FrequenciasService
+    private frequenciasService: FrequenciasService,
+    private liveAnnouncer: LiveAnnouncer
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -233,6 +237,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         this.totalPaginas = res.meta.lastPage;
         this.isLoading = false;
         this.cdr.markForCheck();
+        this.liveAnnouncer.announce(`Lista atualizada: ${this.total} beneficiários encontrados.`);
       },
       error: () => {
         this.erro = 'Erro ao carregar alunos. Tente novamente.';
@@ -480,6 +485,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Modal de Edição ────────────────────────────────────────────
   abrirModalEdicao(aluno: Beneficiario): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.alunoEmEdicao = aluno;
     this.modalEdicaoAberto = true;
     this.cdr.markForCheck();
@@ -509,6 +515,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.modalEdicaoAberto = false;
     this.alunoEmEdicao = null;
     this.editForm.reset();
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 
   salvarEdicao(): void {
@@ -682,6 +689,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Visualização de Perfil Inteiro
   abrirModal(aluno: Beneficiario): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.modalAberto = true;
     this.carregandoDetalhes = true;
     this.alunoSelecionado = null;
@@ -730,6 +738,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   fecharModal(): void {
     this.modalAberto = false;
     this.alunoSelecionado = null;
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 
   getAvatarUrl(aluno: Beneficiario): string {

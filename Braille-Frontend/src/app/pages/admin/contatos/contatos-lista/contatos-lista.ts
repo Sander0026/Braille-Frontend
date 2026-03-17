@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { ContatosService, Contato } from '../../../../core/services/contatos.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 type FiltroLida = 'todas' | 'nao-lidas' | 'lidas';
 
@@ -36,6 +36,7 @@ export class ContatosLista implements OnInit {
     private contatosService: ContatosService,
     private cdr: ChangeDetectorRef,
     private confirmDialog: ConfirmDialogService,
+    private liveAnnouncer: LiveAnnouncer
   ) { }
 
   ngOnInit(): void { this.carregar(); }
@@ -57,6 +58,7 @@ export class ContatosLista implements OnInit {
         this.totalPaginas = res.meta.lastPage;
         this.isLoading = false;
         this.cdr.detectChanges();
+        this.liveAnnouncer.announce(`Lista de mensagens de contato atualizada: ${this.total} encontradas.`);
       },
       error: () => { this.erro = 'Erro ao carregar mensagens.'; this.isLoading = false; this.cdr.detectChanges(); }
     });

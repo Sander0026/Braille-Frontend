@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, F
 import { Router, RouterModule } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
-import { ActiveDescendantKeyManager, FocusKeyManager, Highlightable, FocusableOption, A11yModule } from '@angular/cdk/a11y';
+import { ActiveDescendantKeyManager, FocusKeyManager, Highlightable, FocusableOption, A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Directive, ElementRef, HostBinding, Input, HostListener, QueryList, ViewChildren } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TurmasService, Turma, CreateTurmaDto } from '../../../../core/services/turmas.service';
@@ -95,6 +95,9 @@ export class TurmasLista implements OnInit {
     erroModal = '';
     turmaForm!: FormGroup;
 
+    // Acessibilidade: WCAG 2.4.3
+    lastFocusBeforeModal: HTMLElement | null = null;
+
     // ── Grade Horária Auxiliar ─────────────────────────────────
     dias = DIAS;
     gradeHoraria: { dia: string; horaInicio: string; horaFim: string }[] = [];
@@ -148,6 +151,7 @@ export class TurmasLista implements OnInit {
         private authService: AuthService,
         private toast: ToastService,
         private router: Router,
+        private liveAnnouncer: LiveAnnouncer
     ) { }
 
 
@@ -303,6 +307,7 @@ export class TurmasLista implements OnInit {
                 this.totalTurmas = res.meta.total;
                 this.isLoading = false;
                 this.cdr.markForCheck();
+                this.liveAnnouncer.announce(`Lista de turmas atualizada: ${this.totalTurmas} encontradas.`);
             },
             error: () => {
                 this.erro = 'Não foi possível carregar as turmas. Verifique se o servidor está online.';
@@ -322,6 +327,7 @@ export class TurmasLista implements OnInit {
 
     // ── Modal Editar ───────────────────────────────────────────
     abrirModalEditar(turma: Turma): void {
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.modoEdicao = true;
         this.turmaEmEdicaoId = turma.id;
         this.erroModal = '';
@@ -351,6 +357,7 @@ export class TurmasLista implements OnInit {
         this.modalAberto = false;
         this.erroModal = '';
         this.turmaForm.reset();
+        setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
     salvarModal(): void {
@@ -409,6 +416,7 @@ export class TurmasLista implements OnInit {
 
     // ── Modal Arquivar ──────────────────────────────────────────
     abrirModalArquivar(turma: Turma): void {
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.turmaParaArquivar = turma;
         this.erroArquivamento = '';
         this.modalArquivarAberto = true;
@@ -418,6 +426,7 @@ export class TurmasLista implements OnInit {
         this.modalArquivarAberto = false;
         this.turmaParaArquivar = null;
         this.erroArquivamento = '';
+        setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
     confirmarArquivamento(): void {
@@ -512,6 +521,7 @@ export class TurmasLista implements OnInit {
     abrirModalAlunos(turma: Turma): void { this.verAlunos(turma); }
 
     verAlunos(turma: Turma): void {
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.turmaDetalhes = null;
         this.carregandoDetalhes = true;
         this.modalAlunosAberto = true;
@@ -603,6 +613,22 @@ export class TurmasLista implements OnInit {
 
     salvarMatriculasEmLote(): void {
         if (!this.turmaDetalhes || this.operacaoEmProgresso || this.alunosSelecionadosParaMatricula.length === 0) return;
+        
+        // Verifica capacidade antes de qualquer matrícula
+        const capacidade = this.turmaDetalhes.capacidadeMaxima;
+        const matriculadosAtuais = this.turmaDetalhes.matriculasOficina?.length || 0;
+        const selecionados = this.alunosSelecionadosParaMatricula.length;
+
+        if (capacidade && (matriculadosAtuais + selecionados) > capacidade) {
+            const vagas = capacidade - matriculadosAtuais;
+            if (vagas <= 0) {
+                this.toast.erro('Não foi possível matricular. A turma já está lotada.');
+            } else {
+                this.toast.erro(`Não foi possível matricular. Você selecionou ${selecionados} alunos, mas restam apenas ${vagas} vagas na turma.`);
+            }
+            return; // Impede que qualquer matrícula seja feita (mesmo parcialmente)
+        }
+
         this.operacaoEmProgresso = true;
 
         const idsParaMatricular = [...this.alunosSelecionadosParaMatricula];
@@ -619,15 +645,15 @@ export class TurmasLista implements OnInit {
                     this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => !idsParaMatricular.includes(a.id));
 
                     if (erros > 0 && concluidos === 0) {
-                        // Todos falharam — verifica se foi por lotação
-                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade'));
+                        // Todos falharam
+                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade') || m.toLowerCase().includes('lotada'));
                         if (ehLotada) {
-                            this.toast.erro('⚠️ Turma lotada! A capacidade máxima foi atingida. Edite a turma para aumentar o número de vagas.');
+                            this.toast.erro('Turma lotada! A capacidade máxima foi atingida.');
                         } else {
                             this.toast.erro(`Não foi possível matricular: ${mensagensErro[0] || 'Erro desconhecido'}.`);
                         }
                     } else if (erros > 0) {
-                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade'));
+                        const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade') || m.toLowerCase().includes('lotada'));
                         const detalhe = ehLotada
                             ? 'A turma atingiu a capacidade máxima. Edite a turma para aumentar as vagas.'
                             : `${erros} falha(s).`;
@@ -751,6 +777,7 @@ export class TurmasLista implements OnInit {
     fecharModalAlunos(): void {
         this.modalAlunosAberto = false;
         this.turmaDetalhes = null;
+        setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
     // ─── Grade Horária (Métodos Auxiliares) ─────────────────────────
