@@ -64,7 +64,8 @@ export class UsuariosLista implements OnInit, OnDestroy {
     readonly roles = [
         { value: 'ADMIN', label: 'Administrador' },
         { value: 'SECRETARIA', label: 'Secretaria' },
-        { value: 'PROFESSOR', label: 'Professor' }
+        { value: 'PROFESSOR', label: 'Professor' },
+        { value: 'COMUNICACAO', label: 'Comunicação' }
     ];
 
     constructor(
