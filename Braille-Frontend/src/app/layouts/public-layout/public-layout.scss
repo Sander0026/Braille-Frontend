@@ -34,20 +34,24 @@ $transition: 200ms ease;
     position: sticky;
     top: 0;
     z-index: 100;
-    background: $white;
-    // Removida border-bottom amarela forte para dar lugar a um box-shadow elegante e leve
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06); // Contraste suave tipo Relfe
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .header-inner {
-    max-width: 1100px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 0 1.5rem;
-    height: 120px; // Aumentado bastante
+    height: 85px;
     display: flex;
     align-items: center;
     gap: 2rem;
+    justify-content: center;
+    width: 100%;
+    position: relative;
 }
 
 // ── Logo ───────────────────────────────────────────────────
@@ -56,6 +60,11 @@ $transition: 200ms ease;
     align-items: center;
     text-decoration: none;
     flex-shrink: 0;
+    order: 1;
+    position: absolute;
+    left: 1.5rem;
+    height: 100px;
+    width: auto;
 
     &:focus-visible {
         outline: 2px solid $primary;
@@ -65,7 +74,7 @@ $transition: 200ms ease;
 }
 
 .logo-img {
-    height: 90px; // Logo maior acompanhando o height do container
+    height: 100%;
     width: auto;
     object-fit: contain;
     transition: transform $transition;
@@ -82,38 +91,50 @@ $transition: 200ms ease;
     gap: 0.5rem;
     flex: 1;
     justify-content: center;
+    order: 2;
 }
 
 .nav-link {
     padding: 0.5rem 1.25rem;
     font-size: 0.95rem;
     font-weight: 600;
-    color: $gray-700; // Cor escura para contrastar com branco
+    color: $black;
     text-decoration: none;
     border-radius: 0.5rem;
-    transition: color $transition, background $transition, opacity $transition;
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: visible;
+
+    &::before {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 50%;
+        width: 0%;
+        height: 3px;
+        background: $primary;
+        border-radius: 3px 3px 0 0;
+        transform: translateX(-50%);
+        transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
     &:hover {
-        color: #7a6000;
-        background: color.change($primary, $alpha: 0.05);
+        color: $primary;
+    }
+
+    &:hover::before {
+        width: calc(100% - 2.5rem);
+        background: $primary;
     }
 
     &.active {
-        color: #7a6000;
+        color: #111111;
         font-weight: 700;
-        background: transparent;
-        position: relative;
+        background: $primary;
+        border-radius: 8px;
 
-        &::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50%;
-            height: 3px;
-            background: $primary;
-            border-radius: 3px 3px 0 0;
+        &::before {
+            display: none;
         }
     }
 
@@ -124,36 +145,114 @@ $transition: 200ms ease;
 }
 
 // ── CTA no header ──────────────────────────────────────────
-.btn-inscricao {
+.desktop-only-cta {
+    display: none;
+}
+
+.mobile-only-cta {
+    display: none;
+}
+
+// ── Botão Flutuante "Fale Conosco" ─────────────────────────
+.floating-cta {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 99;
     display: inline-flex;
     align-items: center;
-    padding: 0.6rem 1.5rem;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
     background: $primary;
     border: 2px solid $primary;
     color: #111111;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 800;
     border-radius: 9999px;
     text-decoration: none;
     transition: all $transition;
     white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
+    min-height: 50px;
 
     &:hover {
         background: $primary-dk;
         border-color: $primary-dk;
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(245, 200, 0, 0.4);
     }
 
     &:focus-visible {
         outline: 2px solid $gray-700;
         outline-offset: 2px;
     }
+
+    .material-symbols-rounded {
+        font-size: 1.5rem;
+    }
+
+    .floating-cta-text {
+        display: inline;
+    }
 }
 
-.mobile-only-cta {
-    display: none;
+
+// ── Controles de Acessibilidade ────────────────────────────
+.a11y-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+    order: 3;
+    position: absolute;
+    right: 1.5rem;
 }
+
+.a11y-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    background: color.change($gray-100, $alpha: 0.8);
+    border: 1px solid color.change($gray-700, $alpha: 0.2);
+    color: $gray-700;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all $transition;
+    min-width: 44px;
+    min-height: 44px;
+
+    &:hover {
+        background: color.change($primary, $alpha: 0.1);
+        border-color: $primary;
+        color: $primary;
+    }
+
+    &.active {
+        background: $primary;
+        border-color: $primary;
+        color: #111111;
+    }
+
+    &:focus-visible {
+        outline: 2px solid $primary;
+        outline-offset: 2px;
+    }
+
+    .material-symbols-rounded {
+        font-size: 1.25rem;
+    }
+}
+
+.a11y-contraste {
+    padding: 0.5rem;
+    min-width: auto;
+    min-height: auto;
+}
+
 
 .mobile-menu-btn {
     display: none;
@@ -164,6 +263,7 @@ $transition: 200ms ease;
     padding: 0.5rem;
     border-radius: 4px;
     margin-left: auto; // empurra o hambúrguer pra direita junto dos contrroles de acessibilidade caso não haja espaço
+    order: 5;
 
     &:focus-visible {
         outline: 2px solid $primary;
@@ -266,9 +366,9 @@ main {
 // ── Responsivo ─────────────────────────────────────────────
 @media (max-width: 850px) {
     .header-inner {
-        height: 80px;
+        height: 75px;
         gap: 1rem;
-        justify-content: space-between;
+        justify-content: center;
     }
 
     // Esconde o botão grande para dar espaço aos controles de A11y e ao logo
@@ -280,10 +380,16 @@ main {
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        position: absolute;
+        right: 5.5rem;
+    }
+
+    .logo {
+        height: 80px;
     }
 
     .logo-img {
-        height: 60px;
+        height: 100%;
     }
 
     .main-nav {
@@ -310,13 +416,18 @@ main {
             padding: 1rem;
             font-size: 1.1rem;
 
+            &::before {
+                display: none;
+            }
+
+            &:hover {
+                color: $primary;
+                background: color.change($primary, $alpha: 0.1);
+            }
+
             &.active {
                 background: color.change($primary, $alpha: 0.1);
                 border-radius: 8px;
-
-                &::after {
-                    display: none;
-                }
             }
         }
 
@@ -325,6 +436,22 @@ main {
             margin-top: 1rem;
             width: 100%;
             justify-content: center;
+        }
+    }
+
+    .floating-cta {
+        padding: 0.75rem 1rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+
+        .floating-cta-text {
+            display: none;
+        }
+
+        .material-symbols-rounded {
+            font-size: 1.25rem;
         }
     }
 }

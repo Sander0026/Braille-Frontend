@@ -45,8 +45,11 @@
         }
     </select>
 
-    <input type="date" class="form-input form-input--sm" [(ngModel)]="filtroDe" placeholder="De" />
-    <input type="date" class="form-input form-input--sm" [(ngModel)]="filtroAte" placeholder="Até" />
+    <label for="filtro-de" class="sr-only">Data inicial</label>
+    <input id="filtro-de" type="date" class="form-input form-input--sm" [(ngModel)]="filtroDe" placeholder="De" aria-label="Filtrar a partir de" />
+    
+    <label for="filtro-ate" class="sr-only">Data final</label>
+    <input id="filtro-ate" type="date" class="form-input form-input--sm" [(ngModel)]="filtroAte" placeholder="Até" aria-label="Filtrar até" />
 
     <button class="btn btn-primary btn-sm" (click)="aplicarFiltros()">Filtrar</button>
     <button class="btn btn-secondary btn-sm" (click)="limparFiltros()">Limpar</button>
