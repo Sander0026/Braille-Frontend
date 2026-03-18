@@ -561,13 +561,13 @@
 
                             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                                 @if (alunoSelecionado.termoLgpdUrl) {
-                                <a [href]="alunoSelecionado.termoLgpdUrl" target="_blank" class="btn btn-primary btn-sm"
-                                    title="Clique para visualizar o Termo LGPD (abre em nova guia)">
+                                <button class="btn btn-primary btn-sm" (click)="abrirVisualizadorPdf(alunoSelecionado.termoLgpdUrl, 'termoLgpdUrl')"
+                                    title="Clique para visualizar o Termo LGPD no navegador">
                                     <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 6px;">
-                                        description
+                                        visibility
                                     </span>
-                                    Ver Termo Assinado
-                                </a>
+                                    Visualizar Termo
+                                </button>
 
                                 @if (abaAtiva === 'ativos') {
                                 <button class="btn btn-danger btn-sm" (click)="excluirDocumento('termoLgpdUrl')"
@@ -597,6 +597,34 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal de Visualização de PDF -->
+                @if (urlPdfParaVisualizar && modalAberto) {
+                <div style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 1rem;">
+                  <div style="background: white; border-radius: 8px; width: 90%; max-width: 900px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                    
+                    <!-- Cabeçalho -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid #e5e7eb;">
+                      <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600; color: #1f2937;">Visualizador de Documento</h3>
+                      <button (click)="fecharVisualizadorPdf()" style="background: none; border: none; cursor: pointer; font-size: 1.5rem; color: #6b7280; padding: 0; width: 2rem; height: 2rem; display: flex; align-items: center; justify-content: center;" 
+                        title="Fechar (ESC)">
+                        ✕
+                      </button>
+                    </div>
+
+                    <!-- Iframe do PDF -->
+                    <div style="flex: 1; overflow: hidden; background: #f3f4f6;">
+                      <iframe 
+                        [src]="urlPdfParaVisualizar | safeUrl" 
+                        style="width: 100%; height: 100%; border: none;"
+                        title="Visualizador de PDF">
+                      </iframe>
+                    </div>
+
+                  </div>
+                </div>
+                }
+
 
                 <!-- Endereço -->
                 <div class="profile-section full-width">
