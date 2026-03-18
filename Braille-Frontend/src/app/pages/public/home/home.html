@@ -1,5 +1,7 @@
 <!-- ══════════ HERO ══════════ -->
 <section class="hero" aria-label="Seção de boas-vindas">
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) -->
+    <div class="hero-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + fachadaUrl + ')' : null"></div>
     <div class="hero-inner">
         <div class="hero-content animate-on-scroll">
             <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>

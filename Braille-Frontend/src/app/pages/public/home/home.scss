@@ -86,7 +86,7 @@ $transition: 250ms ease;
     position: relative; // Para o pseudo-elemento do fundo
     overflow: hidden;
 
-    // Imagem de fundo com a fachada
+    // Overlay escuro sobre a foto da fachada para garantir contraste da leitura
     &::before {
         content: '';
         position: absolute;
@@ -94,18 +94,31 @@ $transition: 250ms ease;
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: url('/fachada_ilbes.png'); // Caminho a partir da pasta public do Angular
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        opacity: 0.25; // Opacidade clara para ficar legal com as letras por cima
-        z-index: 0;
+        background: linear-gradient(
+            160deg,
+            rgba(0, 0, 0, 0.68) 0%,
+            rgba(0, 0, 0, 0.52) 100%
+        );
+        z-index: 1;
+        pointer-events: none;
     }
 }
 
+// Camada de imagem de fundo — recebe a URL dinamicamente via Angular [style.backgroundImage]
+.hero-bg {
+    position: absolute;
+    inset: 0; // equivalente a top/right/bottom/left: 0
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    opacity: 1;
+    // Quando nenhuma foto for configurada o background é transparent (= preto do .hero)
+}
+
 .hero-inner {
-    position: relative; // Garante que o conteúdo fique acima do fundo
-    z-index: 1;
+    position: relative; // Garante que o conteúdo fique acima do fundo e do overlay
+    z-index: 2;
     min-height: 86vh;
     display: flex;
     flex-direction: column; // Muda de grid de lado a lado para tudo central
