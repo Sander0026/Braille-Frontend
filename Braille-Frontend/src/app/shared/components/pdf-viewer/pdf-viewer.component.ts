@@ -217,8 +217,8 @@ export class PdfViewerComponent implements OnInit {
   private pdf: any = null;
 
   constructor(private cdr: ChangeDetectorRef) {
-    // Configurar worker do PDF.js
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+    // Configurar worker do PDF.js para usar a versão local (arquivo copiado para /public)
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
   }
 
   ngOnInit() {
