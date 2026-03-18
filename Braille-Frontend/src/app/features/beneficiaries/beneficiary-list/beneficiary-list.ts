@@ -9,7 +9,7 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
 import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
 import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
-import { SafeUrlPipe } from '../../../shared/pipes/safe-url.pipe';
+import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
@@ -34,7 +34,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, SafeUrlPipe, ImportModalComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -51,8 +51,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   alunoSelecionado: Beneficiario | null = null;
 
   // Modal de Visualização de PDF
+  mostrarVisualizadorPdf = false;
   urlPdfParaVisualizar: string | null = null;
-  tipoDocumentoVisualizar: 'termoLgpdUrl' | 'laudoUrl' | 'atestadoUrl' = 'termoLgpdUrl';
 
   // Modais de Confirmação (Padronizados)
   alunoParaInativar: Beneficiario | null = null;
@@ -855,23 +855,16 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  // ── Visualização de PDFs em Iframe ──────────────────────────────────
-  abrirVisualizadorPdf(urlDocumento: string | undefined, tipo: 'termoLgpdUrl' | 'laudoUrl' | 'atestadoUrl'): void {
+  // ── Visualização de PDFs com PDF.js ──────────────────────────────────
+  abrirVisualizadorPdf(urlDocumento: string | undefined): void {
     if (!urlDocumento) return;
-
-    // Monta a URL corrigida (garante extensão .pdf)
-    let urlCorrigida = urlDocumento;
-    if (!urlCorrigida.toLowerCase().endsWith('.pdf')) {
-      urlCorrigida += '.pdf';
-    }
-
-    // Usa o Google Docs Viewer para embutir o PDF
-    this.urlPdfParaVisualizar = `https://docs.google.com/viewer?url=${encodeURIComponent(urlCorrigida)}&embedded=true`;
-    this.tipoDocumentoVisualizar = tipo;
+    this.urlPdfParaVisualizar = urlDocumento;
+    this.mostrarVisualizadorPdf = true;
     this.cdr.detectChanges();
   }
 
   fecharVisualizadorPdf(): void {
+    this.mostrarVisualizadorPdf = false;
     this.urlPdfParaVisualizar = null;
     this.cdr.detectChanges();
   }
