@@ -3,8 +3,10 @@
     <!-- Feedback Banner -->
     @if (mensagemFeedback) {
     <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-        <strong>{{ tipoFeedback === 'sucesso' ? '✅ Sucesso: ' : '⚠️ Erro: ' }}</strong>
-        {{ mensagemFeedback }}
+        <span class="material-symbols-rounded banner-icon">
+            {{ tipoFeedback === 'sucesso' ? 'check_circle' : 'warning' }}
+        </span>
+        <span class="banner-text">{{ mensagemFeedback }}</span>
     </div>
     }
 
@@ -93,34 +95,35 @@
 
             <!-- Formulário inline de novo turno -->
             <div class="turno-form">
-                <div class="turno-fields">
-                    <div class="form-group">
-                        <label>Dia da Semana</label>
-                        <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}">
-                            <option value="">Selecione...</option>
-                            @for (d of dias; track d.valor) {
-                            <option [value]="d.valor">{{ d.label }}</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Início</label>
-                        <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
-                            placeholder="14:00">
-                    </div>
-                    <div class="form-group">
-                        <label>Fim</label>
-                        <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
-                            placeholder="16:00">
-                    </div>
-                    <button type="button" class="btn-add-turno" (click)="adicionarTurno()">
-                        + Adicionar
-                    </button>
+                <div class="form-group-inline">
+                    <label>Dia da Semana</label>
+                    <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}" class="form-input">
+                        <option value="">Selecione...</option>
+                        @for (d of dias; track d.valor) {
+                        <option [value]="d.valor">{{ d.label }}</option>
+                        }
+                    </select>
                 </div>
-                @if (erroTurno) {
-                <span class="error-text">⚠️ {{ erroTurno }}</span>
-                }
+                <div class="form-group-inline">
+                    <label>Início</label>
+                    <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
+                        class="form-input" placeholder="14:00">
+                </div>
+                <div class="form-group-inline">
+                    <label>Fim</label>
+                    <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
+                        class="form-input" placeholder="16:00">
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm btn-incluir-turno" (click)="adicionarTurno()">
+                    + Adicionar
+                </button>
             </div>
+            @if (erroTurno) {
+            <span class="error-text error-with-icon">
+                <span class="material-symbols-rounded">error</span>
+                {{ erroTurno }}
+            </span>
+            }
 
             <!-- Turnos adicionados -->
             @if (gradeHoraria.length > 0) {
