@@ -55,7 +55,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   alunoParaExcluirDefinitivo: Beneficiario | null = null;
   salvando = false;
 
-  documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl'; url: string } | null = null;
+  documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'; url: string } | null = null;
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
 
   // KeyManager
@@ -750,17 +750,25 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   // --- Lógica de Upload e Exclusão de Arquivos no Perfil ---
-  async processarUploadArquivo(event: any, tipo: 'fotoPerfil' | 'laudoUrl'): Promise<void> {
+  async processarUploadArquivo(event: any, tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): Promise<void> {
     const file = event.target.files[0];
     if (!file || !this.alunoSelecionado) return;
 
     this.uploadingImage = true;
     this.cdr.detectChanges();
 
-    this.beneficiariosService.uploadImagem(file).subscribe({
+    const upload$ = tipo === 'termoLgpdUrl'
+      ? this.beneficiariosService.uploadPdf(file, 'lgpd')
+      : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
       next: (res) => {
         const updatePayload: Partial<Beneficiario> = {};
         updatePayload[tipo] = res.url;
+        if (tipo === 'termoLgpdUrl') {
+          updatePayload['termoLgpdAceito'] = true;
+          updatePayload['termoLgpdAceitoEm'] = new Date().toISOString();
+        }
 
         this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
           next: (alunoAtualizado) => {
@@ -788,7 +796,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl'): void {
+  excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): void {
     if (!this.alunoSelecionado) return;
     const urlAtual = this.alunoSelecionado[tipo];
     if (!urlAtual) return;

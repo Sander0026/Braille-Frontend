@@ -26,6 +26,9 @@ export interface Beneficiario {
     causaDeficiencia?: string;
     idadeOcorrencia?: string;
     laudoUrl?: string;
+    termoLgpdUrl?: string;
+    termoLgpdAceito?: boolean;
+    termoLgpdAceitoEm?: string;
     tecAssistivas?: string;
     prefAcessibilidade?: string;
     escolaridade?: string;
@@ -173,6 +176,12 @@ export class BeneficiariosService {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<{ url: string }>('/api/upload', formData);
+    }
+
+    uploadPdf(file: File, tipo: 'lgpd' | 'atestado'): Observable<{ url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.post<{ url: string }>(`/api/upload/pdf?tipo=${tipo}`, formData);
     }
 
     excluirArquivo(urlArquivo: string): Observable<any> {
