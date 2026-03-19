@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ChangeDetectorRef, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import * as pdfjsLib from 'pdfjs-dist';
 
@@ -33,32 +33,57 @@ import * as pdfjsLib from 'pdfjs-dist';
 
       <!-- Canvas do PDF -->
       @if (!carregando && !erro) {
-        <div class="pdf-content">
+        <div class="pdf-scroll-area">
           <canvas #pdfCanvas></canvas>
-          
-          <!-- Controles -->
-          <div class="pdf-controls">
-            <button (click)="paginaAnterior()" [disabled]="paginaAtual === 1">← Anterior</button>
-            <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
-            <button (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas">Próxima →</button>
-            <a [href]="urlPdf" target="_blank" download class="btn-download" title="Baixar PDF">
-              ⬇️ Baixar
-            </a>
+        </div>
+        
+        <div class="pdf-controls">
+          <div class="zoom-controls">
+            <button (click)="diminuirZoom()" [disabled]="escalaAtual <= escalaMinima" title="Reduzir Zoom">🔍 -</button>
+            <span class="zoom-level">{{ porcentagemZoom }}%</span>
+            <button (click)="aumentarZoom()" [disabled]="escalaAtual >= escalaMaxima" title="Aumentar Zoom">🔍 +</button>
           </div>
+
+          <div class="separator"></div>
+
+          <button (click)="paginaAnterior()" [disabled]="paginaAtual === 1">← Anterior</button>
+          <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+          <button (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas">Próxima →</button>
+          
+          <a [href]="urlPdf" target="_blank" download class="btn-download" title="Baixar PDF">
+            ⬇️ Baixar
+          </a>
         </div>
       }
     </div>
   `,
   styles: [`
+   :host {
+      display: block;
+      /* Ocupa exatamente o espaço que o pai (ui-modal) der para ele */
+      width: 100%;
+      height: 100%;
+    }
+
+    :host * {
+      box-sizing: border-box !important;
+    }
+
+    :host {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
     .pdf-viewer-container {
       display: flex;
       flex-direction: column;
+      position: relative;
       width: 100%;
       height: 100%;
+      min-height: 500px;
+      
       background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     }
 
     .pdf-viewer-header {
@@ -147,45 +172,61 @@ import * as pdfjsLib from 'pdfjs-dist';
       background: #b91c1c;
     }
 
-    .pdf-content {
+    .pdf-scroll-area {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      background: #f3f4f6;
-    }
-
-    canvas {
-      display: block;
-      margin: auto;
-      max-width: 100%;
-      max-height: 100%;
-      flex: 1;
-      object-fit: contain;
-    }
-
-    .pdf-controls {
+      overflow: auto; 
+      background: #9ca3af; 
+      padding: 1.5rem;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      margin-left: -1.5rem;
+      margin-right: -1.5rem;
+    }
+   
+    canvas {
+      background: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+      flex-shrink: 0;
+      max-width: none; /* Ignora o tamanho da tela para o zoom funcionar */
+    }
+    .pdf-controls {
+      display: flex;
+      flex-wrap: wrap; /* Permite a quebra de linha dos botões */
+      justify-content: center;
       align-items: center;
-      gap: 1rem;
-      padding: 1rem;
+      gap: 8px; /* Era 10px */
+      padding: 10px; /* Era 15px */
       background: white;
       border-top: 1px solid #e5e7eb;
-      flex-wrap: wrap;
+      width: 100%;
+      max-width: 100%; 
+      box-sizing: border-box; /* O padding de 10px está incluso na largura */
+      flex-shrink: 0; 
+      min-height: 60px; /* Era 70px */
+    }
+    .pdf-controls > * {
+      flex-shrink: 1; 
+      max-width: 100%;
     }
 
     .pdf-controls button, .btn-download {
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 0.75rem; 
       background: #3b82f6;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-weight: 500;
+      font-size: 0.875rem;
       transition: background 0.2s;
       text-decoration: none;
       display: inline-block;
+      white-space: nowrap; /* Tenta manter o texto numa linha só */
+      
+      /* Se a tela do celular/modal for ridiculamente pequena, permite ao texto esmagar */
+      overflow: hidden; 
+      text-overflow: ellipsis;
     }
 
     .pdf-controls button:hover, .btn-download:hover {
@@ -200,12 +241,58 @@ import * as pdfjsLib from 'pdfjs-dist';
     .pdf-controls span {
       color: #6b7280;
       font-weight: 500;
-      min-width: 150px;
+      font-size: 0.875rem;
       text-align: center;
+      white-space: nowrap;
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #f3f4f6;
+      padding: 0.25rem;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+      /* Impede que o bloco do zoom quebre antes do necessário */
+      flex-shrink: 0; 
+    }
+
+    .zoom-controls button {
+      background: white;
+      color: #374151;
+      padding: 0.25rem 0.5rem;
+      border: 1px solid #d1d5db;
+    }
+
+    .zoom-controls button:hover:not(:disabled) {
+      background: #e5e7eb;
+      color: #111827;
+    }
+
+    .zoom-level {
+      min-width: 3rem;
+      text-align: center;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #4b5563;
+    }
+
+    .separator {
+      width: 1px;
+      height: 24px;
+      background: #d1d5db;
+      margin: 0 0.5rem;
+    }
+
+    .pdf-controls button, 
+    .pdf-controls .btn-download, 
+    .zoom-controls {
+      max-width: 100%; /* Se a tela for minúscula, os botões não vazam */
     }
   `]
 })
-export class PdfViewerComponent implements OnInit {
+export class PdfViewerComponent implements AfterViewInit {
   @Input() urlPdf!: string;
   @Output() fecharModal = new EventEmitter<void>();
 
@@ -213,15 +300,41 @@ export class PdfViewerComponent implements OnInit {
   totalPaginas = 0;
   carregando = true;
   erro: string | null = null;
-  
   private pdf: any = null;
+
+  // VARIÁVEIS DE ZOOM
+  escalaAtual = 1.5; // Começa com o zoom agradável
+  escalaMinima = 0.5; // Limite mínimo (50%)
+  escalaMaxima = 3.0; // Limite máximo (300%)
+  
+  // Atalho para mostrar a porcentagem bonitinha no HTML
+  get porcentagemZoom() {
+    return Math.round(this.escalaAtual * 100);
+  }
+
+  // FUNÇÕES DE ZOOM
+  async aumentarZoom() {
+    if (this.escalaAtual < this.escalaMaxima) {
+      this.escalaAtual += 0.25; // Aumenta de 25 em 25%
+      await this.renderizarPagina();
+    }
+  }
+
+  async diminuirZoom() {
+    if (this.escalaAtual > this.escalaMinima) {
+      this.escalaAtual -= 0.25; // Diminui de 25 em 25%
+      await this.renderizarPagina();
+    }
+  }
+
+  @ViewChild('pdfCanvas', { static: false }) pdfCanvas!: ElementRef<HTMLCanvasElement>;
 
   constructor(private cdr: ChangeDetectorRef) {
     // Configurar worker do PDF.js para usar a versão local (arquivo copiado para /public)
     pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.carregarPdf();
   }
 
@@ -249,9 +362,11 @@ export class PdfViewerComponent implements OnInit {
 
       this.totalPaginas = this.pdf.numPages;
       this.paginaAtual = 1;
-      await this.renderizarPagina();
+
       this.carregando = false;
       this.cdr.detectChanges();
+
+      await this.renderizarPagina();
     } catch (err: any) {
       console.error('Erro ao carregar PDF:', err);
       this.erro = err.message || 'Erro ao carregar o documento PDF. Verifique se o arquivo é válido.';
@@ -260,17 +375,18 @@ export class PdfViewerComponent implements OnInit {
     }
   }
 
-  async renderizarPagina() {
+  async renderizarPagina() { 
     try {
       if (!this.pdf) return;
 
       const pagina = await this.pdf.getPage(this.paginaAtual);
-      const canvas = document.querySelector('canvas') as HTMLCanvasElement;
+      
+      // Use o ViewChild em vez do document.querySelector (muito mais seguro)
+      const canvas = this.pdfCanvas.nativeElement;
       const contexto = canvas.getContext('2d') as CanvasRenderingContext2D;
 
       // Renderizar em qualidade alta
-      const escala = window.devicePixelRatio || 1;
-      const viewport = pagina.getViewport({ scale: 2 * escala });
+      const viewport = pagina.getViewport({ scale: this.escalaAtual});
 
       canvas.width = viewport.width;
       canvas.height = viewport.height;
