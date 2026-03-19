@@ -555,8 +555,51 @@
                             </label>
                             }
                         </div>
+
+                        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+                            <h5 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #6b7280;">Termo de Consentimento LGPD</h5>
+
+                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                @if (alunoSelecionado.termoLgpdUrl) {
+                                <button class="btn btn-primary btn-sm" (click)="abrirVisualizadorPdf(alunoSelecionado.termoLgpdUrl)"
+                                    title="Clique para visualizar o Termo LGPD no navegador">
+                                    <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 6px;">
+                                        visibility
+                                    </span>
+                                    Visualizar Termo
+                                </button>
+
+                                @if (abaAtiva === 'ativos') {
+                                <button class="btn btn-danger btn-sm" (click)="excluirDocumento('termoLgpdUrl')"
+                                    [disabled]="uploadingImage || deletandoImage">
+                                    <span class="material-symbols-rounded"
+                                        style="font-size: 16px; margin-right: 6px; vertical-align: middle;">delete</span>
+                                    Excluir Termo
+                                </button>
+                                }
+                                } @else if (abaAtiva === 'ativos') {
+                                <label class="btn btn-secondary btn-sm" style="cursor: pointer;"
+                                    [class.opacity-50]="uploadingImage || deletandoImage">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" style="margin-right: 6px;">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                    Fazer Upload do Termo
+                                    <input type="file" (change)="processarUploadArquivo($event, 'termoLgpdUrl')"
+                                        accept=".pdf" style="display: none;"
+                                        [disabled]="uploadingImage || deletandoImage">
+                                </label>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Visualizador PDF movido para overlay de nível raiz (veja abaixo do modal de perfil) -->
+
 
                 <!-- Endereço -->
                 <div class="profile-section full-width">
@@ -655,6 +698,42 @@
     </div>
 </div>
 }
+
+<!-- ── Overlay do Visualizador de PDF (nível raiz, fora de qualquer modal) ── -->
+@if (mostrarVisualizadorPdf && urlPdfParaVisualizar) {
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-label="Visualizador de documento PDF"
+  style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+  ">
+  <div style="
+    width: 90%;
+    max-width: 960px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  ">
+    <app-pdf-viewer
+      [urlPdf]="urlPdfParaVisualizar"
+      (fecharModal)="fecharVisualizadorPdf()">
+    </app-pdf-viewer>
+  </div>
+</div>
+}
+
+
 
 <!-- Modal de Confirmação de Inativação -->
 @if (alunoParaInativar) {

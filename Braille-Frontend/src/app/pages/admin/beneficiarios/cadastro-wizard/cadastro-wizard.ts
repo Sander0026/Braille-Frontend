@@ -1,4 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { forkJoin } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -17,6 +19,8 @@ import { TabEscapeDirective } from '../../../../shared/directives/tab-escape.dir
 export class CadastroWizard implements OnInit {
   passoAtual = 1;
   cadastroForm!: FormGroup;
+  arquivoFotoSelecionado: File | null = null;
+  arquivoTermoSelecionado: File | null = null;
   arquivoLaudoSelecionado: File | null = null;
   isSalvando = false;
   mensagemFeedback = '';
@@ -301,7 +305,7 @@ export class CadastroWizard implements OnInit {
     if (formGrupo?.valid) {
       this.passoAtual++;
       this.anunciarParaLeitorDeTela(`Avançou para a etapa ${this.passoAtual} de 4.`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
       formGrupo?.markAllAsTouched();
       this.anunciarParaLeitorDeTela('Existem campos obrigatórios não preenchidos nesta etapa.');
@@ -312,7 +316,7 @@ export class CadastroWizard implements OnInit {
     if (this.passoAtual > 1) {
       this.passoAtual--;
       this.anunciarParaLeitorDeTela(`Voltou para a etapa ${this.passoAtual} de 4.`);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
@@ -373,16 +377,47 @@ export class CadastroWizard implements OnInit {
       }
     }
 
-    // Se tem laudo para subir, faz o upload primeiro
+    // Se há arquivos para subir, faz upload antes de criar o aluno
+    const uploadTasks: Array<import('rxjs').Observable<{ tipo: string; url: string }>> = [];
+
+    if (this.arquivoFotoSelecionado) {
+      uploadTasks.push(
+        this.beneficiariosService.uploadImagem(this.arquivoFotoSelecionado).pipe(
+          map((res) => ({ tipo: 'fotoPerfil', url: res.url })),
+        ),
+      );
+    }
+
     if (this.arquivoLaudoSelecionado) {
-      this.beneficiariosService.uploadImagem(this.arquivoLaudoSelecionado).subscribe({
-        next: (resposta) => {
-          // Foto subiu com sucesso no Cloudinary — salva a URL no campo correto
-          payloadBackend['laudoUrl'] = resposta.url;
+      uploadTasks.push(
+        this.beneficiariosService.uploadImagem(this.arquivoLaudoSelecionado).pipe(
+          map((res) => ({ tipo: 'laudoUrl', url: res.url })),
+        ),
+      );
+    }
+
+    if (this.arquivoTermoSelecionado) {
+      uploadTasks.push(
+        this.beneficiariosService.uploadPdf(this.arquivoTermoSelecionado, 'lgpd').pipe(
+          map((res) => ({ tipo: 'termoLgpdUrl', url: res.url })),
+        ),
+      );
+    }
+
+    if (uploadTasks.length > 0) {
+      forkJoin(uploadTasks).subscribe({
+        next: (results) => {
+          results.forEach((r) => {
+            payloadBackend[r.tipo] = r.url;
+            if (r.tipo === 'termoLgpdUrl') {
+              payloadBackend['termoLgpdAceito'] = true;
+              payloadBackend['termoLgpdAceitoEm'] = new Date().toISOString();
+            }
+          });
           this.enviarDadosParaBanco(payloadBackend);
         },
         error: () => {
-          this.exibirFeedback('Erro ao enviar a imagem do laudo. Tente novamente.', 'erro');
+          this.exibirFeedback('Erro ao enviar documentos. Tente novamente.', 'erro');
         },
       });
     } else {
@@ -407,8 +442,10 @@ export class CadastroWizard implements OnInit {
         this.exibirFeedback('Aluno cadastrado com sucesso!', 'sucesso');
         this.cadastroForm.reset();
         this.passoAtual = 1;
+        this.arquivoFotoSelecionado = null;
+        this.arquivoTermoSelecionado = null;
         this.arquivoLaudoSelecionado = null;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+          document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       },
       error: (err: { status: number; error?: { message?: string | string[] } }) => {
         console.error('Erro ao salvar beneficiário:', err);
@@ -438,7 +475,7 @@ export class CadastroWizard implements OnInit {
         );
         this.cadastroForm.reset();
         this.passoAtual = 1;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+          document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         this.cdr.detectChanges();
       },
       error: () => {
@@ -466,7 +503,23 @@ export class CadastroWizard implements OnInit {
     }
   }
 
-  onFileSelected(event: any) {
+  onFotoSelecionada(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.arquivoFotoSelecionado = file;
+      this.anunciarParaLeitorDeTela(`Foto 3x4 selecionada: ${file.name}`);
+    }
+  }
+
+  onTermoSelecionado(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.arquivoTermoSelecionado = file;
+      this.anunciarParaLeitorDeTela(`Termo LGPD selecionado: ${file.name}`);
+    }
+  }
+
+  onLaudoSelecionado(event: any) {
     const file = event.target.files[0];
     if (file) {
       this.arquivoLaudoSelecionado = file;

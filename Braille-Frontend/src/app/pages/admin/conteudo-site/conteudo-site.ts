@@ -45,11 +45,14 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   carregando = false;
   salvando = false;
   uploadandoLogo = false;
+  uploadandoFachada = false;
   mensagemSucesso = '';
   mensagemErro = '';
 
   // Logo
   logoPreview: string | null = null;
+  // Fachada
+  fachadaPreview: string | null = null;
   private apiUrl = environment.apiUrl;
 
   // Modais de Exclusão — existentes
@@ -57,6 +60,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   depoimentoParaExcluir: number | null = null;
   faqParaExcluir: number | null = null;
   logoParaExcluir: boolean = false;
+  fachadaParaExcluir: boolean = false;
 
   // Modais de Exclusão — Sobre
   timelineItemParaExcluir: number | null = null;
@@ -134,6 +138,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     this.formConfig = this.fb.group({
       corPrimaria: ['#f5c800'],
       logoUrl: [''],
+      fachadaUrl: [''],
     });
 
     this.formHero = this.fb.group({
@@ -314,11 +319,14 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
       take(1)
     ).subscribe(configs => {
       const logoUrl = configs['logoUrl'] || '';
+      const fachadaUrl = configs['fachadaUrl'] || '';
       this.formConfig.patchValue({
         corPrimaria: configs['corPrimaria'] || '#f5c800',
         logoUrl,
+        fachadaUrl,
       });
       if (logoUrl) this.logoPreview = logoUrl;
+      if (fachadaUrl) this.fachadaPreview = fachadaUrl;
       this.carregando = false;
     });
 
@@ -522,6 +530,44 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     this.logoPreview = null;
     this.formConfig.patchValue({ logoUrl: '' });
     this.logoParaExcluir = false;
+  }
+
+  // ── Upload de Fachada ─────────────────────────────────────
+  onFachadaChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => this.fachadaPreview = reader.result as string;
+    reader.readAsDataURL(file);
+
+    this.uploadandoFachada = true;
+    const token = localStorage.getItem('token') || '';
+    const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    const form = new FormData();
+    form.append('file', file);
+
+    this.http.post<{ url: string }>(`${this.apiUrl}/upload`, form, { headers }).subscribe({
+      next: (res) => {
+        this.formConfig.patchValue({ fachadaUrl: res.url });
+        this.fachadaPreview = res.url;
+        this.uploadandoFachada = false;
+        this.mensagemSucesso = 'Foto da fachada enviada! Clique em "Salvar Configurações" para aplicar.';
+      },
+      error: () => {
+        this.uploadandoFachada = false;
+        this.mensagemErro = 'Erro ao enviar a foto da fachada. Tente novamente.';
+      }
+    });
+  }
+
+  removerFachada() { this.fachadaParaExcluir = true; }
+  cancelarExclusaoFachada() { this.fachadaParaExcluir = false; }
+  confirmarExclusaoFachada() {
+    this.fachadaPreview = null;
+    this.formConfig.patchValue({ fachadaUrl: '' });
+    this.fachadaParaExcluir = false;
   }
 
   salvarOficinas() {

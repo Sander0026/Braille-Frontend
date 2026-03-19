@@ -1,0 +1,47 @@
+<div class="pdf-viewer-header">
+  <h3>Visualizador de Documento</h3>
+  <button (click)="fechar()" class="btn-close" title="Fechar (ESC)">✕</button>
+</div>
+
+@if (carregando) {
+  <div class="pdf-loading">
+    <span class="spinner"></span>
+    <p>Carregando documento...</p>
+  </div>
+}
+
+@if (erro) {
+  <div class="pdf-error">
+    <span class="error-icon">⚠️</span>
+    <p>{{ erro }}</p>
+    <button (click)="tentar()" class="btn-retry">Tentar Novamente</button>
+  </div>
+}
+
+@if (!carregando && !erro) {
+  <div class="pdf-scroll-area">
+    <canvas #pdfCanvas></canvas>
+  </div>
+  
+  <div class="pdf-controls">
+    <div class="zoom-controls">
+      <button (click)="diminuirZoom()" [disabled]="escalaAtual <= escalaMinima" title="Reduzir Zoom">🔍 -</button>
+      <span class="zoom-level">{{ porcentagemZoom }}%</span>
+      <button (click)="aumentarZoom()" [disabled]="escalaAtual >= escalaMaxima" title="Aumentar Zoom">🔍 +</button>
+    </div>
+
+    <div class="separator"></div>
+
+    <div class="pagination-controls">
+      <button (click)="paginaAnterior()" [disabled]="paginaAtual === 1">← Anterior</button>
+      <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+      <button (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas">Próxima →</button>
+    </div>
+    
+    <div class="separator"></div>
+
+    <a [href]="urlPdf" target="_blank" download class="btn-download" title="Baixar PDF">
+      ⬇️ Baixar
+    </a>
+  </div>
+}

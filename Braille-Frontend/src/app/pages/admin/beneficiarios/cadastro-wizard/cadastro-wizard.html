@@ -49,6 +49,34 @@
         }
       </div>
 
+      <div class="form-group" style="margin-bottom: 1.5rem">
+        <label class="form-label">Foto 3x4 <span class="optional-badge">opcional</span></label>
+        <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">photo_camera</span>
+            Selecionar Foto
+            <input type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFotoSelecionada($event)" style="display: none;" />
+          </label>
+          <span class="file-name" *ngIf="arquivoFotoSelecionado">{{ arquivoFotoSelecionado.name }}</span>
+        </div>
+        <p class="helper-text" style="margin-top: 0.35rem;">
+          Pode ser adicionada posteriormente. Alunos cadastrados via planilha ficarão sem foto até ser anexada manualmente.
+        </p>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 1.5rem">
+        <label class="form-label">Termo de Consentimento (LGPD) <span class="optional-badge">opcional</span></label>
+        <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span>
+            Selecionar PDF
+            <input type="file" accept=".pdf" (change)="onTermoSelecionado($event)" style="display: none;" />
+          </label>
+          <span class="file-name" *ngIf="arquivoTermoSelecionado">{{ arquivoTermoSelecionado.name }}</span>
+        </div>
+        <p class="helper-text" style="margin-top: 0.35rem;">O arquivo ficará disponível no perfil do aluno. Pode ser anexado depois do cadastro.</p>
+      </div>
+
       <!-- Primeiras 2 colunas: Documentos Básicos -->
       <div class="form-grid" style="margin-bottom: 1rem">
         <div class="form-group">
@@ -345,7 +373,7 @@
       <div class="laudo-upload-area">
         <label for="laudoArquivo">📎 Anexar Imagem do Laudo Médico</label>
         <p class="field-hint">Envie apenas arquivos de imagem digitalizados (JPG, PNG). Tamanho máximo: 5MB.</p>
-        <input type="file" id="laudoArquivo" accept="image/*" (change)="onFileSelected($event)" class="file-input"
+        <input type="file" id="laudoArquivo" accept="image/*" (change)="onLaudoSelecionado($event)" class="file-input"
           [attr.aria-label]="'Selecionar arquivo de laudo médico'">
       </div>
       }
