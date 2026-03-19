@@ -9,6 +9,7 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
 import { ToastService } from '../../../core/services/toast.service';
 import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
 import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
+import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
@@ -33,7 +34,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, ImportModalComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -49,13 +50,17 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   deletandoImage = false;
   alunoSelecionado: Beneficiario | null = null;
 
+  // Modal de Visualização de PDF
+  mostrarVisualizadorPdf = false;
+  urlPdfParaVisualizar: string | null = null;
+
   // Modais de Confirmação (Padronizados)
   alunoParaInativar: Beneficiario | null = null;
   alunoParaRestaurar: Beneficiario | null = null;
   alunoParaExcluirDefinitivo: Beneficiario | null = null;
   salvando = false;
 
-  documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl'; url: string } | null = null;
+  documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'; url: string } | null = null;
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
 
   // KeyManager
@@ -750,17 +755,25 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   // --- Lógica de Upload e Exclusão de Arquivos no Perfil ---
-  async processarUploadArquivo(event: any, tipo: 'fotoPerfil' | 'laudoUrl'): Promise<void> {
+  async processarUploadArquivo(event: any, tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): Promise<void> {
     const file = event.target.files[0];
     if (!file || !this.alunoSelecionado) return;
 
     this.uploadingImage = true;
     this.cdr.detectChanges();
 
-    this.beneficiariosService.uploadImagem(file).subscribe({
+    const upload$ = tipo === 'termoLgpdUrl'
+      ? this.beneficiariosService.uploadPdf(file, 'lgpd')
+      : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
       next: (res) => {
         const updatePayload: Partial<Beneficiario> = {};
         updatePayload[tipo] = res.url;
+        if (tipo === 'termoLgpdUrl') {
+          updatePayload['termoLgpdAceito'] = true;
+          updatePayload['termoLgpdAceitoEm'] = new Date().toISOString();
+        }
 
         this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
           next: (alunoAtualizado) => {
@@ -788,7 +801,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl'): void {
+  excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): void {
     if (!this.alunoSelecionado) return;
     const urlAtual = this.alunoSelecionado[tipo];
     if (!urlAtual) return;
@@ -842,5 +855,19 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
+  // ── Visualização de PDFs com PDF.js ──────────────────────────────────
+  abrirVisualizadorPdf(urlDocumento: string | undefined): void {
+    if (!urlDocumento) return;
+    this.urlPdfParaVisualizar = urlDocumento;
+    this.mostrarVisualizadorPdf = true;
+    this.cdr.detectChanges();
+  }
+
+  fecharVisualizadorPdf(): void {
+    this.mostrarVisualizadorPdf = false;
+    this.urlPdfParaVisualizar = null;
+    this.cdr.detectChanges();
+  }
 
 }
+

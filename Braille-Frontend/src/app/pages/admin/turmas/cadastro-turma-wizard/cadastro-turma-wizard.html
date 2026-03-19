@@ -1,167 +1,192 @@
 <div class="wizard-container">
 
-    <!-- Feedback Banner -->
-    @if (mensagemFeedback) {
-    <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-        <span class="material-symbols-rounded banner-icon">
-            {{ tipoFeedback === 'sucesso' ? 'check_circle' : 'warning' }}
-        </span>
-        <span class="banner-text">{{ mensagemFeedback }}</span>
+  <!-- ── Feedback Banner ──────────────────────────────────── -->
+  @if (mensagemFeedback) {
+  <div class="feedback-banner" [class.sucesso]="tipoFeedback === 'sucesso'" [class.erro]="tipoFeedback === 'erro'"
+    role="alert">
+    <span class="banner-icon">{{ tipoFeedback === 'sucesso' ? '✅' : '⚠️' }}</span>
+    {{ mensagemFeedback }}
+  </div>
+  }
+
+  <!-- ── Header ───────────────────────────────────────────── -->
+  <div class="wizard-header">
+    <h1>Nova Oficina / Turma</h1>
+    <p>Preencha as informações abaixo para cadastrar uma nova oficina no sistema.</p>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="etapaAtual" aria-valuemin="1"
+      [attr.aria-valuemax]="totalEtapas" [attr.aria-label]="'Passo ' + etapaAtual + ' de ' + totalEtapas">
+      <div class="progress-fill" [style.width.%]="(etapaAtual / totalEtapas) * 100"></div>
+    </div>
+  </div>
+
+  <!-- ── Formulário Principal ──────────────────────────────── -->
+  <form [formGroup]="formTurma" novalidate>
+
+    <!-- ── ETAPA 1: Dados Básicos ──────────────────────────── -->
+    @if (etapaAtual === 1) {
+    <fieldset class="wizard-step">
+      <legend>Passo 1 de {{ totalEtapas }} — Dados Básicos</legend>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="input-nome">Nome da Turma / Oficina <span aria-hidden="true">*</span></label>
+            <input type="text" id="input-nome" formControlName="nome"
+              placeholder="Ex: Braille Básico — Turma A"
+              [class.input-error]="isFieldInvalid('nome')"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('nome')">
+            @if (isFieldInvalid('nome')) {
+            <span class="error-text" role="alert">O nome é obrigatório.</span>
+            }
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="input-professor">Professor Responsável <span aria-hidden="true">*</span></label>
+            @if (carregandoProfessores) {
+            <p class="loading-hint">Carregando professores...</p>
+            } @else {
+            <select id="input-professor" formControlName="professorId"
+              [class.input-error]="isFieldInvalid('professorId')"
+              aria-required="true"
+              [attr.aria-invalid]="isFieldInvalid('professorId')">
+              <option value="">Selecione um professor...</option>
+              @for (prof of professores; track prof.id) {
+              <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
+              }
+            </select>
+            @if (isFieldInvalid('professorId')) {
+            <span class="error-text" role="alert">Selecione o professor responsável.</span>
+            }
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="form-group">
+            <label for="input-data-inicio">Data de Início</label>
+            <input type="date" id="input-data-inicio" formControlName="dataInicio">
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="form-group">
+            <label for="input-data-fim">Data de Encerramento</label>
+            <input type="date" id="input-data-fim" formControlName="dataFim">
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="form-group">
+            <label for="input-capacidade">Capacidade Máxima</label>
+            <input type="number" id="input-capacidade" formControlName="capacidadeMaxima"
+              placeholder="Ex: 20" min="1">
+            <small class="field-hint">Deixe em branco para sem limite.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="form-group">
+            <label for="input-descricao">Descrição <span class="badge-opt">opcional</span></label>
+            <input type="text" id="input-descricao" formControlName="descricao"
+              placeholder="Resumo, sala, observações sobre a turma">
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <div class="wizard-actions">
+      <a routerLink="/admin/turmas" class="btn btn-secondary">Cancelar</a>
+      <button type="button" class="btn btn-primary" (click)="proximaEtapa()">
+        Próximo →
+      </button>
     </div>
     }
 
-    <header class="wizard-header">
-        <h1>Nova Turma / Oficina</h1>
-        <p>Etapa <strong>{{ etapaAtual }}</strong> de {{ totalEtapas }}</p>
-        <div class="progress-bar" role="progressbar" aria-label="Progresso do cadastro"
-            [attr.aria-valuenow]="etapaAtual" aria-valuemin="1" [attr.aria-valuemax]="totalEtapas">
-            <div class="progress-fill" [style.width.%]="(etapaAtual / totalEtapas) * 100"></div>
+    <!-- ── ETAPA 2: Grade Horária ──────────────────────────── -->
+    @if (etapaAtual === 2) {
+    <fieldset class="wizard-step">
+      <legend>Passo 2 de {{ totalEtapas }} — Grade Horária <span class="badge-opt">opcional</span></legend>
+
+      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">
+        Adicione os dias e horários da oficina. Você pode adicionar múltiplos turnos.
+      </p>
+
+      <!-- Formulário inline de novo turno -->
+      <div class="turno-form">
+        <div class="form-group-inline">
+          <label for="input-dia">Dia da Semana</label>
+          <select id="input-dia" [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}"
+            class="form-input" aria-label="Dia da Semana">
+            <option value="">Dia...</option>
+            @for (d of dias; track d.valor) {
+            <option [value]="d.valor">{{ d.label }}</option>
+            }
+          </select>
         </div>
-    </header>
 
-    <form [formGroup]="formTurma" class="wizard-form">
+        <div class="form-group-inline">
+          <label for="input-hora-inicio">Início</label>
+          <input type="time" id="input-hora-inicio" [(ngModel)]="horaInicioNovoTurno"
+            [ngModelOptions]="{standalone: true}" class="form-input" aria-label="Hora de início">
+        </div>
 
-        <!-- ETAPA 1: Dados Básicos + Professor -->
-        @if (etapaAtual === 1) {
-        <fieldset class="wizard-step">
-            <legend>Passo 1: Dados Básicos</legend>
+        <div class="form-group-inline">
+          <label for="input-hora-fim">Fim</label>
+          <input type="time" id="input-hora-fim" [(ngModel)]="horaFimNovoTurno"
+            [ngModelOptions]="{standalone: true}" class="form-input" aria-label="Hora de fim">
+        </div>
 
-            <div class="row">
-                <div class="col-lg-6">
-                    <div class="form-group">
-                        <label for="input-nome">Nome da Turma / Oficina *</label>
-                        <input type="text" id="input-nome" formControlName="nome"
-                            placeholder="Ex: Braille Básico — Turma A" [class.input-error]="isFieldInvalid('nome')">
-                        @if (isFieldInvalid('nome')) {
-                        <span class="error-text">O nome é obrigatório.</span>
-                        }
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="form-group">
-                        <label for="input-professor">Professor Responsável *</label>
-                        @if (carregandoProfessores) {
-                        <p class="loading-hint">Carregando professores...</p>
-                        } @else {
-                        <select id="input-professor" formControlName="professorId"
-                            [class.input-error]="isFieldInvalid('professorId')">
-                            <option value="">Selecione um professor...</option>
-                            @for (prof of professores; track prof.id) {
-                            <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
-                            }
-                        </select>
-                        @if (isFieldInvalid('professorId')) {
-                        <span class="error-text">Selecione o professor responsável.</span>
-                        }
-                        }
-                    </div>
-                </div>
-            </div>
+        <button type="button" class="btn btn-secondary btn-incluir-turno" (click)="adicionarTurno()">
+          + Incluir
+        </button>
+      </div>
 
-            <div class="row">
-                <div class="col-lg-4">
-                    <div class="form-group">
-                        <label for="input-capacidade">Capacidade Máxima</label>
-                        <input type="number" id="input-capacidade" formControlName="capacidadeMaxima"
-                            placeholder="Ex: 20" min="1">
-                        <small class="field-hint">Deixe em branco para sem limite.</small>
-                    </div>
-                </div>
-                <div class="col-lg-8">
-                    <div class="form-group">
-                        <label for="input-descricao">Descrição <span class="badge-opt">opcional</span></label>
-                        <input type="text" id="input-descricao" formControlName="descricao"
-                            placeholder="Resumo ou observações sobre a turma">
-                    </div>
-                </div>
-            </div>
-        </fieldset>
-        }
+      @if (erroTurno) {
+      <span class="error-text error-with-icon" role="alert">
+        <span class="material-symbols-rounded" aria-hidden="true">error</span>
+        {{ erroTurno }}
+      </span>
+      }
 
-        <!-- ETAPA 2: Grade Horária -->
-        @if (etapaAtual === 2) {
-        <fieldset class="wizard-step">
-            <legend>Passo 2: Grade Horária <span class="badge-opt">opcional</span></legend>
+      <!-- Lista de turnos adicionados -->
+      @if (gradeHoraria.length > 0) {
+      <div class="grade-lista">
+        <h4>Turnos cadastrados</h4>
+        <ul>
+          @for (turno of gradeHoraria; track turno.dia; let i = $index) {
+          <li class="turno-item">
+            <span class="turno-dia">{{ labelDia(turno.dia) }}</span>
+            <span>{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
+            <button type="button" class="btn-remove-turno" (click)="removerTurno(i)"
+              [attr.aria-label]="'Remover turno de ' + labelDia(turno.dia)">✕</button>
+          </li>
+          }
+        </ul>
+      </div>
+      } @else {
+      <p class="grade-vazio">Nenhum turno adicionado. A grade horária é opcional.</p>
+      }
+    </fieldset>
 
-            <div class="grade-info">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-                Registre os dias e horários da turma. O sistema usará esses dados para <strong>detectar choques de
-                    horário</strong> ao matricular alunos e ao alocar professores.
-            </div>
+    <div class="wizard-actions">
+      <button type="button" class="btn btn-secondary" (click)="etapaAnterior()">← Voltar</button>
+      <button type="button" class="btn btn-primary"
+        (click)="finalizarCadastro()"
+        [disabled]="isSalvando"
+        [attr.aria-busy]="isSalvando">
+        {{ isSalvando ? 'Salvando...' : 'Cadastrar Oficina ✓' }}
+      </button>
+    </div>
+    }
 
-            <!-- Formulário inline de novo turno -->
-            <div class="turno-form">
-                <div class="form-group-inline">
-                    <label>Dia da Semana</label>
-                    <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}" class="form-input">
-                        <option value="">Selecione...</option>
-                        @for (d of dias; track d.valor) {
-                        <option [value]="d.valor">{{ d.label }}</option>
-                        }
-                    </select>
-                </div>
-                <div class="form-group-inline">
-                    <label>Início</label>
-                    <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
-                        class="form-input" placeholder="14:00">
-                </div>
-                <div class="form-group-inline">
-                    <label>Fim</label>
-                    <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
-                        class="form-input" placeholder="16:00">
-                </div>
-                <button type="button" class="btn btn-secondary btn-sm btn-incluir-turno" (click)="adicionarTurno()">
-                    + Adicionar
-                </button>
-            </div>
-            @if (erroTurno) {
-            <span class="error-text error-with-icon">
-                <span class="material-symbols-rounded">error</span>
-                {{ erroTurno }}
-            </span>
-            }
-
-            <!-- Turnos adicionados -->
-            @if (gradeHoraria.length > 0) {
-            <div class="grade-lista">
-                <h4>Turnos cadastrados:</h4>
-                <ul>
-                    @for (turno of gradeHoraria; track turno.dia; let i = $index) {
-                    <li class="turno-item">
-                        <span class="turno-dia">{{ labelDia(turno.dia) }}</span>
-                        <span class="turno-hora">{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
-                        <button type="button" class="btn-remove-turno" (click)="removerTurno(i)"
-                            aria-label="Remover turno">
-                            ✕
-                        </button>
-                    </li>
-                    }
-                </ul>
-            </div>
-            } @else {
-            <p class="grade-vazio">Nenhum turno adicionado. Você pode salvar sem horários se preferir.</p>
-            }
-        </fieldset>
-        }
-
-        <!-- Rodapé de Navegação -->
-        <footer class="wizard-actions">
-            @if (etapaAtual > 1) {
-            <button type="button" class="btn btn-secondary" (click)="etapaAnterior()">← Voltar</button>
-            }
-            @if (etapaAtual < totalEtapas) { <button type="button" class="btn btn-primary" (click)="proximaEtapa()">
-                Avançar →</button>
-                }
-                @if (etapaAtual === totalEtapas) {
-                <button type="button" class="btn btn-success" (click)="finalizarCadastro()" [disabled]="isSalvando">
-                    {{ isSalvando ? 'Salvando...' : '✅ Cadastrar Turma' }}
-                </button>
-                }
-        </footer>
-
-    </form>
+  </form>
 </div>

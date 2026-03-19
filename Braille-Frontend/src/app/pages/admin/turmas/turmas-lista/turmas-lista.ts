@@ -69,7 +69,6 @@ export class BuscaResultadoItemDirective implements Highlightable {
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, BuscaResultadoItemDirective, TabelaTrFocavelDirective, A11yModule],
-
     templateUrl: './turmas-lista.html',
     styleUrl: './turmas-lista.scss',
 })
@@ -82,6 +81,7 @@ export class TurmasLista implements OnInit {
     totalTurmas = 0;
     paginaAtual = 1;
     abaAtual: 'ativas' | 'arquivadas' = 'ativas';
+    statusFiltro = 'TODOS';
 
     // ── Professores (para o dropdown) ──────────────────────────
     professores: Usuario[] = [];
@@ -154,7 +154,6 @@ export class TurmasLista implements OnInit {
         private liveAnnouncer: LiveAnnouncer
     ) { }
 
-
     ngOnInit(): void {
         this.iniciarFormularios();
 
@@ -171,7 +170,6 @@ export class TurmasLista implements OnInit {
         this.isProfessor = user?.role === 'PROFESSOR';
         this.userId = user?.sub || '';
 
-        this.iniciarFormularios();
         this.iniciarBuscaAlunos();
         this.carregarDadosIniciais();
     }
@@ -193,7 +191,6 @@ export class TurmasLista implements OnInit {
         }
     }
 
-    // Dispara turmas e professores em paralelo — tempo = max(A, B) em vez de A + B
     carregarDadosIniciais(): void {
         this.isLoading = true;
         this.erro = '';
@@ -226,7 +223,6 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    // ── Formulários ────────────────────────────────────────────
     iniciarFormularios(): void {
         this.turmaForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
@@ -249,7 +245,6 @@ export class TurmasLista implements OnInit {
     }
 
     get turmasFiltradas(): Turma[] {
-        // O backend já filtra — retorna todos (a aba é controlada pelo carregarTurmas)
         return this.turmas;
     }
 
@@ -259,7 +254,6 @@ export class TurmasLista implements OnInit {
         this.carregarTurmas(1);
     }
 
-    // ── Logica de Filtros Ativos ───────────────────────────────
     get quantidadeFiltrosAtivos(): number {
         if (!this.filterForm) return 0;
         let count = 0;
@@ -282,17 +276,12 @@ export class TurmasLista implements OnInit {
         this.carregarTurmas();
     }
 
-    // ── Carregamentos ──────────────────────────────────────────
-
     carregarTurmas(pagina = 1): void {
         this.isLoading = true;
         this.erro = '';
         this.paginaAtual = pagina;
 
-        // Passa statusAtivo baseado na aba: ativas=true, arquivadas=false
         const statusAtivo = this.abaAtual === 'ativas' ? true : false;
-
-        // Se for professor, passa o próprio ID
         const profIdOverride = this.isProfessor ? this.userId : undefined;
 
         const termoBusca = this.buscaCtrl.value?.trim() || undefined;
@@ -317,15 +306,10 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    // carregarProfessores() foi absorvido pelo forkJoin em carregarDadosIniciais()
-
-    // ── Modal Criar → navega para o Wizard completo ─────────────
     abrirModalCriar(): void {
         this.router.navigate(['/admin/turmas/cadastro']);
     }
 
-
-    // ── Modal Editar ───────────────────────────────────────────
     abrirModalEditar(turma: Turma): void {
         this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.modoEdicao = true;
@@ -339,7 +323,6 @@ export class TurmasLista implements OnInit {
             professorId: turma.professor?.id ?? '',
         });
 
-        // Preenche a Grade Horária formatando de minutos para texto
         this.gradeHoraria = [];
         if (turma.gradeHoraria && turma.gradeHoraria.length > 0) {
             this.gradeHoraria = turma.gradeHoraria.map(turno => ({
@@ -414,7 +397,6 @@ export class TurmasLista implements OnInit {
         });
     }
 
-    // ── Modal Arquivar ──────────────────────────────────────────
     abrirModalArquivar(turma: Turma): void {
         this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.turmaParaArquivar = turma;
@@ -507,9 +489,6 @@ export class TurmasLista implements OnInit {
         });
     }
 
-
-
-    // ── Modal Alunos ───────────────────────────────────────────
     alterarAbaModalAlunos(aba: 'adicionar' | 'remover'): void {
         this.modalAlunosAbaAtual = aba;
         if (aba === 'adicionar') {
@@ -526,7 +505,7 @@ export class TurmasLista implements OnInit {
         this.carregandoDetalhes = true;
         this.modalAlunosAberto = true;
         this.modalAlunosAbaAtual = this.isProfessor ? 'remover' : 'adicionar';
-        this.buscaAlunoCtrl.setValue('', { emitEvent: false }); // Limpa a busca anterior
+        this.buscaAlunoCtrl.setValue('', { emitEvent: false });
         this.alunosBuscaRestado = [];
         this.alunosSelecionadosParaMatricula = [];
 
@@ -562,21 +541,17 @@ export class TurmasLista implements OnInit {
         this.beneficiariosService.limparCache();
         this.beneficiariosService.listar(1, 100, termo).subscribe({
             next: (res) => {
-                // Filtra os alunos que já estão matriculados (usa matriculasOficina da nova interface)
                 const IDsMatriculados = (this.turmaDetalhes?.matriculasOficina ?? []).map(m => m.aluno.id);
 
                 this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
                 this.buscandoAlunos = false;
 
-                // Remove seleções de alunos que não estão mais na busca local 
-                // (opcional, mas garante que não salve alunos que não vê na busca, se buscar de novo)
                 this.alunosSelecionadosParaMatricula = this.alunosSelecionadosParaMatricula.filter(id =>
                     this.alunosBuscaRestado.some(a => a.id === id)
                 );
 
                 this.cdr.detectChanges();
 
-                // Reinicia KeyManager quando busca volta os dados
                 setTimeout(() => {
                     this.keyManager = new ActiveDescendantKeyManager(this.buscaItems).withWrap().withTypeAhead();
                 });
@@ -594,7 +569,7 @@ export class TurmasLista implements OnInit {
         if (event.key === 'Enter' || event.key === ' ') {
             const activeItem = this.keyManager.activeItem;
             if (activeItem) {
-                event.preventDefault(); // Evita scroll do espaço
+                event.preventDefault();
                 this.toggleSelecaoAluno(activeItem.itemData.id);
             }
         } else {
@@ -614,7 +589,6 @@ export class TurmasLista implements OnInit {
     salvarMatriculasEmLote(): void {
         if (!this.turmaDetalhes || this.operacaoEmProgresso || this.alunosSelecionadosParaMatricula.length === 0) return;
         
-        // Verifica capacidade antes de qualquer matrícula
         const capacidade = this.turmaDetalhes.capacidadeMaxima;
         const matriculadosAtuais = this.turmaDetalhes.matriculasOficina?.length || 0;
         const selecionados = this.alunosSelecionadosParaMatricula.length;
@@ -626,7 +600,7 @@ export class TurmasLista implements OnInit {
             } else {
                 this.toast.erro(`Não foi possível matricular. Você selecionou ${selecionados} alunos, mas restam apenas ${vagas} vagas na turma.`);
             }
-            return; // Impede que qualquer matrícula seja feita (mesmo parcialmente)
+            return;
         }
 
         this.operacaoEmProgresso = true;
@@ -645,7 +619,6 @@ export class TurmasLista implements OnInit {
                     this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => !idsParaMatricular.includes(a.id));
 
                     if (erros > 0 && concluidos === 0) {
-                        // Todos falharam
                         const ehLotada = mensagensErro.some(m => m.toLowerCase().includes('capacidade') || m.toLowerCase().includes('lotada'));
                         if (ehLotada) {
                             this.toast.erro('Turma lotada! A capacidade máxima foi atingida.');
@@ -689,7 +662,6 @@ export class TurmasLista implements OnInit {
 
         this.turmasService.matricularAluno(this.turmaDetalhes.id, aluno.id).subscribe({
             next: () => {
-                // Re-carrega detalhes para atualizar lista de matriculasOficina
                 this.turmasService.buscarPorId(this.turmaDetalhes!.id).subscribe(t => {
                     this.turmaDetalhes = t;
                     this.alunosBuscaRestado = this.alunosBuscaRestado.filter(a => a.id !== aluno.id);
@@ -719,7 +691,6 @@ export class TurmasLista implements OnInit {
 
         this.turmasService.desmatricularAluno(this.turmaDetalhes.id, alunoId).subscribe({
             next: () => {
-                // Re-carrega detalhes para atualizar lista de matriculasOficina
                 this.turmasService.buscarPorId(this.turmaDetalhes!.id).subscribe(t => {
                     this.turmaDetalhes = t;
                     this.operacaoEmProgresso = false;
@@ -742,10 +713,8 @@ export class TurmasLista implements OnInit {
         const data = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-');
         const nomeArquivo = `Turma_${nomeTurma}_${data}.csv`;
 
-        // Cabeçalho das colunas
         const cabecalho = ['Nome do Aluno', 'Matrícula', 'Status', 'Data de Ingresso'];
 
-        // Linhas de dados
         const linhas = (this.turmaDetalhes.matriculasOficina ?? []).map(m => [
             m.aluno.nomeCompleto,
             m.aluno.matricula ?? '',
@@ -753,12 +722,10 @@ export class TurmasLista implements OnInit {
             m.dataEntrada ? new Date(m.dataEntrada).toLocaleDateString('pt-BR') : '',
         ]);
 
-        // Monta o conteúdo CSV com separador ponto-e-vírgula (padrão Excel PT-BR)
         const csvConteudo = [cabecalho, ...linhas]
             .map(linha => linha.map(cel => `"${String(cel).replace(/"/g, '""')}"`).join(';'))
             .join('\r\n');
 
-        // BOM UTF-8 garante que o Excel exiba acentos corretamente
         const bom = '\uFEFF';
         const blob = new Blob([bom + csvConteudo], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -780,7 +747,6 @@ export class TurmasLista implements OnInit {
         setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
-    // ─── Grade Horária (Métodos Auxiliares) ─────────────────────────
     adicionarTurno() {
         this.erroTurno = '';
 
@@ -834,7 +800,6 @@ export class TurmasLista implements OnInit {
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
     }
 
-    // ── Paginação ──────────────────────────────────────────────
     readonly Math = Math;
 
     get totalPaginas(): number {
@@ -849,14 +814,10 @@ export class TurmasLista implements OnInit {
         if (this.paginaAtual < this.totalPaginas) this.carregarTurmas(this.paginaAtual + 1);
     }
 
-    // ── Utilitários ────────────────────────────────────────────
     trackById(_: number, item: { id: string }): string {
         return item.id;
     }
 
-    // ── Status Acadêmico (Fase 4) ──────────────────────────────
-
-    /** Labels e cores dos status para exibição na UI */
     readonly statusConfig: Record<string, { label: string; cor: string }> = {
         PREVISTA: { label: 'Prevista', cor: 'status-prevista' },
         ANDAMENTO: { label: 'Em Andamento', cor: 'status-andamento' },
@@ -883,5 +844,57 @@ export class TurmasLista implements OnInit {
             }
         });
     }
-}
 
+    // 👉 MÉTODOS DE CICLO DE VIDA CORRIGIDOS
+    async concluirTurma(turma: Turma): Promise<void> {
+        const ok = await this.confirmDialog.confirmar({
+            titulo: 'Concluir Turma',
+            mensagem: `Deseja encerrar oficialmente a turma "${turma.nome}"? Ela será marcada como concluída e não aceitará novas frequências.`,
+            textoBotaoConfirmar: 'Sim, concluir',
+            tipo: 'info'
+        });
+        
+        if (!ok) return;
+
+        this.turmasService.concluir(turma.id).subscribe({
+            next: () => {
+                setTimeout(() => {
+                    this.toast.sucesso('Turma concluída com sucesso!');
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
+            },
+            error: () => {
+                setTimeout(() => {
+                    this.toast.erro('Erro ao concluir turma.');
+                    this.cdr.markForCheck();
+                }, 0);
+            }
+        });
+    }
+
+    async cancelarTurma(turma: Turma): Promise<void> {
+        const ok = await this.confirmDialog.confirmar({
+            titulo: 'Cancelar Turma',
+            mensagem: `Atenção: Tem certeza que deseja cancelar a turma "${turma.nome}"? Esta ação a marcará como inativa.`,
+            textoBotaoConfirmar: 'Sim, cancelar',
+            tipo: 'danger'
+        });
+
+        if (!ok) return;
+
+        this.turmasService.cancelar(turma.id).subscribe({
+            next: () => {
+                setTimeout(() => {
+                    this.toast.sucesso('Turma cancelada com sucesso!');
+                    this.carregarTurmas(this.paginaAtual);
+                }, 0);
+            },
+            error: () => {
+                setTimeout(() => {
+                    this.toast.erro('Erro ao cancelar turma.');
+                    this.cdr.markForCheck();
+                }, 0);
+            }
+        });
+    }
+}

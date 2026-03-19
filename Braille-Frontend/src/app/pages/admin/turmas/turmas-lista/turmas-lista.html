@@ -1,4 +1,3 @@
-<!-- ══════════ CABEÇALHO ══════════ -->
 <div class="page-header">
   <div>
     <h1 class="page-title">Oficinas / Turmas</h1>
@@ -11,7 +10,6 @@
   }
 </div>
 
-<!-- ══════════ BUSCA E FILTROS ══════════ -->
 <div class="filter-bar" role="search">
   <div class="filter-search">
     <label for="busca-turma" class="sr-only">Buscar turma ou oficina por nome</label>
@@ -19,7 +17,6 @@
       [formControl]="buscaCtrl" aria-label="Buscar turma ou oficina por nome" autocomplete="off" />
   </div>
 
-  <!-- Botão de Filtros Avançados -->
   <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
     [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Filtros avançados"
     [attr.aria-expanded]="drawerAberto ? 'true' : 'false'" aria-controls="turmas-filter-drawer">
@@ -31,7 +28,6 @@
   </button>
 </div>
 
-<!-- Aviso de filtros ativos -->
 @if (quantidadeFiltrosAtivos > 0) {
 <div class="filter-active-bar" role="status">
   <span class="material-symbols-rounded" style="font-size:16px;">filter_alt</span>
@@ -40,7 +36,6 @@
 </div>
 }
 
-<!-- Tabs switcher — sempre visível após carregar -->
 <div class="abas-switcher" role="tablist">
   <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'ativas'" [class.ativa]="abaAtual === 'ativas'"
     (click)="alterarAba('ativas')">
@@ -54,7 +49,6 @@
   }
 </div>
 
-<!-- ══════════ ESTADOS ══════════ -->
 @if (isLoading) {
 <div class="loading-state" role="status" aria-busy="true" aria-label="Carregando turmas">
   <div class="spinner" aria-hidden="true"></div>
@@ -72,9 +66,7 @@
   }
 </div>
 } @else {
-<!-- Grade de cards -->
 <div class="turmas-grid" role="region" aria-label="Lista de oficinas">
-  <!-- Indicador de status -->
   @for (turma of turmasFiltradas; track turma.id) {
   <article class="turma-card focavel-card" tabindex="0" appTabelaTrFocavel>
     <div class="card-status-bar" [class.inativa]="!turma.statusAtivo" aria-hidden="true"></div>
@@ -82,14 +74,24 @@
     <div class="card-body">
       <div class="card-title-row">
         <h2 class="turma-nome">{{ turma.nome }}</h2>
-        <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">
-          <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;" aria-hidden="true">
-            {{ turma.statusAtivo ? 'check_circle' : 'inventory_2' }}
-          </span>
-          {{ turma.statusAtivo ? 'Ativa' : 'Arquivada' }}
-        </span>
+        <div style="display:flex; gap: 0.5rem; flex-wrap: wrap;">
+            <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">
+            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;" aria-hidden="true">
+                {{ turma.statusAtivo ? 'check_circle' : 'inventory_2' }}
+            </span>
+            {{ turma.statusAtivo ? 'Ativa' : 'Arquivada' }}
+            </span>
+            
+            <span class="status-badge" [ngClass]="{
+                'badge-prevista': turma.status === 'PREVISTA',
+                'badge-andamento': turma.status === 'ANDAMENTO' || !turma.status,
+                'badge-concluida': turma.status === 'CONCLUIDA',
+                'badge-cancelada': turma.status === 'CANCELADA'
+            }">
+                {{ turma.status || 'ANDAMENTO' }}
+            </span>
+        </div>
       </div>
-
 
       @if (turma.descricao) {
       <p class="turma-descricao">{{ turma.descricao }}</p>
@@ -109,37 +111,48 @@
         <span class="meta-item meta-alunos">
           {{ turma._count?.matriculasOficina ?? 0 }} aluno(s)
         </span>
-
       </div>
     </div>
 
-    <div class="card-footer">
+    <div class="card-footer" style="flex-wrap: wrap; gap: 0.5rem;">
       @if (abaAtual === 'ativas') {
-      <button class="btn-icon" (click)="abrirModalAlunos(turma)" aria-label="Perfil da Oficina e Alunos"
-        title="Perfil da Oficina / Alunos Matriculados">
-        <span class="material-symbols-rounded">group</span>
-      </button>
-      @if (!isProfessor) {
-      <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
-        [attr.aria-label]="'Editar oficina ' + turma.nome">
-        Editar
-      </button>
-      <button class="btn btn-sm btn-warning" (click)="abrirModalArquivar(turma)"
-        [attr.aria-label]="'Arquivar oficina ' + turma.nome"
-        style="background:#b45309; color:white; border-color:#b45309;">
-        Arquivar
-      </button>
-      }
+          <button class="btn-icon" (click)="abrirModalAlunos(turma)" aria-label="Perfil da Oficina e Alunos"
+            title="Perfil da Oficina / Alunos Matriculados">
+            <span class="material-symbols-rounded">group</span>
+          </button>
+          
+          @if (!isProfessor) {
+              <select class="status-select"
+                [value]="turma.status"
+                (change)="mudarStatusTurma(turma, $event)"
+                [attr.aria-label]="'Alterar status da oficina ' + turma.nome">
+                <option value="PREVISTA">Prevista</option>
+                <option value="ANDAMENTO">Em Andamento</option>
+                <option value="CONCLUIDA">Concluída</option>
+                <option value="CANCELADA">Cancelada</option>
+              </select>
+
+              <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
+                [attr.aria-label]="'Editar oficina ' + turma.nome">
+                Editar
+              </button>
+
+              <button class="btn btn-sm btn-warning" (click)="abrirModalArquivar(turma)"
+                [attr.aria-label]="'Arquivar oficina ' + turma.nome"
+                style="background:#b45309; color:white; border-color:#b45309;">
+                Arquivar
+              </button>
+          }
       } @else {
-      <button class="btn btn-sm btn-success" (click)="restaurarTurma(turma)"
-        [attr.aria-label]="'Restaurar oficina ' + turma.nome"
-        style="background:#15803d; color:white; border-color:#15803d;">
-        Restaurar
-      </button>
-      <button class="btn btn-sm btn-danger" (click)="ocultarTurma(turma)"
-        [attr.aria-label]="'Remover da lista a oficina ' + turma.nome">
-        Remover da Lista
-      </button>
+          <button class="btn btn-sm btn-success" (click)="restaurarTurma(turma)"
+            [attr.aria-label]="'Restaurar oficina ' + turma.nome"
+            style="background:#15803d; color:white; border-color:#15803d;">
+            Restaurar
+          </button>
+          <button class="btn btn-sm btn-danger" (click)="ocultarTurma(turma)"
+            [attr.aria-label]="'Remover da lista a oficina ' + turma.nome">
+            Remover da Lista
+          </button>
       }
     </div>
 
@@ -149,7 +162,6 @@
 
 }
 
-<!-- Paginação -->
 @if (totalPaginas > 1) {
 <nav class="pagination" aria-label="Paginação de oficinas">
   <button class="btn btn-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaAtual === 1"
@@ -164,7 +176,6 @@
 }
 
 
-<!-- ══════════ MODAL CRIAR / EDITAR ══════════ -->
 @if (modalAberto) {
 <div class="modal-overlay" role="dialog" [attr.aria-label]="modoEdicao ? 'Editar oficina' : 'Criar nova oficina'"
   aria-modal="true" (click)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
@@ -284,7 +295,6 @@
 </div>
 }
 
-<!-- ══════════ MODAL ARQUIVAR ══════════ -->
 @if (modalArquivarAberto && turmaParaArquivar) {
 <div class="modal-overlay" role="dialog" aria-label="Confirmar arquivamento de oficina" aria-modal="true"
   (click)="fecharModalArquivar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
@@ -322,7 +332,6 @@
 </div>
 }
 
-<!-- ══════════ MODAL ALUNOS ══════════ -->
 @if (modalAlunosAberto) {
 <div class="modal-overlay" role="dialog" aria-label="Alunos matriculados" aria-modal="true"
   (click)="fecharModalAlunos()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
@@ -336,14 +345,12 @@
 
     <div class="modal-body" style="padding-top: 0.5rem;">
 
-      <!-- INFO CARD DA TURMA -->
       @if (turmaDetalhes) {
       <div class="info-card"
         style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
         <h3 style="font-size: 1.1rem; color: #1e293b; margin: 0 0 0.5rem 0;">{{ turmaDetalhes.nome }}</h3>
 
         <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: #475569;">
-          <!-- PROFESSOR -->
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -352,7 +359,6 @@
             <strong>Professor:</strong> {{ turmaDetalhes.professor?.nome || 'Não atribuído' }}
           </div>
 
-          <!-- HORÁRIOS -->
           <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
               style="margin-top: 2px;">
@@ -372,7 +378,6 @@
             </div>
           </div>
 
-          <!-- CAPACIDADE -->
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -398,7 +403,6 @@
       </div>
       }
 
-      <!-- Tabs Switcher para Modal -->
       <div class="abas-switcher" role="tablist" style="margin-bottom: 1.5rem;">
         @if (!isProfessor) {
         <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'adicionar'"
@@ -419,7 +423,6 @@
       </div>
       }
 
-      <!-- ABA: ADICIONAR ALUNOS -->
       @if (modalAlunosAbaAtual === 'adicionar') {
       <div class="busca-alunos-container" style="margin-bottom: 1.5rem;">
         <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>
@@ -473,7 +476,6 @@
       </div>
       }
 
-      <!-- ABA: REMOVER ALUNOS -->
       @if (modalAlunosAbaAtual === 'remover') {
       <div>
         <div
@@ -539,7 +541,6 @@
 </div>
 }
 
-<!-- ══════════ DRAWER: Filtros Avançados ══════════ -->
 @if (drawerAberto) {
 <div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
 }
@@ -557,7 +558,6 @@
 
   <div class="filter-drawer__body">
 
-    <!-- FASE DA TURMA -->
     <section class="filter-section">
       <h3 class="filter-section__title">Situação / Ciclo</h3>
 
@@ -573,7 +573,6 @@
       </div>
     </section>
 
-    <!-- PROFESSOR -->
     <section class="filter-section">
       <h3 class="filter-section__title">Responsabilidade</h3>
 
@@ -590,7 +589,6 @@
 
   </div>
 
-  <!-- Rodapé do Drawer com botões de ação -->
   <div class="filter-drawer__footer">
     <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
     <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar Filtros</button>

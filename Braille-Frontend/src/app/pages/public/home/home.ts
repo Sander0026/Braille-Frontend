@@ -27,6 +27,7 @@ export class Home implements OnInit {
   // Estados com suporte a fallback
   heroConfig: any = {};
   missaoConfig: any = {};
+  fachadaUrl: string = '';
 
   constructor(
     private http: HttpClient,
@@ -37,6 +38,7 @@ export class Home implements OnInit {
   ngOnInit() {
     this.carregarUltimasNoticias();
     this.carregarConteudoCMS();
+    this.carregarFachada();
   }
 
   ngAfterViewInit() {
@@ -98,6 +100,17 @@ export class Home implements OnInit {
         }
       },
       error: (e) => console.error('Erro CMS faq', e)
+    });
+  }
+
+  carregarFachada() {
+    this.siteConfig.configs$.subscribe({
+      next: (configs) => {
+        if (configs && configs['fachadaUrl']) {
+          this.fachadaUrl = configs['fachadaUrl'];
+          this.cdr.markForCheck();
+        }
+      }
     });
   }
 

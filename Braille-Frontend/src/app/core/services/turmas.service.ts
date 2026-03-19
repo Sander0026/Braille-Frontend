@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 import { PaginatedResponse } from './beneficiarios.service';
 
 export interface GradeHorariaDto {
@@ -17,9 +18,11 @@ export interface Turma {
     descricao?: string;
     horario?: string;
     capacidadeMaxima?: number;
+    dataInicio?: string;
+    dataFim?: string;
     statusAtivo: boolean;
     excluido: boolean;
-    status: TurmaStatus;         // Fase 4: ciclo de vida acadêmico
+    status: TurmaStatus;         
     professor?: { id: string; nome: string; email: string };
     gradeHoraria?: GradeHorariaDto[];
     matriculasOficina?: {
@@ -31,8 +34,6 @@ export interface Turma {
     _count?: { matriculasOficina: number };
 }
 
-
-
 export interface CreateTurmaDto {
     nome: string;
     descricao?: string;
@@ -40,13 +41,14 @@ export interface CreateTurmaDto {
     capacidadeMaxima?: number;
     professorId: string;
     gradeHoraria?: GradeHorariaDto[];
+    // 👉 CORREÇÃO 3: Adicionado campos no DTO
+    dataInicio?: string;
+    dataFim?: string;
 }
-
 
 @Injectable({ providedIn: 'root' })
 export class TurmasService {
     private readonly url = '/api/turmas';
-    // Cache por chave de parâmetros — funciona para todas as abas (ativas/arquivadas) e paginações
     private cache = new Map<string, Observable<PaginatedResponse<Turma>>>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
@@ -128,5 +130,15 @@ export class TurmasService {
     mudarStatus(id: string, status: TurmaStatus): Observable<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }> {
         this.limparCache();
         return this.http.patch<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }>(`${this.url}/${id}/status`, { status });
+    }
+
+    cancelar(id: string): Observable<Turma> {
+        this.limparCache(); // 👉 CORREÇÃO 2
+        return this.http.patch<Turma>(`${this.url}/${id}/cancelar`, {}); // 👉 CORREÇÃO 1
+    }
+
+    concluir(id: string): Observable<Turma> {
+        this.limparCache(); // 👉 CORREÇÃO 2
+        return this.http.patch<Turma>(`${this.url}/${id}/concluir`, {}); // 👉 CORREÇÃO 1
     }
 }
