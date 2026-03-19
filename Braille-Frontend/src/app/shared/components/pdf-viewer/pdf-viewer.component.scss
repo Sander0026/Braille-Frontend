@@ -1,0 +1,279 @@
+:host * {
+  box-sizing: border-box !important;
+}
+
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%; 
+  height: 100%; 
+  min-height: 60vh;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden; 
+}
+
+.pdf-viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb;
+  flex-shrink: 0; 
+  width: 100%;
+}
+
+.pdf-viewer-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: #6b7280;
+  padding: 0;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-close:hover {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.pdf-loading, .pdf-error {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.spinner {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.pdf-error {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.error-icon {
+  font-size: 2rem;
+}
+
+.btn-retry {
+  padding: 0.5rem 1rem;
+  background: #dc2626;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-retry:hover {
+  background: #b91c1c;
+}
+
+.pdf-scroll-area {
+  flex: 1;
+  overflow: auto; 
+  background: #9ca3af;
+  padding: 1rem; 
+  display: block; 
+}
+
+canvas {
+  background: white;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  max-width: none !important; 
+  display: block;
+  margin: 0 auto; 
+}
+
+.pdf-controls {
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center; 
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  
+  width: 100%; 
+  max-width: 100%;
+  flex-shrink: 0; 
+}
+
+.zoom-controls, .pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.zoom-controls {
+  background: #f3f4f6;
+  padding: 0.25rem;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.pdf-controls button, .btn-download {
+  padding: 0.5rem 0.75rem; 
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: background 0.2s;
+  text-decoration: none;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.zoom-controls button {
+  background: white;
+  color: #374151;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #d1d5db;
+}
+
+.zoom-controls button:hover:not(:disabled) {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.pdf-controls button:hover:not(.zoom-controls button), .btn-download:hover {
+  background: #2563eb;
+}
+
+.pdf-controls button:disabled {
+  background: #d1d5db;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+.pdf-controls span {
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 0.875rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.zoom-level {
+  min-width: 3.5rem;
+  font-weight: 700;
+  color: #4b5563;
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background: #d1d5db;
+  margin: 0 0.5rem;
+}
+
+@media (max-width: 600px) {
+  .pdf-viewer-header {
+    padding: 0.5rem 1rem;
+  }
+  .pdf-viewer-header h3 {
+    font-size: 1rem;
+  }
+  .btn-close {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1.25rem;
+  }
+
+  .pdf-scroll-area {
+    padding: 0.5rem; 
+  }
+
+  .pdf-controls {
+    padding: 0.5rem;
+    gap: 0.4rem;
+  }
+  
+  .pdf-controls button, .btn-download {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+  }
+  
+  .zoom-level, .pdf-controls span {
+    font-size: 0.75rem;
+  }
+  .zoom-level {
+    min-width: 2.5rem;
+  }
+
+  .separator {
+    display: none; 
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    height: 90vh; 
+  }
+
+  .pdf-viewer-header {
+    padding: 0.75rem 1rem;
+  }
+  .pdf-viewer-header h3 {
+    font-size: 1rem;
+  }
+
+  .pdf-scroll-area {
+    padding: 0.5rem;
+  }
+
+  .pdf-controls {
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .pdf-controls button, .btn-download {
+    padding: 0.4rem 0.6rem; 
+    font-size: 0.8rem; 
+  }
+
+  .pdf-controls span, .zoom-level {
+    font-size: 0.8rem;
+  }
+  .zoom-level {
+    min-width: 2.5rem; 
+  }
+}
