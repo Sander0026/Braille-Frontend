@@ -96,6 +96,7 @@ $transition: 200ms ease;
     justify-content: space-between;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    flex-wrap: wrap; // Garante que o título e as badges não se esmaguem
 }
 
 .turma-nome {
@@ -150,6 +151,7 @@ $transition: 200ms ease;
     padding: 0.875rem 1.25rem;
     border-top: 1px solid $gray-100;
     background: $gray-100;
+    flex-wrap: wrap; // 👉 Essencial para os novos botões caberem no mobile
 }
 
 // ── Badges ─────────────────────────────────────────────────
@@ -255,13 +257,8 @@ $transition: 200ms ease;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .modal {
@@ -284,7 +281,6 @@ $transition: 200ms ease;
         transform: translateY(16px);
         opacity: 0;
     }
-
     to {
         transform: translateY(0);
         opacity: 1;
@@ -502,7 +498,6 @@ $transition: 200ms ease;
 //  FILTROS AVANÇADOS — Drawer
 // ══════════════════════════════════════════
 
-// Botão de filtros na barra de busca
 .filter-btn {
     display: inline-flex;
     align-items: center;
@@ -510,7 +505,6 @@ $transition: 200ms ease;
     white-space: nowrap;
     flex-shrink: 0;
 
-    // Quando há filtros ativos, destacar o botão
     &--active {
         background-color: #fef9c3;
         border-color: #f5c800;
@@ -519,7 +513,6 @@ $transition: 200ms ease;
     }
 }
 
-// Badge de contagem de filtros ativos
 .filter-badge {
     display: inline-flex;
     align-items: center;
@@ -535,7 +528,6 @@ $transition: 200ms ease;
     line-height: 1;
 }
 
-// Barra de aviso de filtros ativos
 .filter-active-bar {
     display: flex;
     align-items: center;
@@ -565,7 +557,6 @@ $transition: 200ms ease;
     }
 }
 
-// Overlay escurecido atrás do drawer
 .filter-overlay {
     position: fixed;
     inset: 0;
@@ -574,17 +565,6 @@ $transition: 200ms ease;
     animation: fadeIn 180ms ease;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-}
-
-// Painel lateral (Drawer)
 .filter-drawer {
     position: fixed;
     top: 0;
@@ -643,7 +623,6 @@ $transition: 200ms ease;
     }
 }
 
-// Seções dentro do drawer
 .filter-section {
     margin-bottom: 1.25rem;
     padding-bottom: 1.25rem;
@@ -664,7 +643,6 @@ $transition: 200ms ease;
     }
 }
 
-// Campo individual do drawer
 .filter-field {
     margin-bottom: 0.75rem;
 
@@ -673,14 +651,12 @@ $transition: 200ms ease;
     }
 }
 
-// Dois campos lado a lado (datas)
 .filter-field-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
 }
 
-// Ajuste da barra de busca para acomodar o botão de filtros
 .filter-bar {
     display: flex;
     gap: 0.75rem;
@@ -741,7 +717,7 @@ $transition: 200ms ease;
     }
     
     .btn-incluir-turno {
-        height: 42px; // Match input height roughly
+        height: 42px; 
     }
 }
 
@@ -789,3 +765,57 @@ $transition: 200ms ease;
         }
     }
 }
+
+//  STATUS BADGE (CICLO DE VIDA)
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+
+  &.badge-prevista {
+    background-color: #fef3c7; 
+    color: #d97706;
+  }
+  
+  &.badge-andamento {
+    background-color: #dbeafe; 
+    color: #2563eb;
+  }
+  
+  &.badge-concluida {
+    background-color: #d1fae5; 
+    color: #059669;
+  }
+  
+  &.badge-cancelada {
+    background-color: #fee2e2; 
+    color: #dc2626;
+  }
+}
+
+// ── Select de Status no Card ────────────────────────────────
+.status-select {
+  padding: 0.3rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 1px solid $gray-200;
+  border-radius: 0.5rem;
+  background: #fff;
+  color: $gray-900;
+  cursor: pointer;
+  outline: none;
+  transition: border-color $transition, box-shadow $transition;
+  height: 32px;
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 2px rgba(245, 200, 0, 0.25);
+  }
+
+  &:hover {
+    border-color: $gray-400;
+  }
+}
