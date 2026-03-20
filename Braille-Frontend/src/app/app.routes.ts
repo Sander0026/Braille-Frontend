@@ -1,6 +1,7 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { descarteGuard } from './core/guards/descarte.guard';
 
 export const routes: Routes = [
   // ── Área Pública ───────────────────────────────────────────────
@@ -62,6 +63,7 @@ export const routes: Routes = [
         path: 'alunos/cadastro',
         loadComponent: () => import('./pages/admin/beneficiarios/cadastro-wizard/cadastro-wizard').then(m => m.CadastroWizard),
         title: 'Novo Aluno — ILBES',
+        canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
@@ -75,6 +77,7 @@ export const routes: Routes = [
         path: 'turmas/cadastro',
         loadComponent: () => import('./pages/admin/turmas/cadastro-turma-wizard/cadastro-turma-wizard').then(m => m.CadastroTurmaWizard),
         title: 'Nova Oficina — ILBES',
+        canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 

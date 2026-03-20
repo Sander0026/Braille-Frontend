@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TurmasService, CreateTurmaDto, GradeHorariaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
+import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 /** Dias da semana para o seletor de grade horária */
 const DIAS: { valor: string; label: string }[] = [
@@ -26,7 +27,7 @@ const DIAS: { valor: string; label: string }[] = [
     templateUrl: './cadastro-turma-wizard.html',
     styleUrls: ['./cadastro-turma-wizard.scss']
 })
-export class CadastroTurmaWizard implements OnInit {
+export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
 
     etapaAtual = 1;
     totalEtapas = 2;
@@ -57,7 +58,16 @@ export class CadastroTurmaWizard implements OnInit {
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
         private cdr: ChangeDetectorRef
-    ) { }
+    ) { 
+        super();
+    }
+
+    isFormDirty(): boolean {
+        // Retorna true se o form principal estiver dirty, ou se houver turnos adicionados mas não salvos
+        const isFormDirty = !!this.formTurma?.dirty;
+        const hasTurnos = this.gradeHoraria.length > 0;
+        return (isFormDirty || hasTurnos) && !this.isSalvando;
+    }
 
     ngOnInit(): void {
         this.formTurma = this.fb.group({

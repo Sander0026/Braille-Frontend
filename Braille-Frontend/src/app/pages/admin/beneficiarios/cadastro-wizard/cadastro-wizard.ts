@@ -7,6 +7,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { BeneficiariosService, ReativacaoAluno } from '../../../../core/services/beneficiarios.service';
 import { A11yModule } from '@angular/cdk/a11y';
 import { TabEscapeDirective } from '../../../../shared/directives/tab-escape.directive';
+import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 
 @Component({
@@ -16,7 +17,7 @@ import { TabEscapeDirective } from '../../../../shared/directives/tab-escape.dir
   templateUrl: './cadastro-wizard.html',
   styleUrl: './cadastro-wizard.scss',
 })
-export class CadastroWizard implements OnInit {
+export class CadastroWizard extends BaseFormDescarte implements OnInit {
   passoAtual = 1;
   cadastroForm!: FormGroup;
   arquivoFotoSelecionado: File | null = null;
@@ -43,7 +44,13 @@ export class CadastroWizard implements OnInit {
     private http: HttpClient,
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
-  ) { }
+  ) {
+    super();
+  }
+
+  isFormDirty(): boolean {
+    return !!this.cadastroForm?.dirty && !this.isSalvando;
+  }
 
   ngOnInit(): void {
     this.iniciarFormulario();
