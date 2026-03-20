@@ -5,6 +5,7 @@ import { HttpClient, HttpClientModule, HttpErrorResponse } from '@angular/common
 import { Router } from '@angular/router';
 import { A11yModule } from '@angular/cdk/a11y';
 import { UsuariosService, CreateUsuarioResponse, ReativacaoResponse } from '../../../../core/services/usuarios.service';
+import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 @Component({
     selector: 'app-cadastro-usuario-wizard',
@@ -13,7 +14,7 @@ import { UsuariosService, CreateUsuarioResponse, ReativacaoResponse } from '../.
     templateUrl: './cadastro-usuario-wizard.html',
     styleUrl: './cadastro-usuario-wizard.scss'
 })
-export class CadastroUsuarioWizard implements OnInit {
+export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
 
     passoAtual = 1;
     cadastroUsuarioForm!: FormGroup;
@@ -34,7 +35,13 @@ export class CadastroUsuarioWizard implements OnInit {
         private router: Router,
         private usuariosService: UsuariosService,
         private cdr: ChangeDetectorRef
-    ) { }
+    ) {
+        super();
+    }
+
+    isFormDirty(): boolean {
+        return !!this.cadastroUsuarioForm?.dirty && !this.isSalvando;
+    }
 
     ngOnInit(): void {
         this.iniciarFormulario();
