@@ -516,19 +516,24 @@
 
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             @if (alunoSelecionado.laudoUrl) {
-                            <a [href]="alunoSelecionado.laudoUrl" target="_blank" class="btn btn-primary btn-sm"
-                                title="Clique para visualizar o laudo original (abre em uma nova guia, você pode dar zoom ou baixar)">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" style="margin-right: 6px;">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                </svg>
-                                Ver Arquivo Anexo
-                            </a>
+                            <!-- Botão inteligente: PDF → pdf-viewer / Imagem → modal de imagem -->
+                            @if (tipoDocumento(alunoSelecionado.laudoUrl) === 'pdf') {
+                            <button class="btn btn-primary btn-sm"
+                                (click)="abrirVisualizadorPdf(alunoSelecionado.laudoUrl)"
+                                title="Visualizar laudo em formato PDF">
+                                <span class="material-symbols-rounded"
+                                    style="font-size:16px;margin-right:6px;vertical-align:middle;">picture_as_pdf</span>
+                                Ver Laudo (PDF)
+                            </button>
+                            } @else {
+                            <button class="btn btn-primary btn-sm"
+                                (click)="abrirModalImagem(alunoSelecionado.laudoUrl)"
+                                title="Visualizar imagem do laudo">
+                                <span class="material-symbols-rounded"
+                                    style="font-size:16px;margin-right:6px;vertical-align:middle;">image</span>
+                                Ver Laudo (Imagem)
+                            </button>
+                            }
 
                             @if (abaAtiva === 'ativos') {
                             <button class="btn btn-danger btn-sm" (click)="excluirDocumento('laudoUrl')"
@@ -733,7 +738,56 @@
 </div>
 }
 
-
+<!-- ── Overlay do Visualizador de Imagem (laudo fotográfico) ── -->
+@if (mostrarModalImagem && urlImagemParaVisualizar) {
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-label="Visualizador de imagem do laudo"
+  (click)="fecharModalImagem()"
+  (keydown.escape)="fecharModalImagem()"
+  tabindex="-1"
+  style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.80);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    padding: 1rem;
+  ">
+  <div
+    (click)="$event.stopPropagation()"
+    style="position: relative; max-width: 90vw; max-height: 90vh;">
+    <!-- Botão fechar -->
+    <button
+      (click)="fecharModalImagem()"
+      aria-label="Fechar visualizador de imagem"
+      style="
+        position: absolute; top: -14px; right: -14px;
+        background: #fff; border: none; border-radius: 50%;
+        width: 32px; height: 32px; cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        font-size: 16px; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1;
+      ">✕</button>
+    <!-- Imagem -->
+    <img
+      [src]="urlImagemParaVisualizar"
+      alt="Laudo médico do aluno"
+      style="
+        max-width: 100%;
+        max-height: 85vh;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        display: block;
+      ">
+  </div>
+</div>
+}
 
 <!-- Modal de Confirmação de Inativação -->
 @if (alunoParaInativar) {

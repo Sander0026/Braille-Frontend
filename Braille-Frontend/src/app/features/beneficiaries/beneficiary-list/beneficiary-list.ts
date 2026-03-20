@@ -54,6 +54,10 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   mostrarVisualizadorPdf = false;
   urlPdfParaVisualizar: string | null = null;
 
+  // Modal de Visualização de Imagem (laudo fotográfico)
+  mostrarModalImagem = false;
+  urlImagemParaVisualizar: string | null = null;
+
   // Modais de Confirmação (Padronizados)
   alunoParaInativar: Beneficiario | null = null;
   alunoParaRestaurar: Beneficiario | null = null;
@@ -762,9 +766,13 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.uploadingImage = true;
     this.cdr.detectChanges();
 
-    const upload$ = tipo === 'termoLgpdUrl'
-      ? this.beneficiariosService.uploadPdf(file, 'lgpd')
-      : this.beneficiariosService.uploadImagem(file);
+    const ehPdf = file.type === 'application/pdf';
+    const upload$ =
+      tipo === 'termoLgpdUrl'
+        ? this.beneficiariosService.uploadPdf(file, 'lgpd')
+        : ehPdf
+          ? this.beneficiariosService.uploadPdf(file, 'atestado')
+          : this.beneficiariosService.uploadImagem(file);
 
     upload$.subscribe({
       next: (res) => {
@@ -855,7 +863,20 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  // ── Visualização de PDFs com PDF.js ──────────────────────────────────
+  // ── Visualização de Documentos ───────────────────────────────────────
+
+  /**
+   * Detecta se a URL aponta para um PDF ou para uma imagem.
+   * PDFs do Cloudinary chegam com /raw/upload/ ou terminam em .pdf
+   */
+  tipoDocumento(url: string | undefined | null): 'pdf' | 'imagem' | null {
+    if (!url) return null;
+    const lower = url.toLowerCase();
+    if (lower.includes('.pdf') || lower.includes('/raw/upload/')) return 'pdf';
+    return 'imagem';
+  }
+
+  // ── PDF Viewer ────────────────────────────────────────────────────────
   abrirVisualizadorPdf(urlDocumento: string | undefined): void {
     if (!urlDocumento) return;
     this.urlPdfParaVisualizar = urlDocumento;
@@ -866,6 +887,19 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   fecharVisualizadorPdf(): void {
     this.mostrarVisualizadorPdf = false;
     this.urlPdfParaVisualizar = null;
+    this.cdr.detectChanges();
+  }
+
+  // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────
+  abrirModalImagem(url: string): void {
+    this.urlImagemParaVisualizar = url;
+    this.mostrarModalImagem = true;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalImagem(): void {
+    this.mostrarModalImagem = false;
+    this.urlImagemParaVisualizar = null;
     this.cdr.detectChanges();
   }
 
