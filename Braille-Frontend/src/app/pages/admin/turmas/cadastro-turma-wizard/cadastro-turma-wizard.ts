@@ -23,7 +23,6 @@ const DIAS: { valor: string; label: string }[] = [
     selector: 'app-cadastro-turma-wizard',
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
-
     templateUrl: './cadastro-turma-wizard.html',
     styleUrls: ['./cadastro-turma-wizard.scss']
 })
@@ -59,36 +58,33 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         private usuariosService: UsuariosService,
         private cdr: ChangeDetectorRef
     ) { 
-        super();
-    }
-
-    isFormDirty(): boolean {
-        // Retorna true se o form principal estiver dirty, ou se houver turnos adicionados mas não salvos
-        const isFormDirty = !!this.formTurma?.dirty;
-        const hasTurnos = this.gradeHoraria.length > 0;
-        return (isFormDirty || hasTurnos) && !this.isSalvando;
-    }
-
-    ngOnInit(): void {
+        // 👉 BLINDAGEM: Inicializa o form direto no construtor para evitar o erro NG0100
         this.formTurma = this.fb.group({
-            nome: ['', Validators.required],
+            nome: ['', [Validators.required, Validators.minLength(3)]],
             professorId: ['', Validators.required],
             descricao: [''],
             capacidadeMaxima: [null],
+            dataInicio: [null],
+            dataFim: [null],
         });
+    }
 
+    ngOnInit(): void {
         this.carregarProfessores();
     }
 
     carregarProfessores() {
         this.carregandoProfessores = true;
-        // Puxa toda a base (até 100), porém filtrando apenas quem tem o ROLE 'PROFESSOR'
         this.usuariosService.listar(1, 100, undefined, false, 'PROFESSOR').subscribe({
             next: (resp) => {
                 this.professores = resp.data;
                 this.carregandoProfessores = false;
+                this.cdr.markForCheck();
             },
-            error: () => { this.carregandoProfessores = false; }
+            error: () => { 
+                this.carregandoProfessores = false; 
+                this.cdr.markForCheck();
+            }
         });
     }
 
@@ -181,11 +177,16 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
             horaFim: this.hmParaMinutos(t.horaFim),
         }));
 
+        const toIso = (d: string | null | undefined): string | undefined =>
+            d ? new Date(d + 'T00:00:00').toISOString() : undefined;
+
         const payload: CreateTurmaDto = {
             nome: v.nome,
             professorId: v.professorId,
             descricao: v.descricao || undefined,
             capacidadeMaxima: v.capacidadeMaxima ? +v.capacidadeMaxima : undefined,
+            dataInicio: toIso(v.dataInicio),
+            dataFim: toIso(v.dataFim),
             gradeHoraria: gradeConvertida.length ? gradeConvertida : undefined,
         };
 
@@ -198,7 +199,6 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
             error: (err: HttpErrorResponse) => {
                 this.isSalvando = false;
                 
-                // O backend pode retornar um array (validação de schema) ou string simples (regra de colisão)
                 let msg = 'Erro ao salvar. Tente novamente.';
                 if (err.status === 400 && err.error?.message) {
                     msg = Array.isArray(err.error.message) ? err.error.message.join(', ') : err.error.message;
@@ -213,10 +213,7 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         this.mensagemFeedback = mensagem;
         this.tipoFeedback = tipo;
         
-        // Força a atualização da tela, vital quando chamadas saem fora da zona do Angular.
         this.cdr.detectChanges();
-        
-        // Rola a tela para garantir que o usuário veja a faixa de erro/sucesso.
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         setTimeout(() => { 

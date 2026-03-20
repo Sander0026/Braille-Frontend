@@ -96,10 +96,14 @@
           </label>
           <input type="text" id="rg" class="form-input" formControlName="rg"
             (input)="formatarRg($event)" (blur)="verificarCampoUnico('rg')"
-            maxlength="14"
+            inputmode="numeric"
+            maxlength="10"
             [class.input-error]="isCampoInvalido('dadosPessoais', 'rg') || rgStatus === 'ativo'"
-            placeholder="11.111.111-1" autocomplete="off">
+            placeholder="1.111.111 ou 11.111.111" autocomplete="off"
+            aria-describedby="rg-hint">
+          <small id="rg-hint" class="field-hint">Digite apenas os números (7 ou 8 dígitos).</small>
         </div>
+
       </div>
 
       <!-- Feedbacks CPF / RG centralizados após os campos -->

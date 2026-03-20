@@ -84,6 +84,44 @@ $error-text: #991b1b;
     }
 }
 
+.col-lg-4 {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+    padding-right: 15px;
+    padding-left: 15px;
+
+    @media (max-width: 768px) {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.badge-opt {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: $text-muted;
+    background: #f3f4f6;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    margin-left: 0.25rem;
+    vertical-align: middle;
+}
+
+.field-hint {
+    display: block;
+    font-size: 0.78rem;
+    color: $text-muted;
+    margin-top: 0.3rem;
+}
+
+.loading-hint {
+    font-size: 0.9rem;
+    color: $text-muted;
+    font-style: italic;
+}
+
+
 .wizard-step {
     border: none;
     padding: 0;
@@ -114,6 +152,8 @@ $error-text: #991b1b;
     input[type="text"],
     input[type="email"],
     input[type="number"],
+    input[type="date"],
+    input[type="time"],
     select,
     textarea {
         width: 100%;

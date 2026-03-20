@@ -1,8 +1,9 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin } from 'rxjs';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BeneficiariosService, Beneficiario } from '../../../core/services/beneficiarios.service';
 import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
@@ -13,8 +14,9 @@ import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-vi
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
-import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
-import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
+import { FormsModule } from '@angular/forms';
+import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
+
 
 @Directive({
   selector: '[appTabelaTrFocavel]',
@@ -34,7 +36,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -53,6 +55,15 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // Modal de Visualização de PDF
   mostrarVisualizadorPdf = false;
   urlPdfParaVisualizar: string | null = null;
+
+  // Modal de Visualização de Imagem (laudo fotográfico)
+  mostrarModalImagem = false;
+  urlImagemParaVisualizar: string | null = null;
+
+  // Modal da Ficha Técnica do Aluno (substitui window.open)
+  mostrarModalFicha = false;
+  fichaHtml: SafeHtml | null = null;
+  fichaAlunoNome = '';
 
   // Modais de Confirmação (Padronizados)
   alunoParaInativar: Beneficiario | null = null;
@@ -91,8 +102,9 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   modalImportAberto = false;
   isAdmin = false;
 
-  // Acessibilidade: WCAG 2.4.3
-  lastFocusBeforeModal: HTMLElement | null = null;
+
+  // Acessibilidade: restaurar foco após fechar modal (WCAG 2.4.3)
+  private lastFocusBeforeModal: HTMLElement | null = null;
 
   // ── Filtros Avançados (Drawer) ──────────────────────────────────
   drawerAberto = false;
@@ -100,6 +112,16 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Exportação ──────────────────────────────────────────────────
   exportando = false;
+
+  // ── Atestados ───────────────────────────────────────────────────
+  atestadosDoAluno: Atestado[] = [];
+  carregandoAtestados = false;
+  modalAtestadoAberto = false;
+  salvandoAtestado = false;
+  uploadingAtestado = false;
+  erroAtestado = '';
+  atestadoPreview: PreviewAtestado | null = null;
+  novoAtestado: CriarAtestadoDto = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
 
   constructor(
     private beneficiariosService: BeneficiariosService,
@@ -109,7 +131,9 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private authService: AuthService,
     private frequenciasService: FrequenciasService,
-    private liveAnnouncer: LiveAnnouncer
+    private liveAnnouncer: LiveAnnouncer,
+    private sanitizer: DomSanitizer,
+    private atestadosService: AtestadosService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -252,179 +276,184 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  // ── Imprimir Ficha do Aluno ──────────────────────────────────────
+  // ── Ficha Técnica do Aluno ─────────────────────────────────────────────────
   /**
-   * Gera um HTML completo da ficha do aluno em uma nova janela
-   * e aciona a impressão nativa. Funciona mesmo com o encapsulamento
-   * de estilos do Angular.
+   * Gera o HTML da ficha e exibe num overlay Angular acessível,
+   * em vez de abrir uma nova janela do navegador.
    */
   imprimirFicha(): void {
     const a = this.alunoSelecionado;
     if (!a) return;
 
-    const fmtData = (v?: string | null) => {
-      if (!v) return 'Não informado';
-      try { return new Date(v).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); }
-      catch { return v; }
-    };
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
 
+    const fmtData = (v?: string | Date | null) => {
+      if (!v) return 'Não informado';
+      try { return new Date(v as string).toLocaleDateString('pt-BR', { timeZone: 'UTC' }); }
+      catch { return String(v); }
+    };
     const ni = (v: any) => v || 'Não informado';
     const sim = (v: boolean | undefined) => v ? 'Sim' : 'Não';
+    const agora = new Date();
+    const dataGeracao = `${agora.toLocaleDateString('pt-BR')} ${agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
 
-    const html = `<!DOCTYPE html>
+    const historicoHtml = a.matriculasOficina && a.matriculasOficina.length > 0
+      ? `<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:8.5pt;">
+          <thead><tr style="background:#e5e7eb;text-align:left;">
+            <th style="padding:6px;border:1px solid #d1d5db;">Oficina</th>
+            <th style="padding:6px;border:1px solid #d1d5db;">Entrada</th>
+            <th style="padding:6px;border:1px solid #d1d5db;">Saída</th>
+            <th style="padding:6px;border:1px solid #d1d5db;text-align:center;">Pres.</th>
+            <th style="padding:6px;border:1px solid #d1d5db;text-align:center;">Faltas</th>
+            <th style="padding:6px;border:1px solid #d1d5db;text-align:center;">%</th>
+            <th style="padding:6px;border:1px solid #d1d5db;">Status</th>
+          </tr></thead>
+          <tbody>${a.matriculasOficina.map(m => {
+              const s = this.frequenciasMap.get(m.turma.id);
+              return `<tr>
+                <td style="padding:6px;border:1px solid #d1d5db;">${m.turma.nome}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;">${fmtData(m.dataEntrada)}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;">${fmtData(m.dataEncerramento)}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;text-align:center;">${s?.presentes ?? '—'}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;text-align:center;">${s?.faltas ?? '—'}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;text-align:center;">${s?.taxaPresenca != null ? s.taxaPresenca + '%' : '—'}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;">${m.status === 'ATIVA' ? 'Em Curso' : m.status}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>`
+      : '<p style="color:#777;margin-top:8px;">Nenhuma oficina registrada.</p>';
+
+    const fichaConteudo = `
+      <div style="font-family:Arial,sans-serif;font-size:10pt;color:#111;">
+        <div style="display:flex;align-items:center;justify-content:space-between;
+                    border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:12px;">
+          <div>
+            <div style="font-size:13pt;font-weight:bold;">Instituto Luiz Braille</div>
+            <div style="font-size:9pt;color:#555;">Ficha de Cadastro do Aluno</div>
+          </div>
+          <div style="font-size:8pt;color:#555;text-align:right;">Gerado em: ${dataGeracao}</div>
+        </div>
+
+        <div style="font-size:14pt;font-weight:bold;margin-bottom:4px;">${a.nomeCompleto}</div>
+        <div style="display:flex;gap:6px;margin-bottom:12px;">
+          <span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
+            ${a.statusAtivo ? 'background:#d1fae5;border-color:#059669;color:#065f46;' : 'background:#fee2e2;border-color:#dc2626;color:#991b1b;'}">
+            ${a.statusAtivo ? 'Ativo' : 'Inativo'}
+          </span>
+          ${a.tipoDeficiencia ? `<span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
+            background:#eff6ff;border-color:#3b82f6;color:#1e40af;">${(a.tipoDeficiencia).replace(/_/g, ' ')}</span>` : ''}
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+            <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
+              border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Informações Pessoais</h4>
+            <p style="font-size:9pt;margin:3px 0;"><strong>CPF:</strong> ${ni(a.cpf)} &nbsp;|&nbsp; <strong>RG:</strong> ${ni(a.rg)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Mat.:</strong> ${ni(a.matricula)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Nascimento:</strong> ${fmtData(a.dataNascimento)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Gênero:</strong> ${ni(a.genero)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Estado Civil:</strong> ${ni(a.estadoCivil)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Telefone:</strong> ${ni(a.telefoneContato)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>E-mail:</strong> ${ni(a.email)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Contato Emergência:</strong> ${ni(a.contatoEmergencia)}</p>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+            <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
+              border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Perfil Inclusivo</h4>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Causa:</strong> ${ni(a.causaDeficiencia)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Idade na Ocorrência:</strong> ${ni(a.idadeOcorrencia)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Acessibilidade Preferida:</strong> ${ni(a.prefAcessibilidade)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Tec. Assistivas:</strong> ${ni(a.tecAssistivas)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Acompanhante:</strong> ${sim(a.precisaAcompanhante)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Acomp. Oftalmológico:</strong> ${sim(a.acompOftalmologico)}</p>
+            ${a.outrasComorbidades ? `<p style="font-size:9pt;margin:3px 0;"><strong>Comorbidades:</strong> ${a.outrasComorbidades}</p>` : ''}
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;grid-column:1/-1;">
+            <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
+              border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Endereço</h4>
+            <p style="font-size:9pt;margin:3px 0;">${ni(a.rua)}${a.numero ? ', ' + a.numero : ''}${a.complemento ? ' — ' + a.complemento : ''}</p>
+            <p style="font-size:9pt;margin:3px 0;">${ni(a.bairro)} — ${ni(a.cidade)} / ${ni(a.uf)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>CEP:</strong> ${ni(a.cep)}</p>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+            <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
+              border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Socioeconômico</h4>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Escolaridade:</strong> ${ni(a.escolaridade)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Profissão:</strong> ${ni(a.profissao)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Renda Familiar:</strong> ${ni(a.rendaFamiliar)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Benefícios Gov.:</strong> ${ni(a.beneficiosGov)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Composição Familiar:</strong> ${ni(a.composicaoFamiliar)}</p>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
+            <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
+              border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Sistema</h4>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Cadastrado em:</strong> ${fmtData(a.criadoEm)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Possui Laudo:</strong> ${a.laudoUrl ? 'Sim (arquivo digital)' : 'Não'}</p>
+          </div>
+          <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;grid-column:1/-1;">
+            <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
+              border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Histórico de Oficinas</h4>
+            ${historicoHtml}
+          </div>
+        </div>
+
+        <div style="margin-top:16px;border-top:1px solid #ccc;padding-top:6px;
+          font-size:7.5pt;color:#777;text-align:right;">
+          Instituto Luiz Braille &nbsp;|&nbsp; Documento gerado automaticamente pelo sistema
+        </div>
+      </div>`;
+
+    this.fichaHtml = this.sanitizer.bypassSecurityTrustHtml(fichaConteudo);
+    this.fichaAlunoNome = a.nomeCompleto;
+    this.mostrarModalFicha = true;
+    this.cdr.detectChanges();
+  }
+
+  /** Abre janela mínima de impressão apenas com o conteúdo da ficha */
+  imprimirFichaModal(): void {
+    // Extrai o HTML bruto do SafeHtml (a propriedade interna do Angular)
+    const rawHtml = (this.fichaHtml as any)?.changingThisBreaksApplicationSecurity ?? '';
+
+    const printWin = window.open('', '_blank',
+      'width=900,height=700,toolbar=0,scrollbars=1,status=0,menubar=0');
+
+    if (!printWin) {
+      // Fallback: se o popup for bloqueado, avisa o usuário
+      alert('Por favor, permita popups para este site para usar a impressão.');
+      return;
+    }
+
+    printWin.document.write(`<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Ficha do Aluno – ${a.nomeCompleto}</title>
+  <title>Ficha – ${this.fichaAlunoNome}</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Arial, sans-serif; font-size: 10pt; color: #111; background: #fff; padding: 16px; }
-    .ficha-header { display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 2px solid #111; padding-bottom: 8px; margin-bottom: 12px; }
-    .ficha-header h1 { font-size: 13pt; font-weight: bold; }
-    .ficha-header .meta { font-size: 8pt; color: #555; text-align: right; }
-    .aluno-nome { font-size: 14pt; font-weight: bold; margin-bottom: 4px; }
-    .badges { display: flex; gap: 6px; margin-bottom: 12px; }
-    .badge { font-size: 8pt; padding: 2px 8px; border-radius: 12px; border: 1px solid #ccc; }
-    .badge-ativo { background: #d1fae5; border-color: #059669; color: #065f46; }
-    .badge-inativo { background: #fee2e2; border-color: #dc2626; color: #991b1b; }
-    .badge-tipo { background: #eff6ff; border-color: #3b82f6; color: #1e40af; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
-    .secao { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; }
-    .secao h4 { font-size: 9pt; text-transform: uppercase; letter-spacing: .05em;
-      color: #374151; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px; margin-bottom: 6px; }
-    .secao p { font-size: 9pt; margin: 3px 0; color: #444; }
-    .secao p strong { color: #111; }
-    .full { grid-column: 1 / -1; }
-    .rodape { margin-top: 16px; border-top: 1px solid #ccc; padding-top: 6px;
-      font-size: 7.5pt; color: #777; text-align: right; }
-    @media print {
-      body { padding: 0; }
-      @page { size: A4; margin: 14mm 14mm 12mm; }
-    }
+    body { font-family: Arial, sans-serif; font-size: 10pt; color: #111;
+           background: #fff; padding: 16px; }
+    @media print { body { padding: 0; } }
   </style>
 </head>
-<body>
-  <div class="ficha-header">
-    <div>
-      <h1>Instituto Luiz Braille</h1>
-      <div style="font-size:9pt;color:#555;">Ficha de Cadastro do Aluno</div>
-    </div>
-    <div class="meta">
-      Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-    </div>
-  </div>
+<body>${rawHtml}</body>
+</html>`);
 
-  <div class="aluno-nome">${a.nomeCompleto}</div>
-  <div class="badges">
-    <span class="badge ${a.statusAtivo ? 'badge-ativo' : 'badge-inativo'}">${a.statusAtivo ? 'Ativo' : 'Inativo'}</span>
-    ${a.tipoDeficiencia ? `<span class="badge badge-tipo">${a.tipoDeficiencia.replace(/_/g, ' ')}</span>` : ''}
-  </div>
+    printWin.document.close();
+    printWin.focus();
+    // Aguarda renderização e dispara o diálogo de impressão
+    setTimeout(() => {
+      printWin.print();
+      printWin.close();
+    }, 350);
+  }
 
-  <div class="grid">
-    <div class="secao">
-      <h4>Informações Pessoais</h4>
-      <p><strong>CPF:</strong> ${ni(a.cpf)} / <strong>RG:</strong> ${ni(a.rg)}</p>
-      <p><strong>Nascimento:</strong> ${fmtData(a.dataNascimento)}</p>
-      <p><strong>Gênero:</strong> ${ni(a.genero)}</p>
-      <p><strong>Estado Civil:</strong> ${ni(a.estadoCivil)}</p>
-      <p><strong>Telefone:</strong> ${ni(a.telefoneContato)}</p>
-      <p><strong>E-mail:</strong> ${ni(a.email)}</p>
-      <p><strong>Contato Emergência:</strong> ${ni(a.contatoEmergencia)}</p>
-    </div>
-
-    <div class="secao">
-      <h4>Perfil Inclusivo</h4>
-      <p><strong>Causa:</strong> ${ni(a.causaDeficiencia)}</p>
-      <p><strong>Idade na Ocorrência:</strong> ${ni(a.idadeOcorrencia)}</p>
-      <p><strong>Acessibilidade Preferida:</strong> ${ni(a.prefAcessibilidade)}</p>
-      <p><strong>Tecnologias Assistivas:</strong> ${ni(a.tecAssistivas)}</p>
-      <p><strong>Acompanhante:</strong> ${sim(a.precisaAcompanhante)}</p>
-      <p><strong>Acomp. Oftalmológico:</strong> ${sim(a.acompOftalmologico)}</p>
-      ${a.outrasComorbidades ? `<p><strong>Outras Comorbidades:</strong> ${a.outrasComorbidades}</p>` : ''}
-    </div>
-
-    <div class="secao full">
-      <h4>Endereço</h4>
-      <p>${ni(a.rua)}${a.numero ? ', ' + a.numero : ''}${a.complemento ? ' — ' + a.complemento : ''}</p>
-      <p>${ni(a.bairro)} — ${ni(a.cidade)} / ${ni(a.uf)}</p>
-      <p><strong>CEP:</strong> ${ni(a.cep)}</p>
-    </div>
-
-    <div class="secao">
-      <h4>Socioeconômico</h4>
-      <p><strong>Escolaridade:</strong> ${ni(a.escolaridade)}</p>
-      <p><strong>Profissão:</strong> ${ni(a.profissao)}</p>
-      <p><strong>Renda Familiar:</strong> ${ni(a.rendaFamiliar)}</p>
-      <p><strong>Benefícios Gov.:</strong> ${ni(a.beneficiosGov)}</p>
-      <p><strong>Composição Familiar:</strong> ${ni(a.composicaoFamiliar)}</p>
-    </div>
-
-    <div class="secao">
-      <h4>Sistema</h4>
-      <p><strong>Cadastrado em:</strong> ${fmtData(a.criadoEm)}</p>
-      <p><strong>Possui Laudo:</strong> ${a.laudoUrl ? 'Sim (arquivo digital)' : 'Não'}</p>
-    </div>
-    <div class="secao full">
-      <h4>Histórico de Oficinas</h4>
-      ${a.matriculasOficina && a.matriculasOficina.length > 0 ? `
-      <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 8.5pt;">
-        <thead>
-          <tr style="background: #e5e7eb; text-align: left;">
-            <th style="padding: 6px; border: 1px solid #d1d5db;">Oficina</th>
-            <th style="padding: 6px; border: 1px solid #d1d5db;">Entrada</th>
-            <th style="padding: 6px; border: 1px solid #d1d5db;">Saída</th>
-            <th style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">Pres.</th>
-            <th style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">Faltas</th>
-            <th style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">%</th>
-            <th style="padding: 6px; border: 1px solid #d1d5db;">Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${a.matriculasOficina.map(m => {
-      const stats = this.frequenciasMap.get(m.turma.id);
-      const pres = stats?.presentes?.toString() || '—';
-      const falt = stats?.faltas?.toString() || '—';
-      const taxa = stats?.taxaPresenca != null ? `${stats.taxaPresenca}%` : '—';
-      return `
-            <tr>
-               <td style="padding: 6px; border: 1px solid #d1d5db;">${m.turma.nome}</td>
-               <td style="padding: 6px; border: 1px solid #d1d5db;">${fmtData(m.dataEntrada)}</td>
-               <td style="padding: 6px; border: 1px solid #d1d5db;">${fmtData(m.dataEncerramento)}</td>
-               <td style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">${pres}</td>
-               <td style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">${falt}</td>
-               <td style="padding: 6px; border: 1px solid #d1d5db; text-align: center;">${taxa}</td>
-               <td style="padding: 6px; border: 1px solid #d1d5db;">${m.status === 'ATIVA' ? 'Em Curso' : m.status}</td>
-            </tr>
-            `;
-    }).join('')}
-        </tbody>
-      </table>
-      ` : '<p style="color: #777; margin-top: 8px;">Nenhuma oficina registrada.</p>'
-      }
-    </div>
-  </div>
-
-  <div class="rodape">Instituto Luiz Braille &nbsp;|&nbsp; Documento gerado automaticamente pelo sistema</div>
-
-  <script>
-    window.onload = function () {
-      window.print();
-      window.onafterprint = function () { window.close(); };
-    };
-  </script>
-</body>
-</html>`;
-
-    const popup = window.open('', '_blank', 'width=820,height=700,scrollbars=yes');
-    if (popup) {
-      popup.document.open();
-      popup.document.write(html);
-      popup.document.close();
-    } else {
-      alert('O navegador bloqueou a janela de impressão. Permita pop-ups para este site e tente novamente.');
-    }
+  /** Fecha o modal da ficha e devolve foco ao botão de origem */
+  fecharModalFicha(): void {
+    this.mostrarModalFicha = false;
+    this.fichaHtml = null;
+    this.cdr.detectChanges();
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 
   // ── Filtros Avançados ────────────────────────────────────────────
@@ -703,6 +732,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
+        this.carregarAtestados();
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
@@ -762,12 +792,18 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.uploadingImage = true;
     this.cdr.detectChanges();
 
-    const upload$ = tipo === 'termoLgpdUrl'
-      ? this.beneficiariosService.uploadPdf(file, 'lgpd')
-      : this.beneficiariosService.uploadImagem(file);
+    const ehPdf = file.type === 'application/pdf';
+    let upload$: any;
+    if (tipo === 'termoLgpdUrl') {
+      upload$ = this.beneficiariosService.uploadPdf(file, 'lgpd');
+    } else if (ehPdf) {
+      upload$ = this.beneficiariosService.uploadPdf(file, 'atestado');
+    } else {
+      upload$ = this.beneficiariosService.uploadImagem(file);
+    }
 
     upload$.subscribe({
-      next: (res) => {
+      next: (res: any) => {
         const updatePayload: Partial<Beneficiario> = {};
         updatePayload[tipo] = res.url;
         if (tipo === 'termoLgpdUrl') {
@@ -855,7 +891,20 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  // ── Visualização de PDFs com PDF.js ──────────────────────────────────
+  // ── Visualização de Documentos ───────────────────────────────────────
+
+  /**
+   * Detecta se a URL aponta para um PDF ou para uma imagem.
+   * PDFs do Cloudinary chegam com /raw/upload/ ou terminam em .pdf
+   */
+  tipoDocumento(url: string | undefined | null): 'pdf' | 'imagem' | null {
+    if (!url) return null;
+    const lower = url.toLowerCase();
+    if (lower.includes('.pdf') || lower.includes('/raw/upload/')) return 'pdf';
+    return 'imagem';
+  }
+
+  // ── PDF Viewer ────────────────────────────────────────────────────────
   abrirVisualizadorPdf(urlDocumento: string | undefined): void {
     if (!urlDocumento) return;
     this.urlPdfParaVisualizar = urlDocumento;
@@ -867,6 +916,147 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.mostrarVisualizadorPdf = false;
     this.urlPdfParaVisualizar = null;
     this.cdr.detectChanges();
+  }
+
+  // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────
+  abrirModalImagem(url: string): void {
+    this.urlImagemParaVisualizar = url;
+    this.mostrarModalImagem = true;
+    this.cdr.detectChanges();
+  }
+
+  fecharModalImagem(): void {
+    this.mostrarModalImagem = false;
+    this.urlImagemParaVisualizar = null;
+    this.cdr.detectChanges();
+  }
+
+  // ── Utilitários de data ──────────────────────────────────────────
+  hojeISO(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  formatarData(iso: string): string {
+    if (!iso) return '—';
+    const partes = iso.substring(0, 10).split('-');
+    if (partes.length !== 3) return iso;
+    const [ano, mes, dia] = partes;
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  // ── Módulo Atestados ─────────────────────────────────────────────
+  abrirModalAtestado(): void {
+    this.modalAtestadoAberto = true;
+    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    this.atestadoPreview = null;
+    this.erroAtestado = '';
+    this.cdr.detectChanges();
+  }
+
+  fecharModalAtestado(): void {
+    this.modalAtestadoAberto = false;
+    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    this.atestadoPreview = null;
+    this.erroAtestado = '';
+    this.cdr.detectChanges();
+  }
+
+  buscarPreviewAtestado(): void {
+    if (!this.alunoSelecionado || !this.novoAtestado.dataInicio || !this.novoAtestado.dataFim) return;
+    this.atestadosService.preview(
+      this.alunoSelecionado.id,
+      this.novoAtestado.dataInicio,
+      this.novoAtestado.dataFim
+    ).subscribe({
+      next: (res) => { this.atestadoPreview = res; this.cdr.detectChanges(); },
+      error: () => { this.atestadoPreview = null; }
+    });
+  }
+
+  uploadArquivoAtestado(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingAtestado = true;
+    this.cdr.detectChanges();
+
+    const ehPdf = file.type === 'application/pdf';
+    const upload$ = ehPdf ? this.beneficiariosService.uploadPdf(file, 'atestado') : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
+      next: (res: any) => {
+        this.novoAtestado.arquivoUrl = res.url ?? res.secure_url ?? res;
+        this.uploadingAtestado = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroAtestado = 'Erro ao enviar arquivo. Tente novamente.';
+        this.uploadingAtestado = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  salvarAtestado(): void {
+    if (!this.alunoSelecionado || this.salvandoAtestado) return;
+    const dto = this.novoAtestado;
+    if (!dto.dataInicio || !dto.dataFim || !dto.motivo) {
+      this.erroAtestado = 'Preencha Data Início, Data Fim e Motivo.';
+      return;
+    }
+    this.salvandoAtestado = true;
+    this.erroAtestado = '';
+    this.atestadosService.criar(this.alunoSelecionado.id, dto).subscribe({
+      next: (res) => {
+        this.salvandoAtestado = false;
+        this.fecharModalAtestado();
+        this.toast.sucesso(`Atestado salvo! ${res.faltasJustificadas} falta(s) justificada(s).`);
+        this.carregarAtestados();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.salvandoAtestado = false;
+        this.erroAtestado = err?.error?.message ?? 'Erro ao salvar atestado.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removerAtestado(id: string): void {
+    this.confirmDialog.confirmar({
+      titulo: 'Remover Atestado',
+      mensagem: 'Tem certeza? As faltas justificadas por este atestado voltarão ao status FALTA.',
+      textoBotaoConfirmar: 'Remover',
+      tipo: 'danger'
+    }).then((confirmado: boolean) => {
+      if (!confirmado) return;
+      this.atestadosService.remover(id).subscribe({
+        next: () => {
+          this.toast.sucesso('Atestado removido e faltas revertidas.');
+          this.carregarAtestados();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.toast.erro(err?.error?.message ?? 'Erro ao remover atestado.');
+        }
+      });
+    });
+  }
+
+  carregarAtestados(): void {
+    if (!this.alunoSelecionado) return;
+    this.carregandoAtestados = true;
+    this.atestadosService.listar(this.alunoSelecionado.id).subscribe({
+      next: (lista) => {
+        this.atestadosDoAluno = lista;
+        this.carregandoAtestados = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoAtestados = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
 }

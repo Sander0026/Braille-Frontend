@@ -75,6 +75,12 @@
                 style="font-size: 1.1rem">check_circle</span> {{ totalPresentes }} presentes</span>
         <span class="stat stat--falta"><span class="material-symbols-rounded" aria-hidden="true"
                 style="font-size: 1.1rem">cancel</span> {{ totalFaltas }} faltas</span>
+        @if (totalJustificadas > 0) {
+        <span class="stat stat--fj" style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:0.5rem; padding:0.25rem 0.75rem; display:flex; align-items:center; gap:0.4rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1.1rem">attach_file</span>
+            {{ totalJustificadas }} justificada(s)
+        </span>
+        }
     </div>
 </div>
 
@@ -132,8 +138,10 @@
         </thead>
         <tbody>
             @for (aluno of alunosNaChamada; track aluno.alunoId) {
-            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr" [class.linha-presente]="aluno.presente"
-                [class.linha-falta]="!aluno.presente">
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr"
+                [class.linha-presente]="aluno.presente"
+                [class.linha-falta]="!aluno.presente && aluno.statusFrequencia !== 'FALTA_JUSTIFICADA'"
+                [class.linha-fj]="aluno.statusFrequencia === 'FALTA_JUSTIFICADA'">
                 <td>
                     <div class="aluno-nome">
                         <!-- Icone salvo antes do nome -->
@@ -147,14 +155,24 @@
                         </div>
 
                         <!-- Avatar -->
-                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
-                            [class.avatar--falta]="!aluno.presente" aria-hidden="true">
+                        <div class="aluno-avatar"
+                            [class.avatar--presente]="aluno.presente"
+                            [class.avatar--falta]="!aluno.presente && aluno.statusFrequencia !== 'FALTA_JUSTIFICADA'"
+                            [class.avatar--fj]="aluno.statusFrequencia === 'FALTA_JUSTIFICADA'"
+                            aria-hidden="true">
                             {{ aluno.nomeCompleto.charAt(0) }}
                         </div>
                         <span class="nome-texto">{{ aluno.nomeCompleto }}</span>
                     </div>
                 </td>
                 <td class="text-center">
+                    <!-- Badge de status -->
+                    @if (aluno.statusFrequencia === 'FALTA_JUSTIFICADA') {
+                    <span class="badge badge-fj" aria-label="Falta Justificada por atestado">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;" aria-hidden="true">attach_file</span>
+                        FJ
+                    </span>
+                    } @else {
                     <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente"
                         [attr.aria-label]="aluno.presente ? 'Presente' : 'Falta'">
                         <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
@@ -163,8 +181,17 @@
                         </span>
                         {{ aluno.presente ? 'Presente' : 'Falta' }}
                     </span>
+                    }
                 </td>
                 <td class="text-center">
+                    <!-- Botão bloqueado para FJ -->
+                    @if (aluno.statusFrequencia === 'FALTA_JUSTIFICADA') {
+                    <span class="badge badge-fj" style="cursor:default; font-size:0.8rem;"
+                        [title]="'Falta justificada por atestado — editação bloqueada'">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px">attach_file</span>
+                        Atestado entregue
+                    </span>
+                    } @else {
                     <button class="btn btn-sm btn-action" [class.btn-danger]="aluno.presente"
                         [class.btn-success]="!aluno.presente" (click)="togglePresente(aluno)"
                         [disabled]="aluno.salvando || salvandoTudo || modoVisualizacao" [attr.aria-label]="aluno.presente
@@ -175,6 +202,7 @@
                             'check_circle' }}</span>
                         <span class="action-text">{{ aluno.presente ? 'Presente' : 'Falta' }}</span>
                     </button>
+                    }
                 </td>
 
             </tr>

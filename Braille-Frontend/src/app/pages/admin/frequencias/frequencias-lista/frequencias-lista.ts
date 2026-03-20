@@ -1,10 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { of, from } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { FocusKeyManager, FocusableOption, A11yModule } from '@angular/cdk/a11y';
-import { Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, AfterViewInit } from '@angular/core';
 
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../core/services/frequencias.service';
 
@@ -18,6 +15,9 @@ interface AlunoNaChamada {
   presente: boolean;
   salvando: boolean;
   salvo: boolean;
+  statusFrequencia?: 'PRESENTE' | 'FALTA' | 'FALTA_JUSTIFICADA'; // novo campo
+  justificativaId?: string;   // ID do atestado que justificou a falta
+  atestadoUrl?: string;       // URL do documento para o botão "Ver Atestado"
 }
 
 @Directive({
@@ -92,10 +92,10 @@ export class FrequenciasLista implements OnInit {
   userId = '';
 
   constructor(
-    private frequenciasService: FrequenciasService,
-    private turmasService: TurmasService,
-    private cdr: ChangeDetectorRef,
-    private authService: AuthService,
+    private readonly frequenciasService: FrequenciasService,
+    private readonly turmasService: TurmasService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly authService: AuthService,
   ) { }
 
   ngOnInit(): void {
@@ -166,15 +166,19 @@ export class FrequenciasLista implements OnInit {
           next: (res) => {
             const registrosExistentes = res.data;
 
-            this.alunosNaChamada = alunos.map(aluno => {
+            this.alunosNaChamada = alunos.map((aluno: any) => {
               const registroExistente = registrosExistentes.find(f => f.alunoId === aluno.id);
+              const statusFreq = (registroExistente as any)?.status as 'PRESENTE' | 'FALTA' | 'FALTA_JUSTIFICADA' | undefined;
+              const isFJ = statusFreq === 'FALTA_JUSTIFICADA';
               return {
                 alunoId: aluno.id,
                 nomeCompleto: aluno.nomeCompleto,
                 frequenciaId: registroExistente?.id,
-                presente: registroExistente?.presente ?? true, // padrão = presente
+                presente: isFJ ? false : (registroExistente?.presente ?? true),
                 salvando: false,
                 salvo: !!registroExistente,
+                statusFrequencia: statusFreq,
+                justificativaId: (registroExistente as any)?.justificativaId,
               };
             });
 
@@ -214,7 +218,11 @@ export class FrequenciasLista implements OnInit {
   }
 
   get totalFaltas(): number {
-    return this.alunosNaChamada.filter(a => !a.presente).length;
+    return this.alunosNaChamada.filter(a => !a.presente && a.statusFrequencia !== 'FALTA_JUSTIFICADA').length;
+  }
+
+  get totalJustificadas(): number {
+    return this.alunosNaChamada.filter(a => a.statusFrequencia === 'FALTA_JUSTIFICADA').length;
   }
 
   salvarChamada(): void {
