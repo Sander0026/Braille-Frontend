@@ -14,6 +14,8 @@ import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-vi
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
+import { FormsModule } from '@angular/forms';
+import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
 
 
 @Directive({
@@ -34,7 +36,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -111,6 +113,16 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // ── Exportação ──────────────────────────────────────────────────
   exportando = false;
 
+  // ── Atestados ───────────────────────────────────────────────────
+  atestadosDoAluno: Atestado[] = [];
+  carregandoAtestados = false;
+  modalAtestadoAberto = false;
+  salvandoAtestado = false;
+  uploadingAtestado = false;
+  erroAtestado = '';
+  atestadoPreview: PreviewAtestado | null = null;
+  novoAtestado: CriarAtestadoDto = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+
   constructor(
     private beneficiariosService: BeneficiariosService,
     private cdr: ChangeDetectorRef,
@@ -120,7 +132,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private authService: AuthService,
     private frequenciasService: FrequenciasService,
     private liveAnnouncer: LiveAnnouncer,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private atestadosService: AtestadosService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -779,15 +792,17 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.cdr.detectChanges();
 
     const ehPdf = file.type === 'application/pdf';
-    const upload$ =
-      tipo === 'termoLgpdUrl'
-        ? this.beneficiariosService.uploadPdf(file, 'lgpd')
-        : ehPdf
-          ? this.beneficiariosService.uploadPdf(file, 'atestado')
-          : this.beneficiariosService.uploadImagem(file);
+    let upload$: any;
+    if (tipo === 'termoLgpdUrl') {
+      upload$ = this.beneficiariosService.uploadPdf(file, 'lgpd');
+    } else if (ehPdf) {
+      upload$ = this.beneficiariosService.uploadPdf(file, 'atestado');
+    } else {
+      upload$ = this.beneficiariosService.uploadImagem(file);
+    }
 
     upload$.subscribe({
-      next: (res) => {
+      next: (res: any) => {
         const updatePayload: Partial<Beneficiario> = {};
         updatePayload[tipo] = res.url;
         if (tipo === 'termoLgpdUrl') {
@@ -913,6 +928,134 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.mostrarModalImagem = false;
     this.urlImagemParaVisualizar = null;
     this.cdr.detectChanges();
+  }
+
+  // ── Utilitários de data ──────────────────────────────────────────
+  hojeISO(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  formatarData(iso: string): string {
+    if (!iso) return '—';
+    const partes = iso.substring(0, 10).split('-');
+    if (partes.length !== 3) return iso;
+    const [ano, mes, dia] = partes;
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  // ── Módulo Atestados ─────────────────────────────────────────────
+  abrirModalAtestado(): void {
+    this.modalAtestadoAberto = true;
+    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    this.atestadoPreview = null;
+    this.erroAtestado = '';
+    this.cdr.detectChanges();
+  }
+
+  fecharModalAtestado(): void {
+    this.modalAtestadoAberto = false;
+    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    this.atestadoPreview = null;
+    this.erroAtestado = '';
+    this.cdr.detectChanges();
+  }
+
+  buscarPreviewAtestado(): void {
+    if (!this.alunoSelecionado || !this.novoAtestado.dataInicio || !this.novoAtestado.dataFim) return;
+    this.atestadosService.preview(
+      this.alunoSelecionado.id,
+      this.novoAtestado.dataInicio,
+      this.novoAtestado.dataFim
+    ).subscribe({
+      next: (res) => { this.atestadoPreview = res; this.cdr.detectChanges(); },
+      error: () => { this.atestadoPreview = null; }
+    });
+  }
+
+  uploadArquivoAtestado(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingAtestado = true;
+    this.cdr.detectChanges();
+
+    const ehPdf = file.type === 'application/pdf';
+    const upload$ = ehPdf ? this.beneficiariosService.uploadPdf(file, 'atestado') : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
+      next: (res: any) => {
+        this.novoAtestado.arquivoUrl = res.url ?? res.secure_url ?? res;
+        this.uploadingAtestado = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroAtestado = 'Erro ao enviar arquivo. Tente novamente.';
+        this.uploadingAtestado = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  salvarAtestado(): void {
+    if (!this.alunoSelecionado || this.salvandoAtestado) return;
+    const dto = this.novoAtestado;
+    if (!dto.dataInicio || !dto.dataFim || !dto.motivo) {
+      this.erroAtestado = 'Preencha Data Início, Data Fim e Motivo.';
+      return;
+    }
+    this.salvandoAtestado = true;
+    this.erroAtestado = '';
+    this.atestadosService.criar(this.alunoSelecionado.id, dto).subscribe({
+      next: (res) => {
+        this.salvandoAtestado = false;
+        this.fecharModalAtestado();
+        this.toast.sucesso(`Atestado salvo! ${res.faltasJustificadas} falta(s) justificada(s).`);
+        this.carregarAtestados();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.salvandoAtestado = false;
+        this.erroAtestado = err?.error?.message ?? 'Erro ao salvar atestado.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removerAtestado(id: string): void {
+    this.confirmDialog.confirmar({
+      titulo: 'Remover Atestado',
+      mensagem: 'Tem certeza? As faltas justificadas por este atestado voltarão ao status FALTA.',
+      textoBotaoConfirmar: 'Remover',
+      tipo: 'danger'
+    }).then((confirmado: boolean) => {
+      if (!confirmado) return;
+      this.atestadosService.remover(id).subscribe({
+        next: () => {
+          this.toast.sucesso('Atestado removido e faltas revertidas.');
+          this.carregarAtestados();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.toast.erro(err?.error?.message ?? 'Erro ao remover atestado.');
+        }
+      });
+    });
+  }
+
+  carregarAtestados(): void {
+    if (!this.alunoSelecionado) return;
+    this.carregandoAtestados = true;
+    this.atestadosService.listar(this.alunoSelecionado.id).subscribe({
+      next: (lista) => {
+        this.atestadosDoAluno = lista;
+        this.carregandoAtestados = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoAtestados = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
 }
