@@ -685,6 +685,141 @@
                 </div>
             </div>
 
+            <!-- ═══ Frequência e Atestados ═══ -->
+            <div class="profile-section full-width historico-section">
+                <h4 style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <span class="material-symbols-rounded" style="font-size:16px;" aria-hidden="true">attach_file</span>
+                        Atestados e Justificativas de Falta
+                    </span>
+                    @if (abaAtiva === 'ativos') {
+                    <button class="btn btn-sm btn-primary" (click)="abrirModalAtestado()" aria-label="Registrar novo atestado">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">add</span>
+                        Registrar Atestado
+                    </button>
+                    }
+                </h4>
+
+                <!-- Formulário inline de criação -->
+                @if (modalAtestadoAberto) {
+                <div class="atestado-form-card">
+                    <div class="atestado-form-header">
+                        <strong>Novo Atestado</strong>
+                        <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalAtestado()" aria-label="Cancelar">
+                            <span class="material-symbols-rounded" aria-hidden="true">close</span>
+                        </button>
+                    </div>
+                    <div class="atestado-form-body">
+                        <div class="atestado-form-row">
+                            <div class="form-group">
+                                <label for="at-inicio">Data Início <span class="required" aria-hidden="true">*</span></label>
+                                <input id="at-inicio" type="date" class="form-input" [(ngModel)]="novoAtestado.dataInicio" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
+                            </div>
+                            <div class="form-group">
+                                <label for="at-fim">Data Fim <span class="required" aria-hidden="true">*</span></label>
+                                <input id="at-fim" type="date" class="form-input" [(ngModel)]="novoAtestado.dataFim" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="at-motivo">Motivo <span class="required" aria-hidden="true">*</span></label>
+                            <input id="at-motivo" type="text" class="form-input" [(ngModel)]="novoAtestado.motivo"
+                                placeholder="Ex: Consulta Médica, Internação Hospitalar..." maxlength="200" />
+                        </div>
+                        <div class="form-group">
+                            <label>Arquivo (PDF / Imagem)</label>
+                            <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
+                                {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo enviado ✔' : 'Selecionar Arquivo') }}
+                                <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;"
+                                    (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" />
+                            </label>
+                            @if (novoAtestado.arquivoUrl) {
+                            <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoAtestado.arquivoUrl!)"
+                                aria-label="Ver arquivo enviado">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">open_in_new</span>
+                                Ver arquivo
+                            </button>
+                            }
+                        </div>
+                        @if (atestadoPreview) {
+                        <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; display:flex; gap:0.5rem; align-items:flex-start;" role="status">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">info</span>
+                            @if (atestadoPreview.totalFaltasNoperiodo === 0) {
+                            <span>Nenhuma falta encontrada no período para justificar.</span>
+                            } @else {
+                            <span>Serão justificadas <strong>{{ atestadoPreview.totalFaltasNoperiodo }}</strong> falta(s) no período selecionado.</span>
+                            }
+                        </div>
+                        }
+                        @if (erroAtestado) {
+                        <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem;" role="alert">{{ erroAtestado }}</div>
+                        }
+                    </div>
+                    <div class="atestado-form-footer">
+                        <button class="btn btn-secondary btn-sm" (click)="fecharModalAtestado()">Cancelar</button>
+                        <button class="btn btn-primary btn-sm" (click)="salvarAtestado()"
+                            [disabled]="salvandoAtestado || !novoAtestado.dataInicio || !novoAtestado.dataFim || !novoAtestado.motivo">
+                            @if (salvandoAtestado) {
+                            <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando...
+                            } @else {
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> Salvar Atestado
+                            }
+                        </button>
+                    </div>
+                </div>
+                }
+
+                <!-- Lista de atestados existentes -->
+                @if (carregandoAtestados) {
+                <div style="padding:1rem; text-align:center;" aria-busy="true">
+                    <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
+                    <p style="font-size:0.85rem; color:#6b7280;">Carregando atestados...</p>
+                </div>
+                } @else if (atestadosDoAluno.length === 0 && !modalAtestadoAberto) {
+                <p style="color:#6b7280; font-size:0.875rem; margin-top:0.5rem;">Nenhum atestado registrado.</p>
+                } @else if (atestadosDoAluno.length > 0) {
+                <table class="historico-table" style="margin-top:0.75rem;">
+                    <thead>
+                        <tr>
+                            <th>Período</th>
+                            <th>Motivo</th>
+                            <th style="text-align:center;">Faltas Justificadas</th>
+                            <th>Documento</th>
+                            @if (isAdmin) { <th>Ação</th> }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (at of atestadosDoAluno; track at.id) {
+                        <tr>
+                            <td style="white-space:nowrap;">{{ formatarData(at.dataInicio) }} – {{ formatarData(at.dataFim) }}</td>
+                            <td>{{ at.motivo }}</td>
+                            <td style="text-align:center;">
+                                <span class="badge badge-fj">{{ at.frequencias?.length ?? 0 }}</span>
+                            </td>
+                            <td>
+                                @if (at.arquivoUrl) {
+                                <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(at.arquivoUrl)"
+                                    aria-label="Ver documento do atestado">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">description</span>
+                                    Ver
+                                </button>
+                                } @else { <span style="color:#9ca3af; font-size:0.8rem;">—</span> }
+                            </td>
+                            @if (isAdmin) {
+                            <td>
+                                <button class="btn btn-danger btn-sm" (click)="removerAtestado(at.id)"
+                                    aria-label="Remover atestado e reverter faltas justificadas">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">delete</span>
+                                </button>
+                            </td>
+                            }
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+                }
+            </div>
+
             }
         </div>
 
