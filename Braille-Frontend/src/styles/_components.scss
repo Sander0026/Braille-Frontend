@@ -226,6 +226,25 @@
         background-color: $color-gray-100;
         color: $color-gray-700;
     }
+
+    // Falta Justificada (atestado) — azul ILBES
+    &.badge-fj {
+        background-color: #dbeafe;
+        color: #1e40af;
+        border: 1px solid #bfdbfe;
+    }
+}
+
+// Linha FJ na tabela de chamada
+.linha-fj {
+    background-color: #eff6ff !important;
+    border-left: 3px solid #3b82f6;
+}
+
+// Avatar FJ (azul)
+.avatar--fj {
+    background-color: #3b82f6 !important;
+    color: #fff !important;
 }
 
 // ============================================================
