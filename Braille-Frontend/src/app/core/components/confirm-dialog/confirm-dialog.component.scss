@@ -52,8 +52,8 @@
     }
 
     &.tipo-warning {
-        background: #fef3c7;
-        color: #b45309;
+        background: #fff8d6; // $color-primary-light
+        color: #d4a800; // $color-primary-dark
     }
 
     &.tipo-info {
@@ -105,11 +105,11 @@
     }
 
     &.tipo-warning {
-        background: #b45309;
-        color: #fff;
+        background: #f5c800; // $color-primary
+        color: #1a1a00; // $color-primary-text
 
         &:hover {
-            background: #92400e;
+            background: #d4a800; // $color-primary-dark
         }
     }
 
