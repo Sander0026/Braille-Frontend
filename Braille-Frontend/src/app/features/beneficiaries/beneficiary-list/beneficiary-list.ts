@@ -732,6 +732,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
+        this.carregarAtestados();
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
