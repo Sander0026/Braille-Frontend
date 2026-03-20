@@ -248,12 +248,31 @@ export class CadastroWizard implements OnInit {
     this.verificarObrigatoriedadeCpfRg();
   }
 
-  // Permite digitar o RG, formatando apenas bloqueando caracteres bizarros ou com máscara definida se desejar
-  formatarRg(event: any) {
-     const input = event.target;
-     // Deixa livre por enquanto mas atualiza o form
-     this.cadastroForm.get('dadosPessoais.rg')?.setValue(input.value, { emitEvent: false });
-     this.verificarObrigatoriedadeCpfRg();
+  /** Máscara de RG: 1.111.111 (7 dígitos) ou 11.111.111 (8 dígitos) */
+  formatarRg(event: Event) {
+    const input = event.target as HTMLInputElement;
+    // Remove tudo que não for dígito
+    let digitos = input.value.replace(/\D/g, '');
+
+    // Limita a 8 dígitos
+    if (digitos.length > 8) digitos = digitos.substring(0, 8);
+
+    let mascara = '';
+    if (digitos.length <= 7) {
+      // 1.111.111
+      mascara = digitos
+        .replace(/(\d{1})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2');
+    } else {
+      // 11.111.111
+      mascara = digitos
+        .replace(/(\d{2})(\d)/, '$1.$2')
+        .replace(/(\d{3})(\d)/, '$1.$2');
+    }
+
+    input.value = mascara;
+    this.cadastroForm.get('dadosPessoais.rg')?.setValue(mascara, { emitEvent: false });
+    this.verificarObrigatoriedadeCpfRg();
   }
 
   // Máscara de Telefone
