@@ -115,6 +115,7 @@ export const routes: Routes = [
         path: 'usuarios/cadastro',
         loadComponent: () => import('./pages/admin/usuarios/cadastro-usuario-wizard/cadastro-usuario-wizard').then(m => m.CadastroUsuarioWizard),
         title: 'Novo Usuário — ILBES',
+        canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN'] }
       },
 
