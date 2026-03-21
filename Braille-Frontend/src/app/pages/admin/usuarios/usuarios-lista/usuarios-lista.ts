@@ -111,6 +111,17 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
     @HostListener('keydown', ['$event'])
     onKeydown(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            if (this.usuarioEmEdicao) {
+                this.fecharModal();
+                event.preventDefault();
+            } else if (this.usuarioVisualizado) {
+                this.fecharPerfil();
+                event.preventDefault();
+            }
+            return;
+        }
+
         if (this.keyManager && !this.usuarioEmEdicao && !this.usuarioVisualizado && !this.usuarioParaExcluir && !this.usuarioParaExcluirDefinitivo && !this.usuarioParaRestaurar && !this.usuarioParaResetar) {
             if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
                 this.keyManager.onKeydown(event);
@@ -181,7 +192,17 @@ export class UsuariosLista implements OnInit, OnDestroy {
         });
     }
 
-    fecharModal(): void {
+    async fecharModal(forcar = false): Promise<void> {
+        if (!forcar && this.editForm.dirty && !this.salvando) {
+            const ok = await this.confirmDialog.confirmar({
+                titulo: 'Sair sem salvar?',
+                mensagem: 'Você tem alterações não salvas. Se sair agora, todos os dados preenchidos serão perdidos.',
+                textoBotaoConfirmar: 'Sair e perder dados',
+                textoBotaoCancelar: 'Continuar editando',
+                tipo: 'warning'
+            });
+            if (!ok) return;
+        }
         this.usuarioEmEdicao = null;
         this.editForm.reset();
         setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
@@ -201,7 +222,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         this.usuariosService.atualizar(this.usuarioEmEdicao.id, payload).subscribe({
             next: () => {
                 this.salvando = false;
-                this.fecharModal();
+                this.fecharModal(true);
                 this.toast.sucesso('Usuário editado com sucesso!');
                 setTimeout(() => this.carregar(), 0);
             },
