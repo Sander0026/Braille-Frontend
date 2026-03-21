@@ -545,7 +545,17 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  fecharModalEdicao(): void {
+  async fecharModalEdicao(forcar = false): Promise<void> {
+    if (!forcar && this.editForm.dirty && !this.salvandoEdicao) {
+        const ok = await this.confirmDialog.confirmar({
+            titulo: 'Sair sem salvar?',
+            mensagem: 'Você tem alterações não salvas. Se sair agora, todos os dados preenchidos serão perdidos.',
+            textoBotaoConfirmar: 'Sair e perder dados',
+            textoBotaoCancelar: 'Continuar editando',
+            tipo: 'warning'
+        });
+        if (!ok) return;
+    }
     this.modalEdicaoAberto = false;
     this.alunoEmEdicao = null;
     this.editForm.reset();
@@ -568,7 +578,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       next: () => {
         setTimeout(() => {
           this.salvandoEdicao = false;
-          this.fecharModalEdicao();
+          this.fecharModalEdicao(true);
           this.toast.sucesso('Aluno atualizado com sucesso!');
           this.carregar();
         }, 0);
