@@ -335,17 +335,22 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           <div style="font-size:8pt;color:#555;text-align:right;">Gerado em: ${dataGeracao}</div>
         </div>
 
-        <div style="font-size:14pt;font-weight:bold;margin-bottom:4px;">${a.nomeCompleto}</div>
-        <div style="display:flex;gap:6px;margin-bottom:12px;">
-          <span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
-            ${a.statusAtivo ? 'background:#d1fae5;border-color:#059669;color:#065f46;' : 'background:#fee2e2;border-color:#dc2626;color:#991b1b;'}">
-            ${a.statusAtivo ? 'Ativo' : 'Inativo'}
-          </span>
-          ${a.tipoDeficiencia ? `<span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
-            background:#eff6ff;border-color:#3b82f6;color:#1e40af;">${(a.tipoDeficiencia).replace(/_/g, ' ')}</span>` : ''}
+        <div style="display:flex;align-items:center;margin-bottom:12px;">
+          ${a.fotoPerfil ? `<img src="${a.fotoPerfil}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin-right:16px;border:2px solid #e5e7eb;flex-shrink:0;" alt="Foto de Perfil do Aluno" />` : ''}
+          <div>
+            <div style="font-size:14pt;font-weight:bold;margin-bottom:4px;">${a.nomeCompleto}</div>
+            <div style="display:flex;gap:6px;">
+              <span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
+                ${a.statusAtivo ? 'background:#d1fae5;border-color:#059669;color:#065f46;' : 'background:#fee2e2;border-color:#dc2626;color:#991b1b;'}">
+                ${a.statusAtivo ? 'Ativo' : 'Inativo'}
+              </span>
+              ${a.tipoDeficiencia ? `<span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
+                background:#eff6ff;border-color:#3b82f6;color:#1e40af;">${(a.tipoDeficiencia).replace(/_/g, ' ')}</span>` : ''}
+            </div>
+          </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
             <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
               border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Informações Pessoais</h4>
