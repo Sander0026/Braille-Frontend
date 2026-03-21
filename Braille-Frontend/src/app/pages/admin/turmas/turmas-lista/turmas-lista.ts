@@ -105,6 +105,7 @@ export class TurmasLista implements OnInit {
     horaInicioNovoTurno = '';
     horaFimNovoTurno = '';
     erroTurno = '';
+    gradeOriginalStr = '';
 
     // ── Modal Arquivar ──────────────────────────────────────────
     modalArquivarAberto = false;
@@ -183,6 +184,20 @@ export class TurmasLista implements OnInit {
 
     @HostListener('keydown', ['$event'])
     onKeydown(event: KeyboardEvent) {
+        if (event.key === 'Escape') {
+            if (this.modalAberto) {
+                this.fecharModal();
+                event.preventDefault();
+            } else if (this.modalArquivarAberto) {
+                this.fecharModalArquivar();
+                event.preventDefault();
+            } else if (this.modalAlunosAberto) {
+                this.fecharModalAlunos();
+                event.preventDefault();
+            }
+            return;
+        }
+
         if (this.gridKeyManager && !this.modalAberto && !this.modalAlunosAberto && !this.modalArquivarAberto) {
             if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
                 this.gridKeyManager.onKeydown(event);
@@ -331,15 +346,32 @@ export class TurmasLista implements OnInit {
                 horaFim: this.minutosParaHmTemplate(turno.horaFim)
             }));
         }
+        this.gradeOriginalStr = JSON.stringify(this.gradeHoraria);
 
         this.modalAberto = true;
         setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
     }
 
-    fecharModal(): void {
+    async fecharModal(forcar = false): Promise<void> {
+        const gradeAtualStr = JSON.stringify(this.gradeHoraria);
+        const gradeDirty = this.gradeOriginalStr !== gradeAtualStr;
+
+        if (!forcar && (this.turmaForm.dirty || gradeDirty) && !this.salvandoModal) {
+            const ok = await this.confirmDialog.confirmar({
+                titulo: 'Sair sem salvar?',
+                mensagem: 'Você tem alterações não salvas. Se sair agora, todos os dados preenchidos serão perdidos.',
+                textoBotaoConfirmar: 'Sair e perder dados',
+                textoBotaoCancelar: 'Continuar editando',
+                tipo: 'warning'
+            });
+            if (!ok) return;
+        }
+
         this.modalAberto = false;
         this.erroModal = '';
         this.turmaForm.reset();
+        this.gradeHoraria = [];
+        this.gradeOriginalStr = '';
         setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
@@ -372,7 +404,7 @@ export class TurmasLista implements OnInit {
             next: () => {
                 setTimeout(() => {
                     this.salvandoModal = false;
-                    this.fecharModal();
+                    this.fecharModal(true);
                     this.toast.sucesso(this.modoEdicao ? 'Oficina atualizada com sucesso!' : 'Oficina criada com sucesso!');
                     this.carregarTurmas(this.paginaAtual);
                 }, 0);
