@@ -1,17 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { A11yModule } from '@angular/cdk/a11y';
 import { ConfirmDialogService } from '../../services/confirm-dialog.service';
 
 @Component({
   selector: 'app-confirm-dialog',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, A11yModule],
   styleUrl: './confirm-dialog.component.scss',
   template: `
     @if (svc.dialogData(); as dialog) {
     <div class="cd-backdrop" (click)="svc._cancelar()" role="dialog" aria-modal="true"
          [attr.aria-label]="dialog.titulo || 'Confirmar ação'">
-      <div class="cd-card" (click)="$event.stopPropagation()">
+      <div class="cd-card" cdkTrapFocus cdkTrapFocusAutoCapture (click)="$event.stopPropagation()">
 
         <!-- Ícone por tipo -->
         <div class="cd-icon" [class]="'cd-icon tipo-' + (dialog.tipo || 'danger')">
