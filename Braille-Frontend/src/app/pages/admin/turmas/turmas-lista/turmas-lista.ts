@@ -765,9 +765,7 @@ export class TurmasLista implements OnInit {
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', nomeArquivo);
-        document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
         URL.revokeObjectURL(url);
 
         this.toast.sucesso(`Arquivo "${nomeArquivo}" baixado com sucesso!`);

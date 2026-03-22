@@ -117,6 +117,16 @@ $transition: 250ms ease;
     // Quando nenhuma foto for configurada dinamicamente, esta imagem será exibida.
 }
 
+// Em alto contraste, desligamos completamente a imagem decorativa
+// e o overlay, deixando apenas o fundo sólido do sistema.
+:host-context(html.alto-contraste) {
+    .hero-bg,
+    .hero::before {
+        display: none !important;
+        background-image: none !important;
+    }
+}
+
 .hero-inner {
     position: relative; // Garante que o conteúdo fique acima do fundo e do overlay
     z-index: 2;
