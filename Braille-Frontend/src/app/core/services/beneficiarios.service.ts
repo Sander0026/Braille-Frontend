@@ -178,7 +178,7 @@ export class BeneficiariosService {
         return this.http.post<{ url: string }>('/api/upload', formData);
     }
 
-    uploadPdf(file: File, tipo: 'lgpd' | 'atestado'): Observable<{ url: string }> {
+    uploadPdf(file: File, tipo: 'lgpd' | 'atestado' | 'laudo'): Observable<{ url: string }> {
         const formData = new FormData();
         formData.append('file', file);
         return this.http.post<{ url: string }>(`/api/upload/pdf?tipo=${tipo}`, formData);

@@ -16,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
 import { FormsModule } from '@angular/forms';
 import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
+import { LaudosService, LaudoMedico, CriarLaudoDto } from '../../../core/services/laudos.service';
 
 
 @Directive({
@@ -114,14 +115,34 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   exportando = false;
 
   // ── Atestados ───────────────────────────────────────────────────
+  gerenciandoAtestados = false; // Modal dedicado
   atestadosDoAluno: Atestado[] = [];
   carregandoAtestados = false;
-  modalAtestadoAberto = false;
+  modalAtestadoAberto = false; // Form de criação
   salvandoAtestado = false;
   uploadingAtestado = false;
   erroAtestado = '';
   atestadoPreview: PreviewAtestado | null = null;
-  novoAtestado: CriarAtestadoDto = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+  atestadoEmEdicao: Atestado | null = null;
+  novoAtestado: any = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+
+  // ── Laudos Médicos ──────────────────────────────────────────────
+  gerenciandoLaudos = false; // Modal dedicado
+  laudosDoAluno: LaudoMedico[] = [];
+  carregandoLaudos = false;
+  modalLaudoAberto = false; // Form de criação
+  salvandoLaudo = false;
+  uploadingLaudo = false;
+  erroLaudo = '';
+  laudoEmEdicao: LaudoMedico | null = null;
+  novoLaudo: any = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
+
+  // ── Termo LGPD ──────────────────────────────────────────────────
+  modalLgpdAberto = false;
+  uploadingLgpd = false;
+  salvandoLgpd = false;
+  erroLgpd = '';
+  novoLgpdUrl = '';
 
   constructor(
     private beneficiariosService: BeneficiariosService,
@@ -133,7 +154,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private frequenciasService: FrequenciasService,
     private liveAnnouncer: LiveAnnouncer,
     private sanitizer: DomSanitizer,
-    private atestadosService: AtestadosService
+    private atestadosService: AtestadosService,
+    private laudosService: LaudosService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -335,17 +357,22 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           <div style="font-size:8pt;color:#555;text-align:right;">Gerado em: ${dataGeracao}</div>
         </div>
 
-        <div style="font-size:14pt;font-weight:bold;margin-bottom:4px;">${a.nomeCompleto}</div>
-        <div style="display:flex;gap:6px;margin-bottom:12px;">
-          <span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
-            ${a.statusAtivo ? 'background:#d1fae5;border-color:#059669;color:#065f46;' : 'background:#fee2e2;border-color:#dc2626;color:#991b1b;'}">
-            ${a.statusAtivo ? 'Ativo' : 'Inativo'}
-          </span>
-          ${a.tipoDeficiencia ? `<span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
-            background:#eff6ff;border-color:#3b82f6;color:#1e40af;">${(a.tipoDeficiencia).replace(/_/g, ' ')}</span>` : ''}
+        <div style="display:flex;align-items:center;margin-bottom:12px;">
+          ${a.fotoPerfil ? `<img src="${a.fotoPerfil}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;margin-right:16px;border:2px solid #e5e7eb;flex-shrink:0;" alt="Foto de Perfil do Aluno" />` : ''}
+          <div>
+            <div style="font-size:14pt;font-weight:bold;margin-bottom:4px;">${a.nomeCompleto}</div>
+            <div style="display:flex;gap:6px;">
+              <span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
+                ${a.statusAtivo ? 'background:#d1fae5;border-color:#059669;color:#065f46;' : 'background:#fee2e2;border-color:#dc2626;color:#991b1b;'}">
+                ${a.statusAtivo ? 'Ativo' : 'Inativo'}
+              </span>
+              ${a.tipoDeficiencia ? `<span style="font-size:8pt;padding:2px 8px;border-radius:12px;border:1px solid;
+                background:#eff6ff;border-color:#3b82f6;color:#1e40af;">${(a.tipoDeficiencia).replace(/_/g, ' ')}</span>` : ''}
+            </div>
+          </div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
           <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
             <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;
               border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Informações Pessoais</h4>
@@ -742,7 +769,6 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
-        this.carregarAtestados();
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
@@ -955,17 +981,42 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     return `${dia}/${mes}/${ano}`;
   }
 
-  // ── Módulo Atestados ─────────────────────────────────────────────
-  abrirModalAtestado(): void {
+  // ── Módulo Atestados (Modal e CRUD) ──────────────────────────────
+  abrirModalGerenciamentoAtestados(): void {
+    if (!this.alunoSelecionado) return;
+    this.gerenciandoAtestados = true;
+    this.carregarAtestados();
+    this.cdr.detectChanges();
+  }
+
+  fecharModalGerenciamentoAtestados(event?: Event): void {
+    if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
+    this.gerenciandoAtestados = false;
+    this.fecharModalAtestadoForm();
+    this.cdr.detectChanges();
+  }
+
+  abrirModalAtestadoForm(atestado?: Atestado): void {
     this.modalAtestadoAberto = true;
-    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    this.atestadoEmEdicao = atestado || null;
+    if (atestado) {
+      this.novoAtestado = {
+        dataInicio: atestado.dataInicio ? atestado.dataInicio.split('T')[0] : '',
+        dataFim: atestado.dataFim ? atestado.dataFim.split('T')[0] : '',
+        motivo: atestado.motivo,
+        arquivoUrl: atestado.arquivoUrl
+      };
+    } else {
+      this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    }
     this.atestadoPreview = null;
     this.erroAtestado = '';
     this.cdr.detectChanges();
   }
 
-  fecharModalAtestado(): void {
+  fecharModalAtestadoForm(): void {
     this.modalAtestadoAberto = false;
+    this.atestadoEmEdicao = null;
     this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
     this.atestadoPreview = null;
     this.erroAtestado = '';
@@ -1010,26 +1061,54 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   salvarAtestado(): void {
     if (!this.alunoSelecionado || this.salvandoAtestado) return;
     const dto = this.novoAtestado;
-    if (!dto.dataInicio || !dto.dataFim || !dto.motivo) {
+
+    // Se não estiver em edição, exige campos de data. (Em edição alteramos só o motivo e arquivo)
+    if (!this.atestadoEmEdicao && (!dto.dataInicio || !dto.dataFim || !dto.motivo)) {
       this.erroAtestado = 'Preencha Data Início, Data Fim e Motivo.';
       return;
     }
+    if (this.atestadoEmEdicao && !dto.motivo) {
+      this.erroAtestado = 'Preencha o Motivo do atestado.';
+      return;
+    }
+
     this.salvandoAtestado = true;
     this.erroAtestado = '';
-    this.atestadosService.criar(this.alunoSelecionado.id, dto).subscribe({
-      next: (res) => {
-        this.salvandoAtestado = false;
-        this.fecharModalAtestado();
-        this.toast.sucesso(`Atestado salvo! ${res.faltasJustificadas} falta(s) justificada(s).`);
-        this.carregarAtestados();
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.salvandoAtestado = false;
-        this.erroAtestado = err?.error?.message ?? 'Erro ao salvar atestado.';
-        this.cdr.detectChanges();
-      }
-    });
+
+    if (this.atestadoEmEdicao) {
+      // Editar
+      const editDto: any = { motivo: dto.motivo, arquivoUrl: dto.arquivoUrl };
+      this.atestadosService.atualizar(this.atestadoEmEdicao.id, editDto).subscribe({
+        next: () => {
+          this.salvandoAtestado = false;
+          this.fecharModalAtestadoForm();
+          this.toast.sucesso('Atestado editado com sucesso.');
+          this.carregarAtestados();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.salvandoAtestado = false;
+          this.erroAtestado = err?.error?.message ?? 'Erro ao atualizar atestado.';
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      // Criar
+      this.atestadosService.criar(this.alunoSelecionado.id, dto).subscribe({
+        next: (res) => {
+          this.salvandoAtestado = false;
+          this.fecharModalAtestadoForm();
+          this.toast.sucesso(`Atestado salvo! ${res.faltasJustificadas} falta(s) justificada(s).`);
+          this.carregarAtestados();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.salvandoAtestado = false;
+          this.erroAtestado = err?.error?.message ?? 'Erro ao salvar atestado.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 
   removerAtestado(id: string): void {
@@ -1057,13 +1136,237 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!this.alunoSelecionado) return;
     this.carregandoAtestados = true;
     this.atestadosService.listar(this.alunoSelecionado.id).subscribe({
-      next: (lista) => {
+      next: (lista: Atestado[]) => {
         this.atestadosDoAluno = lista;
         this.carregandoAtestados = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.carregandoAtestados = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── Módulo Laudos Médicos (Modal e CRUD) ──────────────────────────────
+  abrirModalGerenciamentoLaudos(): void {
+    if (!this.alunoSelecionado) return;
+    this.gerenciandoLaudos = true;
+    this.carregarLaudos();
+    this.cdr.detectChanges();
+  }
+
+  fecharModalGerenciamentoLaudos(event?: Event): void {
+    if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
+    this.gerenciandoLaudos = false;
+    this.fecharModalLaudoForm();
+    this.cdr.detectChanges();
+  }
+
+  abrirModalLaudoForm(laudo?: LaudoMedico): void {
+    this.modalLaudoAberto = true;
+    this.laudoEmEdicao = laudo || null;
+    if (laudo) {
+      this.novoLaudo = {
+        dataEmissao: laudo.dataEmissao ? laudo.dataEmissao.split('T')[0] : '',
+        medicoResponsavel: laudo.medicoResponsavel || '',
+        descricao: laudo.descricao || '',
+        arquivoUrl: laudo.arquivoUrl || ''
+      };
+    } else {
+      this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
+    }
+    this.erroLaudo = '';
+    this.cdr.detectChanges();
+  }
+
+  fecharModalLaudoForm(): void {
+    this.modalLaudoAberto = false;
+    this.laudoEmEdicao = null;
+    this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
+    this.erroLaudo = '';
+    this.cdr.detectChanges();
+  }
+
+  uploadArquivoLaudo(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingLaudo = true;
+    this.cdr.detectChanges();
+
+    const ehPdf = file.type === 'application/pdf';
+    const upload$ = ehPdf ? this.beneficiariosService.uploadPdf(file, 'laudo') : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
+      next: (res: any) => {
+        this.novoLaudo.arquivoUrl = res.url ?? res.secure_url ?? res;
+        this.uploadingLaudo = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroLaudo = 'Erro ao enviar arquivo. Tente novamente.';
+        this.uploadingLaudo = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  salvarLaudo(): void {
+    if (!this.alunoSelecionado || this.salvandoLaudo) return;
+    const dto = this.novoLaudo;
+    if (!dto.dataEmissao || !dto.arquivoUrl) {
+      this.erroLaudo = 'Preencha a Data de Emissão e anexe o documento.';
+      return;
+    }
+    this.salvandoLaudo = true;
+    this.erroLaudo = '';
+
+    if (this.laudoEmEdicao) {
+      // Editar
+      const editDto: any = {
+        dataEmissao: dto.dataEmissao,
+        medicoResponsavel: dto.medicoResponsavel,
+        descricao: dto.descricao,
+        arquivoUrl: dto.arquivoUrl
+      };
+      this.laudosService.atualizar(this.laudoEmEdicao.id, editDto).subscribe({
+        next: () => {
+          this.salvandoLaudo = false;
+          this.fecharModalLaudoForm();
+          this.toast.sucesso('Laudo médico atualizado com sucesso!');
+          this.carregarLaudos();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.salvandoLaudo = false;
+          this.erroLaudo = err?.error?.message ?? 'Erro ao atualizar laudo.';
+          this.cdr.detectChanges();
+        }
+      });
+    } else {
+      // Criar
+      this.laudosService.criar(this.alunoSelecionado.id, dto).subscribe({
+        next: () => {
+          this.salvandoLaudo = false;
+          this.fecharModalLaudoForm();
+          this.toast.sucesso('Laudo médico salvo com sucesso!');
+          this.carregarLaudos();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.salvandoLaudo = false;
+          this.erroLaudo = err?.error?.message ?? 'Erro ao salvar laudo.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+  removerLaudo(id: string): void {
+    this.confirmDialog.confirmar({
+      titulo: 'Remover Laudo Médico',
+      mensagem: 'Tem certeza que deseja excluir este laudo? Esta ação não pode ser desfeita.',
+      textoBotaoConfirmar: 'Remover',
+      tipo: 'danger'
+    }).then((confirmado: boolean) => {
+      if (!confirmado) return;
+      this.laudosService.remover(id).subscribe({
+        next: () => {
+          this.toast.sucesso('Laudo médico removido.');
+          this.carregarLaudos();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.toast.erro(err?.error?.message ?? 'Erro ao remover laudo.');
+        }
+      });
+    });
+  }
+
+  carregarLaudos(): void {
+    if (!this.alunoSelecionado) return;
+    this.carregandoLaudos = true;
+    this.laudosService.listarPorAluno(this.alunoSelecionado.id).subscribe({
+      next: (lista: LaudoMedico[]) => {
+        this.laudosDoAluno = lista;
+        this.carregandoLaudos = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoLaudos = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ============== TERMO LGPD ==============
+
+  abrirModalLgpd(): void {
+    this.modalLgpdAberto = true;
+    this.novoLgpdUrl = '';
+    this.erroLgpd = '';
+    this.cdr.detectChanges();
+  }
+
+  fecharModalLgpd(): void {
+    this.modalLgpdAberto = false;
+    this.novoLgpdUrl = '';
+    this.erroLgpd = '';
+    this.cdr.detectChanges();
+  }
+
+  uploadArquivoLgpd(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingLgpd = true;
+    this.cdr.detectChanges();
+
+    const ehPdf = file.type === 'application/pdf';
+    const upload$ = ehPdf ? this.beneficiariosService.uploadPdf(file, 'lgpd') : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
+      next: (res: any) => {
+        this.novoLgpdUrl = res.url ?? res.secure_url ?? res;
+        this.uploadingLgpd = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroLgpd = 'Erro ao enviar arquivo. Tente novamente.';
+        this.uploadingLgpd = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  salvarLgpd(): void {
+    if (!this.alunoSelecionado || this.salvandoLgpd) return;
+    if (!this.novoLgpdUrl) {
+      this.erroLgpd = 'Você precisa anexar um arquivo.';
+      return;
+    }
+    
+    this.salvandoLgpd = true;
+    this.erroLgpd = '';
+    const dadosAtualizar = { termoLgpdUrl: this.novoLgpdUrl };
+
+    this.beneficiariosService.atualizar(this.alunoSelecionado.id, dadosAtualizar).subscribe({
+      next: (alunoAtualizado) => {
+        this.salvandoLgpd = false;
+        this.alunoSelecionado!.termoLgpdUrl = alunoAtualizado.termoLgpdUrl;
+        
+        // Atualiza a lista da tabela base:
+        const index = this.alunos.findIndex((b: Beneficiario) => b.id === this.alunoSelecionado!.id);
+        if (index > -1) {
+          this.alunos[index].termoLgpdUrl = alunoAtualizado.termoLgpdUrl;
+        }
+
+        this.fecharModalLgpd();
+        this.toast.sucesso('Termo LGPD salvo com sucesso!');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.salvandoLgpd = false;
+        this.erroLgpd = err?.error?.message ?? 'Erro ao salvar o termo LGPD.';
         this.cdr.detectChanges();
       }
     });

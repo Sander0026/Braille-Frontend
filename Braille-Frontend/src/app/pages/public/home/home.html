@@ -169,6 +169,7 @@
     </div>
 </section>
 
+@if (carregandoNoticias || ultimasNoticias.length > 0) {
 <!-- ══════════ ÚLTIMAS NOTÍCIAS ══════════ -->
 <section class="section-noticias" aria-labelledby="noticias-titulo">
     <div class="section-inner">
@@ -222,17 +223,17 @@
             }
         </div>
 
-        <div class="noticias-footer">
-            <a routerLink="/noticias" class="btn-outline-primary">Todas as Notícias <span
-                    class="material-symbols-rounded" aria-hidden="true">arrow_forward</span></a>
-        </div>
-        } @else {
-        <div class="feed-vazio">
-            <p>Nenhuma novidade publicada recentemente.</p>
-        </div>
         }
+
+        <div class="noticias-footer" style="margin-top: 2rem; text-align: center;">
+            <a routerLink="/noticias" class="btn-outline-primary">
+                Acessar Todas as Notícias 
+                <span class="material-symbols-rounded" aria-hidden="true" style="vertical-align: middle;">arrow_forward</span>
+            </a>
+        </div>
     </div>
 </section>
+}
 
 <!-- ══════════ FAQ (PERGUNTAS FREQUENTES) ══════════ -->
 <section class="faq" aria-labelledby="faq-titulo">
