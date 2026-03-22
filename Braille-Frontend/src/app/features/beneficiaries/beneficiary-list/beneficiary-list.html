@@ -685,139 +685,23 @@
                 </div>
             </div>
 
-            <!-- ═══ Frequência e Atestados ═══ -->
+            <!-- ═══ Documentação de Saúde & Presença (Botões de Ação) ═══ -->
             <div class="profile-section full-width historico-section">
-                <h4 style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem;">
-                    <span style="display:flex; align-items:center; gap:6px;">
-                        <span class="material-symbols-rounded" style="font-size:16px;" aria-hidden="true">attach_file</span>
-                        Atestados e Justificativas de Falta
-                    </span>
-                    @if (abaAtiva === 'ativos') {
-                    <button class="btn btn-sm btn-primary" (click)="abrirModalAtestado()" aria-label="Registrar novo atestado">
-                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">add</span>
-                        Registrar Atestado
-                    </button>
-                    }
+                <h4 style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 1rem;">
+                    <span class="material-symbols-rounded" style="font-size:16px;" aria-hidden="true">folder_special</span>
+                    Documentação de Saúde e Frequência
                 </h4>
-
-                <!-- Formulário inline de criação -->
-                @if (modalAtestadoAberto) {
-                <div class="atestado-form-card">
-                    <div class="atestado-form-header">
-                        <strong>Novo Atestado</strong>
-                        <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalAtestado()" aria-label="Cancelar">
-                            <span class="material-symbols-rounded" aria-hidden="true">close</span>
-                        </button>
-                    </div>
-                    <div class="atestado-form-body">
-                        <div class="atestado-form-row">
-                            <div class="form-group">
-                                <label for="at-inicio">Data Início <span class="required" aria-hidden="true">*</span></label>
-                                <input id="at-inicio" type="date" class="form-input" [(ngModel)]="novoAtestado.dataInicio" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
-                            </div>
-                            <div class="form-group">
-                                <label for="at-fim">Data Fim <span class="required" aria-hidden="true">*</span></label>
-                                <input id="at-fim" type="date" class="form-input" [(ngModel)]="novoAtestado.dataFim" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="at-motivo">Motivo <span class="required" aria-hidden="true">*</span></label>
-                            <input id="at-motivo" type="text" class="form-input" [(ngModel)]="novoAtestado.motivo"
-                                placeholder="Ex: Consulta Médica, Internação Hospitalar..." maxlength="200" />
-                        </div>
-                        <div class="form-group">
-                            <label>Arquivo (PDF / Imagem)</label>
-                            <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
-                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
-                                {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo enviado ✔' : 'Selecionar Arquivo') }}
-                                <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;"
-                                    (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" />
-                            </label>
-                            @if (novoAtestado.arquivoUrl) {
-                            <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoAtestado.arquivoUrl!)"
-                                aria-label="Ver arquivo enviado">
-                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">open_in_new</span>
-                                Ver arquivo
-                            </button>
-                            }
-                        </div>
-                        @if (atestadoPreview) {
-                        <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; display:flex; gap:0.5rem; align-items:flex-start;" role="status">
-                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">info</span>
-                            @if (atestadoPreview.totalFaltasNoperiodo === 0) {
-                            <span>Nenhuma falta encontrada no período para justificar.</span>
-                            } @else {
-                            <span>Serão justificadas <strong>{{ atestadoPreview.totalFaltasNoperiodo }}</strong> falta(s) no período selecionado.</span>
-                            }
-                        </div>
-                        }
-                        @if (erroAtestado) {
-                        <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem;" role="alert">{{ erroAtestado }}</div>
-                        }
-                    </div>
-                    <div class="atestado-form-footer">
-                        <button class="btn btn-secondary btn-sm" (click)="fecharModalAtestado()">Cancelar</button>
-                        <button class="btn btn-primary btn-sm" (click)="salvarAtestado()"
-                            [disabled]="salvandoAtestado || !novoAtestado.dataInicio || !novoAtestado.dataFim || !novoAtestado.motivo">
-                            @if (salvandoAtestado) {
-                            <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando...
-                            } @else {
-                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> Salvar Atestado
-                            }
-                        </button>
-                    </div>
+                <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                    <button class="btn btn-outline-primary" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; width:180px; height:120px; border-radius:12px;" (click)="abrirModalGerenciamentoAtestados()">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px;">assignment_late</span>
+                        <span style="font-weight:600; font-size:14px; text-align:center;">Gerenciar<br>Atestados</span>
+                    </button>
+                    
+                    <button class="btn btn-outline-primary" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; width:180px; height:120px; border-radius:12px;" (click)="abrirModalGerenciamentoLaudos()">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px;">health_metrics</span>
+                        <span style="font-weight:600; font-size:14px; text-align:center;">Gerenciar<br>Laudos Médicos</span>
+                    </button>
                 </div>
-                }
-
-                <!-- Lista de atestados existentes -->
-                @if (carregandoAtestados) {
-                <div style="padding:1rem; text-align:center;" aria-busy="true">
-                    <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
-                    <p style="font-size:0.85rem; color:#6b7280;">Carregando atestados...</p>
-                </div>
-                } @else if (atestadosDoAluno.length === 0 && !modalAtestadoAberto) {
-                <p style="color:#6b7280; font-size:0.875rem; margin-top:0.5rem;">Nenhum atestado registrado.</p>
-                } @else if (atestadosDoAluno.length > 0) {
-                <table class="historico-table" style="margin-top:0.75rem;">
-                    <thead>
-                        <tr>
-                            <th>Período</th>
-                            <th>Motivo</th>
-                            <th style="text-align:center;">Faltas Justificadas</th>
-                            <th>Documento</th>
-                            @if (isAdmin) { <th>Ação</th> }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @for (at of atestadosDoAluno; track at.id) {
-                        <tr>
-                            <td style="white-space:nowrap;">{{ formatarData(at.dataInicio) }} – {{ formatarData(at.dataFim) }}</td>
-                            <td>{{ at.motivo }}</td>
-                            <td style="text-align:center;">
-                                <span class="badge badge-fj">{{ at.frequencias?.length ?? 0 }}</span>
-                            </td>
-                            <td>
-                                @if (at.arquivoUrl) {
-                                <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(at.arquivoUrl)"
-                                    aria-label="Ver documento do atestado">
-                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">description</span>
-                                    Ver
-                                </button>
-                                } @else { <span style="color:#9ca3af; font-size:0.8rem;">—</span> }
-                            </td>
-                            @if (isAdmin) {
-                            <td>
-                                <button class="btn btn-danger btn-sm" (click)="removerAtestado(at.id)"
-                                    aria-label="Remover atestado e reverter faltas justificadas">
-                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">delete</span>
-                                </button>
-                            </td>
-                            }
-                        </tr>
-                        }
-                    </tbody>
-                </table>
-                }
             </div>
 
             }
@@ -921,6 +805,264 @@
         display: block;
       ">
   </div>
+</div>
+}
+
+<!-- MODAL DE GERENCIAMENTO DE ATESTADOS -->
+@if (gerenciandoAtestados) {
+<div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-atestado-title"
+    (click)="fecharModalGerenciamentoAtestados($event)">
+    <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modal-atestado-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
+                <span class="material-symbols-rounded" style="color:var(--primary-color);">assignment_late</span>
+                Gerenciar Atestados de {{ alunoSelecionado?.nomeCompleto }}
+            </h3>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModalGerenciamentoAtestados()" aria-label="Fechar">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            @if (!modalAtestadoAberto) {
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
+                <button class="btn btn-primary" (click)="abrirModalAtestadoForm()">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;">add</span> Registrar Novo Atestado
+                </button>
+            </div>
+            } @else {
+            <div class="atestado-form-card" style="margin-bottom:1.5rem; border:2px solid var(--primary-color);">
+                <div class="atestado-form-header">
+                    <strong>Novo Atestado</strong>
+                    <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalAtestadoForm()" aria-label="Cancelar">
+                        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+                    </button>
+                </div>
+                <div class="atestado-form-body">
+                    <div class="atestado-form-row">
+                        <div class="form-group">
+                            <label for="at-inicio">Data Início <span class="required" aria-hidden="true">*</span></label>
+                            <input id="at-inicio" type="date" class="form-input" [(ngModel)]="novoAtestado.dataInicio" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
+                        </div>
+                        <div class="form-group">
+                            <label for="at-fim">Data Fim <span class="required" aria-hidden="true">*</span></label>
+                            <input id="at-fim" type="date" class="form-input" [(ngModel)]="novoAtestado.dataFim" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="at-motivo">Motivo <span class="required" aria-hidden="true">*</span></label>
+                        <input id="at-motivo" type="text" class="form-input" [(ngModel)]="novoAtestado.motivo" placeholder="Ex: Consulta Médica, Internação..." maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label>Arquivo (PDF / Imagem)</label>
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
+                            {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo anexado ✔' : 'Selecionar Arquivo') }}
+                            <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" />
+                        </label>
+                        @if (novoAtestado.arquivoUrl) {
+                        <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoAtestado.arquivoUrl!)" aria-label="Ver arquivo enviado">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">open_in_new</span> Ver arquivo
+                        </button>
+                        }
+                    </div>
+                    @if (atestadoPreview) {
+                    <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; display:flex; gap:0.5rem; align-items:flex-start;" role="status">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">info</span>
+                        @if (atestadoPreview.totalFaltasNoperiodo === 0) {
+                        <span>Nenhuma falta encontrada no período para justificar.</span>
+                        } @else {
+                        <span>Serão justificadas <strong>{{ atestadoPreview.totalFaltasNoperiodo }}</strong> falta(s) no período selecionado.</span>
+                        }
+                    </div>
+                    }
+                    @if (erroAtestado) {
+                    <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem;" role="alert">{{ erroAtestado }}</div>
+                    }
+                </div>
+                <div class="atestado-form-footer">
+                    <button class="btn btn-secondary btn-sm" (click)="fecharModalAtestadoForm()">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" (click)="salvarAtestado()" [disabled]="salvandoAtestado || !novoAtestado.dataInicio || !novoAtestado.dataFim || !novoAtestado.motivo">
+                        @if (salvandoAtestado) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
+                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> Salvar Atestado }
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (carregandoAtestados) {
+            <div style="padding:2rem; text-align:center;" aria-busy="true">
+                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
+                <p style="color:#6b7280;">Buscando atestados...</p>
+            </div>
+            } @else if (atestadosDoAluno.length === 0) {
+            <div style="text-align: center; padding: 2rem; border: 1px dashed #ccc; border-radius: 8px;">
+                <p style="color:#6b7280; font-size:0.95rem;">Nenhum atestado registrado para este aluno.</p>
+            </div>
+            } @else {
+            <table class="historico-table">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Motivo</th>
+                        <th style="text-align:center;">Faltas Justific.</th>
+                        <th>Documento</th>
+                        @if (isAdmin) { <th>Ação</th> }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (at of atestadosDoAluno; track at.id) {
+                    <tr>
+                        <td style="white-space:nowrap; font-weight: 500;">{{ formatarData(at.dataInicio) }} &nbsp;até&nbsp; {{ formatarData(at.dataFim) }}</td>
+                        <td>{{ at.motivo }}</td>
+                        <td style="text-align:center;">
+                            <span class="badge badge-fj">{{ at.frequencias?.length ?? 0 }}</span>
+                        </td>
+                        <td>
+                            @if (at.arquivoUrl) {
+                            <button class="btn btn-outline-primary btn-sm" (click)="abrirVisualizadorPdf(at.arquivoUrl)" aria-label="Ver documento">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span> PDF/IMG
+                            </button>
+                            } @else { <span style="color:#9ca3af;">—</span> }
+                        </td>
+                        @if (isAdmin) {
+                        <td>
+                            <button class="btn btn-danger btn-sm" (click)="removerAtestado(at.id)" aria-label="Remover atestado" title="Excluir e reverter faltas justificadas">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
+                            </button>
+                        </td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalGerenciamentoAtestados()">Voltar ao Perfil</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- MODAL DE GERENCIAMENTO DE LAUDOS -->
+@if (gerenciandoLaudos) {
+<div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-laudo-title"
+    (click)="fecharModalGerenciamentoLaudos($event)">
+    <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modal-laudo-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
+                <span class="material-symbols-rounded" style="color:var(--primary-color);">health_metrics</span>
+                Histórico de Laudos Médicos de {{ alunoSelecionado?.nomeCompleto }}
+            </h3>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModalGerenciamentoLaudos()" aria-label="Fechar">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            @if (!modalLaudoAberto) {
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
+                <button class="btn btn-primary" (click)="abrirModalLaudoForm()">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;">add</span> Anexar Novo Laudo
+                </button>
+            </div>
+            } @else {
+            <div class="atestado-form-card" style="margin-bottom:1.5rem; border:2px solid var(--primary-color);">
+                <div class="atestado-form-header">
+                    <strong>Novo Laudo Médico</strong>
+                    <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalLaudoForm()" aria-label="Cancelar">
+                        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+                    </button>
+                </div>
+                <div class="atestado-form-body">
+                    <div class="atestado-form-row">
+                        <div class="form-group">
+                            <label for="ld-emissao">Data de Emissão <span class="required" aria-hidden="true">*</span></label>
+                            <input id="ld-emissao" type="date" class="form-input" [(ngModel)]="novoLaudo.dataEmissao" [max]="hojeISO()" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ld-medico">Médico Resp. (Opcional)</label>
+                            <input id="ld-medico" type="text" class="form-input" [(ngModel)]="novoLaudo.medicoResponsavel" placeholder="Ex: Dr. José Silva - CRM 123" maxlength="100" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ld-descricao">Descrição / Detalhes (Opcional)</label>
+                        <input id="ld-descricao" type="text" class="form-input" [(ngModel)]="novoLaudo.descricao" placeholder="CID 10, grau de acometimento, etc..." maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label>Documento (PDF / Imagem) <span class="required" aria-hidden="true">*</span></label>
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
+                            {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado ✔' : 'Selecionar Arquivo') }}
+                            <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" />
+                        </label>
+                        @if (novoLaudo.arquivoUrl) {
+                        <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoLaudo.arquivoUrl!)" aria-label="Ver arquivo enviado">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">open_in_new</span> Ver arquivo
+                        </button>
+                        }
+                    </div>
+                    @if (erroLaudo) {
+                    <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem;" role="alert">{{ erroLaudo }}</div>
+                    }
+                </div>
+                <div class="atestado-form-footer">
+                    <button class="btn btn-secondary btn-sm" (click)="fecharModalLaudoForm()">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" (click)="salvarLaudo()" [disabled]="salvandoLaudo || !novoLaudo.dataEmissao || !novoLaudo.arquivoUrl">
+                        @if (salvandoLaudo) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
+                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> Salvar Laudo }
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (carregandoLaudos) {
+            <div style="padding:2rem; text-align:center;" aria-busy="true">
+                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
+                <p style="color:#6b7280;">Buscando laudos médicos...</p>
+            </div>
+            } @else if (laudosDoAluno.length === 0) {
+            <div style="text-align: center; padding: 2rem; border: 1px dashed #ccc; border-radius: 8px;">
+                <p style="color:#6b7280; font-size:0.95rem;">Nenhum laudo médico documentado.</p>
+            </div>
+            } @else {
+            <table class="historico-table">
+                <thead>
+                    <tr>
+                        <th>Emissão</th>
+                        <th>Médico Resp.</th>
+                        <th>Descrição</th>
+                        <th>Documento</th>
+                        @if (isAdmin) { <th>Ação</th> }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (ld of laudosDoAluno; track ld.id) {
+                    <tr>
+                        <td style="white-space:nowrap; font-weight: 500;">{{ formatarData(ld.dataEmissao) }}</td>
+                        <td>{{ ld.medicoResponsavel || '—' }}</td>
+                        <td>{{ ld.descricao || '—' }}</td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm" (click)="abrirVisualizadorPdf(ld.arquivoUrl)" aria-label="Ver Laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span> PDF/IMG
+                            </button>
+                        </td>
+                        @if (isAdmin) {
+                        <td>
+                            <button class="btn btn-danger btn-sm" (click)="removerLaudo(ld.id)" aria-label="Deletar Laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
+                            </button>
+                        </td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalGerenciamentoLaudos()">Voltar ao Perfil</button>
+        </div>
+    </div>
 </div>
 }
 

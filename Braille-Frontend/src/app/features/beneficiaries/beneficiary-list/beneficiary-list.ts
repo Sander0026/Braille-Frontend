@@ -16,6 +16,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
 import { FormsModule } from '@angular/forms';
 import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
+import { LaudosService, LaudoMedico, CriarLaudoDto } from '../../../core/services/laudos.service';
 
 
 @Directive({
@@ -114,14 +115,25 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   exportando = false;
 
   // ── Atestados ───────────────────────────────────────────────────
+  gerenciandoAtestados = false; // Modal dedicado
   atestadosDoAluno: Atestado[] = [];
   carregandoAtestados = false;
-  modalAtestadoAberto = false;
+  modalAtestadoAberto = false; // Form de criação
   salvandoAtestado = false;
   uploadingAtestado = false;
   erroAtestado = '';
   atestadoPreview: PreviewAtestado | null = null;
   novoAtestado: CriarAtestadoDto = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+
+  // ── Laudos Médicos ──────────────────────────────────────────────
+  gerenciandoLaudos = false; // Modal dedicado
+  laudosDoAluno: LaudoMedico[] = [];
+  carregandoLaudos = false;
+  modalLaudoAberto = false; // Form de criação
+  salvandoLaudo = false;
+  uploadingLaudo = false;
+  erroLaudo = '';
+  novoLaudo: CriarLaudoDto = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
 
   constructor(
     private beneficiariosService: BeneficiariosService,
@@ -133,7 +145,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private frequenciasService: FrequenciasService,
     private liveAnnouncer: LiveAnnouncer,
     private sanitizer: DomSanitizer,
-    private atestadosService: AtestadosService
+    private atestadosService: AtestadosService,
+    private laudosService: LaudosService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -747,7 +760,6 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
-        this.carregarAtestados();
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
@@ -960,8 +972,22 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     return `${dia}/${mes}/${ano}`;
   }
 
-  // ── Módulo Atestados ─────────────────────────────────────────────
-  abrirModalAtestado(): void {
+  // ── Módulo Atestados (Modal e CRUD) ──────────────────────────────
+  abrirModalGerenciamentoAtestados(): void {
+    if (!this.alunoSelecionado) return;
+    this.gerenciandoAtestados = true;
+    this.carregarAtestados();
+    this.cdr.detectChanges();
+  }
+
+  fecharModalGerenciamentoAtestados(event?: Event): void {
+    if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
+    this.gerenciandoAtestados = false;
+    this.fecharModalAtestadoForm();
+    this.cdr.detectChanges();
+  }
+
+  abrirModalAtestadoForm(): void {
     this.modalAtestadoAberto = true;
     this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
     this.atestadoPreview = null;
@@ -969,7 +995,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.cdr.detectChanges();
   }
 
-  fecharModalAtestado(): void {
+  fecharModalAtestadoForm(): void {
     this.modalAtestadoAberto = false;
     this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
     this.atestadoPreview = null;
@@ -1024,7 +1050,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.atestadosService.criar(this.alunoSelecionado.id, dto).subscribe({
       next: (res) => {
         this.salvandoAtestado = false;
-        this.fecharModalAtestado();
+        this.fecharModalAtestadoForm();
         this.toast.sucesso(`Atestado salvo! ${res.faltasJustificadas} falta(s) justificada(s).`);
         this.carregarAtestados();
         this.cdr.detectChanges();
@@ -1062,13 +1088,127 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!this.alunoSelecionado) return;
     this.carregandoAtestados = true;
     this.atestadosService.listar(this.alunoSelecionado.id).subscribe({
-      next: (lista) => {
+      next: (lista: Atestado[]) => {
         this.atestadosDoAluno = lista;
         this.carregandoAtestados = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.carregandoAtestados = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // ── Módulo Laudos Médicos (Modal e CRUD) ──────────────────────────────
+  abrirModalGerenciamentoLaudos(): void {
+    if (!this.alunoSelecionado) return;
+    this.gerenciandoLaudos = true;
+    this.carregarLaudos();
+    this.cdr.detectChanges();
+  }
+
+  fecharModalGerenciamentoLaudos(event?: Event): void {
+    if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
+    this.gerenciandoLaudos = false;
+    this.fecharModalLaudoForm();
+    this.cdr.detectChanges();
+  }
+
+  abrirModalLaudoForm(): void {
+    this.modalLaudoAberto = true;
+    this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
+    this.erroLaudo = '';
+    this.cdr.detectChanges();
+  }
+
+  fecharModalLaudoForm(): void {
+    this.modalLaudoAberto = false;
+    this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
+    this.erroLaudo = '';
+    this.cdr.detectChanges();
+  }
+
+  uploadArquivoLaudo(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    this.uploadingLaudo = true;
+    this.cdr.detectChanges();
+
+    const ehPdf = file.type === 'application/pdf';
+    const upload$ = ehPdf ? this.beneficiariosService.uploadPdf(file, 'laudo') : this.beneficiariosService.uploadImagem(file);
+
+    upload$.subscribe({
+      next: (res: any) => {
+        this.novoLaudo.arquivoUrl = res.url ?? res.secure_url ?? res;
+        this.uploadingLaudo = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.erroLaudo = 'Erro ao enviar arquivo. Tente novamente.';
+        this.uploadingLaudo = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  salvarLaudo(): void {
+    if (!this.alunoSelecionado || this.salvandoLaudo) return;
+    const dto = this.novoLaudo;
+    if (!dto.dataEmissao || !dto.arquivoUrl) {
+      this.erroLaudo = 'Preencha a Data de Emissão e anexe o documento.';
+      return;
+    }
+    this.salvandoLaudo = true;
+    this.erroLaudo = '';
+    this.laudosService.criar(this.alunoSelecionado.id, dto).subscribe({
+      next: () => {
+        this.salvandoLaudo = false;
+        this.fecharModalLaudoForm();
+        this.toast.sucesso('Laudo médico salvo com sucesso!');
+        this.carregarLaudos();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.salvandoLaudo = false;
+        this.erroLaudo = err?.error?.message ?? 'Erro ao salvar laudo.';
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  removerLaudo(id: string): void {
+    this.confirmDialog.confirmar({
+      titulo: 'Remover Laudo Médico',
+      mensagem: 'Tem certeza que deseja excluir este laudo? Esta ação não pode ser desfeita.',
+      textoBotaoConfirmar: 'Remover',
+      tipo: 'danger'
+    }).then((confirmado: boolean) => {
+      if (!confirmado) return;
+      this.laudosService.remover(id).subscribe({
+        next: () => {
+          this.toast.sucesso('Laudo médico removido.');
+          this.carregarLaudos();
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          this.toast.erro(err?.error?.message ?? 'Erro ao remover laudo.');
+        }
+      });
+    });
+  }
+
+  carregarLaudos(): void {
+    if (!this.alunoSelecionado) return;
+    this.carregandoLaudos = true;
+    this.laudosService.listarPorAluno(this.alunoSelecionado.id).subscribe({
+      next: (lista: LaudoMedico[]) => {
+        this.laudosDoAluno = lista;
+        this.carregandoLaudos = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoLaudos = false;
         this.cdr.detectChanges();
       }
     });
