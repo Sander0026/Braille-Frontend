@@ -510,98 +510,9 @@
                     <p><strong>Precisa de acompanhante?</strong> {{ alunoSelecionado.precisaAcompanhante ? 'Sim' : 'Não'
                         }}</p>
 
-                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
-                        <h5 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #6b7280;">Documento Médico (Laudo)
-                        </h5>
 
-                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                            @if (alunoSelecionado.laudoUrl) {
-                            <!-- Botão inteligente: PDF → pdf-viewer / Imagem → modal de imagem -->
-                            @if (tipoDocumento(alunoSelecionado.laudoUrl) === 'pdf') {
-                            <button class="btn btn-primary btn-sm"
-                                (click)="abrirVisualizadorPdf(alunoSelecionado.laudoUrl)"
-                                title="Visualizar laudo em formato PDF">
-                                <span class="material-symbols-rounded"
-                                    style="font-size:16px;margin-right:6px;vertical-align:middle;">picture_as_pdf</span>
-                                Ver Laudo (PDF)
-                            </button>
-                            } @else {
-                            <button class="btn btn-primary btn-sm"
-                                (click)="abrirModalImagem(alunoSelecionado.laudoUrl)"
-                                title="Visualizar imagem do laudo">
-                                <span class="material-symbols-rounded"
-                                    style="font-size:16px;margin-right:6px;vertical-align:middle;">image</span>
-                                Ver Laudo (Imagem)
-                            </button>
-                            }
-
-                            @if (abaAtiva === 'ativos') {
-                            <button class="btn btn-danger btn-sm" (click)="excluirDocumento('laudoUrl')"
-                                [disabled]="uploadingImage || deletandoImage">
-                                <span class="material-symbols-rounded"
-                                    style="font-size: 16px; margin-right: 6px; vertical-align: middle;">delete</span>
-                                Excluir Laudo
-                            </button>
-                            }
-                            } @else if (abaAtiva === 'ativos') {
-                            <label class="btn btn-secondary btn-sm" style="cursor: pointer;"
-                                [class.opacity-50]="uploadingImage || deletandoImage">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                    stroke-linejoin="round" style="margin-right: 6px;">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                    <polyline points="17 8 12 3 7 8"></polyline>
-                                    <line x1="12" y1="3" x2="12" y2="15"></line>
-                                </svg>
-                                Fazer Upload do Laudo
-                                <input type="file" (change)="processarUploadArquivo($event, 'laudoUrl')"
-                                    accept=".jpg,.jpeg,.png,.pdf" style="display: none;"
-                                    [disabled]="uploadingImage || deletandoImage">
-                            </label>
-                            }
-                        </div>
-
-                        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid #e5e7eb;">
-                            <h5 style="margin-bottom: 0.5rem; font-size: 0.9rem; color: #6b7280;">Termo de Consentimento LGPD</h5>
-
-                            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                                @if (alunoSelecionado.termoLgpdUrl) {
-                                <button class="btn btn-primary btn-sm" (click)="abrirVisualizadorPdf(alunoSelecionado.termoLgpdUrl)"
-                                    title="Clique para visualizar o Termo LGPD no navegador">
-                                    <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 6px;">
-                                        visibility
-                                    </span>
-                                    Visualizar Termo
-                                </button>
-
-                                @if (abaAtiva === 'ativos') {
-                                <button class="btn btn-danger btn-sm" (click)="excluirDocumento('termoLgpdUrl')"
-                                    [disabled]="uploadingImage || deletandoImage">
-                                    <span class="material-symbols-rounded"
-                                        style="font-size: 16px; margin-right: 6px; vertical-align: middle;">delete</span>
-                                    Excluir Termo
-                                </button>
-                                }
-                                } @else if (abaAtiva === 'ativos') {
-                                <label class="btn btn-secondary btn-sm" style="cursor: pointer;"
-                                    [class.opacity-50]="uploadingImage || deletandoImage">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round" style="margin-right: 6px;">
-                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                        <polyline points="17 8 12 3 7 8"></polyline>
-                                        <line x1="12" y1="3" x2="12" y2="15"></line>
-                                    </svg>
-                                    Fazer Upload do Termo
-                                    <input type="file" (change)="processarUploadArquivo($event, 'termoLgpdUrl')"
-                                        accept=".pdf" style="display: none;"
-                                        [disabled]="uploadingImage || deletandoImage">
-                                </label>
-                                }
-                            </div>
-                        </div>
-                    </div>
                 </div>
+
 
                 <!-- Visualizador PDF movido para overlay de nível raiz (veja abaixo do modal de perfil) -->
 
