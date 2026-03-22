@@ -108,12 +108,13 @@ $transition: 250ms ease;
 .hero-bg {
     position: absolute;
     inset: 0; // equivalente a top/right/bottom/left: 0
+    background-image: url('/fachada_ilbes.png'); // Fallback estático
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     z-index: 0;
     opacity: 1;
-    // Quando nenhuma foto for configurada o background é transparent (= preto do .hero)
+    // Quando nenhuma foto for configurada dinamicamente, esta imagem será exibida.
 }
 
 .hero-inner {
