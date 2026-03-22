@@ -52,23 +52,26 @@ export class Home implements OnInit {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target); // Animar apenas uma vez
+          observer.unobserve(entry.target);
         }
       });
-    }, {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.15 // Dispara quando 15% do elemento estiver visível
-    });
+    }, { root: null, rootMargin: '0px', threshold: 0.15 });
 
-    // Pega todos os elementos com a classe
-    setTimeout(() => {
-      const elements = document.querySelectorAll('.animate-on-scroll');
-      elements.forEach(el => observer.observe(el));
-    }, 100);
-  }
+    // Observa os elementos que já existem e também os que forem chegando via API
+    const observeElements = () => {
+      const elements = document.querySelectorAll('.animate-on-scroll:not(.is-observed)');
+      elements.forEach(el => {
+        el.classList.add('is-observed');
+        observer.observe(el);
+      });
+    };
 
-  carregarConteudoCMS() {
+    // Chamada inicial e observador de mutações do Angular
+    setTimeout(observeElements, 100);
+
+    const domObserver = new MutationObserver(() => observeElements());
+    domObserver.observe(document.body, { childList: true, subtree: true });
+  }  carregarConteudoCMS() {
     this.siteConfig.getSecao('hero').subscribe({
       next: (dados) => this.heroConfig = dados || {},
       error: (e) => console.error('Erro CMS hero', e)
