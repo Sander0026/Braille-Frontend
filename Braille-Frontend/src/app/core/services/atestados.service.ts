@@ -27,6 +27,11 @@ export interface CriarAtestadoDto {
   arquivoUrl?: string;
 }
 
+export interface AtualizarAtestadoDto {
+  motivo?: string;
+  arquivoUrl?: string;
+}
+
 export interface ResultadoCriacaoAtestado {
   atestado: Atestado;
   faltasJustificadas: number;
@@ -64,5 +69,9 @@ export class AtestadosService {
 
   remover(id: string): Observable<{ mensagem: string }> {
     return this.http.delete<{ mensagem: string }>(`${this.atestadosUrl}/${id}`);
+  }
+
+  atualizar(id: string, dto: AtualizarAtestadoDto): Observable<Atestado> {
+    return this.http.patch<Atestado>(`${this.atestadosUrl}/${id}`, dto);
   }
 }
