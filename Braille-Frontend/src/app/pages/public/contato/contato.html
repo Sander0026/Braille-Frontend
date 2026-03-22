@@ -47,6 +47,38 @@
                 </div>
             </div>
 
+            <!-- Redes Sociais -->
+            @if (config?.instagram || config?.facebook || config?.youtube || config?.linkedin) {
+            <div class="info-item info-sociais">
+                <span class="info-icon" aria-hidden="true">🌐</span>
+                <div>
+                    <strong>Redes Sociais</strong>
+                    <div class="social-links-grid">
+                        @if (config?.instagram) {
+                        <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram" class="social-badge">
+                            📷 Instagram
+                        </a>
+                        }
+                        @if (config?.facebook) {
+                        <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook" class="social-badge">
+                            👥 Facebook
+                        </a>
+                        }
+                        @if (config?.youtube) {
+                        <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube" class="social-badge">
+                            ▶️ YouTube
+                        </a>
+                        }
+                        @if (config?.linkedin) {
+                        <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-badge">
+                            💼 LinkedIn
+                        </a>
+                        }
+                    </div>
+                </div>
+            </div>
+            }
+
             <div class="info-aviso" role="note">
                 <p>
                     <strong>ℹ️ Como funciona?</strong><br>
