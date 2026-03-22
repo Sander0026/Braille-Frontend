@@ -612,6 +612,19 @@
                         <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px;">health_metrics</span>
                         <span style="font-weight:600; font-size:14px; text-align:center;">Gerenciar<br>Laudos Médicos</span>
                     </button>
+
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; width:180px; height:120px; border-radius:12px; border: 1px solid #e5e7eb;">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px; color: #10b981;">verified_user</span>
+                        <span style="font-weight:600; font-size:14px; text-align:center;">Termo LGPD</span>
+                        @if (alunoSelecionado.termoLgpdUrl) {
+                            <div style="display: flex; gap: 0.5rem; margin-top: 8px;">
+                                <button class="btn btn-outline-primary btn-sm" (click)="abrirVisualizadorPdf(alunoSelecionado.termoLgpdUrl)" title="Visualizar">Ver</button>
+                                <button class="btn btn-outline-secondary btn-sm" (click)="abrirModalLgpd()" title="Editar / Substituir Arquivo">Editar</button>
+                            </div>
+                        } @else {
+                            <button class="btn btn-primary btn-sm" style="margin-top: 8px;" (click)="abrirModalLgpd()">Anexar Novo</button>
+                        }
+                    </div>
                 </div>
             </div>
 
@@ -743,7 +756,7 @@
             } @else {
             <div class="atestado-form-card" style="margin-bottom:1.5rem; border:2px solid var(--primary-color);">
                 <div class="atestado-form-header">
-                    <strong>Novo Atestado</strong>
+                    <strong>{{ atestadoEmEdicao ? 'Editar Atestado' : 'Novo Atestado' }}</strong>
                     <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalAtestadoForm()" aria-label="Cancelar">
                         <span class="material-symbols-rounded" aria-hidden="true">close</span>
                     </button>
@@ -752,13 +765,18 @@
                     <div class="atestado-form-row">
                         <div class="form-group">
                             <label for="at-inicio">Data Início <span class="required" aria-hidden="true">*</span></label>
-                            <input id="at-inicio" type="date" class="form-input" [(ngModel)]="novoAtestado.dataInicio" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
+                            <input id="at-inicio" type="date" class="form-input" [(ngModel)]="novoAtestado.dataInicio" [max]="hojeISO()" (change)="buscarPreviewAtestado()" [disabled]="!!atestadoEmEdicao" />
                         </div>
                         <div class="form-group">
                             <label for="at-fim">Data Fim <span class="required" aria-hidden="true">*</span></label>
-                            <input id="at-fim" type="date" class="form-input" [(ngModel)]="novoAtestado.dataFim" [max]="hojeISO()" (change)="buscarPreviewAtestado()" />
+                            <input id="at-fim" type="date" class="form-input" [(ngModel)]="novoAtestado.dataFim" [max]="hojeISO()" (change)="buscarPreviewAtestado()" [disabled]="!!atestadoEmEdicao" />
                         </div>
                     </div>
+                    @if (atestadoEmEdicao) {
+                    <div style="background:#fffbeb; border:1px solid #fde68a; color:#b45309; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; margin-bottom: 1rem;">
+                        <strong>Nota:</strong> Não é possível editar as datas de um atestado já salvo, pois as faltas já foram justificadas no diário de classe. Se o período estiver errado, é recomendado excluir este atestado e registrar um novo.
+                    </div>
+                    }
                     <div class="form-group">
                         <label for="at-motivo">Motivo <span class="required" aria-hidden="true">*</span></label>
                         <input id="at-motivo" type="text" class="form-input" [(ngModel)]="novoAtestado.motivo" placeholder="Ex: Consulta Médica, Internação..." maxlength="200" />
@@ -792,9 +810,9 @@
                 </div>
                 <div class="atestado-form-footer">
                     <button class="btn btn-secondary btn-sm" (click)="fecharModalAtestadoForm()">Cancelar</button>
-                    <button class="btn btn-primary btn-sm" (click)="salvarAtestado()" [disabled]="salvandoAtestado || !novoAtestado.dataInicio || !novoAtestado.dataFim || !novoAtestado.motivo">
+                    <button class="btn btn-primary btn-sm" (click)="salvarAtestado()" [disabled]="salvandoAtestado || (!atestadoEmEdicao && (!novoAtestado.dataInicio || !novoAtestado.dataFim)) || !novoAtestado.motivo">
                         @if (salvandoAtestado) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
-                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> Salvar Atestado }
+                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> {{ atestadoEmEdicao ? 'Salvar Edição' : 'Salvar Atestado' }} }
                     </button>
                 </div>
             </div>
@@ -837,9 +855,14 @@
                         </td>
                         @if (isAdmin) {
                         <td>
-                            <button class="btn btn-danger btn-sm" (click)="removerAtestado(at.id)" aria-label="Remover atestado" title="Excluir e reverter faltas justificadas">
-                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
-                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary btn-sm" (click)="abrirModalAtestadoForm(at)" aria-label="Editar atestado" title="Editar atestado">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">edit</span>
+                                </button>
+                                <button class="btn btn-danger btn-sm" (click)="removerAtestado(at.id)" aria-label="Remover atestado" title="Excluir e reverter faltas justificadas">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
+                                </button>
+                            </div>
                         </td>
                         }
                     </tr>
@@ -879,7 +902,7 @@
             } @else {
             <div class="atestado-form-card" style="margin-bottom:1.5rem; border:2px solid var(--primary-color);">
                 <div class="atestado-form-header">
-                    <strong>Novo Laudo Médico</strong>
+                    <strong>{{ laudoEmEdicao ? 'Editar Laudo Médico' : 'Novo Laudo Médico' }}</strong>
                     <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalLaudoForm()" aria-label="Cancelar">
                         <span class="material-symbols-rounded" aria-hidden="true">close</span>
                     </button>
@@ -920,7 +943,7 @@
                     <button class="btn btn-secondary btn-sm" (click)="fecharModalLaudoForm()">Cancelar</button>
                     <button class="btn btn-primary btn-sm" (click)="salvarLaudo()" [disabled]="salvandoLaudo || !novoLaudo.dataEmissao || !novoLaudo.arquivoUrl">
                         @if (salvandoLaudo) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
-                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> Salvar Laudo }
+                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> {{ laudoEmEdicao ? 'Salvar Edição' : 'Salvar Laudo' }} }
                     </button>
                 </div>
             </div>
@@ -959,9 +982,14 @@
                         </td>
                         @if (isAdmin) {
                         <td>
-                            <button class="btn btn-danger btn-sm" (click)="removerLaudo(ld.id)" aria-label="Deletar Laudo">
-                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
-                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary btn-sm" (click)="abrirModalLaudoForm(ld)" aria-label="Editar laudo" title="Editar laudo">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">edit</span>
+                                </button>
+                                <button class="btn btn-danger btn-sm" (click)="removerLaudo(ld.id)" aria-label="Deletar Laudo">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
+                                </button>
+                            </div>
                         </td>
                         }
                     </tr>
@@ -1366,6 +1394,59 @@
     </div>
 
   </div><!-- /.ficha-modal-card -->
+</div>
+}
+
+<!-- ── Modal para Anexar/Editar Termo LGPD ── -->
+@if (modalLgpdAberto) {
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-label="Termo LGPD" (click)="fecharModalLgpd()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="z-index: 100000;">
+    <div class="modal modal--large" (click)="$event.stopPropagation()" style="max-width: 500px; width: 95%;" tabindex="-1">
+        <div class="modal-header">
+            <h2 style="color: #10b981; display:flex; align-items:center; gap:0.5rem;">
+                <span class="material-symbols-rounded" aria-hidden="true">verified_user</span>
+                Termo LGPD
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModalLgpd()" aria-label="Fechar">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem;">
+            <p style="font-size: 0.95rem; margin-bottom: 1.5rem; color:#4b5563;">Faça o upload do documento assinado (PDF ou Imagem).</p>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Selecionar Arquivo <span class="required" aria-hidden="true">*</span></label>
+                <div style="margin-top:0.5rem;">
+                    <label class="btn btn-outline-primary" style="cursor:pointer; display:inline-flex; width:100%; justify-content:center; align-items:center; gap:8px;">
+                        <span class="material-symbols-rounded" aria-hidden="true">upload_file</span>
+                        {{ uploadingLgpd ? 'Enviando...' : (novoLgpdUrl ? 'Substituir Arquivo' : 'Escolher Arquivo...') }}
+                        <input type="file" accept="image/jpeg,image/png,application/pdf" style="display:none;" (change)="uploadArquivoLgpd($event)" [disabled]="uploadingLgpd">
+                    </label>
+                </div>
+                
+                @if (novoLgpdUrl && !uploadingLgpd) {
+                <div style="background:#ecfdf5; border:1px solid #10b981; color:#065f46; padding:0.75rem; border-radius:0.5rem; font-size:0.875rem; display:flex; gap:0.5rem; align-items:flex-start; margin-top:1rem;">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">check_circle</span>
+                    <span>Arquivo recebido e pronto para ser salvo!</span>
+                </div>
+                }
+            </div>
+
+            @if (erroLgpd) {
+                <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; margin-bottom:1rem;" role="alert">
+                    {{ erroLgpd }}
+                </div>
+            }
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+            <button class="btn btn-secondary" (click)="fecharModalLgpd()">Cancelar</button>
+            <button class="btn btn-primary" (click)="salvarLgpd()" [disabled]="salvandoLgpd || !novoLgpdUrl || uploadingLgpd" style="background-color: #10b981; border: none; color: white;">
+                @if (salvandoLgpd) {
+                    <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 14px;">sync</span>
+                    Salvando...
+                } @else {
+                    Salvar Termo LGPD
+                }
+            </button>
+        </div>
+    </div>
 </div>
 }
 

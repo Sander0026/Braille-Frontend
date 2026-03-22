@@ -37,6 +37,10 @@ export class LaudosService {
     return this.http.post<LaudoMedico>(`${this.apiUrl}/alunos/${alunoId}/laudos`, dto);
   }
 
+  atualizar(id: string, dto: Partial<CriarLaudoDto>): Observable<LaudoMedico> {
+    return this.http.patch<LaudoMedico>(`${this.apiUrl}/laudos/${id}`, dto);
+  }
+
   remover(id: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/laudos/${id}`);
   }
