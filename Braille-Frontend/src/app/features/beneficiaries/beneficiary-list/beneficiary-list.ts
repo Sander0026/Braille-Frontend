@@ -636,14 +636,14 @@ export class BeneficiaryList implements OnInit, OnDestroy {
             type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           });
           const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
           const date = new Date().toISOString().slice(0, 10);
           const status = this.abaAtiva === 'inativos' ? 'Inativos' : 'Ativos';
-          a.href = url;
-          a.download = `Alunos_${status}_${date}.xlsx`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          const nomeArquivo = `Alunos_${status}_${date}.xlsx`;
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', nomeArquivo);
+          link.click();
           URL.revokeObjectURL(url);
           this.exportando = false;
           this.cdr.markForCheck();

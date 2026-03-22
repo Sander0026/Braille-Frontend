@@ -68,52 +68,8 @@
         <form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
             <div class="form-header">
                 <h2>Configurações Globais</h2>
-                <p>Cores e marcação principal do portal aberto.</p>
             </div>
-
-            <div class="form-section">
-                <div class="form-row form-row-2">
-                    <div class="form-group">
-                        <label class="form-label" for="corPrimaria">Cor Primária (HEX)</label>
-                        <div class="color-picker-wrap">
-                            <input type="color" id="corPrimaria-color" class="form-input-color"
-                                formControlName="corPrimaria" aria-label="Seletor de cor primária">
-                            <input type="text" id="corPrimaria" class="form-input" formControlName="corPrimaria"
-                                placeholder="#f5c800">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Logo do Instituto (Opcional)</label>
-
-                        <!-- Preview da logo atual -->
-                        @if (logoPreview) {
-                        <div class="logo-preview-wrapper">
-                            <img [src]="logoPreview" alt="Preview da logo" class="logo-preview-img">
-                            <button type="button" class="btn btn-secondary btn-sm btn-remover-logo"
-                                (click)="removerLogo()">
-                                <span class="material-symbols-rounded">delete</span> Remover
-                            </button>
-                        </div>
-                        }
-
-                        <!-- Upload -->
-                        <label class="upload-label" [class.uploading]="uploadandoLogo">
-                            <input type="file" accept="image/*" (change)="onLogoChange($event)"
-                                [disabled]="uploadandoLogo" style="display:none" #logoInput>
-                            <span class="material-symbols-rounded">{{ uploadandoLogo ? 'cloud_sync' : 'upload' }}</span>
-                            {{ uploadandoLogo ? 'Enviando...' : (logoPreview ? 'Substituir imagem' : 'Escolher imagem da
-                            logo') }}
-                            <!-- Trigger click -->
-                            <button type="button" class="upload-trigger" (click)="logoInput.click()"
-                                [disabled]="uploadandoLogo" aria-label="Selecionar arquivo de logo"></button>
-                        </label>
-                        <p class="form-hint">PNG ou SVG com fundo transparente. Recomendado: 200x60px.</p>
-                        <!-- Campo oculto que guarda a URL para o formGroup -->
-                        <input type="hidden" formControlName="logoUrl">
-                    </div>
-                </div>
-            </div>
-
+            
             <!-- Foto da Fachada -->
             <div class="form-section">
                 <h3>Foto da Fachada (Fundo do Hero)</h3>
