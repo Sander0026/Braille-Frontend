@@ -6,6 +6,7 @@ import { environment } from '../../../../environments/environment';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
+import { ApoiadoresService, Apoiador } from '../../admin/apoiadores/apoiadores.service';
 
 @Component({
   selector: 'app-home',
@@ -28,11 +29,14 @@ export class Home implements OnInit {
   heroConfig: any = {};
   missaoConfig: any = {};
   fachadaUrl: string = '';
+  parceiros: Apoiador[] = [];
+  carregandoParceiros = false;
 
   constructor(
     private http: HttpClient,
     private siteConfig: SiteConfigService,
     private cdr: ChangeDetectorRef,
+    private apoiadoresService: ApoiadoresService
   ) { }
 
   ngOnInit() {
@@ -71,7 +75,8 @@ export class Home implements OnInit {
 
     const domObserver = new MutationObserver(() => observeElements());
     domObserver.observe(document.body, { childList: true, subtree: true });
-  }  carregarConteudoCMS() {
+  }
+  carregarConteudoCMS() {
     this.siteConfig.getSecao('hero').subscribe({
       next: (dados) => this.heroConfig = dados || {},
       error: (e) => console.error('Erro CMS hero', e)
@@ -103,6 +108,24 @@ export class Home implements OnInit {
         }
       },
       error: (e) => console.error('Erro CMS faq', e)
+    });
+
+    this.carregarParceiros();
+  }
+
+  carregarParceiros() {
+    this.carregandoParceiros = true;
+    this.apoiadoresService.buscarPublicos().subscribe({
+      next: (dados: Apoiador[]) => {
+        this.parceiros = dados;
+        this.carregandoParceiros = false;
+        this.cdr.detectChanges();
+      },
+      error: (e: any) => {
+        console.error('Erro ao carregar parceiros públicos na home', e);
+        this.carregandoParceiros = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 

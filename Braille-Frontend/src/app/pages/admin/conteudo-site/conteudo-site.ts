@@ -644,7 +644,22 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
         this.formConfig.patchValue({ fachadaUrl: res.url });
         this.fachadaPreview = res.url;
         this.uploadandoFachada = false;
-        this.mensagemSucesso = 'Foto da fachada enviada! Clique em "Salvar Configurações" para aplicar.';
+
+        // Auto-salvar imediatamente após o upload para refletir no site público sem etapa manual
+        const values = this.formConfig.value;
+        const array = Object.keys(values).map(k => ({ chave: k, valor: values[k] ?? '' }));
+        this.siteConfig.salvarConfigs(array).subscribe({
+          next: () => {
+            this.mensagemSucesso = '✅ Foto da fachada salva e publicada com sucesso!';
+            this.siteConfig.aplicarCorPrimaria(values.corPrimaria);
+            this.cdr.detectChanges();
+            setTimeout(() => this.siteConfig.carregarConfigs().subscribe(), 0);
+          },
+          error: () => {
+            this.mensagemErro = 'Foto enviada, mas falha ao salvar. Clique em "Salvar Configurações" manualmente.';
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: () => {
         this.uploadandoFachada = false;
@@ -669,6 +684,21 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     this.fachadaPreview = null;
     this.formConfig.patchValue({ fachadaUrl: '' });
     this.fachadaParaExcluir = false;
+
+    // Auto-salvar para refletir imediatamente no site público
+    const values = this.formConfig.value;
+    const array = Object.keys(values).map(k => ({ chave: k, valor: values[k] ?? '' }));
+    this.siteConfig.salvarConfigs(array).subscribe({
+      next: () => {
+        this.mensagemSucesso = '🗑️ Foto da fachada removida e publicada com sucesso!';
+        this.cdr.detectChanges();
+        setTimeout(() => this.siteConfig.carregarConfigs().subscribe(), 0);
+      },
+      error: () => {
+        this.mensagemErro = 'Foto removida localmente, mas falha ao salvar. Clique em "Salvar Configurações" manualmente.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   salvarOficinas() {

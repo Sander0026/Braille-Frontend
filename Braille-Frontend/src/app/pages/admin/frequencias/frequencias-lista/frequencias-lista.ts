@@ -230,7 +230,6 @@ export class FrequenciasLista implements OnInit {
 
     this.salvandoTudo = true;
     this.feedbackSalvo = 'Salvando Lote de Frequências...';
-    this.cdr.detectChanges();
 
     const payloadAlunos = this.alunosNaChamada.map(aluno => {
       aluno.salvando = true; // Feedback individual
@@ -259,12 +258,11 @@ export class FrequenciasLista implements OnInit {
           });
 
           this.feedbackSalvo = 'Chamada em Lote salva com sucesso!';
-          this.cdr.detectChanges();
 
           // Recarrega os alunos para atualizar as UUIDs das frequências salvas no banco
           this.carregarChamada();
 
-          setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 5000);
+          setTimeout(() => { this.feedbackSalvo = ''; this.cdr.markForCheck(); }, 5000);
         },
         error: (err) => {
           this.salvandoTudo = false;

@@ -1,0 +1,311 @@
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Apoiadores e Parceiros</h1>
+        <p class="page-subtitle">Gerencie as pessoas, empresas e ONGs que apoiam a instituição.</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" (click)="novoApoiador()">
+            <span class="material-symbols-rounded">add</span>
+            Novo Apoiador
+        </button>
+    </div>
+</div>
+
+<div class="filter-bar">
+    <div class="filter-search">
+        <input type="text" class="form-input" placeholder="Buscar por Nome..." [formControl]="searchControl">
+    </div>
+    <select class="form-select" [formControl]="tipoControl" style="width: auto;">
+        <option value="">Todos os Tipos</option>
+        <option value="EMPRESA">Empresas</option>
+        <option value="VOLUNTARIO">Voluntários</option>
+        <option value="ONG">ONGs</option>
+        <option value="IMPRENSA">Imprensa</option>
+        <option value="PROFISSIONAL_LIBERAL">Profissional Liberal</option>
+    </select>
+</div>
+
+@if (carregando) {
+<div class="empty-state text-center" role="status" aria-live="polite" aria-busy="true">
+    <div class="loading-spinner mb-3" aria-hidden="true" style="width: 2rem; height: 2rem;"></div>
+    <p>Carregando apoiadores...</p>
+</div>
+} @else {
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Nome / Razão Social</th>
+                <th>Tipo</th>
+                <th>Status</th>
+                <th>Contato Principal</th>
+                <th>Data de Cadastro</th>
+                <th class="actions-col">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+                        @for (apoiador of apoiadores; track apoiador.id) {
+                        <tr>
+                            <td class="fw-medium">{{ apoiador.nomeRazaoSocial }}</td>
+                            <td>
+                                <span class="badge" [ngClass]="{
+                                    'badge-info': apoiador.tipo === 'EMPRESA',
+                                    'badge-primary': apoiador.tipo === 'PROFISSIONAL_LIBERAL',
+                                    'badge-warning': apoiador.tipo === 'ONG' || apoiador.tipo === 'VOLUNTARIO' || apoiador.tipo === 'IMPRENSA'
+                                }">
+                                    {{ apoiador.tipo.replace('_', ' ') }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-indicator" [class.active]="apoiador.ativo"></span>
+                                {{ apoiador.ativo ? 'Ativo' : 'Inativo' }}
+                            </td>
+                            <td>
+                                @if (apoiador.telefone) { {{ apoiador.telefone }} }
+                                @else if (apoiador.email) { {{ apoiador.email }} }
+                                @else { Não informado }
+                            </td>
+                            <td>{{ apoiador.criadoEm | date:'dd/MM/yyyy' }}</td>
+                            <td class="acoes-cell">
+                                <button class="btn btn-sm btn-ghost" (click)="editarApoiador(apoiador.id)"
+                                    [attr.aria-label]="'Editar apoiador ' + apoiador.nomeRazaoSocial">
+                                    Editar
+                                </button>
+                                <button class="btn btn-sm btn-ghost" (click)="verPerfil(apoiador.id)"
+                                    [attr.aria-label]="'Ver detalhes de ' + apoiador.nomeRazaoSocial">
+                                    Ver
+                                </button>
+                            </td>
+                        </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="6" class="text-center empty-state">
+                                    Nenhum apoiador encontrado no sistema.
+                                </td>
+                            </tr>
+                        }
+        </tbody>
+    </table>
+</div>
+}
+
+@if (modalAberto) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalApoiadorTitulo"
+    (click)="fecharModal()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modalApoiadorTitulo">Perfil do Apoiador</h2>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar janela de perfil">×</button>
+        </div>
+
+        <div class="modal-body profile-body" tabindex="0">
+            @if (carregandoDetalhes) {
+            <div class="loading-container p-4 text-center">
+                <div class="loading-spinner mb-3" aria-hidden="true" style="width: 2rem; height: 2rem;"></div>
+                <p>Buscando ficha completa...</p>
+            </div>
+            } @else if (apoiadorVisualizado) {
+            <div class="profile-header">
+                <div class="avatar-wrapper profile-avatar" style="width: 120px; height: 150px; overflow: hidden; border-radius: 8px; border: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: center; background: #f9fafb;">
+                    @if (apoiadorVisualizado.logoUrl) {
+                        <img [src]="apoiadorVisualizado.logoUrl" alt="Logo de {{ apoiadorVisualizado.nomeFantasia || apoiadorVisualizado.nomeRazaoSocial }}" loading="lazy" style="width: 100%; height: 100%; object-fit: cover;" />
+                    } @else {
+                        <span class="material-symbols-rounded" style="font-size: 3.5rem; color: #9ca3af;" aria-hidden="true">
+                            {{ apoiadorVisualizado.tipo === 'EMPRESA' ? 'domain' : (apoiadorVisualizado.tipo === 'ONG' ? 'volunteer_activism' : 'person') }}
+                        </span>
+                    }
+                </div>
+
+                <div class="profile-title">
+                    <h3>{{ apoiadorVisualizado.nomeFantasia || apoiadorVisualizado.nomeRazaoSocial }}</h3>
+                    <div class="profile-badges" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <span class="badge" [class.badge-primary]="apoiadorVisualizado.tipo === 'EMPRESA'"
+                            [class.badge-info]="apoiadorVisualizado.tipo === 'PROFISSIONAL_LIBERAL'"
+                            [class.badge-neutral]="apoiadorVisualizado.tipo === 'ONG' || apoiadorVisualizado.tipo === 'VOLUNTARIO' || apoiadorVisualizado.tipo === 'IMPRENSA'">
+                            {{ apoiadorVisualizado.tipo.replace('_', ' ') }}
+                        </span>
+                        @if (apoiadorVisualizado.ativo) {
+                            <span class="badge badge-success">Ativo</span>
+                        } @else {
+                            <span class="badge badge-danger">Inativo</span>
+                        }
+                        @if (apoiadorVisualizado.exibirNoSite) {
+                            <span class="badge badge-neutral" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; border: none;">
+                                <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;">public</span> Visível no Site Público
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-grid mt-4">
+                <div class="profile-section">
+                    <h4>Informações Básicas</h4>
+                    <p><strong>Nome / Razão Social:</strong> {{ apoiadorVisualizado.nomeRazaoSocial }}</p>
+                    <p><strong>Documento (CPF/CNPJ):</strong> {{ apoiadorVisualizado.cpfCnpj || 'Não cadastrado' }}</p>
+                    <p><strong>Atividade/Especialidade:</strong> {{ apoiadorVisualizado.atividadeEspecialidade || 'Não informado' }}</p>
+                </div>
+                <div class="profile-section">
+                    <h4>Contato</h4>
+                    <p><strong>Pessoa de Contato:</strong> {{ apoiadorVisualizado.contatoPessoa || 'Não informado' }}</p>
+                    <p><strong>Telefone:</strong> {{ apoiadorVisualizado.telefone || 'Não informado' }}</p>
+                    <p><strong>E-mail:</strong> {{ apoiadorVisualizado.email || 'Não informado' }}</p>
+                </div>
+                
+                <div class="profile-section profile-section--full">
+                    <h4>Endereço e Observações</h4>
+                    <p><strong>Endereço:</strong> {{ apoiadorVisualizado.endereco || 'Endereço não cadastrado' }}</p>
+                    <p class="mt-2" style="background: #f9fafb; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        {{ apoiadorVisualizado.observacoes || 'Nenhuma observação registrada.' }}
+                    </p>
+                    <p class="mt-3" style="font-size: 0.85rem; color: #6b7280;">
+                        Cadastrado em: {{ apoiadorVisualizado.criadoEm | date:'dd/MM/yyyy às HH:mm' }}
+                    </p>
+                </div>
+            </div>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+            <button class="btn btn-primary" (click)="editarApoiador(apoiadorVisualizado?.id || '')" [disabled]="!apoiadorVisualizado">
+                <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+                Editar Dados
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+@if (modalFormAberto) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalFormTitulo" (click)="fecharModalForm()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modalFormTitulo">{{ modoEdicao ? 'Editar Apoiador' : 'Novo Apoiador' }}</h2>
+            <button class="btn-close" (click)="fecharModalForm()" aria-label="Fechar janela">×</button>
+        </div>
+
+        <div class="modal-body" tabindex="0">
+            <form [formGroup]="apoiadorForm" (ngSubmit)="onSubmitForm()">
+            
+            <h5 class="section-title" style="margin-top: 0;">Informações Principais</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label for="tipo" class="form-label">Tipo de Apoiador <span class="text-danger">*</span></label>
+                    <select id="tipo" class="form-select" formControlName="tipo">
+                        <option value="EMPRESA">Empresa</option>
+                        <option value="ONG">ONG / Entidade</option>
+                        <option value="VOLUNTARIO">Voluntário</option>
+                        <option value="PROFISSIONAL_LIBERAL">Profissional Liberal</option>
+                        <option value="IMPRENSA">Imprensa / Mídia</option>
+                        <option value="OUTRO">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-8">
+                    <label for="nomeRazaoSocial" class="form-label">Nome Oficial ou Razão Social <span class="text-danger">*</span></label>
+                    <input id="nomeRazaoSocial" type="text" class="form-input" formControlName="nomeRazaoSocial" placeholder="Ex: Microsoft Informática Ltda">
+                    @if (apoiadorForm.get('nomeRazaoSocial')?.invalid && apoiadorForm.get('nomeRazaoSocial')?.touched) {
+                        <small class="text-danger mt-1 d-block">Este campo é obrigatório.</small>
+                    }
+                </div>
+
+                <div class="col-md-6">
+                    <label for="nomeFantasia" class="form-label">Nome Fantasia (Como é conhecido)</label>
+                    <input id="nomeFantasia" type="text" class="form-input" formControlName="nomeFantasia" placeholder="Ex: Microsoft Brasil">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="cpfCnpj" class="form-label">Documento (CPF ou CNPJ)</label>
+                    <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj" placeholder="Apenas números ou formato padrão">
+                </div>
+            </div>
+
+            <h5 class="section-title mt-4">Contato e Segmentação</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input id="email" type="email" class="form-input" formControlName="email" placeholder="contato@empresa.com">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="telefone" class="form-label">Telefone ou WhatsApp</label>
+                    <input id="telefone" type="text" class="form-input" formControlName="telefone" placeholder="(11) 99999-9999">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="contatoPessoa" class="form-label">Pessoa de Contato (Quem nos atende?)</label>
+                    <input id="contatoPessoa" type="text" class="form-input" formControlName="contatoPessoa" placeholder="Ex: Ana do Marketing">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="atividadeEspecialidade" class="form-label">Atividade ou Especialidade</label>
+                    <input id="atividadeEspecialidade" type="text" class="form-input" formControlName="atividadeEspecialidade" placeholder="Ex: Advogado Trabalhista ou Fornecedor de TI">
+                </div>
+
+                <div class="col-12">
+                    <label for="endereco" class="form-label">Endereço Completo</label>
+                    <input id="endereco" type="text" class="form-input" formControlName="endereco" placeholder="Rua, número, bairro, cidade - UF">
+                </div>
+            </div>
+
+            <h5 class="section-title mt-4">Presença Online e Visual</h5>
+            <div class="row g-3 mb-4 align-items-center">
+                <div class="col-md-6">
+                    <label for="logoImage" class="form-label">Logomarca da Empresa/Entidade</label>
+                    <input id="logoImage" type="file" class="form-input" (change)="onLogoSelected($event)" accept="image/png, image/jpeg, image/webp">
+                    <small class="text-muted d-block mt-1">Imagens quadradas tendem a ficar melhores. Tamanho máx 5MB.</small>
+                </div>
+                <div class="col-md-6 text-center">
+                    <div class="logo-preview-box">
+                        @if (logoPreview) {
+                            <img [src]="logoPreview" alt="Pré-visualização da Logo" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid #e5e7eb; object-fit: contain;">
+                        } @else {
+                            <div class="placeholder-preview" style="background: #f9fafb; padding: 2rem; border-radius: 8px; border: 1px dashed #d1d5db; color: #9ca3af; display: inline-flex; flex-direction: column; align-items: center;">
+                                <span class="material-symbols-rounded" style="font-size: 2rem;">image</span>
+                                <span class="d-block mt-2">Preview da Imagem</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <div class="form-check form-switch mt-2 p-3" style="background: rgba(37, 99, 235, 0.05); border-radius: 8px; border: 1px solid rgba(37, 99, 235, 0.2);">
+                        <input class="form-check-input ms-0 me-3 mt-1" type="checkbox" id="exibirNoSite" formControlName="exibirNoSite" [attr.aria-checked]="apoiadorForm.get('exibirNoSite')?.value" style="transform: scale(1.2);">
+                        <label class="form-check-label d-flex flex-column" for="exibirNoSite" style="cursor: pointer;">
+                            <strong style="color: #1e40af;">Exibir no Site Público?</strong>
+                            <small class="text-muted">Se ativado, esta logomarca (ou nome fantasia) será mostrada no carrossel de patrocinadores/parceiros da Home Page do Instituto. Somente ative com autorização expressa da marca.</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="section-title mt-4">Gerenciamento Interno</h5>
+            <div class="row g-3 mb-4">
+                <div class="col-12">
+                    <label for="observacoes" class="form-label">Observações Restritas (Apenas Administrativo)</label>
+                    <textarea id="observacoes" class="form-input" formControlName="observacoes" rows="3" placeholder="Insira histórico de interações, valores de contratos, notas pessoais..."></textarea>
+                </div>
+            </div>
+
+            <hr class="mt-4 mb-4">
+
+            <div class="d-flex justify-content-end gap-3 mt-4">
+                <button type="button" class="btn btn-secondary" (click)="fecharModalForm()">Cancelar</button>
+                <button type="submit" class="btn btn-primary d-flex align-items-center gap-2" [disabled]="apoiadorForm.invalid || salvando">
+                    @if (salvando) {
+                        <span class="loading-spinner material-symbols-rounded" style="font-size: 1.2rem;">sync</span>
+                        Salvando...
+                    } @else {
+                        <span class="material-symbols-rounded" style="font-size: 1.2rem;">save</span>
+                        Salvar Apoiador
+                    }
+                </button>
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+}
