@@ -1174,12 +1174,12 @@
                     <div class="form-group">
                         <label class="form-label" for="edit-cpf">CPF</label>
                         <input id="edit-cpf" type="text" class="form-input" formControlName="cpf"
-                            placeholder="000.000.000-00" mask="000.000.000-00" />
+                            placeholder="000.000.000-00" maxlength="14" (input)="formatarCpf($event)" />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-rg">RG</label>
                         <input id="edit-rg" type="text" class="form-input" formControlName="rg"
-                            placeholder="0.000.000" />
+                            placeholder="0.000.000/UF" maxlength="14" (input)="formatarRg($event)" />
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-nascimento">Data de Nascimento</label>
@@ -1209,13 +1209,16 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-email">E-mail</label>
-                        <input id="edit-email" type="email" class="form-input" formControlName="email"
-                            placeholder="email@exemplo.com" />
+                        <input id="edit-email" type="text" class="form-input" formControlName="email"
+                            placeholder="email@exemplo.com" (input)="formatarEmail($event)" />
+                        @if (editForm.get('email')?.invalid && editForm.get('email')?.dirty && editForm.get('email')?.value) {
+                            <small class="text-danger mt-1 d-block" style="font-size: 0.8rem; color: #dc2626;">Formato incorreto de e-mail.</small>
+                        }
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="edit-tel">Telefone</label>
                         <input id="edit-tel" type="tel" inputmode="numeric" class="form-input"
-                            formControlName="telefoneContato" placeholder="(00) 00000-0000" />
+                            formControlName="telefoneContato" placeholder="(00) 00000-0000" maxlength="15" (input)="formatarTelefone($event)" />
                     </div>
                 </div>
             </fieldset>
@@ -1229,7 +1232,7 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:.75rem;">
                     <div class="form-group">
                         <label class="form-label" for="edit-cep">CEP</label>
-                        <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep"
+                        <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep" (blur)="buscarCep()"
                             placeholder="00000-000" />
                     </div>
                     <div class="form-group" style="grid-column:2 / -1;">
@@ -1449,4 +1452,4 @@
     </div>
 </div>
 }
-
+

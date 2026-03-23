@@ -28,6 +28,13 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
     // Modal de Reativação
     modalReativacao = false;
     dadosReativacao: ReativacaoResponse | null = null;
+    _payloadPendente: any = null;
+
+    // Validação CPF em tempo real (blur)
+    cpfStatus: 'livre' | 'ativo' | 'inativo' | 'verificando' | 'excluido' | '' = '';
+    cpfConflito: { nome: string; matricula: string | null } | null = null;
+    modalReaproveitar = false;
+    dadosReaproveitar: any = null;
 
     constructor(
         private fb: FormBuilder,
@@ -97,6 +104,56 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
         v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
         event.target.value = v;
         this.cadastroUsuarioForm.get('dadosPessoais.cpf')?.setValue(v, { emitEvent: false });
+        
+        // Limpa erro customizado ao digitar
+        if (this.cpfStatus === 'ativo' || this.cpfStatus === 'verificando') {
+            this.cpfStatus = '';
+            this.cpfConflito = null;
+        }
+    }
+
+    verificarCpfBlur() {
+        const cpfCtrl = this.cadastroUsuarioForm.get('dadosPessoais.cpf');
+        const valor = cpfCtrl?.value ?? '';
+        const limpo = valor.replace(/\D/g, '');
+
+        if (!limpo || limpo.length !== 11) {
+            this.cpfStatus = '';
+            this.cpfConflito = null;
+            return;
+        }
+
+        this.cpfStatus = 'verificando';
+        this.cpfConflito = null;
+        this.cdr.detectChanges();
+
+        this.usuariosService.verificarCpf(limpo).subscribe({
+            next: (res) => {
+                this.cpfStatus = res.status;
+                if (res.status === 'ativo') {
+                    this.cpfConflito = { nome: res.nome, matricula: res.matricula };
+                } else if (res.status === 'inativo') {
+                    this.dadosReativacao = {
+                        _reativacao: true,
+                        id: res.id,
+                        nome: res.nome,
+                        username: res.nome.split(' ')[0].toLowerCase(), // mock
+                        statusAtivo: false,
+                        excluido: false,
+                        message: 'Funcionário inativo encontrado',
+                    };
+                    this.modalReativacao = true;
+                } else if (res.status === 'excluido') {
+                    this.dadosReaproveitar = res;
+                    this.modalReaproveitar = true;
+                }
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.cpfStatus = '';
+                this.cdr.detectChanges();
+            }
+        });
     }
 
     formatarTelefone(event: any) {
@@ -114,6 +171,10 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
     }
 
     avancarPasso() {
+        if (this.passoAtual === 1 && this.cpfStatus === 'ativo') {
+            return; // Bloqueia avanço se tiver dono
+        }
+
         const grupoNome = this.passoAtual === 1 ? 'dadosPessoais' : 'contato';
         const grupo = this.cadastroUsuarioForm.get(grupoNome);
         if (grupo?.valid) {
@@ -173,9 +234,10 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
             next: (resp) => {
                 this.isSalvando = false;
 
-                // Backend retornou sinal de reativação (CPF inativo)
+                // Backend retornou sinal de reativação (CPF inativo/excluído)
                 if ('_reativacao' in resp && resp._reativacao) {
                     this.dadosReativacao = resp as ReativacaoResponse;
+                    this._payloadPendente = payload;
                     this.modalReativacao = true;
                     this.cdr.detectChanges();
                     return;
@@ -205,13 +267,18 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
         });
     }
 
-    // ── Modal Reativação ─────────────────────────────────────────────
+    // ── Modal Reativação e Reaproveitamento ─────────────────────────────────────────────
     confirmarReativacao() {
         if (!this.dadosReativacao) return;
         this.isSalvando = true;
 
         this.usuariosService.reativar(this.dadosReativacao.id).subscribe({
             next: (resp) => {
+                // Se havia alterações no formulário (payload), poderiamos fazer um patch aqui (Opcional)
+                if (this._payloadPendente) {
+                    this.usuariosService.atualizar(this.dadosReativacao!.id, this._payloadPendente).subscribe();
+                }
+
                 this.isSalvando = false;
                 this.modalReativacao = false;
                 this.credenciaisGeradas = {
@@ -220,6 +287,7 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
                 };
                 this.exibirFeedback(`Funcionário ${this.dadosReativacao!.nome} reativado com sucesso!`, 'sucesso');
                 this.dadosReativacao = null;
+                this._payloadPendente = null;
                 this.cdr.detectChanges();
             },
             error: () => {
@@ -233,6 +301,46 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
     cancelarReativacao() {
         this.modalReativacao = false;
         this.dadosReativacao = null;
+        this._payloadPendente = null;
+    }
+
+    confirmarReaproveitar() {
+        if (!this.dadosReaproveitar) return;
+        
+        // Preenche o formulário
+        this.cadastroUsuarioForm.patchValue({
+            dadosPessoais: {
+                nomeCompleto: this.dadosReaproveitar.nome,
+                funcao: this.dadosReaproveitar.role || '',
+                email: this.dadosReaproveitar.email || '',
+            },
+            contato: {
+                telefone: this.dadosReaproveitar.telefone || '',
+                cep: this.dadosReaproveitar.cep || '',
+                rua: this.dadosReaproveitar.rua || '',
+                numero: this.dadosReaproveitar.numero || '',
+                complemento: this.dadosReaproveitar.complemento || '',
+                bairro: this.dadosReaproveitar.bairro || '',
+                cidade: this.dadosReaproveitar.cidade || '',
+                uf: this.dadosReaproveitar.uf || '',
+            }
+        });
+        
+        const telefoneEv = { target: { value: this.dadosReaproveitar.telefone || '' } };
+        this.formatarTelefone(telefoneEv as any);
+        
+        // Define cep livre para salvar (causará reactivate nativamente na submissão)
+        this.cpfStatus = 'livre';
+        this.modalReaproveitar = false;
+        
+        this.exibirFeedback('Os dados antigos foram restaurados. Edite conforme a necessidade.', 'sucesso');
+    }
+
+    cancelarReaproveitar() {
+        this.modalReaproveitar = false;
+        this.dadosReaproveitar = null;
+        this.cadastroUsuarioForm.get('dadosPessoais.cpf')?.setValue('');
+        this.cpfStatus = '';
     }
 
     irParaLista() {
