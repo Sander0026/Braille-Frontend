@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BeneficiariosService, Beneficiario } from '../../../core/services/beneficiarios.service';
@@ -155,7 +156,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private liveAnnouncer: LiveAnnouncer,
     private sanitizer: DomSanitizer,
     private atestadosService: AtestadosService,
-    private laudosService: LaudosService
+    private laudosService: LaudosService,
+    private http: HttpClient
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -164,7 +166,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       dataNascimento: [''],
       genero: [''],
       corRaca: [''],
-      email: [''],
+      email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
       telefoneContato: [''],
       // Endereço
       cep: [''],
@@ -206,6 +208,45 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       dataCadastroInicio: [''],
       dataCadastroFim: [''],
     });
+  }
+
+  // --- MÁSCARAS ---
+  formatarCpf(event: any) {
+    let v = event.target.value.replace(/\D/g, '').substring(0, 11);
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d)/, '$1.$2');
+    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    event.target.value = v;
+    this.editForm.get('cpf')?.setValue(v, { emitEvent: false });
+  }
+
+  formatarRg(event: any) {
+    let v = event.target.value.replace(/\D/g, '').substring(0, 9);
+    let parts = [];
+    while (v.length > 3) {
+      parts.unshift(v.substring(v.length - 3));
+      v = v.substring(0, v.length - 3);
+    }
+    if (v.length > 0) parts.unshift(v);
+    
+    let result = parts.join('.');
+    event.target.value = result;
+    this.editForm.get('rg')?.patchValue(result);
+  }
+
+  formatarEmail(event: any) {
+    let v = event.target.value.replace(/\s/g, '').toLowerCase();
+    event.target.value = v;
+    this.editForm.get('email')?.setValue(v, { emitEvent: false });
+  }
+
+  formatarTelefone(event: any) {
+    let v = event.target.value.replace(/\D/g, '').substring(0, 11);
+    v = v.length <= 10
+        ? v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+        : v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+    event.target.value = v;
+    this.editForm.get('telefoneContato')?.setValue(v, { emitEvent: false });
   }
 
   ngOnInit(): void {
@@ -567,6 +608,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           ? dadosCompletos.dataNascimento.substring(0, 10)
           : '';
         this.editForm.patchValue({ ...dadosCompletos, dataNascimento: dataNasc });
+        
+        // Aplica formatação visual
+        if (dadosCompletos.cpf) this.formatarCpf({ target: { value: dadosCompletos.cpf } });
+        if (dadosCompletos.rg) this.formatarRg({ target: { value: dadosCompletos.rg } });
+        if (dadosCompletos.telefoneContato) this.formatarTelefone({ target: { value: dadosCompletos.telefoneContato } });
+
         this.cdr.markForCheck();
       }
     });
@@ -618,6 +665,37 @@ export class BeneficiaryList implements OnInit, OnDestroy {
         }, 0);
       }
     });
+  }
+
+  buscarCep(): void {
+    let cep = this.editForm.get('cep')?.value;
+    if (!cep) return;
+    cep = cep.replace(/\D/g, '');
+    if (cep.length === 8) {
+      this.liveAnnouncer.announce('Buscando endereço pelo CEP...');
+      this.http.get(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
+        next: (dados: any) => {
+          if (dados.erro) {
+            this.toast.erro('CEP não encontrado. Verifique a digitação.');
+            this.liveAnnouncer.announce('CEP não encontrado. Verifique a digitação.');
+          } else {
+            this.editForm.patchValue({
+              rua: dados.logradouro,
+              bairro: dados.bairro,
+              cidade: dados.localidade,
+              uf: dados.uf
+            });
+            this.liveAnnouncer.announce('Endereço preenchido automaticamente.');
+            this.cdr.markForCheck();
+          }
+        },
+        error: () => {
+          this.toast.erro('Erro ao conectar com o serviço de CEP.');
+          this.liveAnnouncer.announce('Erro ao conectar com o serviço de CEP.');
+          this.cdr.markForCheck();
+        }
+      });
+    }
   }
 
   // ── Exportar Lista para Excel ─────────────────────────────────────

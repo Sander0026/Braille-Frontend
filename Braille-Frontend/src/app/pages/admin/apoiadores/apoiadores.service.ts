@@ -3,6 +3,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
+export interface AcaoApoiador {
+  id: string;
+  dataEvento: string;
+  descricaoAcao: string;
+  apoiadorId: string;
+  criadoEm: string;
+  atualizadoEm: string;
+}
+
 export interface Apoiador {
   id: string;
   tipo: 'VOLUNTARIO' | 'EMPRESA' | 'IMPRENSA' | 'PROFISSIONAL_LIBERAL' | 'ONG' | 'OUTRO';
@@ -20,6 +29,7 @@ export interface Apoiador {
   ativo: boolean;
   criadoEm: string;
   atualizadoEm: string;
+  acoes?: AcaoApoiador[];
 }
 
 export interface PaginatedResult<T> {
@@ -96,6 +106,24 @@ export class ApoiadoresService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.patch<Apoiador>(`${this.apiUrl}/${id}/logo`, formData).pipe(
+      tap(() => this.limparCache())
+    );
+  }
+
+  // ---- Histórico de Ações (CRM Tracking) ---- //
+
+  buscarAcoes(id: string): Observable<AcaoApoiador[]> {
+    return this.http.get<AcaoApoiador[]>(`${this.apiUrl}/${id}/acoes`);
+  }
+
+  adicionarAcao(id: string, dataEvento: string, descricaoAcao: string): Observable<AcaoApoiador> {
+    return this.http.post<AcaoApoiador>(`${this.apiUrl}/${id}/acoes`, { dataEvento, descricaoAcao }).pipe(
+      tap(() => this.limparCache())
+    );
+  }
+
+  removerAcao(apoiadorId: string, acaoId: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${apoiadorId}/acoes/${acaoId}`).pipe(
       tap(() => this.limparCache())
     );
   }
