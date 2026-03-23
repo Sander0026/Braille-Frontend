@@ -22,7 +22,7 @@
 
     <!-- TABS NAV -->
     <div class="tabs-nav-wrapper">
-        <nav class="tabs-nav" role="tablist" aria-label="Abas de Seções" (keydown)="handleKeydown($event)">
+        <div class="tabs-nav" role="tablist" aria-label="Abas de Seções" (keydown)="handleKeydown($event)">
             <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'config'" [attr.tabindex]="abaAtiva === 'config' ? 0 : -1" id="tab-config" aria-controls="pane-config" class="tab-btn" [class.active]="abaAtiva === 'config'" (click)="setAba('config')">
                 <span class="material-symbols-rounded">settings</span> Configurações
             </button>
@@ -50,7 +50,7 @@
             <button #btnAba role="tab" [attr.aria-selected]="abaAtiva === 'contato'" [attr.tabindex]="abaAtiva === 'contato' ? 0 : -1" id="tab-contato" aria-controls="pane-contato" class="tab-btn" [class.active]="abaAtiva === 'contato'" (click)="setAba('contato')">
                 <span class="material-symbols-rounded">contact_page</span> Global (Contato/Redes)
             </button>
-        </nav>
+        </div>
     </div>
 
 
@@ -64,7 +64,7 @@
 
     <!-- ABA: CONFIGURAÇÕES -->
     @if (abaAtiva === 'config') {
-    <div class="tab-pane active" id="pane-config" role="tabpanel" aria-labelledby="tab-config" tabindex="0">
+    <div class="tab-pane active" id="pane-config" role="tabpanel" aria-labelledby="tab-config">
         <form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
             <div class="form-header">
                 <h2>Configurações Globais</h2>
@@ -116,7 +116,7 @@
 
     <!-- ABA: HERO -->
     @if (abaAtiva === 'hero') {
-    <div class="tab-pane active" id="pane-hero" role="tabpanel" aria-labelledby="tab-hero" tabindex="0">
+    <div class="tab-pane active" id="pane-hero" role="tabpanel" aria-labelledby="tab-hero">
         <form [formGroup]="formHero" (ngSubmit)="salvarHero()" class="cms-form">
             <div class="form-header">
                 <h2>Apresentação Principal</h2>
@@ -171,21 +171,21 @@
                 <h3>Estatísticas em Destaque</h3>
                 <div class="form-row form-row-3">
                     <div class="form-group mb-0">
-                        <label class="form-label">Estatística 1</label>
+                        <div class="form-label">Estatística 1</div>
                         <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+"
                             aria-label="Número estatística 1">
                         <input type="text" class="form-input mt-2" formControlName="stat1Desc"
                             placeholder="Descrição (ex: Vidas impactadas)" aria-label="Descrição estatística 1">
                     </div>
                     <div class="form-group mb-0">
-                        <label class="form-label">Estatística 2</label>
+                        <div class="form-label">Estatística 2</div>
                         <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+"
                             aria-label="Número estatística 2">
                         <input type="text" class="form-input mt-2" formControlName="stat2Desc"
                             placeholder="Descrição (ex: Profissionais)" aria-label="Descrição estatística 2">
                     </div>
                     <div class="form-group mb-0">
-                        <label class="form-label">Estatística 3</label>
+                        <div class="form-label">Estatística 3</div>
                         <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6"
                             aria-label="Número estatística 3">
                         <input type="text" class="form-input mt-2" formControlName="stat3Desc"
@@ -205,7 +205,7 @@
 
     <!-- ABA: MISSÃO -->
     @if (abaAtiva === 'missao') {
-    <div class="tab-pane active" id="pane-missao" role="tabpanel" aria-labelledby="tab-missao" tabindex="0">
+    <div class="tab-pane active" id="pane-missao" role="tabpanel" aria-labelledby="tab-missao">
         <form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
             <div class="form-header">
                 <h2>Nossa Missão & Valores</h2>
@@ -213,85 +213,53 @@
             </div>
 
             <div class="form-section">
-                <h3>Texto de Apresentação</h3>
-                <div class="form-row form-row-2">
-                    <div class="form-group">
-                        <label class="form-label" for="titulo-missao">Título da Seção</label>
-                        <input type="text" id="titulo-missao" class="form-input" formControlName="titulo"
-                            placeholder="Ex: Nossa Missão">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="btnSaberMais">Botão Link (Opcional)</label>
-                        <input type="text" id="btnSaberMais" class="form-input" formControlName="btnSaberMais"
-                            placeholder="Ex: Saiba mais sobre nós →">
-                    </div>
-                </div>
+                <h3>Textos de Missão e Visão</h3>
+                <p class="form-hint" style="margin-bottom: 1rem;">
+                    Preencha os parágrafos que aparecerão respectivamente abaixo dos ícones de Missão e Visão na página pública.
+                </p>
 
                 <div class="form-group">
-                    <label class="form-label" for="descricaoLinha1">Parágrafo de Introdução</label>
-                    <quill-editor formControlName="descricaoLinha1" [styles]="{height: '150px'}"></quill-editor>
+                    <label class="form-label" for="descricaoLinha1">Texto da Missão (Parágrafo Inicial)</label>
+                    <quill-editor formControlName="descricaoLinha1" placeholder="Escreva o texto da missão aqui..." [styles]="{height: '150px'}"></quill-editor>
                 </div>
 
                 <div class="form-group mb-0">
-                    <label class="form-label" for="descricaoLinha2">Parágrafo de Complemento (Opcional)</label>
-                    <quill-editor formControlName="descricaoLinha2" [styles]="{height: '150px'}"></quill-editor>
+                    <label class="form-label" for="descricaoLinha2">Texto da Visão (Parágrafo de Complemento)</label>
+                    <quill-editor formControlName="descricaoLinha2" placeholder="Escreva o texto da visão aqui..." [styles]="{height: '150px'}"></quill-editor>
                 </div>
             </div>
 
             <div class="form-section bg-transparent border-0 px-0 shadow-none">
-                <h3 class="mb-3">Cards de Valores</h3>
+                <h3 class="mb-3">Tópicos de Valores</h3>
+                <p class="form-hint" style="margin-bottom: 1rem;">
+                    Estes quatro itens serão apresentados juntos em formato de frase (separados por ponto e vírgula) abaixo do ícone de Valores.
+                </p>
 
-                <!-- Valor 1 & 2 -->
                 <div class="form-row form-row-2">
-                    <div class="form-card dynamic-card">
-                        <label class="form-label">Valor Principal 1</label>
-                        <div class="flex-row">
-                            <input type="text" class="form-input flex-1" formControlName="valor1Icone"
-                                placeholder="Ícone ou Emoji (ex: ✨)" aria-label="Ícone do valor 1">
-                            <input type="text" class="form-input flex-3" formControlName="valor1Titulo"
-                                placeholder="Título (ex: Inclusão)" aria-label="Título do valor 1">
-                        </div>
-                        <input type="text" class="form-input mt-2" formControlName="valor1Desc"
-                            placeholder="Breve descrição do valor" aria-label="Descrição do valor 1">
+                    <div class="form-group">
+                        <label class="form-label" for="valor1Titulo">Valor 1</label>
+                        <input type="text" id="valor1Titulo" class="form-input" formControlName="valor1Titulo"
+                            placeholder="Ex: Acessibilidade">
                     </div>
 
-                    <div class="form-card dynamic-card">
-                        <label class="form-label">Valor Principal 2</label>
-                        <div class="flex-row">
-                            <input type="text" class="form-input flex-1" formControlName="valor2Icone"
-                                placeholder="Ícone" aria-label="Ícone do valor 2">
-                            <input type="text" class="form-input flex-3" formControlName="valor2Titulo"
-                                placeholder="Título" aria-label="Título do valor 2">
-                        </div>
-                        <input type="text" class="form-input mt-2" formControlName="valor2Desc"
-                            placeholder="Breve descrição" aria-label="Descrição do valor 2">
+                    <div class="form-group">
+                        <label class="form-label" for="valor2Titulo">Valor 2</label>
+                        <input type="text" id="valor2Titulo" class="form-input" formControlName="valor2Titulo"
+                            placeholder="Ex: Gratuidade">
                     </div>
                 </div>
 
-                <!-- Valor 3 & 4 -->
-                <div class="form-row form-row-2 mt-4">
-                    <div class="form-card dynamic-card">
-                        <label class="form-label">Valor Complementar 3</label>
-                        <div class="flex-row">
-                            <input type="text" class="form-input flex-1" formControlName="valor3Icone"
-                                placeholder="Ícone" aria-label="Ícone do valor 3">
-                            <input type="text" class="form-input flex-3" formControlName="valor3Titulo"
-                                placeholder="Título" aria-label="Título do valor 3">
-                        </div>
-                        <input type="text" class="form-input mt-2" formControlName="valor3Desc"
-                            placeholder="Breve descrição" aria-label="Descrição do valor 3">
+                <div class="form-row form-row-2">
+                    <div class="form-group">
+                        <label class="form-label" for="valor3Titulo">Valor 3</label>
+                        <input type="text" id="valor3Titulo" class="form-input" formControlName="valor3Titulo"
+                            placeholder="Ex: Qualidade">
                     </div>
 
-                    <div class="form-card dynamic-card">
-                        <label class="form-label">Valor Complementar 4</label>
-                        <div class="flex-row">
-                            <input type="text" class="form-input flex-1" formControlName="valor4Icone"
-                                placeholder="Ícone" aria-label="Ícone do valor 4">
-                            <input type="text" class="form-input flex-3" formControlName="valor4Titulo"
-                                placeholder="Título" aria-label="Título do valor 4">
-                        </div>
-                        <input type="text" class="form-input mt-2" formControlName="valor4Desc"
-                            placeholder="Breve descrição" aria-label="Descrição do valor 4">
+                    <div class="form-group">
+                        <label class="form-label" for="valor4Titulo">Valor 4</label>
+                        <input type="text" id="valor4Titulo" class="form-input" formControlName="valor4Titulo"
+                            placeholder="Ex: Humanização">
                     </div>
                 </div>
             </div>
@@ -307,7 +275,7 @@
 
     <!-- ABA: OFICINAS -->
     @if (abaAtiva === 'oficinas') {
-    <div class="tab-pane active" id="pane-oficinas" role="tabpanel" aria-labelledby="tab-oficinas" tabindex="0">
+    <div class="tab-pane active" id="pane-oficinas" role="tabpanel" aria-labelledby="tab-oficinas">
         <form [formGroup]="formOficinas" (ngSubmit)="salvarOficinas()" class="cms-form">
             <div class="form-header">
                 <h2>Oficinas e Cursos</h2>
@@ -326,11 +294,21 @@
                         </button>
                     </div>
 
-                    <div class="flex-row">
-                        <input type="text" class="form-input flex-1" formControlName="icon"
-                            placeholder="Ícone/Emoji (ex: 💻)" aria-label="Ícone da oficina">
-                        <input type="text" class="form-input flex-3" formControlName="titulo"
-                            placeholder="Título da Oficina" aria-label="Título da oficina">
+                    <div class="flex-row align-items-end pt-1" style="gap: 1rem;">
+                        <div class="form-group flex-1 mb-0 pb-2">
+                            <label class="form-label mb-1">Ícone Corporativo</label>
+                            <select class="form-input w-100" formControlName="icon" aria-label="Selecione o Ícone da oficina" style="padding: 10px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;">
+                                <option value="" disabled>Escolha na lista...</option>
+                                @for(icone of iconesDisponiveis; track icone.valor) {
+                                    <option [value]="icone.valor">{{ icone.nome }}</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group flex-3 mb-0 pb-2">
+                            <label class="form-label mb-1">Título da Oficina</label>
+                            <input type="text" class="form-input w-100" formControlName="titulo"
+                                placeholder="Ex: Informática Adaptada" aria-label="Título da oficina">
+                        </div>
                     </div>
                     <quill-editor formControlName="descricao" [styles]="{height: '100px'}"
                         placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></quill-editor>
@@ -355,7 +333,7 @@
 
     <!-- ABA: DEPOIMENTOS -->
     @if (abaAtiva === 'depoimentos') {
-    <div class="tab-pane active" id="pane-depoimentos" role="tabpanel" aria-labelledby="tab-depoimentos" tabindex="0">
+    <div class="tab-pane active" id="pane-depoimentos" role="tabpanel" aria-labelledby="tab-depoimentos">
         <form [formGroup]="formDepoimentos" (ngSubmit)="salvarDepoimentos()" class="cms-form">
             <div class="form-header">
                 <h2>Depoimentos</h2>
@@ -402,7 +380,7 @@
 
     <!-- ABA: SOBRE -->
     @if (abaAtiva === 'sobre') {
-    <div class="tab-pane active" id="pane-sobre" role="tabpanel" aria-labelledby="tab-sobre" tabindex="0">
+    <div class="tab-pane active" id="pane-sobre" role="tabpanel" aria-labelledby="tab-sobre">
 
         <!-- Hero do Sobre -->
         <form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form">
@@ -537,14 +515,18 @@
                     </div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label [for]="'eqEmoji' + $index">Emoji / Ícone</label>
-                            <input type="text" [id]="'eqEmoji' + $index" formControlName="emoji" class="form-input"
-                                placeholder="Ex: 👩‍⚕️" maxlength="4" />
+                            <label [for]="'eqEmoji' + $index">Ícone / Departamento</label>
+                            <select [id]="'eqEmoji' + $index" class="form-input" formControlName="emoji" aria-label="Selecione o Ícone corporativo" style="padding: 10px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;">
+                                <option value="" disabled selected>Selecione um ícone...</option>
+                                @for (icone of iconesEquipe; track icone.valor) {
+                                <option [value]="icone.valor">{{ icone.nome }}</option>
+                                }
+                            </select>
                         </div>
                         <div class="form-group">
-                            <label [for]="'eqCargo' + $index">Cargo / Área</label>
+                            <label [for]="'eqCargo' + $index">Cargo / Área Administrativa</label>
                             <input type="text" [id]="'eqCargo' + $index" formControlName="cargo" class="form-input"
-                                placeholder="Ex: Coordenação Pedagógica" />
+                                placeholder="Ex: Coordenação Psicológica" />
                         </div>
                         <div class="form-group full-width">
                             <label [for]="'eqDesc' + $index">Descrição</label>
@@ -597,7 +579,7 @@
     }
 
     @if (abaAtiva === 'comunicados') {
-    <div class="tab-pane active" id="pane-comunicados" role="tabpanel" aria-labelledby="tab-comunicados" tabindex="0">
+    <div class="tab-pane active" id="pane-comunicados" role="tabpanel" aria-labelledby="tab-comunicados">
         <div class="form-header">
             <h2>Notícias e Comunicados</h2>
             <p>Publicações que aparecem na página pública inicial e de Notícias do portal.</p>
@@ -608,7 +590,7 @@
 
     <!-- ABA: FAQ -->
     @if (abaAtiva === 'faq') {
-    <div class="tab-pane active" id="pane-faq" role="tabpanel" aria-labelledby="tab-faq" tabindex="0">
+    <div class="tab-pane active" id="pane-faq" role="tabpanel" aria-labelledby="tab-faq">
         <form [formGroup]="formFaq" (ngSubmit)="salvarFaq()" class="cms-form">
             <div class="form-header">
                 <h2>Perguntas Frequentes (FAQ)</h2>
@@ -658,7 +640,7 @@
 
     <!-- ABA: CONTATO E DADOS GLOBAIS -->
     @if (abaAtiva === 'contato') {
-    <div class="tab-pane active" id="pane-contato" role="tabpanel" aria-labelledby="tab-contato" tabindex="0">
+    <div class="tab-pane active" id="pane-contato" role="tabpanel" aria-labelledby="tab-contato">
         <form [formGroup]="formContato" (ngSubmit)="salvarContato()" class="cms-form">
             <div class="form-header">
                 <h2>Contato e Redes Sociais</h2>
@@ -746,10 +728,10 @@
 
 <!-- Modal Excluir Logo -->
 @if (logoParaExcluir) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Logo" (click)="cancelarExclusaoLogo()">
-    <div class="modal" (click)="$event.stopPropagation()">
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Logo" (click)="cancelarExclusaoLogo()" (keydown.escape)="cancelarExclusaoLogo()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Remover Logo</h2>
+            <h2 style="color: #b91c1c;">Remover Logo</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoLogo()" aria-label="Cancelar">✕</button>
         </div>
         <div class="modal-body">
@@ -759,7 +741,7 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoLogo()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoLogo()"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 Remover Logo
             </button>
         </div>
@@ -769,20 +751,20 @@
 
 <!-- Modal Remover Foto da Fachada -->
 @if (fachadaParaExcluir) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Foto da Fachada" (click)="cancelarExclusaoFachada()">
-    <div class="modal" (click)="$event.stopPropagation()">
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Foto da Fachada" (click)="cancelarExclusaoFachada()" (keydown.escape)="cancelarExclusaoFachada()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Remover Foto da Fachada</h2>
+            <h2 style="color: #b91c1c;">Remover Foto da Fachada</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoFachada()" aria-label="Cancelar">✕</button>
         </div>
         <div class="modal-body">
-            <p>Você está prestes a remover a foto da fachada do hero da página inicial.</p>
-            <p>O fundo voltará a ser preto sólido. Deseja continuar?</p>
+            <p>Você está prestes a remover a foto personalizada do hero da página inicial.</p>
+            <p>Ao remover, o sistema voltará a exibir a <strong>imagem padrão do Instituto</strong>. Deseja continuar?</p>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoFachada()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoFachada()"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 Remover Foto
             </button>
         </div>
@@ -793,10 +775,10 @@
 <!-- Modal Excluir Oficina -->
 @if (oficinaParaExcluir !== null) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Oficina"
-    (click)="cancelarExclusaoOficina()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    (click)="cancelarExclusaoOficina()" (keydown.escape)="cancelarExclusaoOficina()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Excluir Oficina</h2>
+            <h2 style="color: #b91c1c;">Excluir Oficina</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoOficina()" aria-label="Cancelar">✕</button>
         </div>
         <div class="modal-body">
@@ -807,7 +789,7 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoOficina()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoOficina()"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 Remover Oficina
             </button>
         </div>
@@ -818,10 +800,10 @@
 <!-- Modal Excluir Depoimento -->
 @if (depoimentoParaExcluir !== null) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Depoimento"
-    (click)="cancelarExclusaoDepoimento()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    (click)="cancelarExclusaoDepoimento()" (keydown.escape)="cancelarExclusaoDepoimento()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Excluir Depoimento</h2>
+            <h2 style="color: #b91c1c;">Excluir Depoimento</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDepoimento()"
                 aria-label="Cancelar">✕</button>
         </div>
@@ -833,7 +815,7 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDepoimento()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDepoimento()"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 Remover Depoimento
             </button>
         </div>
@@ -844,10 +826,10 @@
 <!-- Modal Excluir FAQ -->
 @if (faqParaExcluir !== null) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Pergunta"
-    (click)="cancelarExclusaoFaq()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    (click)="cancelarExclusaoFaq()" (keydown.escape)="cancelarExclusaoFaq()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Excluir Pergunta</h2>
+            <h2 style="color: #b91c1c;">Excluir Pergunta</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoFaq()"
                 aria-label="Cancelar">✕</button>
         </div>
@@ -858,7 +840,7 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoFaq()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoFaq()"
-                style="background-color: #ef4444; color: white; border: none;">
+                style="background-color: #b91c1c; color: white; border: none;">
                 Remover
             </button>
         </div>
@@ -869,10 +851,10 @@
 <!-- Modal Excluir Marco da Timeline -->
 @if (timelineItemParaExcluir !== null) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Marco"
-    (click)="cancelarExclusaoTimeline()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    (click)="cancelarExclusaoTimeline()" (keydown.escape)="cancelarExclusaoTimeline()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Remover Marco</h2>
+            <h2 style="color: #b91c1c;">Remover Marco</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoTimeline()" aria-label="Cancelar">✕</button>
         </div>
         <div class="modal-body">
@@ -882,7 +864,7 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoTimeline()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoTimeline()"
-                style="background-color: #ef4444; color: white; border: none;">Remover</button>
+                style="background-color: #b91c1c; color: white; border: none;">Remover</button>
         </div>
     </div>
 </div>
@@ -891,10 +873,10 @@
 <!-- Modal Excluir Membro da Equipe -->
 @if (equipeMemberParaExcluir !== null) {
 <div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Membro"
-    (click)="cancelarExclusaoEquipe()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    (click)="cancelarExclusaoEquipe()" (keydown.escape)="cancelarExclusaoEquipe()" tabindex="-1">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
         <div class="modal-header">
-            <h2 style="color: #ef4444;">Remover Membro</h2>
+            <h2 style="color: #b91c1c;">Remover Membro</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoEquipe()" aria-label="Cancelar">✕</button>
         </div>
         <div class="modal-body">
@@ -904,7 +886,7 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoEquipe()">Cancelar</button>
             <button class="btn btn-danger" type="button" (click)="confirmarExclusaoEquipe()"
-                style="background-color: #ef4444; color: white; border: none;">Remover</button>
+                style="background-color: #b91c1c; color: white; border: none;">Remover</button>
         </div>
     </div>
 </div>

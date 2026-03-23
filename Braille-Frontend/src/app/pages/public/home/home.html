@@ -1,7 +1,7 @@
 <!-- ══════════ HERO ══════════ -->
 <section class="hero" aria-label="Seção de boas-vindas">
-    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) -->
-    <div class="hero-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + fachadaUrl + ')' : null"></div>
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN -->
+    <div class="hero-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null"></div>
     <div class="hero-inner">
         <div class="hero-content animate-on-scroll">
             <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>
@@ -231,6 +231,46 @@
                 <span class="material-symbols-rounded" aria-hidden="true" style="vertical-align: middle;">arrow_forward</span>
             </a>
         </div>
+    </div>
+</section>
+}
+
+<!-- ══════════ APOIADORES E PARCEIROS ══════════ -->
+@if (carregandoParceiros || parceiros.length > 0) {
+<section class="parceiros" aria-labelledby="parceiros-titulo">
+    <div class="section-inner">
+        <header class="section-header animate-on-scroll text-center">
+            <h2 id="parceiros-titulo" class="section-title">Apoiadores e Parceiros</h2>
+            <p class="section-desc">Empresas e pessoas físicas que acreditam e apoiam nossa missão diariamente.</p>
+        </header>
+
+        @if (carregandoParceiros) {
+        <div class="parceiros-grid" aria-busy="true">
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+            <div class="parceiro-card skeleton-wrapper">
+                <div class="skeleton" style="width: 100px; height: 100px; border-radius: 50%;"></div>
+            </div>
+            }
+        </div>
+        } @else {
+        <div class="parceiros-grid">
+            @for (parceiro of parceiros; track parceiro.id) {
+            <div class="parceiro-card animate-on-scroll">
+                @if (parceiro.logoUrl) {
+                <figure class="parceiro-logo" [attr.aria-label]="parceiro.nomeFantasia || parceiro.nomeRazaoSocial">
+                    <img [src]="parceiro.logoUrl | cloudinary" 
+                         [alt]="'Logo ' + (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)" loading="lazy">
+                </figure>
+                } @else {
+                <div class="parceiro-placeholder">
+                    <span>{{ (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)?.charAt(0) | uppercase }}</span>
+                    <p class="parceiro-nome-fallback">{{ parceiro.nomeFantasia || parceiro.nomeRazaoSocial }}</p>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
     </div>
 </section>
 }
