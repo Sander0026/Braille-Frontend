@@ -88,6 +88,15 @@ export const routes: Routes = [
         title: 'Frequências — ILBES'
       },
 
+      // Apoiadores (Módulo novo)
+      {
+        path: 'apoiadores',
+        loadComponent: () => import('./pages/admin/apoiadores/apoiadores-lista/apoiadores-lista').then(m => m.ApoiadoresLista),
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'EDITOR'] }
+      },
+
+
       // Conteúdo do Site (CMS)
       {
         path: 'conteudo',

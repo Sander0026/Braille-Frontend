@@ -121,6 +121,32 @@ $gray-900: #1a1a1a;
     color: #e5e5e5;
 }
 
+.social-links-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.social-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: $black;
+    background: $primary;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: transform 200ms ease, filter 200ms ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.1);
+    }
+}
+
 .info-aviso {
     background: color.change($primary, $alpha: .1);
     border: 1px solid color.change($primary, $alpha: .25);

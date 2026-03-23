@@ -17,7 +17,7 @@ import { QuillModule } from 'ngx-quill';
   styleUrl: './conteudo-site.scss',
 })
 export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   private observer!: MutationObserver;
   abaAtiva = 'config';
 
@@ -53,7 +53,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   logoPreview: string | null = null;
   // Fachada
   fachadaPreview: string | null = null;
-  private apiUrl = environment.apiUrl;
+  private readonly apiUrl = environment.apiUrl;
 
   // Modais de Exclusão — existentes
   oficinaParaExcluir: number | null = null;
@@ -66,13 +66,100 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   timelineItemParaExcluir: number | null = null;
   equipeMemberParaExcluir: number | null = null;
 
+  // Lista padronizada de ícones corporativos para Oficinas / Seções
+  readonly iconesDisponiveis = [
+    { valor: 'school', nome: '🎓 Educação / Escola' },
+    { valor: 'computer', nome: '💻 Informática / Tecnologia' },
+    { valor: 'music_note', nome: '🎵 Música / Musicoterapia' },
+    { valor: 'palette', nome: '🎨 Artes / Artesanato' },
+    { valor: 'self_improvement', nome: '🧘 Atividade Física / Saúde' },
+    { valor: 'theater_comedy', nome: '🎭 Teatro / Artes Cênicas' },
+    { valor: 'menu_book', nome: '📚 Braille / Leitura' },
+    { valor: 'group', nome: '👥 Convívio Social / Grupo' },
+    { valor: 'volunteer_activism', nome: '❤️ Apoio / Cuidado' },
+    { valor: 'psychology', nome: '🧠 Apoio Psicológico' },
+    { valor: 'restaurant', nome: '🍽️ Culinária / AVDs' },
+    { valor: 'handshake', nome: '🤝 Parcerias / Trabalho' },
+    { valor: 'accessibility_new', nome: '♿ Acessibilidade' },
+    { valor: 'sports_soccer', nome: '⚽ Esportes / Recreação' },
+    { valor: 'brush', nome: '🖌️ Pintura / Desenho' },
+    { valor: 'language', nome: '🗣️ Idiomas / Línguas' },
+    { valor: 'gavel', nome: '⚖️ Direito / Cidadania' },
+    { valor: 'work', nome: '💼 Profissionalização / Emprego' },
+    { valor: 'nature_people', nome: '🌳 Meio Ambiente / Natureza' },
+    { valor: 'record_voice_over', nome: '🎤 Canto / Coral' },
+    { valor: 'family_restroom', nome: '👨‍👩‍👧‍👦 Apoio à Família' },
+    { valor: 'cake', nome: '🍰 Culinária / Confeitaria' },
+    { valor: 'emoji_events', nome: '🏆 Conquistas / Prêmios' },
+    { valor: 'diversity_3', nome: '🌍 Diversidade / Inclusão' },
+    { valor: 'directions_bus', nome: '🚌 Mobilidade / Transporte' },
+    { valor: 'medical_services', nome: '⚕️ Serviços Médicos / Saúde' },
+    { valor: 'smart_toy', nome: '🤖 Robótica / Tecnologias Assistivas' },
+    { valor: 'storefront', nome: '🏪 Empreendedorismo / Bazar' },
+    { valor: 'hearing_disabled', nome: '🧏 Surdez / Libras' },
+    { valor: 'blind', nome: '🦯 Uso de Bengala / O&M' },
+    { valor: 'pets', nome: '🦮 Cão-guia' },
+    { valor: 'diversity_1', nome: '💬 Roda de Conversa' },
+    { valor: 'local_library', nome: '📚 Biblioteca / Sala de Estudo' },
+    { valor: 'spa', nome: '🌿 Bem-estar / Terapias' },
+    { valor: 'directions_run', nome: '🏃 Atletismo / Corrida' },
+    { valor: 'pool', nome: '🏊 Natação / Hidroginástica' },
+    { valor: 'fitness_center', nome: '🏋️ Musculação / Academia' },
+    { valor: 'headphones', nome: '🎧 Audiolivros / Podcast' },
+    { valor: 'calculate', nome: '🧮 Matemática / Soroban' },
+    { valor: 'child_care', nome: '👶 Estimulação Precoce / Infantil' },
+    { valor: 'elderly', nome: '👵 Atividades para Terceira Idade' },
+    { valor: 'construction', nome: '🛠️ Trabalhos Manuais / Marcenaria' }
+  ];
+
+  // Lista padronizada de ícones para Equipe / Departamentos
+  readonly iconesEquipe = [
+    { valor: 'groups', nome: '👥 Diretoria / Gestão' },
+    { valor: 'psychology', nome: '🧠 Psicologia' },
+    { valor: 'diversity_1', nome: '🤝 Assistência Social' },
+    { valor: 'clinical_notes', nome: '⚕️ Terapia Ocupacional' },
+    { valor: 'menu_book', nome: '📚 Pedagogia / Educação' },
+    { valor: 'hearing', nome: '🦻 Fonoaudiologia' },
+    { valor: 'sports_gymnastics', nome: '🤸 Fisioterapia' },
+    { valor: 'visibility', nome: '👁️ Oftalmologia / Médicos' },
+    { valor: 'record_voice_over', nome: '🗣️ Comunicação / RP' },
+    { valor: 'manage_accounts', nome: '💼 Administração / RH' },
+    { valor: 'volunteer_activism', nome: '❤️ Coordenação Voluntariado' },
+    { valor: 'support_agent', nome: '📞 Atendimento / Recepção' },
+    { valor: 'campaign', nome: '📣 Marketing / Captação' },
+    { valor: 'account_balance', nome: '⚖️ Finanças / Contabilidade' },
+    { valor: 'engineering', nome: '🛠️ Operações / T.I.' },
+    { valor: 'security', nome: '🛡️ Segurança' },
+    { valor: 'cleaning_services', nome: '🧹 Limpeza / Conservação' },
+    { valor: 'directions_car', nome: '🚗 Logística / Motorista' },
+    { valor: 'medication', nome: '💊 Enfermagem / Farmácia' },
+    { valor: 'food_bank', nome: '🍲 Nutrição / Refeitório' },
+    { valor: 'gavel', nome: '⚖️ Assessoria Jurídica' },
+    { valor: 'inventory', nome: '📦 Almoxarifado / Suprimentos' },
+    { valor: 'event', nome: '📅 Eventos / Produção' },
+    { valor: 'handshake', nome: '🤝 Parcerias Institucionais' },
+    { valor: 'print', nome: '🖨️ Coord. de Imprensa Braille' },
+    { valor: 'blind', nome: '🦯 Instrutor de O&M' },
+    { valor: 'fitness_center', nome: '🏋️ Esportes / Preparador Físico' },
+    { valor: 'public', nome: '🌐 Projetos Especiais' },
+    { valor: 'savings', nome: '💰 Captação de Recursos' },
+    { valor: 'local_library', nome: '📚 Coord. de Biblioteca' },
+    { valor: 'contact_phone', nome: '📞 Telemarketing / Ouvidoria' },
+    { valor: 'work', nome: '💼 Jovem Aprendiz / Estágio' },
+    { valor: 'diversity_3', nome: '🌍 Conselho / Comitê Ético' },
+    { valor: 'local_shipping', nome: '🚚 Setor de Entregas' },
+    { valor: 'cookie', nome: '🍪 Auxiliar de Cozinha' },
+    { valor: 'groups_3', nome: '👥 Equipe Multidisciplinar' },
+    { valor: 'health_and_safety', nome: '👷 Segurança do Trabalho' }
+  ];
+
   constructor(
-    private fb: FormBuilder,
-    private siteConfig: SiteConfigService,
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private route: ActivatedRoute,
-    private el: ElementRef
+    private readonly fb: FormBuilder,
+    private readonly siteConfig: SiteConfigService,
+    private readonly http: HttpClient,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly route: ActivatedRoute,
+    private readonly el: ElementRef
   ) { }
 
   ngOnInit() {
@@ -91,7 +178,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    // FocusKeyManager substituído por navegação manual para simplificar os tipos do TypeScript
+    // Acessibilidade já é configurada, mas no momento nenhuma ação é necessária em AfterViewInit neste escopo
   }
 
   handleKeydown(event: KeyboardEvent) {
@@ -157,22 +244,12 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     });
 
     this.formMissao = this.fb.group({
-      titulo: [''],
       descricaoLinha1: [''],
       descricaoLinha2: [''],
-      btnSaberMais: [''],
-      valor1Icone: [''],
       valor1Titulo: [''],
-      valor1Desc: [''],
-      valor2Icone: [''],
       valor2Titulo: [''],
-      valor2Desc: [''],
-      valor3Icone: [''],
       valor3Titulo: [''],
-      valor3Desc: [''],
-      valor4Icone: [''],
       valor4Titulo: [''],
-      valor4Desc: [''],
     });
 
     this.formOficinas = this.fb.group({ lista: this.fb.array([]) });
@@ -236,6 +313,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     if (this.oficinaParaExcluir !== null) {
       this.oficinasArray.removeAt(this.oficinaParaExcluir);
       this.oficinaParaExcluir = null;
+      if (this.formOficinas.valid) this.salvarOficinas();
     }
   }
 
@@ -254,6 +332,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     if (this.depoimentoParaExcluir !== null) {
       this.depoimentosArray.removeAt(this.depoimentoParaExcluir);
       this.depoimentoParaExcluir = null;
+      if (this.formDepoimentos.valid) this.salvarDepoimentos();
     }
   }
 
@@ -271,6 +350,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     if (this.faqParaExcluir !== null) {
       this.faqArray.removeAt(this.faqParaExcluir);
       this.faqParaExcluir = null;
+      if (this.formFaq.valid) this.salvarFaq();
     }
   }
 
@@ -289,6 +369,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
     if (this.timelineItemParaExcluir !== null) {
       this.timelineArray.removeAt(this.timelineItemParaExcluir);
       this.timelineItemParaExcluir = null;
+      if (this.formSobreTimeline.valid) this.salvarSobreTimeline();
     }
   }
 
@@ -527,6 +608,16 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   removerLogo() { this.logoParaExcluir = true; }
   cancelarExclusaoLogo() { this.logoParaExcluir = false; }
   confirmarExclusaoLogo() {
+    const oldUrl = this.formConfig.value.logoUrl || this.logoPreview;
+    if (oldUrl && oldUrl.includes('cloudinary')) {
+      const token = localStorage.getItem('token') || '';
+      const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+      this.http.delete(`${this.apiUrl}/upload`, { headers, params: { url: oldUrl } }).subscribe({
+        next: () => console.log('Logo antiga removida do Cloudinary'),
+        error: (e) => console.error('Erro ao remover logo do Cloudinary', e)
+      });
+    }
+
     this.logoPreview = null;
     this.formConfig.patchValue({ logoUrl: '' });
     this.logoParaExcluir = false;
@@ -553,7 +644,22 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
         this.formConfig.patchValue({ fachadaUrl: res.url });
         this.fachadaPreview = res.url;
         this.uploadandoFachada = false;
-        this.mensagemSucesso = 'Foto da fachada enviada! Clique em "Salvar Configurações" para aplicar.';
+
+        // Auto-salvar imediatamente após o upload para refletir no site público sem etapa manual
+        const values = this.formConfig.value;
+        const array = Object.keys(values).map(k => ({ chave: k, valor: values[k] ?? '' }));
+        this.siteConfig.salvarConfigs(array).subscribe({
+          next: () => {
+            this.mensagemSucesso = '✅ Foto da fachada salva e publicada com sucesso!';
+            this.siteConfig.aplicarCorPrimaria(values.corPrimaria);
+            this.cdr.detectChanges();
+            setTimeout(() => this.siteConfig.carregarConfigs().subscribe(), 0);
+          },
+          error: () => {
+            this.mensagemErro = 'Foto enviada, mas falha ao salvar. Clique em "Salvar Configurações" manualmente.';
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: () => {
         this.uploadandoFachada = false;
@@ -565,9 +671,34 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   removerFachada() { this.fachadaParaExcluir = true; }
   cancelarExclusaoFachada() { this.fachadaParaExcluir = false; }
   confirmarExclusaoFachada() {
+    const oldUrl = this.formConfig.value.fachadaUrl || this.fachadaPreview;
+    if (oldUrl && oldUrl.includes('cloudinary')) {
+      const token = localStorage.getItem('token') || '';
+      const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+      this.http.delete(`${this.apiUrl}/upload`, { headers, params: { url: oldUrl } }).subscribe({
+        next: () => console.log('Fachada antiga removida do Cloudinary'),
+        error: (e) => console.error('Erro ao remover fachada do Cloudinary', e)
+      });
+    }
+
     this.fachadaPreview = null;
     this.formConfig.patchValue({ fachadaUrl: '' });
     this.fachadaParaExcluir = false;
+
+    // Auto-salvar para refletir imediatamente no site público
+    const values = this.formConfig.value;
+    const array = Object.keys(values).map(k => ({ chave: k, valor: values[k] ?? '' }));
+    this.siteConfig.salvarConfigs(array).subscribe({
+      next: () => {
+        this.mensagemSucesso = '🗑️ Foto da fachada removida e publicada com sucesso!';
+        this.cdr.detectChanges();
+        setTimeout(() => this.siteConfig.carregarConfigs().subscribe(), 0);
+      },
+      error: () => {
+        this.mensagemErro = 'Foto removida localmente, mas falha ao salvar. Clique em "Salvar Configurações" manualmente.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   salvarOficinas() {
@@ -635,15 +766,19 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private tratarSucesso(nome: string) {
-    this.salvando = false;
-    this.mensagemSucesso = `Seção "${this.getNomeSecao(nome)}" salva com sucesso!`;
-    this.cdr.detectChanges();
-    setTimeout(() => this.siteConfig.carregarSecoes().subscribe(), 0);
+    setTimeout(() => {
+      this.salvando = false;
+      this.mensagemSucesso = `Seção "${this.getNomeSecao(nome)}" salva com sucesso!`;
+      this.cdr.detectChanges();
+      this.siteConfig.carregarSecoes().subscribe();
+    }, 10);
   }
 
   private tratarErro(nome: string) {
-    this.salvando = false;
-    this.mensagemErro = `Erro ao salvar a seção "${this.getNomeSecao(nome)}".`;
-    this.cdr.detectChanges();
+    setTimeout(() => {
+      this.salvando = false;
+      this.mensagemErro = `Erro ao salvar a seção "${this.getNomeSecao(nome)}".`;
+      this.cdr.detectChanges();
+    }, 10);
   }
 }
