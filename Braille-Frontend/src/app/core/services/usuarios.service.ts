@@ -80,6 +80,12 @@ export class UsuariosService {
         return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${role ?? ''}`;
     }
 
+    verificarCpf(cpf: string): Observable<any> {
+        let params = new HttpParams();
+        if (cpf) params = params.set('cpf', cpf);
+        return this.http.get<any>(`${this.url}/check-cpf`, { params });
+    }
+
     listar(page = 1, limit = 10, nome?: string, inativos = false, role?: string): Observable<PaginatedResponse<Usuario>> {
         const key = this.buildCacheKey(page, limit, nome, inativos, role);
         if (!this.cache.has(key)) {

@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
@@ -74,10 +75,12 @@ export class UsuariosLista implements OnInit, OnDestroy {
         private cdr: ChangeDetectorRef,
         private confirmDialog: ConfirmDialogService,
         private toast: ToastService,
-        private liveAnnouncer: LiveAnnouncer
+        private liveAnnouncer: LiveAnnouncer,
+        private http: HttpClient
     ) {
         this.editForm = this.fb.group({
             nome: ['', [Validators.required, Validators.minLength(3)]],
+            cpf: ['', [Validators.required, Validators.minLength(14)]],
             email: ['', [Validators.email]],
             role: ['', Validators.required],
             telefone: [''],
@@ -171,11 +174,18 @@ export class UsuariosLista implements OnInit, OnDestroy {
         // Primeiro define o usuario, depois popula o form e força detecção de mudanças
         // (necessário por conta do withFetch() que roda fora do Zone.js)
         Promise.resolve().then(() => {
+            const telFormated = usuario.telefone
+                ? usuario.telefone.replace(/\D/g, '').length <= 10
+                    ? usuario.telefone.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+                    : usuario.telefone.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
+                : '';
+
             this.editForm.patchValue({
                 nome: usuario.nome,
+                cpf: usuario.cpf ? usuario.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '',
                 email: usuario.email ?? '',
                 role: usuario.role,
-                telefone: usuario.telefone ?? '',
+                telefone: telFormated,
                 cep: usuario.cep ?? '',
                 rua: usuario.rua ?? '',
                 numero: usuario.numero ?? '',
@@ -208,8 +218,78 @@ export class UsuariosLista implements OnInit, OnDestroy {
         setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
 
+    cpfStatus: 'livre' | 'ativo' | 'inativo' | 'verificando' | 'excluido' | '' = '';
+    cpfConflito: { nome: string; matricula: string | null } | null = null;
+
+    formatarCpf(event: any) {
+        let v = event.target.value.replace(/\D/g, '').substring(0, 11);
+        v = v.replace(/(\d{3})(\d)/, '$1.$2');
+        v = v.replace(/(\d{3})(\d)/, '$1.$2');
+        v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+        event.target.value = v;
+        this.editForm.get('cpf')?.setValue(v, { emitEvent: false });
+        
+        if (this.cpfStatus && this.cpfStatus !== 'livre') {
+            this.cpfStatus = '';
+            this.cpfConflito = null;
+        }
+    }
+
+    formatarTelefone(event: any) {
+        let v = event.target.value.replace(/\D/g, '').substring(0, 11);
+        v = v.length <= 10
+            ? v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
+            : v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+        event.target.value = v;
+        this.editForm.get('telefone')?.setValue(v, { emitEvent: false });
+    }
+
+    verificarCpfBlur() {
+        const valor = this.editForm.get('cpf')?.value ?? '';
+        const limpo = valor.replace(/\D/g, '');
+
+        if (!limpo || limpo.length !== 11) {
+            this.cpfStatus = '';
+            this.cpfConflito = null;
+            return;
+        }
+
+        // Se é o mesmo CPF do próprio usuário sendo editado, é válido
+        if (this.usuarioEmEdicao?.cpf === limpo) {
+            this.cpfStatus = 'livre';
+            this.cpfConflito = null;
+            return;
+        }
+
+        this.cpfStatus = 'verificando';
+        this.cpfConflito = null;
+        this.cdr.detectChanges();
+
+        this.usuariosService.verificarCpf(limpo).subscribe({
+            next: (res) => {
+                if (res.status === 'livre' || res.id === this.usuarioEmEdicao?.id) {
+                    this.cpfStatus = 'livre';
+                } else {
+                    // CPF já cadastrado para outra pessoa
+                    this.cpfStatus = res.status as any;
+                    this.cpfConflito = { nome: res.nome, matricula: res.matricula };
+                }
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.cpfStatus = '';
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
     salvar(): void {
-        if (this.editForm.invalid || !this.usuarioEmEdicao) return;
+        const cpfLimpo = this.editForm.get('cpf')?.value?.replace(/\D/g, '');
+        if (this.editForm.invalid || !this.usuarioEmEdicao || (this.cpfStatus && this.cpfStatus !== 'livre' && cpfLimpo !== this.usuarioEmEdicao.cpf)) {
+            this.editForm.markAllAsTouched();
+            return;
+        }
+        
         this.salvando = true;
 
         const rawVal = this.editForm.value;
@@ -233,6 +313,37 @@ export class UsuariosLista implements OnInit, OnDestroy {
                 this.cdr.markForCheck();
             }
         });
+    }
+
+    buscarCep(): void {
+        let cep = this.editForm.get('cep')?.value;
+        if (!cep) return;
+        cep = cep.replace(/\D/g, '');
+        if (cep.length === 8) {
+            this.liveAnnouncer.announce('Buscando endereço pelo CEP...');
+            this.http.get(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
+                next: (dados: any) => {
+                    if (dados.erro) {
+                        this.toast.erro('CEP não encontrado.');
+                        this.liveAnnouncer.announce('CEP não encontrado. Verifique a digitação.');
+                    } else {
+                        this.editForm.patchValue({
+                            rua: dados.logradouro,
+                            bairro: dados.bairro,
+                            cidade: dados.localidade,
+                            uf: dados.uf
+                        });
+                        this.liveAnnouncer.announce('Endereço preenchido automaticamente.');
+                        this.cdr.markForCheck();
+                    }
+                },
+                error: () => {
+                    this.toast.erro('Erro ao buscar o CEP.');
+                    this.liveAnnouncer.announce('Erro ao conectar com o serviço de CEP.');
+                    this.cdr.markForCheck();
+                }
+            });
+        }
     }
 
     excluir(usuario: Usuario): void {

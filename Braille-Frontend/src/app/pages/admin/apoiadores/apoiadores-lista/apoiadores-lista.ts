@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Apoiador, ApoiadoresService } from '../apoiadores.service';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 
@@ -36,6 +36,10 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   logoPreview: string | ArrayBuffer | null = null;
   salvando = false;
 
+  // Form Rápido do Perfil Visualizado
+  novaAcaoForm: FormGroup;
+  salvandoAcao = false;
+
   constructor(
     private readonly router: Router,
     private readonly apoiadoresService: ApoiadoresService,
@@ -49,12 +53,18 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
       cpfCnpj: [''],
       contatoPessoa: [''],
       telefone: [''],
-      email: ['', [Validators.email]],
+      email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
       endereco: [''],
       atividadeEspecialidade: [''],
       observacoes: [''],
       exibirNoSite: [false],
-      ativo: [true]
+      ativo: [true],
+      acoes: this.fb.array([])
+    });
+
+    this.novaAcaoForm = this.fb.group({
+      dataEvento: ['', Validators.required],
+      descricaoAcao: ['', Validators.required]
     });
   }
 
@@ -114,6 +124,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
       exibirNoSite: false,
       ativo: true
     });
+    this.acoesFormArray.clear();
     this.modalFormAberto = true;
   }
 
@@ -125,6 +136,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.logoPreview = null;
     this.modalFormAberto = true;
     this.apoiadorForm.reset();
+    this.acoesFormArray.clear();
     
     this.apoiadoresService.obterPorId(id).subscribe({
       next: (res) => {
@@ -139,12 +151,16 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
           endereco: res.endereco,
           atividadeEspecialidade: res.atividadeEspecialidade,
           observacoes: res.observacoes,
-          exibirNoSite: res.exibirNoSite,
           ativo: res.ativo
         });
         if (res.logoUrl) {
             this.logoPreview = res.logoUrl;
         }
+
+        // Apply Masks
+        if (res.cpfCnpj) this.formatarCpfCnpj({ target: { value: res.cpfCnpj } });
+        if (res.telefone) this.formatarTelefone({ target: { value: res.telefone } });
+
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -152,6 +168,66 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // --- MÁSCARAS ---
+  formatarCpfCnpj(event: any): void {
+    let valor = event.target.value.replace(/\D/g, '');
+    if (valor.length <= 11) {
+      // CPF
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+      valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+      // CNPJ (max 14 digitos numéricos)
+      valor = valor.substring(0, 14);
+      valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
+      valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+      valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
+      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
+    }
+    event.target.value = valor;
+    this.apoiadorForm.get('cpfCnpj')?.setValue(valor, { emitEvent: false });
+  }
+
+  formatarEmail(event: any): void {
+    let v = event.target.value.replace(/\s/g, '').toLowerCase();
+    event.target.value = v;
+    this.apoiadorForm.get('email')?.setValue(v);
+  }
+
+  formatarTelefone(event: any): void {
+    let valor = event.target.value.replace(/\D/g, '');
+    valor = valor.substring(0, 11);
+    
+    if (valor.length > 10) {
+      valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
+    } else if (valor.length > 6) {
+      valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
+    } else if (valor.length > 2) {
+      valor = valor.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
+    } else if (valor.length > 0) {
+      valor = valor.replace(/^(\d{0,2})/, '($1');
+    }
+
+    event.target.value = valor;
+    this.apoiadorForm.get('telefone')?.setValue(valor, { emitEvent: false });
+  }
+
+  // --- CONTROLES DE ARRAY DE AÇÕES NO FORMULÁRIO GERAL ---
+  get acoesFormArray() {
+    return this.apoiadorForm.get('acoes') as FormArray;
+  }
+
+  addAcaoField(dataEvento = '', descricaoAcao = '') {
+    this.acoesFormArray.push(this.fb.group({
+      dataEvento: [dataEvento, Validators.required],
+      descricaoAcao: [descricaoAcao, Validators.required]
+    }));
+  }
+
+  removeAcaoField(index: number) {
+    this.acoesFormArray.removeAt(index);
   }
 
   verPerfil(id: string) {
@@ -176,6 +252,37 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   fecharModal() {
     this.modalAberto = false;
     this.apoiadorVisualizado = null;
+    this.novaAcaoForm.reset();
+  }
+
+  // Lógica do Modal de Histórico Pessoal (Rápido)
+  adicionarAcaoPerfil(event: Event) {
+    event.preventDefault();
+    if (this.novaAcaoForm.invalid || !this.apoiadorVisualizado) {
+      this.novaAcaoForm.markAllAsTouched();
+      return;
+    }
+    this.salvandoAcao = true;
+    const val = this.novaAcaoForm.value;
+    
+    this.apoiadoresService.adicionarAcao(this.apoiadorVisualizado.id, val.dataEvento, val.descricaoAcao).subscribe({
+      next: (novaAcao) => {
+        this.salvandoAcao = false;
+        // Atualiza a view em tempo real
+        if (!this.apoiadorVisualizado!.acoes) {
+          this.apoiadorVisualizado!.acoes = [];
+        }
+        this.apoiadorVisualizado!.acoes.unshift(novaAcao);
+        this.novaAcaoForm.reset();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao adicionar ação avulsa', err);
+        alert('Falha ao adicionar histórico.');
+        this.salvandoAcao = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // Lógica do Modal de Formulário
@@ -217,7 +324,8 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
       atividadeEspecialidade: formData.atividadeEspecialidade || undefined,
       observacoes: formData.observacoes || undefined,
       exibirNoSite: formData.exibirNoSite,
-      ativo: formData.ativo
+      ativo: formData.ativo,
+      acoes: (!this.modoEdicao && formData.acoes?.length) ? formData.acoes : undefined
     };
 
     const req$ = this.modoEdicao && this.idApoiadorEditando

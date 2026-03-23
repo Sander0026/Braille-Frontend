@@ -162,6 +162,53 @@
                         Cadastrado em: {{ apoiadorVisualizado.criadoEm | date:'dd/MM/yyyy às HH:mm' }}
                     </p>
                 </div>
+
+                <!-- HISTÓRICO DE CRM (TIMELINE E AÇÕES) -->
+                <div class="profile-section profile-section--full mt-4 border-top pt-4">
+                    <h4 class="mb-3 d-flex align-items-center gap-2">
+                        <span class="material-symbols-rounded" style="color: #2563eb;">history</span> 
+                        Histórico de Relacionamento e Ações
+                    </h4>
+                    
+                    <form [formGroup]="novaAcaoForm" (submit)="adicionarAcaoPerfil($event)" class="row g-2 align-items-end mb-4" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 8px;">
+                        <input type="hidden" name="dummy" value=""> <!-- prevent empty flex layout collapse -->
+                        <div class="col-md-3">
+                            <label class="form-label mb-1" style="font-size: 0.85rem; font-weight: 600;">Data da Ação</label>
+                            <input type="date" class="form-input form-input-sm" formControlName="dataEvento">
+                        </div>
+                        <div class="col-md-7">
+                            <label class="form-label mb-1" style="font-size: 0.85rem; font-weight: 600;">Descrição (O que o parceiro fez?)</label>
+                            <input type="text" class="form-input form-input-sm" formControlName="descricaoAcao" placeholder="Ex: Doou 30 cestas básicas, Divulgou no Instagram...">
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button type="submit" class="btn btn-primary w-100 btn-sm" [disabled]="novaAcaoForm.invalid || salvandoAcao" style="padding: 0.5rem;">
+                                @if (salvandoAcao) { Salvando... } @else { Adicionar }
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="timeline-container">
+                        @if (!apoiadorVisualizado.acoes || apoiadorVisualizado.acoes.length === 0) {
+                            <div class="text-center text-muted p-4" style="background: #f9fafb; border-radius: 8px;">
+                                <p class="mb-0">Nenhuma ação registrada para este apoiador.</p>
+                            </div>
+                        } @else {
+                            <div class="timeline-list" style="display: flex; flex-direction: column; gap: 1rem;">
+                                @for (acao of apoiadorVisualizado.acoes; track acao.id) {
+                                    <div class="timeline-item" style="display: flex; gap: 1rem; padding: 1rem; border-left: 3px solid #2563eb; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-radius: 0 8px 8px 0;">
+                                        <div class="timeline-date" style="min-width: 90px; color: #6b7280; font-size: 0.85rem; font-weight: 600;">
+                                            {{ acao.dataEvento | date:'dd/MM/yyyy' }}
+                                        </div>
+                                        <div class="timeline-content" style="flex: 1; color: #374151;">
+                                            {{ acao.descricaoAcao }}
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
             </div>
             }
         </div>
@@ -217,7 +264,7 @@
 
                 <div class="col-md-6">
                     <label for="cpfCnpj" class="form-label">Documento (CPF ou CNPJ)</label>
-                    <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj" placeholder="Apenas números ou formato padrão">
+                    <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj" placeholder="Apenas números ou formato padrão" (input)="formatarCpfCnpj($event)" maxlength="18">
                 </div>
             </div>
 
@@ -225,12 +272,15 @@
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label for="email" class="form-label">E-mail</label>
-                    <input id="email" type="email" class="form-input" formControlName="email" placeholder="contato@empresa.com">
+                    <input id="email" type="text" class="form-input" formControlName="email" placeholder="contato@empresa.com" (input)="formatarEmail($event)">
+                    @if (apoiadorForm.get('email')?.invalid && apoiadorForm.get('email')?.dirty && apoiadorForm.get('email')?.value) {
+                        <small class="text-danger mt-1 d-block" style="font-size: 0.8rem; color: #dc2626;">Formato incorreto de e-mail.</small>
+                    }
                 </div>
 
                 <div class="col-md-6">
                     <label for="telefone" class="form-label">Telefone ou WhatsApp</label>
-                    <input id="telefone" type="text" class="form-input" formControlName="telefone" placeholder="(11) 99999-9999">
+                    <input id="telefone" type="text" class="form-input" formControlName="telefone" placeholder="(11) 99999-9999" (input)="formatarTelefone($event)" maxlength="15">
                 </div>
 
                 <div class="col-md-6">
@@ -288,6 +338,40 @@
                     <label for="observacoes" class="form-label">Observações Restritas (Apenas Administrativo)</label>
                     <textarea id="observacoes" class="form-input" formControlName="observacoes" rows="3" placeholder="Insira histórico de interações, valores de contratos, notas pessoais..."></textarea>
                 </div>
+            </div>
+
+            <h5 class="section-title mt-4 d-flex justify-content-between align-items-center">
+                Registro de Ações e Histórico (CRM)
+                <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="addAcaoField()">
+                    <span class="material-symbols-rounded" style="font-size: 1rem">add</span>
+                    Vincular Ação
+                </button>
+            </h5>
+            <p class="text-muted" style="font-size: 0.85rem;">Preencha opcionalmente as ações, doações ou apoios que essa entidade já forneceu ao instituto no momento da criação.</p>
+            
+            <div formArrayName="acoes">
+                @for (acaoCtrl of acoesFormArray.controls; track $index) {
+                <div [formGroupName]="$index" class="row g-2 align-items-end mb-3 pb-3 border-bottom position-relative" style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                    <div class="col-md-3">
+                        <label class="form-label mb-1">Data Evento *</label>
+                        <input type="date" class="form-input form-input-sm" formControlName="dataEvento">
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label mb-1">Descrição do que foi efetuado *</label>
+                        <input type="text" class="form-input form-input-sm" formControlName="descricaoAcao" placeholder="Exclua via lixeira se em branco...">
+                    </div>
+                    <div class="col-md-1 text-center">
+                        <button type="button" class="btn btn-danger btn-sm p-2 w-100 d-flex justify-content-center" (click)="removeAcaoField($index)" title="Remover esta Ação">
+                            <span class="material-symbols-rounded" style="font-size: 1.1rem; margin: 0;">delete</span>
+                        </button>
+                    </div>
+                </div>
+                }
+                @empty {
+                    <div class="text-muted text-center p-3" style="background: #f9fafb; border-radius: 8px; font-size: 0.9rem;">
+                        Você ainda não adicionou entradas de histórico simultâneo para edição. (Mas pode adicionar depois acessando Perfil > Histórico).
+                    </div>
+                }
             </div>
 
             <hr class="mt-4 mb-4">
