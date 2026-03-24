@@ -314,6 +314,12 @@
                             <input type="file" (change)="onFileSelected($event)"
                                 accept="image/jpeg, image/png, image/webp" class="sr-only" />
                         </label>
+                        @if (usuarioVisualizado.fotoPerfil) {
+                        <button class="btn btn-sm btn-danger btn-icon" title="Remover Foto"
+                            aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin()">
+                            <span class="material-symbols-rounded">delete</span>
+                        </button>
+                        }
                     </div>
                 </div>
 

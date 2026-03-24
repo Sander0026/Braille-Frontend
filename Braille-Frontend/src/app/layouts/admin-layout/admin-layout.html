@@ -161,7 +161,7 @@
       <div class="foto-preview-area">
         @if (fotoPreview) {
         <img [src]="fotoPreview" class="foto-preview-img" alt="Pré-visualização da nova foto" />
-        } @else if (fotoPerfil) {
+        } @else if (fotoPerfil && !removerFotoFlag) {
         <img [src]="fotoPerfil" class="foto-preview-img" alt="Foto atual" />
         } @else {
         <div class="foto-preview-placeholder">
@@ -170,11 +170,21 @@
         }
       </div>
 
-      <!-- Input arquivo -->
-      <label class="foto-upload-btn" for="input-foto">
-        <span class="material-symbols-rounded" aria-hidden="true">upload</span>
-        @if (fotoSelecionada) { Alterar arquivo } @else { Selecionar foto }
-      </label>
+      <!-- Controles de Seleção / Remoção -->
+      <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
+        <!-- Input arquivo -->
+        <label class="foto-upload-btn" for="input-foto" style="margin-bottom: 0;">
+          <span class="material-symbols-rounded" aria-hidden="true">upload</span>
+          @if (fotoSelecionada) { Alterar } @else { Selecionar foto }
+        </label>
+        
+        @if (fotoPerfil && !removerFotoFlag) {
+        <button class="btn btn-secondary" style="color: #dc2626; border-color: #fca5a5; display: flex; align-items: center; gap: 0.5rem;" (click)="marcarParaRemoverFoto()" title="Remover minha foto atual">
+          <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 20px;">delete</span>
+          Remover
+        </button>
+        }
+      </div>
       <input id="input-foto" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only"
         (change)="onFotoSelecionada($event)" />
 
@@ -187,8 +197,8 @@
 
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" (click)="salvarFoto()" [disabled]="!fotoSelecionada || carregandoFoto">
-        @if (carregandoFoto) { Salvando... } @else { Salvar Foto }
+      <button class="btn btn-primary" (click)="salvarFoto()" [disabled]="(!fotoSelecionada && !removerFotoFlag) || carregandoFoto">
+        @if (carregandoFoto) { Salvando... } @else { Salvar Alterações }
       </button>
     </div>
 
@@ -302,9 +312,16 @@
         <div class="perfil-header-info">
           <p class="perfil-nome">{{ nomeDisplay }}</p>
           <p class="perfil-cargo">{{ labelCargo }}</p>
-          <button class="perfil-trocar-foto-link" type="button" (click)="abrirModalFoto()">
-            <span class="material-symbols-rounded">photo_camera</span> Trocar foto
-          </button>
+          <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-start; margin-top: 0.5rem; flex-wrap: wrap;">
+            <button class="perfil-trocar-foto-link" type="button" (click)="abrirModalFoto()" style="margin: 0;">
+              <span class="material-symbols-rounded">photo_camera</span> Trocar foto
+            </button>
+            @if (fotoPerfil) {
+            <button class="perfil-trocar-foto-link" style="color: #dc2626; margin: 0;" type="button" (click)="removerMinhaFotoDireto()">
+              <span class="material-symbols-rounded">delete</span> Remover
+            </button>
+            }
+          </div>
         </div>
       </div>
 

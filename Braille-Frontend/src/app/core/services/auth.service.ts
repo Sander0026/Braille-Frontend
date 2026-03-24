@@ -100,7 +100,7 @@ export class AuthService {
     return this.http.get<PerfilUsuario>(`${this.apiUrl}/me`);
   }
 
-  atualizarFoto(fotoPerfil: string): Observable<any> {
+  atualizarFoto(fotoPerfil: string | null): Observable<any> {
     return this.http.patch(`${this.apiUrl}/foto-perfil`, { fotoPerfil });
   }
 

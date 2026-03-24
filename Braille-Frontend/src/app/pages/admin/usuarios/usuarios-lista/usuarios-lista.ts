@@ -448,6 +448,7 @@ export class UsuariosLista implements OnInit, OnDestroy {
         const file = event.target.files?.[0];
         if (!file || !this.usuarioVisualizado) return;
 
+        this.salvando = true;
         this.usuariosService.uploadFoto(file).subscribe({
             next: (res) => {
                 const url = res.url;
@@ -455,14 +456,44 @@ export class UsuariosLista implements OnInit, OnDestroy {
 
                 this.usuariosService.atualizar(this.usuarioVisualizado.id, { fotoPerfil: url }).subscribe({
                     next: () => {
+                        this.salvando = false;
                         if (this.usuarioVisualizado) this.usuarioVisualizado.fotoPerfil = url;
                         setTimeout(() => this.carregar(), 0);
                         this.cdr.markForCheck();
                     },
-                    error: () => { this.cdr.detectChanges(); }
+                    error: () => { this.salvando = false; this.cdr.detectChanges(); }
                 });
             },
-            error: () => { this.cdr.detectChanges(); }
+            error: () => { this.salvando = false; this.cdr.detectChanges(); }
+        });
+    }
+
+    async removerFotoAdmin(): Promise<void> {
+        if (!this.usuarioVisualizado || !this.usuarioVisualizado.fotoPerfil) return;
+        
+        const confirmado = await this.confirmDialog.confirmar({
+            titulo: 'Remover Foto',
+            mensagem: 'Deseja realmente remover a foto deste usuário?',
+            tipo: 'danger',
+            textoBotaoConfirmar: 'Remover',
+            textoBotaoCancelar: 'Cancelar'
+        });
+        if (!confirmado) return;
+
+        this.salvando = true;
+        this.usuariosService.atualizar(this.usuarioVisualizado.id, { fotoPerfil: null }).subscribe({
+            next: () => {
+                this.salvando = false;
+                this.usuarioVisualizado!.fotoPerfil = null;
+                setTimeout(() => this.carregar(), 0);
+                this.toast.sucesso('Foto removida com sucesso!');
+                this.cdr.markForCheck();
+            },
+            error: () => {
+                this.salvando = false;
+                this.toast.erro('Erro ao remover a foto.');
+                this.cdr.markForCheck();
+            }
         });
     }
 
