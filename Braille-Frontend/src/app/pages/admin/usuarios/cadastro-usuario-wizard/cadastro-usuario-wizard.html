@@ -92,15 +92,24 @@
                             [attr.aria-describedby]="isCampoInvalido('dadosPessoais', 'cpf') ? 'erro-wizard-cpf' : null">
                         
                         <!-- Status CPF em Tempo Real -->
-                        <div class="cpf-status-indicator" style="margin-top: 5px; font-size: 0.85rem;" aria-live="polite">
+                        <div class="cpf-status-indicator" aria-live="polite">
                             @if (cpfStatus === 'verificando') {
-                                <span style="color: #6b7280;">⏳ Verificando no sistema...</span>
+                                <div class="status-msg verificando">
+                                    <span class="material-symbols-rounded">pending</span>
+                                    <span>Verificando no sistema...</span>
+                                </div>
                             }
                             @if (cpfStatus === 'livre') {
-                                <span style="color: #10b981;">✅ CPF disponível para cadastro.</span>
+                                <div class="status-msg livre">
+                                    <span class="material-symbols-rounded">check_circle</span>
+                                    <span>CPF disponível para cadastro.</span>
+                                </div>
                             }
                             @if (cpfStatus === 'ativo') {
-                                <span style="color: #ef4444; font-weight: 500;">❌ Já existe um funcionário ativo com este CPF: {{ cpfConflito?.nome }}.</span>
+                                <div class="status-msg ativo">
+                                    <span class="material-symbols-rounded">cancel</span>
+                                    <span>Já existe um funcionário ativo com este CPF: {{ cpfConflito?.nome }}.</span>
+                                </div>
                             }
                         </div>
 
