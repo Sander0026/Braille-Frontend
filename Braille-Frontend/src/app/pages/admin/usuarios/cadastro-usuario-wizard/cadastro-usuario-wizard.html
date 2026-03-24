@@ -3,8 +3,13 @@
     <!-- Feedback Banner -->
     @if (mensagemFeedback) {
     <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-        <strong>{{ tipoFeedback === 'sucesso' ? '✅ Sucesso: ' : '⚠️ Erro: ' }}</strong>
-        {{ mensagemFeedback }}
+        <span class="material-symbols-rounded banner-icon">
+            {{ tipoFeedback === 'sucesso' ? 'check_circle' : 'error' }}
+        </span>
+        <div class="banner-content">
+            <strong>{{ tipoFeedback === 'sucesso' ? 'Sucesso: ' : 'Erro: ' }}</strong>
+            {{ mensagemFeedback }}
+        </div>
     </div>
     }
 
@@ -15,8 +20,11 @@
             <span class="material-symbols-rounded">key</span>
             <h3>Credenciais Geradas — Anote agora!</h3>
         </div>
-        <p class="credenciais-aviso">🔒 Entregue estas informações ao funcionário. A senha deve ser trocada no primeiro
+        <div class="credenciais-aviso">
+            <span class="material-symbols-rounded">lock</span>
+            <p>Entregue estas informações ao funcionário. A senha deve ser trocada no primeiro
             acesso.</p>
+        </div>
         <div class="credenciais-grid">
             <div class="credencial-item">
                 <label>Login (Username)</label>
@@ -210,8 +218,13 @@
                 </button>
                 }
                 @if (passoAtual === 2) {
-                <button type="submit" class="btn btn-success" [disabled]="isSalvando">
-                    {{ isSalvando ? 'Cadastrando...' : '✅ Cadastrar Funcionário' }}
+                <button type="submit" class="btn btn-success btn-with-icon" [disabled]="isSalvando">
+                    @if (!isSalvando) {
+                        <span class="material-symbols-rounded">person_add</span>
+                        Cadastrar Usuário
+                    } @else {
+                        Cadastrando...
+                    }
                 </button>
                 }
         </footer>
@@ -239,8 +252,13 @@
         </p>
         <div class="modal-actions">
             <button class="btn btn-secondary" (click)="cancelarReativacao()">Não, cancelar</button>
-            <button class="btn btn-success" (click)="confirmarReativacao()" [disabled]="isSalvando">
-                {{ isSalvando ? 'Reativando...' : '✅ Sim, reativar' }}
+            <button class="btn btn-success btn-with-icon" (click)="confirmarReativacao()" [disabled]="isSalvando">
+                @if (!isSalvando) {
+                    <span class="material-symbols-rounded">autorenew</span>
+                    Sim, reativar
+                } @else {
+                    Reativando...
+                }
             </button>
         </div>
     </div>
