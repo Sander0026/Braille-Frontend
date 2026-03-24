@@ -21,8 +21,11 @@ $transition: 250ms ease;
 
 .login-wrapper {
     display: flex;
+    height: 100vh;
     min-height: 100vh;
-    background: #f8fafc; // Fundo ligeiramente cinza claro ou branco para contrastar o card, the prompt says "fundo da tela de login branca", let's use #f8fafc for layout and #fff for card, or just all white. Screen shot looks like #f8fafc with a white card. Let's do #f9f9fb.
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f8fafc;
     font-family: 'Inter', sans-serif;
 }
 
@@ -34,6 +37,7 @@ $transition: 250ms ease;
     justify-content: center;
     padding: 2.5rem 1.5rem;
     width: 100%;
+    min-height: 100%;
     position: relative;
     background: #f9f9fb; // Fundo todo branco da tela
 }
@@ -45,6 +49,7 @@ $transition: 250ms ease;
     border-radius: 12px;
     padding: 3rem;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+    margin: auto; // Garante que o conteúdo fique centrado sem cortar no topo
 }
 
 // Cabeçalho do formulário
