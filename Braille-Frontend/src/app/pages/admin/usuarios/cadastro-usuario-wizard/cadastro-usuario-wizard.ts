@@ -47,6 +47,7 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
     }
 
     isFormDirty(): boolean {
+        if (this.credenciaisGeradas) return false;
         return !!this.cadastroUsuarioForm?.dirty && !this.isSalvando;
     }
 

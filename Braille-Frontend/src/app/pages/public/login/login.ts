@@ -3,6 +3,21 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { AbstractControl, ValidationErrors } from '@angular/forms';
+
+export function senhaForteValidator(control: AbstractControl): ValidationErrors | null {
+  const s = control.value || '';
+  if (!s) return null; // let 'required' handle empty
+  const hasUpper = /[A-Z]/.test(s);
+  const hasLower = /[a-z]/.test(s);
+  const hasNumber = /[0-9]/.test(s);
+  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(s);
+  
+  if (s.length >= 8 && hasUpper && hasLower && hasNumber && hasSpecial) {
+    return null;
+  }
+  return { senhaFraca: true };
+}
 
 @Component({
   selector: 'app-login',
@@ -24,6 +39,16 @@ export class Login {
     this.mostrarSenha = !this.mostrarSenha;
   }
 
+  get hasMinLength() { return (this.novaSenhaForm?.get('novaSenha')?.value || '').length >= 8; }
+  get hasUpperCase() { return /[A-Z]/.test(this.novaSenhaForm?.get('novaSenha')?.value || ''); }
+  get hasLowerCase() { return /[a-z]/.test(this.novaSenhaForm?.get('novaSenha')?.value || ''); }
+  get hasNumber() { return /[0-9]/.test(this.novaSenhaForm?.get('novaSenha')?.value || ''); }
+  get hasSpecial() { return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(this.novaSenhaForm?.get('novaSenha')?.value || ''); }
+  
+  get missingColor() {
+    return this.novaSenhaForm?.get('novaSenha')?.touched ? '#dc2626' : '#64748b';
+  }
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
@@ -36,7 +61,7 @@ export class Login {
     });
 
     this.novaSenhaForm = this.fb.group({
-      novaSenha: ['', [Validators.required, Validators.minLength(8)]],
+      novaSenha: ['', [Validators.required, senhaForteValidator]],
       confirmarSenha: ['', [Validators.required]]
     }, { validators: this.senhasIguaisValidator });
   }

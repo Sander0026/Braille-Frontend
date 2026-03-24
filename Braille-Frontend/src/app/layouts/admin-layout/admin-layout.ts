@@ -7,6 +7,7 @@ import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.s
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
 import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
 import { HotkeysService, HotkeyAction } from '../../core/services/hotkeys.service';
@@ -67,6 +68,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   fotoSelecionada: File | null = null;
   fotoErro: string | null = null;
   carregandoFoto = false;
+  removerFotoFlag = false;
 
 
   private destroy$ = new Subject<void>();
@@ -102,7 +104,8 @@ export class AdminLayout implements OnInit, OnDestroy {
     private elRef: ElementRef,
     private cdr: ChangeDetectorRef,
     public a11y: AccessibilityService,
-    private hotkeysService: HotkeysService
+    private hotkeysService: HotkeysService,
+    private confirmDialog: ConfirmDialogService
   ) { }
 
   ngOnInit(): void {
@@ -204,6 +207,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.fotoPreview = null;
     this.fotoSelecionada = null;
     this.fotoErro = null;
+    this.removerFotoFlag = false;
     this.modalAtivo = 'foto';
   }
 
@@ -256,18 +260,44 @@ export class AdminLayout implements OnInit, OnDestroy {
     }
 
     this.fotoSelecionada = file;
+    this.removerFotoFlag = false;
     const reader = new FileReader();
     reader.onload = (e) => { this.fotoPreview = e.target?.result as string; };
     reader.readAsDataURL(file);
   }
 
+  marcarParaRemoverFoto(): void {
+    this.fotoSelecionada = null;
+    this.removerFotoFlag = true;
+    this.fotoPreview = null;
+  }
+
   salvarFoto(): void {
-    if (!this.fotoSelecionada || this.carregandoFoto) return;
+    if ((!this.fotoSelecionada && !this.removerFotoFlag) || this.carregandoFoto) return;
 
     this.carregandoFoto = true;
     this.fotoErro = null;
 
-    this.authService.uploadFoto(this.fotoSelecionada)
+    if (this.removerFotoFlag) {
+      this.authService.atualizarFoto(null)
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.fotoPerfil = null;
+            this.carregandoFoto = false;
+            this.fecharModal();
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.fotoErro = 'Erro ao remover a foto. Tente novamente.';
+            this.carregandoFoto = false;
+            this.cdr.detectChanges();
+          }
+        });
+      return;
+    }
+
+    this.authService.uploadFoto(this.fotoSelecionada!)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: ({ url }) => {
@@ -290,6 +320,34 @@ export class AdminLayout implements OnInit, OnDestroy {
         error: () => {
           this.fotoErro = 'Erro ao fazer o upload. Tente novamente.';
           this.carregandoFoto = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  async removerMinhaFotoDireto(): Promise<void> {
+    const confirmado = await this.confirmDialog.confirmar({
+        titulo: 'Remover Foto',
+        mensagem: 'Deseja realmente remover sua foto de perfil?',
+        tipo: 'danger',
+        textoBotaoConfirmar: 'Remover',
+        textoBotaoCancelar: 'Cancelar'
+    });
+    if (!confirmado) return;
+    
+    this.carregandoPerfil = true;
+    this.authService.atualizarFoto(null)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.fotoPerfil = null;
+          if (this.perfil) this.perfil.fotoPerfil = null;
+          this.carregandoPerfil = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.perfilErro = 'Erro ao remover a foto de perfil. Tente novamente.';
+          this.carregandoPerfil = false;
           this.cdr.detectChanges();
         }
       });
