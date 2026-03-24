@@ -238,25 +238,54 @@ $error-text: #991b1b;
             color: $text-dark;
         }
     }
+
+    .btn-with-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+
+        .material-symbols-rounded {
+            font-size: 1.25rem;
+        }
+    }
 }
 
 // Feedback Banner
 .feedback-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     padding: 1rem;
     border-radius: 8px;
     margin-bottom: 2rem;
     font-size: 0.95rem;
 
+    .banner-icon {
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .banner-content {
+        flex: 1;
+    }
+
     &.sucesso {
         background-color: $success-bg;
         color: $success-text;
         border: 1px solid color.mix(black, $success-bg, 10%);
+        .banner-icon {
+            color: $success-text;
+        }
     }
 
     &.erro {
         background-color: $error-bg;
         color: $error-text;
         border: 1px solid color.mix(black, $error-bg, 10%);
+        .banner-icon {
+            color: $error-text;
+        }
     }
 }
 
@@ -336,6 +365,9 @@ $error-text: #991b1b;
     }
 
     .credenciais-aviso {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
         font-size: 0.85rem;
         color: #92400e;
         margin-bottom: 1rem;
@@ -343,6 +375,16 @@ $error-text: #991b1b;
         background: #fff7ed;
         border-radius: 6px;
         border-left: 3px solid #f97316;
+
+        .material-symbols-rounded {
+            font-size: 1.25rem;
+            color: #f97316;
+            flex-shrink: 0;
+        }
+
+        p {
+            margin: 0;
+        }
     }
 
     .credenciais-grid {
@@ -470,6 +512,17 @@ $error-text: #991b1b;
 
             &:hover:not(:disabled) {
                 background-color: #f59e0b;
+            }
+        }
+
+        .btn-with-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+
+            .material-symbols-rounded {
+                font-size: 1.25rem;
             }
         }
     }
