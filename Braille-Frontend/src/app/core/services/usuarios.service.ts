@@ -11,7 +11,7 @@ export interface Usuario {
     cpf?: string;
     matricula?: string;
     role: 'ADMIN' | 'SECRETARIA' | 'PROFESSOR' | 'COMUNICACAO';
-    fotoPerfil?: string;
+    fotoPerfil?: string | null;
     precisaTrocarSenha?: boolean;
     statusAtivo?: boolean;
     telefone?: string;
@@ -62,7 +62,7 @@ export interface CreateUsuarioDto {
     bairro?: string;
     cidade?: string;
     uf?: string;
-    fotoPerfil?: string;
+    fotoPerfil?: string | null;
 }
 
 
