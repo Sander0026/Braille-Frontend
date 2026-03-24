@@ -527,3 +527,32 @@ $error-text: #991b1b;
         }
     }
 }
+
+// ── Indicador CPF (Validador Async) ──────────────────────────────
+.cpf-status-indicator {
+    margin-top: 5px;
+    font-size: 0.85rem;
+
+    .status-msg {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+
+        .material-symbols-rounded {
+            font-size: 1.1rem;
+        }
+    }
+
+    .verificando {
+        color: #6b7280;
+    }
+
+    .livre {
+        color: #10b981;
+    }
+
+    .ativo {
+        color: #ef4444;
+        font-weight: 500;
+    }
+}
