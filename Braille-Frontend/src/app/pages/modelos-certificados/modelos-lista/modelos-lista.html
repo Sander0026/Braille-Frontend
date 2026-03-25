@@ -1,0 +1,170 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Modelos de Certificados</h1>
+    <p class="page-subtitle">Crie e gerencie os templates de certificados e honrarias do instituto</p>
+  </div>
+  <button class="btn btn-primary" (click)="novoModelo()" aria-label="Criar novo modelo">
+    Novo Modelo
+  </button>
+</div>
+
+@if (isLoading) {
+<div class="loading-state" role="status" aria-busy="true">
+  <div class="spinner" aria-hidden="true"></div>
+  <p>Carregando modelos...</p>
+</div>
+} @else if (erro) {
+<div class="error-banner" role="alert">{{ erro }}</div>
+} @else {
+
+  @if (modelos.length === 0) {
+  <div class="empty-state" role="status">
+    <span class="material-symbols-rounded" style="font-size: 48px; color: #cbd5e1; margin-bottom: 1rem;">workspace_premium</span>
+    <p>Nenhum modelo de certificado encontrado.</p>
+    <button class="btn btn-primary" (click)="novoModelo()">+ Criar Primeiro Modelo</button>
+  </div>
+  } @else {
+  <div class="modelos-grid" role="region" aria-label="Lista de modelos">
+    @for (modelo of modelos; track modelo.id) {
+    <article class="turma-card focavel-card" tabindex="0">
+      <div class="card-status-bar" [class.inativa]="modelo.tipo === 'HONRARIA'" aria-hidden="true"></div>
+      
+      <div class="card-body">
+        <div class="card-title-row">
+          <h2 class="turma-nome">{{ modelo.nome }}</h2>
+          <span class="badge" [class.badge--success]="modelo.tipo === 'ACADEMICO'" [class.badge--neutral]="modelo.tipo === 'HONRARIA'">
+            {{ modelo.tipo === 'ACADEMICO' ? 'Acadêmico' : 'Honraria' }}
+          </span>
+        </div>
+
+        <div class="turma-meta" style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+          <span class="meta-item" title="Assinante">
+            <span class="material-symbols-rounded">signature</span>
+            {{ modelo.nomeAssinante }} ({{ modelo.cargoAssinante }})
+          </span>
+          <span class="meta-item" title="Última atualização">
+            <span class="material-symbols-rounded">calendar_month</span>
+            Atualizado em: {{ modelo.dataAtualizacao | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-footer" style="flex-wrap: wrap; gap: 0.5rem;">
+        <button class="btn btn-sm btn-info" (click)="abrirPreview(modelo)" aria-label="Visualizar modelo {{ modelo.nome }}">
+          <span class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">visibility</span>
+          Visualizar
+        </button>
+        <button class="btn btn-sm btn-secondary" (click)="editarModelo(modelo.id)">
+          Editar
+        </button>
+        <button class="btn btn-sm btn-danger" (click)="excluirModelo(modelo)">
+          Excluir
+        </button>
+      </div>
+    </article>
+    }
+  </div>
+  }
+}
+
+<!-- ── Modal Preview (Simulação Visual do Certificado) ────── -->
+@if (modeloPreview) {
+<div class="modal-overlay" role="dialog" aria-modal="true" [attr.aria-label]="'Preview: ' + modeloPreview.nome"
+     (click)="fecharPreview()"
+     style="position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:1.5rem;overflow-y:auto;">
+
+  <div (click)="$event.stopPropagation()"
+       style="max-width:820px;width:100%;margin:auto;display:flex;flex-direction:column;gap:.75rem;">
+
+    <!-- Barra de título -->
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:.75rem 1rem;background:#1e293b;border-radius:10px;">
+      <div style="display:flex;align-items:center;gap:.75rem;">
+        <span class="material-symbols-rounded" style="color:#f5c800;font-size:1.3rem;">workspace_premium</span>
+        <span style="color:#f1f5f9;font-weight:600;font-size:.95rem;">{{ modeloPreview.nome }}</span>
+        <span style="background:#1d4ed8;color:#eff6ff;padding:.1rem .5rem;border-radius:999px;font-size:.72rem;font-weight:700;">
+          {{ modeloPreview.tipo === 'ACADEMICO' ? 'Acadêmico' : 'Honraria' }}
+        </span>
+        <span style="color:#64748b;font-size:.78rem;font-style:italic;">— simulação de impressão</span>
+      </div>
+      <button (click)="fecharPreview()" aria-label="Fechar preview"
+              style="background:none;border:none;color:#94a3b8;cursor:pointer;display:flex;align-items:center;padding:.4rem;border-radius:6px;"
+              onmouseover="this.style.background='#334155'" onmouseout="this.style.background='none'">
+        <span class="material-symbols-rounded" style="font-size:1.4rem;">close</span>
+      </button>
+    </div>
+
+    <!-- ── Certificado Composto ── -->
+    <div style="position:relative;border-radius:10px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.6);">
+
+      <!-- Fundo: arte base -->
+      <img [src]="modeloPreview.arteBaseUrl" [alt]="modeloPreview.nome"
+           style="width:100%;display:block;">
+
+      <!-- Texto principal posicionado via layoutConfig -->
+      <div [ngStyle]="{
+             position: 'absolute',
+             left: (modeloPreview.layoutConfig?.textoPronto?.x ?? 10) + '%',
+             top:  (modeloPreview.layoutConfig?.textoPronto?.y ?? 30) + '%',
+             'max-width': (modeloPreview.layoutConfig?.textoPronto?.maxWidth ?? 80) + '%',
+             'text-align': modeloPreview.layoutConfig?.textoPronto?.textAlign ?? 'center',
+             transform: 'none'
+           }"
+           style="font-family:'Georgia',serif;color:#1a1a00;white-space:pre-wrap;font-size:clamp(.5rem,1.1vw,.75rem);line-height:1.75;">
+        {{ textoComPlaceholders(modeloPreview.textoTemplate) }}
+      </div>
+
+      <!-- Assinatura 1 posicionada via layoutConfig -->
+      @if (modeloPreview.assinaturaUrl) {
+      <div [ngStyle]="{
+             position: 'absolute',
+             left: (modeloPreview.layoutConfig?.assinatura1?.x ?? 25) + '%',
+             top:  (modeloPreview.layoutConfig?.assinatura1?.y ?? 70) + '%',
+             width: (modeloPreview.layoutConfig?.assinatura1?.width ?? 20) + '%'
+           }"
+           style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <img [src]="modeloPreview.assinaturaUrl" alt="Assinatura"
+             style="width:100%;max-height:50px;object-fit:contain;mix-blend-mode:darken;">
+        <div style="width:80%;border-top:1px solid #5a4a00;padding-top:3px;text-align:center;">
+          <p style="margin:0;font-size:clamp(.45rem,.95vw,.65rem);font-weight:700;color:#1a1a00;font-family:'Georgia',serif;">
+            {{ modeloPreview.nomeAssinante }}
+          </p>
+          <p style="margin:0;font-size:clamp(.4rem,.85vw,.6rem);color:#3a3a00;font-family:'Georgia',serif;">
+            {{ modeloPreview.cargoAssinante }}
+          </p>
+        </div>
+      </div>
+      }
+
+      <!-- Assinatura 2 posicionada via layoutConfig -->
+      @if (modeloPreview.nomeAssinante2 && modeloPreview.assinaturaUrl2) {
+      <div [ngStyle]="{
+             position: 'absolute',
+             left: (modeloPreview.layoutConfig?.assinatura2?.x ?? 55) + '%',
+             top:  (modeloPreview.layoutConfig?.assinatura2?.y ?? 70) + '%',
+             width: (modeloPreview.layoutConfig?.assinatura2?.width ?? 20) + '%'
+           }"
+           style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <img [src]="modeloPreview.assinaturaUrl2" alt="Assinatura 2"
+             style="width:100%;max-height:50px;object-fit:contain;mix-blend-mode:darken;">
+        <div style="width:80%;border-top:1px solid #5a4a00;padding-top:3px;text-align:center;">
+          <p style="margin:0;font-size:clamp(.45rem,.95vw,.65rem);font-weight:700;color:#1a1a00;font-family:'Georgia',serif;">
+            {{ modeloPreview.nomeAssinante2 }}
+          </p>
+          <p style="margin:0;font-size:clamp(.4rem,.85vw,.6rem);color:#3a3a00;font-family:'Georgia',serif;">
+            {{ modeloPreview.cargoAssinante2 }}
+          </p>
+        </div>
+      </div>
+      }
+
+    </div><!-- /certificado composto -->
+
+    <!-- Legenda dos placeholders -->
+    <p style="margin:0;color:#475569;font-size:.75rem;text-align:center;padding:.5rem 0;">
+      <span class="material-symbols-rounded" style="font-size:.9rem;vertical-align:middle;">info</span>
+      Dados de exemplo: nome do aluno, turma, datas e carga horária são substituídos na hora da emissão real.
+    </p>
+
+  </div>
+</div>
+}

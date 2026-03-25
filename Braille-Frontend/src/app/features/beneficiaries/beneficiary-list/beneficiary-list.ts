@@ -18,6 +18,7 @@ import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@an
 import { FormsModule } from '@angular/forms';
 import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
 import { LaudosService, LaudoMedico, CriarLaudoDto } from '../../../core/services/laudos.service';
+import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
 
 
 @Directive({
@@ -114,6 +115,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Exportação ──────────────────────────────────────────────────
   exportando = false;
+  emitindoCertificadoId: string | null = null;
 
   // ── Atestados ───────────────────────────────────────────────────
   gerenciandoAtestados = false; // Modal dedicado
@@ -157,7 +159,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private atestadosService: AtestadosService,
     private laudosService: LaudosService,
-    private http: HttpClient
+    private http: HttpClient,
+    private modelosCertificadosService: ModelosCertificadosService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -1027,9 +1030,36 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharVisualizadorPdf(): void {
+    if (this.urlPdfParaVisualizar && this.urlPdfParaVisualizar.startsWith('blob:')) {
+      window.URL.revokeObjectURL(this.urlPdfParaVisualizar);
+    }
     this.mostrarVisualizadorPdf = false;
     this.urlPdfParaVisualizar = null;
     this.cdr.detectChanges();
+  }
+
+  // ── Emissão de Certificados ─────────────────────────────────────────
+
+  emitirCertificadoAcademico(matriculaId: string): void {
+    if (this.emitindoCertificadoId === matriculaId) return;
+    this.emitindoCertificadoId = matriculaId;
+    this.cdr.detectChanges();
+
+    this.modelosCertificadosService.emitirAcademico(matriculaId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        // Usa o visualizador PDF já existente na tela
+        this.urlPdfParaVisualizar = url;
+        this.mostrarVisualizadorPdf = true;
+        this.emitindoCertificadoId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.toast.erro(err?.error?.message ?? 'Erro ao emitir certificado acadêmico.');
+        this.emitindoCertificadoId = null;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────

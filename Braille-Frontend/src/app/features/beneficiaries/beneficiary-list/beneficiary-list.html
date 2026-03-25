@@ -549,6 +549,7 @@
                                 <th>Faltas</th>
                                 <th>Freq.%</th>
                                 <th>Status</th>
+                                <th style="text-align:center;">Certificado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -583,6 +584,23 @@
                                         m.status === 'CONCLUIDA' ? 'Concluída' :
                                         m.status === 'EVADIDA' ? 'Evadido(a)' : 'Cancelada' }}
                                     </span>
+                                </td>
+                                <td style="text-align: center;">
+                                    @if (m.turma.modeloCertificadoId) {
+                                      <button 
+                                        class="btn btn-sm btn-outline-primary" 
+                                        style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;"
+                                        [disabled]="m.status !== 'CONCLUIDA' || emitindoCertificadoId === m.id"
+                                        (click)="emitirCertificadoAcademico(m.id)"
+                                        [title]="m.status === 'CONCLUIDA' ? 'Emitir Certificado Acadêmico' : 'A turma precisa estar concluída para emissão'">
+                                          <span class="material-symbols-rounded {{ emitindoCertificadoId === m.id ? 'spinner' : '' }}" aria-hidden="true" style="font-size: 14px;">
+                                              {{ emitindoCertificadoId === m.id ? 'sync' : 'workspace_premium' }}
+                                          </span>
+                                          Emitir
+                                      </button>
+                                    } @else {
+                                      <span style="font-size: 11px; color: #9ca3af; font-style: italic;">Sem Modelo</span>
+                                    }
                                 </td>
                             </tr>
                             }

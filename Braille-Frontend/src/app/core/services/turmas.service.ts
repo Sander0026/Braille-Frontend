@@ -18,6 +18,7 @@ export interface Turma {
     descricao?: string;
     horario?: string;
     capacidadeMaxima?: number;
+    cargaHoraria?: string;
     dataInicio?: string;
     dataFim?: string;
     statusAtivo: boolean;
@@ -41,9 +42,10 @@ export interface CreateTurmaDto {
     capacidadeMaxima?: number;
     professorId: string;
     gradeHoraria?: GradeHorariaDto[];
-    // 👉 CORREÇÃO 3: Adicionado campos no DTO
     dataInicio?: string;
     dataFim?: string;
+    cargaHoraria?: string;
+    modeloCertificadoId?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -86,6 +88,14 @@ export class TurmasService {
 
     buscarPorId(id: string): Observable<Turma> {
         return this.http.get<Turma>(`${this.url}/${id}`);
+    }
+
+    alunosDisponiveis(turmaId: string, nome?: string): Observable<{ id: string; nomeCompleto: string; matricula: string | null }[]> {
+        let params = new HttpParams();
+        if (nome?.trim()) params = params.set('nome', nome.trim());
+        return this.http.get<{ id: string; nomeCompleto: string; matricula: string | null }[]>(
+            `${this.url}/${turmaId}/alunos-disponiveis`, { params }
+        );
     }
 
     criar(dados: CreateTurmaDto): Observable<Turma> {

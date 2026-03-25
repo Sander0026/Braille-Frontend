@@ -78,6 +78,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     { rota: '/admin/alunos', label: 'Alunos', icon: 'people', aria: 'Ir para lista de alunos', role: ['ADMIN', 'SECRETARIA'] },
     { rota: '/admin/turmas', label: 'Turmas', icon: 'school', aria: 'Ir para lista de turmas', role: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] },
     { rota: '/admin/frequencias', label: 'Frequências', icon: 'checklist', aria: 'Ir para frequências', role: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] },
+    { rota: '/admin/modelos-certificados', label: 'Certificados', icon: 'workspace_premium', aria: 'Gerir modelos de certificados', role: ['ADMIN', 'SECRETARIA'] },
     { rota: '/admin/apoiadores', label: 'Apoiadores', icon: 'handshake', aria: 'Ir para lista de apoiadores', role: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] },
     { rota: '/admin/conteudo', label: 'Conteúdo do Site', icon: 'web', aria: 'Gerir conteúdo público', role: ['ADMIN', 'COMUNICACAO'] },
     { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] },

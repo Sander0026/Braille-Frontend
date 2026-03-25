@@ -75,6 +75,10 @@
                                     [attr.aria-label]="'Ver detalhes de ' + apoiador.nomeRazaoSocial">
                                     Ver
                                 </button>
+                                <button class="btn btn-sm btn-ghost" style="color: #2563eb;" (click)="abrirModalEmissao(apoiador)"
+                                    [attr.aria-label]="'Emitir honraria para ' + apoiador.nomeRazaoSocial">
+                                    <span class="material-symbols-rounded" style="font-size: 16px; margin-right: 4px; vertical-align: middle;">workspace_premium</span>Honraria
+                                </button>
                             </td>
                         </tr>
                         } @empty {
@@ -389,6 +393,83 @@
                 </button>
             </div>
             </form>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Emissão de Honraria -->
+@if (modalEmissaoAberto && apoiadorParaEmissao) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modalEmissaoTitulo" (click)="fecharModalEmissao()" (keydown.escape)="fecharModalEmissao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="z-index: 1050;">
+    <div class="modal modal--small" (click)="$event.stopPropagation()" (keydown.escape)="fecharModalEmissao()" tabindex="-1" style="max-width: 550px; width: 95%;">
+        <div class="modal-header" style="border-bottom: 1px solid #e5e7eb; padding-bottom: 1rem;">
+            <h2 id="modalEmissaoTitulo" style="display: flex; align-items: center; gap: 8px; color: #1e3a8a; margin: 0; font-size: 1.25rem;">
+                <span class="material-symbols-rounded">workspace_premium</span> Emitir Certificado
+            </h2>
+            <button class="btn-close" (click)="fecharModalEmissao()" aria-label="Fechar">✕</button>
+        </div>
+        <div class="modal-body" style="padding-top: 1.5rem;">
+            <p style="margin-bottom: 1.5rem; color: #4b5563;">
+                Emitindo honraria para: <strong style="color: #111827;">{{ apoiadorParaEmissao.nomeFantasia || apoiadorParaEmissao.nomeRazaoSocial }}</strong>
+            </p>
+            
+            <form [formGroup]="formEmissao" (submit)="emitirHonraria()">
+                <div class="form-group mb-4">
+                    <label class="form-label fw-semibold" for="modeloId">Escolha o Modelo de Honraria <span class="text-danger">*</span></label>
+                    <select id="modeloId" class="form-select" formControlName="modeloId">
+                        <option value="">Selecione um template disponível...</option>
+                        @for (modelo of modelosHonraria; track modelo.id) {
+                            <option [value]="modelo.id">{{ modelo.nome }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label fw-semibold" for="motivoPersonalizado">Motivo Livre ou Agradecimento (Opcional)</label>
+                    <textarea id="motivoPersonalizado" class="form-input" rows="3" formControlName="motivoPersonalizado" placeholder="Este texto será injetado caso o modelo possua a tag { {MOTIVO} }."></textarea>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label fw-semibold" for="dataEmissao">Data Constante no Documento</label>
+                    <input id="dataEmissao" type="date" class="form-input" formControlName="dataEmissao">
+                </div>
+
+                <div class="modal-footer" style="padding-left: 0; padding-right: 0; padding-bottom: 0; border-top: none; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" (click)="fecharModalEmissao()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary d-flex align-items-center gap-2" [disabled]="formEmissao.invalid || emitindoCertificado" style="background-color: #2563eb; border: none;">
+                        @if (emitindoCertificado) {
+                            <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 16px;">sync</span> Gerando...
+                        } @else {
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 16px;">picture_as_pdf</span> Gerar PDF
+                        }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+}
+
+<!-- PDF Viewer Modal -->
+@if (mostrarVisualizadorPdf && urlPdfParaVisualizar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Visualizador de PDF do Certificado" style="z-index: 1060; background: rgba(0,0,0,0.8);" (click)="fecharVisualizadorPdf()" (keydown.escape)="fecharVisualizadorPdf()">
+    <div class="modal" (click)="$event.stopPropagation()" (keydown.escape)="fecharVisualizadorPdf()" tabindex="-1" style="max-width: 900px; width: 95%; height: 95vh; display: flex; flex-direction: column; padding: 0; background: #e5e7eb; overflow: hidden; border-radius: 8px;">
+        <div class="modal-header" style="background: white; border-bottom: 1px solid #d1d5db; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <h2 style="margin: 0; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                <span class="material-symbols-rounded" style="color: #dc2626;">picture_as_pdf</span> Visualização do Certificado
+            </h2>
+            <button class="btn-close" (click)="fecharVisualizadorPdf()" aria-label="Fechar" style="margin: 0;">✕</button>
+        </div>
+        <div class="modal-body" style="flex: 1; padding: 0; overflow: hidden; display: flex; position: relative;">
+            <!-- Loading indicator inside iframe area just in case -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; display: flex; flex-direction: column; align-items: center; color: #6b7280;">
+                <span class="material-symbols-rounded spinner" style="font-size: 2rem; margin-bottom: 8px;" aria-hidden="true">sync</span>
+                Carregando plugin de PDF...
+            </div>
+            <iframe [src]="urlPdfParaVisualizar" title="Visualizador do Certificado em PDF" style="width: 100%; height: 100%; border: none; z-index: 1; position: relative; background: transparent;"></iframe>
+        </div>
+        <div class="modal-footer" style="background: white; border-top: 1px solid #d1d5db; padding: 0.75rem 1.5rem;">
+            <button class="btn btn-secondary w-100" (click)="fecharVisualizadorPdf()">Fechar Visualizador</button>
         </div>
     </div>
 </div>

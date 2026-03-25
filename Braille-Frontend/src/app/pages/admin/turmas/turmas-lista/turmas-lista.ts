@@ -567,15 +567,15 @@ export class TurmasLista implements OnInit {
     }
 
     buscarAlunosParaMatricula(termo: string): void {
+        if (!this.turmaDetalhes) return;
+
         this.buscandoAlunos = true;
         this.cdr.detectChanges();
 
-        this.beneficiariosService.limparCache();
-        this.beneficiariosService.listar(1, 100, termo).subscribe({
-            next: (res) => {
-                const IDsMatriculados = (this.turmaDetalhes?.matriculasOficina ?? []).map(m => m.aluno.id);
-
-                this.alunosBuscaRestado = res.data.filter(a => !IDsMatriculados.includes(a.id));
+        this.turmasService.alunosDisponiveis(this.turmaDetalhes.id, termo).subscribe({
+            next: (alunos) => {
+                // O backend já retorna somente os alunos disponíveis (sem conflito e não matriculados)
+                this.alunosBuscaRestado = alunos as any[];
                 this.buscandoAlunos = false;
 
                 this.alunosSelecionadosParaMatricula = this.alunosSelecionadosParaMatricula.filter(id =>

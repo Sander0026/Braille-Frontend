@@ -1,0 +1,328 @@
+<div class="wizard-container" style="max-width: 900px; margin: 0 auto; padding: 2rem;">
+  
+  <div class="wizard-header">
+    <h1>{{ modoEdicao ? 'Editar Modelo' : 'Novo Modelo de Certificado' }}</h1>
+    <p>Configure a apresentação visual e os textos balizadores do certificado / honraria.</p>
+  </div>
+
+  <form [formGroup]="formModelo" (ngSubmit)="salvar()" novalidate>
+    
+    <fieldset class="wizard-step" style="display: block;">
+      <legend>1. Informações Básicas</legend>
+      
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="input-nome">Nome do Tamplete <span aria-hidden="true">*</span></label>
+            <input type="text" id="input-nome" formControlName="nome" class="form-input"
+              placeholder="Ex: Certificado Braille Padrão 2024"
+              [class.is-invalid]="isFieldInvalid('nome')">
+            @if (isFieldInvalid('nome')) { <span class="error-text">Obrigatório. Mínimo 3 caracteres.</span> }
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="input-tipo">Categoria <span aria-hidden="true">*</span></label>
+            <select id="input-tipo" formControlName="tipo" class="form-input" [class.is-invalid]="isFieldInvalid('tipo')">
+              <option value="ACADEMICO">Oficinas / Acadêmico</option>
+              <option value="HONRARIA">Amigos do Braille (Honrarias Gerais)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+    </fieldset>
+
+    <fieldset class="wizard-step" style="display: block; margin-top: 2rem;">
+      <legend>2. Artes e Assinatura</legend>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label>Arte de Fundo Analógica (JPG/PNG) <span *ngIf="!modoEdicao" aria-hidden="true">*</span></label>
+
+            @if (modoEdicao && modeloEditado?.arteBaseUrl) {
+              <div style="margin-bottom:.75rem;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;position:relative;">
+                <img [src]="modeloEditado!.arteBaseUrl" alt="Arte base atual"
+                     style="width:100%;max-height:140px;object-fit:cover;display:block;">
+                <span style="position:absolute;top:6px;right:6px;background:rgba(22,163,74,.9);color:#fff;font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:999px;">✔ Em uso</span>
+              </div>
+              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Enviar nova imagem (opcional — substitui a atual):</label>
+            }
+            <input type="file" (change)="onFileChange($event, 'arteBase')" accept="image/*" class="form-input" style="padding: 0.5rem;" />
+            <small class="field-hint">A dimensão ideal recomendada é 3508 x 2480 pixels (A4 Paisagem).</small>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label>Firma da Assinatura (PNG Transparente) <span *ngIf="!modoEdicao" aria-hidden="true">*</span></label>
+
+            @if (modoEdicao && modeloEditado?.assinaturaUrl) {
+              <div style="margin-bottom:.75rem;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;background:#f8fafc;display:flex;align-items:center;gap:.75rem;">
+                <img [src]="modeloEditado!.assinaturaUrl" alt="Assinatura atual"
+                     style="max-width:120px;max-height:50px;object-fit:contain;mix-blend-mode:multiply;">
+                <span style="font-size:.78rem;color:#16a34a;font-weight:600;">✔ Assinatura configurada</span>
+              </div>
+              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Enviar nova assinatura (opcional — substitui a atual):</label>
+            }
+            <input type="file" (change)="onFileChange($event, 'assinatura')" accept="image/png" class="form-input" style="padding: 0.5rem;" />
+            <small class="field-hint">A varredura da assinatura será aplicada sob a linha.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="input-nome-assinante">Nome do Signatário <span aria-hidden="true">*</span></label>
+            <input type="text" id="input-nome-assinante" formControlName="nomeAssinante" class="form-input"
+              placeholder="Ex: Prof. Dr. João Silva"
+              [class.is-invalid]="isFieldInvalid('nomeAssinante')">
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="form-group">
+            <label for="input-cargo-assinante">Cargo <span aria-hidden="true">*</span></label>
+            <input type="text" id="input-cargo-assinante" formControlName="cargoAssinante" class="form-input"
+              placeholder="Ex: Diretor de Ensino"
+              [class.is-invalid]="isFieldInvalid('cargoAssinante')">
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top: 1rem;">
+        <div class="col-12">
+          <h5 style="color: #4b5563; font-size: 1.05rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; margin-bottom: 1rem;">Segunda Assinatura (Opcional)</h5>
+        </div>
+        <div class="col-lg-4">
+          <div class="form-group">
+            <label>Firma 2 (PNG Transparente)</label>
+            @if (modoEdicao && modeloEditado?.assinaturaUrl2) {
+              <div style="margin-bottom:.5rem;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;background:#f8fafc;display:flex;align-items:center;gap:.75rem;">
+                <img [src]="modeloEditado!.assinaturaUrl2" alt="Assinatura 2 atual"
+                     style="max-width:100px;max-height:45px;object-fit:contain;mix-blend-mode:multiply;">
+                <span style="font-size:.78rem;color:#16a34a;font-weight:600;">✔ Configurada</span>
+              </div>
+              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Substituir (opcional):</label>
+            }
+            <input type="file" (change)="onFileChange($event, 'assinatura2')" accept="image/png" class="form-input" style="padding: 0.5rem;" />
+            <small class="field-hint">Posicionada no canto direito.</small>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="form-group">
+            <label for="input-nome-assinante2">Nome do Signatário 2</label>
+            <input type="text" id="input-nome-assinante2" formControlName="nomeAssinante2" class="form-input" placeholder="Ex: Dra. Maria Souza">
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="form-group">
+            <label for="input-cargo-assinante2">Cargo 2</label>
+            <input type="text" id="input-cargo-assinante2" formControlName="cargoAssinante2" class="form-input" placeholder="Ex: Vice-Presidente">
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset class="wizard-step" style="display: block; margin-top: 2rem;">
+      <legend>3. Composição Textual (Auto-Injector)</legend>
+      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+        Escreva o texto do certificado. Utilize os botões para injetar variáveis mágicas que serão substituídas pelo sistema na hora de emitir.
+      </p>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.5rem; margin-bottom: 0.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+        @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{ALUNO}}')">+ Nome do Aluno</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{TURMA}}')">+ Nome da Oficina</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Carga Horária</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{DATA_INICIO}}')">+ Data Início</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{DATA_FIM}}')">+ Data Fim</button>
+        } @else {
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{PARCEIRO}}')">+ Nome do Amigo</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{MOTIVO}}')">+ Motivo/Ação</button>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{DATA}}')">+ Data (Dia Mês, Ano)</button>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="text-area-template" class="sr-only">Texto do Certificado</label>
+        <textarea #textoTemplateInput id="textoTemplate" formControlName="textoTemplate" class="form-textarea fixed-font" rows="8"
+                [attr.placeholder]="'Exemplo:\nCertificamos que {{ALUNO}}\ncompletou o curso...\n...'"
+                [class.is-invalid]="isFieldInvalid('textoTemplate')"></textarea>
+        @if (isFieldInvalid('textoTemplate')) { <span class="error-text">O texto precisa ser compreensível (Mínimo 20 caracteres).</span> }
+      </div>
+
+      <!-- Barra de Formatação do Texto -->
+      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.75rem; padding: 0.5rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
+        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-right: 0.5rem;">Alinhamento:</span>
+        <button type="button" (click)="setTextAlign('left')" [style.background]="layoutConfig.textoPronto.textAlign === 'left' ? '#dbeafe' : 'white'"
+                style="border: 1px solid #cbd5e1; border-radius:6px; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.9rem;" title="Alinhar à esquerda">
+          &#8676;
+        </button>
+        <button type="button" (click)="setTextAlign('center')" [style.background]="layoutConfig.textoPronto.textAlign === 'center' ? '#dbeafe' : 'white'"
+                style="border: 1px solid #cbd5e1; border-radius:6px; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.9rem;" title="Centralizar">
+          &#8596;
+        </button>
+        <button type="button" (click)="setTextAlign('right')" [style.background]="layoutConfig.textoPronto.textAlign === 'right' ? '#dbeafe' : 'white'"
+                style="border: 1px solid #cbd5e1; border-radius:6px; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.9rem;" title="Alinhar à direita">
+          &#8677;
+        </button>
+        <button type="button" (click)="setTextAlign('justify')" [style.background]="layoutConfig.textoPronto.textAlign === 'justify' ? '#dbeafe' : 'white'"
+                style="border: 1px solid #cbd5e1; border-radius:6px; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.9rem;" title="Justificar">
+          &#9776;
+        </button>
+
+        <span style="font-size: 0.78rem; font-weight: 600; color: #64748b; margin-left: 1rem; margin-right: 0.5rem;">Tamanho Fonte:</span>
+        <input type="number" [value]="layoutConfig.textoPronto.fontSize || 32" min="8" max="120"
+               (change)="setFontSize($event)"
+               style="width: 65px; padding: 0.25rem 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem;"
+               title="Tamanho da fonte no PDF (pt)">
+        <span style="font-size: 0.75rem; color: #94a3b8;">pt</span>
+      </div>
+    </fieldset>
+
+    <!-- BLOCO DE PREVIEW + CONTROLES DE POSIÇÃO -->
+    <fieldset class="wizard-step" style="display: block; margin-top: 2rem;">
+      <legend>4. Editor Visual / Preview</legend>
+      <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+        Use os controles abaixo para posicionar os elementos. O preview é <strong>idêntico</strong> ao modal Visualizar.
+      </p>
+
+      <div *ngIf="previewBaseUrl">
+
+        <!-- PREVIEW FULL WIDTH (HTML idêntico ao modal Visualizar) -->
+        <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
+          <img [src]="previewBaseUrl" alt="Arte base" style="width: 100%; display: block;">
+
+          <!-- Texto -->
+          <div [ngStyle]="{
+                 position: 'absolute',
+                 left:      layoutConfig.textoPronto.x + '%',
+                 top:       layoutConfig.textoPronto.y + '%',
+                 'max-width': (layoutConfig.textoPronto.maxWidth || 80) + '%',
+                 'text-align': layoutConfig.textoPronto.textAlign || 'center'
+               }"
+               style="font-family:'Georgia',serif;color:#1a1a00;white-space:pre-wrap;
+                      font-size:clamp(.5rem,1.1vw,.75rem);line-height:1.75;
+                      outline: 2px dashed rgba(59,130,246,.5);">
+            {{ formModelo.get('textoTemplate')?.value || '(texto do certificado)' }}
+          </div>
+
+          <!-- Assinatura 1 -->
+          <div *ngIf="assinaturaPreviewUrl"
+               [ngStyle]="{
+                 position: 'absolute',
+                 left:  layoutConfig.assinatura1.x + '%',
+                 top:   layoutConfig.assinatura1.y + '%',
+                 width: (layoutConfig.assinatura1.width || 20) + '%'
+               }"
+               style="display:flex;flex-direction:column;align-items:center;
+                      outline:2px dashed rgba(34,197,94,.5);">
+            <img [src]="assinaturaPreviewUrl" alt="Assinatura"
+                 style="width:100%;max-height:50px;object-fit:contain;mix-blend-mode:darken;">
+            <div style="width:80%;border-top:1px solid #5a4a00;text-align:center;padding-top:2px;">
+              <strong style="display:block;font-size:clamp(.4rem,.8vw,.6rem);font-family:'Georgia',serif;">{{ formModelo.get('nomeAssinante')?.value }}</strong>
+              <span style="display:block;font-size:clamp(.35rem,.7vw,.55rem);color:#555;font-family:'Georgia',serif;">{{ formModelo.get('cargoAssinante')?.value }}</span>
+            </div>
+          </div>
+
+          <!-- Assinatura 2 -->
+          <div *ngIf="assinatura2PreviewUrl"
+               [ngStyle]="{
+                 position: 'absolute',
+                 left:  layoutConfig.assinatura2.x + '%',
+                 top:   layoutConfig.assinatura2.y + '%',
+                 width: (layoutConfig.assinatura2.width || 20) + '%'
+               }"
+               style="display:flex;flex-direction:column;align-items:center;
+                      outline:2px dashed rgba(239,68,68,.5);">
+            <img [src]="assinatura2PreviewUrl" alt="Assinatura 2"
+                 style="width:100%;max-height:50px;object-fit:contain;mix-blend-mode:darken;">
+            <div style="width:80%;border-top:1px solid #5a4a00;text-align:center;padding-top:2px;">
+              <strong style="display:block;font-size:clamp(.4rem,.8vw,.6rem);font-family:'Georgia',serif;">{{ formModelo.get('nomeAssinante2')?.value }}</strong>
+              <span style="display:block;font-size:clamp(.35rem,.7vw,.55rem);color:#555;font-family:'Georgia',serif;">{{ formModelo.get('cargoAssinante2')?.value }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CONTROLES ABAIXO — 3 colunas -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+
+          <!-- Texto Principal -->
+          <div style="padding:.75rem;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;">
+            <p style="margin:0 0 .5rem;font-weight:600;font-size:.85rem;color:#1d4ed8;">
+              <span style="display:inline-block;width:10px;height:10px;border:2px dashed #3b82f6;margin-right:6px;vertical-align:middle;"></span>Texto Principal
+            </p>
+            <label style="font-size:.78rem;color:#475569;display:block;">X (esquerda) <strong>{{ layoutConfig.textoPronto.x }}%</strong></label>
+            <input type="range" min="0" max="90" step="0.5" [value]="layoutConfig.textoPronto.x"
+                   (input)="layoutConfig.textoPronto.x = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Y (topo) <strong>{{ layoutConfig.textoPronto.y }}%</strong></label>
+            <input type="range" min="0" max="90" step="0.5" [value]="layoutConfig.textoPronto.y"
+                   (input)="layoutConfig.textoPronto.y = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Largura máx <strong>{{ layoutConfig.textoPronto.maxWidth || 80 }}%</strong></label>
+            <input type="range" min="20" max="95" step="1" [value]="layoutConfig.textoPronto.maxWidth || 80"
+                   (input)="layoutConfig.textoPronto.maxWidth = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;">
+          </div>
+
+          <!-- Assinatura 1 -->
+          <div *ngIf="assinaturaPreviewUrl"
+               style="padding:.75rem;border:1px solid #bbf7d0;border-radius:8px;background:#f0fdf4;">
+            <p style="margin:0 0 .5rem;font-weight:600;font-size:.85rem;color:#15803d;">
+              <span style="display:inline-block;width:10px;height:10px;border:2px dashed #22c55e;margin-right:6px;vertical-align:middle;"></span>Assinatura 1
+            </p>
+            <label style="font-size:.78rem;color:#475569;display:block;">X% <strong>{{ layoutConfig.assinatura1.x }}%</strong></label>
+            <input type="range" min="0" max="80" step="0.5" [value]="layoutConfig.assinatura1.x"
+                   (input)="layoutConfig.assinatura1.x = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Y% <strong>{{ layoutConfig.assinatura1.y }}%</strong></label>
+            <input type="range" min="0" max="90" step="0.5" [value]="layoutConfig.assinatura1.y"
+                   (input)="layoutConfig.assinatura1.y = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Largura <strong>{{ layoutConfig.assinatura1.width || 20 }}%</strong></label>
+            <input type="range" min="5" max="40" step="0.5" [value]="layoutConfig.assinatura1.width || 20"
+                   (input)="layoutConfig.assinatura1.width = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;">
+          </div>
+
+          <!-- Assinatura 2 -->
+          <div *ngIf="assinatura2PreviewUrl"
+               style="padding:.75rem;border:1px solid #fecaca;border-radius:8px;background:#fef2f2;">
+            <p style="margin:0 0 .5rem;font-weight:600;font-size:.85rem;color:#dc2626;">
+              <span style="display:inline-block;width:10px;height:10px;border:2px dashed #ef4444;margin-right:6px;vertical-align:middle;"></span>Assinatura 2
+            </p>
+            <label style="font-size:.78rem;color:#475569;display:block;">X% <strong>{{ layoutConfig.assinatura2.x }}%</strong></label>
+            <input type="range" min="0" max="80" step="0.5" [value]="layoutConfig.assinatura2.x"
+                   (input)="layoutConfig.assinatura2.x = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Y% <strong>{{ layoutConfig.assinatura2.y }}%</strong></label>
+            <input type="range" min="0" max="90" step="0.5" [value]="layoutConfig.assinatura2.y"
+                   (input)="layoutConfig.assinatura2.y = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Largura <strong>{{ layoutConfig.assinatura2.width || 20 }}%</strong></label>
+            <input type="range" min="5" max="40" step="0.5" [value]="layoutConfig.assinatura2.width || 20"
+                   (input)="layoutConfig.assinatura2.width = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;">
+          </div>
+
+        </div><!-- /controles -->
+      </div><!-- /*ngIf -->
+
+      <div *ngIf="!previewBaseUrl" style="padding: 2rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 8px; color: #64748b; background: #f8fafc;">
+         Faça o upload de uma imagem Arte de Fundo para habilitar o Editor Visual.
+      </div>
+    </fieldset>
+
+    <div class="wizard-actions" style="margin-top: 3rem;">
+      <a routerLink="/admin/modelos-certificados" class="btn btn-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary" [disabled]="isSalvando" [attr.aria-busy]="isSalvando">
+        {{ isSalvando ? 'Salvando e Processando...' : 'Salvar Modelo de Certificado' }}
+      </button>
+    </div>
+
+  </form>
+</div>
