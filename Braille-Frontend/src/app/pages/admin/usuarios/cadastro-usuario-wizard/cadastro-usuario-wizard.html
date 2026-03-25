@@ -3,8 +3,13 @@
     <!-- Feedback Banner -->
     @if (mensagemFeedback) {
     <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-        <strong>{{ tipoFeedback === 'sucesso' ? '✅ Sucesso: ' : '⚠️ Erro: ' }}</strong>
-        {{ mensagemFeedback }}
+        <span class="material-symbols-rounded banner-icon">
+            {{ tipoFeedback === 'sucesso' ? 'check_circle' : 'error' }}
+        </span>
+        <div class="banner-content">
+            <strong>{{ tipoFeedback === 'sucesso' ? 'Sucesso: ' : 'Erro: ' }}</strong>
+            {{ mensagemFeedback }}
+        </div>
     </div>
     }
 
@@ -15,8 +20,11 @@
             <span class="material-symbols-rounded">key</span>
             <h3>Credenciais Geradas — Anote agora!</h3>
         </div>
-        <p class="credenciais-aviso">🔒 Entregue estas informações ao funcionário. A senha deve ser trocada no primeiro
+        <div class="credenciais-aviso">
+            <span class="material-symbols-rounded">lock</span>
+            <p>Entregue estas informações ao funcionário. A senha deve ser trocada no primeiro
             acesso.</p>
+        </div>
         <div class="credenciais-grid">
             <div class="credencial-item">
                 <label>Login (Username)</label>
@@ -84,15 +92,24 @@
                             [attr.aria-describedby]="isCampoInvalido('dadosPessoais', 'cpf') ? 'erro-wizard-cpf' : null">
                         
                         <!-- Status CPF em Tempo Real -->
-                        <div class="cpf-status-indicator" style="margin-top: 5px; font-size: 0.85rem;" aria-live="polite">
+                        <div class="cpf-status-indicator" aria-live="polite">
                             @if (cpfStatus === 'verificando') {
-                                <span style="color: #6b7280;">⏳ Verificando no sistema...</span>
+                                <div class="status-msg verificando">
+                                    <span class="material-symbols-rounded">pending</span>
+                                    <span>Verificando no sistema...</span>
+                                </div>
                             }
                             @if (cpfStatus === 'livre') {
-                                <span style="color: #10b981;">✅ CPF disponível para cadastro.</span>
+                                <div class="status-msg livre">
+                                    <span class="material-symbols-rounded">check_circle</span>
+                                    <span>CPF disponível para cadastro.</span>
+                                </div>
                             }
                             @if (cpfStatus === 'ativo') {
-                                <span style="color: #ef4444; font-weight: 500;">❌ Já existe um funcionário ativo com este CPF: {{ cpfConflito?.nome }}.</span>
+                                <div class="status-msg ativo">
+                                    <span class="material-symbols-rounded">cancel</span>
+                                    <span>Já existe um funcionário ativo com este CPF: {{ cpfConflito?.nome }}.</span>
+                                </div>
                             }
                         </div>
 
@@ -210,8 +227,13 @@
                 </button>
                 }
                 @if (passoAtual === 2) {
-                <button type="submit" class="btn btn-success" [disabled]="isSalvando">
-                    {{ isSalvando ? 'Cadastrando...' : '✅ Cadastrar Funcionário' }}
+                <button type="submit" class="btn btn-success btn-with-icon" [disabled]="isSalvando">
+                    @if (!isSalvando) {
+                        <span class="material-symbols-rounded">person_add</span>
+                        Cadastrar Usuário
+                    } @else {
+                        Cadastrando...
+                    }
                 </button>
                 }
         </footer>
@@ -239,8 +261,13 @@
         </p>
         <div class="modal-actions">
             <button class="btn btn-secondary" (click)="cancelarReativacao()">Não, cancelar</button>
-            <button class="btn btn-success" (click)="confirmarReativacao()" [disabled]="isSalvando">
-                {{ isSalvando ? 'Reativando...' : '✅ Sim, reativar' }}
+            <button class="btn btn-success btn-with-icon" (click)="confirmarReativacao()" [disabled]="isSalvando">
+                @if (!isSalvando) {
+                    <span class="material-symbols-rounded">autorenew</span>
+                    Sim, reativar
+                } @else {
+                    Reativando...
+                }
             </button>
         </div>
     </div>
