@@ -93,6 +93,7 @@ export const routes: Routes = [
         path: 'apoiadores',
         loadComponent: () => import('./pages/admin/apoiadores/apoiadores-lista/apoiadores-lista').then(m => m.ApoiadoresLista),
         canActivate: [roleGuard],
+        canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'EDITOR'] }
       },
 
