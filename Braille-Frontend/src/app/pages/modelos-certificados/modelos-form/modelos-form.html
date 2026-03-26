@@ -193,8 +193,8 @@
       <div *ngIf="previewBaseUrl">
 
         <!-- PREVIEW FULL WIDTH (HTML idêntico ao modal Visualizar) -->
-        <div style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
-          <img [src]="previewBaseUrl" alt="Arte base" style="width: 100%; display: block;">
+        <div #previewContainer class="preview-drag-container" style="position: relative; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; margin-bottom: 1.5rem;">
+          <img [src]="previewBaseUrl" alt="Arte base" style="width: 100%; display: block; pointer-events: none;">
 
           <!-- Texto -->
           <div [ngStyle]="{
