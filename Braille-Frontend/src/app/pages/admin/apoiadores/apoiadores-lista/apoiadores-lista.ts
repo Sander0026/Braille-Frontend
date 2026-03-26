@@ -7,6 +7,7 @@ import { ModelosCertificadosService, ModeloCertificado } from '../../../../core/
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { A11yModule } from '@angular/cdk/a11y';
+import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 @Component({
   selector: 'app-apoiadores-lista',
@@ -16,7 +17,7 @@ import { A11yModule } from '@angular/cdk/a11y';
   templateUrl: './apoiadores-lista.html',
   styleUrls: ['./apoiadores-lista.scss']
 })
-export class ApoiadoresLista implements OnInit, OnDestroy {
+export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestroy {
   apoiadores: Apoiador[] = [];
   carregando = true;
   totalApoiadores = 0;
@@ -52,6 +53,9 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   formEmissao: FormGroup;
   urlPdfParaVisualizar: SafeResourceUrl | null = null;
   mostrarVisualizadorPdf = false;
+  
+  // Wizard Steps
+  passoAtual = 1;
 
   constructor(
     private readonly router: Router,
@@ -61,18 +65,27 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     private readonly fb: FormBuilder,
     private readonly cdr: ChangeDetectorRef
   ) {
+    super();
     this.apoiadorForm = this.fb.group({
-      tipo: ['EMPRESA', Validators.required],
-      nomeRazaoSocial: ['', Validators.required],
-      nomeFantasia: [''],
-      cpfCnpj: [''],
-      contatoPessoa: [''],
-      telefone: [''],
-      email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
-      endereco: [''],
-      atividadeEspecialidade: [''],
-      observacoes: [''],
-      exibirNoSite: [false],
+      informacoesPrincipais: this.fb.group({
+        tipo: ['EMPRESA', Validators.required],
+        nomeRazaoSocial: ['', Validators.required],
+        nomeFantasia: [''],
+        cpfCnpj: ['']
+      }),
+      contatoEndereco: this.fb.group({
+        email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
+        telefone: [''],
+        contatoPessoa: [''],
+        atividadeEspecialidade: [''],
+        endereco: ['']
+      }),
+      visualVisibilidade: this.fb.group({
+        exibirNoSite: [false]
+      }),
+      gerenciamento: this.fb.group({
+        observacoes: ['']
+      }),
       ativo: [true],
       acoes: this.fb.array([])
     });
@@ -148,9 +161,10 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.idApoiadorEditando = null;
     this.logoFile = null;
     this.logoPreview = null;
+    this.passoAtual = 1;
     this.apoiadorForm.reset({
-      tipo: 'EMPRESA',
-      exibirNoSite: false,
+      informacoesPrincipais: { tipo: 'EMPRESA' },
+      visualVisibilidade: { exibirNoSite: false },
       ativo: true
     });
     this.acoesFormArray.clear();
@@ -163,6 +177,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.idApoiadorEditando = id;
     this.logoFile = null;
     this.logoPreview = null;
+    this.passoAtual = 1;
     this.modalFormAberto = true;
     this.apoiadorForm.reset();
     this.acoesFormArray.clear();
@@ -170,16 +185,25 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.apoiadoresService.obterPorId(id).subscribe({
       next: (res) => {
         this.apoiadorForm.patchValue({
-          tipo: res.tipo,
-          nomeRazaoSocial: res.nomeRazaoSocial,
-          nomeFantasia: res.nomeFantasia,
-          cpfCnpj: res.cpfCnpj,
-          contatoPessoa: res.contatoPessoa,
-          telefone: res.telefone,
-          email: res.email,
-          endereco: res.endereco,
-          atividadeEspecialidade: res.atividadeEspecialidade,
-          observacoes: res.observacoes,
+          informacoesPrincipais: {
+            tipo: res.tipo,
+            nomeRazaoSocial: res.nomeRazaoSocial,
+            nomeFantasia: res.nomeFantasia,
+            cpfCnpj: res.cpfCnpj
+          },
+          contatoEndereco: {
+            email: res.email,
+            telefone: res.telefone,
+            contatoPessoa: res.contatoPessoa,
+            atividadeEspecialidade: res.atividadeEspecialidade,
+            endereco: res.endereco
+          },
+          visualVisibilidade: {
+            exibirNoSite: res.exibirNoSite
+          },
+          gerenciamento: {
+            observacoes: res.observacoes
+          },
           ativo: res.ativo
         });
         if (res.logoUrl) {
@@ -216,13 +240,13 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
       valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
     }
     event.target.value = valor;
-    this.apoiadorForm.get('cpfCnpj')?.setValue(valor, { emitEvent: false });
+    this.apoiadorForm.get('informacoesPrincipais.cpfCnpj')?.setValue(valor, { emitEvent: false });
   }
 
   formatarEmail(event: any): void {
     let v = event.target.value.replace(/\s/g, '').toLowerCase();
     event.target.value = v;
-    this.apoiadorForm.get('email')?.setValue(v);
+    this.apoiadorForm.get('contatoEndereco.email')?.setValue(v);
   }
 
   formatarTelefone(event: any): void {
@@ -240,7 +264,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     }
 
     event.target.value = valor;
-    this.apoiadorForm.get('telefone')?.setValue(valor, { emitEvent: false });
+    this.apoiadorForm.get('contatoEndereco.telefone')?.setValue(valor, { emitEvent: false });
   }
 
   // --- CONTROLES DE ARRAY DE AÇÕES NO FORMULÁRIO GERAL ---
@@ -314,9 +338,50 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     });
   }
 
-  // Lógica do Modal de Formulário
+  // Lógica do Form / Descarte Guard
+  isFormDirty(): boolean {
+    return this.modalFormAberto && this.apoiadorForm.dirty && !this.salvando;
+  }
+
+  async fecharFormSeguro() {
+    if (await this.podeDescartar()) {
+      this.fecharModalForm();
+    }
+  }
+
   fecharModalForm() {
     this.modalFormAberto = false;
+    this.apoiadorForm.reset();
+  }
+
+  getGroupName(passo: number): string {
+    switch (passo) {
+      case 1: return 'informacoesPrincipais';
+      case 2: return 'contatoEndereco';
+      case 3: return 'visualVisibilidade';
+      case 4: return 'gerenciamento';
+      default: return 'informacoesPrincipais';
+    }
+  }
+
+  avancarPasso() {
+    const grupo = this.apoiadorForm.get(this.getGroupName(this.passoAtual));
+    if (grupo && grupo.valid) {
+      this.passoAtual++;
+    } else {
+      grupo?.markAllAsTouched();
+    }
+  }
+
+  voltarPasso() {
+    if (this.passoAtual > 1) {
+      this.passoAtual--;
+    }
+  }
+
+  isCampoInvalido(group: string, controlName: string): boolean {
+    const control = this.apoiadorForm.get(`${group}.${controlName}`);
+    return !!(control && control.invalid && control.touched);
   }
 
   onLogoSelected(event: any): void {
@@ -340,19 +405,19 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.salvando = true;
     const formData = this.apoiadorForm.value;
     
-    // Preparando o Dto
+    // Preparando o Dto unificando os grupos
     const saveDto: Partial<Apoiador> = {
-      tipo: formData.tipo,
-      nomeRazaoSocial: formData.nomeRazaoSocial,
-      nomeFantasia: formData.nomeFantasia || undefined,
-      cpfCnpj: formData.cpfCnpj || undefined,
-      contatoPessoa: formData.contatoPessoa || undefined,
-      telefone: formData.telefone || undefined,
-      email: formData.email || undefined,
-      endereco: formData.endereco || undefined,
-      atividadeEspecialidade: formData.atividadeEspecialidade || undefined,
-      observacoes: formData.observacoes || undefined,
-      exibirNoSite: formData.exibirNoSite,
+      tipo: formData.informacoesPrincipais.tipo,
+      nomeRazaoSocial: formData.informacoesPrincipais.nomeRazaoSocial,
+      nomeFantasia: formData.informacoesPrincipais.nomeFantasia || undefined,
+      cpfCnpj: formData.informacoesPrincipais.cpfCnpj || undefined,
+      contatoPessoa: formData.contatoEndereco.contatoPessoa || undefined,
+      telefone: formData.contatoEndereco.telefone || undefined,
+      email: formData.contatoEndereco.email || undefined,
+      endereco: formData.contatoEndereco.endereco || undefined,
+      atividadeEspecialidade: formData.contatoEndereco.atividadeEspecialidade || undefined,
+      observacoes: formData.gerenciamento.observacoes || undefined,
+      exibirNoSite: formData.visualVisibilidade.exibirNoSite,
       ativo: formData.ativo,
       acoes: (!this.modoEdicao && formData.acoes?.length) ? formData.acoes : undefined
     };
