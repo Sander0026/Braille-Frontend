@@ -229,169 +229,254 @@
 }
 
 @if (modalFormAberto) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalFormTitulo" (click)="fecharModalForm()">
-    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 id="modalFormTitulo">{{ modoEdicao ? 'Editar Apoiador' : 'Novo Apoiador' }}</h2>
-            <button class="btn-close" (click)="fecharModalForm()" aria-label="Fechar janela">×</button>
-        </div>
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalFormTitulo" (click)="fecharFormSeguro()">
+    <div class="modal-content modal-lg wizard-container" style="padding: 0" (click)="$event.stopPropagation()">
+        
+        <!-- ====== CABEÇALHO + BARRA DE PROGRESSO ====== -->
+        <header class="wizard-header" style="padding: 1.5rem 1.5rem 0.5rem; margin-bottom: 0;">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h2 id="modalFormTitulo" style="margin: 0; font-size: 1.25rem;">{{ modoEdicao ? 'Editar Apoiador' : 'Novo Apoiador' }}</h2>
+                <button class="btn-close" (click)="fecharFormSeguro()" aria-label="Fechar janela">×</button>
+            </div>
+            <p style="margin: 0 0 1rem;">Preencha as informações do apoiador. Etapa <strong>{{ passoAtual }}</strong> de 4.</p>
 
-        <div class="modal-body" tabindex="0">
-            <form [formGroup]="apoiadorForm" (ngSubmit)="onSubmitForm()">
-            
-            <h5 class="section-title" style="margin-top: 0;">Informações Principais</h5>
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <label for="tipo" class="form-label">Tipo de Apoiador <span class="text-danger">*</span></label>
-                    <select id="tipo" class="form-select" formControlName="tipo">
-                        <option value="EMPRESA">Empresa</option>
-                        <option value="ONG">ONG / Entidade</option>
-                        <option value="VOLUNTARIO">Voluntário</option>
-                        <option value="PROFISSIONAL_LIBERAL">Profissional Liberal</option>
-                        <option value="IMPRENSA">Imprensa / Mídia</option>
-                        <option value="OUTRO">Outro</option>
-                    </select>
-                </div>
-                
-                <div class="col-md-8">
-                    <label for="nomeRazaoSocial" class="form-label">Nome Oficial ou Razão Social <span class="text-danger">*</span></label>
-                    <input id="nomeRazaoSocial" type="text" class="form-input" formControlName="nomeRazaoSocial" placeholder="Ex: Microsoft Informática Ltda">
-                    @if (apoiadorForm.get('nomeRazaoSocial')?.invalid && apoiadorForm.get('nomeRazaoSocial')?.touched) {
-                        <small class="text-danger mt-1 d-block">Este campo é obrigatório.</small>
-                    }
-                </div>
-
-                <div class="col-md-6">
-                    <label for="nomeFantasia" class="form-label">Nome Fantasia (Como é conhecido)</label>
-                    <input id="nomeFantasia" type="text" class="form-input" formControlName="nomeFantasia" placeholder="Ex: Microsoft Brasil">
-                </div>
-
-                <div class="col-md-6">
-                    <label for="cpfCnpj" class="form-label">Documento (CPF ou CNPJ)</label>
-                    <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj" placeholder="Apenas números ou formato padrão" (input)="formatarCpfCnpj($event)" maxlength="18">
-                </div>
+            <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1" aria-valuemax="4"
+                 [attr.aria-label]="'Progresso: etapa ' + passoAtual + ' de 4'">
+                <div class="progress-fill" [style.width.%]="(passoAtual / 4) * 100"></div>
             </div>
 
-            <h5 class="section-title mt-4">Contato e Segmentação</h5>
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label for="email" class="form-label">E-mail</label>
-                    <input id="email" type="text" class="form-input" formControlName="email" placeholder="contato@empresa.com" (input)="formatarEmail($event)">
-                    @if (apoiadorForm.get('email')?.invalid && apoiadorForm.get('email')?.dirty && apoiadorForm.get('email')?.value) {
-                        <small class="text-danger mt-1 d-block" style="font-size: 0.8rem; color: #dc2626;">Formato incorreto de e-mail.</small>
-                    }
+            <!-- Indicadores de passo -->
+            <div class="steps-indicator" aria-hidden="true">
+                @for (step of [1,2,3,4]; track step) {
+                    <div class="step-dot" [class.active]="step === passoAtual" [class.done]="step < passoAtual">{{ step }}</div>
+                }
+            </div>
+        </header>
+
+        <div class="modal-body" tabindex="0" style="padding: 1.5rem;">
+            <form [formGroup]="apoiadorForm" (ngSubmit)="onSubmitForm()" class="wizard-form" style="border: none; padding: 0; box-shadow: none;">
+            
+            <!-- ======================================================== -->
+            <!-- PASSO 1 — Informações Principais                         -->
+            <!-- ======================================================== -->
+            @if (passoAtual === 1) {
+            <fieldset formGroupName="informacoesPrincipais">
+                <legend style="display: none;">Passo 1: Informações Principais</legend>
+                <h5 class="wizard-section-title">Informações Principais</h5>
+                
+                <div class="form-grid" style="margin-bottom: 1rem">
+                    <div class="form-group">
+                        <label for="tipo" class="form-label">Tipo de Apoiador <span class="required" aria-hidden="true">*</span></label>
+                        <select id="tipo" class="form-select" formControlName="tipo" [class.input-error]="isCampoInvalido('informacoesPrincipais', 'tipo')">
+                            <option value="EMPRESA">Empresa</option>
+                            <option value="ONG">ONG / Entidade</option>
+                            <option value="VOLUNTARIO">Voluntário</option>
+                            <option value="PROFISSIONAL_LIBERAL">Profissional Liberal</option>
+                            <option value="IMPRENSA">Imprensa / Mídia</option>
+                            <option value="OUTRO">Outro</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cpfCnpj" class="form-label">Documento (CPF ou CNPJ)</label>
+                        <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj" placeholder="Apenas números ou formato padrão" (input)="formatarCpfCnpj($event)" maxlength="18">
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label for="telefone" class="form-label">Telefone ou WhatsApp</label>
-                    <input id="telefone" type="text" class="form-input" formControlName="telefone" placeholder="(11) 99999-9999" (input)="formatarTelefone($event)" maxlength="15">
+                <div class="form-grid" style="margin-bottom: 1rem">
+                    <div class="form-group full-width">
+                        <label for="nomeRazaoSocial" class="form-label">Nome Oficial ou Razão Social <span class="required" aria-hidden="true">*</span></label>
+                        <input id="nomeRazaoSocial" type="text" class="form-input" formControlName="nomeRazaoSocial" placeholder="Ex: Microsoft Informática Ltda" [class.input-error]="isCampoInvalido('informacoesPrincipais', 'nomeRazaoSocial')">
+                        @if (isCampoInvalido('informacoesPrincipais', 'nomeRazaoSocial')) {
+                            <span class="error-text" role="alert">Este campo é obrigatório.</span>
+                        }
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="nomeFantasia" class="form-label">Nome Fantasia (Como é conhecido)</label>
+                        <input id="nomeFantasia" type="text" class="form-input" formControlName="nomeFantasia" placeholder="Ex: Microsoft Brasil">
+                    </div>
+                </div>
+            </fieldset>
+            }
+
+            <!-- ======================================================== -->
+            <!-- PASSO 2 — Contato e Endereço                             -->
+            <!-- ======================================================== -->
+            @if (passoAtual === 2) {
+            <fieldset formGroupName="contatoEndereco">
+                <legend style="display: none;">Passo 2: Contato e Segmentação</legend>
+                <h5 class="wizard-section-title">Contato e Segmentação</h5>
+
+                <div class="form-grid" style="margin-bottom: 1rem">
+                    <div class="form-group">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input id="email" type="email" class="form-input" formControlName="email" placeholder="contato@empresa.com" (input)="formatarEmail($event)" [class.input-error]="isCampoInvalido('contatoEndereco', 'email')">
+                        @if (isCampoInvalido('contatoEndereco', 'email')) {
+                            <span class="error-text">Formato incorreto de e-mail.</span>
+                        }
+                    </div>
+
+                    <div class="form-group">
+                        <label for="telefone" class="form-label">Telefone ou WhatsApp</label>
+                        <input id="telefone" type="tel" class="form-input" formControlName="telefone" placeholder="(11) 99999-9999" (input)="formatarTelefone($event)" maxlength="15">
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label for="contatoPessoa" class="form-label">Pessoa de Contato (Quem nos atende?)</label>
-                    <input id="contatoPessoa" type="text" class="form-input" formControlName="contatoPessoa" placeholder="Ex: Ana do Marketing">
+                <div class="form-grid" style="margin-bottom: 1rem">
+                    <div class="form-group">
+                        <label for="contatoPessoa" class="form-label">Pessoa de Contato (Quem nos atende?)</label>
+                        <input id="contatoPessoa" type="text" class="form-input" formControlName="contatoPessoa" placeholder="Ex: Ana do Marketing">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="atividadeEspecialidade" class="form-label">Atividade ou Especialidade</label>
+                        <input id="atividadeEspecialidade" type="text" class="form-input" formControlName="atividadeEspecialidade" placeholder="Ex: Advogado Trabalhista ou Fornecedor de TI">
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <label for="atividadeEspecialidade" class="form-label">Atividade ou Especialidade</label>
-                    <input id="atividadeEspecialidade" type="text" class="form-input" formControlName="atividadeEspecialidade" placeholder="Ex: Advogado Trabalhista ou Fornecedor de TI">
-                </div>
-
-                <div class="col-12">
+                <div class="form-group full-width" style="margin-bottom: 1rem">
                     <label for="endereco" class="form-label">Endereço Completo</label>
                     <input id="endereco" type="text" class="form-input" formControlName="endereco" placeholder="Rua, número, bairro, cidade - UF">
                 </div>
-            </div>
+            </fieldset>
+            }
 
-            <h5 class="section-title mt-4">Presença Online e Visual</h5>
-            <div class="row g-3 mb-4 align-items-center">
-                <div class="col-md-6">
-                    <label for="logoImage" class="form-label">Logomarca da Empresa/Entidade</label>
-                    <input id="logoImage" type="file" class="form-input" (change)="onLogoSelected($event)" accept="image/png, image/jpeg, image/webp">
-                    <small class="text-muted d-block mt-1">Imagens quadradas tendem a ficar melhores. Tamanho máx 5MB.</small>
-                </div>
-                <div class="col-md-6 text-center">
-                    <div class="logo-preview-box">
-                        @if (logoPreview) {
-                            <img [src]="logoPreview" alt="Pré-visualização da Logo" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid #e5e7eb; object-fit: contain;">
-                        } @else {
-                            <div class="placeholder-preview" style="background: #f9fafb; padding: 2rem; border-radius: 8px; border: 1px dashed #d1d5db; color: #9ca3af; display: inline-flex; flex-direction: column; align-items: center;">
-                                <span class="material-symbols-rounded" style="font-size: 2rem;">image</span>
-                                <span class="d-block mt-2">Preview da Imagem</span>
-                            </div>
-                        }
+            <!-- ======================================================== -->
+            <!-- PASSO 3 — Presença Online e Visual                       -->
+            <!-- ======================================================== -->
+            @if (passoAtual === 3) {
+            <fieldset formGroupName="visualVisibilidade">
+                <legend style="display: none;">Passo 3: Presença Online e Visual</legend>
+                <h5 class="wizard-section-title">Presença Online e Visual</h5>
+
+                <div class="form-grid" style="margin-bottom: 2rem; align-items: center;">
+                    <div class="form-group">
+                        <label class="form-label">Logomarca da Empresa/Entidade</label>
+                        <div class="file-upload">
+                            <label class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">image</span>
+                                Selecionar Logo
+                                <input type="file" (change)="onLogoSelected($event)" accept="image/png, image/jpeg, image/webp" style="display: none;" />
+                            </label>
+                            <span class="file-name" *ngIf="logoFile">{{ logoFile.name }}</span>
+                        </div>
+                        <p class="field-hint" style="margin-top: 0.5rem;">Imagens quadradas tendem a ficar melhores. Tamanho máx 5MB.</p>
+                    </div>
+
+                    <div class="text-center" style="display: flex; justify-content: center; align-items: center;">
+                        <div class="logo-preview-box">
+                            @if (logoPreview) {
+                                <img [src]="logoPreview" alt="Pré-visualização da Logo" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid #e5e7eb; object-fit: contain;">
+                            } @else {
+                                <div class="placeholder-preview" style="background: #f9fafb; padding: 2rem; border-radius: 8px; border: 1px dashed #d1d5db; color: #9ca3af; display: inline-flex; flex-direction: column; align-items: center;">
+                                    <span class="material-symbols-rounded" style="font-size: 2rem;">image</span>
+                                    <span class="d-block mt-2">Preview da Imagem</span>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <div class="form-check form-switch mt-2 p-3" style="background: rgba(37, 99, 235, 0.05); border-radius: 8px; border: 1px solid rgba(37, 99, 235, 0.2);">
-                        <input class="form-check-input ms-0 me-3 mt-1" type="checkbox" id="exibirNoSite" formControlName="exibirNoSite" [attr.aria-checked]="apoiadorForm.get('exibirNoSite')?.value" style="transform: scale(1.2);">
-                        <label class="form-check-label d-flex flex-column" for="exibirNoSite" style="cursor: pointer;">
-                            <strong style="color: #1e40af;">Exibir no Site Público?</strong>
-                            <small class="text-muted">Se ativado, esta logomarca (ou nome fantasia) será mostrada no carrossel de patrocinadores/parceiros da Home Page do Instituto. Somente ative com autorização expressa da marca.</small>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <div class="checkbox-group" style="background: rgba(37, 99, 235, 0.05); border-radius: 8px; border: 1px solid rgba(37, 99, 235, 0.3); align-items: flex-start; padding: 1.5rem; gap: 1rem;">
+                        <input type="checkbox" id="exibirNoSite" formControlName="exibirNoSite" style="transform: scale(1.4); margin-top: 0.35rem; margin-left: 0.5rem; cursor: pointer;">
+                        <label for="exibirNoSite" class="d-flex flex-column" style="cursor: pointer;">
+                            <strong style="color: #1e40af; font-size: 1.05rem; margin-bottom: 0.25rem;">Exibir no Site Público?</strong>
+                            <span class="text-muted" style="font-weight: normal; font-size: 0.9rem; line-height: 1.5; color: #4b5563;">Se ativado, esta logomarca (ou nome fantasia) será mostrada no carrossel de patrocinadores/parceiros da Home Page do Instituto. Somente ative com autorização expressa da marca.</span>
                         </label>
                     </div>
                 </div>
-            </div>
+            </fieldset>
+            }
 
-            <h5 class="section-title mt-4">Gerenciamento Interno</h5>
-            <div class="row g-3 mb-4">
-                <div class="col-12">
-                    <label for="observacoes" class="form-label">Observações Restritas (Apenas Administrativo)</label>
-                    <textarea id="observacoes" class="form-input" formControlName="observacoes" rows="3" placeholder="Insira histórico de interações, valores de contratos, notas pessoais..."></textarea>
+            <!-- ======================================================== -->
+            <!-- PASSO 4 — Gerenciamento Interno (Ações e Observações)    -->
+            <!-- ======================================================== -->
+            @if (passoAtual === 4) {
+            <fieldset formGroupName="gerenciamento">
+                <legend style="display: none;">Passo 4: Gerenciamento Interno</legend>
+                <h5 class="wizard-section-title">Observações Restritas (Apenas Administrativo)</h5>
+                
+                <div class="form-group full-width" style="margin-bottom: 2rem;">
+                    <textarea id="observacoes" class="form-input form-textarea" formControlName="observacoes" rows="3" placeholder="Insira histórico de interações, valores de contratos, notas pessoais..."></textarea>
                 </div>
-            </div>
+            </fieldset>
 
-            <h5 class="section-title mt-4 d-flex justify-content-between align-items-center">
-                Registro de Ações e Histórico (CRM)
-                <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="addAcaoField()">
-                    <span class="material-symbols-rounded" style="font-size: 1rem">add</span>
-                    Vincular Ação
-                </button>
-            </h5>
-            <p class="text-muted" style="font-size: 0.85rem;">Preencha opcionalmente as ações, doações ou apoios que essa entidade já forneceu ao instituto no momento da criação.</p>
-            
-            <div formArrayName="acoes">
-                @for (acaoCtrl of acoesFormArray.controls; track $index) {
-                <div [formGroupName]="$index" class="row g-2 align-items-end mb-3 pb-3 border-bottom position-relative" style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px dashed #cbd5e1;">
-                    <div class="col-md-3">
-                        <label class="form-label mb-1">Data Evento *</label>
-                        <input type="date" class="form-input form-input-sm" formControlName="dataEvento">
-                    </div>
-                    <div class="col-md-8">
-                        <label class="form-label mb-1">Descrição do que foi efetuado *</label>
-                        <input type="text" class="form-input form-input-sm" formControlName="descricaoAcao" placeholder="Exclua via lixeira se em branco...">
-                    </div>
-                    <div class="col-md-1 text-center">
-                        <button type="button" class="btn btn-danger btn-sm p-2 w-100 d-flex justify-content-center" (click)="removeAcaoField($index)" title="Remover esta Ação">
-                            <span class="material-symbols-rounded" style="font-size: 1.1rem; margin: 0;">delete</span>
-                        </button>
-                    </div>
+            <fieldset>
+                <div class="section-divider">
+                    <span>Registro de Ações (CRM)</span>
                 </div>
-                }
-                @empty {
-                    <div class="text-muted text-center p-3" style="background: #f9fafb; border-radius: 8px; font-size: 0.9rem;">
-                        Você ainda não adicionou entradas de histórico simultâneo para edição. (Mas pode adicionar depois acessando Perfil > Histórico).
+                
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="field-hint mb-0">Preencha opcionalmente as ações, doações ou apoios passados no momento da criação.</p>
+                    <button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="addAcaoField()">
+                        <span class="material-symbols-rounded" style="font-size: 1rem">add</span>
+                        Vincular Ação
+                    </button>
+                </div>
+                
+                <div formArrayName="acoes">
+                    @for (acaoCtrl of acoesFormArray.controls; track $index) {
+                    <div [formGroupName]="$index" class="form-grid form-grid-3 align-items-end mb-3 pb-3 border-bottom position-relative" style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <div class="form-group">
+                            <label class="form-label">Data Evento <span class="required">*</span></label>
+                            <input type="date" class="form-input" formControlName="dataEvento">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label class="form-label">Descrição da Ação/Doação <span class="required">*</span></label>
+                            <div style="display: flex; gap: 0.5rem; align-items: stretch;">
+                                <input type="text" class="form-input" formControlName="descricaoAcao" placeholder="Descreva o que foi feito..." style="flex: 1;">
+                                <button type="button" class="btn btn-danger btn-sm p-2" (click)="removeAcaoField($index)" title="Remover esta Ação" style="display: flex; align-items: center; justify-content: center;">
+                                    <span class="material-symbols-rounded" style="font-size: 1.1rem; margin: 0;">delete</span>
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                }
-            </div>
-
-            <hr class="mt-4 mb-4">
-
-            <div class="d-flex justify-content-end gap-3 mt-4">
-                <button type="button" class="btn btn-secondary" (click)="fecharModalForm()">Cancelar</button>
-                <button type="submit" class="btn btn-primary d-flex align-items-center gap-2" [disabled]="apoiadorForm.invalid || salvando">
-                    @if (salvando) {
-                        <span class="loading-spinner material-symbols-rounded" style="font-size: 1.2rem;">sync</span>
-                        Salvando...
-                    } @else {
-                        <span class="material-symbols-rounded" style="font-size: 1.2rem;">save</span>
-                        Salvar Apoiador
                     }
-                </button>
-            </div>
+                    @empty {
+                        <div class="text-muted text-center p-3" style="background: #f9fafb; border-radius: 8px; font-size: 0.9rem;">
+                            Você ainda não adicionou entradas de histórico simultâneo.
+                        </div>
+                    }
+                </div>
+            </fieldset>
+            }
+
+            <!-- ====== BOTÕES DE NAVEGAÇÃO ====== -->
+            <footer class="wizard-footer pb-0 border-0 mt-4">
+                <div class="wizard-footer-left">
+                    @if (passoAtual > 1) {
+                        <button type="button" class="btn btn-secondary" (click)="voltarPasso()" [attr.aria-label]="'Voltar para etapa ' + (passoAtual - 1)">
+                            ← Voltar
+                        </button>
+                    } @else {
+                        <button type="button" class="btn btn-secondary" (click)="fecharFormSeguro()">Cancelar</button>
+                    }
+                </div>
+
+                <div class="wizard-footer-right">
+                    @if (passoAtual < 4) {
+                        <button type="button" class="btn btn-primary" (click)="avancarPasso()" 
+                            [attr.aria-disabled]="!apoiadorForm.get(getGroupName(passoAtual))?.valid"
+                            [attr.aria-label]="'Avançar para etapa ' + (passoAtual + 1)">
+                            Avançar →
+                        </button>
+                    }
+
+                    @if (passoAtual === 4) {
+                        <button type="submit" class="btn btn-primary d-flex align-items-center gap-2" [disabled]="apoiadorForm.invalid || salvando">
+                            @if (salvando) {
+                                <span class="loading-spinner material-symbols-rounded" style="font-size: 1.2rem;">sync</span>
+                                Salvando...
+                            } @else {
+                                <span class="material-symbols-rounded" style="font-size: 1.2rem;">save</span>
+                                Salvar Apoiador
+                            }
+                        </button>
+                    }
+                </div>
+            </footer>
             </form>
         </div>
     </div>
