@@ -1040,24 +1040,39 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Emissão de Certificados ─────────────────────────────────────────
 
-  emitirCertificadoAcademico(matriculaId: string): void {
-    if (this.emitindoCertificadoId === matriculaId) return;
-    this.emitindoCertificadoId = matriculaId;
+  emitirCertificadoAcademico(matricula: { id: string; turma: { id: string } }): void {
+    if (this.emitindoCertificadoId === matricula.id) return;
+    this.emitindoCertificadoId = matricula.id;
     this.cdr.detectChanges();
 
-    this.modelosCertificadosService.emitirAcademico(matriculaId).subscribe({
+    const alunoId = this.alunoSelecionado!.id;
+    this.modelosCertificadosService.emitirAcademico(matricula.turma.id, alunoId).subscribe({
       next: (blob: Blob) => {
         const url = window.URL.createObjectURL(blob);
-        // Usa o visualizador PDF já existente na tela
         this.urlPdfParaVisualizar = url;
         this.mostrarVisualizadorPdf = true;
         this.emitindoCertificadoId = null;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        this.toast.erro(err?.error?.message ?? 'Erro ao emitir certificado acadêmico.');
-        this.emitindoCertificadoId = null;
-        this.cdr.detectChanges();
+        // Quando responseType='blob', o erro também chega como Blob — precisamos lê-lo como texto
+        const blobError: Blob | null = err?.error instanceof Blob ? err.error : null;
+        if (blobError) {
+          blobError.text().then((text) => {
+            try {
+              const parsed = JSON.parse(text);
+              this.toast.erro(parsed?.message ?? 'Erro ao emitir certificado acadêmico.');
+            } catch {
+              this.toast.erro('Erro ao emitir certificado acadêmico.');
+            }
+            this.emitindoCertificadoId = null;
+            this.cdr.detectChanges();
+          });
+        } else {
+          this.toast.erro(err?.error?.message ?? 'Erro ao emitir certificado acadêmico.');
+          this.emitindoCertificadoId = null;
+          this.cdr.detectChanges();
+        }
       }
     });
   }

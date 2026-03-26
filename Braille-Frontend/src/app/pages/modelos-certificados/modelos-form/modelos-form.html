@@ -48,7 +48,7 @@
                      style="width:100%;max-height:140px;object-fit:cover;display:block;">
                 <span style="position:absolute;top:6px;right:6px;background:rgba(22,163,74,.9);color:#fff;font-size:.7rem;font-weight:600;padding:.2rem .5rem;border-radius:999px;">✔ Em uso</span>
               </div>
-              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Enviar nova imagem (opcional — substitui a atual):</label>
+              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Enviar nova imagem (opcional - substitui a atual):</label>
             }
             <input type="file" (change)="onFileChange($event, 'arteBase')" accept="image/*" class="form-input" style="padding: 0.5rem;" />
             <small class="field-hint">A dimensão ideal recomendada é 3508 x 2480 pixels (A4 Paisagem).</small>
@@ -62,10 +62,10 @@
             @if (modoEdicao && modeloEditado?.assinaturaUrl) {
               <div style="margin-bottom:.75rem;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;background:#f8fafc;display:flex;align-items:center;gap:.75rem;">
                 <img [src]="modeloEditado!.assinaturaUrl" alt="Assinatura atual"
-                     style="max-width:120px;max-height:50px;object-fit:contain;mix-blend-mode:multiply;">
-                <span style="font-size:.78rem;color:#16a34a;font-weight:600;">✔ Assinatura configurada</span>
+                     style="max-width:120px;max-height:50px;object-fit:contain;">
+                <span style="font-size:.78rem;color:#16a34a;font-weight:600;">Assinatura configurada</span>
               </div>
-              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Enviar nova assinatura (opcional — substitui a atual):</label>
+              <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Enviar nova assinatura (opcional - substitui a atual):</label>
             }
             <input type="file" (change)="onFileChange($event, 'assinatura')" accept="image/png" class="form-input" style="padding: 0.5rem;" />
             <small class="field-hint">A varredura da assinatura será aplicada sob a linha.</small>
@@ -102,8 +102,8 @@
             @if (modoEdicao && modeloEditado?.assinaturaUrl2) {
               <div style="margin-bottom:.5rem;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;background:#f8fafc;display:flex;align-items:center;gap:.75rem;">
                 <img [src]="modeloEditado!.assinaturaUrl2" alt="Assinatura 2 atual"
-                     style="max-width:100px;max-height:45px;object-fit:contain;mix-blend-mode:multiply;">
-                <span style="font-size:.78rem;color:#16a34a;font-weight:600;">✔ Configurada</span>
+                     style="max-width:100px;max-height:45px;object-fit:contain;">
+                <span style="font-size:.78rem;color:#16a34a;font-weight:600;">Configurada</span>
               </div>
               <label style="font-size:.8rem;color:#6b7280;margin-bottom:.25rem;display:block;">Substituir (opcional):</label>
             }
@@ -206,7 +206,8 @@
                }"
                style="font-family:'Georgia',serif;color:#1a1a00;white-space:pre-wrap;
                       font-size:clamp(.5rem,1.1vw,.75rem);line-height:1.75;
-                      outline: 2px dashed rgba(59,130,246,.5);">
+                      outline: 2px dashed rgba(59,130,246,.5); cursor: move;"
+               cdkDrag (cdkDragEnded)="onDragEnded($event, 'textoPronto')">
             {{ formModelo.get('textoTemplate')?.value || '(texto do certificado)' }}
           </div>
 
@@ -219,9 +220,10 @@
                  width: (layoutConfig.assinatura1.width || 20) + '%'
                }"
                style="display:flex;flex-direction:column;align-items:center;
-                      outline:2px dashed rgba(34,197,94,.5);">
+                      outline:2px dashed rgba(34,197,94,.5); cursor: move;"
+               cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura1')">
             <img [src]="assinaturaPreviewUrl" alt="Assinatura"
-                 style="width:100%;max-height:50px;object-fit:contain;mix-blend-mode:darken;">
+                 style="width:100%;max-height:50px;object-fit:contain;">
             <div style="width:80%;border-top:1px solid #5a4a00;text-align:center;padding-top:2px;">
               <strong style="display:block;font-size:clamp(.4rem,.8vw,.6rem);font-family:'Georgia',serif;">{{ formModelo.get('nomeAssinante')?.value }}</strong>
               <span style="display:block;font-size:clamp(.35rem,.7vw,.55rem);color:#555;font-family:'Georgia',serif;">{{ formModelo.get('cargoAssinante')?.value }}</span>
@@ -237,15 +239,32 @@
                  width: (layoutConfig.assinatura2.width || 20) + '%'
                }"
                style="display:flex;flex-direction:column;align-items:center;
-                      outline:2px dashed rgba(239,68,68,.5);">
+                      outline:2px dashed rgba(239,68,68,.5); cursor: move;"
+               cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura2')">
             <img [src]="assinatura2PreviewUrl" alt="Assinatura 2"
-                 style="width:100%;max-height:50px;object-fit:contain;mix-blend-mode:darken;">
+                 style="width:100%;max-height:50px;object-fit:contain;">
             <div style="width:80%;border-top:1px solid #5a4a00;text-align:center;padding-top:2px;">
               <strong style="display:block;font-size:clamp(.4rem,.8vw,.6rem);font-family:'Georgia',serif;">{{ formModelo.get('nomeAssinante2')?.value }}</strong>
               <span style="display:block;font-size:clamp(.35rem,.7vw,.55rem);color:#555;font-family:'Georgia',serif;">{{ formModelo.get('cargoAssinante2')?.value }}</span>
             </div>
           </div>
-        </div>
+
+          <!-- Nome do Aluno (elemento posicionável independente) -->
+          <div [ngStyle]="{
+                 position: 'absolute',
+                 left:      layoutConfig.nomeAluno.x + '%',
+                 top:       layoutConfig.nomeAluno.y + '%',
+                 'max-width': (layoutConfig.nomeAluno.maxWidth || 50) + '%'
+               }"
+               style="font-family:'Georgia',serif;font-weight:bold;white-space:nowrap;
+                      font-size:clamp(.6rem,1.4vw,.9rem);
+                      outline:2px dashed rgba(168,85,247,.7);padding:1px 4px; cursor: move;"
+               [style.color]="layoutConfig.nomeAluno.color || '#000'"
+               cdkDrag (cdkDragEnded)="onDragEnded($event, 'nomeAluno')">
+            ✦ Nome do Aluno (automático)
+          </div>
+
+        </div><!-- /preview-container -->
 
         <!-- CONTROLES ABAIXO — 3 colunas -->
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
@@ -309,7 +328,31 @@
                    style="width:100%;">
           </div>
 
+          <!-- Nome do Aluno -->
+          <div style="padding:.75rem;border:1px solid #e9d5ff;border-radius:8px;background:#faf5ff;">
+            <p style="margin:0 0 .5rem;font-weight:600;font-size:.85rem;color:#7e22ce;">
+              <span style="display:inline-block;width:10px;height:10px;border:2px dashed #a855f7;margin-right:6px;vertical-align:middle;"></span>Nome do Aluno <span style="font-size:.7rem;color:#94a3b8;">(preenchido automaticamente)</span>
+            </p>
+            <label style="font-size:.78rem;color:#475569;display:block;">X% <strong>{{ layoutConfig.nomeAluno.x }}%</strong></label>
+            <input type="range" min="0" max="90" step="0.5" [value]="layoutConfig.nomeAluno.x"
+                   (input)="layoutConfig.nomeAluno.x = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Y% <strong>{{ layoutConfig.nomeAluno.y }}%</strong></label>
+            <input type="range" min="0" max="90" step="0.5" [value]="layoutConfig.nomeAluno.y"
+                   (input)="layoutConfig.nomeAluno.y = +$any($event.target).value; formModelo.markAsDirty()"
+                   style="width:100%;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;">Fonte PDF (pt) <strong>{{ layoutConfig.nomeAluno.fontSize || 56 }}pt</strong></label>
+            <input type="number" [value]="layoutConfig.nomeAluno.fontSize || 56" min="12" max="200"
+                   (change)="setNomeAlunoFontSize($event)"
+                   style="width:65px;padding:.2rem .4rem;border:1px solid #cbd5e1;border-radius:6px;font-size:.85rem;margin-bottom:.4rem;">
+            <label style="font-size:.78rem;color:#475569;display:block;margin-top:.3rem;">Cor</label>
+            <input type="color" [value]="layoutConfig.nomeAluno.color || '#000000'"
+                   (input)="setNomeAlunoColor($event)"
+                   style="width:40px;height:28px;border:none;border-radius:4px;cursor:pointer;">
+          </div>
+
         </div><!-- /controles -->
+
       </div><!-- /*ngIf -->
 
       <div *ngIf="!previewBaseUrl" style="padding: 2rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 8px; color: #64748b; background: #f8fafc;">

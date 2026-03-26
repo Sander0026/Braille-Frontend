@@ -5,12 +5,12 @@ import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ModelosCertificadosService, ModeloCertificado } from '../../../core/services/modelos-certificados.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
-import { CdkDragEnd, CdkDrag } from '@angular/cdk/drag-drop';
+import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-modelos-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, CdkDrag],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, DragDropModule],
   templateUrl: './modelos-form.html',
   styleUrl: './modelos-form.scss' // Vamos usar o CSS direto no HTML/SCSS genérico se precisar
 })
@@ -30,8 +30,9 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   assinatura2PreviewUrl: string | ArrayBuffer | null = null;
 
   layoutConfig: any = {
-    textoPronto: { x: 10, y: 30, fontSize: 32, color: '#000000', maxWidth: 80 },
-    assinatura1: { x: 40, y: 70, width: 20 },
+    textoPronto: { x: 30, y: 30, fontSize: 32, color: '#000000', maxWidth: 80 },
+    nomeAluno:   { x: 25, y: 45, fontSize: 56, color: '#000000', maxWidth: 50 },
+    assinatura1: { x: 10, y: 70, width: 20 },
     assinatura2: { x: 60, y: 70, width: 20 },
   };
 
@@ -234,5 +235,17 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
       this.layoutConfig.textoPronto.fontSize = val;
       this.formModelo.markAsDirty();
     }
+  }
+  setNomeAlunoFontSize(event: Event) {
+    const val = Number((event.target as HTMLInputElement).value);
+    if (val >= 8 && val <= 200) {
+      this.layoutConfig.nomeAluno.fontSize = val;
+      this.formModelo.markAsDirty();
+    }
+  }
+
+  setNomeAlunoColor(event: Event) {
+    this.layoutConfig.nomeAluno.color = (event.target as HTMLInputElement).value;
+    this.formModelo.markAsDirty();
   }
 }
