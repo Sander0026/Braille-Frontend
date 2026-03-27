@@ -1,25 +1,30 @@
-import { Component, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { ModelosCertificadosService, ModeloCertificado } from '../../../core/services/modelos-certificados.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+
+/** Dimensões fixas do canvas de preview (proporcional A4 landscape @ 96 dpi) */
+const CANVAS_W = 1122;
+const CANVAS_H = 794;
 
 @Component({
   selector: 'app-modelos-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, DragDropModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, DragDropModule, FormsModule],
   templateUrl: './modelos-form.html',
   styleUrl: './modelos-form.scss' // Vamos usar o CSS direto no HTML/SCSS genérico se precisar
 })
-export class ModelosForm extends BaseFormDescarte implements OnInit {
+export class ModelosForm extends BaseFormDescarte implements OnInit, AfterViewInit, OnDestroy {
   formModelo!: FormGroup;
   modoEdicao = false;
   modeloId = '';
   isSalvando = false;
   modeloEditado: ModeloCertificado | null = null;
+  passoAtual = 1;
 
   arteBaseFile: File | null = null;
   assinaturaFile: File | null = null;
@@ -30,14 +35,27 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   assinatura2PreviewUrl: string | ArrayBuffer | null = null;
 
   layoutConfig: any = {
-    textoPronto: { x: 30, y: 30, fontSize: 32, color: '#000000', maxWidth: 80 },
-    nomeAluno:   { x: 25, y: 45, fontSize: 56, color: '#000000', maxWidth: 50 },
-    assinatura1: { x: 10, y: 70, width: 20 },
+    textoPronto: { x: 10, y: 20, fontSize: 32, color: '#1a1a00', maxWidth: 80, fontFamily: 'Helvetica' },
+    nomeAluno:   { x: 10, y: 45, fontSize: 60, color: '#000000', maxWidth: 80, fontFamily: 'Great Vibes' },
+    assinatura1: { x: 20, y: 70, width: 20 },
     assinatura2: { x: 60, y: 70, width: 20 },
+    qrCode:      { x: 80, y: 80, size: 10 },
   };
 
+  /** Fator de escala atual do canvas de preview */
+  scaleFactor = 1;
+
+  /** Dimensões do canvas exportadas para o template */
+  readonly CANVAS_W = CANVAS_W;
+  readonly CANVAS_H = CANVAS_H;
+
   @ViewChild('textoTemplateInput') textoTemplateInput!: ElementRef<HTMLTextAreaElement>;
+  /** O canvas interno com tamanho fixo A4 */
   @ViewChild('previewContainer')   previewContainer!: ElementRef<HTMLElement>;
+  /** O wrapper externo que determina a largura disponível */
+  @ViewChild('previewWrapper')     previewWrapper!: ElementRef<HTMLElement>;
+
+  private _resizeObserver?: ResizeObserver;
 
   constructor(
     private fb: FormBuilder,
@@ -48,6 +66,28 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     super();
+  }
+
+  ngAfterViewInit(): void {
+    if (this.previewWrapper) {
+      this._resizeObserver = new ResizeObserver(() => this._recalcularScale());
+      this._resizeObserver.observe(this.previewWrapper.nativeElement);
+      this._recalcularScale();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this._resizeObserver?.disconnect();
+  }
+
+  private _recalcularScale(): void {
+    if (!this.previewWrapper) return;
+    const wrapperW = this.previewWrapper.nativeElement.clientWidth || CANVAS_W;
+    this.scaleFactor = Math.min(1, wrapperW / CANVAS_W);
+    // Atualiza a altura do wrapper para reservar o espaço correto
+    const wrapper = this.previewWrapper.nativeElement;
+    wrapper.style.height = Math.round(CANVAS_H * this.scaleFactor) + 'px';
+    this.cdr.detectChanges();
   }
 
   isFormDirty(): boolean {
@@ -203,18 +243,22 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
 
   onDragEnded(event: CdkDragEnd, field: string) {
     const element = event.source.element.nativeElement;
-
-    // Usa a referência direta ao container (mais confiável que closest())
     const container: HTMLElement | null =
       this.previewContainer?.nativeElement ?? element.closest('.preview-drag-container');
 
     if (!container) return;
 
+    // getBoundingClientRect devolve coordenadas visuais (já escaladas pelo browser).
+    // Dividir pelo scaleFactor converte de volta para o espaço do canvas fixo.
+    const scale = this.scaleFactor || 1;
     const contRect = container.getBoundingClientRect();
     const elRect   = element.getBoundingClientRect();
 
-    const xPct = Math.max(0, Math.min(((elRect.left - contRect.left) / contRect.width)  * 100, 90));
-    const yPct = Math.max(0, Math.min(((elRect.top  - contRect.top)  / contRect.height) * 100, 90));
+    const rawXPx = (elRect.left - contRect.left) / scale;
+    const rawYPx = (elRect.top  - contRect.top)  / scale;
+
+    const xPct = Math.max(0, Math.min((rawXPx / CANVAS_W) * 100, 90));
+    const yPct = Math.max(0, Math.min((rawYPx / CANVAS_H) * 100, 90));
 
     if (this.layoutConfig[field]) {
       this.layoutConfig[field].x = Math.round(xPct * 10) / 10;
@@ -247,5 +291,32 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   setNomeAlunoColor(event: Event) {
     this.layoutConfig.nomeAluno.color = (event.target as HTMLInputElement).value;
     this.formModelo.markAsDirty();
+  }
+
+  setTextoColor(event: Event) {
+    this.layoutConfig.textoPronto.color = (event.target as HTMLInputElement).value;
+    this.formModelo.markAsDirty();
+  }
+
+  proximoPasso() {
+    if (this.passoAtual === 1) {
+      if (this.formModelo.get('nome')?.invalid || this.formModelo.get('tipo')?.invalid) {
+        this.formModelo.get('nome')?.markAsTouched();
+        this.formModelo.get('tipo')?.markAsTouched();
+        this.toast.aviso('Por favor, preencha o nome e a categoria antes de prosseguir.');
+        return;
+      }
+    }
+    if (this.passoAtual < 4) {
+      this.passoAtual++;
+      window.scrollTo(0, 0);
+    }
+  }
+
+  passoAnterior() {
+    if (this.passoAtual > 1) {
+      this.passoAtual--;
+      window.scrollTo(0, 0);
+    }
   }
 }
