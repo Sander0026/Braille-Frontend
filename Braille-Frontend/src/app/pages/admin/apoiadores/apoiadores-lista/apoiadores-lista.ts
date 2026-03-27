@@ -53,6 +53,8 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
   formEmissao: FormGroup;
   urlPdfParaVisualizar: SafeResourceUrl | null = null;
   mostrarVisualizadorPdf = false;
+  certificadosEmitidos: any[] = [];
+  carregandoCertificados = false;
   
   // Wizard Steps
   passoAtual = 1;
@@ -98,7 +100,8 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.formEmissao = this.fb.group({
       modeloId: ['', Validators.required],
       motivoPersonalizado: [''],
-      dataEmissao: [this.hojeISO(), Validators.required]
+      dataEmissao: [this.hojeISO(), Validators.required],
+      acaoId: ['']
     });
   }
 
@@ -288,6 +291,8 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.carregandoDetalhes = true;
     this.apoiadorVisualizado = null;
     
+    this.carregarCertificados(id);
+    
     this.apoiadoresService.obterPorId(id).subscribe({
       next: (res) => {
         this.apoiadorVisualizado = res;
@@ -306,6 +311,23 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.modalAberto = false;
     this.apoiadorVisualizado = null;
     this.novaAcaoForm.reset();
+    this.certificadosEmitidos = [];
+  }
+
+  carregarCertificados(id: string) {
+    this.carregandoCertificados = true;
+    this.apoiadoresService.listarCertificados(id).subscribe({
+      next: (certs) => {
+        this.certificadosEmitidos = certs;
+        this.carregandoCertificados = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao carregar certificados', err);
+        this.carregandoCertificados = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   // Lógica do Modal de Histórico Pessoal (Rápido)
@@ -459,13 +481,23 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
 
   // ── Emissão de Honrarias (Certificados) ─────────────────────────────────────────
 
-  abrirModalEmissao(apoiador: Apoiador): void {
+  abrirModalEmissao(apoiador: Apoiador, acao?: any): void {
     this.apoiadorParaEmissao = apoiador;
     this.modalEmissaoAberto = true;
+    
+    let motivoPadrao = '';
+    let dataPronta = this.hojeISO();
+    
+    if (acao) {
+      motivoPadrao = acao.descricaoAcao;
+      dataPronta = new Date(acao.dataEvento).toISOString().split('T')[0];
+    }
+    
     this.formEmissao.reset({
       modeloId: '',
-      motivoPersonalizado: '',
-      dataEmissao: this.hojeISO()
+      motivoPersonalizado: motivoPadrao,
+      dataEmissao: dataPronta,
+      acaoId: acao ? acao.id : ''
     });
     this.cdr.detectChanges();
   }
@@ -491,19 +523,36 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.cdr.detectChanges();
 
     const payload = {
-      apoiadorId: this.apoiadorParaEmissao.id,
       modeloId: this.formEmissao.value.modeloId,
       motivoPersonalizado: this.formEmissao.value.motivoPersonalizado,
-      dataEmissao: this.formEmissao.value.dataEmissao
+      dataEmissao: this.formEmissao.value.dataEmissao,
+      acaoId: this.formEmissao.value.acaoId || undefined
     };
 
-    this.modelosCertificadosService.testarGeracaoGeometrica(payload).subscribe({
-      next: (blob: Blob) => {
+    this.apoiadoresService.emitirCertificado(this.apoiadorParaEmissao.id, payload).subscribe({
+      next: (res: any) => {
+        // Recebe { certificado, pdfBase64 } do backend
+        const byteCharacters = atob(res.pdfBase64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'application/pdf' });
+        
+        // Capturar o id antes de fechar o modal
+        const idEmitido = this.apoiadorParaEmissao?.id;
+
         const url = window.URL.createObjectURL(blob);
         this.urlPdfParaVisualizar = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         this.mostrarVisualizadorPdf = true;
         this.emitindoCertificado = false;
         this.fecharModalEmissao();
+        
+        // Se a visualização estiver aberta, atualiza a lista de certificados
+        if (this.modalAberto && this.apoiadorVisualizado && idEmitido && this.apoiadorVisualizado.id === idEmitido) {
+          this.carregarCertificados(this.apoiadorVisualizado.id);
+        }
       },
       error: (err: any) => {
         console.error('Erro ao emitir honraria', err);

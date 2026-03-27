@@ -127,4 +127,22 @@ export class ApoiadoresService {
       tap(() => this.limparCache())
     );
   }
+
+  // ---- Certificados de Honraria ---- //
+
+  listarCertificados(apoiadorId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/${apoiadorId}/certificados`);
+  }
+
+  emitirCertificado(apoiadorId: string, payload: {
+    modeloId: string;
+    acaoId?: string;
+    motivoPersonalizado?: string;
+    dataEmissao?: string;
+  }): Observable<{ certificado: any; pdfBase64: string }> {
+    return this.http.post<{ certificado: any; pdfBase64: string }>(
+      `${this.apiUrl}/${apoiadorId}/certificados`,
+      payload
+    );
+  }
 }
