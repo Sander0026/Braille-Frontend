@@ -18,6 +18,7 @@ import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@an
 import { FormsModule } from '@angular/forms';
 import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
 import { LaudosService, LaudoMedico, CriarLaudoDto } from '../../../core/services/laudos.service';
+import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
 
 
 @Directive({
@@ -114,6 +115,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Exportação ──────────────────────────────────────────────────
   exportando = false;
+  emitindoCertificadoId: string | null = null;
 
   // ── Atestados ───────────────────────────────────────────────────
   gerenciandoAtestados = false; // Modal dedicado
@@ -157,7 +159,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private atestadosService: AtestadosService,
     private laudosService: LaudosService,
-    private http: HttpClient
+    private http: HttpClient,
+    private modelosCertificadosService: ModelosCertificadosService
   ) {
     this.editForm = this.fb.group({
       nomeCompleto: [''],
@@ -1027,9 +1030,51 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharVisualizadorPdf(): void {
+    if (this.urlPdfParaVisualizar && this.urlPdfParaVisualizar.startsWith('blob:')) {
+      window.URL.revokeObjectURL(this.urlPdfParaVisualizar);
+    }
     this.mostrarVisualizadorPdf = false;
     this.urlPdfParaVisualizar = null;
     this.cdr.detectChanges();
+  }
+
+  // ── Emissão de Certificados ─────────────────────────────────────────
+
+  emitirCertificadoAcademico(matricula: { id: string; turma: { id: string } }): void {
+    if (this.emitindoCertificadoId === matricula.id) return;
+    this.emitindoCertificadoId = matricula.id;
+    this.cdr.detectChanges();
+
+    const alunoId = this.alunoSelecionado!.id;
+    this.modelosCertificadosService.emitirAcademico(matricula.turma.id, alunoId).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        this.urlPdfParaVisualizar = url;
+        this.mostrarVisualizadorPdf = true;
+        this.emitindoCertificadoId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        // Quando responseType='blob', o erro também chega como Blob — precisamos lê-lo como texto
+        const blobError: Blob | null = err?.error instanceof Blob ? err.error : null;
+        if (blobError) {
+          blobError.text().then((text) => {
+            try {
+              const parsed = JSON.parse(text);
+              this.toast.erro(parsed?.message ?? 'Erro ao emitir certificado acadêmico.');
+            } catch {
+              this.toast.erro('Erro ao emitir certificado acadêmico.');
+            }
+            this.emitindoCertificadoId = null;
+            this.cdr.detectChanges();
+          });
+        } else {
+          this.toast.erro(err?.error?.message ?? 'Erro ao emitir certificado acadêmico.');
+          this.emitindoCertificadoId = null;
+          this.cdr.detectChanges();
+        }
+      }
+    });
   }
 
   // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────

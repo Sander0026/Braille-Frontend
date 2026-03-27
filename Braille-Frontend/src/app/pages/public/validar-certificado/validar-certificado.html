@@ -1,0 +1,71 @@
+<div class="validar-container">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      
+      <div class="validar-card">
+        <div class="validar-header">
+          <i class="bi bi-shield-check icon-header"></i>
+          <h1>Validação de Certificado</h1>
+          <p>Verifique a autenticidade de um certificado emitido pelo Instituto Luiz Braille.</p>
+        </div>
+
+        <form [formGroup]="form" (ngSubmit)="validar()" class="validar-form">
+          <div class="form-group">
+            <label for="codigoInput" class="sr-only">Código do Certificado</label>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-hash"></i></span>
+              <input type="text" id="codigoInput" formControlName="codigo" class="form-control form-control-lg text-center" 
+                     placeholder="Digite o código (Ex: D9E7F1A)" style="text-transform: uppercase;">
+              <button class="btn btn-primary btn-lg" type="submit" [disabled]="buscando">
+                @if (buscando) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                } @else {
+                  Validar
+                }
+              </button>
+            </div>
+            @if (form.get('codigo')?.invalid && form.get('codigo')?.touched) {
+              <div class="text-danger mt-2 text-center">Informe um código de validação válido.</div>
+            }
+          </div>
+        </form>
+
+        <!-- Resultado SUCESSO -->
+        @if (resultadoValidacao && !erroValidacao) {
+          <div class="resultado-box success fade-in">
+            <div class="resultado-icon">
+              <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="resultado-content">
+              <h3 class="success-title">Certificado Válido!</h3>
+              <p class="success-subtitle">Este documento foi oficialmente emitido pela nossa instituição.</p>
+              
+              <ul class="dados-lista">
+                <li><strong>Emitido para:</strong> {{ resultadoValidacao.nome }}</li>
+                <li><strong>Certificação:</strong> {{ resultadoValidacao.curso }}</li>
+                <li><strong>Data de Emissão:</strong> {{ resultadoValidacao.data }}</li>
+                <li><strong>Natureza:</strong> {{ resultadoValidacao.tipo === 'ACADEMICO' ? 'Certificação Acadêmica' : 'Honraria / Parceiro' }}</li>
+              </ul>
+            </div>
+          </div>
+        }
+
+        <!-- Resultado ERRO -->
+        @if (erroValidacao) {
+          <div class="resultado-box danger fade-in">
+            <div class="resultado-icon">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <div class="resultado-content">
+              <h3 class="danger-title">Certificado Inválido</h3>
+              <p>O código informado não consta em nossos registros de emissão. Verifique se digitou corretamente.</p>
+              <p class="small text-muted mb-0">Se você possui o documento impresso com este código, ele <strong>pode ser falso</strong> ou ter sido revogado.</p>
+            </div>
+          </div>
+        }
+
+      </div>
+
+    </div>
+  </div>
+</div>

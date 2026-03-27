@@ -6,6 +6,7 @@ import { Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TurmasService, CreateTurmaDto, GradeHorariaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
+import { ModelosCertificadosService, ModeloCertificado } from '../../../../core/services/modelos-certificados.service';
 import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 /** Dias da semana para o seletor de grade horária */
@@ -40,6 +41,10 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
     professores: Usuario[] = [];
     carregandoProfessores = false;
 
+    // Lista de modelos acadêmicos para o dropdown
+    modelosAcademicos: ModeloCertificado[] = [];
+    carregandoModelos = false;
+
     // Grade horária — estrutura auxiliar gerenciada na UI
     dias = DIAS;
 
@@ -57,6 +62,7 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         private router: Router,
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
+        private modelosService: ModelosCertificadosService,
         private cdr: ChangeDetectorRef
     ) {
         super();
@@ -75,9 +81,14 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
             professorId: ['', Validators.required],
             descricao: [''],
             capacidadeMaxima: [null],
+            cargaHoraria: [''],
+            dataInicio: [''],
+            dataFim: [''],
+            modeloCertificadoId: [''],
         });
 
         this.carregarProfessores();
+        this.carregarModelosAcademicos();
     }
 
     carregarProfessores() {
@@ -89,6 +100,18 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
                 this.carregandoProfessores = false;
             },
             error: () => { this.carregandoProfessores = false; }
+        });
+    }
+
+    carregarModelosAcademicos(): void {
+        this.carregandoModelos = true;
+        this.modelosService.listar().subscribe({
+            next: (modelos) => {
+                this.modelosAcademicos = modelos.filter(m => m.tipo === 'ACADEMICO');
+                this.carregandoModelos = false;
+                this.cdr.markForCheck();
+            },
+            error: () => this.carregandoModelos = false
         });
     }
 
@@ -186,12 +209,16 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
             professorId: v.professorId,
             descricao: v.descricao || undefined,
             capacidadeMaxima: v.capacidadeMaxima ? +v.capacidadeMaxima : undefined,
+            modeloCertificadoId: v.modeloCertificadoId || undefined,
             gradeHoraria: gradeConvertida.length ? gradeConvertida : undefined,
+            dataInicio: v.dataInicio ? new Date(v.dataInicio).toISOString() : undefined,
+            dataFim: v.dataFim ? new Date(v.dataFim).toISOString() : undefined
         };
 
         this.turmasService.criar(payload).subscribe({
             next: () => {
                 this.isSalvando = false;
+                this.formTurma.reset(); // evita o guard de descarte ao navegar
                 this.mostrarFeedback('Turma cadastrada com sucesso!', 'sucesso');
                 setTimeout(() => this.router.navigate(['/admin/turmas']), 2000);
             },

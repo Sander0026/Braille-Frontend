@@ -1,0 +1,488 @@
+<div class="wizard-container">
+  
+  <!-- Cabeçalho Dinâmico -->
+  <div class="wizard-header" style="text-align: center; margin-bottom: 2rem;">
+    <h1 style="font-size: 1.75rem; color: #1e293b; margin-bottom: 0.5rem;">
+      {{ modoEdicao ? 'Editar Modelo' : 'Novo Modelo de Certificado' }}
+    </h1>
+    <p style="color: #64748b;">Passo {{ passoAtual }} de 4: 
+      <span *ngIf="passoAtual === 1"><strong>Identificação Básica</strong></span>
+      <span *ngIf="passoAtual === 2"><strong>Artes e Assinaturas</strong></span>
+      <span *ngIf="passoAtual === 3"><strong>Conteúdo e Variáveis</strong></span>
+      <span *ngIf="passoAtual === 4"><strong>Ajuste Visual Final</strong></span>
+    </p>
+  </div>
+
+  <!-- Stepper Visual -->
+  <div class="stepper" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem; position: relative;">
+    <div style="position: absolute; top: 50%; left: 0; right: 0; height: 2px; background: #e2e8f0; z-index: 1;"></div>
+    <div *ngFor="let step of [1,2,3,4]" 
+         [style.background]="passoAtual >= step ? '#3b82f6' : '#fff'"
+         [style.color]="passoAtual >= step ? '#fff' : '#64748b'"
+         [style.border-color]="passoAtual >= step ? '#3b82f6' : '#e2e8f0'"
+         style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 2; transition: all 0.3s ease;">
+      {{ step }}
+    </div>
+  </div>
+
+  <form [formGroup]="formModelo" (ngSubmit)="salvar()" novalidate>
+    
+    <!-- PASSO 1: IDENTIFICAÇÃO -->
+    <div *ngIf="passoAtual === 1" class="wizard-step-content animate-fade-in">
+      <fieldset style="border: none; padding: 0;">
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;">Informações Iniciais</legend>
+        <div class="row">
+          <div class="col-lg-8">
+            <div class="form-group">
+              <label for="input-nome">Nome do Template <span aria-hidden="true" style="color: #ef4444;">*</span></label>
+              <input type="text" id="input-nome" formControlName="nome" class="form-input"
+                placeholder="Ex: Certificado Braille Padrão 2024"
+                [class.is-invalid]="isFieldInvalid('nome')">
+              @if (isFieldInvalid('nome')) { <span class="error-text">Obrigatório. Mínimo 3 caracteres.</span> }
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-tipo">Categoria <span aria-hidden="true" style="color: #ef4444;">*</span></label>
+              <select id="input-tipo" formControlName="tipo" class="form-input" [class.is-invalid]="isFieldInvalid('tipo')">
+                <option value="ACADEMICO">Oficinas / Acadêmico</option>
+                <option value="HONRARIA">Amigos do Braille (Honrarias Gerais)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0 8px 8px 0; margin-top: 1.5rem;">
+          <p style="font-size: 0.9rem; color: #1e40af; margin: 0;"><strong>Dica:</strong> Modelos acadêmicos permitem injetar carga horária e datas da turma. Modelos de honraria são focados em agradecimentos a parceiros.</p>
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- PASSO 2: ARTES E ASSINATURAS -->
+    <div *ngIf="passoAtual === 2" class="wizard-step-content animate-fade-in">
+      <fieldset style="border: none; padding: 0;">
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;">Artes e Assinaturas</legend>
+
+        <!-- Arte de fundo -->
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="form-group">
+              <label for="input-arte-base">Arte de Fundo (JPG/PNG) <span *ngIf="!modoEdicao" aria-hidden="true" style="color: #ef4444;">*</span></label>
+              <div *ngIf="previewBaseUrl" style="margin-bottom:.75rem;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                <img [src]="previewBaseUrl" alt="Preview Base" style="width:100%;max-height:150px;object-fit:cover;">
+              </div>
+              <input type="file" id="input-arte-base" (change)="onFileChange($event, 'arteBase')" accept="image/*" class="form-input" style="padding: 0.5rem;" />
+              <small class="field-hint">A4 Paisagem: 3508 x 2480 px.</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Primeira assinatura: upload + dados -->
+        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px dashed #cbd5e1;">
+        <h5 style="font-size: 1rem; color: #64748b; margin-bottom: 1rem;">Primeira Assinatura</h5>
+        <div class="row" style="background:#f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-assinatura-1">Arquivo PNG Transparente <span *ngIf="!modoEdicao" aria-hidden="true" style="color: #ef4444;">*</span></label>
+              <div *ngIf="assinaturaPreviewUrl" style="margin-bottom:.75rem;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;background:#fff;height:120px;display:flex;align-items:center;justify-content:center;">
+                <img [src]="assinaturaPreviewUrl" alt="Preview Assinatura 1" style="max-height:100%;max-width:100%;object-fit:contain;">
+              </div>
+              <input type="file" id="input-assinatura-1" (change)="onFileChange($event, 'assinatura')" accept="image/png" class="form-input" style="padding: 0.5rem;" />
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-nome-assinante">Nome do Signatário 1</label>
+              <input type="text" id="input-nome-assinante" formControlName="nomeAssinante" class="form-input" placeholder="Ex: Dr. João Silva">
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-cargo-assinante">Cargo 1</label>
+              <input type="text" id="input-cargo-assinante" formControlName="cargoAssinante" class="form-input" placeholder="Ex: Diretor Executivo">
+            </div>
+          </div>
+        </div>
+
+        <!-- Segunda assinatura: upload + dados -->
+        <hr style="margin: 1.5rem 0; border: 0; border-top: 1px dashed #cbd5e1;">
+        <h5 style="font-size: 1rem; color: #64748b; margin-bottom: 1rem;">Segunda Assinatura (Opcional)</h5>
+        <div class="row" style="background:#f8fafc; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-assinatura-2">Arquivo PNG Transparente</label>
+              <div *ngIf="assinatura2PreviewUrl" style="margin-bottom:.75rem;border:1px solid #e2e8f0;border-radius:8px;padding:.5rem;background:#fff;height:120px;display:flex;align-items:center;justify-content:center;">
+                <img [src]="assinatura2PreviewUrl" alt="Preview Assinatura 2" style="max-height:100%;max-width:100%;object-fit:contain;">
+              </div>
+              <input type="file" id="input-assinatura-2" (change)="onFileChange($event, 'assinatura2')" accept="image/png" class="form-input" style="padding: 0.5rem;" />
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-nome-assinante2">Nome do Signatário 2</label>
+              <input type="text" id="input-nome-assinante2" formControlName="nomeAssinante2" class="form-input" placeholder="Ex: Dra. Maria Santos">
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="form-group">
+              <label for="input-cargo-assinante2">Cargo 2</label>
+              <input type="text" id="input-cargo-assinante2" formControlName="cargoAssinante2" class="form-input" placeholder="Ex: Vice-Diretora">
+            </div>
+          </div>
+        </div>
+
+      </fieldset>
+    </div>
+
+
+    <!-- PASSO 3: CONTEÚDO (apenas texto e tags) -->
+    <div *ngIf="passoAtual === 3" class="wizard-step-content animate-fade-in">
+      <fieldset style="border: none; padding: 0;">
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Criação do Texto</legend>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">Escreva o texto do certificado. Use as tags abaixo para inserir dados automáticos na hora da emissão.</p>
+
+        <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{ALUNO}}')">+ Aluno</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{TURMA}}')">+ Oficina</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{DATA_INICIO}}')">+ Início</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{DATA_FIM}}')">+ Fim</button>
+          } @else {
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{PARCEIRO}}')">+ Nome do Amigo</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{MOTIVO}}')">+ Motivo</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" (click)="injetarTag('{{DATA}}')">+ Data Atual</button>
+          }
+        </div>
+
+        <div class="form-group">
+          <textarea #textoTemplateInput id="textoTemplate" formControlName="textoTemplate" class="form-textarea fixed-font" rows="12"
+                  style="font-size: 1.05rem; line-height: 1.8; border-radius: 8px; width: 100%;"
+                  [placeholder]="'Ex:\nO Instituto Luiz Braille certifica que ' + '{' + '{ALUNO}' + '}' + ' concluiu com êxito...'"
+                  [class.is-invalid]="isFieldInvalid('textoTemplate')"></textarea>
+          @if (isFieldInvalid('textoTemplate')) { <span class="error-text">O texto deve ter pelo menos 20 caracteres.</span> }
+        </div>
+        <p style="font-size:0.8rem; color:#94a3b8; margin-top: 0.5rem;">
+          💡 Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
+        </p>
+      </fieldset>
+    </div>
+
+    <!-- PASSO 4: EDITOR VISUAL FINAL + CONTROLES COMPLETOS -->
+    <div *ngIf="passoAtual === 4" class="wizard-step-content animate-fade-in">
+      <fieldset style="border: none; padding: 0;">
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Ajuste Visual Final</legend>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicioná-los. Use os painéis abaixo para ajustar estilos.</p>
+
+        <div *ngIf="previewBaseUrl">
+
+          <!-- ===== WRAPPER EXTERNO: captura a largura disponível para o ResizeObserver ===== -->
+          <div #previewWrapper
+               style="width: 100%;
+                      overflow: hidden;
+                      margin-bottom: 0.5rem;
+                      box-shadow: 0 2px 4px rgba(0,0,0,.08),
+                                  0 8px 24px rgba(0,0,0,.14),
+                                  0 0 0 1px rgba(0,0,0,.06);
+                      border-radius: 6px;">
+
+            <!-- ===== CANVAS FIXO A4 (1122 × 794 px) — escalado via transform ===== -->
+            <div #previewContainer
+                 [style.width.px]="CANVAS_W"
+                 [style.height.px]="CANVAS_H"
+                 [style.transform]="'scale(' + scaleFactor + ')'"
+                 style="position: relative;
+                        transform-origin: top left;
+                        background: #fff;
+                        overflow: hidden;">
+
+              <img [src]="previewBaseUrl" alt="Arte base"
+                   style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none;">
+
+              <!-- Texto principal — font-size em px direto no canvas fixo -->
+              <div [ngStyle]="{
+                     position: 'absolute',
+                     left:      layoutConfig.textoPronto.x + '%',
+                     top:       layoutConfig.textoPronto.y + '%',
+                     'max-width': (layoutConfig.textoPronto.maxWidth || 80) + '%',
+                     'text-align': layoutConfig.textoPronto.textAlign || 'justify',
+                     'font-family': layoutConfig.textoPronto.fontFamily || 'Georgia',
+                     'font-size': (layoutConfig.textoPronto.fontSize || 32) + 'px',
+                     'line-height': '1.75',
+                     'color': layoutConfig.textoPronto.color || '#1a1a00'
+                   }"
+                   style="white-space: pre-wrap; outline: 2px dashed rgba(59,130,246,.6); cursor: move; padding: 2px 4px;"
+                   cdkDrag (cdkDragEnded)="onDragEnded($event, 'textoPronto')">
+                {{ formModelo.get('textoTemplate')?.value || '(texto do certificado aparecerá aqui)' }}
+              </div>
+
+              <!-- Nome do aluno — font-size em px direto no canvas fixo -->
+              <div [ngStyle]="{
+                     'position': 'absolute',
+                     'left':      layoutConfig.nomeAluno.x + '%',
+                     'top':       layoutConfig.nomeAluno.y + '%',
+                     'max-width': (layoutConfig.nomeAluno.maxWidth || 50) + '%',
+                     'font-family': layoutConfig.nomeAluno.fontFamily || 'Georgia',
+                     'font-size': (layoutConfig.nomeAluno.fontSize || 60) + 'px',
+                     'color': layoutConfig.nomeAluno.color || '#000'
+                   }"
+                   style="font-weight: bold; white-space: nowrap; outline: 2px dashed rgba(168,85,247,.7); padding: 1px 6px; cursor: move;"
+                   cdkDrag (cdkDragEnded)="onDragEnded($event, 'nomeAluno')">
+                Nome do Aluno
+              </div>
+
+              <!-- Assinatura 1 — largura em % do canvas, altura proporcional -->
+              <div *ngIf="assinaturaPreviewUrl"
+                   [ngStyle]="{
+                     position: 'absolute',
+                     left:  layoutConfig.assinatura1.x + '%',
+                     top:   layoutConfig.assinatura1.y + '%',
+                     width: (layoutConfig.assinatura1.width || 20) + '%'
+                   }"
+                   style="display:flex;flex-direction:column;align-items:center; outline:2px dashed rgba(34,197,94,.7); cursor: move;"
+                   cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura1')">
+                <img [src]="assinaturaPreviewUrl" alt="Assinatura" style="width:100%;max-height:80px;object-fit:contain;">
+                <div style="width:80%;border-top:1px solid #5a4a00;text-align:center;margin-top:4px;">
+                  <strong style="display:block;font-size:11px;">{{ formModelo.get('nomeAssinante')?.value }}</strong>
+                  <span style="display:block;font-size:9px;color:#555;">{{ formModelo.get('cargoAssinante')?.value }}</span>
+                </div>
+              </div>
+
+              <!-- Assinatura 2 -->
+              <div *ngIf="assinatura2PreviewUrl"
+                   [ngStyle]="{
+                     position: 'absolute',
+                     left:  layoutConfig.assinatura2.x + '%',
+                     top:   layoutConfig.assinatura2.y + '%',
+                     width: (layoutConfig.assinatura2.width || 20) + '%'
+                   }"
+                   style="display:flex;flex-direction:column;align-items:center; outline:2px dashed rgba(239,68,68,.7); cursor: move;"
+                   cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura2')">
+                <img [src]="assinatura2PreviewUrl" alt="Assinatura 2" style="width:100%;max-height:80px;object-fit:contain;">
+                <div style="width:80%;border-top:1px solid #5a4a00;text-align:center;margin-top:4px;">
+                  <strong style="display:block;font-size:11px;">{{ formModelo.get('nomeAssinante2')?.value }}</strong>
+                  <span style="display:block;font-size:9px;color:#555;">{{ formModelo.get('cargoAssinante2')?.value }}</span>
+                </div>
+              </div>
+
+              <!-- QR Code -->
+              <div [ngStyle]="{
+                     position: 'absolute',
+                     left:  layoutConfig.qrCode.x + '%',
+                     top:   layoutConfig.qrCode.y + '%',
+                     width: layoutConfig.qrCode.size + '%'
+                   }"
+                   style="background: white; padding: 2px; border-radius: 4px; outline: 2px dashed rgba(234,88,12,.7); cursor: move;"
+                   cdkDrag (cdkDragEnded)="onDragEnded($event, 'qrCode')">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg"
+                     alt="QR" style="width: 100%; display: block;">
+              </div>
+
+            </div><!-- /canvas fixo -->
+          </div><!-- /wrapper -->
+
+          <!-- Legenda de cores -->
+          <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin-bottom:1.25rem; font-size:0.75rem; color:#64748b;">
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(59,130,246,.8);border-radius:2px;"></span>Texto</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(168,85,247,.8);border-radius:2px;"></span>Nome do Aluno</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(34,197,94,.8);border-radius:2px;"></span>Assinatura 1</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(239,68,68,.8);border-radius:2px;"></span>Assinatura 2</span>
+            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(234,88,12,.8);border-radius:2px;"></span>QR Code</span>
+          </div>
+
+          <!-- ===== PAINEL DE CONTROLES EM GRID 2×2 ===== -->
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+
+            <!-- Card 1: Texto Principal -->
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+              <div style="background:#eff6ff; padding:0.5rem 0.75rem; border-bottom:1px solid #bfdbfe;">
+                <h6 style="margin:0; font-weight:700; color:#1d4ed8; font-size:0.8rem;">🔵 Texto Principal</h6>
+              </div>
+              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
+
+                <div>
+                  <label style="font-size:0.7rem; font-weight:600; color:#64748b;">ALINHAMENTO</label>
+                  <div style="display:flex; gap:0.3rem; margin-top:0.25rem;">
+                    <button type="button" (click)="setTextAlign('left')"
+                            [style.background]="layoutConfig.textoPronto.textAlign === 'left' ? '#3b82f6' : '#f1f5f9'"
+                            [style.color]="layoutConfig.textoPronto.textAlign === 'left' ? '#fff' : '#374151'"
+                            style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Esquerda">⬅</button>
+                    <button type="button" (click)="setTextAlign('center')"
+                            [style.background]="layoutConfig.textoPronto.textAlign === 'center' ? '#3b82f6' : '#f1f5f9'"
+                            [style.color]="layoutConfig.textoPronto.textAlign === 'center' ? '#fff' : '#374151'"
+                            style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Centro">≡</button>
+                    <button type="button" (click)="setTextAlign('right')"
+                            [style.background]="layoutConfig.textoPronto.textAlign === 'right' ? '#3b82f6' : '#f1f5f9'"
+                            [style.color]="layoutConfig.textoPronto.textAlign === 'right' ? '#fff' : '#374151'"
+                            style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Direita">➡</button>
+                    <button type="button" (click)="setTextAlign('justify')"
+                            [style.background]="layoutConfig.textoPronto.textAlign === 'justify' ? '#3b82f6' : '#f1f5f9'"
+                            [style.color]="layoutConfig.textoPronto.textAlign === 'justify' ? '#fff' : '#374151'"
+                            style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Justificado">⊟</button>
+                  </div>
+                </div>
+
+                <div>
+                  <label for="ctrl-fonte-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
+                  <select id="ctrl-fonte-texto" [(ngModel)]="layoutConfig.textoPronto.fontFamily" [ngModelOptions]="{standalone: true}" (change)="formModelo.markAsDirty()" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
+                    <option value="Helvetica">Padrão (Helvetica)</option>
+                    <option value="TimesRoman">Times Roman</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Montserrat">Montserrat</option>
+                    <option value="Merriweather">Merriweather</option>
+                    <option value="Open Sans">Open Sans</option>
+                  </select>
+                </div>
+
+                <div style="display:flex; gap:0.4rem; align-items:flex-end;">
+                  <div style="flex:1;">
+                    <label for="ctrl-tam-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO (pt)</label>
+                    <input id="ctrl-tam-texto" type="number" min="8" max="120"
+                           [value]="layoutConfig.textoPronto.fontSize || 32"
+                           (change)="setFontSize($event)"
+                           style="width:100%; height:30px; padding:0 0.4rem; border:1px solid #e2e8f0; border-radius:5px; font-size:0.82rem; margin-top:0.2rem;">
+                  </div>
+                  <div>
+                    <label for="ctrl-cor-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">COR</label>
+                    <input id="ctrl-cor-texto" type="color" [value]="layoutConfig.textoPronto.color || '#1a1a00'"
+                           (input)="setTextoColor($event)"
+                           style="display:block; width:34px; height:30px; border:1px solid #e2e8f0; border-radius:5px; padding:2px; cursor:pointer; margin-top:0.2rem;">
+                  </div>
+                </div>
+
+                <div>
+                  <label for="ctrl-larg-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.textoPronto.maxWidth }}%</label>
+                  <input id="ctrl-larg-texto" type="range" min="30" max="95"
+                         [value]="layoutConfig.textoPronto.maxWidth"
+                         (input)="layoutConfig.textoPronto.maxWidth = +$any($event.target).value; formModelo.markAsDirty()"
+                         style="width:100%; margin-top:0.2rem;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2: Nome do Aluno -->
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+              <div style="background:#faf5ff; padding:0.5rem 0.75rem; border-bottom:1px solid #e9d5ff;">
+                <h6 style="margin:0; font-weight:700; color:#7c3aed; font-size:0.8rem;">🟣 Nome do Aluno</h6>
+              </div>
+              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
+                <div>
+                  <label for="ctrl-fonte-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
+                  <select id="ctrl-fonte-nome" [(ngModel)]="layoutConfig.nomeAluno.fontFamily" [ngModelOptions]="{standalone: true}" (change)="formModelo.markAsDirty()" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
+                    <option value="Helvetica">Padrão (Helvetica)</option>
+                    <option value="Great Vibes">Great Vibes (Cursiva)</option>
+                    <option value="Parisienne">Parisienne</option>
+                    <option value="Playfair Display">Playfair Display</option>
+                    <option value="Dancing Script">Dancing Script</option>
+                    <option value="Pacifico">Pacifico</option>
+                    <option value="Cinzel">Cinzel (Romana)</option>
+                  </select>
+                </div>
+                <div style="display:flex; gap:0.4rem; align-items:flex-end;">
+                  <div style="flex:1;">
+                    <label for="ctrl-tam-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO (pt)</label>
+                    <input id="ctrl-tam-nome" type="number" min="12" max="160"
+                           [value]="layoutConfig.nomeAluno.fontSize || 56"
+                           (change)="setNomeAlunoFontSize($event)"
+                           style="width:100%; height:30px; padding:0 0.4rem; border:1px solid #e2e8f0; border-radius:5px; font-size:0.82rem; margin-top:0.2rem;">
+                  </div>
+                  <div>
+                    <label for="ctrl-cor-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">COR</label>
+                    <input id="ctrl-cor-nome" type="color" [value]="layoutConfig.nomeAluno.color || '#000000'"
+                           (input)="setNomeAlunoColor($event)"
+                           style="display:block; width:34px; height:30px; border:1px solid #e2e8f0; border-radius:5px; padding:2px; cursor:pointer; margin-top:0.2rem;">
+                  </div>
+                </div>
+                <div>
+                  <label for="ctrl-larg-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.nomeAluno.maxWidth || 50 }}%</label>
+                  <input id="ctrl-larg-nome" type="range" min="20" max="90"
+                         [value]="layoutConfig.nomeAluno.maxWidth || 50"
+                         (input)="layoutConfig.nomeAluno.maxWidth = +$any($event.target).value; formModelo.markAsDirty()"
+                         style="width:100%; margin-top:0.2rem;">
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3: Assinaturas -->
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+              <div style="background:#f0fdf4; padding:0.5rem 0.75rem; border-bottom:1px solid #bbf7d0;">
+                <h6 style="margin:0; font-weight:700; color:#15803d; font-size:0.8rem;">🟢 Assinaturas</h6>
+              </div>
+              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
+                <div>
+                  <label for="ctrl-larg-assin1" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 1: {{ layoutConfig.assinatura1.width }}%</label>
+                  <input id="ctrl-larg-assin1" type="range" min="10" max="40"
+                         [value]="layoutConfig.assinatura1.width"
+                         (input)="layoutConfig.assinatura1.width = +$any($event.target).value; formModelo.markAsDirty()"
+                         style="width:100%; margin-top:0.2rem;">
+                </div>
+                <div>
+                  <label for="ctrl-larg-assin2" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 2: {{ layoutConfig.assinatura2.width }}%</label>
+                  <input id="ctrl-larg-assin2" type="range" min="10" max="40"
+                         [value]="layoutConfig.assinatura2.width"
+                         (input)="layoutConfig.assinatura2.width = +$any($event.target).value; formModelo.markAsDirty()"
+                         style="width:100%; margin-top:0.2rem;">
+                </div>
+                <p style="font-size:0.72rem; color:#94a3b8; margin:0;">Arraste cada assinatura na prévia para posicioná-la.</p>
+              </div>
+            </div>
+
+            <!-- Card 4: QR Code -->
+            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
+              <div style="background:#fff7ed; padding:0.5rem 0.75rem; border-bottom:1px solid #fed7aa;">
+                <h6 style="margin:0; font-weight:700; color:#c2410c; font-size:0.8rem;">🟠 QR Code</h6>
+              </div>
+              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
+                <div>
+                  <label for="ctrl-tam-qr" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO: {{ layoutConfig.qrCode.size }}%</label>
+                  <input id="ctrl-tam-qr" type="range" min="4" max="20"
+                         [value]="layoutConfig.qrCode.size"
+                         (input)="layoutConfig.qrCode.size = +$any($event.target).value; formModelo.markAsDirty()"
+                         style="width:100%; margin-top:0.2rem;">
+                </div>
+                <p style="font-size:0.72rem; color:#94a3b8; margin:0;">O QR Code será gerado automaticamente com o link de validação do certificado.</p>
+              </div>
+            </div>
+
+          </div><!-- /grid 4 cols -->
+        </div><!-- /if previewBaseUrl -->
+
+        <div *ngIf="!previewBaseUrl" style="padding: 3rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b;">
+          ⚠️ Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- Barra de Navegação -->
+    <div style="margin-top: 2.5rem; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 1rem 0; border-top: 1px solid #e2e8f0; position: sticky; bottom: 0; z-index: 10;">
+      <button type="button" (click)="passoAnterior()" *ngIf="passoAtual > 1"
+              class="btn btn-secondary"
+              style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem;">
+        ← Anterior
+      </button>
+      <div *ngIf="passoAtual === 1"></div>
+
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <a routerLink="/admin/modelos-certificados" style="color: #64748b; text-decoration: none; padding: 0.75rem 1rem;">Cancelar</a>
+
+        <button type="button" (click)="proximoPasso()" *ngIf="passoAtual < 4"
+                class="btn btn-primary"
+                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 2rem;">
+          Próximo →
+        </button>
+
+        <button type="submit" *ngIf="passoAtual === 4"
+                class="btn btn-success"
+                [disabled]="isSalvando"
+                style="background: #16a34a; border-color: #16a34a; color: #fff; padding: 0.75rem 2.5rem; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);">
+          {{ isSalvando ? 'Salvando...' : '✅ Finalizar e Salvar' }}
+        </button>
+      </div>
+    </div>
+
+  </form>
+</div>
+
+<style>
+  .animate-fade-in { animation: fadeIn 0.35s ease-out; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
