@@ -10,6 +10,9 @@ export interface AcaoApoiador {
   apoiadorId: string;
   criadoEm: string;
   atualizadoEm: string;
+  // Opcionais recebidos/processados
+  modeloCertificadoId?: string;
+  motivoPersonalizado?: string;
 }
 
 export interface Apoiador {
@@ -53,8 +56,8 @@ export class ApoiadoresService {
     this.cachePublicos = null;
   }
 
-  listar(skip?: number, take?: number, tipo?: string, search?: string, forceRefresh = false): Observable<PaginatedResult<Apoiador>> {
-    const cacheKey = `${skip}-${take}-${tipo}-${search}`;
+  listar(skip?: number, take?: number, tipo?: string, search?: string, forceRefresh = false, ativo?: boolean): Observable<PaginatedResult<Apoiador>> {
+    const cacheKey = `${skip}-${take}-${tipo}-${search}-${ativo}`;
 
     if (!forceRefresh && this.cacheLista[cacheKey]) {
       return of(this.cacheLista[cacheKey]);
@@ -65,6 +68,7 @@ export class ApoiadoresService {
     if (take !== undefined) params = params.set('take', take.toString());
     if (tipo) params = params.set('tipo', tipo);
     if (search) params = params.set('search', search);
+    if (ativo !== undefined) params = params.set('ativo', ativo.toString());
 
     return this.http.get<PaginatedResult<Apoiador>>(this.apiUrl, { params }).pipe(
       tap(res => this.cacheLista[cacheKey] = res)
@@ -102,6 +106,18 @@ export class ApoiadoresService {
     );
   }
 
+  inativar(id: string): Observable<Apoiador> {
+    return this.http.patch<Apoiador>(`${this.apiUrl}/${id}/inativar`, {}).pipe(
+      tap(() => this.limparCache())
+    );
+  }
+
+  reativar(id: string): Observable<Apoiador> {
+    return this.http.patch<Apoiador>(`${this.apiUrl}/${id}/reativar`, {}).pipe(
+      tap(() => this.limparCache())
+    );
+  }
+
   uploadLogo(id: string, file: File): Observable<Apoiador> {
     const formData = new FormData();
     formData.append('file', file);
@@ -116,8 +132,24 @@ export class ApoiadoresService {
     return this.http.get<AcaoApoiador[]>(`${this.apiUrl}/${id}/acoes`);
   }
 
-  adicionarAcao(id: string, dataEvento: string, descricaoAcao: string): Observable<AcaoApoiador> {
-    return this.http.post<AcaoApoiador>(`${this.apiUrl}/${id}/acoes`, { dataEvento, descricaoAcao }).pipe(
+  adicionarAcao(id: string, payload: {
+    dataEvento: string;
+    descricaoAcao: string;
+    modeloCertificadoId?: string;
+    motivoPersonalizado?: string;
+  }): Observable<AcaoApoiador> {
+    return this.http.post<AcaoApoiador>(`${this.apiUrl}/${id}/acoes`, payload).pipe(
+      tap(() => this.limparCache())
+    );
+  }
+
+  editarAcao(apoiadorId: string, acaoId: string, payload: {
+    dataEvento: string;
+    descricaoAcao: string;
+    modeloCertificadoId?: string;
+    motivoPersonalizado?: string;
+  }): Observable<AcaoApoiador> {
+    return this.http.patch<AcaoApoiador>(`${this.apiUrl}/${apoiadorId}/acoes/${acaoId}`, payload).pipe(
       tap(() => this.limparCache())
     );
   }
@@ -143,6 +175,13 @@ export class ApoiadoresService {
     return this.http.post<{ certificado: any; pdfBase64: string }>(
       `${this.apiUrl}/${apoiadorId}/certificados`,
       payload
+    );
+  }
+
+  gerarPdfCertificado(apoiadorId: string, certId: string): Observable<Blob> {
+    return this.http.get(
+      `${this.apiUrl}/${apoiadorId}/certificados/${certId}/pdf`,
+      { responseType: 'blob' }
     );
   }
 }

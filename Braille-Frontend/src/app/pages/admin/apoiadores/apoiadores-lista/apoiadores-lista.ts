@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, FormsModule } from '@angular/forms';
 import { Apoiador, ApoiadoresService } from '../apoiadores.service';
 import { ModelosCertificadosService, ModeloCertificado } from '../../../../core/services/modelos-certificados.service';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -13,7 +13,7 @@ import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte'
   selector: 'app-apoiadores-lista',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, A11yModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule],
   templateUrl: './apoiadores-lista.html',
   styleUrls: ['./apoiadores-lista.scss']
 })
@@ -22,9 +22,10 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
   carregando = true;
   totalApoiadores = 0;
   
-  // Filtros
+  // Filtros e Abas
   searchControl = new FormControl('');
   tipoControl = new FormControl('');
+  abaAtiva: 'ativos' | 'inativos' = 'ativos';
   private readonly destroy$ = new Subject<void>();
 
   // Modal de Perfil
@@ -56,6 +57,16 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
   certificadosEmitidos: any[] = [];
   carregandoCertificados = false;
   
+  // Modal de Ações
+  modalAcoesAberto = false;
+  acaoEditandoId: string | null = null;
+  mostrarFormAcao = false;
+  filtroAcoes = '';
+
+  // Modal de Certificados Emitidos
+  modalCertificadosAberto = false;
+  filtroCertificados = '';
+
   // Wizard Steps
   passoAtual = 1;
 
@@ -94,7 +105,9 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
 
     this.novaAcaoForm = this.fb.group({
       dataEvento: ['', Validators.required],
-      descricaoAcao: ['', Validators.required]
+      descricaoAcao: ['', Validators.required],
+      modeloCertificadoId: [''],
+      motivoPersonalizado: ['']
     });
 
     this.formEmissao = this.fb.group({
@@ -141,8 +154,9 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.carregando = true;
     const search = this.searchControl.value || undefined;
     const tipo = this.tipoControl.value || undefined;
+    const ativo = this.abaAtiva === 'ativos';
 
-    this.apoiadoresService.listar(0, 50, tipo, search).subscribe({
+    this.apoiadoresService.listar(0, 50, tipo, search, true, ativo).subscribe({
       next: (res) => {
         this.apoiadores = res.data;
         this.totalApoiadores = res.total;
@@ -153,6 +167,44 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
         console.error('Erro ao buscar apoiadores', err);
         this.carregando = false;
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  mudarAba(aba: 'ativos' | 'inativos'): void {
+    if (this.abaAtiva === aba) return;
+    this.abaAtiva = aba;
+    this.searchControl.setValue('');
+    this.tipoControl.setValue('');
+    this.carregarApoiadores();
+  }
+
+  inativarApoiador(apoiador: Apoiador): void {
+    if (!confirm(`Inativar ${apoiador.nomeFantasia || apoiador.nomeRazaoSocial}? O logo será removido do site.`)) return;
+    this.apoiadoresService.inativar(apoiador.id).subscribe({
+      next: () => {
+        this.apoiadores = this.apoiadores.filter(a => a.id !== apoiador.id);
+        this.totalApoiadores--;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao inativar', err);
+        alert('Não foi possível inativar o apoiador.');
+      }
+    });
+  }
+
+  reativarApoiador(apoiador: Apoiador): void {
+    if (!confirm(`Reativar ${apoiador.nomeFantasia || apoiador.nomeRazaoSocial}? O logo será exibido no site novamente.`)) return;
+    this.apoiadoresService.reativar(apoiador.id).subscribe({
+      next: () => {
+        this.apoiadores = this.apoiadores.filter(a => a.id !== apoiador.id);
+        this.totalApoiadores--;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao reativar', err);
+        alert('Não foi possível reativar o apoiador.');
       }
     });
   }
@@ -290,8 +342,7 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.modalAberto = true;
     this.carregandoDetalhes = true;
     this.apoiadorVisualizado = null;
-    
-    this.carregarCertificados(id);
+
     
     this.apoiadoresService.obterPorId(id).subscribe({
       next: (res) => {
@@ -312,6 +363,44 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.apoiadorVisualizado = null;
     this.novaAcaoForm.reset();
     this.certificadosEmitidos = [];
+    this.fecharModalAcoes();
+    this.fecharModalCertificados();
+  }
+
+  abrirModalAcoes() {
+    this.modalAcoesAberto = true;
+    this.filtroAcoes = '';
+    this.mostrarFormAcao = false;
+    this.cancelarEdicaoAcao();
+    // Carrega as ações via API (findOne do backend não inclui acoes)
+    if (this.apoiadorVisualizado) {
+      this.apoiadoresService.buscarAcoes(this.apoiadorVisualizado.id).subscribe({
+        next: (acoes) => {
+          this.apoiadorVisualizado!.acoes = acoes;
+          this.cdr.detectChanges();
+        },
+        error: (err) => console.error('Erro ao carregar ações', err)
+      });
+    }
+  }
+
+  fecharModalAcoes() {
+    this.modalAcoesAberto = false;
+    this.mostrarFormAcao = false;
+    this.cancelarEdicaoAcao();
+  }
+
+  abrirModalCertificados() {
+    this.modalCertificadosAberto = true;
+    this.filtroCertificados = '';
+    if (this.apoiadorVisualizado) {
+      this.carregarCertificados(this.apoiadorVisualizado.id);
+    }
+  }
+
+  fecharModalCertificados() {
+    this.modalCertificadosAberto = false;
+    this.certificadosEmitidos = [];
   }
 
   carregarCertificados(id: string) {
@@ -330,7 +419,80 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     });
   }
 
+  // Listas Filtradas (Getters)
+  get acoesFiltradas(): any[] {
+    const acoes = this.apoiadorVisualizado?.acoes ?? [];
+    if (!this.filtroAcoes.trim()) return acoes;
+    const q = this.filtroAcoes.toLowerCase();
+    return acoes.filter((a: any) =>
+      (a.descricaoAcao ?? '').toLowerCase().includes(q)
+    );
+  }
+
+  get certificadosFiltrados(): any[] {
+    if (!this.filtroCertificados.trim()) return this.certificadosEmitidos;
+    const q = this.filtroCertificados.toLowerCase();
+    return this.certificadosEmitidos.filter((c: any) =>
+      (c.modelo?.nome ?? '').toLowerCase().includes(q) ||
+      (c.acao?.descricaoAcao ?? '').toLowerCase().includes(q) ||
+      (c.codigoValidacao ?? '').toLowerCase().includes(q) ||
+      (c.motivoPersonalizado ?? '').toLowerCase().includes(q)
+    );
+  }
+
+  visualizarCertificadoPdf(cert: any): void {
+    if (!this.apoiadorVisualizado || !cert?.id) {
+      alert('Não foi possível identificar o certificado.');
+      return;
+    }
+    // Chama o novo endpoint que re-gera o PDF on-demand
+    this.apoiadoresService.gerarPdfCertificado(this.apoiadorVisualizado.id, cert.id).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        this.urlPdfParaVisualizar = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.mostrarVisualizadorPdf = true;
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        console.error('Erro ao gerar PDF do certificado', err);
+        alert('Não foi possível gerar o PDF. O modelo pode ter sido excluído.');
+      }
+    });
+  }
+
   // Lógica do Modal de Histórico Pessoal (Rápido)
+  editarAcaoPerfil(acao: any) {
+    this.acaoEditandoId = acao.id;
+    this.mostrarFormAcao = true;
+    this.novaAcaoForm.patchValue({
+      dataEvento: new Date(acao.dataEvento).toISOString().split('T')[0],
+      descricaoAcao: acao.descricaoAcao,
+      modeloCertificadoId: '',
+      motivoPersonalizado: ''
+    });
+  }
+
+  cancelarEdicaoAcao() {
+    this.acaoEditandoId = null;
+    this.novaAcaoForm.reset();
+  }
+
+  excluirAcaoPerfil(acaoId: string) {
+    if (!confirm('Deseja excluir permanentemente este histórico e seu certificado vinculado?')) return;
+    this.apoiadoresService.removerAcao(this.apoiadorVisualizado!.id, acaoId).subscribe({
+      next: () => {
+        if (this.apoiadorVisualizado && this.apoiadorVisualizado.acoes) {
+          this.apoiadorVisualizado.acoes = this.apoiadorVisualizado.acoes.filter(a => a.id !== acaoId);
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao excluir ação', err);
+        alert('Realizar logout/login para tentar novamente.');
+      }
+    });
+  }
+
   adicionarAcaoPerfil(event: Event) {
     event.preventDefault();
     if (this.novaAcaoForm.invalid || !this.apoiadorVisualizado) {
@@ -339,25 +501,52 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     }
     this.salvandoAcao = true;
     const val = this.novaAcaoForm.value;
+    const payload = {
+      dataEvento: val.dataEvento,
+      descricaoAcao: val.descricaoAcao,
+      modeloCertificadoId: val.modeloCertificadoId || undefined,
+      motivoPersonalizado: val.motivoPersonalizado || undefined
+    };
     
-    this.apoiadoresService.adicionarAcao(this.apoiadorVisualizado.id, val.dataEvento, val.descricaoAcao).subscribe({
-      next: (novaAcao) => {
-        this.salvandoAcao = false;
-        // Atualiza a view em tempo real
-        if (!this.apoiadorVisualizado!.acoes) {
-          this.apoiadorVisualizado!.acoes = [];
+    if (this.acaoEditandoId) {
+      this.apoiadoresService.editarAcao(this.apoiadorVisualizado.id, this.acaoEditandoId, payload).subscribe({
+        next: (acaoEditada) => {
+          this.salvandoAcao = false;
+          const idx = this.apoiadorVisualizado!.acoes?.findIndex(a => a.id === this.acaoEditandoId) ?? -1;
+          if (idx !== -1 && this.apoiadorVisualizado!.acoes) {
+            this.apoiadorVisualizado!.acoes[idx] = acaoEditada;
+          }
+          this.cancelarEdicaoAcao();
+          this.mostrarFormAcao = false; // fecha o form após editar
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Erro ao editar ação', err);
+          alert('Falha ao editar histórico.');
+          this.salvandoAcao = false;
+          this.cdr.detectChanges();
         }
-        this.apoiadorVisualizado!.acoes.unshift(novaAcao);
-        this.novaAcaoForm.reset();
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao adicionar ação avulsa', err);
-        alert('Falha ao adicionar histórico.');
-        this.salvandoAcao = false;
-        this.cdr.detectChanges();
-      }
-    });
+      });
+    } else {
+      this.apoiadoresService.adicionarAcao(this.apoiadorVisualizado.id, payload).subscribe({
+        next: (novaAcao) => {
+          this.salvandoAcao = false;
+          if (!this.apoiadorVisualizado!.acoes) {
+            this.apoiadorVisualizado!.acoes = [];
+          }
+          this.apoiadorVisualizado!.acoes.unshift(novaAcao);
+          this.novaAcaoForm.reset();
+          this.mostrarFormAcao = false; // fecha o form após adicionar
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Erro ao adicionar ação avulsa', err);
+          alert('Falha ao adicionar histórico.');
+          this.salvandoAcao = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
 
   // Lógica do Form / Descarte Guard
