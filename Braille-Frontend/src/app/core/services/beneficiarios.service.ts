@@ -48,7 +48,7 @@ export interface Beneficiario {
         status: 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA';
         dataEntrada: string;
         dataEncerramento?: string;
-        turma: { id: string; nome: string; horario?: string };
+        turma: { id: string; nome: string; horario?: string; modeloCertificadoId?: string | null; status?: string };
     }[];
 }
 

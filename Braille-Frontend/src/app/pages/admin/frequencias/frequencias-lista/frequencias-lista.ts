@@ -404,7 +404,7 @@ export class FrequenciasLista implements OnInit {
 
   /** Verdadeiro quando a chamada é de data anterior — modo somente leitura */
   get modoVisualizacao(): boolean {
-    return this.chamadaCarregada && !this.ehHoje;
+    return false; // this.chamadaCarregada && !this.ehHoje;
   }
 
   formatarData(iso: string): string {

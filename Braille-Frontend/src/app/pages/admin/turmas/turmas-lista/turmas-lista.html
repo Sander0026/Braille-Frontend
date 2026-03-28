@@ -108,6 +108,12 @@
           {{ turma.horario }}
         </span>
         }
+        @if (turma.cargaHoraria) {
+        <span class="meta-item" title="Carga Horária Total">
+          <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 2px; vertical-align: text-bottom;">schedule</span>
+          {{ turma.cargaHoraria }}
+        </span>
+        }
         <span class="meta-item meta-alunos">
           {{ turma._count?.matriculasOficina ?? 0 }} aluno(s)
         </span>
@@ -377,6 +383,18 @@
               }
             </div>
           </div>
+
+          @if (turmaDetalhes.cargaHoraria) {
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <strong>Carga Horária Ofertada:</strong> {{ turmaDetalhes.cargaHoraria }}
+          </div>
+          }
 
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">

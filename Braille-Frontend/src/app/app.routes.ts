@@ -33,6 +33,11 @@ export const routes: Routes = [
         path: 'noticias/:id',
         loadComponent: () => import('./pages/public/noticia-detalhe/noticia-detalhe').then(m => m.NoticiaDetalhe),
         title: 'Notícia — Instituto Luiz Braille'
+      },
+      {
+        path: 'validar-certificado',
+        loadComponent: () => import('./pages/public/validar-certificado/validar-certificado').then(m => m.ValidarCertificado),
+        title: 'Validação de Certificado — ILBES'
       }
     ]
   },
@@ -95,6 +100,31 @@ export const routes: Routes = [
         canActivate: [roleGuard],
         canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'EDITOR'] }
+      },
+
+      // Certificados
+      {
+        path: 'modelos-certificados',
+        loadComponent: () => import('./pages/modelos-certificados/modelos-lista/modelos-lista').then(m => m.ModelosLista),
+        title: 'Modelos de Certificados — ILBES',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
+      },
+      {
+        path: 'modelos-certificados/novo',
+        loadComponent: () => import('./pages/modelos-certificados/modelos-form/modelos-form').then(m => m.ModelosForm),
+        title: 'Novo Modelo de Certificado — ILBES',
+        canDeactivate: [descarteGuard],
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
+      },
+      {
+        path: 'modelos-certificados/editar/:id',
+        loadComponent: () => import('./pages/modelos-certificados/modelos-form/modelos-form').then(m => m.ModelosForm),
+        title: 'Editar Modelo de Certificado — ILBES',
+        canDeactivate: [descarteGuard],
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
 
