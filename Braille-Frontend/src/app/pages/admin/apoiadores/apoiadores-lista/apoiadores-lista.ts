@@ -32,6 +32,37 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
   modalAberto = false;
   carregandoDetalhes = false;
   apoiadorVisualizado: Apoiador | null = null;
+  carregandoLogoInline = false;
+
+  onLogoSelectedAdmin(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file || !this.apoiadorVisualizado) return;
+
+    this.carregandoLogoInline = true;
+    this.cdr.detectChanges();
+
+    this.apoiadoresService.uploadLogo(this.apoiadorVisualizado.id, file).subscribe({
+      next: (res: any) => {
+        const url = res.logoUrl || res.url;
+        if (this.apoiadorVisualizado && url) {
+          this.apoiadorVisualizado.logoUrl = url;
+          // Atualiza na lista principal
+          const idx = this.apoiadores.findIndex((a) => a.id === this.apoiadorVisualizado!.id);
+          if (idx !== -1) {
+            this.apoiadores[idx].logoUrl = url;
+          }
+        }
+        this.carregandoLogoInline = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro no upload inline da logo', err);
+        alert('Falha ao subir logotipo. Verifique o tamanho ou tente novamente.');
+        this.carregandoLogoInline = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   // Modal de Formulário (Novo/Editar)
   modalFormAberto = false;
@@ -633,7 +664,7 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
       try {
         reader.readAsDataURL(file);
       } catch (e) {
-        reader.onerror(new ProgressEvent('error'));
+        reader.onerror(new ProgressEvent('error') as any);
       }
     }
   }
