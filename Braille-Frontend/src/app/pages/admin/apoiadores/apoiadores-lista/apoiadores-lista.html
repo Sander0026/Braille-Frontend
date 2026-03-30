@@ -376,14 +376,34 @@
                         <p class="field-hint" style="margin-top: 0.5rem;">Imagens quadradas tendem a ficar melhores. Tamanho máx 5MB.</p>
                     </div>
 
-                    <div class="text-center" style="display: flex; justify-content: center; align-items: center;">
+                    <div class="text-center" style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 0.75rem;">
+                        <!-- Feedback messages (Sucesso/Erro e Spinner) acima da foto -->
+                        <div style="min-height: 24px; display: flex; align-items: center;">
+                            @if (carregandoLogo) {
+                                <div class="d-flex align-items-center gap-2" style="color: #2563eb; font-weight: 500; font-size: 0.9rem;">
+                                    <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
+                                    <span>Enviando imagem...</span>
+                                </div>
+                            } @else if (logoFeedback) {
+                                <div class="d-flex align-items-center gap-2" [style.color]="logoFeedbackType === 'success' ? '#16a34a' : '#dc2626'" style="font-weight: 500; font-size: 0.9rem;">
+                                    <span class="material-symbols-rounded" aria-hidden="true">
+                                        {{ logoFeedbackType === 'success' ? 'check_circle' : 'error' }}
+                                    </span>
+                                    <span>{{ logoFeedback }}</span>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Preview com a mesma visualização do Perfil do Apoiador -->
                         <div class="logo-preview-box">
                             @if (logoPreview) {
-                                <img [src]="logoPreview" alt="Pré-visualização da Logo" style="max-width: 150px; max-height: 150px; border-radius: 8px; border: 1px solid #e5e7eb; object-fit: contain;">
+                                <div class="avatar-wrapper profile-avatar" [style.opacity]="carregandoLogo ? '0.5' : '1'" style="transition: opacity 0.3s; margin: 0 auto; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);">
+                                    <img [src]="logoPreview" alt="Pré-visualização da Logo" class="profile-logo" />
+                                </div>
                             } @else {
                                 <div class="placeholder-preview" style="background: #f9fafb; padding: 2rem; border-radius: 8px; border: 1px dashed #d1d5db; color: #9ca3af; display: inline-flex; flex-direction: column; align-items: center;">
                                     <span class="material-symbols-rounded" style="font-size: 2rem;">image</span>
-                                    <span class="d-block mt-2">Preview da Imagem</span>
+                                    <span class="d-block mt-2">Nenhuma Imagem</span>
                                 </div>
                             }
                         </div>

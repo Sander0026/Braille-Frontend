@@ -40,6 +40,9 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
   apoiadorForm: FormGroup;
   logoFile: File | null = null;
   logoPreview: string | ArrayBuffer | null = null;
+  carregandoLogo = false;
+  logoFeedback: string | null = null;
+  logoFeedbackType: 'success' | 'error' = 'success';
   salvando = false;
 
   // Form Rápido do Perfil Visualizado
@@ -216,6 +219,8 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.idApoiadorEditando = null;
     this.logoFile = null;
     this.logoPreview = null;
+    this.carregandoLogo = false;
+    this.logoFeedback = null;
     this.passoAtual = 1;
     this.apoiadorForm.reset({
       informacoesPrincipais: { tipo: 'EMPRESA' },
@@ -232,6 +237,8 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.idApoiadorEditando = id;
     this.logoFile = null;
     this.logoPreview = null;
+    this.carregandoLogo = false;
+    this.logoFeedback = null;
     this.passoAtual = 1;
     this.modalFormAberto = true;
     this.apoiadorForm.reset();
@@ -598,12 +605,36 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
   onLogoSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      this.carregandoLogo = true;
+      this.logoFeedback = null;
+      this.cdr.detectChanges();
+
       this.logoFile = file;
       const reader = new FileReader();
+      
       reader.onload = () => {
-        this.logoPreview = reader.result;
+        // Timeout focado na experiência de usuário solicitada para visualização do loading
+        setTimeout(() => {
+          this.logoPreview = reader.result;
+          this.carregandoLogo = false;
+          this.logoFeedback = 'Foto atualizada!';
+          this.logoFeedbackType = 'success';
+          this.cdr.detectChanges();
+        }, 800);
       };
-      reader.readAsDataURL(file);
+
+      reader.onerror = () => {
+        this.carregandoLogo = false;
+        this.logoFeedback = 'Houve algum erro, tente novamente!';
+        this.logoFeedbackType = 'error';
+        this.cdr.detectChanges();
+      };
+
+      try {
+        reader.readAsDataURL(file);
+      } catch (e) {
+        reader.onerror(new ProgressEvent('error'));
+      }
     }
   }
 
