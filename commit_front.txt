@@ -1,6 +1,0 @@
-feat(ajuda): integracao do painel central de ajuda no frontend
-
-- Criados os arquivos ajuda.ts, ajuda.html e ajuda.scss definindo o layout interativo com grid de tutoriais e secao Sobre o sistema.
-- Adicionada Rota estatica 'ajuda'.
-- Sidebar do AdminLayout injetada com nova opcao global acessivel a todos os Perfis (Secretaria, Comunicacao, Admin, Professor).
-- Resolvidos lints de acessibilidade de output e roles duplicadas.
