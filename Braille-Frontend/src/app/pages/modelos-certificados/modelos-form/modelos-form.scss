@@ -1,4 +1,4 @@
-﻿@use 'sass:color';
+@use 'sass:color';
 // Cores da marca do Instituto (Baseado na UI global)
 $brand-yellow: #fcd34d; // yellow-300 / 400
 $brand-yellow-dark: #fbbf24; // yellow-400 / 500
@@ -13,7 +13,7 @@ $error-bg: #fee2e2;
 $error-text: #991b1b;
 
 .wizard-container {
-    max-width: 800px;
+    max-width: 1200px;
     margin: 2rem auto;
     background-color: #ffffff;
     border-radius: 12px;

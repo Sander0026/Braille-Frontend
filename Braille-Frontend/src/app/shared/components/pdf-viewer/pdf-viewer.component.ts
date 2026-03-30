@@ -70,9 +70,9 @@ export class PdfViewerComponent implements AfterViewInit {
       }
 
       let urlCorrigida = this.urlPdf;
-      if (!urlCorrigida.toLowerCase().endsWith('.pdf')) {
-        urlCorrigida += '.pdf';
-      }
+      // Nota: NÃO adicionar extensão a blob URLs (blob:http://...) —
+      // URLs blob são acedidas por UUID e não precisam de extensão de arquivo.
+      // Adicionar '.pdf' quebraria a URL e causaria ERR_FILE_NOT_FOUND.
 
       this.pdf = await pdfjsLib.getDocument({
         url: urlCorrigida,

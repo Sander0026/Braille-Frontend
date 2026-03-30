@@ -1,9 +1,13 @@
-import { Component, OnInit, ChangeDetectorRef, ChangeDetectionStrategy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule, NgStyle } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { ModelosCertificadosService, ModeloCertificado } from '../../../core/services/modelos-certificados.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
+
+/** Dimensões do canvas de preview — mesmas constantes do editor (modelos-form.ts) */
+const CANVAS_W = 1122;
+const CANVAS_H = 794;
 
 @Component({
   selector: 'app-modelos-lista',
@@ -13,13 +17,21 @@ import { ToastService } from '../../../core/services/toast.service';
   templateUrl: './modelos-lista.html',
   styleUrl: './modelos-lista.scss',
 })
-export class ModelosLista implements OnInit {
+export class ModelosLista implements OnInit, OnDestroy {
   modelos: ModeloCertificado[] = [];
   isLoading = true;
   erro = '';
 
+  readonly CANVAS_W = CANVAS_W;
+  readonly CANVAS_H = CANVAS_H;
+
   // ── Preview ────────────────────────────────────────────────
   modeloPreview: ModeloCertificado | null = null;
+  scaleFactor = 1;
+
+  @ViewChild('previewModalWrapper') previewModalWrapper?: ElementRef<HTMLElement>;
+
+  private _resizeObs?: ResizeObserver;
 
   constructor(
     private modelosService: ModelosCertificadosService,
@@ -31,6 +43,19 @@ export class ModelosLista implements OnInit {
 
   ngOnInit(): void {
     this.carregarModelos();
+  }
+
+  ngOnDestroy(): void {
+    this._resizeObs?.disconnect();
+  }
+
+  private _recalcScale(): void {
+    const el = this.previewModalWrapper?.nativeElement;
+    if (!el) return;
+    const w = el.clientWidth || CANVAS_W;
+    this.scaleFactor = Math.min(1, w / CANVAS_W);
+    el.style.height = Math.round(CANVAS_H * this.scaleFactor) + 'px';
+    this.cdr.markForCheck();
   }
 
   carregarModelos(): void {
@@ -62,9 +87,19 @@ export class ModelosLista implements OnInit {
   abrirPreview(modelo: ModeloCertificado): void {
     this.modeloPreview = modelo;
     this.cdr.markForCheck();
+    // Aguarda o DOM renderizar o modal para registrar o ResizeObserver
+    setTimeout(() => {
+      const el = this.previewModalWrapper?.nativeElement;
+      if (!el) return;
+      this._resizeObs?.disconnect();
+      this._resizeObs = new ResizeObserver(() => this._recalcScale());
+      this._resizeObs.observe(el);
+      this._recalcScale();
+    }, 50);
   }
 
   fecharPreview(): void {
+    this._resizeObs?.disconnect();
     this.modeloPreview = null;
     this.cdr.markForCheck();
   }

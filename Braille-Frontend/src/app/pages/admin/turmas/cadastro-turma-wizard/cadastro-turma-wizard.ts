@@ -209,7 +209,6 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
             professorId: v.professorId,
             descricao: v.descricao || undefined,
             capacidadeMaxima: v.capacidadeMaxima ? +v.capacidadeMaxima : undefined,
-            cargaHoraria: v.cargaHoraria || undefined,
             modeloCertificadoId: v.modeloCertificadoId || undefined,
             gradeHoraria: gradeConvertida.length ? gradeConvertida : undefined,
             dataInicio: v.dataInicio ? new Date(v.dataInicio).toISOString() : undefined,

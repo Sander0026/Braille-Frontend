@@ -41,8 +41,7 @@
 
         <div class="form-group">
             <label for="dataAulaInput">Data da Aula</label>
-            <input type="date" id="dataAulaInput" [(ngModel)]="dataAula" class="form-input" aria-required="true"
-                [max]="hojeISO()" />
+            <input type="date" id="dataAulaInput" [(ngModel)]="dataAula" class="form-input" aria-required="true" />
         </div>
 
         <button class="btn btn-primary" (click)="carregarChamada()"

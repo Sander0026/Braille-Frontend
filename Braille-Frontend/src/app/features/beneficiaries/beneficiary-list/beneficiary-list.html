@@ -574,33 +574,44 @@
                                         {{ freq }}%
                                     </span>
                                 </td>
-                                <td style="text-align: center; color: #6b7280;">—</td>
-                                <td style="text-align: center; color: #6b7280;">—</td>
-                                <td style="text-align: center; color: #6b7280;">—</td>
+                                } @else {
+                                <td style="text-align: center; color: #9ca3af;">—</td>
+                                <td style="text-align: center; color: #9ca3af;">—</td>
+                                <td style="text-align: center; color: #9ca3af;">—</td>
                                 }
                                 <td>
-                                    <span class="badge-status badge-status--{{ m.status.toLowerCase() }}">
-                                        {{ m.status === 'ATIVA' ? 'Em Curso' :
-                                        m.status === 'CONCLUIDA' ? 'Concluída' :
-                                        m.status === 'EVADIDA' ? 'Evadido(a)' : 'Cancelada' }}
+                                    @let statusEfetivo = (m.status === 'ATIVA' && m.turma.status === 'CONCLUIDA') ? 'CONCLUIDA' : m.status;
+                                    <span class="badge-status badge-status--{{ statusEfetivo.toLowerCase() }}">
+                                        {{ statusEfetivo === 'ATIVA' ? 'Em Curso' :
+                                        statusEfetivo === 'CONCLUIDA' ? 'Concluída' :
+                                        statusEfetivo === 'EVADIDA' ? 'Evadido(a)' : 'Cancelada' }}
                                     </span>
                                 </td>
                                 <td style="text-align: center;">
-                                    @if (m.turma.modeloCertificadoId) {
-                                      <button 
-                                        class="btn btn-sm btn-outline-primary" 
-                                        style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;"
-                                        [disabled]="m.status !== 'CONCLUIDA' || emitindoCertificadoId === m.id"
-                                        (click)="emitirCertificadoAcademico(m.id)"
-                                        [title]="m.status === 'CONCLUIDA' ? 'Emitir Certificado Acadêmico' : 'A turma precisa estar concluída para emissão'">
-                                          <span class="material-symbols-rounded {{ emitindoCertificadoId === m.id ? 'spinner' : '' }}" aria-hidden="true" style="font-size: 14px;">
-                                              {{ emitindoCertificadoId === m.id ? 'sync' : 'workspace_premium' }}
-                                          </span>
-                                          Emitir
-                                      </button>
-                                    } @else {
-                                      <span style="font-size: 11px; color: #9ca3af; font-style: italic;">Sem Modelo</span>
-                                    }
+                                      @let freqCert = frequenciasMap.get(m.turma.id)?.taxaPresenca ?? 0;
+                                      @let turmaFinalizada = m.status === 'CONCLUIDA' || m.turma.status === 'CONCLUIDA';
+                                      @let podeEmitir = turmaFinalizada && freqCert >= 75 && !!m.turma.modeloCertificadoId;
+                                      @if (turmaFinalizada) {
+                                        <button 
+                                          class="btn btn-sm"
+                                          [class.btn-outline-primary]="podeEmitir"
+                                          [class.btn-outline-secondary]="!podeEmitir"
+                                          style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;"
+                                          [disabled]="!podeEmitir || emitindoCertificadoId === m.id"
+                                          (click)="emitirCertificadoAcademico(m)"
+                                          [title]="!m.turma.modeloCertificadoId
+                                            ? 'Nenhum modelo de certificado configurado para esta turma'
+                                            : freqCert < 75
+                                              ? 'Frequência de ' + freqCert + '% — abaixo do mínimo de 75%'
+                                              : 'Emitir Certificado Acadêmico'">
+                                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 14px;">
+                                                {{ emitindoCertificadoId === m.id ? 'sync' : (podeEmitir ? 'workspace_premium' : 'block') }}
+                                            </span>
+                                            {{ emitindoCertificadoId === m.id ? 'Gerando...' : 'Emitir' }}
+                                        </button>
+                                      } @else {
+                                        <span style="font-size: 11px; color: #9ca3af; font-style: italic;">—</span>
+                                      }
                                 </td>
                             </tr>
                             }
