@@ -84,6 +84,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     { rota: '/admin/contatos', label: 'Fale Conosco', icon: 'mail', aria: 'Ir para contatos', role: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] },
     { rota: '/admin/usuarios', label: 'Usuários', icon: 'manage_accounts', aria: 'Ir para usuários', role: ['ADMIN'] },
     { rota: '/admin/auditoria', label: 'Auditoria', icon: 'policy', aria: 'Ver logs de auditoria do sistema', role: ['ADMIN'] },
+    { rota: '/admin/ajuda', label: 'Ajuda', icon: 'help', aria: 'Ir para a Central de Ajuda' },
   ];
 
 

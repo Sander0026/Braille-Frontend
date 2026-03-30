@@ -159,6 +159,13 @@ export const routes: Routes = [
         data: { roles: ['ADMIN'] }
       },
 
+      // Ajuda e Documentação — visível para todos os perfis autenticados
+      {
+        path: 'ajuda',
+        loadComponent: () => import('./pages/admin/ajuda/ajuda').then(m => m.Ajuda),
+        title: 'Central de Ajuda — ILBES'
+      },
+
       // Auditoria — Fase 5
       {
         path: 'auditoria',

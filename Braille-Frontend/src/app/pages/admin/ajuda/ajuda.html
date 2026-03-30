@@ -1,0 +1,148 @@
+<div class="page-wrapper">
+
+  <!-- Cabeçalho da Página -->
+  <header class="page-header">
+    <div class="page-header-content">
+      <span class="material-symbols-rounded page-header-icon" aria-hidden="true">help</span>
+      <div>
+        <h1 class="page-title">Central de Ajuda</h1>
+        <p class="page-subtitle">Manuais, guias de uso e informações sobre o sistema ILBES.</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Visualizador de PDF embutido ── -->
+  @if (pdfAtivo) {
+  <section class="pdf-viewer-wrapper" aria-label="Visualizador de manual" aria-live="polite">
+    <div class="pdf-viewer-header">
+      <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+      <span class="pdf-titulo">{{ tituloAtivo }}</span>
+      <button class="btn btn-secondary btn-sm" (click)="fecharPdf()" aria-label="Fechar visualizador de PDF">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+        Fechar
+      </button>
+    </div>
+    <iframe [src]="pdfAtivo" class="pdf-frame" title="Visualizador de manual PDF" aria-label="Conteúdo do manual em PDF"></iframe>
+  </section>
+  }
+
+  <!-- ── Seção: Manuais ── -->
+  <section class="ajuda-section" aria-labelledby="manuais-titulo">
+    <h2 id="manuais-titulo" class="section-title">
+      <span class="material-symbols-rounded" aria-hidden="true">menu_book</span>
+      Manuais de Uso
+    </h2>
+
+    <div class="manuais-grid">
+      @for (manual of manuais; track manual.titulo) {
+      <article class="manual-card card-{{ manual.cor }}" [class.disponivel]="manual.arquivo !== null" [class.em-breve]="manual.arquivo === null">
+
+        <div class="manual-card-icon">
+          <span class="material-symbols-rounded" aria-hidden="true">{{ manual.icon }}</span>
+        </div>
+
+        <div class="manual-card-body">
+          <h3 class="manual-titulo">{{ manual.titulo }}</h3>
+          <p class="manual-descricao">{{ manual.descricao }}</p>
+
+          <div class="manual-perfis" aria-label="Perfis indicados">
+            @for (perfil of manual.perfis; track perfil) {
+            <span class="perfil-badge">{{ perfil }}</span>
+            }
+          </div>
+        </div>
+
+        <div class="manual-card-footer">
+          @if (manual.arquivo) {
+          <button class="btn btn-primary btn-sm" (click)="abrirManual(manual)" [attr.aria-label]="'Abrir ' + manual.titulo">
+            <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
+            Abrir Manual
+          </button>
+          } @else {
+          <output class="badge-em-breve">
+            <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
+            Em breve
+          </output>
+          }
+        </div>
+
+      </article>
+      }
+    </div>
+  </section>
+
+  <!-- ── Separador ── -->
+  <hr class="section-divider" aria-hidden="true" />
+
+  <!-- ── Seção: Sobre o Sistema ── -->
+  <section class="ajuda-section" aria-labelledby="sobre-titulo">
+    <h2 id="sobre-titulo" class="section-title">
+      <span class="material-symbols-rounded" aria-hidden="true">info</span>
+      Sobre o Sistema
+    </h2>
+
+    <div class="sobre-grid">
+
+      <!-- Card: Identidade -->
+      <div class="sobre-card identidade-card">
+        <div class="sistema-logo" aria-label="Logo ILBES">IB</div>
+        <h3 class="sistema-nome">Instituto Luiz Braille</h3>
+        <p class="sistema-subtitulo">Sistema de Gestão Escolar — ILBES</p>
+        <div class="sistema-versao">
+          <span class="material-symbols-rounded" aria-hidden="true">tag</span>
+          Versão <strong>v1.0.0-RC</strong>
+        </div>
+        <p class="sistema-descricao">
+          Sistema desenvolvido para apoiar a administração escolar do Instituto Luiz Braille,
+          voltado ao atendimento de pessoas com deficiência visual.
+        </p>
+      </div>
+
+      <!-- Card: Stack Tecnológica -->
+      <div class="sobre-card">
+        <h3 class="sobre-card-titulo">
+          <span class="material-symbols-rounded" aria-hidden="true">code</span>
+          Tecnologias Utilizadas
+        </h3>
+        <ul class="tech-list">
+          @for (tech of tecnologias; track tech.nome) {
+          <li class="tech-item">
+            <span class="tech-icon" aria-hidden="true">{{ tech.icon }}</span>
+            <div>
+              <strong>{{ tech.nome }}</strong>
+              <span class="tech-descricao">{{ tech.descricao }}</span>
+            </div>
+          </li>
+          }
+        </ul>
+      </div>
+
+      <!-- Card: Equipe -->
+      <div class="sobre-card">
+        <h3 class="sobre-card-titulo">
+          <span class="material-symbols-rounded" aria-hidden="true">groups</span>
+          Equipe de Desenvolvimento
+        </h3>
+        <ul class="equipe-list">
+          @for (membro of equipe; track membro.nome) {
+          <li class="equipe-item">
+            <div class="equipe-avatar" aria-hidden="true">
+              {{ membro.nome.charAt(0) }}
+            </div>
+            <div>
+              <strong>{{ membro.nome }}</strong>
+              <span class="equipe-papel">{{ membro.papel }}</span>
+            </div>
+          </li>
+          }
+        </ul>
+        <div class="projeto-info">
+          <span class="material-symbols-rounded" aria-hidden="true">school</span>
+          Projeto Integrador — 5º Semestre
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
