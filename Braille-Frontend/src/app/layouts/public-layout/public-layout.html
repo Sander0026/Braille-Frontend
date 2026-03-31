@@ -1,44 +1,12 @@
 <div class="public-shell">
   <a href="#conteudo-principal" class="skip-to-content">Ir para o conteúdo principal</a>
 
-  <header class="site-header" role="banner">
-    <div class="header-inner">
-      <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
-        <img src="favicon.ico" alt="" class="logo-img" role="presentation" />
-      </a>
-
-      <nav class="main-nav" [class.is-open]="isMobileMenuOpen" role="navigation" aria-label="Navegação principal">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link"
-          (click)="closeMobileMenu()">Início</a>
-        <a routerLink="/sobre" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Sobre</a>
-        <a routerLink="/noticias" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Notícias</a>
-        <a routerLink="/contato" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Contato</a>
-        <!-- CTA botão no menu apenas no mobile para facilitar acesso -->
-        <a routerLink="/contato" class="btn-inscricao mobile-only-cta" (click)="closeMobileMenu()">
-          Fale Conosco
-        </a>
-      </nav>
-
-      <nav class="a11y-controls" aria-label="Controles de acessibilidade">
-        <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
-          aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
-        <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="fonteAtual === 'grande'"
-          aria-label="Aumentar fonte" title="Fonte grande">A+</button>
-        <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="fonteAtual === 'extragrande'"
-          aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
-        <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="altoContrasteAtivo"
-          aria-label="Alternar alto contraste" title="Alto contraste">
-          <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
-        </button>
-      </nav>
-
-      <!-- ── Botão Hamburger Mobile ── -->
-      <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen"
-        aria-label="Menu de navegação">
-        <span class="material-symbols-rounded" aria-hidden="true">{{ isMobileMenuOpen ? 'close' : 'menu' }}</span>
-      </button>
-    </div>
-  </header>
+  <app-header 
+    theme="public" 
+    [isMobileMenuOpen]="isMobileMenuOpen" 
+    (mobileMenuToggle)="toggleMobileMenu()" 
+    (closeMobile)="closeMobileMenu()">
+  </app-header>
 
   <main id="conteudo-principal" tabindex="-1">
     <router-outlet></router-outlet>

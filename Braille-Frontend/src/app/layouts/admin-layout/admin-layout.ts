@@ -10,7 +10,8 @@ import { ConfirmDialogService } from '../../core/services/confirm-dialog.service
 import { ToastComponent } from '../../core/components/toast/toast.component';
 import { HotkeysService, HotkeyAction } from '../../core/services/hotkeys.service';
 import { FooterComponent } from '../../core/components/footer/footer';
-import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
+import { AccessibilityService } from '../../core/services/accessibility.service';
+import { HeaderComponent } from '../../core/components/header/header';
 
 interface NavItem {
   rota: string;
@@ -25,7 +26,7 @@ type Modal = 'none' | 'foto' | 'senha' | 'perfil' | 'hotkeys';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent, A11yModule, FooterComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent, A11yModule, FooterComponent, HeaderComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
@@ -41,8 +42,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   nomeDisplay = 'Usuário';
   iniciaisDisplay = 'U';
 
-  // ── Dropdown de perfil ───────────────────────────────
-  menuAberto = false;
+  // Header HeaderComponent controla isso internamente agora!
 
   // ── Modais ───────────────────────────────────────────
   modalAtivo: Modal = 'none';
@@ -188,24 +188,18 @@ export class AdminLayout implements OnInit, OnDestroy {
     }
   }
 
-  // ── Dropdown ─────────────────────────────────────────
-  toggleMenu(event: Event): void {
-    event.stopPropagation();
-    this.menuAberto = !this.menuAberto;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    const menuEl = this.elRef.nativeElement.querySelector('.user-menu-wrapper');
-    if (menuEl && !menuEl.contains(event.target as Node)) {
-      this.menuAberto = false;
+  // ── Header Intercept ─────────────────────────────────
+  onHeaderAction(action: 'perfil' | 'foto' | 'senha' | 'sair'): void {
+    switch (action) {
+      case 'perfil': this.abrirModalPerfil(); break;
+      case 'foto': this.abrirModalFoto(); break;
+      case 'senha': this.abrirModalSenha(); break;
+      case 'sair': this.sair(); break;
     }
   }
-
   // ── Modais ───────────────────────────────────────────
   abrirModalFoto(): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
-    this.menuAberto = false;
     this.fotoPreview = null;
     this.fotoSelecionada = null;
     this.fotoErro = null;
@@ -215,7 +209,6 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   abrirModalSenha(): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
-    this.menuAberto = false;
     this.formSenha.reset();
     this.senhaErro = null;
     this.senhaSucesso = false;
@@ -224,7 +217,6 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   abrirModalPerfil(): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
-    this.menuAberto = false;
     this.perfilErro = null;
     this.perfilSucesso = false;
     if (this.perfil) this.atualizarFormPerfil(this.perfil);
@@ -233,7 +225,6 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   abrirModalHotkeys(): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
-    this.menuAberto = false;
     this.modalAtivo = 'hotkeys';
     this.cdr.detectChanges();
   }
@@ -358,10 +349,10 @@ export class AdminLayout implements OnInit, OnDestroy {
   // ── Senha ─────────────────────────────────────────────
   private inicializarFormSenha(): void {
     this.formSenha = this.fb.group({
-      senhaAtual: ['', Validators.required],
-      novaSenha: ['', [Validators.required, Validators.minLength(8)]],
-      confirmarSenha: ['', Validators.required]
-    }, { validators: this.senhasIguaisValidator });
+      senhaAtual: this.fb.control('', { validators: [Validators.required] }),
+      novaSenha: this.fb.control('', { validators: [Validators.required, Validators.minLength(8)] }),
+      confirmarSenha: this.fb.control('', { validators: [Validators.required] })
+    }, { validators: [this.senhasIguaisValidator] });
   }
 
   private inicializarFormPerfil(): void {
@@ -472,18 +463,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     return this.sidebarState === 'full';
   }
 
-  // ── Acessibilidade ───────────────────────────────────
-  toggleAltoContraste(): void {
-    this.a11y.toggleAltoContraste();
-  }
 
-  setFonte(tamanho: FonteSize): void {
-    this.a11y.setFonte(tamanho);
-  }
-
-  get fonteAtual(): FonteSize {
-    return this.a11y.fonteAtual;
-  }
 
   get altoContrasteAtivo(): boolean {
     return this.a11y.isAltoContraste;

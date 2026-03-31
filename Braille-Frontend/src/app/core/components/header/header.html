@@ -1,1 +1,131 @@
-<p>header works!</p>
+@if (theme === 'public') {
+  <header class="site-header" role="banner" aria-label="Cabeçalho Público">
+    <div class="header-inner">
+      <a routerLink="/" class="logo" aria-label="Instituto Luiz Braille — Página inicial">
+        <img src="favicon.ico" alt="" class="logo-img" role="presentation" />
+      </a>
+
+      <nav class="main-nav" [class.is-open]="isMobileMenuOpen" role="navigation" aria-label="Navegação principal">
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}" class="nav-link"
+          (click)="closeMobileMenu()">Início</a>
+        <a routerLink="/sobre" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Sobre</a>
+        <a routerLink="/noticias" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Notícias</a>
+        <a routerLink="/contato" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Contato</a>
+        <!-- CTA botão no menu apenas no mobile para facilitar acesso -->
+        <a routerLink="/contato" class="btn-inscricao mobile-only-cta" (click)="closeMobileMenu()">
+          Fale Conosco
+        </a>
+      </nav>
+
+      <fieldset class="a11y-controls public-a11y" aria-label="Controles de acessibilidade">
+        <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="a11y.fonteAtual === 'padrao'"
+          aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
+        <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="a11y.fonteAtual === 'grande'"
+          aria-label="Aumentar fonte" title="Fonte grande">A+</button>
+        <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="a11y.fonteAtual === 'extragrande'"
+          aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
+        <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="a11y.isAltoContraste"
+          aria-label="Alternar alto contraste" title="Alto contraste">
+          <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
+        </button>
+      </fieldset>
+
+      <!-- ── Botão Hamburger Mobile ── -->
+      <button class="mobile-menu-btn" (click)="toggleMobileMenu()" [attr.aria-expanded]="isMobileMenuOpen"
+        aria-label="Menu de navegação">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ isMobileMenuOpen ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
+  </header>
+} @else {
+  <header class="admin-header" role="banner" aria-label="Cabeçalho do Painel Administrativo">
+    <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel"
+      [attr.aria-expanded]="sidebarState !== 'hidden' ? 'true' : 'false'" aria-controls="sidebar-nav">
+      <span class="material-symbols-rounded" aria-hidden="true">{{ toggleIcon }}</span>
+    </button>
+
+    <div class="header-right">
+      <!-- ── Controles de Acessibilidade ── -->
+      <fieldset class="a11y-controls" aria-label="Controles de acessibilidade">
+        <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="a11y.fonteAtual === 'padrao'"
+          aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
+        <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="a11y.fonteAtual === 'grande'"
+          aria-label="Aumentar fonte" title="Fonte grande">A+</button>
+        <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="a11y.fonteAtual === 'extragrande'"
+          aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
+        <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="a11y.isAltoContraste"
+          aria-label="Ativar ou desativar alto contraste" title="Alto contraste">
+          <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
+        </button>
+      </fieldset>
+
+      <div class="user-menu-wrapper" (click)="fecharMenoExterno()" (keydown.enter)="fecharMenoExterno()">
+        <button class="user-menu-btn" (click)="toggleUserMenu($event)"
+          [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu">
+
+          <!-- Avatar: foto ou iniciais -->
+          @if (fotoPerfil) {
+            <img [src]="fotoPerfil" class="user-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
+          } @else {
+            <div class="user-avatar" aria-hidden="true">{{ iniciaisDisplay }}</div>
+          }
+
+          <div class="user-details">
+            <span class="user-nome">{{ nomeDisplay }}</span>
+            <span class="user-cargo">{{ labelCargo }}</span>
+          </div>
+          <span class="material-symbols-rounded chevron-icon" aria-hidden="true">
+            {{ menuAberto ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+
+        <!-- Dropdown -->
+        @if (menuAberto) {
+        <div class="user-dropdown" role="menu" aria-label="Menu de perfil" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+
+          <!-- Cabeçalho com avatar grande -->
+          <div class="dropdown-header">
+            @if (fotoPerfil) {
+              <img [src]="fotoPerfil" class="dropdown-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
+            } @else {
+              <div class="dropdown-avatar">{{ iniciaisDisplay }}</div>
+            }
+            <div class="dropdown-user-info">
+              <p class="dropdown-nome">{{ nomeDisplay }}</p>
+              <p class="dropdown-cargo">{{ labelCargo }}</p>
+              @if (perfilEmail) {
+                <p class="dropdown-email">{{ perfilEmail }}</p>
+              }
+            </div>
+          </div>
+
+          <hr class="dropdown-divider" />
+
+          <button class="dropdown-item" role="menuitem" (click)="emitUserAction('perfil')">
+            <span class="material-symbols-rounded" aria-hidden="true">person</span>
+            Meu Perfil
+          </button>
+
+          <button class="dropdown-item" role="menuitem" (click)="emitUserAction('foto')">
+            <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+            Trocar Foto
+          </button>
+
+          <button class="dropdown-item" role="menuitem" (click)="emitUserAction('senha')">
+            <span class="material-symbols-rounded" aria-hidden="true">lock</span>
+            Trocar Senha
+          </button>
+
+          <hr class="dropdown-divider" />
+
+          <button class="dropdown-item danger" role="menuitem" (click)="emitUserAction('sair')">
+            <span class="material-symbols-rounded" aria-hidden="true">logout</span>
+            Sair
+          </button>
+
+        </div>
+        }
+      </div>
+    </div>
+  </header>
+}

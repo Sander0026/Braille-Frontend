@@ -30,7 +30,7 @@
     </ul>
 
     <div class="sidebar-footer">
-      <button class="nav-link sair-btn" (click)="sair()" aria-label="Sair"
+      <button class="nav-link sair-btn" (click)="sair()" [attr.aria-label]="!showLabels ? 'Sair' : null"
         [attr.title]="!showLabels ? 'Sair' : null">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">logout</span>
         @if (showLabels) { <span class="nav-label">Sair</span> }
@@ -41,99 +41,20 @@
   <!-- ══ ÁREA PRINCIPAL ════════════════════════════════════════ -->
   <div class="main-area">
 
-    <!-- Header -->
-    <header class="admin-header" role="banner">
-      <button class="toggle-btn" (click)="toggleSidebar()" [attr.aria-label]="toggleLabel"
-        [attr.aria-expanded]="sidebarState !== 'hidden' ? 'true' : 'false'" aria-controls="sidebar-nav">
-        <span class="material-symbols-rounded" aria-hidden="true">{{ toggleIcon }}</span>
-      </button>
-
-      <div class="header-right">
-
-        <!-- ── Controles de Acessibilidade ── -->
-        <fieldset class="a11y-controls" aria-label="Controles de acessibilidade">
-          <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
-            aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
-          <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="fonteAtual === 'grande'"
-            aria-label="Aumentar fonte" title="Fonte grande">A+</button>
-          <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="fonteAtual === 'extragrande'"
-            aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
-          <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="altoContrasteAtivo"
-            aria-label="Ativar ou desativar alto contraste" title="Alto contraste">
-            <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
-          </button>
-        </fieldset>
-
-        <!-- ── Menu de Perfil ── -->
-        <div class="user-menu-wrapper">
-          <button class="user-menu-btn" (click)="toggleMenu($event)"
-            [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu">
-
-            <!-- Avatar: foto ou iniciais -->
-            @if (fotoPerfil) {
-            <img [src]="fotoPerfil" class="user-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
-            } @else {
-            <div class="user-avatar" aria-hidden="true">{{ iniciaisDisplay }}</div>
-            }
-
-            <div class="user-details">
-              <span class="user-nome">{{ nomeDisplay }}</span>
-              <span class="user-cargo">{{ labelCargo }}</span>
-            </div>
-            <span class="material-symbols-rounded chevron-icon" aria-hidden="true">
-              {{ menuAberto ? 'expand_less' : 'expand_more' }}
-            </span>
-          </button>
-
-          <!-- Dropdown -->
-          @if (menuAberto) {
-          <div class="user-dropdown" role="menu" aria-label="Menu de perfil">
-
-            <!-- Cabeçalho com avatar grande -->
-            <div class="dropdown-header">
-              @if (fotoPerfil) {
-              <img [src]="fotoPerfil" class="dropdown-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
-              } @else {
-              <div class="dropdown-avatar">{{ iniciaisDisplay }}</div>
-              }
-              <div class="dropdown-user-info">
-                <p class="dropdown-nome">{{ nomeDisplay }}</p>
-                <p class="dropdown-cargo">{{ labelCargo }}</p>
-                @if (perfil?.email) {
-                <p class="dropdown-email">{{ perfil?.email }}</p>
-                }
-              </div>
-            </div>
-
-            <hr class="dropdown-divider" />
-
-            <button class="dropdown-item" role="menuitem" (click)="abrirModalPerfil()">
-              <span class="material-symbols-rounded" aria-hidden="true">person</span>
-              Meu Perfil
-            </button>
-
-            <button class="dropdown-item" role="menuitem" (click)="abrirModalFoto()">
-              <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
-              Trocar Foto
-            </button>
-
-            <button class="dropdown-item" role="menuitem" (click)="abrirModalSenha()">
-              <span class="material-symbols-rounded" aria-hidden="true">lock</span>
-              Trocar Senha
-            </button>
-
-            <hr class="dropdown-divider" />
-
-            <button class="dropdown-item danger" role="menuitem" (click)="sair()">
-              <span class="material-symbols-rounded" aria-hidden="true">logout</span>
-              Sair
-            </button>
-
-          </div>
-          }
-        </div>
-      </div>
-    </header>
+    <!-- Header Corporativo -->
+    <app-header 
+      theme="admin"
+      [nomeDisplay]="nomeDisplay"
+      [fotoPerfil]="fotoPerfil"
+      [iniciaisDisplay]="iniciaisDisplay"
+      [labelCargo]="labelCargo"
+      [perfilEmail]="perfil?.email"
+      [sidebarState]="sidebarState"
+      [toggleIcon]="toggleIcon"
+      [toggleLabel]="toggleLabel"
+      (sidebarToggle)="toggleSidebar()"
+      (userAction)="onHeaderAction($event)">
+    </app-header>
 
     <!-- Conteúdo das páginas -->
     <main id="main-content" class="page-content" role="main" tabindex="-1">
@@ -149,7 +70,7 @@
 @if (modalAtivo === 'foto') {
 <dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
   (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
 
     <div class="modal-header">
       <h2 id="modal-foto-titulo" class="modal-title">Trocar Foto de Perfil</h2>
@@ -212,7 +133,7 @@
 @if (modalAtivo === 'senha') {
 <dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
   (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
 
     <div class="modal-header">
       <h2 id="modal-senha-titulo" class="modal-title">Trocar Senha</h2>
@@ -294,7 +215,7 @@
 @if (modalAtivo === 'perfil') {
 <dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
   (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
+  <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
 
     <div class="modal-header">
       <h2 id="modal-perfil-titulo" class="modal-title">Meu Perfil</h2>
@@ -419,7 +340,7 @@
 @if (modalAtivo === 'hotkeys') {
 <dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
   (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-content modal-md" (click)="$event.stopPropagation()">
+  <div class="modal-content modal-md" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
     <div class="modal-header">
       <h2 id="modalHotkeysTitulo" style="display:flex; align-items:center; gap:0.5rem">
         <span class="material-symbols-rounded">keyboard</span>
