@@ -30,7 +30,7 @@
     </ul>
 
     <div class="sidebar-footer">
-      <button class="nav-link sair-btn" (click)="sair()" aria-label="Sair da conta"
+      <button class="nav-link sair-btn" (click)="sair()" aria-label="Sair"
         [attr.title]="!showLabels ? 'Sair' : null">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">logout</span>
         @if (showLabels) { <span class="nav-label">Sair</span> }
@@ -51,7 +51,7 @@
       <div class="header-right">
 
         <!-- ── Controles de Acessibilidade ── -->
-        <div class="a11y-controls" role="group" aria-label="Controles de acessibilidade">
+        <fieldset class="a11y-controls" aria-label="Controles de acessibilidade">
           <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="fonteAtual === 'padrao'"
             aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
           <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="fonteAtual === 'grande'"
@@ -62,12 +62,12 @@
             aria-label="Ativar ou desativar alto contraste" title="Alto contraste">
             <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
           </button>
-        </div>
+        </fieldset>
 
         <!-- ── Menu de Perfil ── -->
         <div class="user-menu-wrapper">
           <button class="user-menu-btn" (click)="toggleMenu($event)"
-            [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu" aria-label="Abrir menu de perfil">
+            [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu">
 
             <!-- Avatar: foto ou iniciais -->
             @if (fotoPerfil) {
@@ -105,7 +105,7 @@
               </div>
             </div>
 
-            <div class="dropdown-divider" role="separator"></div>
+            <hr class="dropdown-divider" />
 
             <button class="dropdown-item" role="menuitem" (click)="abrirModalPerfil()">
               <span class="material-symbols-rounded" aria-hidden="true">person</span>
@@ -122,7 +122,7 @@
               Trocar Senha
             </button>
 
-            <div class="dropdown-divider" role="separator"></div>
+            <hr class="dropdown-divider" />
 
             <button class="dropdown-item danger" role="menuitem" (click)="sair()">
               <span class="material-symbols-rounded" aria-hidden="true">logout</span>
@@ -139,14 +139,16 @@
     <main id="main-content" class="page-content" role="main" tabindex="-1">
       <router-outlet />
     </main>
+
+    <app-footer theme="admin"></app-footer>
   </div>
 
 </div>
 
 <!-- ══ MODAL: TROCAR FOTO ═══════════════════════════════════════ -->
 @if (modalAtivo === 'foto') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
-  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -203,13 +205,13 @@
     </div>
 
   </div>
-</div>
+</dialog>
 }
 
 <!-- ══ MODAL: TROCAR SENHA ══════════════════════════════════════ -->
 @if (modalAtivo === 'senha') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
-  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -221,10 +223,10 @@
 
     @if (senhaSucesso) {
     <div class="modal-body">
-      <div class="sucesso-banner" role="status">
+      <output class="sucesso-banner">
         <span class="material-symbols-rounded">check_circle</span>
         Senha alterada com sucesso!
-      </div>
+      </output>
     </div>
     } @else {
     <form [formGroup]="formSenha" (ngSubmit)="salvarSenha()" novalidate>
@@ -285,13 +287,13 @@
     }
 
   </div>
-</div>
+</dialog>
 }
 
 <!-- ══ MODAL: MEU PERFIL ═══════════════════════════════════════ -->
 @if (modalAtivo === 'perfil') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
-  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()">
 
     <div class="modal-header">
@@ -377,7 +379,7 @@
 
           <!-- Status da conta -->
           <div class="form-group">
-            <label class="form-label">Status da conta</label>
+            <span class="form-label">Status da conta</span>
             <div class="perfil-status" [class.ativo]="perfil?.statusAtivo !== false">
               <span class="material-symbols-rounded">
                 {{ perfil?.statusAtivo !== false ? 'check_circle' : 'cancel' }}
@@ -392,10 +394,10 @@
         }
 
         @if (perfilSucesso) {
-        <div class="sucesso-banner" role="status" style="margin-top:.75rem">
+        <output class="sucesso-banner" style="margin-top:.75rem">
           <span class="material-symbols-rounded">check_circle</span>
           Perfil atualizado com sucesso!
-        </div>
+        </output>
         }
 
       </form>
@@ -410,13 +412,13 @@
     </div>
 
   </div>
-</div>
+</dialog>
 }
 
 <!-- Modal Ajuda Atalhos (Alt+H) -->
 @if (modalAtivo === 'hotkeys') {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
-  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-content modal-md" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2 id="modalHotkeysTitulo" style="display:flex; align-items:center; gap:0.5rem">
@@ -447,10 +449,10 @@
       <button type="button" class="btn btn-primary" (click)="fecharModal()">Entendi</button>
     </div>
   </div>
-</div>
+</dialog>
 }
 
-<!-- Modal de Confirmação Global (disponível em todo o painel admin) -->
+<!-- Modal de Confirmaçao Global (disponivel em qualquer area do painel admin) -->
 <app-confirm-dialog />
 
 <!-- Toaster de Feedback Global -->

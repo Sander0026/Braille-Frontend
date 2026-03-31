@@ -1,31 +1,17 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { AsyncPipe, CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { SiteConfigService } from '../../core/services/site-config';
+import { CommonModule } from '@angular/common';
 import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
+import { FooterComponent } from '../../core/components/footer/footer';
 
 @Component({
   selector: 'app-public-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, AsyncPipe, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, FooterComponent],
   templateUrl: './public-layout.html',
   styleUrl: './public-layout.scss',
 })
-export class PublicLayout implements OnInit {
-  readonly currentYear = new Date().getFullYear();
-
+export class PublicLayout {
   isMobileMenuOpen = false;
-
-  // Serviço de Configuração da API
-  private siteConfig = inject(SiteConfigService);
-  contatoConfig$!: Observable<any>;
-
-  ngOnInit() {
-    this.contatoConfig$ = this.siteConfig.secoes$.pipe(
-      map(secoes => secoes['contato_global'] || {})
-    );
-  }
 
   // Acessibilidade Global (Herdado do service)
   public a11y = inject(AccessibilityService);

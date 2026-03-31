@@ -1,1 +1,66 @@
-<p>footer works!</p>
+<!-- ══════════════════════════════════════════════════════════════
+  FOOTER POLIMÓRFICO
+  Alterna entre Layout Público Institucional e Layout Privado Admin
+══════════════════════════════════════════════════════════════ -->
+
+@if (theme === 'public') {
+  <footer class="site-footer public-footer" role="contentinfo" aria-label="Rodapé do site braillix" *ngIf="contatoConfig$ | async as config">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo-icon" aria-hidden="true">⬡</span>
+          <span>Instituto Luiz Braille</span>
+        </div>
+        <p class="footer-tagline">
+          Inclusão, educação e autonomia para pessoas com deficiência visual.
+        </p>
+      </div>
+
+      <!-- Redes Sociais -->
+      <nav class="footer-social" aria-label="Redes sociais" role="navigation">
+        @if (config?.instagram) {
+          <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram">
+            <span class="social-icon">Instagram</span>
+          </a>
+        }
+        @if (config?.facebook) {
+          <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook">
+            <span class="social-icon">Facebook</span>
+          </a>
+        }
+        @if (config?.youtube) {
+          <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube">
+            <span class="social-icon">YouTube</span>
+          </a>
+        }
+        @if (config?.linkedin) {
+          <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <span class="social-icon">LinkedIn</span>
+          </a>
+        }
+      </nav>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          {{ config?.footerDireitos || '&copy; ' + currentYear + ' Instituto Luiz Braille. Todos os direitos reservados.' }}
+        </p>
+      </div>
+    </div>
+  </footer>
+}
+
+@else if (theme === 'admin') {
+  <footer class="site-footer admin-footer" role="contentinfo" aria-label="Rodapé do painel de administração">
+    <div class="footer-inner-admin">
+      <p class="footer-copy">
+        &copy; {{ currentYear }} Instituto Luiz Braille. Painel de Controle Segregado.
+      </p>
+      <div class="footer-admin-links">
+        <a routerLink="/" target="_blank" rel="noopener">
+          Ver Portal Público
+          <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+}

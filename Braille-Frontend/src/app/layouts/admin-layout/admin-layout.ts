@@ -1,16 +1,16 @@
 import { Component, OnInit, OnDestroy, HostListener, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.service';
-import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { ConfirmDialog } from '../../core/components/confirm-dialog/confirm-dialog.component';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
 import { ToastComponent } from '../../core/components/toast/toast.component';
-import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
 import { HotkeysService, HotkeyAction } from '../../core/services/hotkeys.service';
+import { FooterComponent } from '../../core/components/footer/footer';
+import { AccessibilityService, FonteSize } from '../../core/services/accessibility.service';
 
 interface NavItem {
   rota: string;
@@ -25,7 +25,7 @@ type Modal = 'none' | 'foto' | 'senha' | 'perfil' | 'hotkeys';
 
 @Component({
   selector: 'app-admin-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent, A11yModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, ReactiveFormsModule, ConfirmDialog, ToastComponent, A11yModule, FooterComponent],
   templateUrl: './admin-layout.html',
   styleUrl: './admin-layout.scss'
 })
@@ -71,7 +71,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   removerFotoFlag = false;
 
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   readonly navItems: NavItem[] = [
     { rota: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', aria: 'Ir para Dashboard' },
@@ -100,14 +100,14 @@ export class AdminLayout implements OnInit, OnDestroy {
   }
 
   constructor(
-    private authService: AuthService,
-    private router: Router,
-    private fb: FormBuilder,
-    private elRef: ElementRef,
-    private cdr: ChangeDetectorRef,
-    public a11y: AccessibilityService,
-    private hotkeysService: HotkeysService,
-    private confirmDialog: ConfirmDialogService
+    private readonly authService: AuthService,
+    private readonly router: Router,
+    private readonly fb: FormBuilder,
+    private readonly elRef: ElementRef,
+    private readonly cdr: ChangeDetectorRef,
+    public readonly a11y: AccessibilityService,
+    private readonly hotkeysService: HotkeysService,
+    private readonly confirmDialog: ConfirmDialogService
   ) { }
 
   ngOnInit(): void {
@@ -135,7 +135,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.authService.getMe()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (perfil) => {
+        next: (perfil: PerfilUsuario) => {
           // Adiar para fora do ciclo de verificação atual (evita NG0100)
           Promise.resolve().then(() => {
             this.perfil = perfil;
@@ -181,10 +181,10 @@ export class AdminLayout implements OnInit, OnDestroy {
   onResize(): void { this.updateMobileState(); }
 
   toggleSidebar(): void {
-    if (!this.isMobile) {
-      this.sidebarState = this.sidebarState === 'full' ? 'icons' : 'full';
-    } else {
+    if (this.isMobile) {
       this.sidebarState = this.sidebarState === 'hidden' ? 'icons' : 'hidden';
+    } else {
+      this.sidebarState = this.sidebarState === 'full' ? 'icons' : 'full';
     }
   }
 
@@ -302,7 +302,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.authService.uploadFoto(this.fotoSelecionada!)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: ({ url }) => {
+        next: ({ url }: { url: string }) => {
           this.authService.atualizarFoto(url)
             .pipe(takeUntil(this.destroy$))
             .subscribe({
@@ -379,7 +379,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.authService.atualizarPerfil({ nome, email: email || undefined })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (p) => {
+        next: (p: PerfilUsuario) => {
           this.perfil = p;
           this.carregandoPerfil = false;
           this.perfilSucesso = true;
@@ -389,7 +389,7 @@ export class AdminLayout implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }, 2500);
         },
-        error: (err) => {
+        error: (err: any) => {
           this.carregandoPerfil = false;
           this.perfilErro = err?.error?.message ?? 'Erro ao atualizar o perfil.';
           this.cdr.detectChanges();
@@ -424,7 +424,7 @@ export class AdminLayout implements OnInit, OnDestroy {
           this.cdr.detectChanges();
           setTimeout(() => this.fecharModal(), 1800);
         },
-        error: (err) => {
+        error: (err: any) => {
           this.carregandoSenha = false;
           this.senhaErro = err?.error?.message ?? 'Erro ao trocar a senha. Verifique a senha atual.';
           this.cdr.detectChanges();
@@ -455,15 +455,17 @@ export class AdminLayout implements OnInit, OnDestroy {
   }
 
   get toggleIcon(): string {
-    return this.isMobile
-      ? (this.sidebarState === 'hidden' ? 'menu' : 'close')
-      : (this.sidebarState === 'full' ? 'chevron_left' : 'chevron_right');
+    if (this.isMobile) {
+      return this.sidebarState === 'hidden' ? 'menu' : 'close';
+    }
+    return this.sidebarState === 'full' ? 'chevron_left' : 'chevron_right';
   }
 
   get toggleLabel(): string {
-    return this.isMobile
-      ? (this.sidebarState === 'hidden' ? 'Abrir menu lateral' : 'Fechar menu lateral')
-      : (this.sidebarState === 'full' ? 'Recolher menu lateral' : 'Expandir menu lateral');
+    if (this.isMobile) {
+      return this.sidebarState === 'hidden' ? 'Abrir menu lateral' : 'Fechar menu lateral';
+    }
+    return this.sidebarState === 'full' ? 'Recolher menu lateral' : 'Expandir menu lateral';
   }
 
   get showLabels(): boolean {
