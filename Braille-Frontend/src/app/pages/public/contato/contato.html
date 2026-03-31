@@ -1,5 +1,7 @@
 <!-- ══════════ CONTATO — HERO ══════════ -->
 <section class="page-hero" aria-labelledby="contato-titulo">
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN -->
+    <div class="page-hero-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null"></div>
     <div class="page-hero-inner" *ngIf="contatoConfig$ | async as config">
         <p class="page-eyebrow">Fale Conosco</p>
         <h1 id="contato-titulo" class="page-hero-title">Entre em contato</h1>

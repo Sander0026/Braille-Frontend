@@ -1,8 +1,9 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { SiteConfigService } from '../../../core/services/site-config';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
@@ -18,11 +19,11 @@ interface ContatoPayload {
 @Component({
     selector: 'app-contato',
     standalone: true,
-    imports: [CommonModule, FormsModule, TabEscapeDirective],
+    imports: [CommonModule, FormsModule, TabEscapeDirective, CloudinaryPipe],
     templateUrl: './contato.html',
     styleUrl: './contato.scss',
 })
-export class Contato {
+export class Contato implements OnInit {
 
     form: ContatoPayload = {
         nome: '',
@@ -35,6 +36,7 @@ export class Contato {
     enviando = false;
     enviado = false;
     erroEnvio = '';
+    fachadaUrl: string = '';
 
     // Campos tocados (para validação visual)
     tocado: Record<string, boolean> = {};
@@ -46,6 +48,17 @@ export class Contato {
         this.contatoConfig$ = this.siteConfig.secoes$.pipe(
             map(secoes => secoes['contato_global'] || {})
         );
+    }
+
+    ngOnInit() {
+        // Carregar fachadaUrl
+        this.siteConfig.configs$.subscribe({
+            next: (configs) => {
+                if (configs && configs['fachadaUrl']) {
+                    this.fachadaUrl = configs['fachadaUrl'];
+                }
+            }
+        });
     }
 
     marcarTocado(campo: string): void {

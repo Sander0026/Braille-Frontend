@@ -17,11 +17,29 @@ $gray-900: #1a1a1a;
     background: $black;
     padding: 4rem 1.5rem 3.5rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('/fachada_ilbes.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    opacity: 0.3;
 }
 
 .page-hero-inner {
     max-width: 700px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .page-eyebrow {
@@ -348,4 +366,12 @@ textarea.form-input {
     font-size: 3.5rem;
     line-height: 1;
     margin-bottom: 0.5rem;
+}
+
+// ── Alto Contraste ────────────────────────────────────────
+:host-context(html.alto-contraste) {
+    .page-hero-bg {
+        display: none !important;
+        background-image: none !important;
+    }
 }

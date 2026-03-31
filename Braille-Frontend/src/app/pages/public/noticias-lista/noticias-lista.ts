@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
+import { SiteConfigService } from '../../../core/services/site-config';
 
 export interface ComunicadoPublico {
   id: string;
@@ -28,9 +29,11 @@ export class NoticiasLista implements OnInit {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
   private cdr = inject(ChangeDetectorRef);
+  private siteConfig = inject(SiteConfigService);
 
   comunicados: ComunicadoPublico[] = [];
   carregando = true;
+  fachadaUrl: string = '';
 
   // Filtros
   categoriaSelecionada: string | null = null;
@@ -53,6 +56,15 @@ export class NoticiasLista implements OnInit {
   ];
 
   ngOnInit() {
+    // Carregar fachadaUrl
+    this.siteConfig.configs$.subscribe({
+      next: (configs) => {
+        if (configs && configs['fachadaUrl']) {
+          this.fachadaUrl = configs['fachadaUrl'];
+        }
+      }
+    });
+
     this.carregarComunicados(true);
   }
 

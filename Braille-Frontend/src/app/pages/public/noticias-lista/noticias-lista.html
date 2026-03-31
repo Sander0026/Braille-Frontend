@@ -1,4 +1,6 @@
 <header class="page-header" aria-labelledby="page-title">
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN -->
+    <div class="page-header-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null"></div>
     <div class="container">
         <p class="eyebrow" aria-hidden="true">Mural de Avisos</p>
         <h1 id="page-title" class="title">Notícias & Comunicados</h1>
