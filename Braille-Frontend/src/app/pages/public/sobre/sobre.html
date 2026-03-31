@@ -1,5 +1,7 @@
 <!-- ══════════ SOBRE — HERO ══════════ -->
 <section class="page-hero" aria-labelledby="sobre-titulo">
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN -->
+    <div class="page-hero-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null"></div>
     <div class="page-hero-inner animate-on-scroll">
         <p class="page-eyebrow">{{ hero.eyebrow }}</p>
         <h1 id="sobre-titulo" class="page-hero-title">{{ hero.titulo }}</h1>

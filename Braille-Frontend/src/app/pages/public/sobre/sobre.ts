@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { filter, take } from 'rxjs/operators';
 import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 interface TimelineItem { ano: string; titulo: string; descricao: string; }
 interface EquipeMembro { emoji: string; cargo: string; descricao: string; }
@@ -42,7 +43,7 @@ const DEFAULTS = {
 @Component({
     selector: 'app-sobre',
     standalone: true,
-    imports: [CommonModule, RouterLink, SafeHtmlPipe],
+    imports: [CommonModule, RouterLink, SafeHtmlPipe, CloudinaryPipe],
     templateUrl: './sobre.html',
     styleUrl: './sobre.scss',
 })
@@ -52,6 +53,7 @@ export class Sobre implements OnInit, AfterViewInit {
     timeline: TimelineItem[] = [...DEFAULTS.timeline];
     equipe: EquipeMembro[] = [...DEFAULTS.equipe];
     cta = { ...DEFAULTS.cta };
+    fachadaUrl: string = '';
 
     constructor(private siteConfig: SiteConfigService, private el: ElementRef) { }
 
@@ -65,6 +67,15 @@ export class Sobre implements OnInit, AfterViewInit {
     }
 
     ngOnInit(): void {
+        // Carregar fachadaUrl
+        this.siteConfig.configs$.subscribe({
+            next: (configs) => {
+                if (configs && configs['fachadaUrl']) {
+                    this.fachadaUrl = configs['fachadaUrl'];
+                }
+            }
+        });
+
         this.siteConfig.secoes$.pipe(
             filter(s => Object.keys(s).length > 0),
             take(1)

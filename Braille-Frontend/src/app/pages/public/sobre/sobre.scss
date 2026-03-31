@@ -12,11 +12,29 @@ $gray-900: #1a1a1a;
     background: $black;
     padding: 4rem 1.5rem 3.5rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: url('/fachada_ilbes.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: 0;
+    opacity: 0.3;
 }
 
 .page-hero-inner {
     max-width: 700px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .page-eyebrow {
@@ -41,6 +59,14 @@ $gray-900: #1a1a1a;
     color: color.change(#fff, $alpha: .7);
     line-height: 1.7;
     margin: 0;
+}
+
+// Em alto contraste, desligamos a imagem decorativa
+:host-context(html.alto-contraste) {
+    .page-hero-bg {
+        display: none !important;
+        background-image: none !important;
+    }
 }
 
 // ── Content section ───────────────────────────────────────
