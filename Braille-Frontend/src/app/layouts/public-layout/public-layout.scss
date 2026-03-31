@@ -482,3 +482,43 @@ main {
         }
     }
 }
+
+// ══════════════════════════════════════════════════════════════
+// ALTO CONTRASTE — Ajustes para Public Layout
+// ══════════════════════════════════════════════════════════════
+html.alto-contraste {
+    .site-header {
+        background: #000000 !important;
+        border-bottom: 2px solid #f5c800 !important;
+        box-shadow: none !important;
+    }
+
+    .site-footer {
+        background: #000000 !important;
+        border-top: 2px solid #f5c800 !important;
+        color: #f5c800 !important;
+    }
+
+    .footer-tagline,
+    .footer-copy {
+        color: #f5c800 !important;
+    }
+
+    .footer-social a {
+        color: #f5c800 !important;
+
+        &:hover {
+            color: #fffb80 !important;
+        }
+    }
+
+    .floating-cta {
+        background-color: #f5c800 !important;
+        color: #111111 !important;
+        border-color: #c9a500 !important;
+
+        &:hover {
+            background-color: #c9a500 !important;
+        }
+    }
+}

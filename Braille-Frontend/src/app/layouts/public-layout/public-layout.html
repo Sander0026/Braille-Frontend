@@ -45,9 +45,11 @@
   </main>
 
   <!-- ── Botão Flutuante "Fale Conosco" ── -->
-  <a routerLink="/contato" class="floating-cta" aria-label="Fale Conosco">
-    <span class="floating-cta-text">Fale Conosco</span>
-  </a>
+  <aside role="complementary" aria-label="Acesso rápido ao contato">
+    <a routerLink="/contato" class="floating-cta" aria-label="Fale Conosco">
+      <span class="floating-cta-text">Fale Conosco</span>
+    </a>
+  </aside>
 
   <footer class="site-footer" role="contentinfo" *ngIf="contatoConfig$ | async as config">
     <div class="footer-inner">

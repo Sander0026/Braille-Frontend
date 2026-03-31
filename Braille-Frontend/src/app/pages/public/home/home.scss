@@ -275,6 +275,7 @@ $transition: 250ms ease;
             display: -webkit-box;
             background: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -1150,5 +1151,339 @@ $transition: 250ms ease;
             border-color: $black;
             color: $black;
         }
+    }
+}
+
+// ══════════════════════════════════════════════════════════════
+// ALTO CONTRASTE — Ajustes para Home page
+// ══════════════════════════════════════════════════════════════
+html.alto-contraste {
+    .sobre {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
+    }
+
+    .mvv-card {
+        background-color: transparent !important;
+        color: #f5c800 !important;
+    }
+
+    .mvv-titulo {
+        color: #fffb80 !important;
+    }
+
+    .mvv-desc {
+        color: #f5c800 !important;
+    }
+
+    .oficinas {
+        background-color: #000000 !important;
+    }
+
+    .oficina-card {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+        color: #f5c800 !important;
+    }
+
+    .oficina-titulo,
+    .oficina-desc {
+        color: #f5c800 !important;
+    }
+
+    .btn-primary-lg {
+        background-color: #f5c800 !important;
+        color: #111111 !important;
+        border-color: #c9a500 !important;
+
+        &:hover {
+            background-color: #c9a500 !important;
+        }
+    }
+
+    .depoimentos {
+        background-color: #111111 !important;
+    }
+
+    .dep-card {
+        background-color: #1a1800 !important;
+        color: #f5c800 !important;
+        border: 1px solid #f5c800 !important;
+    }
+
+    .dep-texto,
+    .dep-idade {
+        color: #f5c800 !important;
+    }
+
+    .dep-nome {
+        color: #fffb80 !important;
+    }
+
+    .section-noticias {
+        background-color: #111111 !important;
+    }
+
+    .card-noticia {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    .card-noticia-body h3,
+    .card-noticia-body .card-excerpt {
+        color: #f5c800 !important;
+    }
+
+    .faq {
+        background-color: #000000 !important;
+    }
+
+    .faq-item {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    .faq-pergunta {
+        color: #fffb80 !important;
+    }
+
+    .faq-resposta {
+        color: #f5c800 !important;
+    }
+
+    .cta-final {
+        background-color: #f5c800 !important;
+        border-top-color: #111111 !important;
+
+        .cta-text h2 {
+            color: #111111 !important;
+        }
+
+        .cta-text p {
+            color: #2a2800 !important;
+        }
+
+        .btn-hero-primary {
+            background-color: #111111 !important;
+            color: #f5c800 !important;
+            border-color: #f5c800 !important;
+
+            &:hover {
+                background-color: #2a2800 !important;
+            }
+        }
+
+        .btn-hero-secondary {
+            border-color: #111111 !important;
+            color: #111111 !important;
+
+            &:hover {
+                background-color: rgba(17, 17, 17, 0.1) !important;
+                border-color: #111111 !important;
+            }
+        }
+    }
+
+    .section-title {
+        color: #f5c800 !important;
+    }
+
+    .section-desc {
+        color: #f5c800 !important;
+    }
+
+    .btn-outline-primary {
+        border-color: #f5c800 !important;
+        color: #f5c800 !important;
+
+        &:hover {
+            background-color: #f5c800 !important;
+            color: #111111 !important;
+        }
+    }
+
+    // ── Seções principais (backgrounds brancos) ──────────────────
+    .sobre {
+        background-color: #111111 !important;
+    }
+
+    .parceiros {
+        background-color: #111111 !important;
+    }
+
+    .parceiro-card {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    .parceiro-nome-fallback {
+        color: #f5c800 !important;
+    }
+
+    .section-noticias {
+        background-color: #111111 !important;
+    }
+
+    .faq {
+        background-color: #111111 !important;
+    }
+
+    .feed-carregando,
+    .feed-vazio {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+        color: #f5c800 !important;
+    }
+
+    .faq-item {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    .faq-pergunta {
+        background-color: #1a1800 !important;
+        color: #fffb80 !important;
+
+        &:hover {
+            background-color: #2a2800 !important;
+        }
+    }
+
+    .faq-resposta {
+        color: #f5c800 !important;
+    }
+
+    // ── Wave transitions e divisores ──────────────────────────────
+    .wave-transition,
+    .wave-transition-double,
+    .wave-transition-concave {
+        background: #111111 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+        line-height: 0 !important;
+
+        svg {
+            background: #111111 !important;
+            fill: #111111 !important;
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
+        }
+
+        svg path,
+        svg polygon,
+        svg rect,
+        svg ellipse,
+        svg circle,
+        svg polyline,
+        svg line {
+            fill: #111111 !important;
+            stroke: #111111 !important;
+        }
+
+        // Force override dos atributos inline das ondas
+        svg path[fill],
+        svg path[stroke] {
+            fill: #111111 !important;
+            stroke: #111111 !important;
+        }
+    }
+
+    // ── Garantir que SVGs de transição sejam pretos ───────────────
+    svg[viewBox*="1440"],
+    svg[viewBox*="1200"],
+    svg[preserveAspectRatio] {
+        background: #111111 !important;
+        fill: #111111 !important;
+
+        path,
+        polygon,
+        rect,
+        ellipse,
+        circle,
+        polyline,
+        line {
+            fill: #111111 !important;
+            stroke: #111111 !important;
+        }
+
+        // Override de atributos inline específicos
+        path[fill="white"],
+        path[fill="#fff"],
+        path[fill="#ffffff"],
+        path[fill="#b0b0b0"],
+        path[fill="#e8e8e8"],
+        path[fill="#f5f5f5"],
+        path[fill="#f9f9f9"],
+        path[fill="#fafafa"],
+        path[stroke="white"],
+        path[stroke="#fff"],
+        path[stroke="#ffffff"] {
+            fill: #111111 !important;
+            stroke: #111111 !important;
+        }
+    }
+
+    // ── Garantir padding areas sejam pretos ──────────────────────
+    .hero {
+        background-color: #111111 !important;
+    }
+
+    .hero-inner {
+        background-color: transparent !important;
+    }
+
+    .parceiros,
+    .sobre,
+    .oficinas,
+    .depoimentos,
+    .section-noticias,
+    .faq,
+    .cta-final {
+        background-color: #111111 !important;
+    }
+    // ── Texto em seções de fundo preto ───────────────────────────
+    .section-title {
+        color: #f5c800 !important;
+    }
+
+    .section-desc {
+        color: #f5c800 !important;
+    }
+
+    .mvv-titulo {
+        color: #fffb80 !important;
+    }
+
+    .mvv-desc {
+        color: #f5c800 !important;
+    }
+
+    // ── Cards em backgrounds pretos ──────────────────────────────
+    .parceiro-card,
+    .oficina-card,
+    .dep-card,
+    .card-noticia {
+        background-color: #1a1800 !important;
+        border-color: #f5c800 !important;
+        color: #f5c800 !important;
+    }
+
+    .card-noticia-body h3,
+    .card-noticia-body .card-excerpt,
+    .oficina-titulo,
+    .oficina-desc,
+    .dep-texto {
+        color: #f5c800 !important;
+    }
+
+    // ── Garantir que nenhum padding white apareça ────────────────
+    [style*="background: white"],
+    [style*="background-color: white"],
+    [style*="background: #fff"],
+    [style*="background-color: #fff"] {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
     }
 }

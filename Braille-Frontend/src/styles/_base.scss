@@ -261,6 +261,13 @@ h6 {
 // Cores ideais para baixa visão, catarata e fotofobia
 // ============================================================
 html.alto-contraste {
+    background-color: #111111 !important;
+    color: #f5c800 !important;
+
+    body {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
+    }
 
     // ── Inversão universal ────────────────────────────────────
     // Garante que NENHUM elemento fica com fundo branco/cinza
@@ -281,7 +288,19 @@ html.alto-contraste {
 
     svg,
     svg * {
-        background-color: transparent !important;
+        background-color: #111111 !important;
+        fill: #111111 !important;
+        stroke: #111111 !important;
+    }
+
+    // Exceção para SVGs que são componentes visuais (ícones, etc)
+    .material-symbols-rounded,
+    [class*="icon"],
+    [class*="logo"] {
+        svg {
+            fill: #f5c800 !important;
+            stroke: #f5c800 !important;
+        }
     }
 
     // ── Inputs destacados ──────────────────────────────────────
@@ -347,7 +366,7 @@ html.alto-contraste {
 
     // ── Foco super visível (WCAG AA) ──────────────────────────
     :focus-visible {
-        outline: 3px solid #ffffff !important;
+        outline: 3px solid #f5c800 !important;
         outline-offset: 3px !important;
         background-color: #111111 !important;
     }
@@ -359,6 +378,77 @@ html.alto-contraste {
     .badge-prevista,
     .badge-andamento {
         border: 1px solid #f5c800 !important;
+    }
+
+    // ── Reparação: elementos com cor branca explícita ─────────
+    // (badges, spans em dark mode, etc)
+    .badge-categoria,
+    .badge-badge,
+    .status-badge,
+    .tag,
+    [class*="badge"],
+    .alert-error,
+    .alert-success,
+    .alert-warning,
+    .alert-info {
+        background-color: #1a1800 !important;
+        color: #f5c800 !important;
+        border-color: #f5c800 !important;
+    }
+
+    // ── Reparação: Modal/Dialog (geralmente branco) ──────────
+    .modal,
+    .modal-content,
+    .dialog,
+    [role="dialog"] {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
+        border: 1px solid #f5c800 !important;
+    }
+
+    .modal-header,
+    .dialog-header {
+        background-color: #1a1800 !important;
+        border-bottom: 1px solid #f5c800 !important;
+        color: #f5c800 !important;
+    }
+
+    // ── Reparação: Elementos que explicitamente declaram white ──
+    .white-text,
+    .text-white,
+    [style*="color: white"],
+    [style*="color:#fff"],
+    [style*="color: #fff"] {
+        color: #f5c800 !important;
+    }
+
+    // ── Reparação: Backgrounds brancos ──────────────────────
+    .white-bg,
+    .bg-white,
+    [style*="background: white"],
+    [style*="background-color: white"],
+    [style*="background-color: #fff"],
+    [style*="background: #fff"] {
+        background-color: #111111 !important;
+        color: #f5c800 !important;
+    }
+
+    // ── Reparação: Sections e divs (garantir preto completo) ──
+    section,
+    main,
+    article,
+    [role="main"],
+    [role="region"],
+    [role="complementary"],
+    .public-shell {
+        background-color: #111111 !important;
+    }
+
+    // ── Garantir que cinzas claros virem pretos ──────────────
+    [style*="background: #f"],
+    [style*="background: rgb("],
+    [style*="background-color: rgb("] {
+        background-color: #111111 !important;
     }
 }
 

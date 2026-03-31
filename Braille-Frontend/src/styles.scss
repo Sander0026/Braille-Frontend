@@ -25,6 +25,10 @@ app-root {
     /* cada layout gerencia seu próprio scroll internamente */
 }
 
+html.alto-contraste app-root {
+    background-color: #111111 !important;
+}
+
 // ============================================================
 // ACESSIBILIDADE WCAG AAA (Sugestão 3 - Focus de Alto Contraste)
 // ============================================================
