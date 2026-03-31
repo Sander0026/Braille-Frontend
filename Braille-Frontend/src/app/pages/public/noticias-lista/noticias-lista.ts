@@ -113,7 +113,9 @@ export class NoticiasLista implements OnInit {
   // Helper Seguro (Anti XSS) para extrair o Resumo na Pré-visualização do Card
   getTextoPuro(html: string): string {
     if (!html) return '';
-    return html.replace(/<\/?[^>]+(>|$)/g, '').replace(/&nbsp;/g, ' ');
+    const comEspacos = html.replace(/<\/(p|div|h[1-6])>/gi, ' ').replace(/<br\s*[\/]?>/gi, ' ');
+    const semTags = comEspacos.replace(/<\/?[^>]+(>|$)/g, '');
+    return semTags.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   getLabelCategoria(cat: string): string {

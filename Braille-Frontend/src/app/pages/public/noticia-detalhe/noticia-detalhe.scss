@@ -248,11 +248,18 @@ $transition: 0.2s ease-in-out;
         font-size: 1.125rem; // 18px ideal para leitura
         line-height: 1.8;
         color: #2b2b2b;
+        text-align: left; // previne distorção por justificação induzida pelo Quill
         
-        // Proteção contra vazamento de layout por strings contínuas s/ espaço
+        // Controle aprimorado de fluidos de texto (Hifenização e Wrap)
         overflow-wrap: break-word;
         word-wrap: break-word;
-        word-break: break-word;
+        word-break: normal; // Evita corte agressivo em palavras naturais (bug "notic-ias")
+        
+        // Hifenização pt-BR (O Index já possui lang="pt-BR")
+        -webkit-hyphens: auto;
+        -ms-hyphens: auto;
+        hyphens: auto;
+        
         max-width: 100%;
 
         @media (max-width: 768px) {

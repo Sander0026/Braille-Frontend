@@ -227,7 +227,10 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
   }
 
   preview(texto: string, max = 15): string {
-    const limpo = texto ? texto.replace(/<[^>]*>/g, '').trim() : '';
+    if (!texto) return '';
+    const htmlComEspaco = texto.replace(/<\/(p|div|h[1-6])>/gi, ' ').replace(/<br\s*[\/]?>/gi, ' ');
+    const semTags = htmlComEspaco.replace(/<\/?[^>]+(>|$)/g, '');
+    const limpo = semTags.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
     return limpo.length > max ? limpo.slice(0, max) + '…' : limpo;
   }
 }
