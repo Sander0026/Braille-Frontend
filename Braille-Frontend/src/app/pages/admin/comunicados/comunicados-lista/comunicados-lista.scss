@@ -161,10 +161,17 @@ $gray-900: #1f1f1f;
     }
 }
 
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
 /* Modal Form Row Helpers */
 .form-row {
     display: grid;
-    gap: 1rem;
+    gap: 1.5rem;
 
     &.form-row-2 {
         grid-template-columns: 1fr 1fr;
@@ -190,6 +197,12 @@ $gray-900: #1f1f1f;
 .flex-center-y {
     display: flex;
     align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1.6rem; /* Alinha visualmente com o input file vizinho que tem label */
 }
 
 /* Upload Preview */
