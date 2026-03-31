@@ -7,6 +7,7 @@ import { firstValueFrom } from 'rxjs';
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { QuillModule } from 'ngx-quill';
+import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 @Component({
   selector: 'app-comunicados-lista',
@@ -15,7 +16,7 @@ import { QuillModule } from 'ngx-quill';
   templateUrl: './comunicados-lista.html',
   styleUrl: './comunicados-lista.scss'
 })
-export class ComunicadosLista implements OnInit {
+export class ComunicadosLista extends BaseFormDescarte implements OnInit {
   comunicados: Comunicado[] = [];
   isLoading = true;
   erro = '';
@@ -49,12 +50,17 @@ export class ComunicadosLista implements OnInit {
     private route: ActivatedRoute,
     private toast: ToastService
   ) {
+    super();
     this.form = this.fb.group({
       titulo: ['', [Validators.required, Validators.minLength(5)]],
       conteudo: ['', [Validators.required, Validators.minLength(10)]],
       categoria: ['GERAL', [Validators.required]],
       fixado: [false]
     });
+  }
+
+  isFormDirty(): boolean {
+    return this.mostrarModal && this.form.dirty && !this.salvando;
   }
 
   ngOnInit(): void {
@@ -118,11 +124,13 @@ export class ComunicadosLista implements OnInit {
     this.fotoSelecionada = null;
   }
 
-  fecharModal(): void {
-    this.mostrarModal = false;
-    this.editando = null;
-    this.form.reset();
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+  async fecharModal(): Promise<void> {
+    if (await this.podeDescartar()) {
+      this.mostrarModal = false;
+      this.editando = null;
+      this.form.reset();
+      setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    }
   }
 
   /**
@@ -218,7 +226,8 @@ export class ComunicadosLista implements OnInit {
     return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
-  preview(texto: string, max = 120): string {
-    return texto.length > max ? texto.slice(0, max) + '…' : texto;
+  preview(texto: string, max = 15): string {
+    const limpo = texto ? texto.replace(/<[^>]*>/g, '').trim() : '';
+    return limpo.length > max ? limpo.slice(0, max) + '…' : limpo;
   }
 }
