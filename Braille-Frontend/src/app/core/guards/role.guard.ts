@@ -1,6 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ToastService } from '../services/toast.service';
 
 /**
  * Guard funcional que protege rotas específicas baseadas no perfil (role) do usuário.
@@ -9,6 +10,7 @@ import { AuthService } from '../services/auth.service';
 export const roleGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
+    const toastService = inject(ToastService);
 
     // O auth.guard já deve ter garantido o login, mas checamos por segurança
     const user = authService.getUser();
@@ -28,12 +30,13 @@ export const roleGuard: CanActivateFn = (route, state) => {
         return true; // Usuário tem um dos roles permitidos
     }
 
-    // Acesso Negado: Redireciona para o painel inicial com um aviso
+    // Acesso Negado: Dispara Feedback Visual Acessível (Leitor de Tela + Cor) e previne navegação
     // Se o usuário já estiver na rota raiz, evitamos loop
     if (state.url === '/admin/dashboard' || state.url === '/admin') {
         return false; // Evita loop infinito caso a dashboard também tenha restrição que não devia
     }
     
+    toastService.erro('Permissão Negada: Você não tem os privilégios necessários.');
     router.navigate(['/admin/dashboard'], { queryParams: { acesso: 'negado' } });
     return false;
 };
