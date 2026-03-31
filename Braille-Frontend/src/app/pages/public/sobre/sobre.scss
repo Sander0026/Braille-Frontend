@@ -177,8 +177,25 @@ $gray-900: #1a1a1a;
 // ── Equipe ────────────────────────────────────────────────
 .equipe-section {
     background: #fff;
-    padding: 5rem 0;
+    padding: 5rem 1.5rem;
     text-align: center;
+}
+
+.section-header {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 900;
+    color: $gray-900;
+    margin: 0 0 0.75rem;
+}
+
+.section-subtitle {
+    font-size: 0.95rem;
+    color: $gray-600;
+    margin: 0;
 }
 
 .equipe-desc {
@@ -193,6 +210,15 @@ $gray-900: #1a1a1a;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 1.25rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 .equipe-card {
@@ -228,40 +254,111 @@ $gray-900: #1a1a1a;
     line-height: 1;
 }
 
+.equipe-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+    color: $primary;
+}
+
 // ── CTA footer ────────────────────────────────────────────
 .sobre-cta {
     background: $primary;
-    padding: 4rem 0;
+    padding: 5rem 1.5rem;
     text-align: center;
 }
 
+.cta-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 1rem;
+    color: $black;
+}
+
 .sobre-cta-inner {
+    max-width: 700px;
+    margin: 0 auto;
+
     h2 {
         font-size: clamp(1.4rem, 3vw, 2rem);
         font-weight: 900;
         color: $black;
-        margin: 0 0 0.5rem;
+        margin: 0 0 0.75rem;
     }
 
-    p {
-        font-size: 0.9rem;
-        color: color.change($black, $alpha: .7);
-        margin: 0 0 1.5rem;
+    p,
+    .cta-desc {
+        font-size: 0.95rem;
+        color: color.change($black, $alpha: .75);
+        margin: 0 0 2rem;
+        line-height: 1.6;
     }
 }
 
 .btn-cta {
     display: inline-flex;
-    padding: 0.75rem 2rem;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2.25rem;
     background: $black;
     color: $primary;
     font-weight: 800;
     border-radius: 9999px;
     text-decoration: none;
     font-size: 0.95rem;
-    transition: transform 200ms ease;
+    transition: transform 200ms ease, box-shadow 200ms ease;
 
     &:hover {
         transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .material-symbols-rounded {
+        font-size: 1.25rem;
+    }
+}
+
+// ── Alto Contraste ────────────────────────────────────────
+:host-context(html.alto-contraste) {
+    .equipe-section {
+        background: #111111 !important;
+    }
+
+    .section-title {
+        color: #f5c800 !important;
+    }
+
+    .section-subtitle,
+    .equipe-card p,
+    .cta-desc {
+        color: #f5c800 !important;
+    }
+
+    .equipe-card {
+        background: #1a1a00 !important;
+        border-color: #f5c800 !important;
+    }
+
+    .sobre-cta {
+        background: #f5c800 !important;
+    }
+
+    .sobre-cta-inner h2 {
+        color: #111111 !important;
+    }
+
+    .sobre-cta-inner p,
+    .cta-desc {
+        color: #111111 !important;
+    }
+
+    .cta-icon {
+        color: #111111 !important;
+    }
+
+    .btn-cta {
+        background: #111111 !important;
+        color: #f5c800 !important;
+        border: 2px solid #f5c800 !important;
     }
 }
