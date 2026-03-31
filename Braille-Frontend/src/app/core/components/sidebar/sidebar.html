@@ -1,1 +1,32 @@
-<p>sidebar works!</p>
+<nav class="sidebar" aria-label="Menu principal de administração" [attr.aria-hidden]="sidebarState === 'hidden'">
+
+  <div class="sidebar-logo" aria-hidden="true">
+    <div class="logo-mark">IB</div>
+    @if (showLabels) {
+    <span class="logo-text">Instituto Luiz Braille</span>
+    }
+  </div>
+
+  <ul id="sidebar-nav" class="sidebar-nav">
+    @for (item of rotasPermitidas; track item.rota) {
+    <li>
+      <a [routerLink]="item.rota" routerLinkActive="active" 
+        [attr.aria-label]="!showLabels ? item.aria : null" class="nav-link"
+        [attr.title]="!showLabels ? item.label : null">
+        <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
+        @if (showLabels) {
+        <span class="nav-label">{{ item.label }}</span>
+        }
+      </a>
+    </li>
+    }
+  </ul>
+
+  <div class="sidebar-footer">
+    <button class="nav-link sair-btn" (click)="emitAction('sair')" [attr.aria-label]="!showLabels ? 'Sair' : null"
+      [attr.title]="!showLabels ? 'Sair' : null">
+      <span class="material-symbols-rounded nav-icon" aria-hidden="true">logout</span>
+      @if (showLabels) { <span class="nav-label">Sair</span> }
+    </button>
+  </div>
+</nav>

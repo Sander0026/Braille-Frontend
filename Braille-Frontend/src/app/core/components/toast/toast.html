@@ -1,0 +1,20 @@
+<div class="toast-container" aria-live="polite" aria-atomic="true">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast-message" [ngClass]="toast.tipo" role="alert">
+      
+      <!-- Ícone Visual Decorativo -->
+      <span class="material-symbols-rounded toast-icon" aria-hidden="true">
+        {{ getIcon(toast.tipo) }}
+      </span>
+      
+      <!-- Mensagem Principal -->
+      <span class="toast-text">{{ toast.mensagem }}</span>
+      
+      <!-- Botão Acessível de Descartar Rápido -->
+      <button type="button" class="toast-close" (click)="remover(toast.id)" aria-label="Fechar notificação">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+
+    </div>
+  }
+</div>
