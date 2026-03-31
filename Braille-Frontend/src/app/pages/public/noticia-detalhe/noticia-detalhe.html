@@ -5,13 +5,13 @@
 
 <!-- ESTADO: CARREGANDO -->
 @if (carregando) {
-<article class="artigo ghost-article" aria-busy="true" aria-label="Carregando o corpo da notícia...">
-    <!-- Capa Fantasma -->
-    <div class="skeleton skeleton-img capa-fantasma"
-        style="height: 400px; width: 100%; border-radius: 12px; margin-bottom: 2rem;"></div>
-    <!-- Bloco de Texto (Editorial) -->
-    <div class="container-artigo">
+<article class="article-layout-standard ghost-article" aria-busy="true" aria-label="Carregando o corpo da notícia...">
+    <div class="article-container">
         <div class="skeleton skeleton-title" style="width: 85%; height: 3rem; margin-bottom: 2rem;"></div>
+        <!-- Capa Fantasma -->
+        <div class="skeleton skeleton-img capa-fantasma"
+            style="height: 400px; width: 100%; border-radius: 12px; margin-bottom: 2rem;"></div>
+        <!-- Bloco de Texto (Editorial) -->
         <div class="skeleton skeleton-text" style="width: 100%"></div>
         <div class="skeleton skeleton-text" style="width: 100%"></div>
         <div class="skeleton skeleton-text" style="width: 100%"></div>
@@ -35,21 +35,11 @@
 
 <!-- ESTADO: NOTÍCIA CARREGADA -->
 @else if (noticia) {
-<article class="artigo" aria-labelledby="titulo-noticia">
-
-    <!-- CAPA -->
-    @if (noticia.imagemCapa) {
-    <figure class="artigo-capa">
-        <img [src]="noticia.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa do artigo: ' + noticia.titulo"
-            loading="lazy">
-    </figure>
-    }
-
-    <!-- CONTEÚDO EDITORIAL -->
-    <div class="container-artigo">
-
+<article class="article-layout-standard" aria-labelledby="titulo-noticia">
+    <div class="article-container">
+        
         <!-- Metadados superiores -->
-        <header class="artigo-header">
+        <header class="article-header">
             <div class="meta-topo">
                 <span class="badge-categoria" [attr.data-categoria]="noticia.categoria">
                     {{ getLabelCategoria(noticia.categoria) }}
@@ -71,16 +61,23 @@
             </div>
         </header>
 
+        <!-- CAPA -->
+        @if (noticia.imagemCapa) {
+        <figure class="article-featured-image">
+            <img [src]="noticia.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa do artigo: ' + noticia.titulo" loading="lazy">
+        </figure>
+        }
+
         <!-- DIVISOR DECORATIVO -->
         <hr class="divisor" aria-hidden="true" />
 
-        <!-- CONTEÚDO RICO (Quill HTML renderizado de forma segura via DOMPurify PIPE) -->
-        <div class="corpo-noticia ql-content" [innerHTML]="noticia.conteudo | safeHtml"
+        <!-- CONTEÚDO RICO (Quill HTML) -->
+        <div class="article-body ql-content" [innerHTML]="noticia.conteudo | safeHtml"
             aria-label="Conteúdo completo da notícia">
         </div>
 
         <!-- RODAPÉ DO ARTIGO -->
-        <footer class="artigo-footer">
+        <footer class="article-footer">
             <a href="/noticias" class="btn-voltar-rodape">
                 <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
                 Voltar para a lista de notícias
