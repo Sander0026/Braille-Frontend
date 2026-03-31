@@ -124,8 +124,8 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
     this.fotoSelecionada = null;
   }
 
-  async fecharModal(): Promise<void> {
-    if (await this.podeDescartar()) {
+  async fecharModal(forcar = false): Promise<void> {
+    if (forcar || await this.podeDescartar()) {
       this.mostrarModal = false;
       this.editando = null;
       this.form.reset();
@@ -183,7 +183,7 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
       }
 
       this.salvando = false;
-      this.fecharModal();
+      this.fecharModal(true);
       this.carregar();
       this.cdr.detectChanges();
 

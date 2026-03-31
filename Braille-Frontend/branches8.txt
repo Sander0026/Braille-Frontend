@@ -1,0 +1,7 @@
+﻿  dev
+  feat/tela/apoiadores
+  feat/tela/visual/apo
+  feat/tela/visual/comunicados/adm
+* feat/tela/visual/noticias/inst
+  hom
+  main
