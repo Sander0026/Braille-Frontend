@@ -250,6 +250,7 @@ export class ConteudoSite implements OnInit, OnDestroy, AfterViewInit {
       valor2Titulo: [''],
       valor3Titulo: [''],
       valor4Titulo: [''],
+      valoresDescricao: [''],
     });
 
     this.formOficinas = this.fb.group({ lista: this.fb.array([]) });
