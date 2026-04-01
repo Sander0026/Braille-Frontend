@@ -7,28 +7,12 @@
 </div>
 
 <!-- ══ STATS CARDS ══ -->
-@if (stats) {
-<div class="stats-grid">
-    <div class="stat-card stat-total">
-        <span class="stat-label">Total de Logs</span>
-        <span class="stat-value">{{ stats.totalLogs | number }}</span>
-    </div>
-    <div class="stat-card stat-hoje">
-        <span class="stat-label">Hoje</span>
-        <span class="stat-value">{{ stats.logsHoje | number }}</span>
-    </div>
-    @for (item of stats.topAcoes.slice(0,3); track item.acao) {
-    <div class="stat-card stat-acao">
-        <span class="stat-label">{{ item.acao }}</span>
-        <span class="stat-value">{{ item.total | number }}</span>
-    </div>
-    }
-</div>
-}
+<app-audit-stats [stats]="stats"></app-audit-stats>
 
 <!-- ══ FILTROS ══ -->
 <div class="filtros-bar">
-    <select class="form-input form-input--sm" [(ngModel)]="filtroEntidade" aria-label="Filtrar por entidade">
+    <label for="filtro-entidade" class="sr-only">Filtrar por entidade</label>
+    <select id="filtro-entidade" class="form-input form-input--sm" [(ngModel)]="filtroEntidade">
         <option value="">Todas as entidades</option>
         <option value="Turma">Turma</option>
         <option value="Aluno">Aluno</option>
@@ -38,7 +22,8 @@
         <option value="Comunicado">Comunicado</option>
     </select>
 
-    <select class="form-input form-input--sm" [(ngModel)]="filtroAcao" aria-label="Filtrar por ação">
+    <label for="filtro-acao" class="sr-only">Filtrar por ação</label>
+    <select id="filtro-acao" class="form-input form-input--sm" [(ngModel)]="filtroAcao">
         <option value="">Todas as ações</option>
         @for (a of acoes; track a) {
         <option [value]="a">{{ a }}</option>
@@ -70,7 +55,7 @@
 } @else {
 
 <!-- ══ TABELA ══ -->
-<div class="table-wrapper" tabindex="0">
+<div class="table-wrapper">
     <table class="audit-table" aria-label="Log de auditoria">
         <thead>
             <tr>
@@ -86,7 +71,10 @@
         </thead>
         <tbody>
             @for (log of logs; track log.id) {
-            <tr class="audit-row" (click)="abrirDetalhes(log)">
+            <tr class="audit-row" 
+                tabindex="0"
+                (click)="abrirDetalhes(log)"
+                (keydown.enter)="abrirDetalhes(log)">
                 <td class="col-data">{{ formatarData(log.criadoEm) }}</td>
                 <td>
                     <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
@@ -151,77 +139,9 @@
 }
 
 <!-- ══ MODAL DETALHES ══ -->
-@if (logSelecionado) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes do log" (click)="fecharDetalhes()"
-    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <div class="modal modal--lg" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 class="modal-title">
-                <span class="badge-acao" [ngClass]="acaoCor[logSelecionado.acao]">{{ logSelecionado.acao }}</span>
-                &nbsp;{{ logSelecionado.entidade }}
-            </h2>
-            <button class="modal-close" (click)="fecharDetalhes()" aria-label="Fechar">✕</button>
-        </div>
-        <div class="modal-body">
-
-            <dl class="detail-grid">
-                <dt>ID do Log</dt>
-                <dd>{{ logSelecionado.id }}</dd>
-                <dt>Registro ID</dt>
-                <dd>{{ logSelecionado.registroId ?? '—' }}</dd>
-                <dt>Data/Hora</dt>
-                <dd>{{ formatarData(logSelecionado.criadoEm) }}</dd>
-                <dt>Autor</dt>
-                <dd>{{ logSelecionado.autorNome ?? logSelecionado.autorId ?? 'Sistema' }}</dd>
-                <dt>Cargo</dt>
-                <dd>{{ logSelecionado.autorRole ?? '—' }}</dd>
-                <dt>IP</dt>
-                <dd>{{ logSelecionado.ip ?? '—' }}</dd>
-                <dt>User Agent</dt>
-                <dd class="ua">{{ logSelecionado.userAgent ?? '—' }}</dd>
-            </dl>
-
-            @if (diferencas.length > 0) {
-            <div class="diff-section">
-                <h3>Alterações</h3>
-                <div class="diff-table-wrapper" tabindex="0">
-                    <table class="diff-table">
-                        <thead>
-                            <tr>
-                                <th>Campo</th>
-                                <th>Valor Anterior</th>
-                                <th>Novo Valor</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @for (diff of diferencas; track diff.campo) {
-                            <tr [class.is-changed]="diff.alterado">
-                                <td class="diff-campo">{{ diff.campo }}</td>
-                                <td class="diff-old" [class.empty]="diff.de === '—'">{{ diff.de }}</td>
-                                <td class="diff-new" [class.empty]="diff.para === '—'">
-                                    <!-- Se não foi alterado (ex: numa exclusão ou qdo o valor manteve) -->
-                                    @if(diff.alterado) {
-                                    {{ diff.para }}
-                                    } @else {
-                                    <span class="text-muted">Mantido</span>
-                                    }
-                                </td>
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            } @else {
-            <div class="diff-section empty-diff">
-                <p>Nenhuma alteração visível nos campos mapeados.</p>
-            </div>
-            }
-
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="fecharDetalhes()">Fechar</button>
-        </div>
-    </div>
-</div>
-}
+<app-audit-modal-detalhes
+    [isOpen]="modalAberto()"
+    [log]="logSelecionado()"
+    [acaoCor]="acaoCor"
+    (closeRequested)="fecharDetalhes()">
+</app-audit-modal-detalhes>

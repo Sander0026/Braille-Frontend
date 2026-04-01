@@ -1,0 +1,72 @@
+@if (isOpen && log) {
+<div class="modal-overlay" (click)="fechar()" (keydown.enter)="fechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal modal--lg" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-title" aria-modal="true">
+        <header class="modal-header">
+            <h2 id="modal-title" class="modal-title">
+                <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
+                &nbsp;{{ log.entidade }}
+            </h2>
+            <button class="modal-close" (click)="fechar()" aria-label="Fechar modal de detalhes">✕</button>
+        </header>
+
+        <main class="modal-body">
+            <dl class="detail-grid">
+                <dt>ID do Log</dt>
+                <dd>{{ log.id }}</dd>
+                <dt>Registro ID</dt>
+                <dd>{{ log.registroId ?? '—' }}</dd>
+                <dt>Data/Hora</dt>
+                <dd>{{ formatarData(log.criadoEm) }}</dd>
+                <dt>Autor</dt>
+                <dd>{{ log.autorNome ?? log.autorId ?? 'Sistema' }}</dd>
+                <dt>Cargo</dt>
+                <dd>{{ log.autorRole ?? '—' }}</dd>
+                <dt>IP</dt>
+                <dd>{{ log.ip ?? '—' }}</dd>
+                <dt>User Agent</dt>
+                <dd class="ua">{{ log.userAgent ?? '—' }}</dd>
+            </dl>
+
+            @if (diferencas.length > 0) {
+            <section class="diff-section">
+                <h3>Alterações</h3>
+                <div class="diff-table-wrapper">
+                    <table class="diff-table" aria-label="Tabela de diferenças">
+                        <thead>
+                            <tr>
+                                <th scope="col">Campo</th>
+                                <th scope="col">Valor Anterior</th>
+                                <th scope="col">Novo Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (diff of diferencas; track diff.campo) {
+                            <tr [class.is-changed]="diff.alterado">
+                                <td class="diff-campo">{{ diff.campo }}</td>
+                                <td class="diff-old" [class.empty]="diff.de === '—'">{{ diff.de }}</td>
+                                <td class="diff-new" [class.empty]="diff.para === '—'">
+                                    @if(diff.alterado) {
+                                    {{ diff.para }}
+                                    } @else {
+                                    <span class="text-muted">Mantido</span>
+                                    }
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            } @else {
+            <section class="diff-section empty-diff">
+                <p>Nenhuma alteração visível nos campos mapeados.</p>
+            </section>
+            }
+        </main>
+
+        <footer class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="fechar()">Fechar</button>
+        </footer>
+    </dialog>
+</div>
+}
