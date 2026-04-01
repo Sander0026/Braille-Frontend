@@ -8,6 +8,7 @@ import { QuillModule } from 'ngx-quill';
 import { routes } from './app.routes';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { provideServiceWorker } from '@angular/service-worker';
 import { provideTabEscapeForTextareas } from './shared/providers/tab-escape.provider';
 
@@ -23,7 +24,8 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withFetch(), withInterceptors([apiInterceptor, authInterceptor])),
+    // Registry de Escudos da API (Ida + Volta + Quedas)
+    provideHttpClient(withFetch(), withInterceptors([apiInterceptor, authInterceptor, errorInterceptor])),
     provideServiceWorker('ngsw-worker.js', {
         enabled: !isDevMode(),
         registrationStrategy: 'registerWhenStable:30000'

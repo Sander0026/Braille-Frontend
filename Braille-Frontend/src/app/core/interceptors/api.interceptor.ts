@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 
 export const apiInterceptor: HttpInterceptorFn = (req, next) => {
     // Ignora chamadas que já possuem o endereço HTTP/HTTPS inteiro
-    if (req.url.startsWith('http')) {
+    if (req.url.startsWith('http://') || req.url.startsWith('https://')) {
         return next(req);
     }
 

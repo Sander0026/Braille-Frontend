@@ -3,14 +3,17 @@ import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
-import { BehaviorSubject, catchError, filter, switchMap, take, throwError } from 'rxjs';
+import { BehaviorSubject, throwError } from 'rxjs';
+import { catchError, filter, switchMap, take } from 'rxjs/operators';
 
 /**
- * Interceptor que injeta o Bearer Token JWT nas requisições seguras da API
- * e captura erros 401 globais para deslogar forçadamente a aplicação.
+ * Interceptor de Autenticação.
+ * Escopo: Interceptar viagens de ida (Injetar JWT) e Voltas (Tratar Exclusivamente 401 - Token Vencido).
+ * Respeita Single Responsibility delegando erros genéricos de API.
  */
+// Variáveis persistentes no módulo para o ciclo de vida da Engine Concorrente do Refresh
 let isRefreshing = false;
-const refreshTokenSubject: BehaviorSubject<any> = new BehaviorSubject<any>(null);
+const refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
@@ -18,60 +21,73 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const toast = inject(ToastService);
   const token = authService.getToken();
 
-  // Rotas públicas que NÃO precisam de token
-  const publicUrls = ['/auth/login', '/inscricoes', '/contatos'];
-  const isPublicPost = publicUrls.some(url => req.url.includes(url) && req.method === 'POST');
+  // Rotas públicas mapeadas rigorosamente que não admitem Tokens na Criação/Registro
+  const publicPaths = ['/auth/login', '/inscricoes', '/contatos'];
+  const isPublicUrl = publicPaths.some(path => req.url.endsWith(path) || req.url.includes(path));
+  const isPublicPost = isPublicUrl && req.method === 'POST';
 
   let novoReq = req;
 
-  // Injetar o Token de Acesso na viagem de ida a Vercel
+  // 1. Viagem de Ida: Injetar o Token de Acesso
   if (token && !isPublicPost) {
     novoReq = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
   }
 
-  // Interceptar a viagem de volta do response avaliando se fomos derrubados
+  // 2. Viagem de Volta: Capturar somente os Gritos de Desautenticação (401)
   return next(novoReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      // 401 Unauthorized indica Token Vencido (Passaporte 15min Morto)
-      if (error.status === 401 && !novoReq.url.includes('/auth/refresh') && authService.getRefreshToken()) {
+      
+      if (error.status === 401) {
+          const isRefreshRoute = novoReq.url.includes('/auth/refresh');
+          const hasRefreshToken = !!authService.getRefreshToken();
 
-        if (!isRefreshing) {
-          isRefreshing = true;
-          refreshTokenSubject.next(null); // Trava o resto da fila de Imagens / Endpoints
+          // A) Rota de Refresh falhou? O Visto morreu permanentemente (Loop da Morte protegido).
+          if (isRefreshRoute) {
+             authService.logout();
+             toast.aviso('Sua sessão expirou perfeitamente. Faça seu login novamente.');
+             router.navigate(['/login']);
+             return throwError(() => error);
+          }
 
-          return authService.renovarToken().pipe(
-            switchMap((tokenResponse: any) => {
-              isRefreshing = false;
-              refreshTokenSubject.next(tokenResponse.access_token);
-              // Repete a batida que falhou usando o NOVO Token (Tudo escuro para o usuário)
-              return next(novoReq.clone({ setHeaders: { Authorization: `Bearer ${tokenResponse.access_token}` } }));
-            }),
-            catchError((refreshError) => {
-              isRefreshing = false;
-              authService.logout(); // Destroi todas as Cookies (Tentou hackear API de Refresh ou Visto de 7D Revogado)
-              toast.aviso('Sua Sessão Segura foi invalidada perlo servidor. Faça o Login novamente.');
-              router.navigate(['/login']);
-              return throwError(() => refreshError);
-            })
-          );
-        } else {
-          // Se já está no meio do redemoinho pedindo 1 token novo, os outros componentes entram na Fila (BehaviorSubject)
-          return refreshTokenSubject.pipe(
-            filter(t => t != null),
-            take(1),
-            switchMap(jwt => {
-              return next(novoReq.clone({ setHeaders: { Authorization: `Bearer ${jwt}` } }));
-            })
-          );
-        }
+          // B) Tem Refresh Token? Reconstruir Sessão sob os panos via Subscrição Transparente
+          if (hasRefreshToken) {
+            if (isRefreshing) {
+              // C) Uma renovação concorrente já está rolando. Me coloco na fila silenciosa.
+              return refreshTokenSubject.pipe(
+                filter(t => t != null),
+                take(1),
+                switchMap(jwt => {
+                  return next(novoReq.clone({ setHeaders: { Authorization: `Bearer ${jwt}` } }));
+                })
+              );
+            } else {
+              isRefreshing = true;
+              refreshTokenSubject.next(null); // Congela a fila (Image loading, Profile fetch)
+              
+              return authService.renovarToken().pipe(
+                switchMap((tokenResponse: any) => {
+                  isRefreshing = false;
+                  refreshTokenSubject.next(tokenResponse.access_token);
+                  // Refaz a request que tomou o primeiro Tiro 401 agora com Colete Prova-De-Balas
+                  return next(novoReq.clone({ setHeaders: { Authorization: `Bearer ${tokenResponse.access_token}` } }));
+                }),
+                catchError((refreshError) => {
+                  isRefreshing = false;
+                  authService.logout();
+                  toast.aviso('Falha grave na estabilização. Sua conta foi desconectada por segurança.');
+                  router.navigate(['/login']);
+                  return throwError(() => refreshError);
+                })
+              );
+            }
+          } else {
+            // D) Sem tokens sobreviventes. Direto pra degola.
+            authService.logout();
+            router.navigate(['/login']);
+          }
       }
 
-      // Caiu num 401 mas não tinha Refresh Token, ou já estava fora logado = Manda pro limbo convencional.
-      if (error.status === 401 && !novoReq.url.includes('/auth/refresh')) {
-        authService.logout();
-        router.navigate(['/login']);
-      }
-
+      // Os erros não-401 escorrem livremente para quem é de direito (Nosso novo error.interceptor).
       return throwError(() => error);
     })
   );
