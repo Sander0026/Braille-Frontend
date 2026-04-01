@@ -1,0 +1,163 @@
+@if (carregando()) {
+<div class="loading-state">
+    <span class="material-symbols-rounded spinner">sync</span>
+    <p>Carregando dados da seção...</p>
+</div>
+} @else {
+
+<!-- ABA: HERO -->
+@if (abaAtiva === 'hero') {
+<form [formGroup]="formHero" (ngSubmit)="salvarHero()" class="cms-form">
+    <div class="form-header">
+        <h2>Apresentação Principal</h2>
+        <p>Bem-vindo, títulos e destaques iniciais (primeira dobra do site).</p>
+    </div>
+
+    <div class="form-section">
+        <h3>Títulos e Textos</h3>
+        <div class="form-group">
+            <label class="form-label" for="eyebrow">Pequeno Título Superior</label>
+            <input type="text" id="eyebrow" class="form-input" formControlName="eyebrow"
+                placeholder="Ex: Instituto de Educação Inclusiva">
+        </div>
+
+        <div class="form-row form-row-2">
+            <div class="form-group">
+                <label class="form-label" for="tituloLinha1">Título Linha 1</label>
+                <input type="text" id="tituloLinha1" class="form-input" formControlName="tituloLinha1"
+                    placeholder="Ex: Mais do que inclusão —">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="tituloDestaque">Palavra em Destaque (Linha 2)</label>
+                <input type="text" id="tituloDestaque" class="form-input" formControlName="tituloDestaque"
+                    placeholder="Ex: transformação">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="descricao">Descrição Abaixo do Título</label>
+            <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                placeholder="Insira a descrição..."></quill-editor>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Botões Principais</h3>
+        <div class="form-row form-row-2">
+            <div class="form-group mb-0">
+                <label class="form-label" for="btnPrimario">Texto do Botão Primário</label>
+                <input type="text" id="btnPrimario" class="form-input" formControlName="btnPrimario"
+                    placeholder="Ex: Fale Conosco">
+            </div>
+            <div class="form-group mb-0">
+                <label class="form-label" for="btnSecundario">Texto do Botão Secundário</label>
+                <input type="text" id="btnSecundario" class="form-input" formControlName="btnSecundario"
+                    placeholder="Ex: Conheça o Instituto">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Estatísticas em Destaque</h3>
+        <div class="form-row form-row-3">
+            <div class="form-group mb-0">
+                <div class="form-label">Estatística 1</div>
+                <input type="text" class="form-input" formControlName="stat1Num" placeholder="Ex: 300+"
+                    aria-label="Número estatística 1">
+                <input type="text" class="form-input mt-2" formControlName="stat1Desc"
+                    placeholder="Descrição (ex: Vidas impactadas)" aria-label="Descrição estatística 1">
+            </div>
+            <div class="form-group mb-0">
+                <div class="form-label">Estatística 2</div>
+                <input type="text" class="form-input" formControlName="stat2Num" placeholder="Ex: 30+"
+                    aria-label="Número estatística 2">
+                <input type="text" class="form-input mt-2" formControlName="stat2Desc"
+                    placeholder="Descrição (ex: Profissionais)" aria-label="Descrição estatística 2">
+            </div>
+            <div class="form-group mb-0">
+                <div class="form-label">Estatística 3</div>
+                <input type="text" class="form-input" formControlName="stat3Num" placeholder="Ex: 6"
+                    aria-label="Número estatística 3">
+                <input type="text" class="form-input mt-2" formControlName="stat3Desc"
+                    placeholder="Descrição (ex: Oficinas)" aria-label="Descrição estatística 3">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formHero.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar Apresentação }
+        </button>
+    </div>
+</form>
+}
+
+<!-- ABA: MISSÃO -->
+@if (abaAtiva === 'missao') {
+<form [formGroup]="formMissao" (ngSubmit)="salvarMissao()" class="cms-form">
+    <div class="form-header">
+        <h2>Nossa Missão & Valores</h2>
+        <p>Textos da seção central e cards de princípios orientadores.</p>
+    </div>
+
+    <div class="form-section">
+        <h3>Textos de Missão e Visão</h3>
+        <p class="form-hint" style="margin-bottom: 1rem;">
+            Preencha os parágrafos que aparecerão respectivamente abaixo dos ícones de Missão e Visão na página pública.
+        </p>
+
+        <div class="form-group">
+            <label class="form-label" for="descricaoLinha1">Texto da Missão (Parágrafo Inicial)</label>
+            <quill-editor formControlName="descricaoLinha1" placeholder="Escreva o texto da missão aqui..." [styles]="{height: '150px'}"></quill-editor>
+        </div>
+
+        <div class="form-group mb-0">
+            <label class="form-label" for="descricaoLinha2">Texto da Visão (Parágrafo de Complemento)</label>
+            <quill-editor formControlName="descricaoLinha2" placeholder="Escreva o texto da visão aqui..." [styles]="{height: '150px'}"></quill-editor>
+        </div>
+    </div>
+
+    <div class="form-section bg-transparent border-0 px-0 shadow-none">
+        <h3 class="mb-3">Tópicos de Valores</h3>
+        <p class="form-hint" style="margin-bottom: 1rem;">
+            Estes quatro itens serão apresentados juntos em formato de frase (separados por ponto e vírgula) abaixo do ícone de Valores.
+        </p>
+
+        <div class="form-row form-row-2">
+            <div class="form-group">
+                <label class="form-label" for="valor1Titulo">Valor 1</label>
+                <input type="text" id="valor1Titulo" class="form-input" formControlName="valor1Titulo"
+                    placeholder="Ex: Acessibilidade">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="valor2Titulo">Valor 2</label>
+                <input type="text" id="valor2Titulo" class="form-input" formControlName="valor2Titulo"
+                    placeholder="Ex: Gratuidade">
+            </div>
+        </div>
+
+        <div class="form-row form-row-2">
+            <div class="form-group">
+                <label class="form-label" for="valor3Titulo">Valor 3</label>
+                <input type="text" id="valor3Titulo" class="form-input" formControlName="valor3Titulo"
+                    placeholder="Ex: Qualidade">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="valor4Titulo">Valor 4</label>
+                <input type="text" id="valor4Titulo" class="form-input" formControlName="valor4Titulo"
+                    placeholder="Ex: Humanização">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formMissao.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar Missão }
+        </button>
+    </div>
+</form>
+}
+
+} <!-- /else !carregando() -->

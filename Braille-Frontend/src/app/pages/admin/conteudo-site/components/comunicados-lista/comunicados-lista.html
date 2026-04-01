@@ -15,28 +15,28 @@
 </div>
 
 <!-- Lista -->
-@if (isLoading) {
+@if (isLoading()) {
 <div class="loading-container" role="status" aria-live="polite">
     <div class="loading-spinner" aria-hidden="true"></div>
     <span>Carregando comunicados...</span>
 </div>
-} @else if (erro) {
+} @else if (erro()) {
 <div role="alert" class="card card-body" aria-live="assertive">
-    <p class="form-error">{{ erro }}</p>
+    <p class="form-error">{{ erro() }}</p>
     <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
 </div>
-} @else if (comunicados.length === 0) {
+} @else if (comunicados().length === 0) {
 <div class="empty-state" role="status">
     <h2>Nenhum comunicado</h2>
     <p class="empty-state-text">Crie o primeiro comunicado clicando em "Novo Comunicado".</p>
 </div>
 } @else {
 <div class="comunicados-lista" role="region" aria-label="Lista de comunicados">
-    @for (c of comunicados; track c.id) {
+    @for (c of comunicados(); track c.id) {
     <article class="comunicado-card card">
         @if (c.imagemCapa) {
         <div class="card-img-wrapper">
-            <img [src]="c.imagemCapa" alt="Capa" class="card-img" loading="lazy" />
+            <img [src]="c.imagemCapa" alt="Capa do comunicado" class="card-img" loading="lazy" />
         </div>
         }
         <div class="card-body">
@@ -65,13 +65,12 @@
 }
 
 <!-- Modal criar / editar -->
-@if (mostrarModal) {
-<div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="editando ? 'Editar comunicado' : 'Novo comunicado'" (click)="fecharModal()">
-    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+@if (mostrarModal()) {
+<div class="modal-backdrop" (click)="fecharModal()" (keydown.enter)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal modal-lg" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-titulo" aria-modal="true">
         <div class="modal-header">
-            <h2>{{ editando ? 'Editar Comunicado' : 'Novo Comunicado' }}</h2>
-            <button class="btn btn-icon btn-ghost" (click)="fecharModal()" aria-label="Fechar">✕</button>
+            <h2 id="modal-titulo">{{ editando() ? 'Editar Comunicado' : 'Novo Comunicado' }}</h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModal()" aria-label="Fechar modal">✕</button>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-body">
@@ -103,26 +102,27 @@
                 <div class="form-group">
                     <label class="form-label">Imagem de Capa (Recomendado: 800x600)</label>
 
-                    @if (fotoPreview) {
+                    @if (fotoPreview()) {
                     <div class="foto-preview-wrapper mb-2">
-                        <img [src]="fotoPreview" alt="Pré-visualização da Capa" class="foto-preview" />
+                        <img [src]="fotoPreview()" alt="Pré-visualização da Capa selecionada" class="foto-preview" />
                         <button type="button" class="btn btn-secondary btn-sm btn-remover"
                             (click)="removerFotoDaPrevia()">
                             Remover Capa
                         </button>
                     </div>
                     } @else {
+                    <label for="foto-capa" class="sr-only">Selecione uma imagem de capa</label>
                     <input type="file" id="foto-capa" class="form-input" accept="image/png, image/jpeg, image/webp"
                         (change)="onFotoChange($event)" />
                     }
                 </div>
 
                 <div class="form-group flex-center-y">
-                    <label class="switch">
-                        <input type="checkbox" formControlName="fixado">
+                    <label class="switch" for="fixado-input">
+                        <input id="fixado-input" type="checkbox" formControlName="fixado">
                         <span class="slider round"></span>
                     </label>
-                    <span class="ml-2 form-label mb-0" style="margin-bottom: 0;">Fixar no topo do mural</span>
+                    <label for="fixado-input" class="ml-2 form-label mb-0" style="margin-bottom: 0;">Fixar no topo do mural</label>
                 </div>
             </div>
 
@@ -141,22 +141,21 @@
 
         <div class="modal-footer">
             <button class="btn btn-secondary" type="button" (click)="fecharModal()"
-                [disabled]="salvando">Cancelar</button>
-            <button class="btn btn-primary" type="submit" (click)="salvar()" [disabled]="form.invalid || salvando">
-                @if (salvando) { <span class="loading-spinner" style="width:1rem;height:1rem" aria-hidden="true"></span>
+                [disabled]="salvando()">Cancelar</button>
+            <button class="btn btn-primary" type="button" (click)="salvar()" [disabled]="form.invalid || salvando()">
+                @if (salvando()) { <span class="loading-spinner" style="width:1rem;height:1rem" aria-hidden="true"></span>
                 }
-                {{ editando ? 'Salvar Alterações' : 'Publicar' }}
+                {{ editando() ? 'Salvar Alterações' : 'Publicar' }}
             </button>
         </div>
-    </div>
+    </dialog>
 </div>
 }
 
 <!-- Modal de Confirmação de Exclusão -->
-@if (comunicadoParaExcluir) {
-<div class="modal-backdrop" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Excluir comunicado ' + comunicadoParaExcluir.titulo" (click)="cancelarExclusao()">
-    <div class="modal" (click)="$event.stopPropagation()">
+@if (comunicadoParaExcluir()) {
+<div class="modal-backdrop" (click)="cancelarExclusao()" (keydown.enter)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-titulo-exclusao" aria-modal="true">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Comunicado</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()"
@@ -164,7 +163,7 @@
         </div>
 
         <div class="modal-body">
-            <p>Você está prestes a excluir o comunicado <strong>{{ comunicadoParaExcluir.titulo }}</strong>.</p>
+            <p>Você está prestes a excluir o comunicado <strong>{{ comunicadoParaExcluir()?.titulo }}</strong>.</p>
             <p>Esta ação não pode ser desfeita. Deseja continuar?</p>
         </div>
 
@@ -175,6 +174,6 @@
                 Excluir Comunicado
             </button>
         </div>
-    </div>
+    </dialog>
 </div>
 }

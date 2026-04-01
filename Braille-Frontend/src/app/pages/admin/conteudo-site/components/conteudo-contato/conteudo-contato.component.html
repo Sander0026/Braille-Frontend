@@ -1,0 +1,84 @@
+@if (carregando()) {
+<div class="loading-state">
+    <span class="material-symbols-rounded spinner">sync</span>
+    <p>Carregando dados da seção Contato...</p>
+</div>
+} @else {
+<form [formGroup]="formContato" (ngSubmit)="salvarContato()" class="cms-form">
+    <div class="form-header">
+        <h2>Contato e Redes Sociais</h2>
+        <p>Informações globais exibidas no Rodapé e na Página de Fale Conosco (<a href="/contato" target="_blank">/contato</a>).</p>
+    </div>
+
+    <div class="form-section">
+        <h3>Dados de Contato Principais</h3>
+        <div class="form-row form-row-2">
+            <div class="form-group mb-0">
+                <label class="form-label" for="telefoneCentral">Telefone Oficial</label>
+                <input type="text" id="telefoneCentral" class="form-input" formControlName="telefoneCentral"
+                    placeholder="Ex: (00) 0000-0000">
+            </div>
+            <div class="form-group mb-0">
+                <label class="form-label" for="emailOficial">E-mail Oficial</label>
+                <input type="email" id="emailOficial" class="form-input" formControlName="emailOficial"
+                    placeholder="Ex: contato@instituto.org.br">
+            </div>
+        </div>
+
+        <div class="form-group mt-3">
+            <label class="form-label" for="enderecoCompleto">Endereço Completo</label>
+            <input type="text" id="enderecoCompleto" class="form-input" formControlName="enderecoCompleto"
+                placeholder="Ex: Rua Exemplo, 120 - Bairro, Cidade - SP, 00000-000">
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Redes Sociais</h3>
+        <p class="form-hint mb-3">Se o campo for preenchido, o ícone respectivo aparecerá no rodapé do site.</p>
+        <div class="form-row form-row-2">
+            <div class="form-group mb-0">
+                <label class="form-label" for="instagram">Link Instagram</label>
+                <input type="url" id="instagram" class="form-input" formControlName="instagram"
+                    placeholder="https://instagram.com/instituto">
+            </div>
+            <div class="form-group mb-0">
+                <label class="form-label" for="facebook">Link Facebook</label>
+                <input type="url" id="facebook" class="form-input" formControlName="facebook"
+                    placeholder="https://facebook.com/instituto">
+            </div>
+            <div class="form-group mb-0 mt-3">
+                <label class="form-label" for="youtube">Link YouTube</label>
+                <input type="url" id="youtube" class="form-input" formControlName="youtube"
+                    placeholder="https://youtube.com/c/instituto">
+            </div>
+            <div class="form-group mb-0 mt-3">
+                <label class="form-label" for="linkedin">Link LinkedIn</label>
+                <input type="url" id="linkedin" class="form-input" formControlName="linkedin"
+                    placeholder="https://linkedin.com/company/instituto">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section">
+        <h3>Opções da Página de Contato / Rodapé</h3>
+        
+        <div class="form-group">
+            <label class="form-label" for="heroDescricaoContato">Texto Descritivo Principal (Página Fale Conosco)</label>
+            <quill-editor id="heroDescricaoContato" formControlName="heroDescricaoContato" [styles]="{height: '100px'}"
+                placeholder="Ex: Estamos abertos para voluntariado e parcerias. Envie uma mensagem..."></quill-editor>
+        </div>
+
+        <div class="form-group mb-0">
+            <label class="form-label" for="footerDireitos">Texto de Copyright (Rodapé)</label>
+            <input type="text" id="footerDireitos" class="form-input" formControlName="footerDireitos"
+                placeholder="Ex: © 2026 Instituto Luiz Braille - CNPJ: 00.000.000/0001-00">
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formContato.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar Contato e Redes }
+        </button>
+    </div>
+</form>
+}

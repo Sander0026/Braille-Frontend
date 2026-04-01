@@ -1,0 +1,189 @@
+@if (carregando()) {
+<div class="loading-state">
+    <span class="material-symbols-rounded spinner">sync</span>
+    <p>Carregando dados da seção...</p>
+</div>
+} @else {
+
+<!-- ABA: OFICINAS -->
+@if (abaAtiva === 'oficinas') {
+<form [formGroup]="formOficinas" (ngSubmit)="salvarOficinas()" class="cms-form">
+    <div class="form-header">
+        <h2>Oficinas e Cursos</h2>
+        <p>Gerencie os cards de oficinas (grade) ofertados na Home.</p>
+    </div>
+
+    <!-- Arrays de Oficinas -->
+    <div formArrayName="lista">
+        @for (card of oficinasArray.controls; track card; let i = $index) {
+        <div [formGroupName]="i" class="form-card dynamic-card">
+            <div class="dynamic-card-header">
+                <span class="card-badge">Card {{ i + 1 }}</span>
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'oficina')" aria-label="Remover card"
+                    title="Remover card">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            </div>
+
+            <div class="flex-row align-items-end pt-1" style="gap: 1rem;">
+                <div class="form-group flex-1 mb-0 pb-2">
+                    <label class="form-label mb-1" [for]="'of-icone-' + i">Ícone Corporativo</label>
+                    <select [id]="'of-icone-' + i" class="form-input w-100" formControlName="icon" aria-label="Selecione o Ícone da oficina" style="padding: 10px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;">
+                        <option value="" disabled>Escolha na lista...</option>
+                        @for (icone of iconesDisponiveis; track icone.valor) {
+                            <option [value]="icone.valor">{{ icone.nome }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group flex-3 mb-0 pb-2">
+                    <label class="form-label mb-1" [for]="'of-titulo-' + i">Título da Oficina</label>
+                    <input type="text" [id]="'of-titulo-' + i" class="form-input w-100" formControlName="titulo"
+                        placeholder="Ex: Informática Adaptada" aria-label="Título da oficina">
+                </div>
+            </div>
+            
+            <quill-editor formControlName="descricao" [styles]="{height: '100px'}"
+                placeholder="Breve descrição ou resumo..." aria-label="Descrição da oficina"></quill-editor>
+        </div>
+        }
+    </div>
+
+    <div class="add-row">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarOficina()">
+            <span class="material-symbols-rounded">add</span> Adicionar Oficina
+        </button>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formOficinas.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar Oficinas }
+        </button>
+    </div>
+</form>
+}
+
+<!-- ABA: DEPOIMENTOS -->
+@if (abaAtiva === 'depoimentos') {
+<form [formGroup]="formDepoimentos" (ngSubmit)="salvarDepoimentos()" class="cms-form">
+    <div class="form-header">
+        <h2>Depoimentos</h2>
+        <p>Gerencie os relatos exibidos no carrossel de depoimentos.</p>
+    </div>
+
+    <div formArrayName="lista">
+        @for (item of depoimentosArray.controls; track item; let i = $index) {
+        <div [formGroupName]="i" class="form-card dynamic-card">
+            <div class="dynamic-card-header">
+                <span class="card-badge">Depoimento {{ i + 1 }}</span>
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'depoimento')"
+                    aria-label="Remover depoimento" title="Remover depoimento">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            </div>
+
+            <quill-editor formControlName="texto" [styles]="{height: '100px', marginBottom: '1rem'}"
+                placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></quill-editor>
+            
+            <div class="flex-row" style="gap: 1rem;">
+                <div class="form-group flex-3 mb-0">
+                    <label class="sr-only" [for]="'dp-nome-' + i">Nome do Depoente</label>
+                    <input type="text" [id]="'dp-nome-' + i" class="form-input" formControlName="nome" placeholder="Nome Completo"
+                        aria-label="Nome do depoente">
+                </div>
+                <div class="form-group flex-1 mb-0">
+                    <label class="sr-only" [for]="'dp-idade-' + i">Idade do Depoente</label>
+                    <input type="number" [id]="'dp-idade-' + i" class="form-input" formControlName="idade"
+                        placeholder="Idade (opcional)" aria-label="Idade do depoente">
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="add-row">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarDepoimento()">
+            <span class="material-symbols-rounded">add</span> Adicionar Depoimento
+        </button>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formDepoimentos.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar Depoimentos }
+        </button>
+    </div>
+</form>
+}
+
+<!-- ABA: FAQ -->
+@if (abaAtiva === 'faq') {
+<form [formGroup]="formFaq" (ngSubmit)="salvarFaq()" class="cms-form">
+    <div class="form-header">
+        <h2>Perguntas Frequentes (FAQ)</h2>
+        <p>Gerencie as perguntas e respostas exibidas no modo sanfona (acordeon) da Página Inicial.</p>
+    </div>
+
+    <div formArrayName="lista">
+        @for (item of faqArray.controls; track item; let i = $index) {
+        <div [formGroupName]="i" class="form-card dynamic-card">
+            <div class="dynamic-card-header">
+                <span class="card-badge">Pergunta {{ i + 1 }}</span>
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'faq')" aria-label="Remover pergunta"
+                    title="Remover pergunta">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label" [for]="'faq-pergunta-' + i">Pergunta</label>
+                <input type="text" [id]="'faq-pergunta-' + i" class="form-input" formControlName="pergunta"
+                    placeholder="Ex: Como posso me matricular?">
+            </div>
+            
+            <div class="form-group mb-0">
+                <label class="form-label" [for]="'faq-resposta-' + i">Resposta (Detalhada)</label>
+                <quill-editor [id]="'faq-resposta-' + i" formControlName="resposta" [styles]="{height: '100px'}"
+                    placeholder="Escreva a resposta de forma clara..."></quill-editor>
+            </div>
+        </div>
+        }
+    </div>
+
+    <div class="add-row">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarFaq()">
+            <span class="material-symbols-rounded">add</span> Adicionar Pergunta
+        </button>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formFaq.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar FAQ }
+        </button>
+    </div>
+</form>
+}
+
+} <!-- /else !carregando() -->
+
+<!-- Modal Excluir Item Dinâmico -->
+@if (itemParaExcluir() !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Item"
+    (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #b91c1c; text-transform: capitalize;">Excluir {{ itemParaExcluir()?.tipo }}</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a remover este item da lista.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar as Alterações</strong>. Deseja continuar?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusao()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusao()"
+                style="background-color: #b91c1c; color: white; border: none;">
+                Remover da Lista
+            </button>
+        </div>
+    </dialog>
+</div>
+}

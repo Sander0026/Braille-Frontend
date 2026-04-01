@@ -1,0 +1,233 @@
+@if (carregando()) {
+<div class="loading-state">
+    <span class="material-symbols-rounded spinner">sync</span>
+    <p>Carregando dados da seção Sobre...</p>
+</div>
+} @else {
+
+<!-- Hero do Sobre -->
+<form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form mb-5">
+    <div class="form-header">
+        <h2>Apresentação da Página Sobre</h2>
+        <p>Texto de destaque que aparece no topo da página /sobre.</p>
+    </div>
+    <div class="form-grid">
+        <div class="form-group full-width">
+            <label for="sobreEyebrow">Pequeno Título Superior</label>
+            <input type="text" id="sobreEyebrow" formControlName="eyebrow" class="form-input"
+                placeholder="Ex: Conheça o Instituto" />
+        </div>
+        <div class="form-group full-width">
+            <label for="sobreTitulo">Título Principal</label>
+            <input type="text" id="sobreTitulo" formControlName="titulo" class="form-input"
+                placeholder="Ex: Sobre o Instituto Luiz Braille" />
+        </div>
+        <div class="form-group full-width">
+            <label for="sobreDescricao">Descrição</label>
+            <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                placeholder="Breve descrição exibida abaixo do título…"></quill-editor>
+        </div>
+    </div>
+    <div class="form-actions mt-3">
+        <button type="submit" class="btn btn-primary" [disabled]="salvandoHero() || formSobreHero.invalid">
+            <span class="material-symbols-rounded">{{ salvandoHero() ? 'sync' : 'save' }}</span>
+            {{ salvandoHero() ? 'Salvando…' : 'Salvar Apresentação' }}
+        </button>
+    </div>
+</form>
+
+<!-- Nossa História -->
+<form [formGroup]="formSobreHistoria" (ngSubmit)="salvarSobreHistoria()" class="cms-form mb-5">
+    <div class="form-header">
+        <h2>Nossa História</h2>
+        <p>Texto da seção de história do instituto.</p>
+    </div>
+    <div class="form-grid">
+        <div class="form-group full-width">
+            <label for="historiaTitulo">Título da Seção</label>
+            <input type="text" id="historiaTitulo" formControlName="titulo" class="form-input"
+                placeholder="Ex: Nossa História" />
+        </div>
+        <div class="form-group full-width">
+            <label for="historiaParagrafo1">Parágrafo 1</label>
+            <quill-editor formControlName="paragrafo1" [styles]="{height: '200px'}"
+                placeholder="Primeiro parágrafo da história…"></quill-editor>
+        </div>
+        <div class="form-group full-width">
+            <label for="historiaParagrafo2">Parágrafo 2</label>
+            <quill-editor formControlName="paragrafo2" [styles]="{height: '200px'}"
+                placeholder="Segundo parágrafo da história…"></quill-editor>
+        </div>
+        <div class="form-group full-width">
+            <label for="historiaParagrafo3">Parágrafo 3 (opcional)</label>
+            <quill-editor formControlName="paragrafo3" [styles]="{height: '200px'}"
+                placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></quill-editor>
+        </div>
+    </div>
+    <div class="form-actions mt-3">
+        <button type="submit" class="btn btn-primary" [disabled]="salvandoHistoria() || formSobreHistoria.invalid">
+            <span class="material-symbols-rounded">{{ salvandoHistoria() ? 'sync' : 'save' }}</span>
+            {{ salvandoHistoria() ? 'Salvando…' : 'Salvar História' }}
+        </button>
+    </div>
+</form>
+
+<!-- Linha do Tempo -->
+<form [formGroup]="formSobreTimeline" (ngSubmit)="salvarSobreTimeline()" class="cms-form mb-5">
+    <div class="form-header">
+        <h2>Linha do Tempo</h2>
+        <p>Marcos históricos exibidos ao lado do texto "Nossa História".</p>
+    </div>
+    <div formArrayName="lista">
+        @for (item of timelineArray.controls; track $index) {
+        <div class="item-card form-card dynamic-card mb-3" [formGroupName]="$index">
+            <div class="dynamic-card-header">
+                <span class="card-badge">Marco {{ $index + 1 }}</span>
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao($index, 'timeline')"
+                    aria-label="Remover marco" title="Remover marco histórico">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            </div>
+            
+            <div class="flex-row mt-3" style="gap: 1rem;">
+                <div class="form-group flex-1 pt-1">
+                    <label [for]="'tlAno' + $index">Ano / Período</label>
+                    <input type="text" [id]="'tlAno' + $index" formControlName="ano" class="form-input w-100"
+                        placeholder="Ex: 1990 ou Hoje" />
+                </div>
+                <div class="form-group flex-2 pt-1">
+                    <label [for]="'tlTitulo' + $index">Título</label>
+                    <input type="text" [id]="'tlTitulo' + $index" formControlName="titulo" class="form-input w-100"
+                        placeholder="Ex: Fundação" />
+                </div>
+            </div>
+            <div class="form-group full-width mb-0">
+                <label [for]="'tlDesc' + $index">Descrição</label>
+                <input type="text" [id]="'tlDesc' + $index" formControlName="descricao" class="form-input"
+                    placeholder="Breve descrição do marco…" />
+            </div>
+        </div>
+        }
+    </div>
+    
+    <div class="add-row">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarItemTimeline()">
+            <span class="material-symbols-rounded">add</span> Adicionar Marco
+        </button>
+    </div>
+
+    <div class="form-actions mt-3">
+        <button type="submit" class="btn btn-primary" [disabled]="salvandoTimeline() || formSobreTimeline.invalid">
+            <span class="material-symbols-rounded">{{ salvandoTimeline() ? 'sync' : 'save' }}</span>
+            {{ salvandoTimeline() ? 'Salvando…' : 'Salvar Linha do Tempo' }}
+        </button>
+    </div>
+</form>
+
+<!-- Nossa Equipe -->
+<form [formGroup]="formSobreEquipe" (ngSubmit)="salvarSobreEquipe()" class="cms-form mb-5">
+    <div class="form-header">
+        <h2>Nossa Equipe</h2>
+        <p>Cards de membros ou áreas da equipe exibidos na seção "Nossa Equipe".</p>
+    </div>
+    <div formArrayName="lista">
+        @for (membro of equipeArray.controls; track $index) {
+        <div class="item-card form-card dynamic-card mb-3" [formGroupName]="$index">
+            <div class="dynamic-card-header">
+                <span class="card-badge">Membro / Área {{ $index + 1 }}</span>
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao($index, 'equipe')"
+                    aria-label="Remover membro">
+                    <span class="material-symbols-rounded">delete</span>
+                </button>
+            </div>
+            <div class="flex-row mt-3" style="gap: 1rem;">
+                <div class="form-group flex-1 pt-1">
+                    <label [for]="'eqEmoji' + $index">Ícone Corporativo</label>
+                    <select [id]="'eqEmoji' + $index" class="form-input w-100" formControlName="emoji" aria-label="Selecione o Ícone corporativo" style="padding: 10px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;">
+                        <option value="" disabled selected>Selecione um ícone...</option>
+                        @for (icone of iconesEquipe; track icone.valor) {
+                        <option [value]="icone.valor">{{ icone.nome }}</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group flex-2 pt-1">
+                    <label [for]="'eqCargo' + $index">Cargo / Área Administrativa</label>
+                    <input type="text" [id]="'eqCargo' + $index" formControlName="cargo" class="form-input w-100"
+                        placeholder="Ex: Coordenação Psicológica" />
+                </div>
+            </div>
+            
+            <div class="form-group full-width mb-0">
+                <label [for]="'eqDesc' + $index">Descrição</label>
+                <input type="text" [id]="'eqDesc' + $index" formControlName="descricao" class="form-input"
+                    placeholder="Breve descrição da função…" />
+            </div>
+        </div>
+        }
+    </div>
+    
+    <div class="add-row">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="adicionarMembroEquipe()">
+            <span class="material-symbols-rounded">add</span> Adicionar Membro
+        </button>
+    </div>
+    
+    <div class="form-actions mt-3">
+        <button type="submit" class="btn btn-primary" [disabled]="salvandoEquipe() || formSobreEquipe.invalid">
+            <span class="material-symbols-rounded">{{ salvandoEquipe() ? 'sync' : 'save' }}</span>
+            {{ salvandoEquipe() ? 'Salvando…' : 'Salvar Equipe' }}
+        </button>
+    </div>
+</form>
+
+<!-- CTA / Rodapé -->
+<form [formGroup]="formSobreCta" (ngSubmit)="salvarSobreCta()" class="cms-form mb-5">
+    <div class="form-header">
+        <h2>Chamada para Ação (Rodapé)</h2>
+        <p>Texto do bloco de CTA exibido no final da página /sobre.</p>
+    </div>
+    <div class="form-grid">
+        <div class="form-group full-width">
+            <label for="sobreCtaTitulo">Título</label>
+            <input type="text" id="sobreCtaTitulo" formControlName="titulo" class="form-input"
+                placeholder="Ex: Quer saber mais ou precisa de atendimento?" />
+        </div>
+        <div class="form-group full-width">
+            <label for="sobreCtaDesc">Descrição</label>
+            <quill-editor formControlName="descricao" [styles]="{height: '150px'}"
+                placeholder="Ex: Entre em contato com nossa secretaria…"></quill-editor>
+        </div>
+    </div>
+    <div class="form-actions mt-3">
+        <button type="submit" class="btn btn-primary" [disabled]="salvandoCta() || formSobreCta.invalid">
+            <span class="material-symbols-rounded">{{ salvandoCta() ? 'sync' : 'save' }}</span>
+            {{ salvandoCta() ? 'Salvando…' : 'Salvar Chamada à Ação' }}
+        </button>
+    </div>
+</form>
+
+} <!-- /else !carregando -->
+
+<!-- Modal Excluir Item Dinâmico -->
+@if (itemParaExcluir() !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Item"
+    (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 style="color: #b91c1c; text-transform: capitalize;">Excluir {{ itemParaExcluir()?.tipo }}</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()" aria-label="Cancelar">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a remover este item da lista.</p>
+            <p>A ação refletirá no site apenas após você <strong>Salvar as Alterações</strong> correspondentes. Deseja continuar?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusao()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusao()"
+                style="background-color: #b91c1c; color: white; border: none;">
+                Remover da Lista
+            </button>
+        </div>
+    </dialog>
+</div>
+}
