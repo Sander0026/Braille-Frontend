@@ -1,0 +1,134 @@
+@if (isOpen) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalApoiadorTitulo"
+    (click)="fecharModal()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 id="modalApoiadorTitulo">Perfil do Apoiador</h2>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar janela de perfil">×</button>
+        </div>
+
+        <div class="modal-body profile-body" tabindex="0">
+            @if (carregandoDetalhes) {
+            <div class="loading-container p-4 text-center">
+                <div class="loading-spinner mb-3" aria-hidden="true" style="width: 2rem; height: 2rem;"></div>
+                <p>Buscando ficha completa...</p>
+            </div>
+            } @else if (apoiador) {
+            <div class="profile-header">
+                <div class="avatar-wrapper profile-avatar">
+                    @if (apoiador.logoUrl) {
+                    <img [src]="apoiador.logoUrl"
+                        alt="Logo de {{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}"
+                        loading="lazy" class="profile-logo" [class.opacity-50]="carregandoLogoInline" />
+                    } @else {
+                    <span class="material-symbols-rounded" style="font-size: 3.5rem; color: #9ca3af;"
+                        aria-hidden="true" [class.opacity-50]="carregandoLogoInline">
+                        {{ apoiador.tipo === 'EMPRESA' ? 'domain' : (apoiador.tipo === 'ONG' ? 'volunteer_activism' : 'person') }}
+                    </span>
+                    }
+
+                    <div class="avatar-actions" [style.opacity]="carregandoLogoInline ? '1' : null"
+                         [style.pointer-events]="carregandoLogoInline ? 'none' : 'auto'">
+                        @if (carregandoLogoInline) {
+                        <span class="material-symbols-rounded spinner text-white" style="font-size: 2rem;">sync</span>
+                        } @else {
+                        <label class="btn btn-sm btn-icon m-0 p-0 w-100 h-100 d-flex justify-content-center align-items-center"
+                            title="Atualizar Foto" aria-label="Atualizar Foto">
+                            <span class="material-symbols-rounded" style="color: white; font-size: 2rem;">photo_camera</span>
+                            <input type="file" (change)="onLogoSelectedAdmin($event)" accept="image/jpeg, image/png, image/webp"
+                                class="sr-only" style="display: none;" />
+                        </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="profile-title">
+                    <h3>{{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}</h3>
+                    <div class="profile-badges" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                        <span class="badge" [class.badge-primary]="apoiador.tipo === 'EMPRESA'"
+                            [class.badge-info]="apoiador.tipo === 'PROFISSIONAL_LIBERAL'"
+                            [class.badge-neutral]="apoiador.tipo === 'ONG' || apoiador.tipo === 'VOLUNTARIO' || apoiador.tipo === 'IMPRENSA'">
+                            {{ apoiador.tipo.replace('_', ' ') }}
+                        </span>
+                        @if (apoiador.ativo) {
+                        <span class="badge badge-success" style="background:var(--success-bg,#dcfce7); color:#16a34a; padding: 4px 8px; border-radius: 4px;">Ativo</span>
+                        } @else {
+                        <span class="badge badge-danger" style="background:var(--error-bg,#fee2e2); color:#dc2626; padding: 4px 8px; border-radius: 4px;">Inativo</span>
+                        }
+                        @if (apoiador.exibirNoSite) {
+                        <span class="badge badge-neutral" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; border: none; padding: 4px 8px; border-radius: 4px;">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px; vertical-align: middle;">public</span> Visível no Site Público
+                        </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-grid mt-4" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1.5rem;">
+                <div class="profile-section" style="background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">Informações Básicas</h4>
+                    <p><strong>Nome / Razão Social:</strong> {{ apoiador.nomeRazaoSocial }}</p>
+                    <p><strong>Documento (CPF/CNPJ):</strong> {{ apoiador.cpfCnpj || 'Não cadastrado' }}</p>
+                    <p><strong>Atividade/Especialidade:</strong> {{ apoiador.atividadeEspecialidade || 'Não informado' }}</p>
+                </div>
+                <div class="profile-section" style="background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">Contato</h4>
+                    <p><strong>Pessoa de Contato:</strong> {{ apoiador.contatoPessoa || 'Não informado' }}</p>
+                    <p><strong>Telefone:</strong> {{ apoiador.telefone || 'Não informado' }}</p>
+                    <p><strong>E-mail:</strong> {{ apoiador.email || 'Não informado' }}</p>
+                </div>
+
+                <div class="profile-section" style="grid-column: 1 / -1; background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                    <h4 style="margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">Endereço e Observações</h4>
+                    <p><strong>Endereço:</strong> {{ apoiador.endereco || 'Endereço não cadastrado' }}</p>
+                    <p class="mt-2" style="background: #fff; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb;">
+                        {{ apoiador.observacoes || 'Nenhuma observação registrada.' }}
+                    </p>
+                    <p class="mt-3" style="font-size: 0.85rem; color: #6b7280;">
+                        Cadastrado em: {{ apoiador.criadoEm | date:'dd/MM/yyyy às HH:mm' }}
+                    </p>
+                </div>
+
+                <!-- HISTÓRICO DE CRM E CERTIFICADOS -->
+                <div class="profile-section" style="grid-column: 1 / -1; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
+                    <h4 style="margin-bottom: 1rem;">Gerenciamento do Relacionamento</h4>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button
+                            class="btn btn-outline-primary d-flex align-items-center gap-2 justify-content-center"
+                            style="flex: 1; border: 2px solid #2563eb; padding: 1rem; background: transparent; cursor: pointer; border-radius: 8px; color: #2563eb;" 
+                            (click)="viewActionsRequested.emit()">
+                            <span class="material-symbols-rounded" style="font-size: 1.5rem;">history</span>
+                            <div style="text-align: left;">
+                                <div style="font-weight: bold;">Histórico de Ações</div>
+                                <div style="font-size: 0.8rem; font-weight: normal; color: #4b5563;">Eventos, doações e relacionamento</div>
+                            </div>
+                        </button>
+                        <button
+                            class="btn btn-outline-success d-flex align-items-center gap-2 justify-content-center"
+                            style="flex: 1; border: 2px solid #059669; padding: 1rem; background: transparent; cursor: pointer; border-radius: 8px; color: #059669;"
+                            (click)="viewCertificatesRequested.emit()">
+                            <span class="material-symbols-rounded" style="font-size: 1.5rem;">workspace_premium</span>
+                            <div style="text-align: left;">
+                                <div style="font-weight: bold;">Certificados e Honrarias</div>
+                                <div style="font-size: 0.8rem; font-weight: normal; color: #4b5563;">Emitir e visualizar reconhecimentos</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+            }
+        </div>
+
+        <div class="modal-footer" style="padding: 1rem 1.5rem; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 0.5rem;">
+            <button class="btn btn-secondary" style="padding: 0.5rem 1rem; cursor: pointer; background: #e5e7eb; border: none; border-radius: 4px;" (click)="fecharModal()">Fechar</button>
+            <button class="btn btn-primary" style="padding: 0.5rem 1rem; cursor: pointer; background: #2563eb; color: #fff; border: none; border-radius: 4px; display: flex; align-items: center; gap: 4px;"
+                (click)="editar()" [disabled]="!apoiador">
+                <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 1.2rem;">edit</span>
+                Editar Dados
+            </button>
+        </div>
+    </div>
+</div>
+}

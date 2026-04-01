@@ -1,0 +1,91 @@
+@if (isOpen) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAcoesTitulo"
+    (click)="fecharModal()">
+    <div class="modal-content modal-lg" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <div>
+                <h2 id="modalAcoesTitulo" style="margin-bottom: 0.25rem;">Histórico de Ações</h2>
+                <p class="text-muted" style="margin: 0; font-size: 0.85rem;" *ngIf="apoiador">Registro de relacionamento e CRM com <strong>{{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}</strong></p>
+            </div>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar modal de CRM">×</button>
+        </div>
+
+        <div class="modal-body" tabindex="0" style="padding: 1.5rem; background: #f8fafc;">
+            <!-- FORMULÁRIO DE NOVA AÇÃO -->
+            <div class="acoes-form-box" style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+                <h4 style="margin-top: 0; margin-bottom: 1rem; color: #1e293b; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-rounded" aria-hidden="true">add_circle</span>
+                    Registrar Nova Interação
+                </h4>
+                
+                <form [formGroup]="acaoForm" (ngSubmit)="adicionarAcao()" class="form-grid" style="align-items: end;">
+                    <div class="form-group">
+                        <label class="form-label">Data da Ação/Evento <span class="required" aria-hidden="true">*</span></label>
+                        <input type="date" class="form-input" formControlName="dataEvento" [class.input-error]="acaoForm.get('dataEvento')?.invalid && acaoForm.get('dataEvento')?.touched">
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: span 2;">
+                        <label class="form-label">Descrição / O que aconteceu? <span class="required" aria-hidden="true">*</span></label>
+                        <input type="text" class="form-input" formControlName="descricaoAcao" placeholder="Ex: Reunião Presencial, Doação de Computadores..." [class.input-error]="acaoForm.get('descricaoAcao')?.invalid && acaoForm.get('descricaoAcao')?.touched">
+                    </div>
+                    
+                    <div class="form-group" style="display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn btn-primary" [disabled]="acaoForm.invalid || salvandoAcao" style="height: 42px; width: 100%;">
+                            @if (salvandoAcao) {
+                                <span class="spinner material-symbols-rounded">sync</span>
+                            } @else {
+                                Salvar Ação
+                            }
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TIMELINE / LISTA DE AÇÕES EXISTENTES -->
+            <h4 style="margin-top: 0; margin-bottom: 1rem; color: #1e293b; font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                    <span class="material-symbols-rounded" aria-hidden="true">history</span>
+                    Histórico Cronológico
+                </div>
+                @if (carregandoAcoes) {
+                    <span class="spinner material-symbols-rounded text-primary">sync</span>
+                }
+            </h4>
+
+            @if (!carregandoAcoes && acoes.length === 0) {
+                <div class="empty-state text-center p-5" style="background: #fff; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                    <span class="material-symbols-rounded text-muted" style="font-size: 3rem; margin-bottom: 1rem; display: block;">hourglass_empty</span>
+                    <h5>Nenhuma interação registrada</h5>
+                    <p class="text-muted">Adicione a primeira ação usando o formulário acima.</p>
+                </div>
+            } @else {
+                <div class="timeline" style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    @for (acao of acoes; track acao.id; let isLast = $last) {
+                        <div class="timeline-item" [style.border-bottom]="!isLast ? '1px solid #e2e8f0' : 'none'" [style.margin-bottom]="!isLast ? '1rem' : '0'" [style.padding-bottom]="!isLast ? '1rem' : '0'" style="display: flex; gap: 1rem;">
+                            
+                            <div class="timeline-date" style="flex: 0 0 100px; text-align: right;">
+                                <div style="font-weight: bold; color: #0f172a; font-size: 0.95rem;">{{ acao.dataEvento | date:'dd/MM/yyyy' }}</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">às {{ acao.criadoEm | date:'HH:mm' }}</div>
+                            </div>
+
+                            <div class="timeline-marker" style="position: relative; top: 3px;">
+                                <span class="material-symbols-rounded" style="color: #3b82f6; font-size: 1.25rem;">radio_button_checked</span>
+                            </div>
+
+                            <div class="timeline-content" style="flex: 1;">
+                                <div style="font-weight: 500; color: #1e293b; font-size: 1.05rem; margin-bottom: 0.25rem;">{{ acao.descricaoAcao }}</div>
+                            </div>
+
+                            <div class="timeline-actions">
+                                <button class="btn btn-sm btn-icon btn-danger-outline" (click)="removerAcao(acao.id!)" aria-label="Apagar registro" title="Excluir" style="color: #ef4444; background: transparent; border: 1px dashed #ef4444; padding: 0.25rem; border-radius: 4px; cursor: pointer;">
+                                    <span class="material-symbols-rounded" style="font-size: 1rem;">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+}

@@ -1,168 +1,66 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
-import { FormControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, FormsModule } from '@angular/forms';
-import { Apoiador, ApoiadoresService } from '../apoiadores.service';
-import { ModelosCertificadosService, ModeloCertificado } from '../../../../core/services/modelos-certificados.service';
-import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { A11yModule } from '@angular/cdk/a11y';
-import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
+import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { ApoiadoresService, Apoiador, AcaoApoiador } from '../apoiadores.service';
+import { MasksUtil } from '../../../../shared/utils/masks.util';
+
+// Importa os sub-componentes modulares (Micro-frontends)
+import { ApoiadorWizardFormComponent } from '../components/apoiador-wizard-form/apoiador-wizard-form.component';
+import { ApoiadorPerfilComponent } from '../components/apoiador-perfil/apoiador-perfil.component';
+import { ApoiadorAcoesComponent } from '../components/apoiador-acoes/apoiador-acoes.component';
+import { ApoiadorCertificadosComponent } from '../components/apoiador-certificados/apoiador-certificados.component';
 
 @Component({
   selector: 'app-apoiadores-lista',
   standalone: true,
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    FormsModule,
+    ApoiadorWizardFormComponent,
+    ApoiadorPerfilComponent,
+    ApoiadorAcoesComponent,
+    ApoiadorCertificadosComponent
+  ],
   templateUrl: './apoiadores-lista.html',
-  styleUrls: ['./apoiadores-lista.scss']
+  styleUrl: './apoiadores-lista.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestroy {
-  apoiadores: Apoiador[] = [];
-  carregando = true;
-  totalApoiadores = 0;
+export class ApoiadoresLista implements OnInit, OnDestroy {
+  // Estado da Listagem
+  pesquisaTermo = '';
+  filtroTipo = 'TODOS';
+  apoiadoresOriginais: Apoiador[] = [];
+  apoiadoresFiltrados: Apoiador[] = [];
+  carregandoLista = true;
+  total = 0;
+
+  // Estados dos Modais usando Signals (Melhor Performance que propriedades comuns)
+  modalFormAberto = signal<boolean>(false);
+  modalPerfilAberto = signal<boolean>(false);
+  modalAcoesAberto = signal<boolean>(false);
+  modalCertificadosAberto = signal<boolean>(false);
+
+  // Estados de Contexto (O Atual Selecionado)
+  apoiadorAtual: Apoiador | null = null;
+  modoEdicao = false;
   
-  // Filtros e Abas
-  searchControl = new FormControl('');
-  tipoControl = new FormControl('');
-  abaAtiva: 'ativos' | 'inativos' = 'ativos';
+  // Dependências de contexto (Modais Filhos)
+  acoesFiltradas: AcaoApoiador[] = [];
+  certificadosEmitidos: any[] = [];
+  carregandoContextoFilho = false;
+
   private readonly destroy$ = new Subject<void>();
 
-  // Modal de Perfil
-  modalAberto = false;
-  carregandoDetalhes = false;
-  apoiadorVisualizado: Apoiador | null = null;
-  carregandoLogoInline = false;
-
-  onLogoSelectedAdmin(event: any): void {
-    const file = event.target.files?.[0];
-    if (!file || !this.apoiadorVisualizado) return;
-
-    this.carregandoLogoInline = true;
-    this.cdr.detectChanges();
-
-    this.apoiadoresService.uploadLogo(this.apoiadorVisualizado.id, file).subscribe({
-      next: (res: any) => {
-        const url = res.logoUrl || res.url;
-        if (this.apoiadorVisualizado && url) {
-          this.apoiadorVisualizado.logoUrl = url;
-          // Atualiza na lista principal
-          const idx = this.apoiadores.findIndex((a) => a.id === this.apoiadorVisualizado!.id);
-          if (idx !== -1) {
-            this.apoiadores[idx].logoUrl = url;
-          }
-        }
-        this.carregandoLogoInline = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro no upload inline da logo', err);
-        alert('Falha ao subir logotipo. Verifique o tamanho ou tente novamente.');
-        this.carregandoLogoInline = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  // Modal de Formulário (Novo/Editar)
-  modalFormAberto = false;
-  modoEdicao = false;
-  idApoiadorEditando: string | null = null;
-  apoiadorForm: FormGroup;
-  logoFile: File | null = null;
-  logoPreview: string | ArrayBuffer | null = null;
-  carregandoLogo = false;
-  logoFeedback: string | null = null;
-  logoFeedbackType: 'success' | 'error' = 'success';
-  salvando = false;
-
-  // Form Rápido do Perfil Visualizado
-  novaAcaoForm: FormGroup;
-  salvandoAcao = false;
-
-  // Gerenciamento de Certificados (Honraria)
-  modelosHonraria: ModeloCertificado[] = [];
-  modalEmissaoAberto = false;
-  emitindoCertificado = false;
-  apoiadorParaEmissao: Apoiador | null = null;
-  formEmissao: FormGroup;
-  urlPdfParaVisualizar: SafeResourceUrl | null = null;
-  mostrarVisualizadorPdf = false;
-  certificadosEmitidos: any[] = [];
-  carregandoCertificados = false;
-  
-  // Modal de Ações
-  modalAcoesAberto = false;
-  acaoEditandoId: string | null = null;
-  mostrarFormAcao = false;
-  filtroAcoes = '';
-
-  // Modal de Certificados Emitidos
-  modalCertificadosAberto = false;
-  filtroCertificados = '';
-
-  // Wizard Steps
-  passoAtual = 1;
-
   constructor(
-    private readonly router: Router,
     private readonly apoiadoresService: ApoiadoresService,
-    private readonly modelosCertificadosService: ModelosCertificadosService,
-    private readonly sanitizer: DomSanitizer,
-    private readonly fb: FormBuilder,
     private readonly cdr: ChangeDetectorRef
-  ) {
-    super();
-    this.apoiadorForm = this.fb.group({
-      informacoesPrincipais: this.fb.group({
-        tipo: ['EMPRESA', Validators.required],
-        nomeRazaoSocial: ['', Validators.required],
-        nomeFantasia: [''],
-        cpfCnpj: ['']
-      }),
-      contatoEndereco: this.fb.group({
-        email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
-        telefone: [''],
-        contatoPessoa: [''],
-        atividadeEspecialidade: [''],
-        endereco: ['']
-      }),
-      visualVisibilidade: this.fb.group({
-        exibirNoSite: [false]
-      }),
-      gerenciamento: this.fb.group({
-        observacoes: ['']
-      }),
-      ativo: [true],
-      acoes: this.fb.array([])
-    });
-
-    this.novaAcaoForm = this.fb.group({
-      dataEvento: ['', Validators.required],
-      descricaoAcao: ['', Validators.required],
-      modeloCertificadoId: [''],
-      motivoPersonalizado: ['']
-    });
-
-    this.formEmissao = this.fb.group({
-      modeloId: ['', Validators.required],
-      motivoPersonalizado: [''],
-      dataEmissao: [this.hojeISO(), Validators.required],
-      acaoId: ['']
-    });
-  }
+  ) {}
 
   ngOnInit(): void {
     this.carregarApoiadores();
-    this.configurarFiltros();
-    this.carregarModelosHonraria();
-  }
-
-  carregarModelosHonraria(): void {
-    this.modelosCertificadosService.listar().subscribe((modelos: ModeloCertificado[]) => {
-      this.modelosHonraria = modelos.filter((m: ModeloCertificado) => m.tipo === 'HONRARIA');
-      this.cdr.detectChanges();
-    });
   }
 
   ngOnDestroy(): void {
@@ -170,655 +68,194 @@ export class ApoiadoresLista extends BaseFormDescarte implements OnInit, OnDestr
     this.destroy$.complete();
   }
 
-  private configurarFiltros(): void {
-    this.searchControl.valueChanges
-      .pipe(
-        debounceTime(400),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(() => this.carregarApoiadores());
-
-    this.tipoControl.valueChanges
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.carregarApoiadores());
-  }
+  // ==========================================
+  // LÓGICA DE ROOT: LISTAGEM E FETCHING (SRP)
+  // ==========================================
 
   carregarApoiadores(): void {
-    this.carregando = true;
-    const search = this.searchControl.value || undefined;
-    const tipo = this.tipoControl.value || undefined;
-    const ativo = this.abaAtiva === 'ativos';
+    this.carregandoLista = true;
+    this.cdr.detectChanges(); // forçar caso assincrono
 
-    this.apoiadoresService.listar(0, 50, tipo, search, true, ativo).subscribe({
-      next: (res) => {
-        this.apoiadores = res.data;
-        this.totalApoiadores = res.total;
-        this.carregando = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao buscar apoiadores', err);
-        this.carregando = false;
-        this.cdr.detectChanges();
-      }
-    });
+    this.apoiadoresService.listar()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (dados) => {
+          this.apoiadoresOriginais = [ ...dados.data ];
+          this.aplicarFiltros(); 
+          this.carregandoLista = false;
+          this.total = dados.total;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Erro ao carregar lista principal', err);
+          this.carregandoLista = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 
-  mudarAba(aba: 'ativos' | 'inativos'): void {
-    if (this.abaAtiva === aba) return;
-    this.abaAtiva = aba;
-    this.searchControl.setValue('');
-    this.tipoControl.setValue('');
-    this.carregarApoiadores();
+  aplicarFiltros(): void {
+    let result = this.apoiadoresOriginais;
+
+    if (this.filtroTipo !== 'TODOS') {
+      result = result.filter(a => a.tipo === this.filtroTipo);
+    }
+
+    if (this.pesquisaTermo && this.pesquisaTermo.trim()) {
+      const termo = this.pesquisaTermo.toLowerCase().trim();
+      const numApenas = termo.replace(/\D/g, ''); // RegEx isolado só pra fetch
+
+      result = result.filter(a => {
+        const nomeRazao = a.nomeRazaoSocial.toLowerCase();
+        const fantasia = a.nomeFantasia?.toLowerCase() || '';
+        const docLimpo = a.cpfCnpj ? a.cpfCnpj.replace(/\D/g, '') : '';
+        const regexDoc = numApenas.length >= 3 && docLimpo.includes(numApenas);
+
+        return nomeRazao.includes(termo) || fantasia.includes(termo) || regexDoc;
+      });
+    }
+
+    this.apoiadoresFiltrados = result;
+    this.cdr.detectChanges();
   }
 
-  inativarApoiador(apoiador: Apoiador): void {
-    if (!confirm(`Inativar ${apoiador.nomeFantasia || apoiador.nomeRazaoSocial}? O logo será removido do site.`)) return;
-    this.apoiadoresService.inativar(apoiador.id).subscribe({
-      next: () => {
-        this.apoiadores = this.apoiadores.filter(a => a.id !== apoiador.id);
-        this.totalApoiadores--;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao inativar', err);
-        alert('Não foi possível inativar o apoiador.');
-      }
-    });
+  get maskUtil() { return MasksUtil; }
+
+  limparFiltros(): void {
+    this.pesquisaTermo = '';
+    this.filtroTipo = 'TODOS';
+    this.aplicarFiltros();
   }
 
-  reativarApoiador(apoiador: Apoiador): void {
-    if (!confirm(`Reativar ${apoiador.nomeFantasia || apoiador.nomeRazaoSocial}? O logo será exibido no site novamente.`)) return;
-    this.apoiadoresService.reativar(apoiador.id).subscribe({
-      next: () => {
-        this.apoiadores = this.apoiadores.filter(a => a.id !== apoiador.id);
-        this.totalApoiadores--;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao reativar', err);
-        alert('Não foi possível reativar o apoiador.');
-      }
-    });
+  toggleStatus(apoiador: Apoiador): void {
+    if (!apoiador.id) return;
+    const novoStatus = !apoiador.ativo;
+    
+    // Optimistic Update
+    const oldStatus = apoiador.ativo;
+    apoiador.ativo = novoStatus;
+    
+    this.apoiadoresService.atualizar(apoiador.id, { ativo: novoStatus })
+      .subscribe({
+        error: () => {
+          // Revert on fail
+          apoiador.ativo = oldStatus;
+          alert('Erro ao alterar status no servidor.');
+          this.cdr.detectChanges();
+        }
+      });
   }
 
-  novoApoiador() {
-    this.fecharModal();
-    this.fecharModalForm();
+  // ==========================================
+  // ORQUESTRAÇÃO DE MODAIS (STATES)
+  // ==========================================
+
+  abrirNovo(): void {
+    this.fecharTodosModais();
     this.modoEdicao = false;
-    this.idApoiadorEditando = null;
-    this.logoFile = null;
-    this.logoPreview = null;
-    this.carregandoLogo = false;
-    this.logoFeedback = null;
-    this.passoAtual = 1;
-    this.apoiadorForm.reset({
-      informacoesPrincipais: { tipo: 'EMPRESA' },
-      visualVisibilidade: { exibirNoSite: false },
-      ativo: true
-    });
-    this.acoesFormArray.clear();
-    this.modalFormAberto = true;
+    this.apoiadorAtual = null;
+    this.modalFormAberto.set(true);
   }
 
-  editarApoiador(id: string) {
-    this.fecharModal(); // Fecha view se aberto
+  editarApoiador(id: string): void {
+    this.fecharTodosModais(); // Garante sem memory leak de modais abertos no fundo
     this.modoEdicao = true;
-    this.idApoiadorEditando = id;
-    this.logoFile = null;
-    this.logoPreview = null;
-    this.carregandoLogo = false;
-    this.logoFeedback = null;
-    this.passoAtual = 1;
-    this.modalFormAberto = true;
-    this.apoiadorForm.reset();
-    this.acoesFormArray.clear();
     
-    this.apoiadoresService.obterPorId(id).subscribe({
-      next: (res) => {
-        this.apoiadorForm.patchValue({
-          informacoesPrincipais: {
-            tipo: res.tipo,
-            nomeRazaoSocial: res.nomeRazaoSocial,
-            nomeFantasia: res.nomeFantasia,
-            cpfCnpj: res.cpfCnpj
-          },
-          contatoEndereco: {
-            email: res.email,
-            telefone: res.telefone,
-            contatoPessoa: res.contatoPessoa,
-            atividadeEspecialidade: res.atividadeEspecialidade,
-            endereco: res.endereco
-          },
-          visualVisibilidade: {
-            exibirNoSite: res.exibirNoSite
-          },
-          gerenciamento: {
-            observacoes: res.observacoes
-          },
-          ativo: res.ativo
-        });
-        if (res.logoUrl) {
-            this.logoPreview = res.logoUrl;
-        }
-
-        // Apply Masks
-        if (res.cpfCnpj) this.formatarCpfCnpj({ target: { value: res.cpfCnpj } });
-        if (res.telefone) this.formatarTelefone({ target: { value: res.telefone } });
-
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao buscar perfil para edição', err);
-        this.cdr.detectChanges();
-      }
-    });
+    // Set a context early for Form Wizard rendering
+    this.apoiadorAtual = this.apoiadoresOriginais.find(a => a.id === id) || null;
+    this.modalFormAberto.set(true);
   }
 
-  // --- MÁSCARAS ---
-  formatarCpfCnpj(event: any): void {
-    let valor = event.target.value.replace(/\D/g, '');
-    if (valor.length <= 11) {
-      // CPF
-      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-      valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-      valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    } else {
-      // CNPJ (max 14 digitos numéricos)
-      valor = valor.substring(0, 14);
-      valor = valor.replace(/^(\d{2})(\d)/, '$1.$2');
-      valor = valor.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-      valor = valor.replace(/\.(\d{3})(\d)/, '.$1/$2');
-      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
-    }
-    event.target.value = valor;
-    this.apoiadorForm.get('informacoesPrincipais.cpfCnpj')?.setValue(valor, { emitEvent: false });
+  abrirDados(apoiador: Apoiador): void {
+    this.fecharTodosModais();
+    this.apoiadorAtual = { ...apoiador };
+    this.modalPerfilAberto.set(true);
   }
 
-  formatarEmail(event: any): void {
-    let v = event.target.value.replace(/\s/g, '').toLowerCase();
-    event.target.value = v;
-    this.apoiadorForm.get('contatoEndereco.email')?.setValue(v);
+  abrirAcoes(apoiadorId: string): void {
+    this.fecharTodosModais();
+    this.apoiadorAtual = this.apoiadoresOriginais.find(a => a.id === apoiadorId) || null;
+    this.modalAcoesAberto.set(true);
+    this.fetchAcoes(apoiadorId);
   }
 
-  formatarTelefone(event: any): void {
-    let valor = event.target.value.replace(/\D/g, '');
-    valor = valor.substring(0, 11);
-    
-    if (valor.length > 10) {
-      valor = valor.replace(/^(\d{2})(\d{5})(\d{4}).*/, '($1) $2-$3');
-    } else if (valor.length > 6) {
-      valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, '($1) $2-$3');
-    } else if (valor.length > 2) {
-      valor = valor.replace(/^(\d{2})(\d{0,5})/, '($1) $2');
-    } else if (valor.length > 0) {
-      valor = valor.replace(/^(\d{0,2})/, '($1');
-    }
-
-    event.target.value = valor;
-    this.apoiadorForm.get('contatoEndereco.telefone')?.setValue(valor, { emitEvent: false });
+  abrirCertificados(apoiadorId: string): void {
+    this.fecharTodosModais();
+    this.apoiadorAtual = this.apoiadoresOriginais.find(a => a.id === apoiadorId) || null;
+    this.modalCertificadosAberto.set(true);
+    this.fetchCertificados(apoiadorId);
   }
 
-  // --- CONTROLES DE ARRAY DE AÇÕES NO FORMULÁRIO GERAL ---
-  get acoesFormArray() {
-    return this.apoiadorForm.get('acoes') as FormArray;
+  private fecharTodosModais(): void {
+    this.modalFormAberto.set(false);
+    this.modalPerfilAberto.set(false);
+    this.modalAcoesAberto.set(false);
+    this.modalCertificadosAberto.set(false);
   }
 
-  addAcaoField(dataEvento = '', descricaoAcao = '') {
-    this.acoesFormArray.push(this.fb.group({
-      dataEvento: [dataEvento, Validators.required],
-      descricaoAcao: [descricaoAcao, Validators.required]
-    }));
+  // ==========================================
+  // CALLBACKS E ATUALIZAÇÕES DOS FILHOS
+  // ==========================================
+
+  onFormSaved(): void {
+    this.modalFormAberto.set(false);
+    this.carregarApoiadores(); 
   }
 
-  removeAcaoField(index: number) {
-    this.acoesFormArray.removeAt(index);
+  onModalFormClosed(): void {
+    this.modalFormAberto.set(false);
   }
 
-  verPerfil(id: string) {
-    this.modalAberto = true;
-    this.carregandoDetalhes = true;
-    this.apoiadorVisualizado = null;
-
-    
-    this.apoiadoresService.obterPorId(id).subscribe({
-      next: (res) => {
-        this.apoiadorVisualizado = res;
-        this.carregandoDetalhes = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao buscar perfil', err);
-        this.carregandoDetalhes = false;
-        this.cdr.detectChanges();
-      }
-    });
+  onPerfilClosed(): void {
+    this.modalPerfilAberto.set(false);
   }
 
-  fecharModal() {
-    this.modalAberto = false;
-    this.apoiadorVisualizado = null;
-    this.novaAcaoForm.reset();
-    this.certificadosEmitidos = [];
-    this.fecharModalAcoes();
-    this.fecharModalCertificados();
+  onAcoesClosed(): void {
+    this.modalAcoesAberto.set(false);
   }
 
-  abrirModalAcoes() {
-    this.modalAcoesAberto = true;
-    this.filtroAcoes = '';
-    this.mostrarFormAcao = false;
-    this.cancelarEdicaoAcao();
-    // Carrega as ações via API (findOne do backend não inclui acoes)
-    if (this.apoiadorVisualizado) {
-      this.apoiadoresService.buscarAcoes(this.apoiadorVisualizado.id).subscribe({
-        next: (acoes) => {
-          this.apoiadorVisualizado!.acoes = acoes;
-          this.cdr.detectChanges();
-        },
-        error: (err) => console.error('Erro ao carregar ações', err)
-      });
-    }
+  onCertificadosClosed(): void {
+    this.modalCertificadosAberto.set(false);
   }
 
-  fecharModalAcoes() {
-    this.modalAcoesAberto = false;
-    this.mostrarFormAcao = false;
-    this.cancelarEdicaoAcao();
-  }
+  // Fetches das tabelas filhas isolados.
+  fetchAcoes(id?: string): void {
+    const target = id || this.apoiadorAtual?.id;
+    if (!target) return;
 
-  abrirModalCertificados() {
-    this.modalCertificadosAberto = true;
-    this.filtroCertificados = '';
-    if (this.apoiadorVisualizado) {
-      this.carregarCertificados(this.apoiadorVisualizado.id);
-    }
-  }
-
-  fecharModalCertificados() {
-    this.modalCertificadosAberto = false;
-    this.certificadosEmitidos = [];
-  }
-
-  carregarCertificados(id: string) {
-    this.carregandoCertificados = true;
-    this.apoiadoresService.listarCertificados(id).subscribe({
-      next: (certs) => {
-        this.certificadosEmitidos = certs;
-        this.carregandoCertificados = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao carregar certificados', err);
-        this.carregandoCertificados = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  // Listas Filtradas (Getters)
-  get acoesFiltradas(): any[] {
-    const acoes = this.apoiadorVisualizado?.acoes ?? [];
-    if (!this.filtroAcoes.trim()) return acoes;
-    const q = this.filtroAcoes.toLowerCase();
-    return acoes.filter((a: any) =>
-      (a.descricaoAcao ?? '').toLowerCase().includes(q)
-    );
-  }
-
-  get certificadosFiltrados(): any[] {
-    if (!this.filtroCertificados.trim()) return this.certificadosEmitidos;
-    const q = this.filtroCertificados.toLowerCase();
-    return this.certificadosEmitidos.filter((c: any) =>
-      (c.modelo?.nome ?? '').toLowerCase().includes(q) ||
-      (c.acao?.descricaoAcao ?? '').toLowerCase().includes(q) ||
-      (c.codigoValidacao ?? '').toLowerCase().includes(q) ||
-      (c.motivoPersonalizado ?? '').toLowerCase().includes(q)
-    );
-  }
-
-  visualizarCertificadoPdf(cert: any): void {
-    if (!this.apoiadorVisualizado || !cert?.id) {
-      alert('Não foi possível identificar o certificado.');
-      return;
-    }
-    // Chama o novo endpoint que re-gera o PDF on-demand
-    this.apoiadoresService.gerarPdfCertificado(this.apoiadorVisualizado.id, cert.id).subscribe({
-      next: (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        this.urlPdfParaVisualizar = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-        this.mostrarVisualizadorPdf = true;
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        console.error('Erro ao gerar PDF do certificado', err);
-        alert('Não foi possível gerar o PDF. O modelo pode ter sido excluído.');
-      }
-    });
-  }
-
-  // Lógica do Modal de Histórico Pessoal (Rápido)
-  editarAcaoPerfil(acao: any) {
-    this.acaoEditandoId = acao.id;
-    this.mostrarFormAcao = true;
-    this.novaAcaoForm.patchValue({
-      dataEvento: new Date(acao.dataEvento).toISOString().split('T')[0],
-      descricaoAcao: acao.descricaoAcao,
-      modeloCertificadoId: '',
-      motivoPersonalizado: ''
-    });
-  }
-
-  cancelarEdicaoAcao() {
-    this.acaoEditandoId = null;
-    this.novaAcaoForm.reset();
-  }
-
-  excluirAcaoPerfil(acaoId: string) {
-    if (!confirm('Deseja excluir permanentemente este histórico e seu certificado vinculado?')) return;
-    this.apoiadoresService.removerAcao(this.apoiadorVisualizado!.id, acaoId).subscribe({
-      next: () => {
-        if (this.apoiadorVisualizado && this.apoiadorVisualizado.acoes) {
-          this.apoiadorVisualizado.acoes = this.apoiadorVisualizado.acoes.filter(a => a.id !== acaoId);
-        }
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Erro ao excluir ação', err);
-        alert('Realizar logout/login para tentar novamente.');
-      }
-    });
-  }
-
-  adicionarAcaoPerfil(event: Event) {
-    event.preventDefault();
-    if (this.novaAcaoForm.invalid || !this.apoiadorVisualizado) {
-      this.novaAcaoForm.markAllAsTouched();
-      return;
-    }
-    this.salvandoAcao = true;
-    const val = this.novaAcaoForm.value;
-    const payload = {
-      dataEvento: val.dataEvento,
-      descricaoAcao: val.descricaoAcao,
-      modeloCertificadoId: val.modeloCertificadoId || undefined,
-      motivoPersonalizado: val.motivoPersonalizado || undefined
-    };
-    
-    if (this.acaoEditandoId) {
-      this.apoiadoresService.editarAcao(this.apoiadorVisualizado.id, this.acaoEditandoId, payload).subscribe({
-        next: (acaoEditada) => {
-          this.salvandoAcao = false;
-          const idx = this.apoiadorVisualizado!.acoes?.findIndex(a => a.id === this.acaoEditandoId) ?? -1;
-          if (idx !== -1 && this.apoiadorVisualizado!.acoes) {
-            this.apoiadorVisualizado!.acoes[idx] = acaoEditada;
-          }
-          this.cancelarEdicaoAcao();
-          this.mostrarFormAcao = false; // fecha o form após editar
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Erro ao editar ação', err);
-          alert('Falha ao editar histórico.');
-          this.salvandoAcao = false;
-          this.cdr.detectChanges();
-        }
-      });
-    } else {
-      this.apoiadoresService.adicionarAcao(this.apoiadorVisualizado.id, payload).subscribe({
-        next: (novaAcao) => {
-          this.salvandoAcao = false;
-          if (!this.apoiadorVisualizado!.acoes) {
-            this.apoiadorVisualizado!.acoes = [];
-          }
-          this.apoiadorVisualizado!.acoes.unshift(novaAcao);
-          this.novaAcaoForm.reset();
-          this.mostrarFormAcao = false; // fecha o form após adicionar
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.error('Erro ao adicionar ação avulsa', err);
-          alert('Falha ao adicionar histórico.');
-          this.salvandoAcao = false;
-          this.cdr.detectChanges();
-        }
-      });
-    }
-  }
-
-  // Lógica do Form / Descarte Guard
-  isFormDirty(): boolean {
-    return this.modalFormAberto && this.apoiadorForm.dirty && !this.salvando;
-  }
-
-  async fecharFormSeguro() {
-    if (await this.podeDescartar()) {
-      this.fecharModalForm();
-    }
-  }
-
-  fecharModalForm() {
-    this.modalFormAberto = false;
-    this.apoiadorForm.reset();
-  }
-
-  getGroupName(passo: number): string {
-    switch (passo) {
-      case 1: return 'informacoesPrincipais';
-      case 2: return 'contatoEndereco';
-      case 3: return 'visualVisibilidade';
-      case 4: return 'gerenciamento';
-      default: return 'informacoesPrincipais';
-    }
-  }
-
-  avancarPasso() {
-    const grupo = this.apoiadorForm.get(this.getGroupName(this.passoAtual));
-    if (grupo && grupo.valid) {
-      this.passoAtual++;
-    } else {
-      grupo?.markAllAsTouched();
-    }
-  }
-
-  voltarPasso() {
-    if (this.passoAtual > 1) {
-      this.passoAtual--;
-    }
-  }
-
-  isCampoInvalido(group: string, controlName: string): boolean {
-    const control = this.apoiadorForm.get(`${group}.${controlName}`);
-    return !!(control && control.invalid && control.touched);
-  }
-
-  onLogoSelected(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.carregandoLogo = true;
-      this.logoFeedback = null;
-      this.cdr.detectChanges();
-
-      this.logoFile = file;
-      const reader = new FileReader();
-      
-      reader.onload = () => {
-        // Timeout focado na experiência de usuário solicitada para visualização do loading
-        setTimeout(() => {
-          this.logoPreview = reader.result;
-          this.carregandoLogo = false;
-          this.logoFeedback = 'Foto atualizada!';
-          this.logoFeedbackType = 'success';
-          this.cdr.detectChanges();
-        }, 800);
-      };
-
-      reader.onerror = () => {
-        this.carregandoLogo = false;
-        this.logoFeedback = 'Houve algum erro, tente novamente!';
-        this.logoFeedbackType = 'error';
-        this.cdr.detectChanges();
-      };
-
-      try {
-        reader.readAsDataURL(file);
-      } catch (e) {
-        reader.onerror(new ProgressEvent('error') as any);
-      }
-    }
-  }
-
-  onSubmitForm(): void {
-    if (this.apoiadorForm.invalid) {
-      this.apoiadorForm.markAllAsTouched();
-      return;
-    }
-
-    this.salvando = true;
-    const formData = this.apoiadorForm.value;
-    
-    // Preparando o Dto unificando os grupos
-    const saveDto: Partial<Apoiador> = {
-      tipo: formData.informacoesPrincipais.tipo,
-      nomeRazaoSocial: formData.informacoesPrincipais.nomeRazaoSocial,
-      nomeFantasia: formData.informacoesPrincipais.nomeFantasia || undefined,
-      cpfCnpj: formData.informacoesPrincipais.cpfCnpj || undefined,
-      contatoPessoa: formData.contatoEndereco.contatoPessoa || undefined,
-      telefone: formData.contatoEndereco.telefone || undefined,
-      email: formData.contatoEndereco.email || undefined,
-      endereco: formData.contatoEndereco.endereco || undefined,
-      atividadeEspecialidade: formData.contatoEndereco.atividadeEspecialidade || undefined,
-      observacoes: formData.gerenciamento.observacoes || undefined,
-      exibirNoSite: formData.visualVisibilidade.exibirNoSite,
-      ativo: formData.ativo,
-      acoes: (!this.modoEdicao && formData.acoes?.length) ? formData.acoes : undefined
-    };
-
-    const req$ = this.modoEdicao && this.idApoiadorEditando
-      ? this.apoiadoresService.atualizar(this.idApoiadorEditando, saveDto)
-      : this.apoiadoresService.criar(saveDto);
-
-    req$.subscribe({
-      next: (res) => {
-        const id = this.modoEdicao && this.idApoiadorEditando ? this.idApoiadorEditando : (res as Apoiador).id;
-        if (this.logoFile && id) {
-          this.apoiadoresService.uploadLogo(id, this.logoFile).subscribe({
-            next: () => this.sucessoForm(),
-            error: (err) => {
-              console.error('Erro no upload', err);
-              this.sucessoForm();
-            }
-          });
-        } else {
-          this.sucessoForm();
-        }
-      },
-      error: (err) => {
-        console.error('Erro ao salvar apoiador', err);
-        alert('Erro ao salvar no servidor. Verifique os dados e tente novamente.');
-        this.salvando = false;
-        this.cdr.detectChanges();
-      }
-    });
-  }
-
-  private sucessoForm(): void {
-    this.salvando = false;
-    this.cdr.detectChanges();
-    this.fecharModalForm();
-    this.carregarApoiadores(); // recarrega a lista
-  }
-
-  // ── Emissão de Honrarias (Certificados) ─────────────────────────────────────────
-
-  abrirModalEmissao(apoiador: Apoiador, acao?: any): void {
-    this.apoiadorParaEmissao = apoiador;
-    this.modalEmissaoAberto = true;
-    
-    let motivoPadrao = '';
-    let dataPronta = this.hojeISO();
-    
-    if (acao) {
-      motivoPadrao = acao.descricaoAcao;
-      dataPronta = new Date(acao.dataEvento).toISOString().split('T')[0];
-    }
-    
-    this.formEmissao.reset({
-      modeloId: '',
-      motivoPersonalizado: motivoPadrao,
-      dataEmissao: dataPronta,
-      acaoId: acao ? acao.id : ''
-    });
-    this.cdr.detectChanges();
-  }
-
-  fecharModalEmissao(): void {
-    this.modalEmissaoAberto = false;
-    this.apoiadorParaEmissao = null;
-    this.cdr.detectChanges();
-  }
-
-  hojeISO(): string {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-  }
-
-  emitirHonraria(): void {
-    if (this.formEmissao.invalid || !this.apoiadorParaEmissao) {
-      this.formEmissao.markAllAsTouched();
-      return;
-    }
-
-    this.emitindoCertificado = true;
+    this.carregandoContextoFilho = true;
     this.cdr.detectChanges();
 
-    const payload = {
-      modeloId: this.formEmissao.value.modeloId,
-      motivoPersonalizado: this.formEmissao.value.motivoPersonalizado,
-      dataEmissao: this.formEmissao.value.dataEmissao,
-      acaoId: this.formEmissao.value.acaoId || undefined
-    };
-
-    this.apoiadoresService.emitirCertificado(this.apoiadorParaEmissao.id, payload).subscribe({
-      next: (res: any) => {
-        // Recebe { certificado, pdfBase64 } do backend
-        const byteCharacters = atob(res.pdfBase64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: 'application/pdf' });
-        
-        // Capturar o id antes de fechar o modal
-        const idEmitido = this.apoiadorParaEmissao?.id;
-
-        const url = window.URL.createObjectURL(blob);
-        this.urlPdfParaVisualizar = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-        this.mostrarVisualizadorPdf = true;
-        this.emitindoCertificado = false;
-        this.fecharModalEmissao();
-        
-        // Se a visualização estiver aberta, atualiza a lista de certificados
-        if (this.modalAberto && this.apoiadorVisualizado && idEmitido && this.apoiadorVisualizado.id === idEmitido) {
-          this.carregarCertificados(this.apoiadorVisualizado.id);
-        }
+    this.apoiadoresService.buscarAcoes(target).subscribe({
+      next: (acoes: AcaoApoiador[]) => {
+        this.acoesFiltradas = acoes;
+        this.carregandoContextoFilho = false;
+        this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Erro ao emitir honraria', err);
-        alert('Erro ao emitir documento.');
-        this.emitindoCertificado = false;
+      error: () => {
+        this.carregandoContextoFilho = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  // ── PDF Viewer ────────────────────────────────────────────────────────
-  fecharVisualizadorPdf(): void {
-    this.mostrarVisualizadorPdf = false;
-    this.urlPdfParaVisualizar = null;
+  fetchCertificados(id?: string): void {
+    const target = id || this.apoiadorAtual?.id;
+    if (!target) return;
+
+    this.carregandoContextoFilho = true;
     this.cdr.detectChanges();
+
+    this.apoiadoresService.listarCertificados(target).subscribe({
+      next: (cert: any[]) => {
+        this.certificadosEmitidos = cert;
+        this.carregandoContextoFilho = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoContextoFilho = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
-
