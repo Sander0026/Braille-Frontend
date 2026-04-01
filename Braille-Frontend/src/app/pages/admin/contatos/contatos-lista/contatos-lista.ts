@@ -1,9 +1,12 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { Component, OnInit, ChangeDetectionStrategy, inject, signal, computed, DestroyRef } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 import { ContatosService, Contato } from '../../../../core/services/contatos.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { tap } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 
 type FiltroLida = 'todas' | 'nao-lidas' | 'lidas';
 
@@ -11,100 +14,144 @@ type FiltroLida = 'todas' | 'nao-lidas' | 'lidas';
   selector: 'app-contatos-lista',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, A11yModule],
+  providers: [DatePipe],
   templateUrl: './contatos-lista.html',
-  styleUrl: './contatos-lista.scss'
+  styleUrl: './contatos-lista.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ContatosLista implements OnInit {
-  contatos: Contato[] = [];
-  isLoading = true;
-  erro = '';
-  total = 0;
-  paginaAtual = 1;
-  totalPaginas = 1;
-  filtroAtivo: FiltroLida = 'todas';
+  // Injeções Modernas
+  private readonly contatosService = inject(ContatosService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly datePipe = inject(DatePipe);
 
-  contatoSelecionado: Contato | null = null;
-  processando = false;
+  // Estados Baseados em Signals
+  contatos = signal<Contato[]>([]);
+  isLoading = signal<boolean>(true);
+  erro = signal<string>('');
+  
+  total = signal<number>(0);
+  paginaAtual = signal<number>(1);
+  totalPaginas = signal<number>(1);
+  filtroAtivo = signal<FiltroLida>('todas');
+  
+  contatoSelecionado = signal<Contato | null>(null);
+  private lastFocusBeforeModal: HTMLElement | null = null;
 
+  // Filtros UI
   readonly filtros: { valor: FiltroLida; label: string }[] = [
     { valor: 'todas', label: 'Todas' },
     { valor: 'nao-lidas', label: 'Não lidas' },
     { valor: 'lidas', label: 'Lidas' }
   ];
 
-  constructor(
-    private contatosService: ContatosService,
-    private cdr: ChangeDetectorRef,
-    private confirmDialog: ConfirmDialogService,
-    private liveAnnouncer: LiveAnnouncer
-  ) { }
+  // Computeds (Calculados Otimizados de forma reativa, sem recalcular na main thread continuamente)
+  paginas = computed(() => {
+    return Array.from({ length: this.totalPaginas() }, (_, i) => i + 1);
+  });
 
-  ngOnInit(): void { this.carregar(); }
+  ngOnInit(): void {
+    this.carregar();
+  }
 
   mudarFiltro(filtro: FiltroLida): void {
-    this.filtroAtivo = filtro;
-    this.paginaAtual = 1;
+    this.filtroAtivo.set(filtro);
+    this.paginaAtual.set(1);
     this.carregar();
   }
 
   carregar(): void {
-    this.isLoading = true;
-    const lida = this.filtroAtivo === 'todas' ? undefined :
-      this.filtroAtivo === 'lidas' ? true : false;
-    this.contatosService.listar(this.paginaAtual, 15, lida).subscribe({
-      next: (res) => {
-        this.contatos = res.data;
-        this.total = res.meta.total;
-        this.totalPaginas = res.meta.lastPage;
-        this.isLoading = false;
-        this.cdr.detectChanges();
-        this.liveAnnouncer.announce(`Lista de mensagens de contato atualizada: ${this.total} encontradas.`);
-      },
-      error: () => { this.erro = 'Erro ao carregar mensagens.'; this.isLoading = false; this.cdr.detectChanges(); }
-    });
+    this.isLoading.set(true);
+    this.erro.set('');
+    
+    const fl = this.filtroAtivo();
+    const lida = fl === 'todas' ? undefined : fl === 'lidas' ? true : false;
+    
+    this.contatosService.listar(this.paginaAtual(), 15, lida)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.contatos.set(res.data);
+          this.total.set(res.meta.total);
+          this.totalPaginas.set(res.meta.lastPage);
+          this.isLoading.set(false);
+          this.liveAnnouncer.announce(`Lista de mensagens de contato atualizada: ${this.total()} encontradas.`);
+        },
+        error: () => {
+          this.erro.set('Erro ao carregar mensagens.');
+          this.isLoading.set(false);
+        }
+      });
   }
 
   abrirMensagem(contato: Contato): void {
-    this.contatoSelecionado = contato;
-    if (!contato.lida) { this.marcarLida(contato); }
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    this.contatoSelecionado.set(contato);
+    if (!contato.lida) {
+      this.marcarLida(contato);
+    }
   }
 
-  fecharMensagem(): void { this.contatoSelecionado = null; }
+  fecharMensagem(): void {
+    this.contatoSelecionado.set(null);
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+  }
 
   marcarLida(contato: Contato): void {
-    this.contatosService.marcarComoLida(contato.id).subscribe({
-      next: () => { contato.lida = true; this.cdr.detectChanges(); },
-      error: () => { }
-    });
+    const contatoId = contato.id; // Clonagem imutável simplificada
+    this.contatosService.marcarComoLida(contatoId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          // Atualiza o objeto no signal local via sub-propriedade mantendo a ref mutável ou mapeando
+          this.contatos.update(lista => 
+            lista.map(c => c.id === contatoId ? { ...c, lida: true } : c)
+          );
+          
+          // Se for o selecionado atual, dá o merge reativo nele também
+          const selecionado = this.contatoSelecionado();
+          if (selecionado && selecionado.id === contatoId) {
+            this.contatoSelecionado.set({ ...selecionado, lida: true });
+          }
+        },
+        error: () => {
+          console.error(`Falha ao marcar como lida (ID: ${contatoId})`);
+        }
+      });
   }
 
   async excluir(contato: Contato): Promise<void> {
+    const nomeLimpo = contato.nome || 'Usuário Indefinido';
     const ok = await this.confirmDialog.confirmar({
       titulo: 'Excluir Mensagem',
-      mensagem: `Tem certeza que deseja excluir a mensagem de "${contato.nome}"? Esta ação não pode ser desfeita.`,
+      mensagem: `Tem certeza que deseja excluir a mensagem de "${nomeLimpo}"? Esta ação não pode ser desfeita.`,
       textoBotaoConfirmar: 'Sim, excluir',
       tipo: 'danger',
     });
+    
     if (!ok) return;
-    this.contatosService.excluir(contato.id).subscribe({
-      next: () => { this.fecharMensagem(); this.carregar(); },
-      error: () => { this.cdr.detectChanges(); }
-    });
-  }
 
-  formatarData(data: string): string {
-    return new Date(data).toLocaleDateString('pt-BR', {
-      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
+    try {
+      await firstValueFrom(
+        this.contatosService.excluir(contato.id)
+      );
+      this.fecharMensagem();
+      this.carregar();
+    } catch (e: any) {
+      this.erro.set('Houve um erro indesejado ao tentar excluir a mensagem.');
+    }
   }
 
   irParaPagina(p: number): void {
-    if (p < 1 || p > this.totalPaginas) return;
-    this.paginaAtual = p;
+    if (p < 1 || p > this.totalPaginas()) return;
+    this.paginaAtual.set(p);
     this.carregar();
   }
 
-  get paginas(): number[] {
-    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  // Delegando formatação para o Core Pipe do Angular via Class
+  formatarData(data: string): string {
+    return this.datePipe.transform(data, 'dd/MM/yyyy HH:mm') || '--';
   }
 }

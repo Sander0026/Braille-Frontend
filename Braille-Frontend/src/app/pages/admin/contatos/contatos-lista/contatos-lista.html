@@ -9,46 +9,48 @@
 <!-- Filtros -->
 <div class="tab-bar" role="tablist" aria-label="Filtrar mensagens">
     @for (f of filtros; track f.valor) {
-    <button role="tab" class="tab-btn" [class.active]="filtroAtivo === f.valor"
-        [attr.aria-selected]="filtroAtivo === f.valor" (click)="mudarFiltro(f.valor)"
+    <button role="tab" class="tab-btn" [class.active]="filtroAtivo() === f.valor"
+        [attr.aria-selected]="filtroAtivo() === f.valor" (click)="mudarFiltro(f.valor)"
         [attr.aria-label]="'Mostrar ' + f.label">
         {{ f.label }}
-        @if (filtroAtivo === f.valor && total > 0) {
-        <span class="tab-count" aria-hidden="true">{{ total }}</span>
+        @if (filtroAtivo() === f.valor && total() > 0) {
+        <span class="tab-count" aria-hidden="true">{{ total() }}</span>
         }
     </button>
     }
 </div>
 
 <!-- Lista de mensagens -->
-@if (isLoading) {
+@if (isLoading()) {
 <div class="loading-container" role="status" aria-live="polite">
     <div class="loading-spinner" aria-hidden="true"></div>
     <span>Carregando mensagens...</span>
 </div>
-} @else if (erro) {
-<div role="alert" class="card card-body" aria-live="assertive">
-    <p class="form-error">{{ erro }}</p>
-    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+} @else if (erro()) {
+<div role="alert" class="card card-body form-error-container" aria-live="assertive">
+    <span class="material-symbols-rounded" aria-hidden="true">error</span>
+    <p class="form-error">{{ erro() }}</p>
+    <button class="btn btn-secondary mt-3" (click)="carregar()">Tentar novamente</button>
 </div>
-} @else if (contatos.length === 0) {
+} @else if (contatos().length === 0) {
 <div class="empty-state" role="status">
+    <span class="material-symbols-rounded empty-icon" aria-hidden="true">inbox</span>
     <h3>Nenhuma mensagem</h3>
     <p>Quando alguém preencher o formulário de contato, aparecerá aqui.</p>
 </div>
 } @else {
 <div class="mensagens-lista" role="region" aria-label="Lista de mensagens de contato">
-    @for (contato of contatos; track contato.id) {
+    @for (contato of contatos(); track contato.id) {
     <article class="mensagem-item" [class.nao-lida]="!contato.lida">
         <div class="mensagem-header">
             <div class="mensagem-remetente">
                 <div class="remetente-avatar" aria-hidden="true">
-                    {{ contato.nome.slice(0, 1).toUpperCase() }}
+                    {{ contato.nome.charAt(0).toUpperCase() }}
                 </div>
                 <div>
                     <strong class="remetente-nome">
                         @if (!contato.lida) {
-                        <span class="badge-nao-lida" aria-label="Não lida">•</span>
+                        <span class="badge-nao-lida" aria-label="Mensagem não lida"></span>
                         }
                         {{ contato.nome }}
                     </strong>
@@ -56,68 +58,76 @@
                 </div>
             </div>
             <div class="mensagem-acoes">
-                <span class="mensagem-data">{{ formatarData(contato.criadoEm) }}</span>
+                <span class="mensagem-data" aria-label="Data Válida">{{ formatarData(contato.criadoEm) }}</span>
                 <button class="btn btn-sm btn-secondary" (click)="abrirMensagem(contato)"
-                    [attr.aria-label]="'Ler mensagem de ' + contato.nome">
+                    [attr.aria-label]="'Ler mensagem completa de ' + contato.nome">
                     Ler
                 </button>
                 <button class="btn btn-sm btn-danger" (click)="excluir(contato)"
-                    [attr.aria-label]="'Excluir mensagem de ' + contato.nome">
+                    [attr.aria-label]="'Excluir permanentemente mensagem de ' + contato.nome">
                     Excluir
                 </button>
             </div>
         </div>
         @if (contato.assunto) {
-        <p class="mensagem-assunto">{{ contato.assunto }}</p>
+        <p class="mensagem-assunto"><strong>Assunto: </strong>{{ contato.assunto }}</p>
         }
-        <p class="mensagem-preview">{{ contato.mensagem.slice(0, 100) }}{{ contato.mensagem.length > 100 ? '…' : '' }}
-        </p>
+        <p class="mensagem-preview">{{ contato.mensagem.slice(0, 100) }}{{ contato.mensagem.length > 100 ? '…' : '' }}</p>
     </article>
     }
 </div>
 
-@if (totalPaginas > 1) {
+@if (totalPaginas() > 1) {
 <nav class="pagination" role="navigation" aria-label="Paginação de mensagens">
-    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+    <button (click)="irParaPagina(paginaAtual() - 1)" [disabled]="paginaAtual() === 1"
         aria-label="Página anterior">‹</button>
-    @for (p of paginas; track p) {
-    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual"
-        [attr.aria-current]="p === paginaAtual ? 'page' : null" [attr.aria-label]="'Ir para página ' + p">{{ p
-        }}</button>
+        
+    @for (p of paginas(); track p) {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual()"
+        [attr.aria-current]="p === paginaAtual() ? 'page' : null" 
+        [attr.aria-label]="'Ir para página ' + p">{{ p }}</button>
     }
-    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+    
+    <button (click)="irParaPagina(paginaAtual() + 1)" [disabled]="paginaAtual() === totalPaginas()"
         aria-label="Próxima página">›</button>
 </nav>
 }
 }
 
-<!-- Modal leitura completa -->
-@if (contatoSelecionado) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Mensagem de ' + contatoSelecionado.nome"
-    (click)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <div class="modal" (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <div>
-                <h2>{{ contatoSelecionado.nome }}</h2>
-                <p style="font-size:.8rem;color:#737373;margin-top:.2rem">{{ contatoSelecionado.telefone || 'Celular não
-                    informado' }} · {{
-                    formatarData(contatoSelecionado.criadoEm) }}</p>
+<!-- Modal leitura completa WCAG Avançada com Dialog Html5 -->
+@if (contatoSelecionado() !== null) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Lendo Mensagem de ' + contatoSelecionado()?.nome"
+    (click)="fecharMensagem()" (keydown.escape)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()">
+        <div class="modal-header d-flex justify-content-between">
+            <div class="d-flex flex-column">
+                <h2 style="margin: 0;">{{ contatoSelecionado()?.nome }}</h2>
+                <div class="small-text-hint mt-1" style="color:#737373;">
+                    <span>{{ contatoSelecionado()?.telefone || 'Celular não informado' }}</span>
+                    <span> · </span>
+                    <time [attr.datetime]="contatoSelecionado()?.criadoEm">{{ formatarData(contatoSelecionado()?.criadoEm!) }}</time>
+                </div>
             </div>
-            <button class="btn btn-icon btn-ghost" (click)="fecharMensagem()" aria-label="Fechar mensagem">✕</button>
+            <button class="btn btn-icon btn-ghost align-self-start" (click)="fecharMensagem()" aria-label="Fechar janela de leitura">✕</button>
         </div>
         <div class="modal-body">
-            @if (contatoSelecionado.assunto) {
-            <p class="mensagem-assunto-full">{{ contatoSelecionado.assunto }}</p>
+            @if (contatoSelecionado()?.assunto) {
+            <p class="mensagem-assunto-full" style="font-weight: 600; font-size: 1.1rem; color: #111827;">
+                Assunto: {{ contatoSelecionado()?.assunto }}
+            </p>
             }
-            <p class="mensagem-texto">{{ contatoSelecionado.mensagem }}</p>
+            <div class="mensagem-texto" style="color: #4b5563; line-height: 1.6; white-space: pre-wrap;">
+                {{ contatoSelecionado()?.mensagem }}
+            </div>
         </div>
-        <div class="modal-footer">
-            <button class="btn btn-danger" (click)="excluir(contatoSelecionado)"
-                [attr.aria-label]="'Excluir mensagem de ' + contatoSelecionado.nome">
-                Excluir
+        <div class="modal-footer" style="gap:1rem; padding-top:1.5rem;">
+            <button class="btn btn-secondary" style="border:1px solid #d1d5db;" (click)="fecharMensagem()">Fechar Leitura</button>
+            <button class="btn btn-danger" (click)="excluir(contatoSelecionado()!)"
+                [attr.aria-label]="'Excluir permanentemente mensagem de ' + contatoSelecionado()?.nome"
+                style="background-color: #b91c1c; color: white; border: none;">
+                Excluir Definitivamente
             </button>
-            <button class="btn btn-secondary" (click)="fecharMensagem()">Fechar</button>
         </div>
-    </div>
+    </dialog>
 </div>
 }
