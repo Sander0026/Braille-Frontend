@@ -1,34 +1,26 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
-import { SafeUrlPipe } from '../../../core/pipes/safe-url.pipe'; 
+import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
+
 @Component({
   selector: 'app-beneficiary-details',
-  imports: [CommonModule, SafeUrlPipe],
+  imports: [CommonModule, PdfViewerComponent],
   templateUrl: './beneficiary-details.html',
   styleUrl: './beneficiary-details.scss',
 })
 export class BeneficiaryDetails {
+  // Variável que guarda o estado visível do documento
+  termoLgpdMock: string = 'https://res.cloudinary.com/dpe1qzhhs/raw/upload/v1773854461/braille_lgpd/f7cac7ywqckqxp2guh88.pdf';
+  
+  // Controle de estado enxuto e explícito
+  exibirTermo: boolean = false;
 
-  // Variável que guarda a URL montada do visualizador
-  urlVisualizadorPdf: string | null = null;
-
-  // Exemplo de como o termo do beneficiário pode estar salvo (Simulação)
-  termoLgpdMock = 'https://res.cloudinary.com/dpe1qzhhs/raw/upload/v1773854461/braille_lgpd/f7cac7ywqckqxp2guh88.pdf';
-
-  abrirPdf(urlDoCloudinary: string) {
-    if (!urlDoCloudinary) return;
-
-    let urlCorrigida = urlDoCloudinary;
-    if (!urlCorrigida.toLowerCase().endsWith('.pdf')) {
-      urlCorrigida += '.pdf';
-    }
-
-    // Monta a URL passando pelo Google Viewer com embedded=true
-    this.urlVisualizadorPdf = `https://docs.google.com/viewer?url=${encodeURIComponent(urlCorrigida)}&embedded=true`;
+  abrirPdf() {
+    this.exibirTermo = true;
   }
 
   fecharPdf() {
-    this.urlVisualizadorPdf = null;
+    this.exibirTermo = false;
   }
 }
 

@@ -1,47 +1,29 @@
-<div class="pdf-viewer-header">
-  <h3>Visualizador de Documento</h3>
-  <button (click)="fechar()" class="btn-close" title="Fechar (ESC)">✕</button>
-</div>
-
-@if (carregando) {
-  <div class="pdf-loading">
-    <span class="spinner"></span>
-    <p>Carregando documento...</p>
-  </div>
-}
-
-@if (erro) {
-  <div class="pdf-error">
-    <span class="error-icon">⚠️</span>
-    <p>{{ erro }}</p>
-    <button (click)="tentar()" class="btn-retry">Tentar Novamente</button>
-  </div>
-}
-
-@if (!carregando && !erro) {
-  <div class="pdf-scroll-area">
-    <canvas #pdfCanvas></canvas>
-  </div>
+<dialog 
+  *ngIf="urlVisualizadorPdf" 
+  open
+  class="mt-8 border border-gray-200 rounded-lg shadow-xl overflow-hidden bg-white w-full block"
+  aria-modal="true" 
+  aria-labelledby="pdf-viewer-title">
   
-  <div class="pdf-controls">
-    <div class="zoom-controls">
-      <button (click)="diminuirZoom()" [disabled]="escalaAtual <= escalaMinima" title="Reduzir Zoom">🔍 -</button>
-      <span class="zoom-level">{{ porcentagemZoom }}%</span>
-      <button (click)="aumentarZoom()" [disabled]="escalaAtual >= escalaMaxima" title="Aumentar Zoom">🔍 +</button>
-    </div>
-
-    <div class="separator"></div>
-
-    <div class="pagination-controls">
-      <button (click)="paginaAnterior()" [disabled]="paginaAtual === 1">← Anterior</button>
-      <span>Página {{ paginaAtual }} de {{ totalPaginas }}</span>
-      <button (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas">Próxima →</button>
-    </div>
+  <header class="bg-gray-800 text-white flex justify-between items-center p-4">
+    <h3 id="pdf-viewer-title" class="font-semibold text-sm md:text-base">Visualizador Interativo de Documento</h3>
     
-    <div class="separator"></div>
+    <button 
+      (click)="onClose()" 
+      class="text-gray-300 hover:text-white focus:text-white font-bold text-2xl px-2 leading-none transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 rounded"
+      aria-label="Encerrar visualização do documento e fechar o modal"
+      title="Fechar janela">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </header>
 
-    <a [href]="urlPdf" target="_blank" download class="btn-download" title="Baixar PDF">
-      ⬇️ Baixar
-    </a>
+  <div class="relative w-full" style="padding-top: 75%; min-height: 50vh;">
+    <iframe 
+      [src]="urlVisualizadorPdf | safeUrl" 
+      class="absolute top-0 left-0 w-full h-full border-0 bg-gray-50"
+      title="Iframe de Visualização de Arquivo PDF Externo"
+      sandbox="allow-scripts allow-same-origin allow-popups"> <!-- Segurança OWASP adicionada no iFrame -->
+    </iframe>
   </div>
-}
+
+</dialog>
