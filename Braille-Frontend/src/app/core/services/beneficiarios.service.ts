@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { DashboardService } from './dashboard.service';
+import { StorageService } from './storage.service';
 
 export interface Beneficiario {
     id: string;
@@ -72,11 +73,15 @@ export interface ReativacaoAluno {
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
     private readonly url = '/api/beneficiaries';
-    // Cache por chave — cobre ativos, inativos, busca por nome e qualquer paginaçao
-    private cache = new Map<string, Observable<PaginatedResponse<Beneficiario>>>();
+    // Cache Passivo O(1) sem Leaks (Zero setTimeout na call stack do Angular Node Engine)
+    private readonly cache = new Map<string, { data$: Observable<PaginatedResponse<Beneficiario>>, expiresAt: number }>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
-    constructor(private readonly http: HttpClient, private readonly dashboardService: DashboardService) { }
+    constructor(
+        private readonly http: HttpClient, 
+        private readonly dashboardService: DashboardService,
+        private readonly storage: StorageService
+    ) { }
 
     limparCache(): void {
         this.cache.clear();
@@ -90,27 +95,29 @@ export class BeneficiariosService {
 
     listar(page = 1, limit = 10, busca?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<PaginatedResponse<Beneficiario>> {
         const key = this.buildCacheKey(page, limit, busca, inativos, filtros);
+        const now = Date.now();
 
-        if (!this.cache.has(key)) {
-            let params = new HttpParams().set('page', page).set('limit', limit);
-            if (busca) params = params.set('busca', busca);
-            if (inativos) params = params.set('inativos', 'true');
-
-            // Adiciona todos os filtros extras dinamicamente
-            if (filtros) {
-                Object.entries(filtros).forEach(([k, v]) => {
-                    if (v !== null && v !== undefined && v !== '') {
-                        params = params.set(k, String(v));
-                    }
-                });
-            }
-
-            const req$ = this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params }).pipe(shareReplay(1));
-            this.cache.set(key, req$);
-            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
+        // Expiração passiva do GC (Garbage Collector) - Sem Timeout Engine Leaks
+        if (this.cache.has(key) && this.cache.get(key)!.expiresAt > now) {
+            return this.cache.get(key)!.data$;
         }
 
-        return this.cache.get(key)!;
+        let params = new HttpParams().set('page', page).set('limit', limit);
+        if (busca) params = params.set('busca', busca);
+        if (inativos) params = params.set('inativos', 'true');
+
+        if (filtros) {
+            Object.entries(filtros).forEach(([k, v]) => {
+                if (v !== null && v !== undefined && v !== '') {
+                    params = params.set(k, String(v));
+                }
+            });
+        }
+
+        const req$ = this.http.get<PaginatedResponse<Beneficiario>>(this.url, { params }).pipe(shareReplay(1));
+        this.cache.set(key, { data$: req$, expiresAt: now + this.cacheTimeMs });
+
+        return req$;
     }
 
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<ArrayBuffer> {
@@ -172,21 +179,17 @@ export class BeneficiariosService {
         return this.http.post<Beneficiario>(`${this.url}/${id}/reactivate`, {});
     }
 
+    /** DELEGATES SRP DE STORAGE (Mantém Contrato Antigo para Zero Regressions UI) */
     uploadImagem(file: File): Observable<{ url: string }> {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.http.post<{ url: string }>('/api/upload', formData);
+        return this.storage.uploadGlobalImage(file);
     }
 
     uploadPdf(file: File, tipo: 'lgpd' | 'atestado' | 'laudo'): Observable<{ url: string }> {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.http.post<{ url: string }>(`/api/upload/pdf?tipo=${tipo}`, formData);
+        return this.storage.uploadSecurePdf(file, tipo);
     }
 
     excluirArquivo(urlArquivo: string): Observable<any> {
-        let params = new HttpParams().set('url', urlArquivo);
-        return this.http.delete('/api/upload', { params });
+        return this.storage.deleteCloudFile(urlArquivo);
     }
 
     importar(file: File): Observable<ImportResult> {

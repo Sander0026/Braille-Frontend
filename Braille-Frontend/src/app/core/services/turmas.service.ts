@@ -51,10 +51,10 @@ export interface CreateTurmaDto {
 @Injectable({ providedIn: 'root' })
 export class TurmasService {
     private readonly url = '/api/turmas';
-    private cache = new Map<string, Observable<PaginatedResponse<Turma>>>();
+    private readonly cache = new Map<string, { data$: Observable<PaginatedResponse<Turma>>, expiresAt: number }>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
-    constructor(private http: HttpClient) { }
+    constructor(private readonly http: HttpClient) { }
 
     limparCache(): void {
         this.cache.clear();
@@ -66,20 +66,22 @@ export class TurmasService {
 
     listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string, status?: string): Observable<PaginatedResponse<Turma>> {
         const key = this.buildCacheKey(page, limit, nome, statusAtivo, professorId, status);
+        const now = Date.now();
 
-        if (!this.cache.has(key)) {
-            let params = new HttpParams().set('page', page).set('limit', limit).set('excluido', 'false');
-            if (nome) params = params.set('nome', nome);
-            if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
-            if (professorId) params = params.set('professorId', professorId);
-            if (status) params = params.set('status', status);
-
-            const req$ = this.http.get<PaginatedResponse<Turma>>(this.url, { params }).pipe(shareReplay(1));
-            this.cache.set(key, req$);
-            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
+        if (this.cache.has(key) && this.cache.get(key)!.expiresAt > now) {
+            return this.cache.get(key)!.data$;
         }
 
-        return this.cache.get(key)!;
+        let params = new HttpParams().set('page', page).set('limit', limit).set('excluido', 'false');
+        if (nome) params = params.set('nome', nome);
+        if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
+        if (professorId) params = params.set('professorId', professorId);
+        if (status) params = params.set('status', status);
+
+        const req$ = this.http.get<PaginatedResponse<Turma>>(this.url, { params }).pipe(shareReplay(1));
+        this.cache.set(key, { data$: req$, expiresAt: now + this.cacheTimeMs });
+
+        return req$;
     }
 
     listarProfessoresAtivos(): Observable<{ id: string; nome: string }[]> {
