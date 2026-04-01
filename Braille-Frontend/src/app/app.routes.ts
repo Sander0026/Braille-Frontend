@@ -66,7 +66,7 @@ export const routes: Routes = [
       },
       {
         path: 'alunos/cadastro',
-        loadComponent: () => import('./pages/admin/beneficiarios/cadastro-wizard/cadastro-wizard').then(m => m.CadastroWizard),
+        loadComponent: () => import('./features/beneficiaries/beneficiary-form/beneficiary-form').then(m => m.BeneficiaryFormComponent),
         title: 'Novo Aluno — ILBES',
         canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'SECRETARIA'] }
