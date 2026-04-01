@@ -1,0 +1,113 @@
+@if (aberto) {
+<div class="modal-overlay" role="dialog" [attr.aria-label]="modoEdicao ? 'Editar oficina' : 'Criar nova oficina'"
+  aria-modal="true" (click)="aoFechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  
+  <dialog class="modal" open (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">
+        {{ modoEdicao ? 'Editar Oficina' : 'Nova Oficina' }}
+      </h2>
+      <button class="modal-close" (click)="aoFechar()" aria-label="Fechar modal">✕</button>
+    </div>
+
+    <form [formGroup]="turmaForm" (ngSubmit)="submeter()" class="modal-body" novalidate>
+
+      @if (erroAPI) {
+      <div class="error-banner" role="alert">{{ erroAPI }}</div>
+      }
+
+      <div class="form-group">
+        <label for="modalNomeTurma">Nome da Oficina <span class="required" aria-hidden="true">*</span></label>
+        <input type="text" id="modalNomeTurma" formControlName="nome" class="form-input"
+          [class.is-invalid]="isCampoInvalido('nome')" placeholder="Ex: Oficina de Braille" aria-required="true"
+          [attr.aria-invalid]="isCampoInvalido('nome')" />
+        @if (isCampoInvalido('nome')) {
+        <span class="error-text" role="alert">Nome é obrigatório (mínimo 3 caracteres).</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="modalProfessor">Professor Responsável <span class="required" aria-hidden="true">*</span></label>
+        <select id="modalProfessor" formControlName="professorId" class="form-input"
+          [class.is-invalid]="isCampoInvalido('professorId')" aria-required="true"
+          [attr.aria-invalid]="isCampoInvalido('professorId')">
+          <option value="">Selecione um professor...</option>
+          @for (prof of professores; track prof.id) {
+          <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
+          }
+        </select>
+        @if (isCampoInvalido('professorId')) {
+        <span class="error-text" role="alert">Selecione o professor responsável.</span>
+        }
+      </div>
+
+      <div class="row" style="display:flex; gap:1rem;">
+        <div class="form-group" style="flex:1;">
+          <label for="modalCapacidade">Capacidade <span class="badge-opt">opcional</span></label>
+          <input type="number" id="modalCapacidade" formControlName="capacidadeMaxima" class="form-input"
+            placeholder="Ex: 20" min="1" />
+        </div>
+        <div class="form-group" style="flex:2;">
+          <label for="modalDescricao">Descrição <span class="badge-opt">opcional</span></label>
+          <input type="text" id="modalDescricao" formControlName="descricao" class="form-input"
+            placeholder="Resumo, sala, observações..." />
+        </div>
+      </div>
+
+      <fieldset class="grade-horaria-fieldset">
+        <legend>Grade Horária <span class="badge-opt">opcional</span></legend>
+        <p class="grade-helper">Adicione os dias e horas para evitar conflitos (ex: Seg 14:00 às 16:00).</p>
+
+        <div class="turno-form">
+          <div class="form-group-inline">
+            <select [ngModel]="diaNovoTurno()" (ngModelChange)="diaNovoTurno.set($event)" [ngModelOptions]="{standalone: true}" class="form-input"
+              aria-label="Dia da Semana">
+              <option value="">Dia...</option>
+              @for (d of dias; track d.valor) {
+              <option [value]="d.valor">{{ d.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group-inline">
+            <input type="time" [ngModel]="horaInicioNovoTurno()" (ngModelChange)="horaInicioNovoTurno.set($event)" [ngModelOptions]="{standalone: true}"
+              class="form-input" aria-label="Início" />
+          </div>
+          <div class="form-group-inline">
+            <input type="time" [ngModel]="horaFimNovoTurno()" (ngModelChange)="horaFimNovoTurno.set($event)" [ngModelOptions]="{standalone: true}"
+              class="form-input" aria-label="Fim" />
+          </div>
+          <button type="button" class="btn btn-secondary btn-sm btn-incluir-turno" (click)="adicionarTurno()">+ Incluir</button>
+        </div>
+        
+        @if (erroTurno()) { 
+          <span class="error-text error-with-icon" role="alert">
+            <span class="material-symbols-rounded">error</span> 
+            {{ erroTurno() }}
+          </span> 
+        }
+
+        @if (gradeHoraria().length > 0) {
+        <ul class="grade-list">
+          @for (turno of gradeHoraria(); track turno.dia; let i = $index) {
+          <li class="grade-item">
+            <span class="dia-label">{{ labelDia(turno.dia) }}</span>
+            <span>{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
+            <button type="button" class="btn-remove" (click)="removerTurno(i)" aria-label="Remover">✕</button>
+          </li>
+          }
+        </ul>
+        }
+      </fieldset>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="aoFechar()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="turmaForm.invalid || salvando"
+          [attr.aria-busy]="salvando">
+          {{ salvando ? 'Salvando...' : (modoEdicao ? 'Atualizar' : 'Criar Oficina') }}
+        </button>
+      </div>
+
+    </form>
+  </dialog>
+</div>
+}

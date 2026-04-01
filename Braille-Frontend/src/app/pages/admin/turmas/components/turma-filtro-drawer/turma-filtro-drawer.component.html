@@ -1,0 +1,49 @@
+@if (aberto) {
+<div class="filter-overlay" (click)="fecharDrawer()" (keydown.enter)="fecharDrawer()" tabindex="-1" aria-hidden="true" style="animation: fadeIn 0.2s ease;"></div>
+}
+
+<dialog open id="turmas-filter-drawer" class="filter-drawer" [class.filter-drawer--open]="aberto"
+  aria-label="Filtros avançados" [formGroup]="filterForm">
+
+  <div class="filter-drawer__header">
+    <h2 class="filter-drawer__title">
+      <span class="material-symbols-rounded">tune</span>
+      Filtros Avançados
+    </h2>
+    <button type="button" class="btn btn-icon btn-ghost" (click)="fecharDrawer()" aria-label="Fechar filtros">✕</button>
+  </div>
+
+  <div class="filter-drawer__body">
+    <section class="filter-section">
+      <h3 class="filter-section__title">Situação / Ciclo</h3>
+      <div class="filter-field">
+        <label class="form-label" for="f-status">Fase da Execução</label>
+        <select id="f-status" class="form-input" formControlName="status">
+          <option value="">Todas</option>
+          <option value="PREVISTA">Prevista (Não Iniciada)</option>
+          <option value="ANDAMENTO">Em Andamento</option>
+          <option value="CONCLUIDA">Concluída (Histórico)</option>
+          <option value="CANCELADA">Cancelada / Suspensa</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="filter-section">
+      <h3 class="filter-section__title">Responsabilidade</h3>
+      <div class="filter-field">
+        <label class="form-label" for="f-prof">Professor / Orientador</label>
+        <select id="f-prof" class="form-input" formControlName="professorId">
+          <option value="">Todos os professores</option>
+          @for (prof of professores; track prof.id) {
+            <option [value]="prof.id">{{ prof.nome }}</option>
+          }
+        </select>
+      </div>
+    </section>
+  </div>
+
+  <div class="filter-drawer__footer">
+    <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
+    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar Filtros</button>
+  </div>
+</dialog>

@@ -1,0 +1,180 @@
+@if (aberto) {
+<div class="modal-overlay" role="dialog" aria-label="Alunos matriculados na oficina selecionada" aria-modal="true"
+  (click)="aoFechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+
+  <dialog class="modal" open (click)="$event.stopPropagation()">
+    <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
+      <h2 class="modal-title" style="display:flex; align-items:center; font-size: 1.25rem;">
+        Perfil da Oficina
+      </h2>
+      <button class="modal-close" (click)="aoFechar()" aria-label="Fechar perfíl">✕</button>
+    </div>
+
+    <div class="modal-body" style="padding-top: 0.5rem;">
+      @if (turmaDetalhes()) {
+      <div class="info-card"
+        style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1.1rem; color: #1e293b; margin: 0 0 0.5rem 0;">{{ turmaDetalhes()?.nome }}</h3>
+
+        <!-- Dados do Componente Principal -->
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: #475569;">
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <strong>Professor:</strong> {{ turmaDetalhes()?.professor?.nome || 'Não atribuído' }}
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <strong>Alunos:</strong>
+            @if (turmaDetalhes()?.capacidadeMaxima) {
+            <span>
+              {{ turmaDetalhes()?.matriculasOficina?.length || 0 }}/{{ turmaDetalhes()?.capacidadeMaxima }}
+            </span>
+            @if ((turmaDetalhes()?.matriculasOficina?.length || 0) >= turmaDetalhes()!.capacidadeMaxima!) {
+            <span
+              style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; padding:0.1rem 0.5rem; border-radius:9999px; font-weight:600;">Lotada</span>
+            }
+            } @else {
+            <span>{{ turmaDetalhes()?.matriculasOficina?.length || 0 }} (sem limite definido)</span>
+            }
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Navegação Interna -->
+      <div class="abas-switcher" role="tablist" style="margin-bottom: 1.5rem;">
+        @if (!isProfessor) {
+        <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual() === 'adicionar'"
+          [class.ativa]="abaAtual() === 'adicionar'" (click)="alterarAba('adicionar')">
+          Adicionar Alunos
+        </button>
+        }
+        <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual() === 'remover'"
+          [class.ativa]="abaAtual() === 'remover'" (click)="alterarAba('remover')">
+          Alunos Matriculados
+        </button>
+      </div>
+
+      @if (carregandoDetalhes()) {
+      <div class="loading-state" aria-busy="true">
+        <div class="spinner" aria-hidden="true"></div>
+        <p>Carregando alunos...</p>
+      </div>
+      }
+
+      @if (abaAtual() === 'adicionar') {
+      <div class="busca-alunos-container" style="margin-bottom: 1.5rem;">
+        <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>
+        <input type="search" id="buscarAlunoInput" class="form-input" placeholder="Buscar aluno para adicionar..."
+          [formControl]="buscaAlunoCtrl" aria-label="Buscar aluno por nome para matricular" autocomplete="off"
+          [attr.aria-busy]="buscandoAlunos()" (keydown)="onBuscaKeydown($event)" />
+
+        @if (buscandoAlunos()) {
+        <div class="loading-state empty-state--sm" aria-busy="true">
+          <div class="spinner" aria-hidden="true" style="width: 20px; height: 20px;"></div>
+        </div>
+        }
+
+        @if (alunosBuscaRestado().length > 0) {
+        <ul class="busca-resultados" aria-label="Resultados da busca de alunos"
+          style="position:static; max-height:220px; border-top:1px solid #e5e5e5; margin-top:0.5rem; box-shadow:none;">
+          @for (aluno of alunosBuscaRestado(); track aluno.id) {
+          <li class="busca-resultado-item" appBuscaItem [itemData]="aluno" [id]="'aluno-op-' + aluno.id">
+            <label style="display:flex; align-items:center; gap:0.75rem; width:100%; cursor:pointer;">
+              <input type="checkbox" [checked]="alunosSelecionadosParaMatricula().includes(aluno.id)"
+                (change)="toggleSelecaoAluno(aluno.id)" class="custom-checkbox" />
+              <div style="display:flex; flex-direction:column; justify-content:center;">
+                  <span style="font-size:0.9rem;">{{ aluno.nomeCompleto }}</span>
+              </div>
+            </label>
+          </li>
+          }
+        </ul>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
+          <button class="btn btn-primary" (click)="salvarMatriculasEmLote()"
+            [disabled]="operacaoEmProgresso() || alunosSelecionadosParaMatricula().length === 0"
+            style="display:flex; align-items:center; gap:0.5rem;">
+            @if (operacaoEmProgresso()) {
+            <div class="spinner" aria-hidden="true"
+              style="width:14px; height:14px; border-width:2px; display:inline-block;"></div>
+            Salvando ({{ alunosSelecionadosParaMatricula().length }})
+            } @else {
+            Salvar {{ alunosSelecionadosParaMatricula().length }} aluno(s)
+            }
+          </button>
+        </div>
+        } @else if (!buscandoAlunos() && buscaAlunoCtrl.value) {
+        <div class="empty-state empty-state--sm" style="padding:1rem;">
+          <p>Nenhum aluno livre encontrado.</p>
+        </div>
+        }
+      </div>
+      }
+
+      @if (abaAtual() === 'remover') {
+      <div>
+        <div
+          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
+          <h3 style="font-size: 1rem; margin: 0; color: #4b5563;">
+            Alunos Matriculados ({{ turmaDetalhes()?.matriculasOficina?.length || 0 }})
+          </h3>
+          @if ((turmaDetalhes()?.matriculasOficina?.length || 0) > 0) {
+          <button class="btn btn-primary btn-sm" (click)="exportarListaCSV()" title="Exportar lista para Excel/CSV"
+             aria-label="Exportar para Excel e CSV">
+            Exportar CSV
+          </button>
+          }
+        </div>
+
+        @if (!turmaDetalhes()?.matriculasOficina?.length) {
+        <div class="empty-state empty-state--sm">
+          <p>Nenhum aluno matriculado nesta oficina.</p>
+        </div>
+        } @else {
+        <ul class="alunos-list" aria-label="Lista de alunos matriculados">
+          @for (matricula of turmaDetalhes()?.matriculasOficina ?? []; track matricula.aluno.id) {
+          <li class="aluno-item" style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <div class="aluno-avatar" aria-hidden="true">
+                {{ matricula.aluno.nomeCompleto.charAt(0) }}
+              </div>
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-weight: 500; color: #1e293b;">{{ matricula.aluno.nomeCompleto }}</span>
+                <span style="font-size: 0.8rem; color: #475569;">
+                  Matrícula: {{ matricula.aluno.matricula || 'Gerando pendente...' }}
+                </span>
+              </div>
+            </div>
+            @if (!isProfessor) {
+            <button class="btn btn-danger btn-sm"
+              (click)="removerAluno(matricula.aluno.id, matricula.aluno.nomeCompleto)" [disabled]="operacaoEmProgresso()"
+              aria-label="Remover da turma" title="Remover aluno"
+              style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600;">
+              Remover
+            </button>
+            }
+          </li>
+          }
+        </ul>
+        }
+      </div>
+      }
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="aoFechar()">Fechar Quadro</button>
+    </div>
+  </dialog>
+</div>
+}
