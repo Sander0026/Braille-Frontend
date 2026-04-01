@@ -5,8 +5,8 @@
 @use 'sass:color';
 
 $primary: #f5c800;
-$primary-dk: #c9a300;
-$black: #1a1a00;
+$primary-text: #1a1a00;
+$black: #111111;
 $white: #ffffff;
 $gray-100: #f7f7f7;
 $gray-600: #5c5c5c;
@@ -19,81 +19,39 @@ $transition: 200ms ease;
 .public-shell {
     display: flex;
     flex-direction: column;
-    height: 100%;
-    /* herda 100% do app-root que herda do body */
+    height: 100vh;
+    height: 100dvh;
     overflow-y: auto;
-    /* aqui fica o scroll vertical das páginas públicas */
     overflow-x: hidden;
-    /* sem scroll horizontal */
 }
-
-
 
 // ── Main ───────────────────────────────────────────────────
 main {
-    flex: 1;
-    /* cresce para preencher o espaço e empurrar o footer para o fim */
+    flex: 1; // cresce para preencher espaço vazio, e empurra footer ao final
+    outline: none; // Evitar que o main tenha o box-shadow ridículo do navegador no clique nativo sem quebrar ARIA focus 
 }
 
-// ── Botão Flutuante "Fale Conosco" ─────────────────────────
-.floating-cta {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 99;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.75rem;
+// ── Pular para o Conteúdo (WCAG Skip Link) ───────────────
+// Obrigatoriamente Injetado para Leitores de Texto. Visual só no keypress(tab).
+.skip-to-content {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    z-index: 9999;
     padding: 0.75rem 1.5rem;
     background: $primary;
-    border: 2px solid $primary;
-    color: #111111;
-    font-size: 0.95rem;
-    font-weight: 800;
-    border-radius: 9999px;
+    color: $primary-text;
+    font-weight: 700;
+    font-size: 1rem;
+    border-radius: 0.5rem;
     text-decoration: none;
-    transition: all $transition;
-    white-space: nowrap;
-    box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
-    min-height: 50px;
-
-    &:hover {
-        background: $primary-dk;
-        border-color: $primary-dk;
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px rgba(245, 200, 0, 0.4);
-    }
+    transition: top 200ms ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 
     &:focus-visible {
-        outline: 2px solid $gray-700;
-        outline-offset: 2px;
-    }
-
-    .material-symbols-rounded {
-        font-size: 1.5rem;
-    }
-
-    .floating-cta-text {
-        display: inline;
-    }
-}
-
-// ── Responsivo ─────────────────────────────────────────────
-@media (max-width: 850px) {
-    .floating-cta {
-        padding: 0.75rem 1rem;
-        bottom: 1.5rem;
-        right: 1.5rem;
-        font-size: 0.85rem;
-        min-height: 44px;
-
-        .floating-cta-text {
-            display: none;
-        }
-
-        .material-symbols-rounded {
-            font-size: 1.25rem;
-        }
+        top: 1rem;
+        outline: 3px solid #111111;
+        outline-offset: 3px;
+        box-shadow: 0 0 0 5px rgba(245, 200, 0, 0.5);
     }
 }

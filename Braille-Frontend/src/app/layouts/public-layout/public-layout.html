@@ -1,21 +1,27 @@
 <div class="public-shell">
-  <a href="#conteudo-principal" class="skip-to-content">Ir para o conteúdo principal</a>
+  <!-- Ponto Crítico de Acessibilidade (WCAG): Foco garantido e off-screen by default -->
+  <a href="#conteudo-principal" class="skip-to-content" aria-label="Pular navegação do cabeçalho e ir direto ao conteúdo">Ir para o conteúdo principal</a>
 
+  <!-- Menu Control Signal Bound via () -->
   <app-header 
     theme="public" 
-    [isMobileMenuOpen]="isMobileMenuOpen" 
+    [isMobileMenuOpen]="isMobileMenuOpen()" 
     (mobileMenuToggle)="toggleMobileMenu()" 
     (closeMobile)="closeMobileMenu()">
   </app-header>
 
+  <!-- Section semantica base e alvo da ancora de acessibilidade -->
   <main id="conteudo-principal" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
 
-  <!-- ── Botão Flutuante "Fale Conosco" ── -->
-  <a routerLink="/contato" class="floating-cta" aria-label="Fale Conosco">
-    <span class="floating-cta-text">Fale Conosco</span>
-  </a>
+  <!-- ── Floating UI Component ── -->
+  <app-floating-cta 
+    path="/contato" 
+    label="Fale Conosco" 
+    icon="chat" 
+    ariaLabel="Abrir formulario de fale conosco">
+  </app-floating-cta>
 
   <app-footer theme="public"></app-footer>
 </div><!-- /.public-shell -->
