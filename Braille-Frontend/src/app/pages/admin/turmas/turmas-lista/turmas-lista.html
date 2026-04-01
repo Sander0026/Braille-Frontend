@@ -1,614 +1,149 @@
-<div class="page-header">
-  <div>
-    <h1 class="page-title">Oficinas / Turmas</h1>
-    <p class="page-subtitle">Gerencie as oficinas e turmas do instituto</p>
-  </div>
-  @if (!isProfessor) {
-  <button class="btn btn-primary" (click)="abrirModalCriar()" aria-label="Criar nova oficina">
-    Nova Oficina
-  </button>
-  }
-</div>
 
-<div class="filter-bar" role="search">
-  <div class="filter-search">
-    <label for="busca-turma" class="sr-only">Buscar turma ou oficina por nome</label>
-    <input id="busca-turma" type="search" class="form-input" placeholder="Buscar oficina por nome..."
-      [formControl]="buscaCtrl" aria-label="Buscar turma ou oficina por nome" autocomplete="off" />
-  </div>
+<main class="page-container" id="main-content">
+  <div class="page-header" style="flex-direction:row; justify-content:space-between; flex-wrap:wrap;">
+    <h1 class="page-title">Gestão de Oficinas</h1>
 
-  <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
-    [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Filtros avançados"
-    [attr.aria-expanded]="drawerAberto ? 'true' : 'false'" aria-controls="turmas-filter-drawer">
-    <span class="material-symbols-rounded">tune</span>
-    Filtros
-    @if (quantidadeFiltrosAtivos > 0) {
-    <span class="filter-badge">{{ quantidadeFiltrosAtivos }}</span>
-    }
-  </button>
-</div>
-
-@if (quantidadeFiltrosAtivos > 0) {
-<div class="filter-active-bar" role="status">
-  <span class="material-symbols-rounded" style="font-size:16px;">filter_alt</span>
-  <span>{{ quantidadeFiltrosAtivos }} filtro(s) ativo(s) — {{ totalTurmas }} resultado(s)</span>
-  <button type="button" class="btn-link" (click)="limparFiltros()">Limpar todos</button>
-</div>
-}
-
-<div class="abas-switcher" role="tablist">
-  <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'ativas'" [class.ativa]="abaAtual === 'ativas'"
-    (click)="alterarAba('ativas')">
-    Ativas
-  </button>
-  @if (!isProfessor) {
-  <button class="aba-btn" role="tab" [attr.aria-selected]="abaAtual === 'arquivadas'"
-    [class.ativa]="abaAtual === 'arquivadas'" (click)="alterarAba('arquivadas')">
-    Arquivadas
-  </button>
-  }
-</div>
-
-@if (isLoading) {
-<div class="loading-state" role="status" aria-busy="true" aria-label="Carregando turmas">
-  <div class="spinner" aria-hidden="true"></div>
-  <p>Carregando oficinas...</p>
-</div>
-} @else if (erro) {
-<div class="error-banner" role="alert">{{ erro }}</div>
-} @else {
-
-@if (turmasFiltradas.length === 0) {
-<div class="empty-state empty-state--sm" role="status">
-  <p>Nenhuma oficina {{ abaAtual === 'ativas' ? 'ativa' : 'arquivada' }} encontrada.</p>
-  @if (abaAtual === 'ativas' && !isProfessor) {
-  <button class="btn btn-primary" (click)="abrirModalCriar()">+ Nova Oficina</button>
-  }
-</div>
-} @else {
-<div class="turmas-grid" role="region" aria-label="Lista de oficinas">
-  @for (turma of turmasFiltradas; track turma.id) {
-  <article class="turma-card focavel-card" tabindex="0" appTabelaTrFocavel>
-    <div class="card-status-bar" [class.inativa]="!turma.statusAtivo" aria-hidden="true"></div>
-
-    <div class="card-body">
-      <div class="card-title-row">
-        <h2 class="turma-nome">{{ turma.nome }}</h2>
-        <div style="display:flex; gap: 0.5rem; flex-wrap: wrap;">
-            <span class="badge" [class.badge--success]="turma.statusAtivo" [class.badge--neutral]="!turma.statusAtivo">
-            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;" aria-hidden="true">
-                {{ turma.statusAtivo ? 'check_circle' : 'inventory_2' }}
-            </span>
-            {{ turma.statusAtivo ? 'Ativa' : 'Arquivada' }}
-            </span>
-            
-            <span class="status-badge" [ngClass]="{
-                'badge-prevista': turma.status === 'PREVISTA',
-                'badge-andamento': turma.status === 'ANDAMENTO' || !turma.status,
-                'badge-concluida': turma.status === 'CONCLUIDA',
-                'badge-cancelada': turma.status === 'CANCELADA'
-            }">
-                {{ turma.status || 'ANDAMENTO' }}
-            </span>
-        </div>
-      </div>
-
-      @if (turma.descricao) {
-      <p class="turma-descricao">{{ turma.descricao }}</p>
-      }
-
-      <div class="turma-meta">
-        @if (turma.professor) {
-        <span class="meta-item">
-          {{ turma.professor.nome }}
-        </span>
-        }
-        @if (turma.horario) {
-        <span class="meta-item">
-          {{ turma.horario }}
-        </span>
-        }
-        @if (turma.cargaHoraria) {
-        <span class="meta-item" title="Carga Horária Total">
-          <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 2px; vertical-align: text-bottom;">schedule</span>
-          {{ turma.cargaHoraria }}
-        </span>
-        }
-        <span class="meta-item meta-alunos">
-          {{ turma._count?.matriculasOficina ?? 0 }} aluno(s)
-        </span>
-      </div>
-    </div>
-
-    <div class="card-footer" style="flex-wrap: wrap; gap: 0.5rem;">
-      @if (abaAtual === 'ativas') {
-          <button class="btn-icon" (click)="abrirModalAlunos(turma)" aria-label="Perfil da Oficina e Alunos"
-            title="Perfil da Oficina / Alunos Matriculados">
-            <span class="material-symbols-rounded">group</span>
-          </button>
-          
-          @if (!isProfessor) {
-              <select class="status-select"
-                [value]="turma.status"
-                (change)="mudarStatusTurma(turma, $event)"
-                [attr.aria-label]="'Alterar status da oficina ' + turma.nome">
-                <option value="PREVISTA">Prevista</option>
-                <option value="ANDAMENTO">Em Andamento</option>
-                <option value="CONCLUIDA">Concluída</option>
-                <option value="CANCELADA">Cancelada</option>
-              </select>
-
-              <button class="btn btn-sm btn-secondary" (click)="abrirModalEditar(turma)"
-                [attr.aria-label]="'Editar oficina ' + turma.nome">
-                Editar
-              </button>
-
-              <button class="btn btn-sm btn-warning" (click)="abrirModalArquivar(turma)"
-                [attr.aria-label]="'Arquivar oficina ' + turma.nome"
-                style="background:#b45309; color:white; border-color:#b45309;">
-                Arquivar
-              </button>
-          }
-      } @else {
-          <button class="btn btn-sm btn-success" (click)="restaurarTurma(turma)"
-            [attr.aria-label]="'Restaurar oficina ' + turma.nome"
-            style="background:#15803d; color:white; border-color:#15803d;">
-            Restaurar
-          </button>
-          <button class="btn btn-sm btn-danger" (click)="ocultarTurma(turma)"
-            [attr.aria-label]="'Remover da lista a oficina ' + turma.nome">
-            Remover da Lista
-          </button>
-      }
-    </div>
-
-  </article>
-  }
-</div>
-
-}
-
-@if (totalPaginas > 1) {
-<nav class="pagination" aria-label="Paginação de oficinas">
-  <button class="btn btn-secondary btn-sm" (click)="paginaAnterior()" [disabled]="paginaAtual === 1"
-    aria-label="Página anterior">←</button>
-  <span class="pagination-info">
-    Página {{ paginaAtual }} de {{ totalPaginas }} ({{ totalTurmas }} oficinas)
-  </span>
-  <button class="btn btn-secondary btn-sm" (click)="proximaPagina()" [disabled]="paginaAtual === totalPaginas"
-    aria-label="Próxima página">→</button>
-</nav>
-}
-}
-
-
-@if (modalAberto) {
-<div class="modal-overlay" role="dialog" [attr.aria-label]="modoEdicao ? 'Editar oficina' : 'Criar nova oficina'"
-  aria-modal="true" (click)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title">
-
-        {{ modoEdicao ? 'Editar Oficina' : 'Nova Oficina' }}
-      </h2>
-      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">✕</button>
-    </div>
-
-    <form [formGroup]="turmaForm" (ngSubmit)="salvarModal()" class="modal-body" novalidate>
-
-      @if (erroModal) {
-      <div class="error-banner" role="alert">{{ erroModal }}</div>
-      }
-
-      <div class="form-group">
-        <label for="modalNomeTurma">
-          Nome da Oficina <span class="required" aria-hidden="true">*</span>
-        </label>
-        <input type="text" id="modalNomeTurma" formControlName="nome" class="form-input"
-          [class.is-invalid]="isCampoInvalido('nome')" placeholder="Ex: Oficina de Braille" aria-required="true"
-          [attr.aria-invalid]="isCampoInvalido('nome')" />
-        @if (isCampoInvalido('nome')) {
-        <span class="error-text" role="alert">Nome é obrigatório (mínimo 3 caracteres).</span>
-        }
-      </div>
-
-      <div class="form-group">
-        <label for="modalProfessor">
-          Professor Responsável <span class="required" aria-hidden="true">*</span>
-        </label>
-        <select id="modalProfessor" formControlName="professorId" class="form-input"
-          [class.is-invalid]="isCampoInvalido('professorId')" aria-required="true"
-          [attr.aria-invalid]="isCampoInvalido('professorId')">
-          <option value="">Selecione um professor...</option>
-          @for (prof of professores; track prof.id) {
-          <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
-          }
-        </select>
-        @if (isCampoInvalido('professorId')) {
-        <span class="error-text" role="alert">Selecione o professor responsável.</span>
-        }
-      </div>
-
-      <div class="row" style="display:flex; gap:1rem;">
-        <div class="form-group" style="flex:1;">
-          <label for="modalCapacidade">Capacidade <span class="badge-opt">opcional</span></label>
-          <input type="number" id="modalCapacidade" formControlName="capacidadeMaxima" class="form-input"
-            placeholder="Ex: 20" min="1" />
-        </div>
-        <div class="form-group" style="flex:2;">
-          <label for="modalDescricao">Descrição <span class="badge-opt">opcional</span></label>
-          <input type="text" id="modalDescricao" formControlName="descricao" class="form-input"
-            placeholder="Resumo, sala, observações..." />
-        </div>
-      </div>
-
-      <fieldset class="grade-horaria-fieldset">
-        <legend>Grade Horária <span class="badge-opt">opcional</span></legend>
-        <p class="grade-helper">Adicione os dias e horas para evitar conflitos (ex: Seg 14:00 às 16:00).</p>
-
-        <div class="turno-form">
-          <div class="form-group-inline">
-            <select [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}" class="form-input"
-              aria-label="Dia da Semana">
-              <option value="">Dia...</option>
-              @for (d of dias; track d.valor) {
-              <option [value]="d.valor">{{ d.label }}</option>
-              }
-            </select>
-          </div>
-          <div class="form-group-inline">
-            <input type="time" [(ngModel)]="horaInicioNovoTurno" [ngModelOptions]="{standalone: true}"
-              class="form-input" aria-label="Início" required />
-          </div>
-          <div class="form-group-inline">
-            <input type="time" [(ngModel)]="horaFimNovoTurno" [ngModelOptions]="{standalone: true}"
-              class="form-input" aria-label="Fim" required />
-          </div>
-          <button type="button" class="btn btn-secondary btn-sm btn-incluir-turno" (click)="adicionarTurno()">+ Incluir</button>
-        </div>
-        @if (erroTurno) { 
-          <span class="error-text error-with-icon">
-            <span class="material-symbols-rounded">error</span> 
-            {{ erroTurno }}
-          </span> 
-        }
-
-        @if (gradeHoraria.length > 0) {
-        <ul class="grade-list">
-          @for (turno of gradeHoraria; track turno.dia; let i = $index) {
-          <li class="grade-item">
-            <span class="dia-label">{{ labelDia(turno.dia) }}</span>
-            <span>{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
-            <button type="button" class="btn-remove" (click)="removerTurno(i)" aria-label="Remover">✕</button>
-          </li>
-          }
-        </ul>
-        }
-      </fieldset>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="fecharModal()">
-          Cancelar
-        </button>
-        <button type="submit" class="btn btn-primary" [disabled]="turmaForm.invalid || salvandoModal"
-          [attr.aria-busy]="salvandoModal">
-          {{ salvandoModal ? 'Salvando...' : (modoEdicao ? 'Atualizar' : 'Criar Oficina') }}
-        </button>
-      </div>
-
-    </form>
-  </div>
-</div>
-}
-
-@if (modalArquivarAberto && turmaParaArquivar) {
-<div class="modal-overlay" role="dialog" aria-label="Confirmar arquivamento de oficina" aria-modal="true"
-  (click)="fecharModalArquivar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal modal--sm" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 class="modal-title" style="display:flex; align-items:center;">
-        Arquivar Oficina
-      </h2>
-      <button class="modal-close" (click)="fecharModalArquivar()" aria-label="Fechar">✕</button>
-    </div>
-    <div class="modal-body">
-      <p class="excluir-texto">
-        Tem certeza que deseja arquivar a oficina
-        <strong>{{ turmaParaArquivar.nome }}</strong>?
-      </p>
-      <p class="excluir-aviso" style="border-color:#fbbf24; background:#fffbeb; color:#92400e;">
-        Ela será movida para as turmas arquivadas e deixará de aparecer como ativa.
-      </p>
-      @if (erroArquivamento) {
-      <div class="error-banner" role="alert">{{ erroArquivamento }}</div>
-      }
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="fecharModalArquivar()">Cancelar</button>
-      <button class="btn" style="background:#b45309; color:white; border:none;" (click)="confirmarArquivamento()"
-        [disabled]="arquivando" [attr.aria-busy]="arquivando">
-        @if (arquivando) {
-        Arquivando...
-        } @else {
-        Sim, arquivar
+    <div class="page-actions" style="display:flex; gap:1rem; align-items:center;">
+      <button class="btn btn-secondary btn-icon-text" (click)="abrirFiltros()"
+        [attr.aria-expanded]="drawerAberto()">
+        <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+        Configurar Filtros
+        @if (tempProfessorId() || tempStatus()) {
+        <span class="badge" aria-label="filtros ativos">{{ (tempProfessorId() ? 1 : 0) + (tempStatus() ? 1 : 0) }}</span>
         }
       </button>
+
+      @if (!isProfessor()) {
+      <button class="btn btn-primary btn-icon-text" (click)="abrirModalCriar()"
+        aria-label="Adicionar nova oficina">
+        <span class="material-symbols-rounded">add</span>
+        Nova Oficina
+      </button>
+      }
     </div>
   </div>
-</div>
-}
 
-@if (modalAlunosAberto) {
-<div class="modal-overlay" role="dialog" aria-label="Alunos matriculados" aria-modal="true"
-  (click)="fecharModalAlunos()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header" style="border-bottom: none; padding-bottom: 0;">
-      <h2 class="modal-title" style="display:flex; align-items:center; font-size: 1.25rem;">
-        Perfil da Oficina
-      </h2>
-      <button class="modal-close" (click)="fecharModalAlunos()" aria-label="Fechar">✕</button>
-    </div>
+  <div class="tabs-container" role="tablist" aria-label="Status das Oficinas">
+    <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ATIVO'"
+      [class.active]="abaAtiva() === 'ATIVO'" (click)="mudarAba('ATIVO')">
+      {{ titleAtivo() }}
+    </button>
+    <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ARQUIVADO'"
+      [class.active]="abaAtiva() === 'ARQUIVADO'" (click)="mudarAba('ARQUIVADO')">
+      {{ titleArquivado() }}
+    </button>
+  </div>
 
-    <div class="modal-body" style="padding-top: 0.5rem;">
-
-      @if (turmaDetalhes) {
-      <div class="info-card"
-        style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 1.1rem; color: #1e293b; margin: 0 0 0.5rem 0;">{{ turmaDetalhes.nome }}</h3>
-
-        <div style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.9rem; color: #475569;">
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            <strong>Professor:</strong> {{ turmaDetalhes.professor?.nome || 'Não atribuído' }}
-          </div>
-
-          <div style="display: flex; align-items: flex-start; gap: 0.5rem;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
-              style="margin-top: 2px;">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-            <strong>Horários:</strong>
-            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
-              @if (turmaDetalhes.gradeHoraria && turmaDetalhes.gradeHoraria.length > 0) {
-              @for (turno of turmaDetalhes.gradeHoraria; track turno.dia) {
-              <span>{{ labelDia(turno.dia) }} — {{ minutosParaHmTemplate(turno.horaInicio) }} às {{
-                minutosParaHmTemplate(turno.horaFim) }}</span>
+  <section class="content-section" aria-live="polite" aria-label="Lista de Oficinas">
+    
+    @if (carregando()) {
+      <div class="empty-state" aria-busy="true">
+        <div class="spinner"></div>
+        <p>Buscando turmas...</p>
+      </div>
+    } @else if (turmasFiltradas().length === 0) {
+      <div class="empty-state">
+        <span class="material-symbols-rounded empty-icon" aria-hidden="true">folder_off</span>
+        <h3 class="empty-title">Nenhuma {{ abaAtiva() === 'ARQUIVADO' ? 'arquivada' : 'turma' }} encontrada.</h3>
+        <p class="empty-desc">
+          @if (tempProfessorId() || tempStatus()) {
+             Tente modificar os filtros laterais.
+          } @else {
+             Cadastre uma primeira oficina para iniciar.
+          }
+        </p>
+      </div>
+    } @else {
+      <div class="turmas-grid">
+        @for (turma of turmasFiltradas(); track turma.id) {
+          <article class="turma-card" [class.arquivada]="turma.excluido" aria-label="Detalhes da Oficina">
+            <header class="tcard-header">
+              <h3 class="tcard-title">
+                {{ turma.nome }}
+                @if (turma.excluido) {
+                  <span class="badge" style="background:#f1f5f9; color:#475569; font-size:10px;">ARQ</span>
+                }
+              </h3>
+              @if (!isProfessor()) {
+                <div class="tcard-actions">
+                  <button class="btn-icon" (click)="abrirModalEditar(turma)" aria-label="Editar" title="Editar informações da Turma">
+                    <span class="material-symbols-rounded">edit</span>
+                  </button>
+                  <button class="btn-icon btn-danger" (click)="alternarArquivamento(turma.id, !!turma.excluido, $event)"
+                    [attr.aria-label]="turma.excluido ? 'Desarquivar oficina' : 'Arquivar oficina'">
+                    <span class="material-symbols-rounded">{{ turma.excluido ? 'unarchive' : 'inventory_2' }}</span>
+                  </button>
+                </div>
               }
-              } @else {
-              <span>{{ turmaDetalhes.horario || 'Não definido' }}</span>
-              }
-            </div>
-          </div>
+            </header>
 
-          @if (turmaDetalhes.cargaHoraria) {
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              <strong>Carga Horária Ofertada:</strong> {{ turmaDetalhes.cargaHoraria }}
-          </div>
-          }
-
-          <div style="display: flex; align-items: center; gap: 0.5rem;">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-            <strong>Alunos:</strong>
-            @if (turmaDetalhes.capacidadeMaxima) {
-            <span>
-              {{ turmaDetalhes.matriculasOficina?.length || 0 }}/{{ turmaDetalhes.capacidadeMaxima }}
-              ({{ turmaDetalhes.matriculasOficina?.length || 0 }} de {{ turmaDetalhes.capacidadeMaxima }} vagas)
-            </span>
-            @if ((turmaDetalhes.matriculasOficina?.length || 0) >= turmaDetalhes.capacidadeMaxima) {
-            <span
-              style="background:#fee2e2; color:#b91c1c; font-size:0.75rem; padding:0.1rem 0.5rem; border-radius:9999px; font-weight:600;">Lotada</span>
-            }
-            } @else {
-            <span>{{ turmaDetalhes.matriculasOficina?.length || 0 }} (sem limite definido)</span>
-            }
-          </div>
-        </div>
-      </div>
-      }
-
-      <div class="abas-switcher" role="tablist" style="margin-bottom: 1.5rem;">
-        @if (!isProfessor) {
-        <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'adicionar'"
-          [class.ativa]="modalAlunosAbaAtual === 'adicionar'" (click)="alterarAbaModalAlunos('adicionar')">
-          Adicionar Alunos
-        </button>
-        }
-        <button class="aba-btn" role="tab" [attr.aria-selected]="modalAlunosAbaAtual === 'remover'"
-          [class.ativa]="modalAlunosAbaAtual === 'remover'" (click)="alterarAbaModalAlunos('remover')">
-          Alunos Matriculados
-        </button>
-      </div>
-
-      @if (carregandoDetalhes) {
-      <div class="loading-state" aria-busy="true">
-        <div class="spinner" aria-hidden="true"></div>
-        <p>Carregando alunos...</p>
-      </div>
-      }
-
-      @if (modalAlunosAbaAtual === 'adicionar') {
-      <div class="busca-alunos-container" style="margin-bottom: 1.5rem;">
-        <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>
-        <input type="search" id="buscarAlunoInput" class="form-input" placeholder="Buscar aluno para adicionar..."
-          [formControl]="buscaAlunoCtrl" aria-label="Buscar aluno por nome para matricular" autocomplete="off"
-          [attr.aria-busy]="buscandoAlunos" (keydown)="onBuscaKeydown($event)" />
-
-        @if (buscandoAlunos) {
-        <div class="loading-state empty-state--sm" aria-busy="true">
-          <div class="spinner" aria-hidden="true" style="width: 20px; height: 20px;"></div>
-        </div>
-        }
-
-        @if (alunosBuscaRestado.length > 0) {
-        <ul class="busca-resultados" aria-label="Resultados da busca de alunos"
-          style="position:static; max-height:220px; border-top:1px solid #e5e5e5; margin-top:0.5rem; box-shadow:none;">
-          @for (aluno of alunosBuscaRestado; track aluno.id) {
-          <li class="busca-resultado-item" appBuscaItem [itemData]="aluno" [id]="'aluno-op-' + aluno.id">
-            <label style="display:flex; align-items:center; gap:0.75rem; width:100%; cursor:pointer;">
-              <input type="checkbox" [checked]="alunosSelecionadosParaMatricula.includes(aluno.id)"
-                (change)="toggleSelecaoAluno(aluno.id)" class="custom-checkbox" />
-              <div style="display:flex; flex-direction:column; justify-content:center;">
-                  <span style="font-size:0.9rem;">{{ aluno.nomeCompleto }}</span>
-                  <span style="font-size: 0.8rem; color: #6b7280; margin-top: 0.1rem;">
-                      Matrícula: {{ aluno.matricula || 'Gerando pendente...' }}
-                  </span>
-              </div>
-            </label>
-          </li>
-          }
-        </ul>
-
-        <div style="display:flex; justify-content:flex-end; margin-top:1rem;">
-          <button class="btn btn-primary" (click)="salvarMatriculasEmLote()"
-            [disabled]="operacaoEmProgresso || alunosSelecionadosParaMatricula.length === 0"
-            style="display:flex; align-items:center; gap:0.5rem;">
-            @if (operacaoEmProgresso) {
-            <div class="spinner" aria-hidden="true"
-              style="width:14px; height:14px; border-width:2px; display:inline-block;"></div>
-            Salvando ({{ alunosSelecionadosParaMatricula.length }})
-            } @else {
-            Salvar {{ alunosSelecionadosParaMatricula.length }} aluno(s)
-            }
-          </button>
-        </div>
-        } @else if (!buscandoAlunos && buscaAlunoCtrl.value) {
-        <div class="empty-state empty-state--sm" style="padding:1rem;">
-          <p>Nenhum aluno desmatriculado encontrado.</p>
-        </div>
-        }
-      </div>
-      }
-
-      @if (modalAlunosAbaAtual === 'remover') {
-      <div>
-        <div
-          style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem;">
-          <h3 style="font-size: 1rem; margin: 0; color: #4b5563;">
-            Alunos Matriculados ({{ (turmaDetalhes?.matriculasOficina?.length || 0) }})
-          </h3>
-          @if ((turmaDetalhes?.matriculasOficina?.length || 0) > 0) {
-          <button class="btn btn-primary btn-sm" (click)="exportarListaCSV()" title="Exportar lista para Excel/CSV"
-            style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem;">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Exportar CSV
-          </button>
-          }
-        </div>
-
-        @if (!turmaDetalhes?.matriculasOficina || turmaDetalhes?.matriculasOficina?.length === 0) {
-        <div class="empty-state empty-state--sm">
-          <span class="empty-icon" aria-hidden="true">
-          </span>
-          <p>Nenhum aluno matriculado nesta oficina.</p>
-        </div>
-        } @else {
-        <ul class="alunos-list" aria-label="Lista de alunos matriculados">
-          @for (matricula of turmaDetalhes?.matriculasOficina ?? []; track matricula.aluno.id) {
-          <li class="aluno-item" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <div class="aluno-avatar" aria-hidden="true">
-                {{ matricula.aluno.nomeCompleto.charAt(0) }}
-              </div>
-              <div style="display: flex; flex-direction: column;">
-                <span style="font-weight: 500; color: #1e293b;">{{ matricula.aluno.nomeCompleto }}</span>
-                <span style="font-size: 0.8rem; color: #475569;">
-                  Matrícula: {{ matricula.aluno.matricula || 'Gerando pendente...' }}
+            <div class="tcard-body">
+              <div class="tcard-info">
+                <span class="material-symbols-rounded text-icon">person</span>
+                <span class="truncated-text" [title]="turma.professor?.nome || 'N/A'">
+                  <strong>Tutor:</strong> {{ turma.professor?.nome || 'Não atribuído' }}
                 </span>
               </div>
+              <div class="tcard-info">
+                <span class="material-symbols-rounded text-icon">groups</span>
+                <span>
+                  <strong>Qtd:</strong> 
+                  {{ turma.matriculasOficina?.length || 0 }}
+                  @if (turma.capacidadeMaxima) {
+                     / {{ turma.capacidadeMaxima }}
+                  }
+                </span>
+              </div>
+              <div class="tcard-info schedule-info" [title]="formatarGradeHoraria(turma.gradeHoraria)">
+                <span class="material-symbols-rounded text-icon">calendar_clock</span>
+                <span class="truncated-text"><strong>Hr:</strong> {{ formatarGradeHoraria(turma.gradeHoraria) }}</span>
+              </div>
+              <div class="tcard-info">
+                <span class="material-symbols-rounded text-icon">info</span>
+                <span><strong>Fase:</strong> {{ turma.status || '--' }}</span>
+              </div>
             </div>
-            @if (!isProfessor) {
-            <button class="btn btn-danger btn-sm"
-              (click)="removerAluno(matricula.aluno.id, matricula.aluno.nomeCompleto)" [disabled]="operacaoEmProgresso"
-              aria-label="Remover da turma" title="Remover aluno"
-              style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-              Remover
-            </button>
-            }
-          </li>
-          }
-        </ul>
 
+            <footer class="tcard-footer">
+              <button class="btn btn-secondary btn-sm abstract-btn" style="width:100%;" 
+                      (click)="abrirModalAlunos(turma)"
+                      [attr.aria-label]="isProfessor() ? 'Ver lista de alunos' : 'Gerenciar alunos'">
+                <span class="material-symbols-rounded">{{ isProfessor() ? 'group' : 'how_to_reg' }}</span>
+                {{ isProfessor() ? 'Lista de Frequência / Presença' : 'Gestão de Alunos' }}
+              </button>
+            </footer>
+          </article>
         }
       </div>
-      }
+    }
+  </section>
+</main>
 
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="fecharModalAlunos()">Fechar</button>
-    </div>
-  </div>
-</div>
-}
+<!-- Injeção dos Sub-Componentes (Micro-Frontends Decompostos) -->
 
-@if (drawerAberto) {
-<div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
-}
-<div id="turmas-filter-drawer" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
-  aria-modal="true" aria-label="Filtros avançados" [formGroup]="filterForm">
+<app-turma-filtro-drawer 
+   [aberto]="drawerAberto()" 
+   [professores]="professoresDisponiveis()"
+   (aplicar)="aplicarFiltros($event)" 
+   (limpar)="limparFiltrosDrawer()" 
+   (aoFechar)="fecharFiltros()">
+</app-turma-filtro-drawer>
 
-  <div class="filter-drawer__header">
-    <h2 class="filter-drawer__title">
-      <span class="material-symbols-rounded">tune</span>
-      Filtros Avançados
-    </h2>
-    <button type="button" class="btn btn-icon btn-ghost" (click)="drawerAberto = false"
-      aria-label="Fechar filtros">✕</button>
-  </div>
+<app-turma-form-modal 
+   [aberto]="modalEditarAberto()" 
+   [professores]="professoresDisponiveis()" 
+   [turmaEdicao]="turmaAtiva()"
+   [salvando]="salvandoTurma()" 
+   [erroAPI]="erroSalvarTurma()"
+   (salvar)="salvarOficina($event)" 
+   (tentarFecharSujo)="tentarFecharSujo($event)" 
+   (fechar)="modalEditarAberto.set(false)">
+</app-turma-form-modal>
 
-  <div class="filter-drawer__body">
-
-    <section class="filter-section">
-      <h3 class="filter-section__title">Situação / Ciclo</h3>
-
-      <div class="filter-field">
-        <label class="form-label" for="f-status">Fase da Execução</label>
-        <select id="f-status" class="form-input" formControlName="status">
-          <option value="">Todas</option>
-          <option value="PREVISTA">Prevista (Não Iniciada)</option>
-          <option value="ANDAMENTO">Em Andamento</option>
-          <option value="CONCLUIDA">Concluída (Histórico)</option>
-          <option value="CANCELADA">Cancelada / Suspensa</option>
-        </select>
-      </div>
-    </section>
-
-    <section class="filter-section">
-      <h3 class="filter-section__title">Responsabilidade</h3>
-
-      <div class="filter-field">
-        <label class="form-label" for="f-prof">Professor / Orientador</label>
-        <select id="f-prof" class="form-input" formControlName="professorId">
-          <option value="">Todos os professores</option>
-          @for (prof of professoresFiltro; track prof.id) {
-          <option [value]="prof.id">{{ prof.nome }}</option>
-          }
-        </select>
-      </div>
-    </section>
-
-  </div>
-
-  <div class="filter-drawer__footer">
-    <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
-    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar Filtros</button>
-  </div>
-</div>
+<app-turma-alunos-modal 
+   [aberto]="modalAlunosAberto()"
+   [turmaOriginal]="turmaAtiva()"
+   [isProfessor]="isProfessor()"
+   (recarregarGrade)="carregarTurmas()"
+   (fechar)="fecharModalAlunos()">
+</app-turma-alunos-modal>
