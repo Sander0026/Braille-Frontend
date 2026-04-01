@@ -11,19 +11,13 @@
     </div>
   </header>
 
-  <!-- ── Visualizador de PDF embutido ── -->
-  @if (pdfAtivo) {
-  <section class="pdf-viewer-wrapper" aria-label="Visualizador de manual" aria-live="polite">
-    <div class="pdf-viewer-header">
-      <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
-      <span class="pdf-titulo">{{ tituloAtivo }}</span>
-      <button class="btn btn-secondary btn-sm" (click)="fecharPdf()" aria-label="Fechar visualizador de PDF">
-        <span class="material-symbols-rounded" aria-hidden="true">close</span>
-        Fechar
-      </button>
-    </div>
-    <iframe [src]="pdfAtivo" class="pdf-frame" title="Visualizador de manual PDF" aria-label="Conteúdo do manual em PDF"></iframe>
-  </section>
+  <!-- ── Visualizador de PDF Embutido ── -->
+  @if (manualAtivo()) {
+    <app-pdf-viewer
+      [titulo]="manualAtivo()!.titulo"
+      [src]="manualAtivo()!.arquivo!"
+      (close)="fecharPdf()">
+    </app-pdf-viewer>
   }
 
   <!-- ── Seção: Manuais ── -->
@@ -35,38 +29,10 @@
 
     <div class="manuais-grid">
       @for (manual of manuais; track manual.titulo) {
-      <article class="manual-card card-{{ manual.cor }}" [class.disponivel]="manual.arquivo !== null" [class.em-breve]="manual.arquivo === null">
-
-        <div class="manual-card-icon">
-          <span class="material-symbols-rounded" aria-hidden="true">{{ manual.icon }}</span>
-        </div>
-
-        <div class="manual-card-body">
-          <h3 class="manual-titulo">{{ manual.titulo }}</h3>
-          <p class="manual-descricao">{{ manual.descricao }}</p>
-
-          <div class="manual-perfis" aria-label="Perfis indicados">
-            @for (perfil of manual.perfis; track perfil) {
-            <span class="perfil-badge">{{ perfil }}</span>
-            }
-          </div>
-        </div>
-
-        <div class="manual-card-footer">
-          @if (manual.arquivo) {
-          <button class="btn btn-primary btn-sm" (click)="abrirManual(manual)" [attr.aria-label]="'Abrir ' + manual.titulo">
-            <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
-            Abrir Manual
-          </button>
-          } @else {
-          <output class="badge-em-breve">
-            <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
-            Em breve
-          </output>
-          }
-        </div>
-
-      </article>
+        <app-manual-card 
+          [manual]="manual" 
+          (openManual)="abrirManual($event)">
+        </app-manual-card>
       }
     </div>
   </section>

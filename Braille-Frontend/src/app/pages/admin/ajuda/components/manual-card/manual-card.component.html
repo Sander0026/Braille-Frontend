@@ -1,0 +1,33 @@
+<article class="manual-card card-{{ manual.cor }}" [class.disponivel]="manual.arquivo !== null" [class.em-breve]="manual.arquivo === null">
+
+  <div class="manual-card-icon">
+    <span class="material-symbols-rounded" aria-hidden="true">{{ manual.icon }}</span>
+  </div>
+
+  <div class="manual-card-body">
+    <h3 class="manual-titulo">{{ manual.titulo }}</h3>
+    <p class="manual-descricao">{{ manual.descricao }}</p>
+
+    <div class="manual-perfis" aria-label="Perfis indicados">
+      @for (perfil of manual.perfis; track perfil) {
+      <span class="perfil-badge">{{ perfil }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="manual-card-footer">
+    @if (manual.arquivo) {
+    <!-- O aria-label garante contexto específico para botões genéricos de 'Abrir' -->
+    <button class="btn btn-primary btn-sm" (click)="onAbrirManual()" [attr.aria-label]="'Abrir versão em PDF de ' + manual.titulo">
+      <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
+      Abrir Manual
+    </button>
+    } @else {
+    <output class="badge-em-breve">
+      <span class="material-symbols-rounded" aria-hidden="true">schedule</span>
+      Em breve
+    </output>
+    }
+  </div>
+
+</article>

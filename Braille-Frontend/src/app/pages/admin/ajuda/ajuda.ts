@@ -1,83 +1,46 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-interface ManualCard {
-  titulo: string;
-  descricao: string;
-  icon: string;
-  cor: string;
-  arquivo: string | null; // null = em breve
-  perfis: string[];
-}
+import { ManualCard, MANUAIS_AJUDA, TECNOLOGIAS_SISTEMA, EQUIPE_SISTEMA } from './ajuda.constants';
+import { PdfViewerComponent } from './components/pdf-viewer/pdf-viewer.component';
+import { ManualCardComponent } from './components/manual-card/manual-card.component';
+import { AccessibilityService } from '../../../core/services/accessibility.service';
 
 @Component({
   selector: 'app-ajuda',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, PdfViewerComponent, ManualCardComponent],
   templateUrl: './ajuda.html',
-  styleUrl: './ajuda.scss'
+  styleUrl: './ajuda.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Ajuda {
-  pdfAtivo: string | null = null;
-  tituloAtivo = '';
+  // Desacoplado: as constantes não entopem a classe.
+  readonly manuais = MANUAIS_AJUDA;
+  readonly tecnologias = TECNOLOGIAS_SISTEMA;
+  readonly equipe = EQUIPE_SISTEMA;
 
-  readonly manuais: ManualCard[] = [
-    {
-      titulo: 'Guia da Secretaria',
-      descricao: 'Como cadastrar alunos, gerenciar matrículas em oficinas e controlar frequências.',
-      icon: 'badge',
-      cor: 'primary',
-      arquivo: null, // Será o path: 'assets/manuais/secretaria_guia.pdf'
-      perfis: ['Secretaria', 'Admin']
-    },
-    {
-      titulo: 'Guia do Professor',
-      descricao: 'Como acessar o diário de classe, registrar presença e encerrar chamadas.',
-      icon: 'school',
-      cor: 'info',
-      arquivo: null, // Será o path: 'assets/manuais/professor_guia.pdf'
-      perfis: ['Professor', 'Admin']
-    },
-    {
-      titulo: 'Guia da Comunicação',
-      descricao: 'Como publicar comunicados, gerenciar notícias, eventos e o conteúdo do site institucional.',
-      icon: 'campaign',
-      cor: 'warning',
-      arquivo: null, // Será o path: 'assets/manuais/comunicacao_guia.pdf'
-      perfis: ['Comunicação', 'Admin']
-    },
-    {
-      titulo: 'Guia do Administrador',
-      descricao: 'Emissão de certificados, gestão de apoiadores, comunicados e configurações do sistema.',
-      icon: 'admin_panel_settings',
-      cor: 'success',
-      arquivo: null, // Será o path: 'assets/manuais/admin_guia.pdf'
-      perfis: ['Admin']
-    }
-  ];
+  // Reativo: Performance otimizada com a gestão unificada de render de modal/PDF do Angular
+  manualAtivo = signal<ManualCard | null>(null);
 
-  readonly tecnologias = [
-    { nome: 'Angular 19', icon: '🅰️', descricao: 'Frontend' },
-    { nome: 'NestJS', icon: '🐈', descricao: 'Backend API' },
-    { nome: 'PostgreSQL + Neon', icon: '🐘', descricao: 'Banco de Dados' },
-    { nome: 'Cloudinary', icon: '☁️', descricao: 'Armazenamento de Arquivos' },
-    { nome: 'Vercel', icon: '▲', descricao: 'Hospedagem Frontend' },
-    { nome: 'Render.com', icon: '🌐', descricao: 'Hospedagem Backend' },
-  ];
-
-  readonly equipe = [
-    { nome: 'Equipe PI-5', papel: 'Desenvolvimento e Arquitetura' },
-  ];
+  /** A11y Tracker para restaurar o Keyboard Focus quando fecham o visualizador */
+  private ultimoElementoFocado: HTMLElement | null = null;
 
   abrirManual(manual: ManualCard): void {
     if (!manual.arquivo) return;
-    this.pdfAtivo = manual.arquivo;
-    this.tituloAtivo = manual.titulo;
+    this.ultimoElementoFocado = document.activeElement as HTMLElement;
+    this.manualAtivo.set(manual);
   }
 
   fecharPdf(): void {
-    this.pdfAtivo = null;
-    this.tituloAtivo = '';
+    this.manualAtivo.set(null);
+    // Restaurar foco anterior
+    if (this.ultimoElementoFocado) {
+      setTimeout(() => {
+        this.ultimoElementoFocado?.focus();
+        this.ultimoElementoFocado = null;
+      }, 0);
+    }
   }
 }
