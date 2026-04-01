@@ -1,1 +1,48 @@
-<p>dashboard works!</p>
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Visão geral do Instituto Luiz Braille</p>
+    </div>
+</div>
+
+@if (acessoNegado()) {
+<div class="card card-body u-mb-lg" role="alert" aria-live="polite"
+    style="border-left: 4px solid #dc2626; background-color: #fef2f2; display: flex; align-items: center; gap: .75rem;">
+    <span class="material-symbols-rounded" style="color: #dc2626;" aria-hidden="true">block</span>
+    <p style="margin: 0; color: #991b1b; font-weight: 500;">Acesso negado: Você não tem permissão para acessar a área solicitada.</p>
+</div>
+}
+
+@if (erro()) {
+<div class="card card-body" role="alert" aria-live="assertive">
+    <p style="color: #dc2626">{{ erro() }}</p>
+</div>
+} @else {
+    @if (uiState$ | async; as state) {
+        <section class="stats-grid" role="region" aria-label="Resumo de estatísticas" aria-live="polite">
+            @for (card of state.cards; track card.label) {
+                <app-stat-card [card]="card"></app-stat-card>
+            }
+        </section>
+
+        @if (state.acoes.length > 0) {
+        <section class="quick-actions" aria-label="Ações rápidas">
+            <h2 class="section-title">Ações rápidas</h2>
+            <div class="actions-grid">
+                @for (acao of state.acoes; track acao.label) {
+                    <app-quick-action [action]="acao"></app-quick-action>
+                }
+            </div>
+        </section>
+        }
+    } @else {
+        <div class="stats-grid" aria-busy="true" aria-live="polite" aria-label="Carregando estatísticas...">
+            @for (i of [1,2,3,4]; track i) {
+                <div class="stat-card--skeleton" aria-hidden="true">
+                    <div class="skeleton-box"></div>
+                    <div class="skeleton-line"></div>
+                </div>
+            }
+        </div>
+    }
+}

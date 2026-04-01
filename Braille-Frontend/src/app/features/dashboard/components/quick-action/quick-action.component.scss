@@ -1,0 +1,42 @@
+@use 'sass:color';
+
+$primary: #f5c800;
+$gray-200: #e5e5e5;
+$gray-900: #1f1f1f;
+$white: #ffffff;
+$transition: 250ms ease;
+
+:host {
+    display: block;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.25rem;
+    background: $white;
+    border: 1.5px solid $gray-200;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    color: $gray-900;
+    font-size: 0.825rem;
+    font-weight: 600;
+    text-align: center;
+    transition: all $transition;
+
+    span.material-symbols-rounded {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.75rem;
+        color: $primary;
+        filter: brightness(0.85);
+    }
+
+    &:hover {
+        border-color: $primary;
+        background: color.change($primary, $alpha: .06);
+        transform: translateY(-2px);
+    }
+}

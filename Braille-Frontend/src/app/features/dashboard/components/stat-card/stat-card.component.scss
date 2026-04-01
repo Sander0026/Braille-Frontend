@@ -1,0 +1,97 @@
+@use 'sass:color';
+
+$primary: #f5c800;
+$info: #2563eb;
+$success: #16a34a;
+$warning: #b45309;
+$gray-200: #e5e5e5;
+$gray-500: #737373;
+$gray-900: #1f1f1f;
+$white: #ffffff;
+$transition: 250ms ease;
+
+:host {
+    display: block;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: $white;
+    border-radius: 1rem;
+    border: 1px solid $gray-200;
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+    transition: transform $transition, box-shadow $transition;
+
+    &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .1);
+    }
+
+    &--primary .stat-icon {
+        background: color.change($primary, $alpha: .15);
+        color: #c9a500;
+    }
+    &--info .stat-icon {
+        background: color.change($info, $alpha: .1);
+        color: $info;
+    }
+    &--success .stat-icon {
+        background: color.change($success, $alpha: .1);
+        color: $success;
+    }
+    &--warning .stat-icon {
+        background: color.change($warning, $alpha: .1);
+        color: $warning;
+    }
+    &--primary { border-left: 4px solid $primary; }
+    &--info { border-left: 4px solid $info; }
+    &--success { border-left: 4px solid $success; }
+    &--warning { border-left: 4px solid $warning; }
+}
+
+.stat-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    flex-shrink: 0;
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.4rem;
+    }
+}
+
+.stat-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-valor {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $gray-900;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.78rem;
+    color: $gray-500;
+    margin-top: 0.2rem;
+    font-weight: 500;
+}
+
+.stat-arrow {
+    color: $gray-500;
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1rem;
+    }
+}

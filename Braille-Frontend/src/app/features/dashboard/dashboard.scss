@@ -1,1 +1,83 @@
-// Component-level styles - use global tokens from styles.scss
+// Dashboard Styles — ILBES Admin
+
+// ── Stats Grid ────────────────────────────────────────────────
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+
+    @media (min-width: 576px) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    @media (min-width: 1024px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+// ── Skeleton Loading ──────────────────────────────────────────
+$gray-100: #f5f5f5;
+
+.stat-card--skeleton {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem;
+    background: #ffffff;
+    border-radius: 1rem;
+    border: 1px solid #e5e5e5;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
+}
+
+.skeleton-box {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 0.75rem;
+    background: $gray-100;
+    animation: pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton-line {
+    width: 60%;
+    height: 1.75rem;
+    border-radius: 0.4rem;
+    background: $gray-100;
+    animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+// ── Seção de Ações Rápidas ─────────────────────────────────────
+$gray-900: #1f1f1f;
+
+.section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: $gray-900;
+    margin-bottom: 1rem;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+
+    @media (min-width: 768px) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.quick-actions {
+    margin-top: 0.5rem;
+}

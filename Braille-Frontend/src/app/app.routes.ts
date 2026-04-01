@@ -53,7 +53,7 @@ export const routes: Routes = [
       // Dashboard
       {
         path: 'dashboard',
-        loadComponent: () => import('./pages/admin/dashboard/dashboard').then(m => m.Dashboard),
+        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
         title: 'Dashboard — ILBES'
       },
 
