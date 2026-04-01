@@ -1,0 +1,36 @@
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card modal-md" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2 id="modalHotkeysTitulo" class="modal-title" style="display:flex; align-items:center; gap:0.5rem">
+        <span class="material-symbols-rounded">keyboard</span>
+        Atalhos de Teclado
+      </h2>
+      <button class="btn-close" (click)="fecharModal()" aria-label="Fechar atalhos">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body" style="padding: 1.5rem">
+      <p style="margin-bottom: 1.5rem; color: #4b5563;">
+        Use as seguintes combinações para navegar rapidamente pelo sistema.
+      </p>
+
+      <ul class="hotkeys-list" aria-label="Lista de atalhos de teclado">
+        @for (hotkey of hotkeysDisponiveis; track hotkey.combo) {
+        <li class="hotkey-item">
+          <strong class="hotkey-desc">{{ hotkey.description }}</strong>
+          <kbd class="hotkey-combo" [attr.aria-label]="'Atalho: ' + hotkey.combo.toUpperCase().replace('.', ' mais ')">
+            {{ hotkey.combo.toUpperCase().replace('.', ' + ') }}
+          </kbd>
+        </li>
+        }
+      </ul>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="fecharModal()">Entendi</button>
+    </div>
+  </div>
+</dialog>

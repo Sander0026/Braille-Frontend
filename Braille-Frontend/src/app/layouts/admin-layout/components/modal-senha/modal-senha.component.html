@@ -1,0 +1,77 @@
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2 id="modal-senha-titulo" class="modal-title">Trocar Senha</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    @if (senhaSucesso) {
+    <div class="modal-body">
+      <output class="sucesso-banner">
+        <span class="material-symbols-rounded">check_circle</span>
+        Senha alterada com sucesso!
+      </output>
+    </div>
+    } @else {
+    <form [formGroup]="formSenha" (ngSubmit)="salvarSenha()" novalidate>
+      <div class="modal-body">
+
+        <!-- Senha atual -->
+        <div class="form-group">
+          <label class="form-label" for="senha-atual">Senha atual</label>
+          <input id="senha-atual" type="password" class="form-input" formControlName="senhaAtual"
+            autocomplete="current-password" placeholder="Digite sua senha atual"
+            [attr.aria-invalid]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched"
+            [attr.aria-describedby]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched ? 'erro-senha-atual' : null" />
+          @if (formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched) {
+          <p id="erro-senha-atual" class="form-error">Campo obrigatório.</p>
+          }
+        </div>
+
+        <!-- Nova senha -->
+        <div class="form-group">
+          <label class="form-label" for="nova-senha">Nova senha</label>
+          <input id="nova-senha" type="password" class="form-input" formControlName="novaSenha"
+            autocomplete="new-password" placeholder="Mínimo 8 caracteres (letras e números)"
+            [attr.aria-invalid]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched"
+            [attr.aria-describedby]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched ? 'erro-nova-senha' : null" />
+          @if (formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched) {
+          <p id="erro-nova-senha" class="form-error">
+             A senha deve ter pelo menos 8 caracteres, incluindo letras e números.
+          </p>
+          }
+        </div>
+
+        <!-- Confirmar nova senha -->
+        <div class="form-group">
+          <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
+          <input id="confirmar-senha" type="password" class="form-input" formControlName="confirmarSenha"
+            autocomplete="new-password" placeholder="Repita a nova senha" [attr.aria-invalid]="confirmacaoInvalida"
+            [attr.aria-describedby]="confirmacaoInvalida ? 'erro-confirmar-senha' : null" />
+          @if (confirmacaoInvalida) {
+          <p id="erro-confirmar-senha" class="form-error" role="alert">As senhas não coincidem.</p>
+          }
+        </div>
+
+        <!-- Erro geral (senha atual incorreta) -->
+        @if (senhaErro) {
+        <p class="form-error" role="alert">{{ senhaErro }}</p>
+        }
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="formSenha.invalid || carregandoSenha">
+          @if (carregandoSenha) { Salvando... } @else { Salvar Senha }
+        </button>
+      </div>
+    </form>
+    }
+
+  </div>
+</dialog>

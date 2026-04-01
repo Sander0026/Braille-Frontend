@@ -1,0 +1,121 @@
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
+  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h2 id="modal-perfil-titulo" class="modal-title">Meu Perfil</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+        <span class="material-symbols-rounded">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Avatar + info rápida -->
+      <div class="perfil-header">
+        @if (fotoPerfil) {
+        <img [src]="fotoPerfil" class="perfil-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
+        } @else {
+        <div class="perfil-avatar-iniciais">{{ iniciaisDisplay }}</div>
+        }
+        <div class="perfil-header-info">
+          <p class="perfil-nome">{{ nomeDisplay }}</p>
+          <p class="perfil-cargo">{{ labelCargo }}</p>
+          <div class="perfil-actions-buttons">
+            <button class="perfil-trocar-foto-link" type="button" (click)="emitAction('foto')">
+              <span class="material-symbols-rounded">photo_camera</span> Trocar foto
+            </button>
+            @if (fotoPerfil) {
+            <button class="perfil-trocar-foto-link perfil-remover-foto-link" type="button" (click)="emitAction('removerFoto')">
+              <span class="material-symbols-rounded">delete</span> Remover
+            </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="perfil-divider"></div>
+
+      <!-- Formulário de edição -->
+      <form [formGroup]="formPerfil" (ngSubmit)="salvarPerfil()" novalidate>
+
+        <div class="perfil-grid">
+          <!-- Nome -->
+          <div class="form-group">
+            <label class="form-label" for="perfil-nome">Nome completo</label>
+            <input id="perfil-nome" type="text" class="form-input" formControlName="nome"
+              placeholder="Seu nome completo" />
+            @if (formPerfil.get('nome')?.invalid && formPerfil.get('nome')?.touched) {
+            <p class="form-error">Nome obrigatório (mínimo 2 caracteres).</p>
+            }
+          </div>
+
+          <!-- Username readonly -->
+          <div class="form-group">
+            <label class="form-label" for="perfil-username">Nome de usuário</label>
+            <input id="perfil-username" type="text" class="form-input form-input-readonly"
+              [value]="perfil?.username ?? usuario?.username ?? ''" aria-label="Nome de usuário (imutável)" readonly />
+            <p class="form-hint">O nome de usuário não pode ser alterado.</p>
+          </div>
+
+          <!-- E-mail -->
+          <div class="form-group">
+            <label class="form-label" for="perfil-email">E-mail</label>
+            <input id="perfil-email" type="email" class="form-input" formControlName="email"
+              placeholder="seu@email.com" />
+            @if (formPerfil.get('email')?.invalid && formPerfil.get('email')?.touched) {
+            <p class="form-error">Informe um e-mail válido.</p>
+            }
+          </div>
+
+          <!-- Cargo readonly -->
+          <div class="form-group">
+            <label class="form-label" for="perfil-cargo-input">Cargo / Perfil</label>
+            <input id="perfil-cargo-input" type="text" class="form-input form-input-readonly" [value]="labelCargo" aria-label="Cargo ou Perfil (imutável)"
+              readonly />
+          </div>
+
+          <!-- Membro desde -->
+          @if (perfil?.criadoEm) {
+          <div class="form-group">
+            <label class="form-label" for="perfil-membro-desde">Membro desde</label>
+            <input id="perfil-membro-desde" type="text" class="form-input form-input-readonly" [value]="perfil?.criadoEm | date:'dd/MM/yyyy'"
+              aria-label="Membro desde a data (imutável)" readonly />
+          </div>
+          }
+
+          <!-- Status da conta -->
+          <div class="form-group">
+            <span class="form-label">Status da conta</span>
+            <div class="perfil-status" [class.ativo]="perfil?.statusAtivo !== false">
+              <span class="material-symbols-rounded">
+                {{ perfil?.statusAtivo !== false ? 'check_circle' : 'cancel' }}
+              </span>
+              {{ perfil?.statusAtivo !== false ? 'Ativa' : 'Inativa' }}
+            </div>
+          </div>
+        </div>
+
+        @if (perfilErro) {
+        <p class="form-error profile-error" role="alert">{{ perfilErro }}</p>
+        }
+
+        @if (perfilSucesso) {
+        <output class="sucesso-banner profile-sucesso">
+          <span class="material-symbols-rounded">check_circle</span>
+          Perfil atualizado com sucesso!
+        </output>
+        }
+
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+      <button type="button" class="btn btn-primary" (click)="salvarPerfil()"
+        [disabled]="formPerfil.invalid || carregandoPerfil">
+        @if (carregandoPerfil) { Salvando... } @else { Salvar Alterações }
+      </button>
+    </div>
+
+  </div>
+</dialog>

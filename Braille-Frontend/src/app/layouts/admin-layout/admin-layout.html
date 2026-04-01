@@ -32,7 +32,7 @@
 
     <!-- Conteúdo das páginas -->
     <main id="main-content" class="page-content" role="main" tabindex="-1">
-      <router-outlet />
+      <router-outlet></router-outlet>
     </main>
 
     <app-footer theme="admin"></app-footer>
@@ -40,315 +40,45 @@
 
 </div>
 
-<!-- ══ MODAL: TROCAR FOTO ═══════════════════════════════════════ -->
+<!-- ══ SUB-COMPONENTES DE MODAL ═══════════════════════════════════════ -->
+
 @if (modalAtivo === 'foto') {
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h2 id="modal-foto-titulo" class="modal-title">Trocar Foto de Perfil</h2>
-      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">
-        <span class="material-symbols-rounded">close</span>
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <!-- Preview -->
-      <div class="foto-preview-area">
-        @if (fotoPreview) {
-        <img [src]="fotoPreview" class="foto-preview-img" alt="Pré-visualização da nova foto" />
-        } @else if (fotoPerfil && !removerFotoFlag) {
-        <img [src]="fotoPerfil" class="foto-preview-img" alt="Foto atual" />
-        } @else {
-        <div class="foto-preview-placeholder">
-          <span class="material-symbols-rounded">person</span>
-        </div>
-        }
-      </div>
-
-      <!-- Controles de Seleção / Remoção -->
-      <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: center; margin-bottom: 0.5rem; flex-wrap: wrap;">
-        <!-- Input arquivo -->
-        <label class="foto-upload-btn" for="input-foto" style="margin-bottom: 0;">
-          <span class="material-symbols-rounded" aria-hidden="true">upload</span>
-          @if (fotoSelecionada) { Alterar } @else { Selecionar foto }
-        </label>
-        
-        @if (fotoPerfil && !removerFotoFlag) {
-        <button class="btn btn-secondary" style="color: #dc2626; border-color: #fca5a5; display: flex; align-items: center; gap: 0.5rem;" (click)="marcarParaRemoverFoto()" title="Remover minha foto atual">
-          <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 20px;">delete</span>
-          Remover
-        </button>
-        }
-      </div>
-      <input id="input-foto" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only"
-        (change)="onFotoSelecionada($event)" />
-
-      <p class="foto-hint">Formatos: JPG, PNG, WebP. Máx: 2 MB.</p>
-
-      @if (fotoErro) {
-      <p class="form-error" role="alert">{{ fotoErro }}</p>
-      }
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
-      <button class="btn btn-primary" (click)="salvarFoto()" [disabled]="(!fotoSelecionada && !removerFotoFlag) || carregandoFoto">
-        @if (carregandoFoto) { Salvando... } @else { Salvar Alterações }
-      </button>
-    </div>
-
-  </div>
-</dialog>
+  <app-modal-foto
+    [fotoPerfil]="fotoPerfil"
+    (close)="fecharModal()"
+    (fotoAtualizada)="onFotoAtualizada($event)">
+  </app-modal-foto>
 }
 
-<!-- ══ MODAL: TROCAR SENHA ══════════════════════════════════════ -->
 @if (modalAtivo === 'senha') {
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h2 id="modal-senha-titulo" class="modal-title">Trocar Senha</h2>
-      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar modal">
-        <span class="material-symbols-rounded">close</span>
-      </button>
-    </div>
-
-    @if (senhaSucesso) {
-    <div class="modal-body">
-      <output class="sucesso-banner">
-        <span class="material-symbols-rounded">check_circle</span>
-        Senha alterada com sucesso!
-      </output>
-    </div>
-    } @else {
-    <form [formGroup]="formSenha" (ngSubmit)="salvarSenha()" novalidate>
-      <div class="modal-body">
-
-        <!-- Senha atual -->
-        <div class="form-group">
-          <label class="form-label" for="senha-atual">Senha atual</label>
-          <input id="senha-atual" type="password" class="form-input" formControlName="senhaAtual"
-            autocomplete="current-password" placeholder="Digite sua senha atual"
-            [attr.aria-invalid]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched"
-            [attr.aria-describedby]="formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched ? 'erro-senha-atual' : null" />
-          @if (formSenha.get('senhaAtual')?.invalid && formSenha.get('senhaAtual')?.touched) {
-          <p id="erro-senha-atual" class="form-error">Campo obrigatório.</p>
-          }
-        </div>
-
-        <!-- Nova senha -->
-        <div class="form-group">
-          <label class="form-label" for="nova-senha">Nova senha</label>
-          <input id="nova-senha" type="password" class="form-input" formControlName="novaSenha"
-            autocomplete="new-password" placeholder="Mínimo 8 caracteres"
-            [attr.aria-invalid]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched"
-            [attr.aria-describedby]="formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched ? 'erro-nova-senha' : null" />
-          @if (formSenha.get('novaSenha')?.invalid && formSenha.get('novaSenha')?.touched) {
-          <p id="erro-nova-senha" class="form-error">Mínimo de 8 caracteres.</p>
-          }
-        </div>
-
-        <!-- Confirmar nova senha -->
-        <div class="form-group">
-          <label class="form-label" for="confirmar-senha">Confirmar nova senha</label>
-          <input id="confirmar-senha" type="password" class="form-input" formControlName="confirmarSenha"
-            autocomplete="new-password" placeholder="Repita a nova senha" [attr.aria-invalid]="confirmacaoInvalida"
-            [attr.aria-describedby]="confirmacaoInvalida ? 'erro-confirmar-senha' : null" />
-          @if (confirmacaoInvalida) {
-          <p id="erro-confirmar-senha" class="form-error" role="alert">As senhas não coincidem.</p>
-          }
-        </div>
-
-        <!-- Erro geral (senha atual incorreta) -->
-        @if (senhaErro) {
-        <p class="form-error" role="alert">{{ senhaErro }}</p>
-        }
-
-        <p class="senha-requisitos">
-          A senha deve ter pelo menos 8 caracteres.
-        </p>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="fecharModal()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" [disabled]="formSenha.invalid || carregandoSenha">
-          @if (carregandoSenha) { Salvando... } @else { Salvar Senha }
-        </button>
-      </div>
-    </form>
-    }
-
-  </div>
-</dialog>
+  <app-modal-senha
+    (close)="fecharModal()">
+  </app-modal-senha>
 }
 
-<!-- ══ MODAL: MEU PERFIL ═══════════════════════════════════════ -->
 @if (modalAtivo === 'perfil') {
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
-
-    <div class="modal-header">
-      <h2 id="modal-perfil-titulo" class="modal-title">Meu Perfil</h2>
-      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
-        <span class="material-symbols-rounded">close</span>
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <!-- Avatar + info rápida -->
-      <div class="perfil-header">
-        @if (fotoPerfil) {
-        <img [src]="fotoPerfil" class="perfil-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
-        } @else {
-        <div class="perfil-avatar-iniciais">{{ iniciaisDisplay }}</div>
-        }
-        <div class="perfil-header-info">
-          <p class="perfil-nome">{{ nomeDisplay }}</p>
-          <p class="perfil-cargo">{{ labelCargo }}</p>
-          <div style="display: flex; gap: 0.75rem; align-items: center; justify-content: flex-start; margin-top: 0.5rem; flex-wrap: wrap;">
-            <button class="perfil-trocar-foto-link" type="button" (click)="abrirModalFoto()" style="margin: 0;">
-              <span class="material-symbols-rounded">photo_camera</span> Trocar foto
-            </button>
-            @if (fotoPerfil) {
-            <button class="perfil-trocar-foto-link" style="color: #dc2626; margin: 0;" type="button" (click)="removerMinhaFotoDireto()">
-              <span class="material-symbols-rounded">delete</span> Remover
-            </button>
-            }
-          </div>
-        </div>
-      </div>
-
-      <div class="perfil-divider"></div>
-
-      <!-- Formulário de edição -->
-      <form [formGroup]="formPerfil" (ngSubmit)="salvarPerfil()" novalidate>
-
-        <div class="perfil-grid">
-          <!-- Nome -->
-          <div class="form-group">
-            <label class="form-label" for="perfil-nome">Nome completo</label>
-            <input id="perfil-nome" type="text" class="form-input" formControlName="nome"
-              placeholder="Seu nome completo" />
-            @if (formPerfil.get('nome')?.invalid && formPerfil.get('nome')?.touched) {
-            <p class="form-error">Nome obrigatório (mínimo 2 caracteres).</p>
-            }
-          </div>
-
-          <!-- Username readonly -->
-          <div class="form-group">
-            <span class="form-label">Nome de usuário</span>
-            <input type="text" class="form-input form-input-readonly"
-              [value]="perfil?.username ?? usuario?.username ?? ''" aria-label="Nome de usuário" readonly />
-            <p class="form-hint">O nome de usuário não pode ser alterado.</p>
-          </div>
-
-          <!-- E-mail -->
-          <div class="form-group">
-            <label class="form-label" for="perfil-email">E-mail</label>
-            <input id="perfil-email" type="email" class="form-input" formControlName="email"
-              placeholder="seu@email.com" />
-            @if (formPerfil.get('email')?.invalid && formPerfil.get('email')?.touched) {
-            <p class="form-error">Informe um e-mail válido.</p>
-            }
-          </div>
-
-          <!-- Cargo readonly -->
-          <div class="form-group">
-            <span class="form-label">Cargo / Perfil</span>
-            <input type="text" class="form-input form-input-readonly" [value]="labelCargo" aria-label="Cargo ou Perfil"
-              readonly />
-          </div>
-
-          <!-- Membro desde -->
-          @if (perfil?.criadoEm) {
-          <div class="form-group">
-            <span class="form-label">Membro desde</span>
-            <input type="text" class="form-input form-input-readonly" [value]="perfil?.criadoEm | date:'dd/MM/yyyy'"
-              aria-label="Membro desde a data" readonly />
-          </div>
-          }
-
-          <!-- Status da conta -->
-          <div class="form-group">
-            <span class="form-label">Status da conta</span>
-            <div class="perfil-status" [class.ativo]="perfil?.statusAtivo !== false">
-              <span class="material-symbols-rounded">
-                {{ perfil?.statusAtivo !== false ? 'check_circle' : 'cancel' }}
-              </span>
-              {{ perfil?.statusAtivo !== false ? 'Ativa' : 'Inativa' }}
-            </div>
-          </div>
-        </div>
-
-        @if (perfilErro) {
-        <p class="form-error" role="alert" style="margin-top:.5rem">{{ perfilErro }}</p>
-        }
-
-        @if (perfilSucesso) {
-        <output class="sucesso-banner" style="margin-top:.75rem">
-          <span class="material-symbols-rounded">check_circle</span>
-          Perfil atualizado com sucesso!
-        </output>
-        }
-
-      </form>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
-      <button type="button" class="btn btn-primary" (click)="salvarPerfil()"
-        [disabled]="formPerfil.invalid || carregandoPerfil">
-        @if (carregandoPerfil) { Salvando... } @else { Salvar Alterações }
-      </button>
-    </div>
-
-  </div>
-</dialog>
+  <app-modal-perfil
+    [perfil]="perfil"
+    [usuario]="usuario"
+    [fotoPerfil]="fotoPerfil"
+    [nomeDisplay]="nomeDisplay"
+    [iniciaisDisplay]="iniciaisDisplay"
+    [labelCargo]="labelCargo"
+    (close)="fecharModal()"
+    (action)="handlePerfilAction($event)"
+    (perfilAtualizado)="onPerfilAtualizado($event)">
+  </app-modal-perfil>
 }
 
-<!-- Modal Ajuda Atalhos (Alt+H) -->
 @if (modalAtivo === 'hotkeys') {
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-content modal-md" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2 id="modalHotkeysTitulo" style="display:flex; align-items:center; gap:0.5rem">
-        <span class="material-symbols-rounded">keyboard</span>
-        Atalhos de Teclado
-      </h2>
-      <button class="btn-close" (click)="fecharModal()" aria-label="Fechar atalhos">×</button>
-    </div>
-
-    <div class="modal-body" style="padding: 1.5rem">
-      <p style="margin-bottom: 1.5rem; color: #4b5563;">Use as seguintes combinações para navegar rapidamente pelo
-        sistema de qualquer tela.</p>
-
-      <div style="display: flex; flex-direction: column; gap: 1rem;">
-        @for (hotkey of hotkeysDisponiveis; track hotkey.combo) {
-        <div
-          style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid #e5e7eb;">
-          <strong style="color: #1f2937;">{{ hotkey.description }}</strong>
-          <kbd
-            style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 0.2rem 0.6rem; border-radius: 4px; font-family: monospace; font-size: 0.9rem; font-weight: bold; color: #111827;">{{
-            hotkey.combo.toUpperCase().replace('.', ' + ') }}</kbd>
-        </div>
-        }
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="fecharModal()">Entendi</button>
-    </div>
-  </div>
-</dialog>
+  <app-modal-hotkeys
+    [hotkeysDisponiveis]="hotkeysDisponiveis"
+    (close)="fecharModal()">
+  </app-modal-hotkeys>
 }
 
 <!-- Modal de Confirmaçao Global (disponivel em qualquer area do painel admin) -->
-<app-confirm-dialog />
+<app-confirm-dialog></app-confirm-dialog>
 
 <!-- Toaster de Feedback Global -->
-<app-toast />
+<app-toast></app-toast>
