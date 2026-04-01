@@ -1,0 +1,138 @@
+<section class="filtro-card" aria-label="Filtros do histórico">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="turmaHistorico">Filtrar por Oficina</label>
+            <select id="turmaHistorico" [ngModel]="turmaSelecionadaId()" (ngModelChange)="updateTurma($event)"
+                class="form-input">
+                <option value="">Todas as oficinas</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+        <button class="btn btn-secondary" (click)="carregarHistorico()" aria-label="Aplicar filtro">
+            <span class="material-symbols-rounded" aria-hidden="true">search</span> Filtrar
+        </button>
+    </div>
+</section>
+
+@if (carregandoHistorico()) {
+<div class="loading-state" aria-busy="true" aria-label="Carregando histórico">
+    <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 3rem;">sync</span>
+    <p>Carregando histórico...</p>
+</div>
+} @else if (erroHistorico()) {
+<div class="alert danger" role="alert"><span class="material-symbols-rounded" aria-hidden="true">error</span> {{
+    erroHistorico() }}</div>
+} @else if (historico().length === 0) {
+<div class="empty-state">
+    <span class="material-symbols-rounded empty-icon" aria-hidden="true"
+        style="font-size: 3rem; color: #9ca3af;">bar_chart</span>
+    <h2>Nenhum registro encontrado</h2>
+    <p>Ainda não há chamadas registradas para os filtros selecionados.</p>
+</div>
+} @else {
+
+<div class="data-table-wrapper" role="region" aria-label="Histórico de frequências">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th scope="col">Data</th>
+                <th scope="col">Oficina</th>
+                <th scope="col" class="text-center">Alunos Totais</th>
+                <th scope="col" class="text-center">Presenças</th>
+                <th scope="col" class="text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (resumo of historico(); track resumo.dataAula + resumo.turmaId) {
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
+                <td>{{ formatarData(resumo.dataAula) }}</td>
+                <td>{{ resumo.turmaNome }}</td>
+                <td class="text-center">{{ resumo.totalAlunos }}</td>
+                <td class="text-center">
+                    <span class="badge badge-success" style="margin-right: 4px;" title="Presentes">{{ resumo.presentes
+                        }}</span>
+                    <span class="badge badge-danger" title="Faltas">{{ resumo.faltas }}</span>
+                </td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-ghost" (click)="abrirDetalhes(resumo)"
+                        [attr.aria-label]="'Ver mais detalhes da turma ' + resumo.turmaNome + ' na data ' + formatarData(resumo.dataAula)">
+                        <span class="material-symbols-rounded" aria-hidden="true">visibility</span> Detalhes
+                    </button>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+<nav class="pagination" aria-label="Paginação do histórico">
+    <button class="btn btn-secondary btn-sm" (click)="paginaAnteriorHistorico()" [disabled]="paginaHistorico() === 1"
+        aria-label="Página anterior">←</button>
+    <span class="pagination-info">
+        Página {{ paginaHistorico() }} de {{ totalPaginas() }}
+        ({{ totalHistorico() }} registros)
+    </span>
+    <button class="btn btn-secondary btn-sm" (click)="proximaPaginaHistorico()"
+        [disabled]="paginaHistorico() >= totalPaginas()" aria-label="Próxima página">→</button>
+</nav>
+}
+
+<!-- ══════════ MODAL DE DETALHES DE FREQUENCIA C/ DIALOG NATIVO ══════════ -->
+@if (modalDetalhesAberto()) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes da chamada da turma"
+    (click)="fecharDetalhes()" (keydown.escape)="fecharDetalhes()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                Chamada — {{ formatarData(detalhesResumo()?.dataAula) }}
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharDetalhes()" aria-label="Fechar janela de detalhes"><span
+                    class="material-symbols-rounded" aria-hidden="true">close</span></button>
+        </div>
+        <div class="modal-body">
+            @if (carregandoDetalhes()) {
+            <div class="loading-state empty-state--sm" aria-busy="true">
+                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
+                <p>Buscando lista de alunos...</p>
+            </div>
+            } @else {
+
+            <div
+                style="display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; justify-content: space-around;">
+                <div style="font-size: 0.9rem; color: #374151;"><strong>Total de Alunos:</strong> {{
+                    detalhesAlunos().length }}</div>
+                <div style="font-size: 0.9rem; color: #166534;"><strong>Presentes:</strong> {{ detalhesResumo()?.presentes
+                    }}</div>
+                <div style="font-size: 0.9rem; color: #991b1b;"><strong>Faltas:</strong> {{ detalhesResumo()?.faltas }}
+                </div>
+            </div>
+
+            <ul class="alunos-list" style="max-height: 400px; overflow-y: auto;">
+                @for (aluno of detalhesAlunos(); track aluno.id) {
+                <li class="aluno-item"
+                    style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
+                    <div class="aluno-nome">
+                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
+                            [class.avatar--falta]="!aluno.presente" aria-hidden="true"
+                            style="width: 2rem; height: 2rem; font-size: 0.8rem;">
+                            {{ aluno.aluno?.nomeCompleto?.charAt(0) || '?' }}
+                        </div>
+                        <span class="nome-texto">{{ aluno.aluno?.nomeCompleto }}</span>
+                    </div>
+                    <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente">
+                        {{ aluno.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharDetalhes()">Sair</button>
+        </div>
+    </dialog>
+</div>
+}

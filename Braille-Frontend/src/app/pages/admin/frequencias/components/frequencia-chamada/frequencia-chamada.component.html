@@ -1,0 +1,209 @@
+<!-- Seletor de turma + data -->
+<section class="filtro-card" aria-label="Selecione a oficina e data">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="turmaSelect">Oficina / Turma</label>
+            <select id="turmaSelect" [ngModel]="turmaSelecionadaId()" (ngModelChange)="updateTurma($event)"
+                class="form-input" aria-required="true">
+                <option value="">Selecione uma oficina...</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="dataAulaInput">Data da Aula</label>
+            <input type="date" id="dataAulaInput" [ngModel]="dataAula()" (ngModelChange)="updateData($event)"
+                class="form-input" aria-required="true" />
+        </div>
+
+        <button class="btn btn-primary" (click)="carregarChamada()"
+            [disabled]="!turmaSelecionadaId() || !dataAula() || carregandoChamada()"
+            aria-label="Carregar lista de chamada">
+            @if (carregandoChamada()) { <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
+            Carregando... }
+            @else { <span class="material-symbols-rounded" aria-hidden="true">search</span> Carregar Chamada }
+        </button>
+    </div>
+</section>
+
+<!-- Erro de carregamento -->
+@if (erroCarregamento()) {
+<div class="alert danger" role="alert" aria-live="assertive">
+    <span class="material-symbols-rounded" aria-hidden="true">error</span> {{ erroCarregamento() }}
+</div>
+}
+
+<!-- Chamada carregada -->
+@if (chamadaCarregada()) {
+
+<!-- Cabeçalho da chamada -->
+<div class="chamada-header">
+    <div class="chamada-info">
+        <span class="chamada-turma">{{ turmaSelecionadaNome() }}</span>
+        <span class="chamada-data">{{ formatarData(dataAula()) }}</span>
+    </div>
+    <div class="chamada-stats">
+        <span class="stat stat--presente"><span class="material-symbols-rounded" aria-hidden="true"
+                style="font-size: 1.1rem">check_circle</span> {{ totalPresentes() }} presentes</span>
+        <span class="stat stat--falta"><span class="material-symbols-rounded" aria-hidden="true"
+                style="font-size: 1.1rem">cancel</span> {{ totalFaltas() }} faltas</span>
+        @if (totalJustificadas() > 0) {
+        <span class="stat stat--fj"
+            style="background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; border-radius:0.5rem; padding:0.25rem 0.75rem; display:flex; align-items:center; gap:0.4rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1.1rem">attach_file</span>
+            {{ totalJustificadas() }} justificada(s)
+        </span>
+        }
+    </div>
+</div>
+
+@if (nenhumaTurma()) {
+<!-- Turma sem alunos -->
+<div class="empty-state" role="status" aria-live="polite">
+    <span class="material-symbols-rounded empty-icon" aria-hidden="true"
+        style="font-size: 3rem; color: #9ca3af;">group_off</span>
+    <h2>Nenhum aluno matriculado</h2>
+    <p>Esta oficina ainda não tem alunos matriculados.</p>
+</div>
+
+} @else {
+
+<!-- Banner: modo somente leitura para datas passadas -->
+@if (modoVisualizacao()) {
+<div class="alert"
+    style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; display:flex; align-items:center; gap:0.75rem; padding:0.875rem 1rem; border-radius:0.5rem; margin-bottom:1rem;"
+    role="status" aria-live="polite">
+    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1.25rem;">lock</span>
+    <span>
+        <strong>Somente leitura</strong> — Esta chamada é de uma data anterior e não pode ser alterada.
+        Chamadas só podem ser editadas no próprio dia da aula.
+    </span>
+</div>
+}
+
+<!-- Ações em massa (só visíveis quando é hoje) -->
+@if (!modoVisualizacao()) {
+<div class="acoes-massa" role="group" aria-label="Marcar todos">
+    <button class="btn btn-sm btn-secondary" (click)="marcarTodos(true)" aria-label="Marcar todos como presentes">
+        <span class="material-symbols-rounded" aria-hidden="true">playlist_add_check</span> Marcar todos presentes
+    </button>
+    <button class="btn btn-sm btn-secondary" (click)="marcarTodos(false)" aria-label="Marcar todos como ausentes">
+        <span class="material-symbols-rounded" aria-hidden="true">event_busy</span> Marcar todos ausentes
+    </button>
+</div>
+}
+
+<!-- Lista de chamada -->
+<div class="data-table-wrapper" role="region" aria-label="Lista de chamada">
+    <table class="data-table" aria-describedby="chamada-desc">
+        <caption id="chamada-desc" class="sr-only">
+            Chamada da oficina {{ turmaSelecionadaNome() }} em {{ formatarData(dataAula()) }}.
+            Clique em Presente ou Falta para alternar o status de cada aluno.
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Aluno</th>
+                <th scope="col" style="width: 150px;" class="text-center">Status</th>
+                <th scope="col" style="width: 200px;" class="text-center">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (aluno of alunosNaChamada(); track aluno.alunoId) {
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr" [class.linha-presente]="aluno.presente"
+                [class.linha-falta]="!aluno.presente && aluno.statusFrequencia !== 'FALTA_JUSTIFICADA'"
+                [class.linha-fj]="aluno.statusFrequencia === 'FALTA_JUSTIFICADA'"
+                [attr.aria-disabled]="aluno.statusFrequencia === 'FALTA_JUSTIFICADA'">
+                <td>
+                    <div class="aluno-nome">
+                        <!-- Icone salvo antes do nome -->
+                        <div class="salvo-indicator" [class.is-salvo]="aluno.salvo" aria-label="Status salvo"
+                            [title]="aluno.salvo ? 'Registrado' : 'Não salvo'">
+                            @if (aluno.salvo) {
+                            <span class="material-symbols-rounded">check_circle</span>
+                            } @else {
+                            <span class="material-symbols-rounded indicator-pendente">radio_button_unchecked</span>
+                            }
+                        </div>
+
+                        <!-- Avatar -->
+                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
+                            [class.avatar--falta]="!aluno.presente && aluno.statusFrequencia !== 'FALTA_JUSTIFICADA'"
+                            [class.avatar--fj]="aluno.statusFrequencia === 'FALTA_JUSTIFICADA'" aria-hidden="true">
+                            {{ aluno.nomeCompleto.charAt(0) }}
+                        </div>
+                        <span class="nome-texto">{{ aluno.nomeCompleto }}</span>
+                    </div>
+                </td>
+                <td class="text-center">
+                    <!-- Badge de status -->
+                    @if (aluno.statusFrequencia === 'FALTA_JUSTIFICADA') {
+                    <span class="badge badge-fj" aria-label="Falta Justificada por atestado">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">attach_file</span>
+                        FJ
+                    </span>
+                    } @else {
+                    <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente"
+                        [attr.aria-label]="aluno.presente ? 'Presente' : 'Falta'">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">
+                            {{ aluno.presente ? 'check_circle' : 'cancel' }}
+                        </span>
+                        {{ aluno.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                    }
+                </td>
+                <td class="text-center">
+                    <!-- Botão bloqueado para FJ -->
+                    @if (aluno.statusFrequencia === 'FALTA_JUSTIFICADA') {
+                    <span class="badge badge-fj" style="cursor:default; font-size:0.8rem;"
+                        [title]="'Falta justificada por atestado — editação bloqueada'">
+                        <span class="material-symbols-rounded" aria-hidden="true"
+                            style="font-size:14px">attach_file</span>
+                        Atestado
+                    </span>
+                    } @else {
+                    <button class="btn btn-sm btn-action" [class.btn-danger]="aluno.presente"
+                        [class.btn-success]="!aluno.presente" (click)="togglePresente(aluno)"
+                        [disabled]="aluno.salvando || salvandoTudo() || modoVisualizacao()" [attr.aria-label]="aluno.presente
+                      ? 'Marcar ' + aluno.nomeCompleto + ' como ausente'
+                      : 'Marcar ' + aluno.nomeCompleto + ' como presente'"
+                        [title]="modoVisualizacao() ? 'Chamada de data anterior — somente leitura' : ''">
+                        <span class="material-symbols-rounded" aria-hidden="true">{{ aluno.presente ? 'cancel' :
+                            'check_circle' }}</span>
+                        <span class="action-text">{{ aluno.presente ? 'Presente' : 'Falta' }}</span>
+                    </button>
+                    }
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Feedback salvo -->
+@if (feedbackSalvo()) {
+<div class="alert" [class.success]="feedbackSalvo().includes('sucesso')"
+    [class.danger]="feedbackSalvo().includes('Erro')" role="alert" aria-live="assertive">
+    <span class="material-symbols-rounded" aria-hidden="true">{{ feedbackSalvo().includes('sucesso') ? 'check_circle' :
+        'error' }}</span>
+    {{ feedbackSalvo() }}
+</div>
+}
+
+<!-- Botão salvar chamada — oculto em modo visualização -->
+@if (!modoVisualizacao()) {
+<div class="salvar-footer">
+    <button class="btn btn-primary btn-lg" (click)="salvarChamada()" [disabled]="salvandoTudo()"
+        aria-label="Salvar chamada de todos os alunos" [attr.aria-busy]="salvandoTudo()">
+        @if (salvandoTudo()) { <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span> Salvando
+        chamada... }
+        @else { <span class="material-symbols-rounded" aria-hidden="true">save</span> Salvar Chamada }
+    </button>
+</div>
+}
+
+}
+}

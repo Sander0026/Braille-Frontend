@@ -1,0 +1,93 @@
+<section class="filtro-card" aria-label="Buscar relatório do aluno">
+    <div class="filtro-row">
+        <div class="form-group">
+            <label for="relatorioTurmaSelect">Oficina</label>
+            <select id="relatorioTurmaSelect" [ngModel]="turmaSelecionadaId()" (ngModelChange)="onTurmaRelatorioChange($event)"
+                class="form-input">
+                <option value="">Selecione uma oficina...</option>
+                @for (turma of turmas; track turma.id) {
+                <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="relatorioAlunoSelect">Aluno</label>
+            <select id="relatorioAlunoSelect" [ngModel]="alunoSelecionadoId()" (ngModelChange)="updateAluno($event)" class="form-input"
+                [disabled]="!turmaSelecionadaId() || alunosRelatorio().length === 0">
+                <option value="">Selecione um aluno da oficina...</option>
+                @for (aluno of alunosRelatorio(); track aluno.id) {
+                <option [value]="aluno.id">{{ aluno.nomeCompleto }}</option>
+                }
+            </select>
+        </div>
+
+        <button class="btn btn-primary" (click)="carregarRelatorio()"
+            [disabled]="!alunoSelecionadoId() || carregandoRelatorio()" aria-label="Gerar Relatório de Frequência">
+            @if (carregandoRelatorio()) { <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
+            Gerando... }
+            @else { <span class="material-symbols-rounded" aria-hidden="true">monitoring</span> Gerar Relatório }
+        </button>
+    </div>
+</section>
+
+@if (erroRelatorio()) {
+<div class="alert danger" role="alert"><span class="material-symbols-rounded" aria-hidden="true">error</span> {{
+    erroRelatorio() }}</div>
+}
+
+@if (relatorioEstatisticas()) {
+<!-- Estatísticas Rápidas -->
+<div class="chamada-header" style="flex-wrap: nowrap; margin-bottom: 2rem;">
+    <div class="chamada-info" style="flex: 1;">
+        <span class="chamada-turma">Estatísticas do Aluno</span>
+        <span class="chamada-data">Total de {{ relatorioEstatisticas().totalAulas }} aulas registradas nesta
+            oficina.</span>
+    </div>
+    <div class="chamada-stats" style="gap: 1.5rem;">
+        <span class="stat stat--presente" style="font-size: 1.1rem; padding: 0.5rem 1rem;"><span
+                class="material-symbols-rounded" aria-hidden="true">check_circle</span> {{
+            relatorioEstatisticas().taxaPresenca }}% de Presença</span>
+        <span class="stat stat--falta" style="font-size: 1.1rem; padding: 0.5rem 1rem;"><span
+                class="material-symbols-rounded" aria-hidden="true">cancel</span> {{
+            relatorioEstatisticas().faltas }} Faltas</span>
+    </div>
+</div>
+
+<h2 style="font-size: 1.1rem; color: #1f1f1f; margin-bottom: 1rem;">Extrato de Aulas</h2>
+
+@if (relatorioHistorico().length === 0) {
+<div class="empty-state empty-state--sm">
+    <p>Nenhuma aula letiva registrada na oficina confirmada para pesquisa ainda.</p>
+</div>
+} @else {
+<div class="data-table-wrapper">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th scope="col">Data da Aula</th>
+                <th scope="col" class="text-center">Status do Aluno</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (historico of relatorioHistorico(); track historico.id) {
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr">
+                <td>{{ formatarData(historico.dataAula) }}</td>
+                <td class="text-center">
+                    <span class="badge" [class.badge-success]="historico.presente"
+                        [class.badge-danger]="!historico.presente">
+                        <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                            aria-hidden="true">
+                            {{ historico.presente ? 'check_circle' : 'cancel' }}
+                        </span>
+                        {{ historico.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+}
+
+}
