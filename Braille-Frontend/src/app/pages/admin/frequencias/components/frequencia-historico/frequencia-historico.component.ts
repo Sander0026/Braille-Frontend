@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../../core/services/frequencias.service';
 import { Turma } from '../../../../../core/services/turmas.service';
 import { AuthService } from '../../../../../core/services/auth.service';
-import { TabelaTrFocavelDirective } from '../../frequencias-lista/frequencias-lista.ts';
+import { TabelaTrFocavelDirective } from '../../frequencias-lista/frequencias-lista';
 
 @Component({
   selector: 'app-frequencia-historico',
