@@ -1,0 +1,139 @@
+<dialog #dialogForm class="modal-content modal-lg" aria-labelledby="modal-titulo" 
+  (cancel)="$event.preventDefault(); onCancelBtn()" 
+  cdkTrapFocus 
+  [cdkTrapFocusAutoCapture]="true">
+
+  <div class="modal-header">
+    <h2 id="modal-titulo">Editar Usuário</h2>
+    <button class="btn btn-icon btn-ghost" (click)="onCancelBtn()" aria-label="Fechar modal de edição">
+       <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
+  </div>
+
+  @if (usuarioEdicao) {
+    <form [formGroup]="editForm" (ngSubmit)="onSaveForm()" class="modal-body">
+
+      <!-- Linha: Login (somente leitura) -->
+      <div class="info-row-readonly">
+        <span class="info-label">Login (usuário do sistema)</span>
+        <span class="info-value info-badge" [attr.aria-label]="'Login de acesso: ' + usuarioEdicao.username">
+          {{ usuarioEdicao.username }}
+        </span>
+      </div>
+
+      <!-- Seção: Dados Básicos -->
+      <p class="section-label">Dados Básicos</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="edit-nome" class="form-label">Nome completo <span class="required" aria-hidden="true">*</span></label>
+          <input id="edit-nome" type="text" class="form-input"
+            [class.is-invalid]="editForm.get('nome')?.invalid && editForm.get('nome')?.touched"
+            formControlName="nome" autocomplete="name" />
+          @if (editForm.get('nome')?.invalid && editForm.get('nome')?.touched) {
+            <span class="form-error" role="alert">Nome obrigatório (mín. 3 caracteres)</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="edit-cpf" class="form-label">CPF <span class="required" aria-hidden="true">*</span></label>
+          <input id="edit-cpf" type="text" class="form-input"
+            [class.is-invalid]="(editForm.get('cpf')?.invalid && editForm.get('cpf')?.touched) || (cpfStatus() !== '' && cpfStatus() !== 'livre' && cpfStatus() !== 'verificando')"
+            formControlName="cpf" maxlength="14" (input)="formatarCpf($event)" (blur)="verificarCpfBlur()" autocomplete="off" />
+          
+          <div class="cpf-status-indicator" style="margin-top: 5px; font-size: 0.85rem;" aria-live="polite">
+            @if (cpfStatus() === 'verificando') {
+                <span style="color: #6b7280;">⏳ Verificando no sistema...</span>
+            }
+            @if (cpfStatus() === 'livre') {
+                <span style="color: #10b981;">✅ CPF disponível.</span>
+            }
+            @if (cpfStatus() === 'ativo' || cpfStatus() === 'inativo' || cpfStatus() === 'excluido') {
+                <span style="color: #ef4444; font-weight: 500;">❌ CPF já pertence a outro usuário: {{ cpfConflito()?.nome }}.</span>
+            }
+          </div>
+
+          @if (editForm.get('cpf')?.invalid && editForm.get('cpf')?.touched) {
+            <span class="form-error" role="alert">CPF obrigatório (11 dígitos).</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="edit-email" class="form-label">E-mail</label>
+          <input id="edit-email" type="email" class="form-input"
+            [class.is-invalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
+            formControlName="email" autocomplete="email" />
+          @if (editForm.get('email')?.invalid && editForm.get('email')?.touched) {
+            <span class="form-error" role="alert">E-mail inválido</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="edit-role" class="form-label">Função <span class="required" aria-hidden="true">*</span></label>
+          <select id="edit-role" class="form-select" formControlName="role">
+            @for (r of roles; track r.value) {
+              <option [value]="r.value">{{ r.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit-telefone" class="form-label">Telefone</label>
+          <input id="edit-telefone" type="tel" inputmode="numeric" class="form-input"
+            formControlName="telefone" autocomplete="tel" placeholder="(00) 00000-0000" 
+            maxlength="15" (input)="formatarTelefone($event)" />
+        </div>
+      </div>
+
+      <!-- Seção: Endereço -->
+      <p class="section-label">Endereço</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="edit-cep" class="form-label">CEP</label>
+          <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep" (blur)="buscarCep()"
+            placeholder="00000-000" maxlength="9" />
+        </div>
+
+        <div class="form-group form-group--wide">
+          <label for="edit-rua" class="form-label">Rua / Logradouro</label>
+          <input id="edit-rua" type="text" class="form-input" formControlName="rua" autocomplete="address-line1" />
+        </div>
+
+        <div class="form-group form-group--narrow">
+          <label for="edit-numero" class="form-label">Nº</label>
+          <input id="edit-numero" type="text" class="form-input" formControlName="numero" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-complemento" class="form-label">Complemento</label>
+          <input id="edit-complemento" type="text" class="form-input" formControlName="complemento" autocomplete="address-line2" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-bairro" class="form-label">Bairro</label>
+          <input id="edit-bairro" type="text" class="form-input" formControlName="bairro" />
+        </div>
+
+        <div class="form-group">
+          <label for="edit-cidade" class="form-label">Cidade</label>
+          <input id="edit-cidade" type="text" class="form-input" formControlName="cidade" autocomplete="address-level2" />
+        </div>
+
+        <div class="form-group form-group--narrow">
+          <label for="edit-uf" class="form-label">UF</label>
+          <input id="edit-uf" type="text" class="form-input" formControlName="uf" maxlength="2" placeholder="SP" style="text-transform:uppercase" />
+        </div>
+      </div>
+    </form>
+  }
+
+  <div class="modal-footer">
+    <button class="btn btn-secondary" type="button" (click)="onCancelBtn()" [disabled]="salvando()">Cancelar</button>
+    <button class="btn btn-primary" type="button" (click)="onSaveForm()" [disabled]="editForm.invalid || salvando()">
+        @if (salvando()) { 
+          <span class="loading-spinner" aria-hidden="true"></span> Salvando... 
+        } @else { 
+          Salvar Alterações 
+        }
+    </button>
+  </div>
+</dialog>

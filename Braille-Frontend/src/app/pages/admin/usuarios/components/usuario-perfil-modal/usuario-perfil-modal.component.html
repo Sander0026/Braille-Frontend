@@ -1,0 +1,114 @@
+<dialog #dialogPerfil class="modal-content modal-lg" aria-labelledby="perfil-titulo" 
+  (cancel)="fecharModal(true)" 
+  cdkTrapFocus 
+  [cdkTrapFocusAutoCapture]="true">
+
+  @if (usuario; as u) {
+    <div class="modal-header">
+      <h2 id="perfil-titulo">Perfil do Usuário</h2>
+      <button class="btn btn-close" (click)="fecharModal()" aria-label="Fechar perfil">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </div>
+
+    <div class="modal-body profile-body">
+      <!-- Cabeçalho do Perfil -->
+      <div class="profile-header">
+        <div class="profile-avatar avatar-wrapper">
+          @if (u.fotoPerfil) {
+            <img [src]="u.fotoPerfil" alt="Foto de Perfil de {{ u.nome }}" loading="lazy" />
+          } @else {
+            <span class="material-symbols-rounded" style="font-size: 3rem; color: #9ca3af;" aria-hidden="true">person</span>
+          }
+
+          <!-- Botões Trocar/Remover Foto -->
+          <div class="avatar-actions">
+            <!-- Label encapsula o file input implicitamente ligado -->
+            <label class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" tabindex="0" (keydown.enter)="$event.preventDefault(); fileInput.click()">
+              <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+              <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" />
+            </label>
+            @if (u.fotoPerfil) {
+              <button class="btn btn-sm btn-danger btn-icon" title="Remover Foto" aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin()">
+                <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <div class="profile-title">
+          <h3>{{ u.nome }}</h3>
+          <div class="profile-badges">
+            <span class="badge" 
+              [class.badge-primary]="u.role === 'ADMIN'"
+              [class.badge-info]="u.role === 'SECRETARIA'"
+              [class.badge-neutral]="u.role === 'PROFESSOR'">
+              {{ labelRole(u.role) }}
+            </span>
+            @if (u.precisaTrocarSenha) {
+              <span class="badge badge-warning">Senha Padrão Ativa</span>
+            }
+            @if (u.matricula) {
+              <span class="badge badge-neutral" title="Matrícula Institucional">{{ u.matricula }}</span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid de Informações -->
+      <div class="profile-grid">
+        <div class="profile-section">
+          <h4>Acesso ao Sistema</h4>
+          <p><strong>Login:</strong> {{ u.username }}</p>
+          <p><strong>E-mail:</strong> {{ u.email || 'Não informado' }}</p>
+          <p><strong>Matrícula:</strong> {{ u.matricula || 'N/A' }}</p>
+        </div>
+
+        <div class="profile-section">
+          <h4>Contato</h4>
+          <p><strong>Telefone:</strong> {{ u.telefone || 'Não informado' }}</p>
+          <p><strong>CPF:</strong> {{ u.cpf || 'Não informado' }}</p>
+        </div>
+
+        <div class="profile-section profile-section--full">
+          <h4>Endereço</h4>
+          <p>
+            {{ u.rua || '—' }}{{ u.numero ? ', ' + u.numero : '' }}
+            {{ u.complemento ? '— ' + u.complemento : '' }}
+          </p>
+          <p>
+            {{ u.bairro || '' }}{{ u.bairro && u.cidade ? ' · ' : '' }}
+            {{ u.cidade || '' }}{{ u.uf ? ' / ' + u.uf : '' }}
+          </p>
+          <p><strong>CEP:</strong> {{ u.cep || 'Não informado' }}</p>
+        </div>
+
+        <!-- Segurança -->
+        <div class="profile-section">
+          <h4>Segurança Administrador</h4>
+          <p style="margin-bottom: 1rem; color: #4b5563;">
+             Restaurar credenciais. No próximo login, ele deverá criar uma nova.
+          </p>
+          <button class="btn btn-warning" (click)="resetarSenhaAdmin()" [disabled]="salvando()" aria-label="Forçar Reset de Senha do Usuário">
+            @if (salvando()) {
+               <span class="loading-spinner" aria-hidden="true"></span>
+               Processando...
+            } @else {
+               <span class="material-symbols-rounded" aria-hidden="true">lock_reset</span>
+               Resetar Senha para Padrão
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-ghost" (click)="fecharModal()">Fechar</button>
+      <button class="btn btn-primary" (click)="editar.emit(u); fecharModal()">
+        <span class="material-symbols-rounded" aria-hidden="true">edit</span>
+        Editar Dados
+      </button>
+    </div>
+  }
+
+</dialog>
