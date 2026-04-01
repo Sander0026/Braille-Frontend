@@ -29,12 +29,12 @@ export interface ResumoFrequencia {
 @Injectable({ providedIn: 'root' })
 export class FrequenciasService {
     private readonly url = '/api/frequencias';
-    private resumoCache$: Observable<PaginatedResponse<ResumoFrequencia>> | null = null;
+    private resumoCache: { data$: Observable<PaginatedResponse<ResumoFrequencia>>, expiresAt: number } | null = null;
     private readonly cacheTimeMs = 1 * 60 * 1000;
 
-    constructor(private http: HttpClient) { }
+    constructor(private readonly http: HttpClient) { }
 
-    limparCache(): void { this.resumoCache$ = null; }
+    limparCache(): void { this.resumoCache = null; }
 
     listar(page = 1, limit = 20, turmaId?: string, dataAula?: string, professorId?: string): Observable<PaginatedResponse<Frequencia>> {
         let params = new HttpParams().set('page', page).set('limit', limit);
@@ -46,14 +46,18 @@ export class FrequenciasService {
 
     listarResumo(page = 1, limit = 20, turmaId?: string, professorId?: string): Observable<PaginatedResponse<ResumoFrequencia>> {
         const isDefaultList = page === 1 && limit === 20 && !turmaId && !professorId;
+        const now = Date.now();
 
         if (isDefaultList) {
-            if (!this.resumoCache$) {
-                const params = new HttpParams().set('page', '1').set('limit', '20');
-                this.resumoCache$ = this.http.get<PaginatedResponse<ResumoFrequencia>>(`${this.url}/resumo`, { params }).pipe(shareReplay(1));
-                setTimeout(() => this.limparCache(), this.cacheTimeMs);
+            if (this.resumoCache && this.resumoCache.expiresAt > now) {
+                return this.resumoCache.data$;
             }
-            return this.resumoCache$;
+
+            const params = new HttpParams().set('page', '1').set('limit', '20');
+            const req$ = this.http.get<PaginatedResponse<ResumoFrequencia>>(`${this.url}/resumo`, { params }).pipe(shareReplay(1));
+            
+            this.resumoCache = { data$: req$, expiresAt: now + this.cacheTimeMs };
+            return req$;
         }
 
         let params = new HttpParams().set('page', page).set('limit', limit);

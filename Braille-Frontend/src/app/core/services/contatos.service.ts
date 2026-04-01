@@ -17,11 +17,11 @@ export interface Contato {
 @Injectable({ providedIn: 'root' })
 export class ContatosService {
     private readonly url = '/api/contatos';
-    // Cache por chave — funciona para todos os filtros (todas, lidas, não-lidas) e paginações
-    private cache = new Map<string, Observable<PaginatedResponse<Contato>>>();
+    // Cache Passivo O(1) sem Leaks (GC Collector tracking)
+    private readonly cache = new Map<string, { data$: Observable<PaginatedResponse<Contato>>, expiresAt: number }>();
     private readonly cacheTimeMs = 2 * 60 * 1000; // 2 minutos
 
-    constructor(private http: HttpClient) { }
+    constructor(private readonly http: HttpClient) { }
 
     limparCache(): void {
         this.cache.clear();
@@ -33,17 +33,19 @@ export class ContatosService {
 
     listar(page = 1, limit = 20, lida?: boolean): Observable<PaginatedResponse<Contato>> {
         const key = this.buildCacheKey(page, limit, lida);
+        const now = Date.now();
 
-        if (!this.cache.has(key)) {
-            let params = new HttpParams().set('page', page).set('limit', limit);
-            if (lida !== undefined) params = params.set('lida', String(lida));
-
-            const req$ = this.http.get<PaginatedResponse<Contato>>(this.url, { params }).pipe(shareReplay(1));
-            this.cache.set(key, req$);
-            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
+        if (this.cache.has(key) && this.cache.get(key)!.expiresAt > now) {
+            return this.cache.get(key)!.data$;
         }
 
-        return this.cache.get(key)!;
+        let params = new HttpParams().set('page', page).set('limit', limit);
+        if (lida !== undefined) params = params.set('lida', String(lida));
+
+        const req$ = this.http.get<PaginatedResponse<Contato>>(this.url, { params }).pipe(shareReplay(1));
+        this.cache.set(key, { data$: req$, expiresAt: now + this.cacheTimeMs });
+
+        return req$;
     }
 
     buscarPorId(id: string): Observable<Contato> {
