@@ -3,13 +3,13 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ComunicadosService, Comunicado } from '../../../core/services/comunicados.service';
+import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 
 // Pipes reutilizáveis (DRY Application)
-import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
-import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
-import { CategoryLabelPipe } from '../../../shared/pipes/category-label.pipe';
-import { StripHtmlPipe } from '../../../shared/pipes/strip-html.pipe';
+import { SafeHtmlPipe } from '../../../../core/pipes/safe-html.pipe';
+import { CloudinaryPipe } from '../../../../core/pipes/cloudinary.pipe';
+import { CategoryLabelPipe } from '../../../../shared/pipes/category-label.pipe';
+import { StripHtmlPipe } from '../../../../shared/pipes/strip-html.pipe';
 
 @Component({
     selector: 'app-noticia-detalhe',

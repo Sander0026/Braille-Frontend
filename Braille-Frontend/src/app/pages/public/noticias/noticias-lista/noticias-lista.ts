@@ -4,10 +4,10 @@ import { RouterModule, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-import { ComunicadosService, Comunicado } from '../../../core/services/comunicados.service';
-import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
-import { StripHtmlPipe } from '../../../shared/pipes/strip-html.pipe';
-import { CategoryLabelPipe } from '../../../shared/pipes/category-label.pipe';
+import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
+import { CloudinaryPipe } from '../../../../core/pipes/cloudinary.pipe';
+import { StripHtmlPipe } from '../../../../shared/pipes/strip-html.pipe';
+import { CategoryLabelPipe } from '../../../../shared/pipes/category-label.pipe';
 
 @Component({
   selector: 'app-noticias-lista',
