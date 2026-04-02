@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, input, output, effect, ElementRef, ViewChild, HostListener } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, effect, ElementRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-ui-modal',
@@ -104,7 +104,7 @@ export class UiModal {
   }
 
   // Previne bugs default de navegação nativa paralisando a renderização descontrolável da tag <dialog> base
-  onEscape(event: KeyboardEvent) {
+  onEscape(event: Event) {
     event.preventDefault();
     if (!this.disableBackdropClick()) {
       this.onClose();
