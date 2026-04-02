@@ -1,7 +1,8 @@
 {
-  "name": "Instituto Braille ES (ILBES)",
-  "short_name": "ILBES App",
-  "theme_color": "#0a889b",
+  "name": "Instituto Luiz Braille — ILBES",
+  "short_name": "ILBES",
+  "description": "Sistema de gestão do Instituto de Educação Inclusiva Luiz Braille.",
+  "theme_color": "#f5c800",
   "background_color": "#ffffff",
   "display": "standalone",
   "scope": "./",
