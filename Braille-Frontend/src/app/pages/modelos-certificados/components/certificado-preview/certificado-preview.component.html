@@ -1,0 +1,133 @@
+<!-- WRAPPER EXTERNO: captura a largura disponível para scale do ResizeObserver -->
+<div #previewWrapper
+     [style.height]="wrapperHeightPx()"
+     class="preview-wrapper"
+     [class.draggable-mode]="isDraggable">
+
+  <!-- CANVAS FIXO A4 (1122 × 794 px) escalado via transform -->
+  <div #previewContainer
+       [style.width.px]="CANVAS_W"
+       [style.height.px]="CANVAS_H"
+       [style.transform]="'scale(' + scaleFactor() + ')'"
+       class="preview-container preview-drag-container">
+
+    @if (arteBaseUrl) {
+      <img [src]="arteBaseUrl" alt="Arte base do certificado" class="arte-base">
+    }
+
+    <!-- Nome do Aluno -->
+    @if (layoutConfig?.nomeAluno) {
+    <div [ngStyle]="{
+           'left':       layoutConfig.nomeAluno.x + '%',
+           'top':        layoutConfig.nomeAluno.y + '%',
+           'max-width':  (layoutConfig.nomeAluno.maxWidth || 50) + '%',
+           'font-family':layoutConfig.nomeAluno.fontFamily || 'Georgia, cursive',
+           'font-size':  (layoutConfig.nomeAluno.fontSize || 60) + 'px',
+           'color':      layoutConfig.nomeAluno.color || '#000'
+         }"
+         class="cert-element"
+         [class.is-draggable]="isDraggable"
+         [class.nome-aluno-outline]="isDraggable"
+         [cdkDragDisabled]="!isDraggable"
+         cdkDrag (cdkDragEnded)="onDragEnded($event, 'nomeAluno')">
+      {{ applyMocks ? 'Maria da Silva Santos' : 'Nome do Aluno' }}
+    </div>
+    }
+
+    <!-- Texto Principal -->
+    @if (layoutConfig?.textoPronto) {
+    <div [ngStyle]="{
+           'left':       layoutConfig.textoPronto.x + '%',
+           'top':        layoutConfig.textoPronto.y + '%',
+           'max-width':  (layoutConfig.textoPronto.maxWidth || 80) + '%',
+           'text-align': layoutConfig.textoPronto.textAlign || 'justify',
+           'font-family':layoutConfig.textoPronto.fontFamily || 'Georgia, serif',
+           'font-size':  (layoutConfig.textoPronto.fontSize || 32) + 'px',
+           'color':      layoutConfig.textoPronto.color || '#1a1a00'
+         }"
+         class="cert-text-element cert-element"
+         [class.is-draggable]="isDraggable"
+         [class.texto-pronto-outline]="isDraggable"
+         [cdkDragDisabled]="!isDraggable"
+         cdkDrag (cdkDragEnded)="onDragEnded($event, 'textoPronto')">
+      {{ displayTextoTemplate }}
+    </div>
+    }
+
+    <!-- Assinatura 1 -->
+    @if (layoutConfig?.assinatura1 && assinaturaUrl) {
+    <div [ngStyle]="{
+           'left':  layoutConfig.assinatura1.x + '%',
+           'top':   layoutConfig.assinatura1.y + '%',
+           'width': (layoutConfig.assinatura1.width || 20) + '%'
+         }"
+         class="cert-assinatura cert-element"
+         [class.is-draggable]="isDraggable"
+         [class.assinatura1-outline]="isDraggable"
+         [cdkDragDisabled]="!isDraggable"
+         cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura1')">
+      <img [src]="assinaturaUrl" alt="Assinatura" class="assinatura-img">
+      <div class="assinatura-texto">
+        <strong>{{ nomeAssinante || (applyMocks ? 'Signatário 1' : '') }}</strong>
+        <span>{{ cargoAssinante || (applyMocks ? 'Cargo' : '') }}</span>
+      </div>
+    </div>
+    }
+
+    <!-- Assinatura 2 -->
+    @if (layoutConfig?.assinatura2 && assinaturaUrl2 && nomeAssinante2) {
+    <div [ngStyle]="{
+           'left':  layoutConfig.assinatura2.x + '%',
+           'top':   layoutConfig.assinatura2.y + '%',
+           'width': (layoutConfig.assinatura2.width || 20) + '%'
+         }"
+         class="cert-assinatura cert-element"
+         [class.is-draggable]="isDraggable"
+         [class.assinatura2-outline]="isDraggable"
+         [cdkDragDisabled]="!isDraggable"
+         cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura2')">
+      <img [src]="assinaturaUrl2" alt="Assinatura 2" class="assinatura-img">
+      <div class="assinatura-texto">
+        <strong>{{ nomeAssinante2 || (applyMocks ? 'Signatário 2' : '') }}</strong>
+        <span>{{ cargoAssinante2 || (applyMocks ? 'Cargo' : '') }}</span>
+      </div>
+    </div>
+    }
+
+    <!-- QR Code -->
+    @if (layoutConfig?.qrCode) {
+    <div [ngStyle]="{
+           'left':  layoutConfig.qrCode.x + '%',
+           'top':   layoutConfig.qrCode.y + '%',
+           'width': (layoutConfig.qrCode.size || 10) + '%'
+         }"
+         class="cert-qr cert-element"
+         [class.is-draggable]="isDraggable"
+         [class.qr-outline]="isDraggable"
+         [cdkDragDisabled]="!isDraggable"
+         cdkDrag (cdkDragEnded)="onDragEnded($event, 'qrCode')">
+         
+      <svg *ngIf="applyMocks" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;opacity:.85;">
+         <rect x="5"  y="5"  width="35" height="35" rx="4" fill="none" stroke="#1a1a00" stroke-width="5"/>
+         <rect x="14" y="14" width="18" height="18" rx="2" fill="#1a1a00"/>
+         <rect x="60" y="5"  width="35" height="35" rx="4" fill="none" stroke="#1a1a00" stroke-width="5"/>
+         <rect x="69" y="14" width="18" height="18" rx="2" fill="#1a1a00"/>
+         <rect x="5"  y="60" width="35" height="35" rx="4" fill="none" stroke="#1a1a00" stroke-width="5"/>
+         <rect x="14" y="69" width="18" height="18" rx="2" fill="#1a1a00"/>
+         <rect x="47" y="5"  width="8" height="8" fill="#1a1a00"/>
+         <rect x="47" y="18" width="8" height="8" fill="#1a1a00"/>
+         <rect x="60" y="47" width="8" height="8" fill="#1a1a00"/>
+         <rect x="73" y="47" width="8" height="8" fill="#1a1a00"/>
+         <rect x="86" y="47" width="8" height="8" fill="#1a1a00"/>
+         <rect x="47" y="60" width="8" height="8" fill="#1a1a00"/>
+         <rect x="60" y="73" width="8" height="8" fill="#1a1a00"/>
+         <rect x="47" y="73" width="8" height="8" fill="#1a1a00"/>
+         <rect x="73" y="60" width="8" height="8" fill="#1a1a00"/>
+         <rect x="86" y="86" width="8" height="8" fill="#1a1a00"/>
+      </svg>
+      <img *ngIf="!applyMocks" src="assets/images/qr-placeholder.svg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg'" alt="QR Code" style="width: 100%; display: block;">
+    </div>
+    }
+
+  </div>
+</div>

@@ -841,3 +841,73 @@ $transition: 200ms ease;
   }
 }
 
+// ── Native Dialog ──────────────────────────────────
+.preview-dialog {
+  border: none;
+  padding: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+  width: min(96vw, 1180px);
+  margin: auto;
+  max-height: 95vh;
+  
+  &::backdrop {
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(4px);
+  }
+
+  .dialog-content {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    background: #1e293b;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .dialog-title-group {
+    display:flex;
+    align-items:center;
+    gap:0.75rem;
+
+    .auth-icon { color:#f5c800; font-size:1.3rem; }
+    h2 { color:#f1f5f9; font-weight:600; font-size:0.95rem; margin:0; }
+    .muted-text { color:#64748b; font-size:0.78rem; font-style:italic; }
+  }
+
+  .btn-close {
+    background:none;
+    border:none;
+    color:#94a3b8;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    padding:0.4rem;
+    border-radius:6px;
+    &:hover { background:#334155; }
+  }
+
+  .dialog-body {
+    padding: 1rem;
+    background: #e2e8f0;
+    max-height: calc(95vh - 100px);
+    overflow-y: auto;
+  }
+
+  .dialog-footer {
+    padding: 0.5rem 1rem;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    p { margin:0; display:inline; color:#94a3b8; font-size:0.75rem; }
+  }
+}
+

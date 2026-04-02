@@ -1,79 +1,58 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, HostListener, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule, NgStyle } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy, ViewChild, ElementRef, inject, DestroyRef, signal } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import { ModelosCertificadosService, ModeloCertificado } from '../../../core/services/modelos-certificados.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
-
-/** Dimensões do canvas de preview — mesmas constantes do editor (modelos-form.ts) */
-const CANVAS_W = 1122;
-const CANVAS_H = 794;
+import { CertificadoPreviewComponent } from '../components/certificado-preview/certificado-preview.component';
 
 @Component({
   selector: 'app-modelos-lista',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, NgStyle, RouterModule],
+  imports: [CommonModule, RouterModule, CertificadoPreviewComponent, DatePipe],
   templateUrl: './modelos-lista.html',
   styleUrl: './modelos-lista.scss',
 })
-export class ModelosLista implements OnInit, OnDestroy {
-  modelos: ModeloCertificado[] = [];
-  isLoading = true;
-  erro = '';
+export class ModelosLista implements OnInit {
+  // Estado Reativo local via Signals
+  modelos = signal<ModeloCertificado[]>([]);
+  isLoading = signal<boolean>(true);
+  erro = signal<string>('');
+  
+  modeloPreview = signal<ModeloCertificado | null>(null);
 
-  readonly CANVAS_W = CANVAS_W;
-  readonly CANVAS_H = CANVAS_H;
+  @ViewChild('previewDialog') previewDialog?: ElementRef<HTMLDialogElement>;
 
-  // ── Preview ────────────────────────────────────────────────
-  modeloPreview: ModeloCertificado | null = null;
-  scaleFactor = 1;
-
-  @ViewChild('previewModalWrapper') previewModalWrapper?: ElementRef<HTMLElement>;
-
-  private _resizeObs?: ResizeObserver;
-
-  constructor(
-    private modelosService: ModelosCertificadosService,
-    private confirmDialog: ConfirmDialogService,
-    private toast: ToastService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
+  // Dependências
+  private readonly modelosService = inject(ModelosCertificadosService);
+  private readonly confirmDialog = inject(ConfirmDialogService);
+  private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef); // Gerencia a memória das streams (RxJS)
 
   ngOnInit(): void {
     this.carregarModelos();
   }
 
-  ngOnDestroy(): void {
-    this._resizeObs?.disconnect();
-  }
-
-  private _recalcScale(): void {
-    const el = this.previewModalWrapper?.nativeElement;
-    if (!el) return;
-    const w = el.clientWidth || CANVAS_W;
-    this.scaleFactor = Math.min(1, w / CANVAS_W);
-    el.style.height = Math.round(CANVAS_H * this.scaleFactor) + 'px';
-    this.cdr.markForCheck();
-  }
-
   carregarModelos(): void {
-    this.isLoading = true;
-    this.erro = '';
+    this.isLoading.set(true);
+    this.erro.set('');
     
-    this.modelosService.listar().subscribe({
-      next: (res: any) => {
-        this.modelos = res;
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.erro = 'Não foi possível carregar os modelos de certificado.';
-        this.isLoading = false;
-        this.cdr.markForCheck();
-      }
-    });
+    this.modelosService.listar()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res: any) => {
+          this.modelos.set(res || []);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.erro.set('Não foi possível carregar os modelos de certificado.');
+          this.isLoading.set(false);
+        }
+      });
   }
 
   novoModelo(): void {
@@ -85,41 +64,23 @@ export class ModelosLista implements OnInit, OnDestroy {
   }
 
   abrirPreview(modelo: ModeloCertificado): void {
-    this.modeloPreview = modelo;
-    this.cdr.markForCheck();
-    // Aguarda o DOM renderizar o modal para registrar o ResizeObserver
+    this.modeloPreview.set(modelo);
     setTimeout(() => {
-      const el = this.previewModalWrapper?.nativeElement;
-      if (!el) return;
-      this._resizeObs?.disconnect();
-      this._resizeObs = new ResizeObserver(() => this._recalcScale());
-      this._resizeObs.observe(el);
-      this._recalcScale();
-    }, 50);
+      if (this.previewDialog?.nativeElement) {
+        this.previewDialog.nativeElement.showModal();
+      }
+    }, 0);
   }
 
   fecharPreview(): void {
-    this._resizeObs?.disconnect();
-    this.modeloPreview = null;
-    this.cdr.markForCheck();
+    const dialog = this.previewDialog?.nativeElement;
+    if (dialog && dialog.open) {
+      dialog.close();
+    }
   }
 
-  /** Substitui as tags dinâmicas por valores de exemplo para o preview visual */
-  textoComPlaceholders(template: string): string {
-    return template
-      .replace(/\{\{NOME_ALUNO\}\}/gi,  'Maria da Silva Santos')
-      .replace(/\{\{TURMA\}\}/gi,       'Braille Nível I')
-      .replace(/\{\{CURSO\}\}/gi,       'Braille Nível I')
-      .replace(/\{\{CARGA_HORARIA\}\}/gi, '40')
-      .replace(/\{\{DATA_INICIO\}\}/gi,  '03/01/2025')
-      .replace(/\{\{DATA_FIM\}\}/gi,     '28/03/2025')
-      .replace(/\{\{DATA_EMISSAO\}\}/gi, new Date().toLocaleDateString('pt-BR'))
-      .replace(/\{\{[^}]+\}\}/g,         '[...]'); // fallback para outras tags
-  }
-
-  @HostListener('keydown.escape')
-  onEsc(): void {
-    if (this.modeloPreview) this.fecharPreview();
+  onDialogClosed(): void {
+    this.modeloPreview.set(null);
   }
 
   async excluirModelo(modelo: ModeloCertificado): Promise<void> {
@@ -132,15 +93,17 @@ export class ModelosLista implements OnInit, OnDestroy {
     
     if (!ok) return;
 
-    this.modelosService.excluir(modelo.id).subscribe({
-      next: () => {
-        this.toast.sucesso('Modelo excluído com sucesso!');
-        this.carregarModelos();
-      },
-      error: (err: any) => {
-        const msg = err.error?.message || 'Erro ao excluir o modelo. Talvez ele já esteja em uso por alguma turma.';
-        this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
-      }
-    });
+    this.modelosService.excluir(modelo.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.sucesso('Modelo excluído com sucesso!');
+          this.carregarModelos();
+        },
+        error: (err: any) => {
+          const msg = err.error?.message || 'Erro ao excluir. O modelo pode estar em uso.';
+          this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
+        }
+      });
   }
 }
