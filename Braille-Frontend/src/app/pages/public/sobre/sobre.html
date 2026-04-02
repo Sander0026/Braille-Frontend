@@ -1,9 +1,9 @@
 <!-- ══════════ SOBRE — HERO ══════════ -->
 <section class="page-hero" aria-labelledby="sobre-titulo">
-    <div class="page-hero-inner animate-on-scroll">
-        <p class="page-eyebrow">{{ hero.eyebrow }}</p>
-        <h1 id="sobre-titulo" class="page-hero-title">{{ hero.titulo }}</h1>
-        <div class="page-hero-desc" [innerHTML]="hero.descricao | safeHtml"></div>
+    <div class="page-hero-inner" appAnimateOnScroll>
+        <p class="page-eyebrow">{{ hero().eyebrow }}</p>
+        <h1 id="sobre-titulo" class="page-hero-title">{{ hero().titulo }}</h1>
+        <div class="page-hero-desc" [innerHTML]="hero().descricao | safeHtml"></div>
     </div>
 </section>
 
@@ -11,25 +11,29 @@
 <section class="content-section" aria-labelledby="historia-titulo">
     <div class="content-inner">
         <div class="content-grid">
-            <div class="content-text animate-on-scroll">
+            <div class="content-text" appAnimateOnScroll>
                 <div class="section-label" aria-hidden="true">
                     <span class="material-symbols-rounded">history</span>
                     Nossa Trajetória
                 </div>
-                <h2 id="historia-titulo" class="content-title">{{ historia.titulo }}</h2>
-                <div [innerHTML]="historia.paragrafo1 | safeHtml"></div>
-                @if (historia.paragrafo2) {
-                <div [innerHTML]="historia.paragrafo2 | safeHtml"></div>
-                }
-                @if (historia.paragrafo3) {
-                <div [innerHTML]="historia.paragrafo3 | safeHtml"></div>
-                }
+                <h2 id="historia-titulo" class="content-title">{{ historia().titulo }}</h2>
+                
+                <div class="historia-body" aria-live="polite">
+                    <div [innerHTML]="historia().paragrafo1 | safeHtml"></div>
+                    @if (historia().paragrafo2) {
+                    <div [innerHTML]="historia().paragrafo2 | safeHtml"></div>
+                    }
+                    @if (historia().paragrafo3) {
+                    <div [innerHTML]="historia().paragrafo3 | safeHtml"></div>
+                    }
+                </div>
             </div>
 
-            <div class="timeline animate-on-scroll delay-100" role="list" aria-label="Linha do tempo do instituto">
-                @for (item of timeline; track item.ano) {
+            <!-- TIMELINE -->
+            <div class="timeline delay-100" appAnimateOnScroll role="list" aria-label="Linha do tempo histórica do instituto">
+                @for (item of timeline(); track item.ano) {
                 <div class="timeline-item" role="listitem">
-                    <div class="timeline-year">{{ item.ano }}</div>
+                    <div class="timeline-year" aria-label="Ano do acontecimento">{{ item.ano }}</div>
                     <div class="timeline-content">
                         <strong>{{ item.titulo }}</strong>
                         <div [innerHTML]="item.descricao | safeHtml"></div>
@@ -41,7 +45,7 @@
     </div>
 </section>
 
-<!-- ══════════ SEPARADOR ══════════ -->
+<!-- ══════════ SEPARADOR SVG ══════════ -->
 <div class="wave-sep" aria-hidden="true">
     <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M0,0 C360,80 1080,80 1440,0 L1440,80 L0,80 Z" fill="#ffffff" />
@@ -51,24 +55,25 @@
 <!-- ══════════ EQUIPE ══════════ -->
 <section class="equipe-section" aria-labelledby="equipe-titulo">
     <div class="content-inner">
-        <div class="section-header animate-on-scroll">
+        
+        <header class="section-header" appAnimateOnScroll>
             <h2 id="equipe-titulo" class="section-title">Nossa Equipe</h2>
             <p class="section-subtitle">
                 Profissionais qualificados e apaixonados pela causa da inclusão visual.
             </p>
-        </div> 
+        </header>
 
-        <div class="equipe-grid" role="list" aria-label="Equipe do instituto">
-            @for (membro of equipe; track membro.cargo) {
-            <div class="equipe-card animate-on-scroll" role="listitem"
-                [class.delay-100]="$index % 4 === 1"
-                [class.delay-200]="$index % 4 === 2"
-                [class.delay-300]="$index % 4 === 3">
+        <div class="equipe-grid" role="list" aria-label="Equipe e Coordenadores do instituto">
+            @for (membro of equipe(); track membro.cargo; let i = $index) {
+            <div class="equipe-card" role="listitem" appAnimateOnScroll
+                [class.delay-100]="i % 4 === 1"
+                [class.delay-200]="i % 4 === 2"
+                [class.delay-300]="i % 4 === 3">
                 <div class="equipe-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">{{ membro.emoji }}</span>
                 </div>
-                <h3>{{ membro.cargo }}</h3>
-                <div [innerHTML]="membro.descricao | safeHtml"></div>
+                <h3 aria-label="Cargo e departamento da equipe">{{ membro.cargo }}</h3>
+                <div class="equipe-desc" [innerHTML]="membro.descricao | safeHtml"></div>
             </div>
             }
         </div>
@@ -77,10 +82,10 @@
 
 <!-- ══════════ CTA ══════════ -->
 <section class="sobre-cta" aria-labelledby="cta-sobre-titulo">
-    <div class="content-inner sobre-cta-inner animate-on-scroll">
+    <div class="content-inner sobre-cta-inner" appAnimateOnScroll>
         <span class="material-symbols-rounded cta-icon" aria-hidden="true">contact_support</span>
-        <h2 id="cta-sobre-titulo">{{ cta.titulo }}</h2>
-        <div [innerHTML]="cta.descricao | safeHtml" class="cta-desc"></div>
+        <h2 id="cta-sobre-titulo">{{ cta().titulo }}</h2>
+        <div [innerHTML]="cta().descricao | safeHtml" class="cta-desc"></div>
         <a routerLink="/contato" class="btn-cta">
             Fale Conosco
             <span class="material-symbols-rounded" aria-hidden="true">arrow_forward</span>

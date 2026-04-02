@@ -1,14 +1,17 @@
-import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { SiteConfigService } from '../../../core/services/site-config';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs/operators';
+
+import { SiteConfigService } from '../../../core/services/site-config';
 import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
+import { AnimateOnScrollDirective } from '../../../shared/directives/animate-on-scroll.directive';
 
 interface TimelineItem { ano: string; titulo: string; descricao: string; }
 interface EquipeMembro { emoji: string; cargo: string; descricao: string; }
 
-// Valores padrão caso o admin ainda não tenha salvo os dados
+// Valores padrão imutáveis
 const DEFAULTS = {
     hero: {
         eyebrow: 'Conheça o Instituto',
@@ -42,67 +45,72 @@ const DEFAULTS = {
 @Component({
     selector: 'app-sobre',
     standalone: true,
-    imports: [CommonModule, RouterLink, SafeHtmlPipe],
+    imports: [CommonModule, RouterLink, SafeHtmlPipe, AnimateOnScrollDirective],
     templateUrl: './sobre.html',
     styleUrl: './sobre.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush // Performace Elevada
 })
-export class Sobre implements OnInit, AfterViewInit {
-    hero = { ...DEFAULTS.hero };
-    historia = { ...DEFAULTS.historia };
-    timeline: TimelineItem[] = [...DEFAULTS.timeline];
-    equipe: EquipeMembro[] = [...DEFAULTS.equipe];
-    cta = { ...DEFAULTS.cta };
+export class Sobre {
+    // Matrizes Reativas encapsuladas e blindadas
+    hero = signal({ ...DEFAULTS.hero });
+    historia = signal({ ...DEFAULTS.historia });
+    timeline = signal<TimelineItem[]>([...DEFAULTS.timeline]);
+    equipe = signal<EquipeMembro[]>([...DEFAULTS.equipe]);
+    cta = signal({ ...DEFAULTS.cta });
 
-    constructor(private siteConfig: SiteConfigService, private el: ElementRef) { }
-
-    ngAfterViewInit(): void {
-        const observer = new IntersectionObserver(
-            (entries) => entries.forEach(e => e.target.classList.toggle('is-visible', e.isIntersecting)),
-            { threshold: 0.12 }
-        );
-        this.el.nativeElement.querySelectorAll('.animate-on-scroll')
-            .forEach((el: Element) => observer.observe(el));
+    constructor(private siteConfig: SiteConfigService) {
+        // Inicializador integrado com fechamento defensivo memory pass
+        this.carregarConfiguracoesLayout();
     }
 
-    ngOnInit(): void {
+    private carregarConfiguracoesLayout(): void {
         this.siteConfig.secoes$.pipe(
             filter(s => Object.keys(s).length > 0),
-            take(1)
+            take(1),
+            takeUntilDestroyed()
         ).subscribe(secoes => {
-            // Hero
             const h = secoes['sobre_hero'];
-            if (h?.['titulo']) this.hero = { eyebrow: h['eyebrow'] || DEFAULTS.hero.eyebrow, titulo: h['titulo'], descricao: h['descricao'] || DEFAULTS.hero.descricao };
+            if (h?.['titulo']) {
+                this.hero.set({ 
+                    eyebrow: h['eyebrow'] || DEFAULTS.hero.eyebrow, 
+                    titulo: h['titulo'], 
+                    descricao: h['descricao'] || DEFAULTS.hero.descricao 
+                });
+            }
 
-            // História
             const hist = secoes['sobre_historia'];
-            if (hist?.['paragrafo1']) this.historia = {
-                titulo: hist['titulo'] || DEFAULTS.historia.titulo,
-                paragrafo1: hist['paragrafo1'] || '',
-                paragrafo2: hist['paragrafo2'] || '',
-                paragrafo3: hist['paragrafo3'] || '',
-            };
+            if (hist?.['paragrafo1']) {
+                this.historia.set({
+                    titulo: hist['titulo'] || DEFAULTS.historia.titulo,
+                    paragrafo1: hist['paragrafo1'] || '',
+                    paragrafo2: hist['paragrafo2'] || '',
+                    paragrafo3: hist['paragrafo3'] || '',
+                });
+            }
 
-            // Timeline
             const tl = secoes['sobre_timeline'];
             if (tl?.['lista']) {
                 try {
                     const parsed = JSON.parse(tl['lista']) as TimelineItem[];
-                    if (parsed.length > 0) this.timeline = parsed;
-                } catch { /* mantém default */ }
+                    if (parsed.length > 0) this.timeline.set(parsed);
+                } catch { /* Segurança Silenciosa - Evita crash */ }
             }
 
-            // Equipe
             const eq = secoes['sobre_equipe'];
             if (eq?.['lista']) {
                 try {
                     const parsed = JSON.parse(eq['lista']) as EquipeMembro[];
-                    if (parsed.length > 0) this.equipe = parsed;
-                } catch { /* mantém default */ }
+                    if (parsed.length > 0) this.equipe.set(parsed);
+                } catch { /* Segurança Silenciosa - Evita crash */ }
             }
 
-            // CTA
-            const cta = secoes['sobre_cta'];
-            if (cta?.['titulo']) this.cta = { titulo: cta['titulo'], descricao: cta['descricao'] || DEFAULTS.cta.descricao };
+            const ctaMeta = secoes['sobre_cta'];
+            if (ctaMeta?.['titulo']) {
+                this.cta.set({ 
+                    titulo: ctaMeta['titulo'], 
+                    descricao: ctaMeta['descricao'] || DEFAULTS.cta.descricao 
+                });
+            }
         });
     }
 }
