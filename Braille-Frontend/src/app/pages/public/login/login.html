@@ -1,4 +1,4 @@
-<!-- Skip link de acessibilidade -->
+<!-- Skip link de acessibilidade (WCAG Navigation Bypass) -->
 <nav aria-label="Acesso Rápido">
   <a href="#login-form" class="skip-to-content" style="z-index: 9999;">Pular para o formulário de login</a>
 </nav>
@@ -8,29 +8,29 @@
   <div class="form-panel">
     <div class="form-card">
 
-      <div class="form-heading">
+      <header class="form-heading">
         <div class="logo-container">
-          <img src="favicon.ico" alt="Logo Instituto Luiz Braille" class="login-logo" />
+          <img src="favicon.ico" alt="Logo corporativo Instituto Luiz Braille" class="login-logo" />
         </div>
         <h1>Sistema Administrativo</h1>
         <p>Acesso restrito ao painel institucional</p>
-      </div>
+      </header>
 
       <!-- Alerta de erro persistente no DOM para leitura de tela -->
       <div aria-live="assertive" aria-atomic="true">
-        @if (erroLogin) {
+        @if (erroLogin()) {
         <div class="alert-erro" role="alert">
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true" width="20" height="20">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <span>{{ erroLogin }}</span>
+          <span style="margin-left: 6px;">{{ erroLogin() }}</span>
         </div>
         }
       </div>
 
-      @if (!precisaTrocarSenha) {
-      <!-- Formulário -->
+      @if (!precisaTrocarSenha()) {
+      <!-- Formulário Tradicional de Login -->
       <form id="login-form" [formGroup]="loginForm" (ngSubmit)="fazerLogin()"
         aria-label="Formulário de acesso ao sistema" novalidate>
 
@@ -61,22 +61,22 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2 2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <input id="senha" [type]="mostrarSenha ? 'text' : 'password'"
+            <input id="senha" [type]="mostrarSenha() ? 'text' : 'password'"
               class="input-field password-field has-icon-left"
               [class.is-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched"
               formControlName="senha" placeholder="" autocomplete="current-password" aria-required="true"
               [attr.aria-invalid]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched"
               [attr.aria-describedby]="loginForm.get('senha')?.invalid && loginForm.get('senha')?.touched ? 'erro-login-senha' : null" />
             <button type="button" class="toggle-password-btn" (click)="toggleSenha()"
-              aria-label="Alternar visibilidade da senha">
-              @if (mostrarSenha) {
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              [attr.aria-label]="mostrarSenha() ? 'Ocultar a senha digitada' : 'Exibir a senha digitada em texto limpo'">
+              @if (mostrarSenha()) {
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21">
                 </path>
               </svg>
               } @else {
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true" width="20" height="20">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -91,16 +91,14 @@
           }
         </div>
 
-        <!-- Botão Submit -->
-        <!-- [disabled] removido: impedia foco via Tab e ativação por Enter (WCAG 2.1.1) -->
-        <!-- aria-disabled comunica o estado sem bloquear a interação por teclado -->
+        <!-- Botão Submit Restrito -->
         <button type="submit" class="submit-btn"
-          [class.is-loading]="carregando"
-          [attr.aria-disabled]="loginForm.invalid || carregando"
-          [attr.aria-busy]="carregando"
+          [class.is-loading]="carregando()"
+          [attr.aria-disabled]="loginForm.invalid || carregando()"
+          [attr.aria-busy]="carregando()"
           [attr.aria-describedby]="loginForm.invalid ? 'login-hint-validacao' : null"
           aria-label="Acessar o painel administrativo">
-          @if (carregando) {
+          @if (carregando()) {
           <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
             <path style="opacity:.75" fill="currentColor"
@@ -117,17 +115,15 @@
 
       </form>
       } @else {
-      <!-- Formulário de Nova Senha Obrigatória -->
+      <!-- Formulário Seguro de Nova Senha -->
       <form id="nova-senha-form" [formGroup]="novaSenhaForm" (ngSubmit)="confirmarNovaSenha()"
         aria-label="Formulário de definição de nova senha" novalidate>
 
-        <div
-          style="margin-bottom: 1.5rem; padding: 1rem; background-color: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; border-radius: 4px; font-size: 0.9rem;">
+        <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: #fef2f2; border-left: 4px solid #ef4444; color: #991b1b; border-radius: 4px; font-size: 0.9rem;" role="alert">
           <b>Ação Necessária:</b> A coordenação redefiniu sua conta. Você precisa criar uma nova senha pessoal
           permanente antes de prosseguir.
         </div>
 
-        <!-- Campo: Nova Senha -->
         <div class="input-group">
           <label for="novaSenha" class="input-label">Nova Senha</label>
           <div class="input-wrapper">
@@ -137,59 +133,27 @@
               [attr.aria-invalid]="novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched"
               [attr.aria-describedby]="novaSenhaForm.get('novaSenha')?.invalid && novaSenhaForm.get('novaSenha')?.touched ? 'erro-reset-senha' : 'hint-nova-senha'" />
           </div>
-          <span id="hint-nova-senha" class="sr-only">A senha precisa cobrir os requisitos de segurança da plataforma.</span>
+          <span id="hint-nova-senha" class="sr-only">A senha precisa cobrir os requisitos de segurança listados abaixo.</span>
 
-          <div class="password-requirements mt-2 p-3 bg-gray-50 rounded-md border border-gray-100" style="font-size: 0.85rem; display: flex; flex-direction: column; gap: 0.5rem; background-color: #f8fafc; border-radius: 0.375rem; padding: 0.75rem; margin-top: 0.5rem;">
+          <!-- LOOP DRY para Requisitos Visuais (Cortado mais de 40 linhas repetidas hardcoded) -->
+          <div class="password-requirements" style="display: flex; flex-direction: column; gap: 0.5rem; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 0.375rem; padding: 0.75rem; margin-top: 0.5rem; font-size: 0.85rem;" role="status" aria-live="polite">
             <div style="font-weight: 600; margin-bottom: 0.25rem; color: #475569;">Sua senha deve conter:</div>
             
-            <div style="display: flex; align-items: center; gap: 0.5rem;" [style.color]="hasMinLength ? '#15803d' : missingColor">
-              @if (hasMinLength) {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              } @else {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              }
-              <span>Pelo menos 8 caracteres</span>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 0.5rem;" [style.color]="hasUpperCase ? '#15803d' : missingColor">
-              @if (hasUpperCase) {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              } @else {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              }
-              <span>Uma letra maiúscula</span>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 0.5rem;" [style.color]="hasLowerCase ? '#15803d' : missingColor">
-              @if (hasLowerCase) {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              } @else {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              }
-              <span>Uma letra minúscula</span>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 0.5rem;" [style.color]="hasNumber ? '#15803d' : missingColor">
-              @if (hasNumber) {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              } @else {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              }
-              <span>Pelo menos um número</span>
-            </div>
-
-            <div style="display: flex; align-items: center; gap: 0.5rem;" [style.color]="hasSpecial ? '#15803d' : missingColor">
-              @if (hasSpecial) {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-              } @else {
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-              }
-              <span>Um caractere especial (@, !, #, $, etc.)</span>
-            </div>
+            @for (req of senhaReqs(); track req.label) {
+                <div style="display: flex; align-items: center; gap: 0.5rem;" 
+                  [style.color]="req.isValid ? '#15803d' : (novaSenhaForm.get('novaSenha')?.touched ? '#dc2626' : '#64748b')">
+                  @if (req.isValid) {
+                    <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                  } @else {
+                    <svg style="width: 16px; height: 16px; flex-shrink: 0;" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                  }
+                  <span>{{ req.label }}</span>
+                </div>
+            }
           </div>
+
         </div>
 
-        <!-- Campo: Confirmar Senha -->
         <div class="input-group">
           <label for="confirmarSenha" class="input-label">Confirmar Senha</label>
           <div class="input-wrapper">
@@ -204,9 +168,13 @@
           }
         </div>
 
-        <button type="submit" class="submit-btn" [disabled]="novaSenhaForm.invalid || carregando"
-          [attr.aria-busy]="carregando" aria-label="Confirmar nova senha de acesso">
-          @if (carregando) {
+        <!-- O [disabled] nativo foi revertido para bloqueio condicional se adequando ao padrão WCAG evitando traps the teclado -->
+        <button type="submit" class="submit-btn" 
+          [class.disable-style]="novaSenhaForm.invalid || carregando()"
+          [attr.aria-disabled]="novaSenhaForm.invalid || carregando()"
+          [attr.aria-busy]="carregando()" 
+          aria-label="Confirmar nova senha de acesso">
+          @if (carregando()) {
           <svg class="spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
             <circle style="opacity:.25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
             <path style="opacity:.75" fill="currentColor"
