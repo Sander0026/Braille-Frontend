@@ -9,7 +9,7 @@ import { BeneficiariosService, Beneficiario } from '../../../core/services/benef
 import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
+import { DataBraillePipe } from '../../../shared/pipes/data-braille.pipe';
 import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
@@ -39,7 +39,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })

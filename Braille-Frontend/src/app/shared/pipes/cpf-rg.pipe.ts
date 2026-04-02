@@ -7,10 +7,10 @@ import { Pipe, PipeTransform } from '@angular/core';
 })
 /**
  * CpfRgPipe — Formata documentos fiscais brasileiros.
- * 
+ *
  * - CPF (11 dígitos): 000.000.000-00
  * - RG  (< 11 dígitos): pontua por milhares (ex: 1.234.567)
- * 
+ *
  * Retorna '—' para inputs nulos ou vazios.
  */
 export class CpfRgPipe implements PipeTransform {

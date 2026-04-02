@@ -19,12 +19,12 @@ export class StripHtmlPipe implements PipeTransform {
       // 1. Remove todas as tags HTML (incluindo self-closing e mal-formadas)
       .replace(/<\/?[^>]+(>|$)/g, '')
       // 2. Normaliza entidades HTML comuns vindas de editores WYSIWYG
-      .replace(/&nbsp;/g,  ' ')
-      .replace(/&amp;/g,   '&')
-      .replace(/&lt;/g,    '<')
-      .replace(/&gt;/g,    '>')
-      .replace(/&quot;/g,  '"')
-      .replace(/&#39;/g,   "'")
+      .replaceAll('&nbsp;',  ' ')
+      .replaceAll('&amp;',   '&')
+      .replaceAll('&lt;',    '<')
+      .replaceAll('&gt;',    '>')
+      .replaceAll('&quot;',  '"')
+      .replaceAll('&#39;',   "'")
       // 3. Colapsa múltiplos espaços em branco em um único
       .replace(/\s{2,}/g,  ' ')
       .trim();
