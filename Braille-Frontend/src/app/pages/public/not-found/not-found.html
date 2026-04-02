@@ -1,4 +1,6 @@
-<main class="not-found-container" aria-labelledby="error-title">
+<!-- WAI-ARIA Imbução Global: Transformar o contêiner vazio em um Alerta Ativo -->
+<!-- Leitores de Tela interromperão o que estão lidando e anunciarão dinamicamente o erro. -->
+<main class="not-found-container" aria-labelledby="error-title" aria-live="assertive" role="alert">
     <div class="not-found-content">
         <span class="error-code" aria-hidden="true">404</span>
         <h1 id="error-title" class="title">Página Não Encontrada</h1>
@@ -6,17 +8,20 @@
             indisponível.</p>
 
         <div class="actions">
-            <a routerLink="/" class="btn btn-primary" aria-label="Voltar para a página inicial">
+            <!-- Labels Explícitas (A11y Standard compliance) -->
+            <a routerLink="/" class="btn btn-primary" aria-label="Voltar diretamente para a página inicial">
                 <span class="material-symbols-rounded" aria-hidden="true">home</span>
                 Ir para o Início
             </a>
 
-            <!-- Somente mostra botão Voltar se houver histórico do próprio site -->
+            <!-- Blocagem do Botão de Fallback Condicional ao @if do History Native -->
+            @if (possuiHistorico()) {
             <button class="btn btn-secondary" (click)="voltarPaginaAnterior()"
-                aria-label="Voltar para a página de onde vim">
+                aria-label="Voltar para a página anterior de onde você se originou">
                 <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
                 Voltar
             </button>
+            }
         </div>
     </div>
 </main>
