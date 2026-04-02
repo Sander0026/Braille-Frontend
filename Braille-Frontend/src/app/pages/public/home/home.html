@@ -1,9 +1,10 @@
+@if (heroConfig$ | async; as heroConfig) {
 <!-- ══════════ HERO ══════════ -->
-<section class="hero" aria-label="Seção de boas-vindas">
-    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN -->
-    <div class="hero-bg" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null"></div>
+<section class="hero" aria-label="Seção principal de boas-vindas ao Instituto">
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN e Proteção de Leak Signal -->
+    <div class="hero-bg" [style.backgroundImage]="fachadaUrl() ? 'url(' + (fachadaUrl() | cloudinary) + ')' : null"></div>
     <div class="hero-inner">
-        <div class="hero-content animate-on-scroll">
+        <div class="hero-content animate-on-scroll" appAnimateOnScroll>
             <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>
             <h1 class="hero-title">
                 {{ heroConfig['tituloLinha1'] || 'Mais do que inclusão' }}<br>
@@ -13,24 +14,26 @@
                 @if (heroConfig['descricao']) {
                 <div [innerHTML]="heroConfig['descricao'] | safeHtml"></div>
                 } @else {
-                Há mais de 30 anos o <strong>Instituto Luiz Braille</strong> oferece educação, autonomia e oportunidades
-                para pessoas com deficiência visual em nossa comunidade.
+                <p>
+                    Há mais de 30 anos o <strong>Instituto Luiz Braille</strong> oferece educação, autonomia e oportunidades
+                    para pessoas com deficiência visual em nossa comunidade.
+                </p>
                 }
             </div>
             <div class="hero-actions">
-                <a routerLink="/contato" class="btn-hero-primary">
+                <a routerLink="/contato" class="btn-hero-primary" aria-label="Navegar para a página Fale Conosco">
                     {{ heroConfig['btnPrimario'] || 'Fale Conosco' }}
                     <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2.5" stroke-linecap="round">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a routerLink="/sobre" class="btn-hero-secondary">
+                <a routerLink="/sobre" class="btn-hero-secondary" aria-label="Navegar para saber mais sobre o Instituto">
                     {{ heroConfig['btnSecundario'] || 'Conheça o Instituto' }}
                 </a>
             </div>
 
-            <div class="hero-stats" role="list" aria-label="Números do instituto">
+            <div class="hero-stats" role="list" aria-label="Estatísticas principais do instituto">
                 <div class="stat-item" role="listitem">
                     <span class="stat-num">{{ heroConfig['stat1Num'] || '300+' }}</span>
                     <span class="stat-label">{{ heroConfig['stat1Desc'] || 'Alunos atendidos por ano' }}</span>
@@ -50,13 +53,15 @@
         </div>
     </div>
 </section>
+}
 
+@if (missaoConfig$ | async; as missaoConfig) {
 <!-- ══════════ MISSÃO, VISÃO E VALORES ══════════ -->
-<section class="sobre" aria-label="Nossa Missão, Visão e Valores">
+<section class="sobre" aria-label="Diretrizes Estratégicas: Nossa Missão, Visão e Valores">
     <div class="section-inner mvv-grid">
 
         <!-- MISSÃO -->
-        <article class="mvv-card animate-on-scroll">
+        <article class="mvv-card animate-on-scroll" appAnimateOnScroll>
             <div class="mvv-icon" aria-hidden="true">
                 <span class="material-symbols-rounded">flag</span>
             </div>
@@ -65,7 +70,7 @@
         </article>
 
         <!-- VISÃO -->
-        <article class="mvv-card animate-on-scroll delay-100">
+        <article class="mvv-card animate-on-scroll delay-100" appAnimateOnScroll>
             <div class="mvv-icon" aria-hidden="true">
                 <span class="material-symbols-rounded">wb_sunny</span>
             </div>
@@ -74,7 +79,7 @@
         </article>
 
         <!-- VALORES -->
-        <article class="mvv-card animate-on-scroll delay-200">
+        <article class="mvv-card animate-on-scroll delay-200" appAnimateOnScroll>
             <div class="mvv-icon" aria-hidden="true">
                 <span class="material-symbols-rounded">public</span>
             </div>
@@ -89,23 +94,24 @@
 
     </div>
 </section>
+}
 
 <!-- ══════════ OFICINAS ══════════ -->
 <section class="oficinas" aria-labelledby="oficinas-titulo">
     <div class="wave-transition">
-        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M0,0 C240,120 480,120 720,60 C960,0 1200,0 1440,60 L1440,0 L0,0 Z" fill="#ffffff" />
         </svg>
     </div>
     <div class="section-inner">
-        <div class="section-header animate-on-scroll">
+        <div class="section-header animate-on-scroll" appAnimateOnScroll>
             <h2 id="oficinas-titulo" class="section-title">Nossas Oficinas</h2>
             <p class="section-subtitle">Atividades gratuitas para pessoas com deficiência visual de todas as idades.</p>
         </div>
 
-        <div class="oficinas-grid" role="region" aria-label="Lista de oficinas">
-            @for (of of oficinas; track of.titulo) {
-            <article class="oficina-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
+        <div class="oficinas-grid" role="region" aria-label="Lista de oficinas ativas">
+            @for (of of oficinas(); track of.titulo) {
+            <article class="oficina-card animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
                 <div class="oficina-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
@@ -114,7 +120,7 @@
                 <div class="oficina-desc" [innerHTML]="of.descricao | safeHtml"></div>
             </article>
             } @empty {
-            <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;">
+            <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;" role="status">
                 <p>Nenhuma oficina cadastrada no momento.</p>
             </div>
             }
@@ -122,7 +128,7 @@
 
         <div class="oficinas-cta">
             <a routerLink="/contato" class="btn-primary-lg"
-                aria-label="Entre em contato para saber sobre nossas oficinas">
+                aria-label="Entre em contato para saber sobre as inscrições de nossas oficinas">
                 Quero Saber Mais
             </a>
         </div>
@@ -132,18 +138,18 @@
 <!-- ══════════ DEPOIMENTOS ══════════ -->
 <section class="depoimentos" aria-labelledby="dep-titulo">
     <div class="wave-transition-double">
-        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M0,20 C320,100 420,100 720,50 C1020,0 1120,0 1440,60 L1440,0 L0,0 Z" fill="#b0b0b0"
                 opacity="0.4" />
             <path d="M0,60 C320,0 420,0 720,50 C1020,100 1120,100 1440,20 L1440,0 L0,0 Z" fill="#e8e8e8" />
         </svg>
     </div>
     <div class="section-inner">
-        <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll">O que nossos alunos dizem</h2>
+        <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll" appAnimateOnScroll>O que nossos alunos dizem</h2>
 
-        <div class="dep-grid" role="region" aria-label="Depoimentos de alunos">
-            @for (dep of depoimentos; track dep.nome) {
-            <blockquote class="dep-card animate-on-scroll" [class.delay-100]="$index % 3 === 1"
+        <div class="dep-grid" role="region" aria-label="Grade de Depoimentos de estudantes">
+            @for (dep of depoimentos(); track dep.nome) {
+            <blockquote class="dep-card animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index % 3 === 1"
                 [class.delay-200]="$index % 3 === 2">
                 <div class="dep-texto" [innerHTML]="dep.texto | safeHtml"></div>
                 <footer class="dep-autor">
@@ -155,32 +161,30 @@
                 </footer>
             </blockquote>
             } @empty {
-            <div class="feed-vazio" style="grid-column: 1 / -1; color: white; min-height: 100px; text-align: center;">
+            <div class="feed-vazio" style="grid-column: 1 / -1; color: white; min-height: 100px; text-align: center;" role="status">
                 <p>Nenhum depoimento cadastrado no momento.</p>
             </div>
             }
         </div>
     </div>
     <div class="wave-transition-concave">
-        <!-- Onda inferior (curva côncava). Fundo = #111111, curvo pra revelar o branco (#ffffff) -->
-        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M0,0 C480,120 960,120 1440,0 L1440,0 L0,0 Z" fill="#111111" />
         </svg>
     </div>
 </section>
 
-@if (carregandoNoticias || ultimasNoticias.length > 0) {
+@if (carregandoNoticias() || ultimasNoticias().length > 0) {
 <!-- ══════════ ÚLTIMAS NOTÍCIAS ══════════ -->
 <section class="section-noticias" aria-labelledby="noticias-titulo">
     <div class="section-inner">
-        <header class="section-header animate-on-scroll">
+        <header class="section-header animate-on-scroll" appAnimateOnScroll>
             <h2 id="noticias-titulo" class="section-title">Últimas Novidades</h2>
             <p class="section-desc">Acompanhe as notícias, vagas para PCD e comunicados mais recentes do Instituto.</p>
         </header>
 
-        @if (carregandoNoticias) {
-        <div class="skeleton-grid-home" aria-busy="true">
-            <!-- 3 Blocos de Skeletons Imersivos simulando Notícias Reais -->
+        @if (carregandoNoticias()) {
+        <div class="skeleton-grid-home" aria-busy="true" aria-label="Carregando bloco de notícias">
             @for (i of [1, 2, 3]; track i) {
             <div class="card-noticia skeleton-wrapper" style="border: none; box-shadow: none">
                 <div class="skeleton skeleton-img" style="height: 200px; border-radius: 1rem 1rem 0 0;"></div>
@@ -196,29 +200,29 @@
             </div>
             }
         </div>
-        } @else if (ultimasNoticias.length > 0) {
-        <div class="grid-noticias">
-            @for (item of ultimasNoticias; track item.id) {
-            <article class="card-noticia animate-on-scroll" [class.delay-100]="$index === 1"
-                [class.delay-200]="$index === 2">
+        } @else if (ultimasNoticias().length > 0) {
+        <div class="grid-noticias" role="list">
+            @for (item of ultimasNoticias(); track item.id) {
+            <article class="card-noticia animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index === 1"
+                [class.delay-200]="$index === 2" role="listitem">
                 <figure class="card-noticia-img">
                     @if (item.imagemCapa) {
                     <img [src]="item.imagemCapa | cloudinary" alt="{{ item.titulo }}" loading="lazy" />
                     } @else {
                     <div class="placeholder"><span class="material-symbols-rounded">article</span></div>
                     }
-                    <span class="badge" [attr.data-categoria]="item.categoria">{{ getLabelCategoria(item.categoria)
-                        }}</span>
+                    <span class="badge" [attr.data-categoria]="item.categoria">{{ item.categoria | categoryLabel }}</span>
                 </figure>
                 <div class="card-noticia-body">
                     <h3>{{ item.titulo }}</h3>
-                    <p class="card-excerpt">{{ getTextoPuro(item.conteudo) }}</p>
+                    <!-- Parsing Limpo (XSS seguro e modularizado) via StripHtmlPipe puro -->
+                    <p class="card-excerpt">{{ item.conteudo | stripHtml }}</p>
                     <footer>
-                        <time>{{ item.criadoEm | date:'dd/MM/yyyy' }}</time>
+                        <time [attr.datetime]="item.criadoEm">{{ item.criadoEm | date:'dd/MM/yyyy' }}</time>
                     </footer>
                 </div>
-                <a routerLink="/noticias" class="full-link"
-                    [attr.aria-label]="'Ler notícia completa: ' + item.titulo"></a>
+                <!-- Link sobreposto mantendo o card clicável acessível no WCAG -->
+                <a routerLink="/noticias" class="full-link" [attr.aria-label]="'Acessar detalhes completos da notícia: ' + item.titulo"></a>
             </article>
             }
         </div>
@@ -226,7 +230,7 @@
         }
 
         <div class="noticias-footer" style="margin-top: 2rem; text-align: center;">
-            <a routerLink="/noticias" class="btn-outline-primary">
+            <a routerLink="/noticias" class="btn-outline-primary" aria-label="Ver histórico e todas as postagens de notícias">
                 Acessar Todas as Notícias 
                 <span class="material-symbols-rounded" aria-hidden="true" style="vertical-align: middle;">arrow_forward</span>
             </a>
@@ -235,16 +239,16 @@
 </section>
 }
 
+@if (carregandoParceiros() || parceiros().length > 0) {
 <!-- ══════════ APOIADORES E PARCEIROS ══════════ -->
-@if (carregandoParceiros || parceiros.length > 0) {
 <section class="parceiros" aria-labelledby="parceiros-titulo">
     <div class="section-inner">
-        <header class="section-header animate-on-scroll text-center">
+        <header class="section-header animate-on-scroll text-center" appAnimateOnScroll>
             <h2 id="parceiros-titulo" class="section-title">Apoiadores e Parceiros</h2>
             <p class="section-desc">Empresas e pessoas físicas que acreditam e apoiam nossa missão diariamente.</p>
         </header>
 
-        @if (carregandoParceiros) {
+        @if (carregandoParceiros()) {
         <div class="parceiros-grid" aria-busy="true">
             @for (i of [1, 2, 3, 4, 5]; track i) {
             <div class="parceiro-card skeleton-wrapper">
@@ -253,18 +257,18 @@
             }
         </div>
         } @else {
-        <div class="parceiros-grid">
-            @for (parceiro of parceiros; track parceiro.id) {
-            <div class="parceiro-card animate-on-scroll">
+        <div class="parceiros-grid" role="list">
+            @for (parceiro of parceiros(); track parceiro.id) {
+            <div class="parceiro-card animate-on-scroll" appAnimateOnScroll role="listitem">
                 @if (parceiro.logoUrl) {
                 <figure class="parceiro-logo" [attr.aria-label]="parceiro.nomeFantasia || parceiro.nomeRazaoSocial">
                     <img [src]="parceiro.logoUrl | cloudinary" 
-                         [alt]="'Logo ' + (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)" loading="lazy">
+                         [alt]="'Logo corporativo de ' + (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)" loading="lazy">
                 </figure>
                 } @else {
                 <div class="parceiro-placeholder">
-                    <span>{{ (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)?.charAt(0) | uppercase }}</span>
-                    <p class="parceiro-nome-fallback">{{ parceiro.nomeFantasia || parceiro.nomeRazaoSocial }}</p>
+                    <span aria-hidden="true">{{ (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)?.charAt(0) | uppercase }}</span>
+                    <p class="parceiro-nome-fallback" aria-label="Nome do parceiro">{{ parceiro.nomeFantasia || parceiro.nomeRazaoSocial }}</p>
                 </div>
                 }
             </div>
@@ -278,14 +282,14 @@
 <!-- ══════════ FAQ (PERGUNTAS FREQUENTES) ══════════ -->
 <section class="faq" aria-labelledby="faq-titulo">
     <div class="section-inner">
-        <header class="section-header animate-on-scroll">
+        <header class="section-header animate-on-scroll" appAnimateOnScroll>
             <h2 id="faq-titulo" class="section-title">Perguntas Frequentes</h2>
             <p class="section-desc">Tire suas dúvidas sobre matrículas, horários e funcionamento do Instituto.</p>
         </header>
 
         <div class="faq-list">
-            @for (item of faq; track item.pergunta) {
-            <details class="faq-item animate-on-scroll" [class.delay-100]="$index === 1" [class.delay-200]="$index === 2">
+            @for (item of faq(); track item.pergunta) {
+            <details class="faq-item animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index === 1" [class.delay-200]="$index === 2">
                 <summary class="faq-pergunta">
                     <span>{{ item.pergunta }}</span>
                     <span class="material-symbols-rounded faq-icon" aria-hidden="true">expand_more</span>
@@ -293,7 +297,7 @@
                 <div class="faq-resposta ql-content" [innerHTML]="item.resposta | safeHtml"></div>
             </details>
             } @empty {
-            <div class="feed-vazio">
+            <div class="feed-vazio" role="status">
                 <p>Nenhuma pergunta cadastrada no momento.</p>
             </div>
             }
@@ -303,17 +307,17 @@
 
 <!-- ══════════ CTA FINAL ══════════ -->
 <section class="cta-final" aria-labelledby="cta-titulo">
-    <div class="section-inner cta-inner animate-on-scroll">
+    <div class="section-inner cta-inner animate-on-scroll" appAnimateOnScroll>
         <div class="cta-text">
             <h2 id="cta-titulo">Pronto para começar?</h2>
             <p>A inscrição é gratuita e pode ser feita online. Nossa equipe entrará em contato para agendar uma visita.
             </p>
         </div>
         <div class="cta-actions">
-            <a routerLink="/contato" class="btn-hero-primary">
+            <a routerLink="/contato" class="btn-hero-primary" aria-label="Navegar para contatar a secretaria">
                 Fale com a Secretaria
             </a>
-            <a routerLink="/sobre" class="btn-hero-secondary">
+            <a routerLink="/sobre" class="btn-hero-secondary" aria-label="Ler mais detalhes e informações do instituto">
                 Saiba Mais
             </a>
         </div>
