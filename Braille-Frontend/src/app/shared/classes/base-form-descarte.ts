@@ -44,10 +44,8 @@ export function injectFormDescarte(isDirtyFn: () => boolean) {
 export abstract class BaseFormDescarte implements ComponenteComDescarte {
     protected confirmDialogService = inject(ConfirmDialogService);
     
-    // Otimização contra vazamento global em janelas sobrepostas
-    private destroyRef = inject(DestroyRef);
-
     constructor() {
+        const destroyRef = inject(DestroyRef);
         const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
             if (this.isFormDirty()) {
                 event.preventDefault();
@@ -60,7 +58,7 @@ export abstract class BaseFormDescarte implements ComponenteComDescarte {
         window.addEventListener('beforeunload', beforeUnloadHandler);
         
         // Remoção manual do Listener antes do DOM Element ser expurgado
-        this.destroyRef.onDestroy(() => {
+        destroyRef.onDestroy(() => {
             window.removeEventListener('beforeunload', beforeUnloadHandler);
         });
     }
