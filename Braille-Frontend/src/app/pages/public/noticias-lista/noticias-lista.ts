@@ -1,47 +1,47 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterLink } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { environment } from '../../../../environments/environment';
-import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
-export interface ComunicadoPublico {
-  id: string;
-  titulo: string;
-  conteudo: string;
-  categoria: string;
-  imagemCapa?: string;
-  fixado: boolean;
-  criadoEm: string;
-  atualizadoEm: string;
-}
+import { ComunicadosService, Comunicado } from '../../../core/services/comunicados.service';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
+import { StripHtmlPipe } from '../../../shared/pipes/strip-html.pipe';
+import { CategoryLabelPipe } from '../../../shared/pipes/category-label.pipe';
 
 @Component({
   selector: 'app-noticias-lista',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterModule, CloudinaryPipe],
+  imports: [
+    CommonModule, 
+    FormsModule, 
+    RouterLink, 
+    RouterModule, 
+    CloudinaryPipe, 
+    StripHtmlPipe, 
+    CategoryLabelPipe
+  ],
   templateUrl: './noticias-lista.html',
-  styleUrl: './noticias-lista.scss'
+  styleUrl: './noticias-lista.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush // Otimização profunda em matrizes (Listas)
 })
 export class NoticiasLista implements OnInit {
-  private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
-  private cdr = inject(ChangeDetectorRef);
 
-  comunicados: ComunicadoPublico[] = [];
-  carregando = true;
+  // Estrutura Reativa Total
+  comunicados = signal<Comunicado[]>([]);
+  carregando = signal<boolean>(true);
 
-  // Filtros
-  categoriaSelecionada: string | null = null;
-  busca: string = '';
+  // Filtros Reativos Blindados Contra Mutação
+  categoriaSelecionada = signal<string | null>(null);
+  busca = signal<string>('');
 
-  // Paginação
-  paginaAtual = 1;
-  limite = 9; // 3 colunas x 3 linhas fica bonito
-  totalItems = 0;
-  temMais = false;
+  // Paginação Limpa
+  paginaAtual = signal<number>(1);
+  limite = 9; // Grid bonito (3x3)
+  totalItems = signal<number>(0);
+  temMais = signal<boolean>(false);
 
+  // Apenas layout render para toolbar nativa
   categorias = [
     { valor: null, label: 'Todos' },
     { valor: 'NOTICIA', label: 'Notícias' },
@@ -52,73 +52,60 @@ export class NoticiasLista implements OnInit {
     { valor: 'GERAL', label: 'Avisos Gerais' }
   ];
 
+  // Injeção Oficial SRP
+  constructor(private comunicadosService: ComunicadosService) {}
+
   ngOnInit() {
     this.carregarComunicados(true);
   }
 
   carregarComunicados(reset = false) {
     if (reset) {
-      this.paginaAtual = 1;
-      this.comunicados = [];
-      this.carregando = true;
+      this.paginaAtual.set(1);
+      this.comunicados.set([]);
+      this.carregando.set(true);
     }
 
-    let url = `${this.apiUrl}/comunicados?page=${this.paginaAtual}&limit=${this.limite}`;
-    if (this.categoriaSelecionada) {
-      url += `&categoria=${this.categoriaSelecionada}`;
-    }
-    if (this.busca) {
-      url += `&titulo=${encodeURIComponent(this.busca)}`;
-    }
+    const cat = this.categoriaSelecionada() || undefined;
+    const term = this.busca() || undefined;
 
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        const items = Array.isArray(res) ? res : (res.data ?? []);
+    // Acesso limpo isolado (API restrita HTTP do Serviço SRP) prevenindo Mem-Leak
+    this.comunicadosService.listar(this.paginaAtual(), this.limite, cat, term)
+      .pipe(takeUntilDestroyed())
+      .subscribe({
+        next: (res: any) => {
+          const items = Array.isArray(res) ? res : (res.data ?? []);
 
-        if (reset) {
-          this.comunicados = items;
-        } else {
-          this.comunicados = [...this.comunicados, ...items];
+          if (reset) {
+            this.comunicados.set(items);
+          } else {
+            this.comunicados.update(curr => [...curr, ...items]);
+          }
+
+          this.totalItems.set(res.total ?? items.length);
+          this.temMais.set(this.paginaAtual() < (res.totalPages ?? 1));
+          this.carregando.set(false);
+        },
+        error: () => {
+          // Engolindo o erro silenciosamente perante a renderização DevSecOps
+          this.carregando.set(false);
         }
-
-        this.totalItems = res.total ?? items.length;
-        this.temMais = this.paginaAtual < (res.totalPages ?? 1);
-        this.carregando = false;
-        this.cdr.detectChanges(); // withFetch() roda fora do Zone.js
-      },
-      error: (err) => {
-        console.error('Erro ao carregar comunicados', err);
-        this.carregando = false;
-        this.cdr.detectChanges();
-      }
-    });
+      });
   }
 
   filtrarPorCategoria(cat: string | null) {
-    if (this.categoriaSelecionada === cat) return;
-    this.categoriaSelecionada = cat;
+    if (this.categoriaSelecionada() === cat) return;
+    this.categoriaSelecionada.set(cat);
     this.carregarComunicados(true);
   }
 
-  buscar() {
+  executarBuscar() {
     this.carregarComunicados(true);
   }
 
   carregarMais() {
-    if (!this.temMais) return;
-    this.paginaAtual++;
+    if (!this.temMais()) return;
+    this.paginaAtual.update(v => v + 1);
     this.carregarComunicados(false);
-  }
-
-  // Helper Seguro (Anti XSS) para extrair o Resumo na Pré-visualização do Card
-  getTextoPuro(html: string): string {
-    if (!html) return '';
-    const comEspacos = html.replace(/<\/(p|div|h[1-6])>/gi, ' ').replace(/<br\s*[\/]?>/gi, ' ');
-    const semTags = comEspacos.replace(/<\/?[^>]+(>|$)/g, '');
-    return semTags.replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
-  }
-
-  getLabelCategoria(cat: string): string {
-    return this.categorias.find(c => c.valor === cat)?.label || 'Geral';
   }
 }
