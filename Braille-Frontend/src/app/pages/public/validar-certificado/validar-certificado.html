@@ -2,67 +2,83 @@
   <div class="row justify-content-center">
     <div class="col-md-8 col-lg-6">
       
-      <div class="validar-card">
-        <div class="validar-header">
-          <i class="bi bi-shield-check icon-header"></i>
-          <h1>Validação de Certificado</h1>
+      <div class="validar-card" aria-labelledby="validador-certificado-heading">
+        <header class="validar-header">
+          <span class="material-symbols-rounded icon-header" aria-hidden="true">verified_user</span>
+          <h1 id="validador-certificado-heading">Validação de Certificado</h1>
           <p>Verifique a autenticidade de um certificado emitido pelo Instituto Luiz Braille.</p>
-        </div>
+        </header>
 
-        <form [formGroup]="form" (ngSubmit)="validar()" class="validar-form">
+        <form [formGroup]="form" (ngSubmit)="validar()" class="validar-form" aria-live="polite">
           <div class="form-group">
-            <label for="codigoInput" class="sr-only">Código do Certificado</label>
+            <label for="codigoInput" class="sr-only">Código Único do Certificado</label>
             <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-hash"></i></span>
-              <input type="text" id="codigoInput" formControlName="codigo" class="form-control form-control-lg text-center" 
-                     placeholder="Digite o código (Ex: D9E7F1A)" style="text-transform: uppercase;">
-              <button class="btn btn-primary btn-lg" type="submit" [disabled]="buscando">
-                @if (buscando) {
+              <span class="input-group-text" aria-hidden="true"><span class="material-symbols-rounded">tag</span></span>
+              
+              <!-- Componente Blindado com Validações Semânticas -->
+              <input type="text" id="codigoInput" formControlName="codigo" 
+                     class="form-control form-control-lg text-center" 
+                     placeholder="Digite o código (Ex: D9E7F1A)" 
+                     style="text-transform: uppercase;"
+                     [attr.aria-invalid]="form.get('codigo')?.invalid && form.get('codigo')?.touched"
+                     aria-describedby="codigo-erro">
+                     
+              <button class="btn btn-primary btn-lg" type="submit" [disabled]="buscando()"
+                      [attr.aria-busy]="buscando()"
+                      title="Procurar certificado no banco de dados">
+                @if (buscando()) {
                   <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span class="sr-only">Buscando autenticidade, por favor aguarde...</span>
                 } @else {
                   Validar
                 }
               </button>
             </div>
+            
+            <!-- ALERTA DE FORMULÁRIO -->
             @if (form.get('codigo')?.invalid && form.get('codigo')?.touched) {
-              <div class="text-danger mt-2 text-center">Informe um código de validação válido.</div>
+              <div id="codigo-erro" class="text-danger mt-2 text-center" role="alert" aria-live="assertive">
+                Informe um código de validação com pelo menos 5 caracteres válidos.
+              </div>
             }
           </div>
         </form>
 
-        <!-- Resultado SUCESSO -->
-        @if (resultadoValidacao && !erroValidacao) {
-          <div class="resultado-box success fade-in">
-            <div class="resultado-icon">
-              <i class="bi bi-check-circle-fill"></i>
+        <div aria-live="assertive" aria-atomic="true">
+          <!-- Resultado SUCESSO -->
+          @if (resultadoValidacao() && !erroValidacao()) {
+            <div class="resultado-box success fade-in" role="alert">
+              <div class="resultado-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">check_circle</span>
+              </div>
+              <div class="resultado-content">
+                <h3 class="success-title">Certificado Válido!</h3>
+                <p class="success-subtitle">Este documento foi oficialmente emitido pela nossa instituição.</p>
+                
+                <ul class="dados-lista">
+                  <li><strong>Emitido para:</strong> {{ resultadoValidacao().nome }}</li>
+                  <li><strong>Certificação:</strong> {{ resultadoValidacao().curso }}</li>
+                  <li><strong>Data de Emissão:</strong> {{ resultadoValidacao().data }}</li>
+                  <li><strong>Natureza:</strong> {{ resultadoValidacao().tipo === 'ACADEMICO' ? 'Certificação Acadêmica' : 'Honraria / Parceiro' }}</li>
+                </ul>
+              </div>
             </div>
-            <div class="resultado-content">
-              <h3 class="success-title">Certificado Válido!</h3>
-              <p class="success-subtitle">Este documento foi oficialmente emitido pela nossa instituição.</p>
-              
-              <ul class="dados-lista">
-                <li><strong>Emitido para:</strong> {{ resultadoValidacao.nome }}</li>
-                <li><strong>Certificação:</strong> {{ resultadoValidacao.curso }}</li>
-                <li><strong>Data de Emissão:</strong> {{ resultadoValidacao.data }}</li>
-                <li><strong>Natureza:</strong> {{ resultadoValidacao.tipo === 'ACADEMICO' ? 'Certificação Acadêmica' : 'Honraria / Parceiro' }}</li>
-              </ul>
-            </div>
-          </div>
-        }
+          }
 
-        <!-- Resultado ERRO -->
-        @if (erroValidacao) {
-          <div class="resultado-box danger fade-in">
-            <div class="resultado-icon">
-              <i class="bi bi-x-circle-fill"></i>
+          <!-- Resultado ERRO -->
+          @if (erroValidacao()) {
+            <div class="resultado-box danger fade-in" role="alert">
+              <div class="resultado-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">cancel</span>
+              </div>
+              <div class="resultado-content">
+                <h3 class="danger-title">Certificado Inválido ou Inexistente</h3>
+                <p>O código informado não consta em nossos registros de emissão automáticos. Verifique se digitou a credencial corretamente.</p>
+                <p class="small text-muted mb-0">Se você possui o documento impresso com este código, ele <strong>pode ser falso</strong> ou ter sido revogado por nossos administradores.</p>
+              </div>
             </div>
-            <div class="resultado-content">
-              <h3 class="danger-title">Certificado Inválido</h3>
-              <p>O código informado não consta em nossos registros de emissão. Verifique se digitou corretamente.</p>
-              <p class="small text-muted mb-0">Se você possui o documento impresso com este código, ele <strong>pode ser falso</strong> ou ter sido revogado.</p>
-            </div>
-          </div>
-        }
+          }
+        </div>
 
       </div>
 
