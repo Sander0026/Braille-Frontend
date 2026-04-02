@@ -1,5 +1,7 @@
+<!-- FLUXO REATIVO LIMPO - SUBSTITUIÇÃO DO *ngIf -->
+@if (urlVisualizadorPdf()) {
+<!-- ARIA Controls de segurança e foco em Popups -->
 <dialog 
-  *ngIf="urlVisualizadorPdf" 
   open
   class="mt-8 border border-gray-200 rounded-lg shadow-xl overflow-hidden bg-white w-full block"
   aria-modal="true" 
@@ -17,13 +19,16 @@
     </button>
   </header>
 
+  <!-- RENDERIZAÇÃO ISOLADA DO IFRAME (Sandboxed Frame) -->
   <div class="relative w-full" style="padding-top: 75%; min-height: 50vh;">
     <iframe 
-      [src]="urlVisualizadorPdf | safeUrl" 
+      [src]="urlVisualizadorPdf() | safeUrl" 
       class="absolute top-0 left-0 w-full h-full border-0 bg-gray-50"
       title="Iframe de Visualização de Arquivo PDF Externo"
-      sandbox="allow-scripts allow-same-origin allow-popups"> <!-- Segurança OWASP adicionada no iFrame -->
+      sandbox="allow-scripts allow-same-origin allow-popups"> 
+      <!-- OWASP: Sandbox restringe o frame contra vazamentos maliciosos limitando execuções top-level e submits -->
     </iframe>
   </div>
 
 </dialog>
+}

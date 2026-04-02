@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SafeUrlPipe } from '../../../core/pipes/safe-url.pipe';
 
@@ -6,37 +6,42 @@ import { SafeUrlPipe } from '../../../core/pipes/safe-url.pipe';
   selector: 'app-pdf-viewer',
   standalone: true,
   imports: [CommonModule, SafeUrlPipe],
-  templateUrl: './pdf-viewer.component.html'
+  templateUrl: './pdf-viewer.component.html',
+  styleUrls: ['./pdf-viewer.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush // Desbloqueando performance maxima de renderização
 })
 export class PdfViewerComponent {
   
-  private _rawUrl: string = '';
-  public urlVisualizadorPdf: string = '';
+  /**
+   * Entrada Funcional Type-Safe Integrada aos Signals.
+   * Totalmente retrocompatível com a injeção pai `[url]="..."`
+   */
+  url = input.required<string>();
 
   /**
-   * Setter reativo: Sempre que a URL de input mudar fora deste componente,
-   * ele cuidará de formatar, escapar (anti XSS/Injection) e re-engatilhar o parser do Google Viewer.
+   * Encapsulamento EventBus Nativo Substituto do antigo EventEmitter.
    */
-  @Input({ required: true }) set url(val: string) {
-    if (!val) {
-      this.urlVisualizadorPdf = '';
-      return;
-    }
+  closed = output<void>();
+
+  /**
+   * Setter Reativo Seguro e Cached.
+   * Elimina Shadow Updates do antigo `@Input() set url()` que disparavam renders paralelos.
+   * Contém proteção OWASP Sanitizante com o encodeURIComponent e Parser Automático.
+   */
+  urlVisualizadorPdf = computed<string>(() => {
+    const rawVal = this.url();
+    if (!rawVal) return '';
+
+    let urlCorrigida = rawVal;
     
-    this._rawUrl = val;
-    let urlCorrigida = val;
-    
-    // Normalize para PDF extensions para forçar leitura pelo Chrome/Google Viewer
+    // Normalize para extensões .pdf assegurando o disparo do Motor do Viewer do Google docs
     if (!urlCorrigida.toLowerCase().endsWith('.pdf')) {
       urlCorrigida += '.pdf';
     }
 
-    // Builder Restrito contra Prototype Pollution ou Bypass
-    this.urlVisualizadorPdf = `https://docs.google.com/viewer?url=${encodeURIComponent(urlCorrigida)}&embedded=true`;
-  }
-
-  // Permite comunicação com o Parent para encerrar o Modal via Acessibilidade ou Mouse
-  @Output() closed = new EventEmitter<void>();
+    // Gerador blindado
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(urlCorrigida)}&embedded=true`;
+  });
 
   onClose() {
     this.closed.emit();
