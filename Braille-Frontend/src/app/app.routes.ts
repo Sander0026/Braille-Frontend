@@ -26,12 +26,12 @@ export const routes: Routes = [
       },
       {
         path: 'noticias',
-        loadComponent: () => import('./pages/public/noticias-lista/noticias-lista').then(m => m.NoticiasLista),
+        loadComponent: () => import('./pages/public/noticias/noticias-lista/noticias-lista').then(m => m.NoticiasLista),
         title: 'Notícias e Comunicados — ILBES'
       },
       {
         path: 'noticias/:id',
-        loadComponent: () => import('./pages/public/noticia-detalhe/noticia-detalhe').then(m => m.NoticiaDetalhe),
+        loadComponent: () => import('./pages/public/noticias/noticia-detalhe/noticia-detalhe').then(m => m.NoticiaDetalhe),
         title: 'Notícia — Instituto Luiz Braille'
       },
       {
