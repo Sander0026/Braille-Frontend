@@ -1,8 +1,0 @@
-refactor(ui-button): delecao deadcode, transclusao modular srp e refatoracao tailwind via computed signals
-
-[Core UI / Estrutura SRP]
-- Liberação funcional do encapsulamento engessado do botão mediante injeção da flag de transclusão DOM `<ng-content>`, permitindo acoplamento atômico nativo de ícones material e nodes HTML dinâmicos lado-a-lado com sua tag de Label no mesmo fluxo de componente de marcação pai.
-
-[Arquitetura e Performance Extremas]
-- Expurgado para sempre os arquivos satélites não-compiláveis que a suíte angular (ng g c) deixou solto como Lixo de Repositório (`ui-button.html` e `.scss`).
-- Corte severo de reflow UI com a abstenção integral da diretiva pesada `[ngClass]`. Toda a cascata analítica de estilização do botão TailwindCSS passa por Signal Atômico Cached em um `computed()`. Mudanças na tela renderizam sem interações demoradas na árvore do Angular baseadas no destravamento de `OnPush`.
