@@ -1,0 +1,89 @@
+<a href="/noticias" class="voltar-link" aria-label="Voltar para todas as notícias">
+    <span class="material-symbols-rounded">arrow_back</span>
+    Voltar para as Notícias
+</a>
+
+<!-- ESTADO: CARREGANDO -->
+@if (carregando) {
+<article class="article-layout-standard ghost-article" aria-busy="true" aria-label="Carregando o corpo da notícia...">
+    <div class="article-container">
+        <div class="skeleton skeleton-title" style="width: 85%; height: 3rem; margin-bottom: 2rem;"></div>
+        <!-- Capa Fantasma -->
+        <div class="skeleton skeleton-img capa-fantasma"
+            style="height: 400px; width: 100%; border-radius: 12px; margin-bottom: 2rem;"></div>
+        <!-- Bloco de Texto (Editorial) -->
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 80%"></div>
+        <br>
+        <div class="skeleton skeleton-text" style="width: 100%"></div>
+        <div class="skeleton skeleton-text" style="width: 70%"></div>
+    </div>
+</article>
+}
+
+<!-- ESTADO: ERRO -->
+@else if (erro) {
+<div class="error-state" role="alert">
+    <span class="material-symbols-rounded" aria-hidden="true">error_outline</span>
+    <h2>Notícia não encontrada</h2>
+    <p>{{ erro }}</p>
+    <a href="/noticias" class="btn-voltar">← Ir para todas as notícias</a>
+</div>
+}
+
+<!-- ESTADO: NOTÍCIA CARREGADA -->
+@else if (noticia) {
+<article class="article-layout-standard" aria-labelledby="titulo-noticia">
+    <div class="article-container">
+        
+        <!-- Metadados superiores -->
+        <header class="article-header">
+            <div class="meta-topo">
+                <span class="badge-categoria" [attr.data-categoria]="noticia.categoria">
+                    {{ getLabelCategoria(noticia.categoria) }}
+                </span>
+                @if (noticia.fixado) {
+                <span class="badge-fixado" title="Comunicado fixado">
+                    <span class="material-symbols-rounded" aria-hidden="true">push_pin</span> Importante
+                </span>
+                }
+            </div>
+
+            <h1 id="titulo-noticia" class="titulo">{{ noticia.titulo }}</h1>
+
+            <div class="meta-info">
+                <time [attr.datetime]="noticia.criadoEm" class="data">
+                    <span class="material-symbols-rounded" aria-hidden="true">calendar_today</span>
+                    Publicado em {{ noticia.criadoEm | date:'dd \'de\' MMMM \'de\' yyyy' }}
+                </time>
+            </div>
+        </header>
+
+        <!-- CAPA -->
+        @if (noticia.imagemCapa) {
+        <figure class="article-featured-image">
+            <img [src]="noticia.imagemCapa | cloudinary" [alt]="'Imagem ilustrativa do artigo: ' + noticia.titulo" loading="lazy">
+        </figure>
+        }
+
+        <!-- DIVISOR DECORATIVO -->
+        <hr class="divisor" aria-hidden="true" />
+
+        <!-- CONTEÚDO RICO (Quill HTML) -->
+        <div class="article-body ql-content" [innerHTML]="noticia.conteudo | safeHtml"
+            aria-label="Conteúdo completo da notícia">
+        </div>
+
+        <!-- RODAPÉ DO ARTIGO -->
+        <footer class="article-footer">
+            <a href="/noticias" class="btn-voltar-rodape">
+                <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+                Voltar para a lista de notícias
+            </a>
+        </footer>
+
+    </div>
+</article>
+}
