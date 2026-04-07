@@ -10,7 +10,7 @@ export interface Environment {
   apiUrl: string;
   /**
    * DSN do cliente Sentry.io para rastreamento de erros.
-   * ⚠️ OBRIGATÓRIO em produção — substitua antes do deploy.
+  * OBRIGATÓRIO em produção — substitua antes do deploy.
    * Deixe vazio ('') para desabilitar o Sentry neste ambiente.
    */
   sentryDsn: string;
@@ -21,6 +21,6 @@ export interface Environment {
 export const environment: Environment = {
   production: false,
   apiUrl: '/api', // Proxy local → redireciona para localhost:3000 via proxy.conf.json
-  sentryDsn: '', // ⚠️ Deixe vazio em DEV — nunca use o DSN de produção aqui
+  sentryDsn: '', // Deixe vazio em DEV — nunca use o DSN de produção aqui
   sentryEnv: 'development',
 };

@@ -4,7 +4,7 @@
   @if (mensagemFeedback) {
   <div class="feedback-banner" [class.sucesso]="tipoFeedback === 'sucesso'" [class.erro]="tipoFeedback === 'erro'"
     role="alert">
-    <span class="banner-icon">{{ tipoFeedback === 'sucesso' ? '✅' : '⚠️' }}</span>
+    <span class="banner-icon material-symbols-rounded">{{ tipoFeedback === 'sucesso' ? 'check_circle' : 'warning' }}</span>
     {{ mensagemFeedback }}
   </div>
   }

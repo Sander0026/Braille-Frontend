@@ -814,7 +814,7 @@
                         <label>Arquivo (PDF / Imagem)</label>
                         <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
                             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
-                            {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo anexado ✔' : 'Selecionar Arquivo') }}
+                            {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo anexado' : 'Selecionar Arquivo') }}
                             <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" />
                         </label>
                         @if (novoAtestado.arquivoUrl) {
@@ -955,7 +955,7 @@
                         <label>Documento (PDF / Imagem) <span class="required" aria-hidden="true">*</span></label>
                         <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
                             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
-                            {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado ✔' : 'Selecionar Arquivo') }}
+                            {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado' : 'Selecionar Arquivo') }}
                             <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" />
                         </label>
                         @if (novoLaudo.arquivoUrl) {
@@ -1212,7 +1212,7 @@
         <button class="btn btn-primary btn-sm"
                 (click)="imprimirFichaModal()"
                 aria-label="Imprimir ou salvar como PDF">
-          🖨️ Imprimir / PDF
+                    Imprimir / PDF
         </button>
         <button class="btn btn-secondary btn-sm"
                 (click)="fecharModalFicha()"
