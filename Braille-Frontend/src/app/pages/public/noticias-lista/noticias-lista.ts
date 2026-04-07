@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { environment } from '../../../../environments/environment';
 import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
+import { SiteConfigService } from '../../../core/services/site-config';
 
 export interface ComunicadoPublico {
   id: string;
@@ -28,9 +29,11 @@ export class NoticiasLista implements OnInit {
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl;
   private cdr = inject(ChangeDetectorRef);
+  private siteConfig = inject(SiteConfigService);
 
   comunicados: ComunicadoPublico[] = [];
   carregando = true;
+  fachadaUrl: string = '';
 
   // Filtros
   categoriaSelecionada: string | null = null;
@@ -53,6 +56,7 @@ export class NoticiasLista implements OnInit {
   ];
 
   ngOnInit() {
+    this.carregarFachada();
     this.carregarComunicados(true);
   }
 
@@ -118,5 +122,23 @@ export class NoticiasLista implements OnInit {
 
   getLabelCategoria(cat: string): string {
     return this.categorias.find(c => c.valor === cat)?.label || 'Geral';
+  }
+
+  carregarFachada() {
+    const configs = this.siteConfig.getConfig('fachadaUrl');
+    if (configs) {
+      this.fachadaUrl = configs;
+      this.cdr.markForCheck();
+    } else {
+      // Se ainda não carregou, inscreve para receber quando carregar
+      this.siteConfig.configs$.subscribe({
+        next: (confs) => {
+          if (confs && confs['fachadaUrl']) {
+            this.fachadaUrl = confs['fachadaUrl'];
+            this.cdr.markForCheck();
+          }
+        }
+      });
+    }
   }
 }

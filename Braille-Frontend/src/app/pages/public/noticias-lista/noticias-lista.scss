@@ -13,6 +13,7 @@
 $color-primary: var(--color-primary, #f5c800);
 $color-primary-dark: var(--color-primary-dark, #dcb300);
 $color-text-main: var(--color-text-main, #1a1a00);
+$white: #ffffff;
 $gray-50: #f9fafb;
 $gray-100: #f3f4f6;
 $gray-200: #e5e7eb;
@@ -40,10 +41,33 @@ $transition: 0.2s ease-in-out;
 // HEADER DA PÁGINA
 // ══════════════════════════════════════════════════════════════
 .page-header {
-    background: #1a1a00;
+    background-color: #1a1a00;
+    background-image: url('/fachada_ilbes.png');
     color: white;
     padding: 4rem 0;
     text-align: center;
+    position: relative;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            160deg,
+            rgba(0, 0, 0, 0.68) 0%,
+            rgba(0, 0, 0, 0.52) 100%
+        );
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .container {
+        position: relative;
+        z-index: 2;
+    }
 
     .eyebrow {
         font-size: 0.72rem;
@@ -63,11 +87,12 @@ $transition: 0.2s ease-in-out;
     }
 
     .subtitle {
-        font-size: 1rem;
-        color: rgba(255, 255, 255, 0.7);
+        font-size: 1.1rem;
+        color: color.change($white, $alpha: .9);
         line-height: 1.7;
-        margin: 0 auto;
+        margin: 0 auto 2.5rem;
         max-width: 600px;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     }
 }
 

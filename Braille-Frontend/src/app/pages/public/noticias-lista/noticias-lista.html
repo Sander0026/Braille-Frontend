@@ -1,4 +1,4 @@
-<header class="page-header" aria-labelledby="page-title">
+<header class="page-header" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null" aria-labelledby="page-title">
     <div class="container">
         <p class="eyebrow" aria-hidden="true">Mural de Avisos</p>
         <h1 id="page-title" class="title">Notícias & Comunicados</h1>

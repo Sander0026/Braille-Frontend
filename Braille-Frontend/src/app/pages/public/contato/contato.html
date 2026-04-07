@@ -1,5 +1,5 @@
 <!-- ══════════ CONTATO — HERO ══════════ -->
-<section class="page-hero" aria-labelledby="contato-titulo">
+<section class="page-hero" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null" aria-labelledby="contato-titulo">
     <div class="page-hero-inner" *ngIf="contatoConfig$ | async as config">
         <p class="page-eyebrow">Fale Conosco</p>
         <h1 id="contato-titulo" class="page-hero-title">Entre em contato</h1>

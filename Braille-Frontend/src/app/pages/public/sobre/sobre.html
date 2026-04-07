@@ -1,5 +1,5 @@
 <!-- ══════════ SOBRE — HERO ══════════ -->
-<section class="page-hero" aria-labelledby="sobre-titulo">
+<section class="page-hero" [style.backgroundImage]="fachadaUrl ? 'url(' + (fachadaUrl | cloudinary) + ')' : null" aria-labelledby="sobre-titulo">
     <div class="page-hero-inner animate-on-scroll">
         <p class="page-eyebrow">{{ hero.eyebrow }}</p>
         <h1 id="sobre-titulo" class="page-hero-title">{{ hero.titulo }}</h1>

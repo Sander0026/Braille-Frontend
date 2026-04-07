@@ -1,9 +1,10 @@
-import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { filter, take } from 'rxjs/operators';
 import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 interface TimelineItem { ano: string; titulo: string; descricao: string; }
 interface EquipeMembro { emoji: string; cargo: string; descricao: string; }
@@ -42,7 +43,7 @@ const DEFAULTS = {
 @Component({
     selector: 'app-sobre',
     standalone: true,
-    imports: [CommonModule, RouterLink, SafeHtmlPipe],
+    imports: [CommonModule, RouterLink, SafeHtmlPipe, CloudinaryPipe],
     templateUrl: './sobre.html',
     styleUrl: './sobre.scss',
 })
@@ -52,8 +53,9 @@ export class Sobre implements OnInit, AfterViewInit {
     timeline: TimelineItem[] = [...DEFAULTS.timeline];
     equipe: EquipeMembro[] = [...DEFAULTS.equipe];
     cta = { ...DEFAULTS.cta };
+    fachadaUrl: string = '';
 
-    constructor(private siteConfig: SiteConfigService, private el: ElementRef) { }
+    constructor(private siteConfig: SiteConfigService, private el: ElementRef, private cdr: ChangeDetectorRef) { }
 
     ngAfterViewInit(): void {
         const observer = new IntersectionObserver(
@@ -65,6 +67,7 @@ export class Sobre implements OnInit, AfterViewInit {
     }
 
     ngOnInit(): void {
+        this.carregarFachada();
         this.siteConfig.secoes$.pipe(
             filter(s => Object.keys(s).length > 0),
             take(1)
@@ -104,5 +107,22 @@ export class Sobre implements OnInit, AfterViewInit {
             const cta = secoes['sobre_cta'];
             if (cta?.['titulo']) this.cta = { titulo: cta['titulo'], descricao: cta['descricao'] || DEFAULTS.cta.descricao };
         });
+    }
+
+    carregarFachada() {
+        const configs = this.siteConfig.getConfig('fachadaUrl');
+        if (configs) {
+            this.fachadaUrl = configs;
+            this.cdr.markForCheck();
+        } else {
+            this.siteConfig.configs$.subscribe({
+                next: (confs) => {
+                    if (confs && confs['fachadaUrl']) {
+                        this.fachadaUrl = confs['fachadaUrl'];
+                        this.cdr.markForCheck();
+                    }
+                }
+            });
+        }
     }
 }
