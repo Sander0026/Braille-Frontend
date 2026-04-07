@@ -1,0 +1,19 @@
+refactor(utils): modernizacao para funcoes puras, unknown type-safe e consts exportadas
+
+[audit-diff.util]
+- Classe AuditDiffUtil com metodos estaticos convertida para funcoes puras exportadas (padrao TS moderno, mais tree-shakeable e testavel sem instanciar objetos).
+- Substituicao de `any` por `unknown` com type guard `isIsoDateString` — elimina code smell critico do SonarQube e ativa checagem de tipos real.
+- AUDIT_FIELD_LABELS e AUDIT_IGNORED_FIELDS extraidas como consts exportadas (SRP: separacao de dados de configuracao da logica de transformacao).
+- Uso de ReadonlySet para AUDIT_IGNORED_FIELDS — imutabilidade garantida em runtime.
+- AuditDiffUtil mantido como alias deprecated para Zero Regressions em consumers existentes.
+
+[html-sanitizer.util]
+- HtmlSanitizerUtil convertida para funcao pura `generatePreview` exportada diretamente.
+- replace literal &nbsp; substituido por replaceAll (SonarQube: menor overhead sem compilacao de regex).
+- Default de `max` ajustado de 15 (muito curto para previews reais) para 150 caracteres.
+- HtmlSanitizerUtil mantido como alias deprecated.
+
+[masks.util]
+- MasksUtil com metodos estaticos convertida para 3 funcoes puras exportadas.
+- Indentacao inconsistente (2/4 espacos misturados) corrigida para padrao uniforme de 2 espacos.
+- MasksUtil mantido como alias deprecated para Zero Regressions.
