@@ -239,3 +239,63 @@ $gray-900: #1a1a1a;
         transform: translateY(-2px);
     }
 }
+
+// ── Alto Contraste ────────────────────────────────────────
+:host-context(html.alto-contraste) {
+    .content-section {
+        background: $black !important;
+
+        .content-title {
+            color: $primary !important;
+        }
+
+        .section-label {
+            color: $primary !important;
+        }
+
+        .content-text p {
+            color: $primary !important;
+        }
+    }
+
+    .wave-sep svg path {
+        fill: $black !important;
+    }
+
+    .equipe-section {
+        background: $black !important;
+
+        .section-title {
+            color: $primary !important;
+        }
+
+        .section-subtitle {
+            color: $primary !important;
+        }
+
+        .equipe-card {
+            background: $black !important;
+            border: 1px solid $primary !important;
+
+            h3 {
+                color: $primary !important;
+            }
+
+            p {
+                color: $primary !important;
+            }
+        }
+    }
+
+    .sobre-cta {
+        background: $black !important;
+
+        h2 {
+            color: $primary !important;
+        }
+
+        p {
+            color: $primary !important;
+        }
+    }
+}
