@@ -239,3 +239,28 @@ $gray-900: #1a1a1a;
         transform: translateY(-2px);
     }
 }
+
+// ── Separador entre seções (default) ───────────────────────
+.wave-sep {
+    line-height: 0;
+
+    svg {
+        display: block;
+        width: 100%;
+    }
+}
+
+// ── Alto contraste: preto sólido entre seções ──────────────
+:host-context(html.alto-contraste) {
+    .page-hero,
+    .content-section,
+    .wave-sep,
+    .equipe-section,
+    .wave-sep svg {
+        background: #000 !important;
+    }
+
+    .wave-sep svg path {
+        fill: #000 !important;
+    }
+}

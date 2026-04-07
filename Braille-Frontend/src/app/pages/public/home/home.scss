@@ -1153,3 +1153,23 @@ $transition: 250ms ease;
         }
     }
 }
+
+// ─────────────────────────────────────────────────────────────
+// ALTO CONTRASTE (HOME): remover vazios claros entre seções
+// ─────────────────────────────────────────────────────────────
+:host-context(html.alto-contraste) {
+    .sobre,
+    .oficinas,
+    .depoimentos,
+    .wave-transition,
+    .wave-transition svg,
+    .wave-transition-double,
+    .wave-transition-double svg {
+        background: #000 !important;
+    }
+
+    .wave-transition svg path,
+    .wave-transition-double svg path {
+        fill: #000 !important;
+    }
+}
