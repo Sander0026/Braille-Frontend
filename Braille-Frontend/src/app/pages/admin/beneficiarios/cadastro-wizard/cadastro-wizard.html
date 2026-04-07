@@ -12,10 +12,13 @@
 
   <!-- ====== CABEÇALHO + BARRA DE PROGRESSO ====== -->
   <header class="wizard-header">
-    <h1>{{ isModoEdicao ? 'Editar Aluno' : 'Cadastro de Alunos (PcD Visual)' }}</h1>
+    <h1>Cadastro de Alunos (PcD Visual)</h1>
     <p>Preencha as informações do aluno. Etapa <strong>{{ passoAtual }}</strong> de 4.</p>
 
-    <progress max="4" [value]="passoAtual" aria-label="Progresso: etapa atual"></progress>
+    <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="passoAtual" aria-valuemin="1" aria-valuemax="4"
+      [attr.aria-label]="'Progresso: etapa ' + passoAtual + ' de 4'">
+      <div class="progress-fill" [style.width.%]="(passoAtual / 4) * 100"></div>
+    </div>
 
     <!-- Indicadores de passo -->
     <div class="steps-indicator" aria-hidden="true">
@@ -47,13 +50,13 @@
       </div>
 
       <div class="form-group" style="margin-bottom: 1.5rem">
-        <label for="fotoUpload" class="form-label">Foto 3x4 <span class="optional-badge">opcional</span></label>
+        <label class="form-label">Foto 3x4 <span class="optional-badge">opcional</span></label>
         <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
-          <label for="fotoUpload" class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">photo_camera</span>
             Selecionar Foto
+            <input type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFotoSelecionada($event)" style="display: none;" />
           </label>
-          <input id="fotoUpload" type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFotoSelecionada($event)" style="display: none;" />
           <span class="file-name" *ngIf="arquivoFotoSelecionado">{{ arquivoFotoSelecionado.name }}</span>
         </div>
         <p class="helper-text" style="margin-top: 0.35rem;">
@@ -62,13 +65,13 @@
       </div>
 
       <div class="form-group" style="margin-bottom: 1.5rem">
-        <label for="termoUpload" class="form-label">Termo de Consentimento (LGPD) <span class="optional-badge">opcional</span></label>
+        <label class="form-label">Termo de Consentimento (LGPD) <span class="optional-badge">opcional</span></label>
         <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
-          <label for="termoUpload" class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+          <label class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span>
             Selecionar PDF
+            <input type="file" accept=".pdf" (change)="onTermoSelecionado($event)" style="display: none;" />
           </label>
-          <input id="termoUpload" type="file" accept=".pdf" (change)="onTermoSelecionado($event)" style="display: none;" />
           <span class="file-name" *ngIf="arquivoTermoSelecionado">{{ arquivoTermoSelecionado.name }}</span>
         </div>
         <p class="helper-text" style="margin-top: 0.35rem;">O arquivo ficará disponível no perfil do aluno. Pode ser anexado depois do cadastro.</p>
@@ -109,7 +112,7 @@
           <span class="error-text" role="alert">Preencha pelo menos o CPF ou o RG.</span>
         }
         @if (cpfStatus === 'verificando' || rgStatus === 'verificando') {
-          <output aria-live="polite" class="helper-text">Verificando documentos...</output>
+          <span class="helper-text" role="status" aria-live="polite">Verificando documentos...</span>
         }
         @if (cpfStatus === 'ativo' && cpfConflito) {
           <span class="error-text" role="alert" aria-live="assertive">
@@ -194,7 +197,7 @@
           <label for="cep" class="form-label">CEP <span class="required" aria-hidden="true">*</span></label>
           <input type="tel" inputmode="numeric" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
             [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9"
-            autocomplete="off">
+            autocomplete="postal-code">
           @if (isCampoInvalido('enderecoLocalizacao', 'cep')) {
           <span class="error-text" role="alert">Informe um CEP válido (8 dígitos).</span>
           }
@@ -205,7 +208,7 @@
               aria-hidden="true">*</span></label>
           <input type="text" id="rua" formControlName="rua" class="form-input"
             [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')"
-            placeholder="Preenchido automaticamente pelo CEP" autocomplete="off">
+            placeholder="Preenchido automaticamente pelo CEP" autocomplete="street-address">
           @if (isCampoInvalido('enderecoLocalizacao', 'rua')) {
           <span class="error-text" role="alert">A rua é obrigatória.</span>
           }
@@ -478,24 +481,20 @@
         Avançar →
       </button>
       <!-- Anúncio ao leitor de tela quando o passo tem erros -->
-      <output id="wizard-validacao-hint" class="sr-only" aria-live="polite">
+      <span id="wizard-validacao-hint" class="sr-only" aria-live="polite" role="status">
         @if (!cadastroForm.get(getGroupName(passoAtual))?.valid) {
           Preencha todos os campos obrigatórios desta etapa para continuar.
         }
-      </output>
+      </span>
       }
 
       @if (passoAtual === 4) {
-      <div style="display:flex; gap: 0.75rem;">
-        @if (isModoEdicao) {
-          <button type="button" class="btn btn-secondary" (click)="emitirCancelamento()">Cancelar Edição</button>
-        }
-        <button type="submit" class="btn btn-primary" [disabled]="cadastroForm.invalid || isSalvando">
-          @if (isSalvando) { <span class="loading-spinner" aria-hidden="true"
-            style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> Salvando... }
-          @else { {{ isModoEdicao ? 'Salvar Edição' : 'Concluir Cadastro' }} }
-        </button>
-      </div>
+      <button type="submit" class="btn btn-primary" [disabled]="cadastroForm.invalid || isSalvando"
+        aria-label="Salvar cadastro do aluno">
+        @if (isSalvando) { <span class="loading-spinner" aria-hidden="true"
+          style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> Salvando... }
+        @else { Salvar Cadastro }
+      </button>
       }
     </footer>
 
@@ -504,8 +503,9 @@
 
 <!-- ── Modal de Reativação de Aluno ──────────────────────────────── -->
 @if (modalReativacao && dadosReativacao) {
-<dialog open class="modal-reativacao-overlay" (keydown.escape)="cancelarReativacao()" (click)="cancelarReativacao()" aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-reativacao-box" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<div class="modal-reativacao-overlay" (click)="cancelarReativacao()" role="dialog" aria-modal="true"
+  aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-reativacao-box" (click)="$event.stopPropagation()">
 
     <div class="modal-reativ-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -539,5 +539,5 @@
     </div>
 
   </div>
-</dialog>
+</div>
 }

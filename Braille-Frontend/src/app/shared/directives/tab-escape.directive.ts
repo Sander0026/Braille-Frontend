@@ -20,7 +20,7 @@ export class TabEscapeDirective {
   private readonly platformId = inject(PLATFORM_ID);
 
   onKeydown(event: KeyboardEvent): void {
-    // 🔴 CORREÇÃO CRÍTICA: document não existe em SSR (Node.js). 
+    // CORREÇÃO CRÍTICA: document não existe em SSR (Node.js). 
     // Sem esta guarda, ativar SSR derrubaria o servidor imediatamente.
     if (!isPlatformBrowser(this.platformId)) return;
     if (event.key !== 'Tab') return;

@@ -151,7 +151,7 @@ $transition: 200ms ease;
     padding: 0.875rem 1.25rem;
     border-top: 1px solid $gray-100;
     background: $gray-100;
-    flex-wrap: wrap; // 👉 Essencial para os novos botões caberem no mobile
+    flex-wrap: wrap; // Essencial para os novos botões caberem no mobile
 }
 
 // ── Badges ─────────────────────────────────────────────────
@@ -818,4 +818,4 @@ $transition: 200ms ease;
   &:hover {
     border-color: $gray-400;
   }
-}
+}

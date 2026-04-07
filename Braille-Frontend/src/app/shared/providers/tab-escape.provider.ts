@@ -11,10 +11,10 @@ import { isPlatformBrowser } from '@angular/common';
  * Move o foco para o próximo/anterior elemento focável sem prender o usuário.
  * WCAG 2.1 SC 2.1.1 (Teclado) e SC 2.1.2 (Sem armadilha de teclado).
  *
- * ⚠️ SINGLETON: Inclua apenas UMA vez no `app.config.ts`.
+ * SINGLETON: Inclua apenas UMA vez no `app.config.ts`.
  *    O provider contém proteção interna contra registros duplicados.
  *
- * ✅ SSR-SAFE: O listener é registrado apenas em ambientes browser.
+ * SSR-SAFE: O listener é registrado apenas em ambientes browser.
  */
 
 /** Flag singleton: garante que o listener seja registrado apenas uma vez */
@@ -41,7 +41,7 @@ function getFocusableElements(): HTMLElement[] {
 }
 
 function registerTabEscape(): void {
-  // 🔴 CORREÇÃO CRÍTICA: document não existe em SSR (Node.js).
+  // CORREÇÃO CRÍTICA: document não existe em SSR (Node.js).
   // Verificado via flag singleton para evitar registros duplicados acidentais.
   if (tabEscapeRegistered) return;
   tabEscapeRegistered = true;

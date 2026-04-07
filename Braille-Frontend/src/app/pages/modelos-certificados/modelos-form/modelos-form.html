@@ -163,7 +163,7 @@
           @if (isFieldInvalid('textoTemplate')) { <span class="error-text" role="alert">O texto deve ter pelo menos 20 caracteres.</span> }
         </div>
         <p style="font-size:0.8rem; color:#94a3b8; margin-top: 0.5rem;" aria-live="polite">
-          💡 Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
+          Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
         </p>
       </fieldset>
     </div>
@@ -207,7 +207,7 @@
             <!-- Card 1: Texto Principal -->
             <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
               <div style="background:#eff6ff; padding:0.5rem 0.75rem; border-bottom:1px solid #bfdbfe;">
-                <h6 style="margin:0; font-weight:700; color:#1d4ed8; font-size:0.8rem;">🔵 Texto Principal</h6>
+                <h6 style="margin:0; font-weight:700; color:#1d4ed8; font-size:0.8rem;">Texto Principal</h6>
               </div>
               <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
                 <div>
@@ -218,7 +218,7 @@
                       <button type="button" aria-label="Alinhar à esquerda" (click)="setTextAlign('left')"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'left' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'left' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Esquerda">⬅</button>
+                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Esquerda">←</button>
                       <button type="button" aria-label="Alinhar ao centro" (click)="setTextAlign('center')"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'center' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'center' ? '#fff' : '#374151'"
@@ -226,7 +226,7 @@
                       <button type="button" aria-label="Alinhar à direita" (click)="setTextAlign('right')"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'right' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'right' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Direita">➡</button>
+                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Direita">→</button>
                       <button type="button" aria-label="Texto justificado" (click)="setTextAlign('justify')"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'justify' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'justify' ? '#fff' : '#374151'"
@@ -276,7 +276,7 @@
             <!-- Card 2: Nome do Aluno -->
             <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
               <div style="background:#faf5ff; padding:0.5rem 0.75rem; border-bottom:1px solid #e9d5ff;">
-                <h6 style="margin:0; font-weight:700; color:#7c3aed; font-size:0.8rem;">🟣 Nome do Participante</h6>
+                <h6 style="margin:0; font-weight:700; color:#7c3aed; font-size:0.8rem;">Nome do Participante</h6>
               </div>
               <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
                 <div>
@@ -319,7 +319,7 @@
             <!-- Card 3: Assinaturas -->
             <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
               <div style="background:#f0fdf4; padding:0.5rem 0.75rem; border-bottom:1px solid #bbf7d0;">
-                <h6 style="margin:0; font-weight:700; color:#15803d; font-size:0.8rem;">🟢 Assinaturas</h6>
+                <h6 style="margin:0; font-weight:700; color:#15803d; font-size:0.8rem;">Assinaturas</h6>
               </div>
               <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
                 <div>
@@ -343,7 +343,7 @@
             <!-- Card 4: QR Code -->
             <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
               <div style="background:#fff7ed; padding:0.5rem 0.75rem; border-bottom:1px solid #fed7aa;">
-                <h6 style="margin:0; font-weight:700; color:#c2410c; font-size:0.8rem;">🟠 Autenticidade (QR Code)</h6>
+                <h6 style="margin:0; font-weight:700; color:#c2410c; font-size:0.8rem;">Autenticidade (QR Code)</h6>
               </div>
               <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
                 <div>
@@ -361,7 +361,7 @@
         </div><!-- /if previewBaseUrl -->
 
         <div *ngIf="!previewBaseUrl()" style="padding: 3rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b;" role="alert">
-          ⚠️ Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
+          Atenção: Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
         </div>
       </fieldset>
     </div>
@@ -388,7 +388,7 @@
                 class="btn btn-success"
                 [disabled]="isSalvando()"
                 style="background: #16a34a; border-color: #16a34a; color: #fff; padding: 0.75rem 2.5rem; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);">
-          {{ isSalvando() ? 'Salvando Alterações...' : '✅ Finalizar e Salvar Modelo' }}
+          {{ isSalvando() ? 'Salvando Alterações...' : 'Finalizar e Salvar Modelo' }}
         </button>
       </div>
     </div>

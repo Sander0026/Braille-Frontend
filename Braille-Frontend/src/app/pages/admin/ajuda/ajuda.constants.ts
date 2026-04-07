@@ -54,12 +54,12 @@ export const MANUAIS_AJUDA: ManualCard[] = [
 ];
 
 export const TECNOLOGIAS_SISTEMA: TecnologiaItem[] = [
-  { nome: 'Angular 19', icon: '🅰️', descricao: 'Frontend' },
-  { nome: 'NestJS', icon: '🐈', descricao: 'Backend API' },
-  { nome: 'PostgreSQL + Neon', icon: '🐘', descricao: 'Banco de Dados' },
-  { nome: 'Cloudinary', icon: '☁️', descricao: 'Armazenamento de Arquivos' },
+  { nome: 'Angular 19', icon: 'code', descricao: 'Frontend' },
+  { nome: 'NestJS', icon: 'api', descricao: 'Backend API' },
+  { nome: 'PostgreSQL + Neon', icon: 'database', descricao: 'Banco de Dados' },
+  { nome: 'Cloudinary', icon: 'cloud', descricao: 'Armazenamento de Arquivos' },
   { nome: 'Vercel', icon: '▲', descricao: 'Hospedagem Frontend' },
-  { nome: 'Render.com', icon: '🌐', descricao: 'Hospedagem Backend' },
+  { nome: 'Render.com', icon: 'language', descricao: 'Hospedagem Backend' },
 ];
 
 export const EQUIPE_SISTEMA: EquipeItem[] = [

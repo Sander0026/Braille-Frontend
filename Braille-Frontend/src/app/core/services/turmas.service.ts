@@ -145,12 +145,12 @@ export class TurmasService {
     }
 
     cancelar(id: string): Observable<Turma> {
-        this.limparCache(); // 👉 CORREÇÃO 2
-        return this.http.patch<Turma>(`${this.url}/${id}/cancelar`, {}); // 👉 CORREÇÃO 1
+        this.limparCache(); // CORREÇÃO 2
+        return this.http.patch<Turma>(`${this.url}/${id}/cancelar`, {}); // CORREÇÃO 1
     }
 
     concluir(id: string): Observable<Turma> {
-        this.limparCache(); // 👉 CORREÇÃO 2
-        return this.http.patch<Turma>(`${this.url}/${id}/concluir`, {}); // 👉 CORREÇÃO 1
+        this.limparCache(); // CORREÇÃO 2
+        return this.http.patch<Turma>(`${this.url}/${id}/concluir`, {}); // CORREÇÃO 1
     }
 }

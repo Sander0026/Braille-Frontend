@@ -1,6 +1,6 @@
 <div class="public-shell">
   <!-- Ponto Crítico de Acessibilidade (WCAG): Foco garantido e off-screen by default -->
-  <a href="#conteudo-principal" class="skip-to-content" aria-label="Pular navegação do cabeçalho e ir direto ao conteúdo">Ir para o conteúdo principal</a>
+  <a href="#main-content" class="skip-to-content" aria-label="Pular navegação do cabeçalho e ir direto ao conteúdo">Ir para o conteúdo principal</a>
 
   <!-- Menu Control Signal Bound via () -->
   <app-header 
@@ -11,17 +11,19 @@
   </app-header>
 
   <!-- Section semantica base e alvo da ancora de acessibilidade -->
-  <main id="conteudo-principal" tabindex="-1">
+  <main id="main-content" tabindex="-1">
     <router-outlet></router-outlet>
   </main>
 
   <!-- ── Floating UI Component ── -->
-  <app-floating-cta 
-    path="/contato" 
-    label="Fale Conosco" 
-    icon="chat" 
-    ariaLabel="Abrir formulario de fale conosco">
-  </app-floating-cta>
+  <aside class="floating-cta-region" aria-label="Ações rápidas">
+    <app-floating-cta 
+      path="/contato" 
+      label="Fale Conosco" 
+      icon="chat" 
+      ariaLabel="Abrir formulario de fale conosco">
+    </app-floating-cta>
+  </aside>
 
   <app-footer theme="public"></app-footer>
 </div><!-- /.public-shell -->

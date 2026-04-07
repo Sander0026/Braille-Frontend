@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, DestroyRef, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -48,6 +48,7 @@ export class Home implements OnInit {
   missaoConfig$: Observable<any>;
 
   private apiUrl = environment.apiUrl;
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
     private http: HttpClient,
@@ -66,21 +67,21 @@ export class Home implements OnInit {
     );
 
     // Inscrições atadas ao LifeCycle (Limpeza automática através de takeUntilDestroyed)
-    this.siteConfig.configs$.pipe(takeUntilDestroyed()).subscribe(configs => {
+  this.siteConfig.configs$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(configs => {
       if (configs && configs['fachadaUrl']) {
          this.fachadaUrl.set(configs['fachadaUrl']);
       }
     });
 
-    this.siteConfig.getSecao('oficinas').pipe(takeUntilDestroyed()).subscribe(dados => {
+  this.siteConfig.getSecao('oficinas').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(dados => {
       this.safeParseJsonSignal(dados, this.oficinas);
     });
 
-    this.siteConfig.getSecao('depoimentos').pipe(takeUntilDestroyed()).subscribe(dados => {
+  this.siteConfig.getSecao('depoimentos').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(dados => {
       this.safeParseJsonSignal(dados, this.depoimentos);
     });
 
-    this.siteConfig.getSecao('faq').pipe(takeUntilDestroyed()).subscribe(dados => {
+  this.siteConfig.getSecao('faq').pipe(takeUntilDestroyed(this.destroyRef)).subscribe(dados => {
       this.safeParseJsonSignal(dados, this.faq);
     });
   }
@@ -106,7 +107,7 @@ export class Home implements OnInit {
 
   private carregarParceiros() {
     this.carregandoParceiros.set(true);
-    this.apoiadoresService.buscarPublicos().pipe(takeUntilDestroyed()).subscribe({
+  this.apoiadoresService.buscarPublicos().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (dados: Apoiador[]) => {
         this.parceiros.set(dados || []);
         this.carregandoParceiros.set(false);
@@ -119,7 +120,7 @@ export class Home implements OnInit {
 
   private carregarUltimasNoticias() {
     this.carregandoNoticias.set(true);
-    this.http.get<any>(`${this.apiUrl}/comunicados?page=1&limit=3`).pipe(takeUntilDestroyed()).subscribe({
+  this.http.get<any>(`${this.apiUrl}/comunicados?page=1&limit=3`).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.ultimasNoticias.set(Array.isArray(res) ? res : (res.data ?? []));
         this.carregandoNoticias.set(false);

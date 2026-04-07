@@ -214,7 +214,7 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
           if (err?.error?.message) {
             det = Array.isArray(err.error.message) ? err.error.message[0] : err.error.message;
           }
-          this.feedbackSalvo.set(`⚠️ Erro Crítico: ${det}`);
+          this.feedbackSalvo.set(`Erro Crítico: ${det}`);
         }
       });
   }

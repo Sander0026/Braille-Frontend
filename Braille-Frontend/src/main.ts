@@ -52,36 +52,36 @@ bootstrapApplication(App, appConfig)
             curr = curr.parentElement;
           }
 
-          console.log(`   📍 Componente: <%c${angularComponent}%c>`, 'color: #e65100; font-weight: bold;', 'color: inherit;');
-          console.log(`   📝 Problema: ${node.failureSummary}`);
-          console.log('   🔍 Elemento HTML afetado:', domElement ?? selectorString);
+          console.log(`   [Componente] <%c${angularComponent}%c>`, 'color: #e65100; font-weight: bold;', 'color: inherit;');
+          console.log(`   [Problema] ${node.failureSummary}`);
+          console.log('   [Elemento HTML afetado]:', domElement ?? selectorString);
           console.log('   --------------------------------------------------');
         };
 
         /** Executa a auditoria Axe-Core e exibe violações formatadas no console DevTools */
         const rodarAuditoria = (): void => {
-          console.log('%c⏳ Rodando auditoria do Axe-Core...', 'color: #1976d2;');
+          console.log('%c[A11Y] Rodando auditoria do Axe-Core...', 'color: #1976d2;');
 
           axe.default.run().then((results) => {
             if (results.violations.length === 0) {
               console.log(
-                '%c✅ [A11Y] Axe-core: Nenhuma violação nesta tela/modal!',
+                '%c[A11Y] Axe-core: Nenhuma violação nesta tela/modal!',
                 'color: white; background: #2e7d32; font-weight: bold; padding: 4px 8px; border-radius: 4px;'
               );
               return;
             }
 
             console.log(
-              `%c🚨 [A11Y] ${results.violations.length} REGRA(S) DE ACESSIBILIDADE VIOLADA(S)`,
+              `%c[A11Y] ${results.violations.length} REGRA(S) DE ACESSIBILIDADE VIOLADA(S)`,
               'color: white; background: #d32f2f; font-weight: bold; font-size: 14px; padding: 6px 12px; border-radius: 4px;'
             );
 
             results.violations.forEach((violation, index) => {
               console.log(
-                `%c${index + 1}. ❌ ${violation.help} (${violation.id})`,
+                `%c${index + 1}. ${violation.help} (${violation.id})`,
                 'color: #d32f2f; font-weight: bold; font-size: 13px; margin-top: 10px;'
               );
-              console.log(`📖 Como resolver: ${violation.helpUrl}`);
+              console.log(`[Como resolver] ${violation.helpUrl}`);
 
               violation.nodes.forEach(logViolationNode);
             });
@@ -100,7 +100,7 @@ bootstrapApplication(App, appConfig)
         });
 
         console.log(
-          '%c💡 DICA: Para testar modais, abra o modal e chame auditarAcessibilidade() no console.',
+          '%cDICA: Para testar modais, abra o modal e chame auditarAcessibilidade() no console.',
           'color: #e65100; font-style: italic; margin-top: 10px;'
         );
       });
