@@ -8,7 +8,7 @@
         <span class="stat-label">Hoje</span>
         <span class="stat-value" aria-live="polite">{{ stats.logsHoje | number }}</span>
     </div>
-    <!-- ✅ ng8102: stats.topAcoes já é um array fixo pelo contrato typescript -->
+    <!-- Exibe apenas o Top 3 ações mais realizadas -->
     @for (item of stats.topAcoes.slice(0, 3); track item.acao) {
     <div class="stat-card stat-acao">
         <span class="stat-label">{{ item.acao }}</span>
