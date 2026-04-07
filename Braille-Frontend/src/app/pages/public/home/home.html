@@ -84,12 +84,7 @@
                 <span class="material-symbols-rounded">public</span>
             </div>
             <h2 class="mvv-titulo">Valores</h2>
-            <p class="mvv-desc">
-                {{ missaoConfig['valor1Titulo'] ? missaoConfig['valor1Titulo'] + '; ' : 'Acessibilidade; ' }}
-                {{ missaoConfig['valor2Titulo'] ? missaoConfig['valor2Titulo'] + '; ' : 'Gratuidade; ' }}
-                {{ missaoConfig['valor3Titulo'] ? missaoConfig['valor3Titulo'] + '; ' : 'Qualidade; ' }}
-                {{ missaoConfig['valor4Titulo'] ? missaoConfig['valor4Titulo'] + '.' : 'Humanização.' }}
-            </p>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha2'] || 'Valorizamos a dignidade, o respeito e a inclusão, atuando com ética, empatia e compromisso para promover autonomia e acessibilidade.') | safeHtml"></div>
         </article>
 
     </div>
