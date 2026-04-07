@@ -1,4 +1,11 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  signal,
+  inject,
+  DestroyRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -14,27 +21,32 @@ import { ModelosCertificadosService } from '../../../core/services/modelos-certi
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './validar-certificado.html',
   styleUrls: ['./validar-certificado.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush // Alta Resolução SRP Reativa
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ValidarCertificado implements OnInit {
-  form: FormGroup;
-  
-  // Rastreio Atômico Moderno DevSecOps (Substitui CD Refing Manual)
-  resultadoValidacao = signal<any>(null);
-  erroValidacao = signal<boolean>(false);
-  buscando = signal<boolean>(false);
+export class ValidarCertificado {
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private certificadosService: ModelosCertificadosService
-  ) {
-    // Validação Segura e Sanitations Integradas ao Hook Frontal
-    this.form = this.fb.group({
-      codigo: ['', [Validators.required, Validators.minLength(5)]]
-    });
-    
-    // Tratamento Atômico do Memory Leak Nativo de QueryParams (Fechado via DI-Destruída)
+  // ── DI via inject() — campo-level = injection context válido ────────────────
+  private readonly fb                  = inject(FormBuilder);
+  private readonly route               = inject(ActivatedRoute);
+  private readonly certificadosService = inject(ModelosCertificadosService);
+  private readonly destroyRef          = inject(DestroyRef);
+
+  // ── Estado reativo ───────────────────────────────────────────────────────────
+  resultadoValidacao = signal<any>(null);
+  erroValidacao      = signal<boolean>(false);
+  buscando           = signal<boolean>(false);
+
+  // ── Formulário ───────────────────────────────────────────────────────────────
+  readonly form: FormGroup = this.fb.group({
+    codigo: ['', [Validators.required, Validators.minLength(5)]],
+  });
+
+  constructor() {
+    /**
+     * takeUntilDestroyed() SEM argumento é válido aqui porque está dentro do
+     * constructor = injection context ativo.
+     * Alternativa equivalente: passar this.destroyRef explicitamente.
+     */
     this.route.queryParams
       .pipe(takeUntilDestroyed())
       .subscribe(params => {
@@ -46,8 +58,6 @@ export class ValidarCertificado implements OnInit {
       });
   }
 
-  ngOnInit(): void {}
-
   validar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -58,21 +68,24 @@ export class ValidarCertificado implements OnInit {
     this.resultadoValidacao.set(null);
     this.erroValidacao.set(false);
 
-    // Sanitização de Injection Frontal (Clean Format String)
-    const codigoLimpo = this.form.value.codigo.trim().toUpperCase();
+    // Sanitização do código (sem XSS/Injection — apenas trim + uppercase)
+    const codigoLimpo: string = (this.form.value.codigo as string).trim().toUpperCase();
 
-    // Barreira contra Memory Leaks WCF Network
+    /**
+     * CORREÇÃO NG0203: takeUntilDestroyed() dentro de um método normal requer
+     * DestroyRef explícito — sem ele, o Angular não encontra o injection context.
+     */
     this.certificadosService.validarAutenticidade(codigoLimpo)
       .pipe(
-        takeUntilDestroyed(),
+        takeUntilDestroyed(this.destroyRef),
         catchError(() => {
           this.erroValidacao.set(true);
           this.resultadoValidacao.set(null);
           this.buscando.set(false);
-          return of(null); // Abort silenciado sem Stack Traces Vazadas
-        })
+          return of(null); // Aborto silencioso — sem stack traces expostos (OWASP)
+        }),
       )
-      .subscribe((result) => {
+      .subscribe(result => {
         if (result) {
           this.resultadoValidacao.set(result);
           this.erroValidacao.set(false);

@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../core/services/auth.service';
 import { senhaForteValidator } from '../../../shared/validators/password.validator';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -12,66 +13,71 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './login.html',
   styleUrl: './login.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush, // Renderização Ultra Otimizada e Controlada
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Login {
-  loginForm: FormGroup;
-  novaSenhaForm: FormGroup;
-  
-  // Estado Reativo Atômico
-  erroLogin = signal<string>('');
-  carregando = signal<boolean>(false);
-  precisaTrocarSenha = signal<boolean>(false);
-  senhaAntigaTemp = signal<string>('');
-  mostrarSenha = signal<boolean>(false);
+  // ── DIP: injeção explícita via inject() — testável e sem acoplamento ──────
+  private readonly fb           = inject(FormBuilder);
+  private readonly authService  = inject(AuthService);
+  private readonly router       = inject(Router);
+  // DestroyRef vincula o ciclo de vida do componente a subscrições fora do constructor
+  private readonly destroyRef   = inject(DestroyRef);
 
-  // Interceptador leve para atualizar Regras de Senha sem acionar CD de Força Bruta
+  loginForm:    FormGroup;
+  novaSenhaForm: FormGroup;
+
+  // ── Estado Reativo Atômico ─────────────────────────────────────────────────
+  erroLogin          = signal<string>('');
+  carregando         = signal<boolean>(false);
+  precisaTrocarSenha = signal<boolean>(false);
+  senhaAntigaTemp    = signal<string>('');
+  mostrarSenha       = signal<boolean>(false);
+  senhaAlteradaOk    = signal<boolean>(false); // substitui alert() nativo (inacessível/inacessível a11y)
+
   private novaSenhaValue = signal<string>('');
 
   senhaReqs = computed(() => {
     const s = this.novaSenhaValue();
     return [
-      { label: 'Pelo menos 8 caracteres', isValid: s.length >= 8 },
-      { label: 'Uma letra maiúscula', isValid: /[A-Z]/.test(s) },
-      { label: 'Uma letra minúscula', isValid: /[a-z]/.test(s) },
-      { label: 'Pelo menos um número', isValid: /[0-9]/.test(s) },
-      { label: 'Um caractere especial (@, !, #, etc.)', isValid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(s) }
+      { label: 'Pelo menos 8 caracteres',              isValid: s.length >= 8 },
+      { label: 'Uma letra maiúscula',                  isValid: /[A-Z]/.test(s) },
+      { label: 'Uma letra minúscula',                  isValid: /[a-z]/.test(s) },
+      { label: 'Pelo menos um número',                 isValid: /[0-9]/.test(s) },
+      { label: 'Um caractere especial (@, !, #, etc.)', isValid: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(s) },
     ];
   });
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {
+  constructor() {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
-      senha: ['', Validators.required]
+      senha:    ['', Validators.required],
     });
 
     this.novaSenhaForm = this.fb.group({
-      // Responsabilidade Desacoplada e reaproveitável
-      novaSenha: ['', [Validators.required, senhaForteValidator]],
-      confirmarSenha: ['', [Validators.required]]
+      novaSenha:      ['', [Validators.required, senhaForteValidator]],
+      confirmarSenha: ['', Validators.required],
     }, { validators: this.senhasIguaisValidator });
 
-    // Observa digitação minimizando leaks (TakeUntilDestroyed elimina listener residual em caso de fechamento)
+    // ✅ takeUntilDestroyed() DENTRO do constructor — contexto de injeção válido
     this.novaSenhaForm.get('novaSenha')?.valueChanges.pipe(
-      takeUntilDestroyed()
-    ).subscribe(v => this.novaSenhaValue.set(v || ''));
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(v => this.novaSenhaValue.set(v ?? ''));
   }
 
-  // Cast seguro isolando form de injeção Prototype ou Type Error abstratos
+  // ── Validators ────────────────────────────────────────────────────────────
   senhasIguaisValidator(g: AbstractControl) {
     const form = g as FormGroup;
-    return form.get('novaSenha')?.value === form.get('confirmarSenha')?.value ? null : { mismatch: true };
+    return form.get('novaSenha')?.value === form.get('confirmarSenha')?.value
+      ? null
+      : { mismatch: true };
   }
 
-  toggleSenha() {
+  // ── Actions ───────────────────────────────────────────────────────────────
+  toggleSenha(): void {
     this.mostrarSenha.update(v => !v);
   }
 
-  fazerLogin() {
+  fazerLogin(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -80,14 +86,15 @@ export class Login {
     this.carregando.set(true);
     this.erroLogin.set('');
 
-    // Prevenção de Whitespace Exploit (Limpeza restrita via DTO Mapping)
     const payload = {
-        username: this.loginForm.value.username?.trim(),
-        senha: this.loginForm.value.senha
+      username: (this.loginForm.value.username as string)?.trim(),
+      senha:    this.loginForm.value.senha as string,
     };
 
-    // Subscrição ancorada ao escopo do Componente
-    this.authService.login(payload).pipe(takeUntilDestroyed()).subscribe({
+    // ✅ DestroyRef passado explicitamente — funciona fora do constructor (NG0203 corrigido)
+    this.authService.login(payload).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: () => {
         const user = this.authService.getUser();
         if (user?.precisaTrocarSenha) {
@@ -95,29 +102,17 @@ export class Login {
           this.senhaAntigaTemp.set(payload.senha);
           this.carregando.set(false);
         } else {
-           // Promisse Chain final garantindo fechamento fluído pós roteamento
-          this.router.navigate(['/admin']).then(() => this.carregando.set(false));
+          void this.router.navigate(['/admin']).then(() => this.carregando.set(false));
         }
       },
-      error: (err: any) => {
+      error: (err: HttpErrorResponse) => {
         this.carregando.set(false);
-        
-        // Neutralização Severa de Stack Traces API devolvidos à View
-        if (err.status === 401 || err.status === 403) {
-          const apiMsg = err.error?.message;
-          this.erroLogin.set((typeof apiMsg === 'string') 
-            ? apiMsg 
-            : (Array.isArray(apiMsg) ? apiMsg[0] : 'Usuário ou senha incorretos. Verifique e tente novamente.'));
-        } else if (err.status === 0) {
-          this.erroLogin.set('Não foi possível conectar ao servidor. Verifique sua conexão.');
-        } else {
-          this.erroLogin.set('Ocorreu um erro inesperado. Tente novamente mais tarde.');
-        }
-      }
+        this.erroLogin.set(this.resolveErrorMessage(err));
+      },
     });
   }
 
-  confirmarNovaSenha() {
+  confirmarNovaSenha(): void {
     if (this.novaSenhaForm.invalid) {
       this.novaSenhaForm.markAllAsTouched();
       return;
@@ -126,11 +121,14 @@ export class Login {
     this.carregando.set(true);
     this.erroLogin.set('');
 
-    const novaSenha = this.novaSenhaForm.value.novaSenha;
+    const novaSenha = this.novaSenhaForm.value.novaSenha as string;
 
-    this.authService.trocarSenha(this.senhaAntigaTemp(), novaSenha).pipe(takeUntilDestroyed()).subscribe({
+    // ✅ DestroyRef passado explicitamente — funciona fora do constructor (NG0203 corrigido)
+    this.authService.trocarSenha(this.senhaAntigaTemp(), novaSenha).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: () => {
-        alert('Senha alterada com sucesso! Faça login novamente com a nova senha.');
+        this.senhaAlteradaOk.set(true);
         this.authService.logout();
         this.precisaTrocarSenha.set(false);
         this.loginForm.reset();
@@ -138,10 +136,24 @@ export class Login {
         this.carregando.set(false);
       },
       error: () => {
-         // Silencia logs expostos caso os requisitos crachem backend mal tratadamente.
-         this.carregando.set(false);
-         this.erroLogin.set('Erro ao alterar a senha. A senha não atende aos requisitos ou expirou.');
-      }
+        this.carregando.set(false);
+        this.erroLogin.set('Erro ao alterar a senha. A senha não atende aos requisitos ou expirou.');
+      },
     });
+  }
+
+  // ── Private Helpers ───────────────────────────────────────────────────────
+  /** Resolve a mensagem de erro sem expor stack traces internos ao usuário (OWASP A3). */
+  private resolveErrorMessage(err: HttpErrorResponse): string {
+    if (err.status === 401 || err.status === 403) {
+      const apiMsg = (err.error as { message?: string | string[] })?.message;
+      if (typeof apiMsg === 'string') return apiMsg;
+      if (Array.isArray(apiMsg))      return apiMsg[0];
+      return 'Usuário ou senha incorretos. Verifique e tente novamente.';
+    }
+    if (err.status === 0) {
+      return 'Não foi possível conectar ao servidor. Verifique sua conexão.';
+    }
+    return 'Ocorreu um erro inesperado. Tente novamente mais tarde.';
   }
 }

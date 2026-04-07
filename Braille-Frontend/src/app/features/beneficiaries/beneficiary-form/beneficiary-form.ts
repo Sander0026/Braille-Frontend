@@ -1,7 +1,7 @@
 import { Component, OnInit, OnChanges, Input, Output, EventEmitter, ChangeDetectorRef, SimpleChanges } from '@angular/core';
 import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -190,6 +190,10 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         outrasComorbidades: [''],
       }),
     });
+  }
+
+  getControl(path: string): FormControl {
+    return this.cadastroForm.get(path) as FormControl;
   }
 
   buscarCep() {

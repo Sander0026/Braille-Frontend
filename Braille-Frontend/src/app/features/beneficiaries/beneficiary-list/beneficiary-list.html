@@ -1175,8 +1175,8 @@
 @if (modalEdicaoAberto && alunoEmEdicao) {
 <div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true"
     [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="fecharModalEdicao()"
-    cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="overflow-y: auto; padding-top: 2vh;">
-    <div style="max-width: 900px; width: 95%; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; position: relative;" (click)="$event.stopPropagation()">
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="display: flex; align-items: center; justify-content: center; z-index: 1050;">
+    <div style="max-width: 820px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" (click)="$event.stopPropagation()">
         <app-beneficiary-form 
            [alunoEmEdicao]="alunoEmEdicao" 
            (salvou)="aoSalvarEdicao()" 

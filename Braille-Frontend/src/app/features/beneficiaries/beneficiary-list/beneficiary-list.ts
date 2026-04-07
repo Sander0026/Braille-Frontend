@@ -520,15 +520,24 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   abrirModalEdicao(aluno: Beneficiario): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
 
-    // Carrega dados completos do aluno para passar ao form
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
+        // ✅ Ordem atômica garantida:
+        // 1. Popula alunoEmEdicao PRIMEIRO
+        // 2. Só ENTÃO abre o modal
+        // Isso elimina o race condition onde modalEdicaoAberto=true chegava
+        // antes de alunoEmEdicao ser definido, fazendo o form iniciar em modo CRIAÇÃO.
         this.alunoEmEdicao = dadosCompletos;
         this.modalEdicaoAberto = true;
         this.cdr.markForCheck();
-      }
+      },
+      error: () => {
+        this.toast.erro('Não foi possível carregar os dados do aluno. Tente novamente.');
+        this.cdr.markForCheck();
+      },
     });
   }
+
 
   fecharModalEdicao(): void {
     this.modalEdicaoAberto = false;

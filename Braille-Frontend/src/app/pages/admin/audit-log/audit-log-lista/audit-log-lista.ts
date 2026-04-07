@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { AuditLogService, AuditLog, AuditStats, AuditAcao, QueryAuditDto } from '../../../../core/services/audit-log.service';
+import { takeUntil, map } from 'rxjs/operators';
+import { AuditLogService, AuditLog, AuditStats, AuditAcao, QueryAuditDto, defaultAuditStats } from '../../../../core/services/audit-log.service';
 
 import { AuditStatsComponent } from '../components/audit-stats/audit-stats.component';
 import { AuditModalDetalhesComponent } from '../components/audit-modal-detalhes/audit-modal-detalhes.component';
@@ -83,8 +83,12 @@ export class AuditLogLista implements OnInit, OnDestroy {
         this.auditService.stats()
             .pipe(takeUntil(this.destroy$))
             .subscribe({
-                next: (s) => { this.stats = s; this.cdr.markForCheck(); },
-                error: () => { /* stats não crítico */ },
+                // ✅ Merge com defaults: garante que topAcoes nunca seja undefined
+                next: (s) => {
+                    this.stats = { ...defaultAuditStats(), ...s, topAcoes: s?.topAcoes ?? [] };
+                    this.cdr.markForCheck();
+                },
+                error: () => { /* stats não crítico — silencia sem expor detalhes ao usuário */ },
             });
     }
 
@@ -104,16 +108,25 @@ export class AuditLogLista implements OnInit, OnDestroy {
         if (this.filtroAte) q.ate = this.filtroAte;
 
         this.auditService.listar(q)
-            .pipe(takeUntil(this.destroy$))
+            .pipe(
+                takeUntil(this.destroy$),
+                // ✅ Normaliza o contrato ANTES do subscribe: garante que data é sempre Array real
+                // Isso protege contra re-emissão do cache shareReplay que pode devolver objeto sem Symbol.iterator
+                map(res => ({
+                    data:  Array.isArray(res?.data) ? res.data : [],
+                    total: res?.meta?.total ?? 0,
+                })),
+            )
             .subscribe({
-                next: (res) => {
-                    this.logs = res.data;
-                    this.total = res.meta.total;
+                next: ({ data, total }) => {
+                    this.logs  = data;
+                    this.total = total;
                     this.isLoading = false;
                     this.cdr.markForCheck();
                 },
-                error: (err) => {
-                    this.erro = err.error?.message ?? 'Erro ao carregar logs.';
+                error: (err: { error?: { message?: string } }) => {
+                    // ✅ Nunca expõe stack trace — apenas mensagem segura (OWASP A3)
+                    this.erro = err.error?.message ?? 'Erro ao carregar logs de auditoria.';
                     this.isLoading = false;
                     this.cdr.markForCheck();
                 },

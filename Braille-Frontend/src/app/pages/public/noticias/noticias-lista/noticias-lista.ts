@@ -1,4 +1,11 @@
-import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  signal,
+  inject,
+  DestroyRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -13,68 +20,71 @@ import { CategoryLabelPipe } from '../../../../shared/pipes/category-label.pipe'
   selector: 'app-noticias-lista',
   standalone: true,
   imports: [
-    CommonModule, 
-    FormsModule, 
-    RouterLink, 
-    RouterModule, 
-    CloudinaryPipe, 
-    StripHtmlPipe, 
-    CategoryLabelPipe
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    RouterModule,
+    CloudinaryPipe,
+    StripHtmlPipe,
+    CategoryLabelPipe,
   ],
   templateUrl: './noticias-lista.html',
-  styleUrl: './noticias-lista.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush // Otimização profunda em matrizes (Listas)
+  styleUrl:    './noticias-lista.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class NoticiasLista implements OnInit {
 
-  // Estrutura Reativa Total
-  comunicados = signal<Comunicado[]>([]);
-  carregando = signal<boolean>(true);
+  // ── Infraestrutura de DI (campo-level = injection context válido) ────────────
+  private readonly comunicadosService = inject(ComunicadosService);
+  private readonly destroyRef          = inject(DestroyRef);
 
-  // Filtros Reativos Blindados Contra Mutação
+  // ── Estado reativo ───────────────────────────────────────────────────────────
+  comunicados          = signal<Comunicado[]>([]);
+  carregando           = signal<boolean>(true);
   categoriaSelecionada = signal<string | null>(null);
-  busca = signal<string>('');
+  busca                = signal<string>('');
+  paginaAtual          = signal<number>(1);
+  readonly limite      = 9; // Grid 3×3
+  totalItems           = signal<number>(0);
+  temMais              = signal<boolean>(false);
 
-  // Paginação Limpa
-  paginaAtual = signal<number>(1);
-  limite = 9; // Grid bonito (3x3)
-  totalItems = signal<number>(0);
-  temMais = signal<boolean>(false);
+  // ── Dados estáticos ──────────────────────────────────────────────────────────
+  readonly categorias = [
+    { valor: null,            label: 'Todos'          },
+    { valor: 'NOTICIA',       label: 'Notícias'       },
+    { valor: 'VAGA_EMPREGO',  label: 'Vagas PCD'      },
+    { valor: 'SERVICO',       label: 'Serviços'       },
+    { valor: 'EVENTO_CULTURAL',label: 'Eventos'       },
+    { valor: 'LEGISLACAO',    label: 'Legislação'     },
+    { valor: 'GERAL',         label: 'Avisos Gerais'  },
+  ] as const;
 
-  // Apenas layout render para toolbar nativa
-  categorias = [
-    { valor: null, label: 'Todos' },
-    { valor: 'NOTICIA', label: 'Notícias' },
-    { valor: 'VAGA_EMPREGO', label: 'Vagas PCD' },
-    { valor: 'SERVICO', label: 'Serviços' },
-    { valor: 'EVENTO_CULTURAL', label: 'Eventos' },
-    { valor: 'LEGISLACAO', label: 'Legislação' },
-    { valor: 'GERAL', label: 'Avisos Gerais' }
-  ];
-
-  // Injeção Oficial SRP
-  constructor(private comunicadosService: ComunicadosService) {}
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.carregarComunicados(true);
   }
 
-  carregarComunicados(reset = false) {
+  carregarComunicados(reset = false): void {
     if (reset) {
       this.paginaAtual.set(1);
       this.comunicados.set([]);
       this.carregando.set(true);
     }
 
-    const cat = this.categoriaSelecionada() || undefined;
-    const term = this.busca() || undefined;
+    const cat  = this.categoriaSelecionada() ?? undefined;
+    const term = this.busca()                ?? undefined;
 
-    // Acesso limpo isolado (API restrita HTTP do Serviço SRP) prevenindo Mem-Leak
-    this.comunicadosService.listar(this.paginaAtual(), this.limite, cat, term)
-      .pipe(takeUntilDestroyed())
+    /**
+     * takeUntilDestroyed(this.destroyRef) é o padrão correto quando chamado
+     * FORA do contexto de injeção (i.e., dentro de um método regular).
+     * Passar o DestroyRef explicitamente é o contrato público da API Angular
+     * para esse caso de uso — evita NG0203 e garante clean-up automático.
+     */
+    this.comunicadosService
+      .listar(this.paginaAtual(), this.limite, cat, term)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res: any) => {
-          const items = Array.isArray(res) ? res : (res.data ?? []);
+          const items: Comunicado[] = Array.isArray(res) ? res : (res.data ?? []);
 
           if (reset) {
             this.comunicados.set(items);
@@ -82,28 +92,28 @@ export class NoticiasLista implements OnInit {
             this.comunicados.update(curr => [...curr, ...items]);
           }
 
-          this.totalItems.set(res.total ?? items.length);
+          this.totalItems.set(res.total      ?? items.length);
           this.temMais.set(this.paginaAtual() < (res.totalPages ?? 1));
           this.carregando.set(false);
         },
         error: () => {
-          // Engolindo o erro silenciosamente perante a renderização DevSecOps
+          // Silencia o erro de rede para não travar o UI público (DevSecOps: sem stack-trace exposto)
           this.carregando.set(false);
-        }
+        },
       });
   }
 
-  filtrarPorCategoria(cat: string | null) {
+  filtrarPorCategoria(cat: string | null): void {
     if (this.categoriaSelecionada() === cat) return;
     this.categoriaSelecionada.set(cat);
     this.carregarComunicados(true);
   }
 
-  executarBuscar() {
+  executarBuscar(): void {
     this.carregarComunicados(true);
   }
 
-  carregarMais() {
+  carregarMais(): void {
     if (!this.temMais()) return;
     this.paginaAtual.update(v => v + 1);
     this.carregarComunicados(false);

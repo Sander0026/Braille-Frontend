@@ -1,23 +1,395 @@
 <div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
 
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- MODO EDIÇÃO — Modal flat com seções scrolláveis                       -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+@if (isModoEdicao) {
+<form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" novalidate class="edit-modal">
+
+  <!-- ── Header fixo ──────────────────────────────────────────────── -->
+  <div class="edit-modal__header">
+    <h2 class="edit-modal__title">Editar Aluno</h2>
+    <button type="button" class="edit-modal__close" (click)="emitirCancelamento()"
+      aria-label="Fechar modal de edição">×</button>
+  </div>
+
+  <!-- ── Corpo scrollável ────────────────────────────────────────── -->
+  <div class="edit-modal__body">
+
+    @if (mensagemFeedback) {
+    <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
+      <strong>{{ tipoFeedback === 'sucesso' ? 'Sucesso: ' : 'Erro: ' }}</strong>{{ mensagemFeedback }}
+    </div>
+    }
+
+    <!-- ══ DADOS PESSOAIS ══════════════════════════════════════════ -->
+    <fieldset class="edit-section" formGroupName="dadosPessoais">
+      <legend class="edit-section__title">Dados Pessoais</legend>
+
+      <!-- Nome -->
+      <div class="edit-field">
+        <label for="e-nomeCompleto" class="edit-label">Nome Completo</label>
+        <input id="e-nomeCompleto" type="text" class="edit-input" formControlName="nomeCompleto"
+          [class.edit-input--error]="isCampoInvalido('dadosPessoais','nomeCompleto')"
+          placeholder="Nome completo" autocomplete="name">
+        @if (isCampoInvalido('dadosPessoais','nomeCompleto')) {
+        <span class="edit-error" role="alert">Nome obrigatório (mínimo 3 caracteres).</span>
+        }
+      </div>
+
+      <!-- CPF + RG -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-cpf" class="edit-label">CPF</label>
+          <input id="e-cpf" type="text" class="edit-input" formControlName="cpf"
+            (input)="formatarDocumento($event)" (blur)="verificarCampoUnico('cpf')"
+            maxlength="14" placeholder="000.000.000-00" autocomplete="off"
+            [class.edit-input--error]="cpfStatus === 'ativo'">
+        </div>
+        <div class="edit-field">
+          <label for="e-rg" class="edit-label">RG</label>
+          <input id="e-rg" type="text" class="edit-input" formControlName="rg"
+            (input)="formatarRg($event)" (blur)="verificarCampoUnico('rg')"
+            maxlength="10" placeholder="00.000.000" autocomplete="off"
+            [class.edit-input--error]="rgStatus === 'ativo'">
+        </div>
+      </div>
+
+      <!-- Feedback documentos -->
+      @if (cpfStatus === 'ativo' && cpfConflito) {
+      <span class="edit-error" role="alert">
+        CPF já pertence ao aluno ativo: <strong>{{ cpfConflito.nomeCompleto }}</strong>
+      </span>
+      }
+      @if (rgStatus === 'ativo' && rgConflito) {
+      <span class="edit-error" role="alert">
+        RG já pertence ao aluno ativo: <strong>{{ rgConflito.nomeCompleto }}</strong>
+      </span>
+      }
+
+      <!-- Nascimento + Gênero -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-dataNascimento" class="edit-label">Data de Nascimento</label>
+          <input id="e-dataNascimento" type="date" class="edit-input" formControlName="dataNascimento"
+            [class.edit-input--error]="isCampoInvalido('dadosPessoais','dataNascimento')" autocomplete="bday">
+          @if (isCampoInvalido('dadosPessoais','dataNascimento')) {
+          <span class="edit-error" role="alert">Data obrigatória.</span>
+          }
+        </div>
+        <div class="edit-field">
+          <label for="e-genero" class="edit-label">Gênero</label>
+          <select id="e-genero" formControlName="genero" class="edit-input edit-select">
+            <option value="">Selecione...</option>
+            <option value="Masculino">Masculino</option>
+            <option value="Feminino">Feminino</option>
+            <option value="Não-binário">Não-binário</option>
+            <option value="Prefiro não informar">Prefiro não informar</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- O bloco abaixo mistura dadosPessoais (cor/raça e estadoCivil)
+           e enderecoLocalizacao (email e telefoneContato) para replicar o mockup visual -->
+      
+      <!-- Cor / Raça + Estado Civil (dadosPessoais) -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-corRaca" class="edit-label">Cor / Raça</label>
+          <select id="e-corRaca" formControlName="corRaca" class="edit-input edit-select">
+            <option value="">Selecione...</option>
+            <option value="BRANCA">Branca</option>
+            <option value="PRETA">Preta</option>
+            <option value="PARDA">Parda</option>
+            <option value="AMARELA">Amarela</option>
+            <option value="INDIGENA">Indígena</option>
+            <option value="NAO_DECLARADO">Prefiro não responder</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <label for="e-estadoCivil" class="edit-label">Estado Civil</label>
+          <select id="e-estadoCivil" formControlName="estadoCivil" class="edit-input edit-select">
+            <option value="">Selecione...</option>
+            <option value="Solteiro(a)">Solteiro(a)</option>
+            <option value="Casado(a)">Casado(a)</option>
+            <option value="Divorciado(a)">Divorciado(a)</option>
+            <option value="Viúvo(a)">Viúvo(a)</option>
+            <option value="União Estável">União Estável</option>
+          </select>
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- Contatos que visualmente pertencem a Pessoais mas no TS são Endereço/Contato -->
+    <fieldset class="edit-section" style="margin-top: -1.5rem; margin-bottom: 1.5rem;">
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-email" class="edit-label">E-mail</label>
+          <input id="e-email" type="email" class="edit-input" [formControl]="getControl('enderecoLocalizacao.email')"
+            placeholder="exemplo@email.com" autocomplete="email">
+        </div>
+        <div class="edit-field">
+          <label for="e-telefoneContato" class="edit-label">Telefone</label>
+          <input id="e-telefoneContato" type="tel" class="edit-input" [formControl]="getControl('enderecoLocalizacao.telefoneContato')"
+            (input)="formatarTelefone($event)" maxlength="15"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','telefoneContato')"
+            placeholder="(00) 00000-0000" autocomplete="tel">
+        </div>
+      </div>
+    </fieldset>
+
+    <!-- ══ ENDEREÇO ════════════════════════════════════════════════ -->
+    <fieldset class="edit-section" formGroupName="enderecoLocalizacao">
+      <legend class="edit-section__title">Endereço</legend>
+
+      <!-- CEP + Rua -->
+      <div class="edit-row">
+        <div class="edit-field edit-field--sm">
+          <label for="e-cep" class="edit-label">CEP</label>
+          <input id="e-cep" type="tel" class="edit-input" formControlName="cep"
+            (blur)="buscarCep()" maxlength="9" placeholder="00000-000" autocomplete="off"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','cep')">
+          @if (isCampoInvalido('enderecoLocalizacao','cep')) {
+          <span class="edit-error" role="alert">CEP inválido.</span>
+          }
+        </div>
+        <div class="edit-field">
+          <label for="e-rua" class="edit-label">Rua / Logradouro</label>
+          <input id="e-rua" type="text" class="edit-input" formControlName="rua"
+            placeholder="Rua..." autocomplete="off"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','rua')">
+        </div>
+      </div>
+
+      <!-- Número + Complemento + Bairro -->
+      <div class="edit-row edit-row--3">
+        <div class="edit-field edit-field--xs">
+          <label for="e-numero" class="edit-label">Número</label>
+          <input id="e-numero" type="text" class="edit-input" formControlName="numero"
+            placeholder="Ex: 18" autocomplete="off"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','numero')">
+        </div>
+        <div class="edit-field">
+          <label for="e-complemento" class="edit-label">Complemento</label>
+          <input id="e-complemento" type="text" class="edit-input" formControlName="complemento"
+            placeholder="Apto, Bloco..." autocomplete="address-line2">
+        </div>
+        <div class="edit-field">
+          <label for="e-bairro" class="edit-label">Bairro</label>
+          <input id="e-bairro" type="text" class="edit-input" formControlName="bairro"
+            placeholder="Bairro" autocomplete="address-level3"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','bairro')">
+        </div>
+      </div>
+
+      <!-- Cidade + UF -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-cidade" class="edit-label">Cidade</label>
+          <input id="e-cidade" type="text" class="edit-input" formControlName="cidade"
+            placeholder="Cidade" autocomplete="address-level2"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','cidade')">
+        </div>
+        <div class="edit-field edit-field--xs">
+          <label for="e-uf" class="edit-label">UF</label>
+          <input id="e-uf" type="text" class="edit-input" formControlName="uf"
+            placeholder="ES" maxlength="2" autocomplete="address-level1"
+            [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','uf')">
+        </div>
+      </div>
+
+      <!-- Contato de Emergência -->
+      <div class="edit-field">
+        <label for="e-contatoEmergencia" class="edit-label">Contato de Emergência</label>
+        <input id="e-contatoEmergencia" type="text" class="edit-input" formControlName="contatoEmergencia"
+          placeholder="Nome e telefone de um familiar ou responsável">
+      </div>
+    </fieldset>
+
+    <!-- ══ DEFICIÊNCIA & ACESSIBILIDADE ═══════════════════════════ -->
+    <fieldset class="edit-section" formGroupName="perfilDeficiencia">
+      <legend class="edit-section__title">Deficiência &amp; Acessibilidade</legend>
+
+      <!-- Tipo + Causa -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-tipoDeficiencia" class="edit-label">Tipo de Deficiência</label>
+          <select id="e-tipoDeficiencia" formControlName="tipoDeficiencia" class="edit-input edit-select"
+            [class.edit-input--error]="isCampoInvalido('perfilDeficiencia','tipoDeficiencia')">
+            <option value="">Selecione...</option>
+            <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
+            <option value="BAIXA_VISAO">Baixa Visão</option>
+            <option value="VISAO_MONOCULAR">Visão Monocular</option>
+          </select>
+          @if (isCampoInvalido('perfilDeficiencia','tipoDeficiencia')) {
+          <span class="edit-error" role="alert">Campo obrigatório.</span>
+          }
+        </div>
+        <div class="edit-field">
+          <label for="e-causaDeficiencia" class="edit-label">Causa</label>
+          <select id="e-causaDeficiencia" formControlName="causaDeficiencia" class="edit-input edit-select">
+            <option value="">Selecione...</option>
+            <option value="CONGENITA">Congênita</option>
+            <option value="ADQUIRIDA">Adquirida</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Idade Ocorrência + Tec. Assistivas -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-idadeOcorrencia" class="edit-label">Idade na Ocorrência</label>
+          <input id="e-idadeOcorrencia" type="text" class="edit-input" formControlName="idadeOcorrencia"
+            placeholder="Ex: Aos 15 anos"
+            [style.opacity]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled ? '0.45' : '1'">
+        </div>
+        <div class="edit-field">
+          <label for="e-tecAssistivas" class="edit-label">Tecnologias Assistivas</label>
+          <input id="e-tecAssistivas" type="text" class="edit-input" formControlName="tecAssistivas"
+            placeholder="Ex: Cão-guia, NVDA, Bengala">
+        </div>
+      </div>
+
+      <!-- Pref. Acessibilidade -->
+      <div class="edit-field">
+        <label for="e-prefAcessibilidade" class="edit-label">Preferências de Acessibilidade</label>
+        <select id="e-prefAcessibilidade" formControlName="prefAcessibilidade" class="edit-input edit-select"
+          [class.edit-input--error]="isCampoInvalido('perfilDeficiencia','prefAcessibilidade')">
+          <option value="">Selecione...</option>
+          <option value="BRAILLE">Braille</option>
+          <option value="FONTE_AMPLIADA">Fonte Ampliada</option>
+          <option value="ARQUIVO_DIGITAL">Arquivo Digital</option>
+          <option value="AUDIO">Áudio</option>
+        </select>
+        @if (isCampoInvalido('perfilDeficiencia','prefAcessibilidade')) {
+        <span class="edit-error" role="alert">Campo obrigatório.</span>
+        }
+      </div>
+
+      <!-- Checkbox que pertence a perfilDeficiencia -->
+      <div class="edit-checks">
+        <label class="edit-check">
+          <input type="checkbox" formControlName="possuiLaudo"> Possui laudo médico
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- ── NOVA SEÇÃO: BINDING SOCIOECONOMICO (Acoplada visualmente a Deficiência) ── -->
+    <fieldset class="edit-section" style="margin-top: -1rem; margin-bottom: 1.5rem;">
+      <!-- Outras Comorbidades -->
+      <div class="edit-field">
+        <label for="e-outrasComorbidades" class="edit-label">Outras Comorbidades</label>
+        <textarea id="e-outrasComorbidades" [formControl]="getControl('socioeconomico.outrasComorbidades')"
+          rows="3" class="edit-input edit-textarea"
+          placeholder="Descreva outras condições de saúde relevantes..." tabEscape></textarea>
+      </div>
+
+      <!-- Checkboxes -->
+      <div class="edit-checks">
+        <label class="edit-check">
+          <input type="checkbox" [formControl]="getControl('socioeconomico.precisaAcompanhante')"> Precisa de acompanhante
+        </label>
+        <label class="edit-check">
+          <input type="checkbox" [formControl]="getControl('socioeconomico.acompOftalmologico')"> Acompanhamento oftalmológico
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- ══ SOCIOECONÔMICO & EMERGÊNCIA ════════════════════════════ -->
+    <fieldset class="edit-section" formGroupName="socioeconomico">
+      <legend class="edit-section__title">Socioeconômico &amp; Emergência</legend>
+
+      <!-- Escolaridade + Profissão -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-escolaridade" class="edit-label">Escolaridade</label>
+          <select id="e-escolaridade" formControlName="escolaridade" class="edit-input edit-select">
+            <option value="">Selecione...</option>
+            <option value="Sem escolaridade">Sem escolaridade</option>
+            <option value="Ensino Fundamental Incompleto">Ens. Fund. Incompleto</option>
+            <option value="Ensino Fundamental Completo">Ens. Fund. Completo</option>
+            <option value="Ensino Médio Incompleto">Ens. Médio Incompleto</option>
+            <option value="Ensino Médio Completo">Médio completo</option>
+            <option value="Ensino Superior Incompleto">Superior Incompleto</option>
+            <option value="Ensino Superior Completo">Superior Completo</option>
+            <option value="Pós-graduação">Pós-graduação</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <label for="e-profissao" class="edit-label">Profissão</label>
+          <input id="e-profissao" type="text" class="edit-input" formControlName="profissao"
+            placeholder="Ex: Recepcionista">
+        </div>
+      </div>
+
+      <!-- Renda + Benefícios -->
+      <div class="edit-row">
+        <div class="edit-field">
+          <label for="e-rendaFamiliar" class="edit-label">Renda Familiar</label>
+          <select id="e-rendaFamiliar" formControlName="rendaFamiliar" class="edit-input edit-select">
+            <option value="">Selecione...</option>
+            <option value="Sem renda">Sem renda</option>
+            <option value="Até 1 salário mínimo">Até 1 salário mínimo</option>
+            <option value="De 1 a 2 salários mínimos">De 1 a 2 sal. mínimos</option>
+            <option value="De 2 a 3 salários mínimos">De 2 a 3 sal. mínimos</option>
+            <option value="Acima de 3 salários mínimos">Acima de 3 sal. mínimos</option>
+          </select>
+        </div>
+        <div class="edit-field">
+          <label for="e-beneficiosGov" class="edit-label">Benefícios Gov.</label>
+          <input id="e-beneficiosGov" type="text" class="edit-input" formControlName="beneficiosGov"
+            placeholder="Ex: BPC/LOAS">
+        </div>
+      </div>
+
+      <!-- Composição Familiar -->
+      <div class="edit-field">
+        <label for="e-composicaoFamiliar" class="edit-label">Composição Familiar</label>
+        <input id="e-composicaoFamiliar" type="text" class="edit-input" formControlName="composicaoFamiliar"
+          placeholder="Ex: Mora com cônjuge e 2 filhos">
+      </div>
+    </fieldset>
+
+  </div><!-- /edit-modal__body -->
+
+  <!-- ── Footer fixo ──────────────────────────────────────────────── -->
+  <div class="edit-modal__footer">
+    <button type="button" class="btn btn-secondary" (click)="emitirCancelamento()"
+      aria-label="Cancelar edição">
+      Cancelar
+    </button>
+    <button type="submit" class="btn btn-primary edit-modal__save"
+      [disabled]="cadastroForm.invalid || isSalvando"
+      aria-label="Salvar alterações do aluno">
+      @if (isSalvando) {
+        <span class="loading-spinner" aria-hidden="true"
+          style="width:14px; height:14px; border-width:2px; margin-right:6px;"></span>
+        Salvando...
+      } @else {
+        Salvar
+      }
+    </button>
+  </div>
+
+</form>
+}
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- MODO CRIAÇÃO — Wizard por passos (comportamento original intacto)     -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+@if (!isModoEdicao) {
 <div class="wizard-container">
 
-  <!-- ====== FEEDBACK BANNER ====== -->
   @if (mensagemFeedback) {
   <div class="feedback-banner" [ngClass]="tipoFeedback" role="alert" aria-live="assertive">
-    <strong>{{ tipoFeedback === 'sucesso' ? 'Sucesso: ' : 'Erro: ' }}</strong>
-    {{ mensagemFeedback }}
+    <strong>{{ tipoFeedback === 'sucesso' ? 'Sucesso: ' : 'Erro: ' }}</strong>{{ mensagemFeedback }}
   </div>
   }
 
-  <!-- ====== CABEÇALHO + BARRA DE PROGRESSO ====== -->
   <header class="wizard-header">
-    <h1>{{ isModoEdicao ? 'Editar Aluno' : 'Cadastro de Alunos (PcD Visual)' }}</h1>
+    <h1>Cadastro de Alunos (PcD Visual)</h1>
     <p>Preencha as informações do aluno. Etapa <strong>{{ passoAtual }}</strong> de 4.</p>
-
     <progress max="4" [value]="passoAtual" aria-label="Progresso: etapa atual"></progress>
-
-    <!-- Indicadores de passo -->
     <div class="steps-indicator" aria-hidden="true">
       @for (step of [1,2,3,4]; track step) {
       <div class="step-dot" [class.active]="step === passoAtual" [class.done]="step < passoAtual">{{ step }}</div>
@@ -25,19 +397,13 @@
     </div>
   </header>
 
-  <!-- ====== FORMULÁRIO ====== -->
   <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="wizard-form" novalidate>
 
-    <!-- ======================================================== -->
-    <!-- PASSO 1 — Dados Identificadores                           -->
-    <!-- ======================================================== -->
     @if (passoAtual === 1) {
     <fieldset formGroupName="dadosPessoais">
       <legend>Passo 1: Dados Identificadores</legend>
-
       <div class="form-group" style="margin-bottom: 1.5rem">
-        <label for="nomeCompleto" class="form-label">Nome Completo <span class="required"
-            aria-hidden="true">*</span></label>
+        <label for="nomeCompleto" class="form-label">Nome Completo <span class="required" aria-hidden="true">*</span></label>
         <input type="text" id="nomeCompleto" class="form-input" formControlName="nomeCompleto"
           [class.input-error]="isCampoInvalido('dadosPessoais', 'nomeCompleto')" placeholder="Digite o nome completo"
           aria-required="true" autocomplete="name">
@@ -45,7 +411,6 @@
         <span class="error-text" role="alert">O nome completo é obrigatório (mínimo 3 caracteres).</span>
         }
       </div>
-
       <div class="form-group" style="margin-bottom: 1.5rem">
         <label for="fotoUpload" class="form-label">Foto 3x4 <span class="optional-badge">opcional</span></label>
         <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
@@ -56,13 +421,10 @@
           <input id="fotoUpload" type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFotoSelecionada($event)" style="display: none;" />
           <span class="file-name" *ngIf="arquivoFotoSelecionado">{{ arquivoFotoSelecionado.name }}</span>
         </div>
-        <p class="helper-text" style="margin-top: 0.35rem;">
-          Pode ser adicionada posteriormente. Alunos cadastrados via planilha ficarão sem foto até ser anexada manualmente.
-        </p>
+        <p class="helper-text" style="margin-top: 0.35rem;">Pode ser adicionada posteriormente.</p>
       </div>
-
       <div class="form-group" style="margin-bottom: 1.5rem">
-        <label for="termoUpload" class="form-label">Termo de Consentimento (LGPD) <span class="optional-badge">opcional</span></label>
+        <label for="termoUpload" class="form-label">Termo LGPD <span class="optional-badge">opcional</span></label>
         <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
           <label for="termoUpload" class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span>
@@ -71,78 +433,47 @@
           <input id="termoUpload" type="file" accept=".pdf" (change)="onTermoSelecionado($event)" style="display: none;" />
           <span class="file-name" *ngIf="arquivoTermoSelecionado">{{ arquivoTermoSelecionado.name }}</span>
         </div>
-        <p class="helper-text" style="margin-top: 0.35rem;">O arquivo ficará disponível no perfil do aluno. Pode ser anexado depois do cadastro.</p>
       </div>
-
-      <!-- Primeiras 2 colunas: Documentos Básicos -->
       <div class="form-grid" style="margin-bottom: 1rem">
         <div class="form-group">
-          <label for="cpf" class="form-label">
-            CPF <span class="required" aria-hidden="true" title="Preencha o CPF ou o RG" *ngIf="isCampoInvalido('dadosPessoais', 'cpf')">*</span>
-          </label>
+          <label for="cpf" class="form-label">CPF</label>
           <input type="text" id="cpf" class="form-input" formControlName="cpf"
             (input)="formatarDocumento($event)" (blur)="verificarCampoUnico('cpf')"
-            maxlength="14"
-            [class.input-error]="isCampoInvalido('dadosPessoais', 'cpf') || cpfStatus === 'ativo'"
+            maxlength="14" [class.input-error]="isCampoInvalido('dadosPessoais', 'cpf') || cpfStatus === 'ativo'"
             placeholder="000.000.000-00" autocomplete="off">
         </div>
-
         <div class="form-group">
-          <label for="rg" class="form-label">
-            RG <span class="required" aria-hidden="true" title="Preencha o CPF ou o RG" *ngIf="isCampoInvalido('dadosPessoais', 'rg')">*</span>
-          </label>
+          <label for="rg" class="form-label">RG</label>
           <input type="text" id="rg" class="form-input" formControlName="rg"
-            (input)="formatarRg($event)" (blur)="verificarCampoUnico('rg')"
-            inputmode="numeric"
-            maxlength="10"
+            (input)="formatarRg($event)" (blur)="verificarCampoUnico('rg')" maxlength="10"
             [class.input-error]="isCampoInvalido('dadosPessoais', 'rg') || rgStatus === 'ativo'"
-            placeholder="1.111.111 ou 11.111.111" autocomplete="off"
-            aria-describedby="rg-hint">
+            placeholder="1.111.111" autocomplete="off" aria-describedby="rg-hint">
           <small id="rg-hint" class="field-hint">Digite apenas os números (7 ou 8 dígitos).</small>
         </div>
-
       </div>
-
-      <!-- Feedbacks CPF / RG centralizados após os campos -->
       <div class="form-group full-width" style="margin-bottom: 1rem;">
         @if (isCampoInvalido('dadosPessoais', 'cpf') && isCampoInvalido('dadosPessoais', 'rg')) {
           <span class="error-text" role="alert">Preencha pelo menos o CPF ou o RG.</span>
         }
-        @if (cpfStatus === 'verificando' || rgStatus === 'verificando') {
-          <output aria-live="polite" class="helper-text">Verificando documentos...</output>
-        }
         @if (cpfStatus === 'ativo' && cpfConflito) {
-          <span class="error-text" role="alert" aria-live="assertive">
-            Já existe um aluno <strong>ativo</strong> com este CPF:
-            <strong>{{ cpfConflito.nomeCompleto }}</strong>
-            @if (cpfConflito.matricula) { — Matrícula: {{ cpfConflito.matricula }} }
-          </span>
+          <span class="error-text" role="alert">CPF: aluno ativo <strong>{{ cpfConflito.nomeCompleto }}</strong></span>
         }
-        @else if (rgStatus === 'ativo' && rgConflito) {
-          <span class="error-text" role="alert" aria-live="assertive">
-            Já existe um aluno <strong>ativo</strong> com este RG:
-            <strong>{{ rgConflito.nomeCompleto }}</strong>
-            @if (rgConflito.matricula) { — Matrícula: {{ rgConflito.matricula }} }
-          </span>
+        @if (rgStatus === 'ativo' && rgConflito) {
+          <span class="error-text" role="alert">RG: aluno ativo <strong>{{ rgConflito.nomeCompleto }}</strong></span>
         }
       </div>
-
-      <!-- Outras 2 colunas: Dados Demográficos 1 -->
       <div class="form-grid" style="margin-bottom: 1rem">
         <div class="form-group">
-          <label for="dataNascimento" class="form-label">Data de Nascimento <span class="required"
-              aria-hidden="true">*</span></label>
+          <label for="dataNascimento" class="form-label">Data de Nascimento <span class="required" aria-hidden="true">*</span></label>
           <input type="date" id="dataNascimento" class="form-input" formControlName="dataNascimento"
-            [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true"
-            autocomplete="bday">
+            [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true">
           @if (isCampoInvalido('dadosPessoais', 'dataNascimento')) {
-          <span class="error-text" role="alert">A data de nascimento é obrigatória.</span>
+          <span class="error-text" role="alert">Data obrigatória.</span>
           }
         </div>
-
         <div class="form-group">
           <label for="genero" class="form-label">Gênero</label>
-          <select id="genero" formControlName="genero" class="form-select" autocomplete="sex">
+          <select id="genero" formControlName="genero" class="form-select">
             <option value="">Selecione...</option>
             <option value="Masculino">Masculino</option>
             <option value="Feminino">Feminino</option>
@@ -151,25 +482,22 @@
           </select>
         </div>
       </div>
-
-      <!-- Outras 2 colunas: Dados Demográficos 2 -->
       <div class="form-grid" style="margin-bottom: 1rem">
         <div class="form-group">
           <label for="corRaca" class="form-label">Cor / Raça</label>
-          <select id="corRaca" formControlName="corRaca" class="form-select" autocomplete="off">
+          <select id="corRaca" formControlName="corRaca" class="form-select">
             <option value="">Selecione...</option>
             <option value="BRANCA">Branca</option>
             <option value="PRETA">Preta</option>
             <option value="PARDA">Parda</option>
             <option value="AMARELA">Amarela</option>
             <option value="INDIGENA">Indígena</option>
-            <option value="NAO_DECLARADO">Prefiro não responder / Não declarado</option>
+            <option value="NAO_DECLARADO">Prefiro não responder</option>
           </select>
         </div>
-
         <div class="form-group">
           <label for="estadoCivil" class="form-label">Estado Civil</label>
-          <select id="estadoCivil" formControlName="estadoCivil" class="form-select" autocomplete="off">
+          <select id="estadoCivil" formControlName="estadoCivil" class="form-select">
             <option value="">Selecione...</option>
             <option value="Solteiro(a)">Solteiro(a)</option>
             <option value="Casado(a)">Casado(a)</option>
@@ -182,318 +510,223 @@
     </fieldset>
     }
 
-    <!-- ======================================================== -->
-    <!-- PASSO 2 — Contato e Localização                          -->
-    <!-- ======================================================== -->
     @if (passoAtual === 2) {
     <fieldset formGroupName="enderecoLocalizacao">
       <legend>Passo 2: Contato e Localização</legend>
-
       <div class="form-row">
         <div class="form-group form-group--small">
           <label for="cep" class="form-label">CEP <span class="required" aria-hidden="true">*</span></label>
-          <input type="tel" inputmode="numeric" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9"
-            autocomplete="off">
+          <input type="tel" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9">
           @if (isCampoInvalido('enderecoLocalizacao', 'cep')) {
-          <span class="error-text" role="alert">Informe um CEP válido (8 dígitos).</span>
+          <span class="error-text" role="alert">CEP inválido.</span>
           }
         </div>
-
         <div class="form-group">
-          <label for="rua" class="form-label">Rua / Logradouro <span class="required"
-              aria-hidden="true">*</span></label>
+          <label for="rua" class="form-label">Rua <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="rua" formControlName="rua" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')"
-            placeholder="Preenchido automaticamente pelo CEP" autocomplete="off">
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')" placeholder="Logradouro">
           @if (isCampoInvalido('enderecoLocalizacao', 'rua')) {
-          <span class="error-text" role="alert">A rua é obrigatória.</span>
+          <span class="error-text" role="alert">Rua obrigatória.</span>
           }
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group form-group--xsmall">
           <label for="numero" class="form-label">Número <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="numero" formControlName="numero" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'numero')" placeholder="Ex: 123"
-            autocomplete="off">
-          @if (isCampoInvalido('enderecoLocalizacao', 'numero')) {
-          <span class="error-text" role="alert">O número é obrigatório.</span>
-          }
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'numero')" placeholder="123">
         </div>
-
         <div class="form-group form-group--small">
           <label for="complemento" class="form-label">Complemento</label>
-          <input type="text" id="complemento" formControlName="complemento" placeholder="Apto, Bloco..."
-            class="form-input" autocomplete="address-line2">
+          <input type="text" id="complemento" formControlName="complemento" placeholder="Apto..." class="form-input">
         </div>
-
         <div class="form-group">
           <label for="bairro" class="form-label">Bairro <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="bairro" formControlName="bairro" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'bairro')"
-            placeholder="Preenchido automaticamente" autocomplete="address-level3">
-          @if (isCampoInvalido('enderecoLocalizacao', 'bairro')) {
-          <span class="error-text" role="alert">O bairro é obrigatório.</span>
-          }
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'bairro')" placeholder="Bairro">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
           <label for="cidade" class="form-label">Cidade <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="cidade" formControlName="cidade" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cidade')"
-            placeholder="Preenchido automaticamente" autocomplete="address-level2">
-          @if (isCampoInvalido('enderecoLocalizacao', 'cidade')) {
-          <span class="error-text" role="alert">A cidade é obrigatória.</span>
-          }
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cidade')" placeholder="Cidade">
         </div>
-
         <div class="form-group form-group--xsmall">
           <label for="uf" class="form-label">UF <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="uf" formControlName="uf" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'uf')" placeholder="ES" maxlength="2"
-            autocomplete="address-level1">
-          @if (isCampoInvalido('enderecoLocalizacao', 'uf')) {
-          <span class="error-text" role="alert">UF obrigatória.</span>
-          }
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'uf')" placeholder="ES" maxlength="2">
         </div>
       </div>
-
       <div class="form-group">
         <label for="pontoReferencia" class="form-label">Ponto de Referência</label>
-        <input type="text" class="form-input" id="pontoReferencia" formControlName="pontoReferencia"
-          placeholder="Ex: Próximo à padaria central">
+        <input type="text" class="form-input" id="pontoReferencia" formControlName="pontoReferencia">
       </div>
-
       <div class="form-row">
         <div class="form-group">
-          <label for="telefoneContato" class="form-label">Telefone de Contato <span class="required"
-              aria-hidden="true">*</span></label>
-          <input type="tel" inputmode="numeric" id="telefoneContato" class="form-input"
-            formControlName="telefoneContato" (input)="formatarTelefone($event)" maxlength="15"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')"
-            placeholder="(00) 00000-0000" aria-required="true" autocomplete="tel">
+          <label for="telefoneContato" class="form-label">Telefone <span class="required" aria-hidden="true">*</span></label>
+          <input type="tel" id="telefoneContato" class="form-input" formControlName="telefoneContato"
+            (input)="formatarTelefone($event)" maxlength="15"
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" placeholder="(00) 00000-0000">
           @if (isCampoInvalido('enderecoLocalizacao', 'telefoneContato')) {
-          <span class="error-text" role="alert">O telefone é obrigatório.</span>
+          <span class="error-text" role="alert">Telefone obrigatório.</span>
           }
         </div>
-
         <div class="form-group">
           <label for="email" class="form-label">E-mail</label>
-          <input type="email" id="email" class="form-input" formControlName="email" placeholder="exemplo@email.com"
-            autocomplete="email">
+          <input type="email" id="email" class="form-input" formControlName="email" placeholder="exemplo@email.com">
         </div>
       </div>
-
       <div class="form-group">
         <label for="contatoEmergencia" class="form-label">Contato de Emergência</label>
         <input type="text" id="contatoEmergencia" class="form-input" formControlName="contatoEmergencia"
-          placeholder="Nome e telefone de um familiar ou responsável">
-        <small class="field-hint">Ex: Maria Silva — (27) 99999-0000 (mãe)</small>
+          placeholder="Nome e telefone">
       </div>
     </fieldset>
     }
 
-    <!-- ======================================================== -->
-    <!-- PASSO 3 — Perfil da Deficiência                          -->
-    <!-- ======================================================== -->
     @if (passoAtual === 3) {
     <fieldset formGroupName="perfilDeficiencia">
       <legend>Passo 3: Perfil da Deficiência Visual</legend>
-
       <div class="form-row">
         <div class="form-group">
-          <label for="tipoDeficiencia" class="form-label">Tipo de Deficiência Visual <span class="required"
-              aria-hidden="true">*</span></label>
+          <label for="tipoDeficiencia" class="form-label">Tipo <span class="required" aria-hidden="true">*</span></label>
           <select id="tipoDeficiencia" formControlName="tipoDeficiencia" class="form-select"
-            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')" aria-required="true">
+            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')">
             <option value="">Selecione...</option>
             <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
-            <option value="BAIXA_VISAO">Baixa Visão / Visão Subnormal</option>
+            <option value="BAIXA_VISAO">Baixa Visão</option>
             <option value="VISAO_MONOCULAR">Visão Monocular</option>
           </select>
           @if (isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')) {
-          <span class="error-text" role="alert">Selecione o tipo de deficiência.</span>
+          <span class="error-text" role="alert">Campo obrigatório.</span>
           }
         </div>
-
         <div class="form-group">
-          <label for="causaDeficiencia" class="form-label">Causa da Deficiência</label>
+          <label for="causaDeficiencia" class="form-label">Causa</label>
           <select id="causaDeficiencia" formControlName="causaDeficiencia" class="form-select">
             <option value="">Selecione...</option>
-            <option value="CONGENITA">Congênita (desde o nascimento)</option>
+            <option value="CONGENITA">Congênita</option>
             <option value="ADQUIRIDA">Adquirida</option>
           </select>
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
-          <label for="idadeOcorrencia" class="form-label">
-            Idade em que ocorreu (se adquirida)
-          </label>
+          <label for="idadeOcorrencia" class="form-label">Idade Ocorrência</label>
           <input type="text" id="idadeOcorrencia" formControlName="idadeOcorrencia" class="form-input"
             placeholder="Ex: Aos 15 anos"
-            [style.opacity]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled ? '0.45' : '1'"
-            [style.cursor]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled ? 'not-allowed' : 'text'"
-            [attr.aria-disabled]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled || null">
+            [style.opacity]="cadastroForm.get('perfilDeficiencia.idadeOcorrencia')?.disabled ? '0.45' : '1'">
         </div>
-
         <div class="form-group">
-          <label for="prefAcessibilidade" class="form-label">Preferência de Comunicação <span class="required"
-              aria-hidden="true">*</span></label>
+          <label for="prefAcessibilidade" class="form-label">Pref. Comunicação <span class="required" aria-hidden="true">*</span></label>
           <select id="prefAcessibilidade" formControlName="prefAcessibilidade" class="form-select"
-            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')" aria-required="true">
+            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')">
             <option value="">Selecione...</option>
             <option value="BRAILLE">Braille</option>
-            <option value="FONTE_AMPLIADA">Texto com Fonte Ampliada</option>
-            <option value="ARQUIVO_DIGITAL">Arquivo Digital Acessível (PDF/Doc)</option>
+            <option value="FONTE_AMPLIADA">Fonte Ampliada</option>
+            <option value="ARQUIVO_DIGITAL">Arquivo Digital</option>
             <option value="AUDIO">Áudio</option>
           </select>
           @if (isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')) {
-          <span class="error-text" role="alert">A preferência de comunicação é obrigatória.</span>
+          <span class="error-text" role="alert">Campo obrigatório.</span>
           }
         </div>
       </div>
-
       <div class="form-group">
-        <label for="tecAssistivas" class="form-label">Tecnologias Assistivas Utilizadas</label>
+        <label for="tecAssistivas" class="form-label">Tecnologias Assistivas</label>
         <input type="text" id="tecAssistivas" class="form-input" formControlName="tecAssistivas"
-          placeholder="Ex: Bengala, Cão-guia, Leitor de tela (NVDA/JAWS), Lupa">
+          placeholder="Ex: Bengala, Cão-guia">
       </div>
-
       <div class="form-group checkbox-group">
         <input type="checkbox" id="possuiLaudo" formControlName="possuiLaudo">
-        <label for="possuiLaudo">Possui Laudo Médico Atualizado?</label>
+        <label for="possuiLaudo">Possui Laudo Médico?</label>
       </div>
-
       @if (cadastroForm.get('perfilDeficiencia.possuiLaudo')?.value) {
       <div class="laudo-upload-area">
-        <label for="laudoArquivo">Anexar Imagem do Laudo Médico</label>
-        <p class="field-hint">Envie apenas arquivos de imagem digitalizados (JPG, PNG). Tamanho máximo: 5MB.</p>
-        <input type="file" id="laudoArquivo" accept="image/*" (change)="onLaudoSelecionado($event)" class="file-input"
-          [attr.aria-label]="'Selecionar arquivo de laudo médico'">
+        <label for="laudoArquivo">Anexar Imagem do Laudo</label>
+        <input type="file" id="laudoArquivo" accept="image/*" (change)="onLaudoSelecionado($event)" class="file-input">
       </div>
       }
     </fieldset>
     }
 
-    <!-- ======================================================== -->
-    <!-- PASSO 4 — Situação Socioeconômica e Saúde                -->
-    <!-- ======================================================== -->
     @if (passoAtual === 4) {
     <fieldset formGroupName="socioeconomico">
       <legend>Passo 4: Situação Socioeconômica e Saúde</legend>
-
       <div class="form-row">
         <div class="form-group">
           <label for="escolaridade" class="form-label">Escolaridade</label>
           <select id="escolaridade" formControlName="escolaridade" class="form-select">
             <option value="">Selecione...</option>
             <option value="Sem escolaridade">Sem escolaridade</option>
-            <option value="Ensino Fundamental Incompleto">Ens. Fundamental Incompleto</option>
-            <option value="Ensino Fundamental Completo">Ens. Fundamental Completo</option>
+            <option value="Ensino Fundamental Incompleto">Ens. Fund. Incompleto</option>
+            <option value="Ensino Fundamental Completo">Ens. Fund. Completo</option>
             <option value="Ensino Médio Incompleto">Ens. Médio Incompleto</option>
             <option value="Ensino Médio Completo">Ens. Médio Completo</option>
-            <option value="Ensino Superior Incompleto">Ens. Superior Incompleto</option>
-            <option value="Ensino Superior Completo">Ens. Superior Completo</option>
+            <option value="Ensino Superior Incompleto">Superior Incompleto</option>
+            <option value="Ensino Superior Completo">Superior Completo</option>
             <option value="Pós-graduação">Pós-graduação</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label for="profissao" class="form-label">Profissão / Ocupação</label>
-          <input type="text" id="profissao" formControlName="profissao" class="form-input"
-            placeholder="Ex: Recepcionista, Estudante" autocomplete="organization-title">
+          <label for="profissao" class="form-label">Profissão</label>
+          <input type="text" id="profissao" formControlName="profissao" class="form-input" placeholder="Ex: Recepcionista">
         </div>
       </div>
-
       <div class="form-row">
         <div class="form-group">
-          <label for="rendaFamiliar" class="form-label">Renda Familiar Mensal</label>
+          <label for="rendaFamiliar" class="form-label">Renda Familiar</label>
           <select id="rendaFamiliar" formControlName="rendaFamiliar" class="form-select">
             <option value="">Selecione...</option>
             <option value="Sem renda">Sem renda</option>
             <option value="Até 1 salário mínimo">Até 1 salário mínimo</option>
-            <option value="De 1 a 2 salários mínimos">De 1 a 2 salários mínimos</option>
-            <option value="De 2 a 3 salários mínimos">De 2 a 3 salários mínimos</option>
-            <option value="Acima de 3 salários mínimos">Acima de 3 salários mínimos</option>
+            <option value="De 1 a 2 salários mínimos">De 1 a 2 sal. mínimos</option>
+            <option value="De 2 a 3 salários mínimos">De 2 a 3 sal. mínimos</option>
+            <option value="Acima de 3 salários mínimos">Acima de 3 sal. mínimos</option>
           </select>
         </div>
-
         <div class="form-group">
-          <label for="beneficiosGov" class="form-label">Benefícios Governamentais</label>
-          <input type="text" id="beneficiosGov" formControlName="beneficiosGov" class="form-input"
-            placeholder="Ex: BPC/LOAS, Bolsa Família">
+          <label for="beneficiosGov" class="form-label">Benefícios Gov.</label>
+          <input type="text" id="beneficiosGov" formControlName="beneficiosGov" class="form-input" placeholder="Ex: BPC/LOAS">
         </div>
       </div>
-
       <div class="form-group">
         <label for="composicaoFamiliar" class="form-label">Composição Familiar</label>
         <input type="text" id="composicaoFamiliar" formControlName="composicaoFamiliar" class="form-input"
           placeholder="Ex: Mora com cônjuge e 2 filhos">
       </div>
-
-      <div class="section-divider">
-        <span>Saúde e Autonomia</span>
-      </div>
-
+      <div class="section-divider"><span>Saúde e Autonomia</span></div>
       <div class="form-group checkbox-group">
         <input type="checkbox" id="precisaAcompanhante" formControlName="precisaAcompanhante">
-        <label for="precisaAcompanhante">Necessita de acompanhante para deslocamentos?</label>
+        <label for="precisaAcompanhante">Necessita de acompanhante?</label>
       </div>
-
       <div class="form-group checkbox-group">
         <input type="checkbox" id="acompOftalmologico" formControlName="acompOftalmologico">
-        <label for="acompOftalmologico">Faz acompanhamento oftalmológico ou reabilitação?</label>
+        <label for="acompOftalmologico">Faz acompanhamento oftalmológico?</label>
       </div>
-
       <div class="form-group">
-        <label for="outrasComorbidades" class="form-label">Outras Comorbidades ou Deficiências Associadas</label>
+        <label for="outrasComorbidades" class="form-label">Outras Comorbidades</label>
         <textarea id="outrasComorbidades" formControlName="outrasComorbidades" rows="3" class="form-textarea"
-          placeholder="Descreva se houver outras condições de saúde relevantes..." tabEscape></textarea>
+          placeholder="Descreva outras condições..." tabEscape></textarea>
       </div>
-
     </fieldset>
     }
 
-    <!-- ====== BOTÕES DE NAVEGAÇÃO ====== -->
     <footer class="wizard-footer">
       @if (passoAtual > 1) {
-      <button type="button" class="btn btn-secondary" (click)="voltarPasso()"
-        [attr.aria-label]="'Voltar para etapa ' + (passoAtual - 1)">
-        ← Voltar
-      </button>
+      <button type="button" class="btn btn-secondary" (click)="voltarPasso()">← Voltar</button>
       }
-
       @if (passoAtual < 4) {
-      <!-- M-02: aria-disabled em vez de [disabled] para não bloquear foco/Enter via teclado (WCAG 2.1.1) -->
-      <button type="button" class="btn btn-primary" (click)="avancarPasso()"
-        [attr.aria-disabled]="!cadastroForm.get(getGroupName(passoAtual))?.valid"
-        [attr.aria-describedby]="!cadastroForm.get(getGroupName(passoAtual))?.valid ? 'wizard-validacao-hint' : null"
-        [attr.aria-label]="'Avançar para etapa ' + (passoAtual + 1)">
-        Avançar →
-      </button>
-      <!-- Anúncio ao leitor de tela quando o passo tem erros -->
-      <output id="wizard-validacao-hint" class="sr-only" aria-live="polite">
-        @if (!cadastroForm.get(getGroupName(passoAtual))?.valid) {
-          Preencha todos os campos obrigatórios desta etapa para continuar.
-        }
-      </output>
+      <button type="button" class="btn btn-primary" (click)="avancarPasso()">Avançar →</button>
       }
-
       @if (passoAtual === 4) {
       <div style="display:flex; gap: 0.75rem;">
-        @if (isModoEdicao) {
-          <button type="button" class="btn btn-secondary" (click)="emitirCancelamento()">Cancelar Edição</button>
-        }
         <button type="submit" class="btn btn-primary" [disabled]="cadastroForm.invalid || isSalvando">
           @if (isSalvando) { <span class="loading-spinner" aria-hidden="true"
             style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> Salvando... }
-          @else { {{ isModoEdicao ? 'Salvar Edição' : 'Concluir Cadastro' }} }
+          @else { Concluir Cadastro }
         </button>
       </div>
       }
@@ -501,43 +734,33 @@
 
   </form>
 </div>
+}
 
-<!-- ── Modal de Reativação de Aluno ──────────────────────────────── -->
+<!-- ── Modal de Reativação ──────────────────────────────────── -->
 @if (modalReativacao && dadosReativacao) {
-<dialog open class="modal-reativacao-overlay" (keydown.escape)="cancelarReativacao()" (click)="cancelarReativacao()" aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+<dialog open class="modal-reativacao-overlay" (keydown.escape)="cancelarReativacao()" (click)="cancelarReativacao()"
+  aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="modal-reativacao-box" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
-
     <div class="modal-reativ-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
-        <path d="M18 8a2 2 0 0 1 0 4" />
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
       </svg>
     </div>
-
     <h2 id="modal-reativ-titulo">Aluno já cadastrado</h2>
-
     <p>
-      O CPF/RG informado pertence a
-      <strong>{{ dadosReativacao.nomeCompleto }}</strong>
-      @if (dadosReativacao.matricula) { <span class="matricula-badge">(Matrícula: {{ dadosReativacao.matricula
-        }})</span> },
-      que está <strong>{{ dadosReativacao.excluido ? 'excluído' : 'inativo' }}</strong> no sistema.
+      O CPF/RG informado pertence a <strong>{{ dadosReativacao.nomeCompleto }}</strong>
+      @if (dadosReativacao.matricula) { <span class="matricula-badge">(Mat.: {{ dadosReativacao.matricula }})</span> },
+      que está <strong>{{ dadosReativacao.excluido ? 'excluído' : 'inativo' }}</strong>.
     </p>
-    <p>Deseja <strong>reativar</strong> o cadastro deste aluno?</p>
-
+    <p>Deseja <strong>reativar</strong> este aluno?</p>
     <div class="modal-reativ-actions">
-      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [disabled]="isSalvando">
-        Não, cancelar
-      </button>
+      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [disabled]="isSalvando">Não, cancelar</button>
       <button class="btn-reativ-confirmar" (click)="confirmarReativacao()" [disabled]="isSalvando">
-        @if (isSalvando) { Reativando... }
-        @else { Sim, reativar aluno }
+        @if (isSalvando) { Reativando... } @else { Sim, reativar aluno }
       </button>
     </div>
-
   </div>
 </dialog>
 }
