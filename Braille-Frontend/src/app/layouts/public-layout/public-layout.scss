@@ -154,11 +154,17 @@ $transition: 200ms ease;
 }
 
 // ── Botão Flutuante "Fale Conosco" ─────────────────────────
-.floating-cta {
+// Container do botão flutuante (landmark region)
+aside[role="complementary"] {
     position: fixed;
     bottom: 2rem;
     right: 2rem;
     z-index: 99;
+    pointer-events: auto;
+}
+
+.floating-cta {
+    position: static;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -441,8 +447,6 @@ main {
 
     .floating-cta {
         padding: 0.75rem 1rem;
-        bottom: 1.5rem;
-        right: 1.5rem;
         font-size: 0.85rem;
         min-height: 44px;
 
@@ -480,5 +484,17 @@ main {
             padding: 0.4rem;
             font-size: 0.8rem;
         }
+    }
+
+    aside[role="complementary"] {
+        bottom: 1.5rem;
+        right: 1.5rem;
+    }
+}
+
+@media (max-width: 420px) {
+    aside[role="complementary"] {
+        bottom: 0.95rem;
+        right: 0.75rem;
     }
 }
