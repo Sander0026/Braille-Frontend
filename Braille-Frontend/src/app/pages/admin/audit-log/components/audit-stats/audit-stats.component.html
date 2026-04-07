@@ -8,8 +8,8 @@
         <span class="stat-label">Hoje</span>
         <span class="stat-value" aria-live="polite">{{ stats.logsHoje | number }}</span>
     </div>
-    <!-- ✅ (stats.topAcoes ?? []) garante que .slice() nunca seja chamado em undefined -->
-    @for (item of (stats.topAcoes ?? []).slice(0, 3); track item.acao) {
+    <!-- ✅ ng8102: stats.topAcoes já é um array fixo pelo contrato typescript -->
+    @for (item of stats.topAcoes.slice(0, 3); track item.acao) {
     <div class="stat-card stat-acao">
         <span class="stat-label">{{ item.acao }}</span>
         <span class="stat-value">{{ item.total | number }}</span>
