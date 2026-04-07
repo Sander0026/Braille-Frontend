@@ -69,7 +69,7 @@ $gray-900: #1a1a1a;
 // ── Content section ───────────────────────────────────────
 .content-section {
     background: $gray-100;
-    padding: 5rem 0;
+    padding: 4rem 0;
 }
 
 .content-inner {
@@ -93,7 +93,7 @@ $gray-900: #1a1a1a;
     font-size: clamp(1.4rem, 3vw, 2rem);
     font-weight: 800;
     color: $gray-900;
-    margin: 0 0 1.25rem;
+    margin: 0 0 1.5rem;
 }
 
 .text-center {
@@ -174,22 +174,38 @@ $gray-900: #1a1a1a;
 // ── Equipe ────────────────────────────────────────────────
 .equipe-section {
     background: #fff;
-    padding: 5rem 0;
+    padding: 4rem 0;
     text-align: center;
+
+    .section-header {
+        margin-bottom: 2.25rem;
+    }
+
+    .section-title {
+        margin: 0 0 0.9rem;
+    }
+
+    .section-subtitle {
+        margin: 0 auto;
+        max-width: 720px;
+        line-height: 1.55;
+    }
 }
 
 .equipe-desc {
     text-align: center;
     color: $gray-600;
     font-size: 0.95rem;
-    margin: 0 auto 2.5rem;
+    margin: 0 auto 3.5rem;
     max-width: 500px;
 }
 
 .equipe-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.25rem;
+    gap: 2rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1.25rem;
 }
 
 .equipe-card {
@@ -228,22 +244,33 @@ $gray-900: #1a1a1a;
 // ── CTA footer ────────────────────────────────────────────
 .sobre-cta {
     background: $primary;
-    padding: 4rem 0;
+    padding: 4.5rem 0;
     text-align: center;
 }
 
 .sobre-cta-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .cta-icon {
+        margin-bottom: 1rem;
+    }
+
     h2 {
         font-size: clamp(1.4rem, 3vw, 2rem);
         font-weight: 900;
         color: $black;
-        margin: 0 0 0.5rem;
+        margin: 0 0 1.4rem;
     }
 
+    .cta-desc,
     p {
         font-size: 0.9rem;
         color: color.change($black, $alpha: .7);
-        margin: 0 0 1.5rem;
+        margin: 0 0 2.4rem;
+        max-width: 760px;
+        line-height: 1.65;
     }
 }
 
