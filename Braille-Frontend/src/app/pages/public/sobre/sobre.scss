@@ -9,13 +9,24 @@ $gray-900: #1a1a1a;
 
 // ── Page hero (shared with Sobre/Contato) ─────────────────
 .page-hero {
-    background-color: $primary;
-    width: 100%;
-    height: 100%;
+    background: $black;
+    background-image: url('/fachada_ilbes.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
     padding: 4rem 1.5rem 3.5rem;
     text-align: center;
     position: relative;
     overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.52) 100%);
+        z-index: 0;
+        pointer-events: none;
+    }
 }
 
 .page-hero-inner {
@@ -30,24 +41,25 @@ $gray-900: #1a1a1a;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: $black;
+    color: $primary;
     margin: 0 0 0.75rem;
 }
 
 .page-hero-title {
     font-size: clamp(1.75rem, 4vw, 2.8rem);
     font-weight: 900;
-    color: $black;
+    color: #fff;
     margin: 0 0 1rem;
     line-height: 1.2;
 }
 
 .page-hero-desc {
     font-size: 1.1rem;
-    color: $black;
+    color: color.change(#fff, $alpha: .9);
     line-height: 1.7;
     margin: 0 auto;
     max-width: 600px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 // ── Content section ───────────────────────────────────────
