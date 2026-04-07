@@ -23,7 +23,7 @@
             <h2 class="info-titulo">Outras formas de contato</h2>
 
             <div class="info-item">
-                <span class="info-icon" aria-hidden="true">📍</span>
+                <span class="info-icon material-symbols-rounded" aria-hidden="true">location_on</span>
                 <div>
                     <strong>Endereço</strong>
                     <p>{{ config?.enderecoCompleto || 'Rua Exemplo, 123 — Centro, Cidade — Estado' }}</p>
@@ -31,7 +31,7 @@
             </div>
 
             <div class="info-item">
-                <span class="info-icon" aria-hidden="true">📞</span>
+                <span class="info-icon material-symbols-rounded" aria-hidden="true">call</span>
                 <div>
                     <strong>Telefone</strong>
                     <p>{{ config?.telefoneCentral || '(XX) XXXX-XXXX' }}</p>
@@ -40,7 +40,7 @@
             </div>
 
             <div class="info-item">
-                <span class="info-icon" aria-hidden="true">✉️</span>
+                <span class="info-icon material-symbols-rounded" aria-hidden="true">mail</span>
                 <div>
                     <strong>E-mail</strong>
                     <p>{{ config?.emailOficial || 'contato@institutobraille.org.br' }}</p>
@@ -50,28 +50,32 @@
             <!-- Redes Sociais -->
             @if (config?.instagram || config?.facebook || config?.youtube || config?.linkedin) {
             <div class="info-item info-sociais">
-                <span class="info-icon" aria-hidden="true">🌐</span>
+                <span class="info-icon material-symbols-rounded" aria-hidden="true">language</span>
                 <div>
                     <strong>Redes Sociais</strong>
                     <div class="social-links-grid">
                         @if (config?.instagram) {
                         <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram" class="social-badge">
-                            📷 Instagram
+                            <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+                            Instagram
                         </a>
                         }
                         @if (config?.facebook) {
                         <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook" class="social-badge">
-                            👥 Facebook
+                            <span class="material-symbols-rounded" aria-hidden="true">groups</span>
+                            Facebook
                         </a>
                         }
                         @if (config?.youtube) {
                         <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube" class="social-badge">
-                            ▶️ YouTube
+                            <span class="material-symbols-rounded" aria-hidden="true">smart_display</span>
+                            YouTube
                         </a>
                         }
                         @if (config?.linkedin) {
                         <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn" class="social-badge">
-                            💼 LinkedIn
+                            <span class="material-symbols-rounded" aria-hidden="true">business_center</span>
+                            LinkedIn
                         </a>
                         }
                     </div>
@@ -81,7 +85,7 @@
 
             <div class="info-aviso" role="note">
                 <p>
-                    <strong>ℹ️ Como funciona?</strong><br>
+                    <strong><span class="material-symbols-rounded" aria-hidden="true">info</span> Como funciona?</strong><br>
                     Ao enviar este formulário, nossa secretaria recebe a mensagem e entrará em contato
                     pelo telefone ou e-mail que você informar.
                 </p>
@@ -94,7 +98,7 @@
             <!-- Estado: sucesso -->
             @if (enviado) {
             <section class="success-state" aria-label="Mensagem enviada com sucesso" aria-live="polite">
-                <div class="success-icon" aria-hidden="true">✅</div>
+                <div class="success-icon" aria-hidden="true"><span class="material-symbols-rounded">check_circle</span></div>
                 <h2>Mensagem enviada!</h2>
                 <p>
                     Recebemos sua mensagem com sucesso. Nossa secretaria entrará em
@@ -116,7 +120,7 @@
                 </p>
 
                 @if (erroEnvio) {
-                <div class="form-error-banner" role="alert">⚠️ {{ erroEnvio }}</div>
+                <div class="form-error-banner" role="alert"><span class="material-symbols-rounded" aria-hidden="true">warning</span> {{ erroEnvio }}</div>
                 }
 
                 <!-- Nome -->
@@ -197,8 +201,8 @@
 
                 <!-- Submit -->
                 <button type="submit" class="btn-primary btn-full" [disabled]="enviando" [attr.aria-busy]="enviando">
-                    @if (enviando) { <span aria-live="polite" aria-atomic="true">⏳ Enviando...</span> }
-                    @else { 📨 Enviar Mensagem }
+                    @if (enviando) { <span aria-live="polite" aria-atomic="true"><span class="material-symbols-rounded" aria-hidden="true">hourglass_top</span> Enviando...</span> }
+                    @else { <span class="material-symbols-rounded" aria-hidden="true">send</span> Enviar Mensagem }
                 </button>
 
             </form>

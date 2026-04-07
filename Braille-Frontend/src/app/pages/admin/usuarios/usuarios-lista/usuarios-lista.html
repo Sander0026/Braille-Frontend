@@ -182,13 +182,13 @@
                     
                     <div class="cpf-status-indicator" style="margin-top: 5px; font-size: 0.85rem;" aria-live="polite">
                         @if (cpfStatus === 'verificando') {
-                            <span style="color: #6b7280;">⏳ Verificando no sistema...</span>
+                            <span style="color: #6b7280;">Verificando no sistema...</span>
                         }
                         @if (cpfStatus === 'livre') {
-                            <span style="color: #10b981;">✅ CPF disponível.</span>
+                            <span style="color: #10b981;">CPF disponível.</span>
                         }
                         @if (cpfStatus === 'ativo' || cpfStatus === 'inativo' || cpfStatus === 'excluido') {
-                            <span style="color: #ef4444; font-weight: 500;">❌ CPF já pertence a outro usuário: {{ cpfConflito?.nome }}.</span>
+                            <span style="color: #ef4444; font-weight: 500;">CPF já pertence a outro usuário: {{ cpfConflito?.nome }}.</span>
                         }
                     </div>
 

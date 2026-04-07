@@ -137,6 +137,7 @@ $gray-900: #1a1a1a;
     font-size: 1.3rem;
     margin-top: 0.1rem;
     flex-shrink: 0;
+    font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 20;
 }
 
 .info-hint {
@@ -168,6 +169,11 @@ $gray-900: #1a1a1a;
         transform: translateY(-2px);
         filter: brightness(1.1);
     }
+
+    .material-symbols-rounded {
+        font-size: 0.95rem;
+        line-height: 1;
+    }
 }
 
 .info-aviso {
@@ -186,6 +192,14 @@ $gray-900: #1a1a1a;
 
     strong {
         color: $primary;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+
+        .material-symbols-rounded {
+            font-size: 0.9rem;
+            line-height: 1;
+        }
     }
 }
 
@@ -225,6 +239,14 @@ $gray-900: #1a1a1a;
     font-size: 0.82rem;
     color: #991b1b;
     margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+
+    .material-symbols-rounded {
+        font-size: 1rem;
+        line-height: 1;
+    }
 }
 
 // Form group
@@ -371,4 +393,19 @@ textarea.form-input {
     font-size: 3.5rem;
     line-height: 1;
     margin-bottom: 0.5rem;
+
+    .material-symbols-rounded {
+        font-size: 3.5rem;
+        line-height: 1;
+        color: #16a34a;
+    }
+}
+
+.btn-primary.btn-full {
+    .material-symbols-rounded {
+        font-size: 1rem;
+        line-height: 1;
+        vertical-align: middle;
+        margin-right: 0.25rem;
+    }
 }
