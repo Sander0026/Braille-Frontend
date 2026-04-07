@@ -6,6 +6,7 @@ import { SiteConfigService } from '../../../core/services/site-config';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
+import { CloudinaryPipe } from '../../../core/pipes/cloudinary.pipe';
 
 interface ContatoPayload {
     nome: string;
@@ -18,7 +19,7 @@ interface ContatoPayload {
 @Component({
     selector: 'app-contato',
     standalone: true,
-    imports: [CommonModule, FormsModule, TabEscapeDirective],
+    imports: [CommonModule, FormsModule, TabEscapeDirective, CloudinaryPipe],
     templateUrl: './contato.html',
     styleUrl: './contato.scss',
 })
@@ -41,11 +42,13 @@ export class Contato {
 
     // Dados Dinâmicos do CMS (Aba Contato)
     contatoConfig$: Observable<any>;
+    fachadaUrl: string = '';
 
     constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private siteConfig: SiteConfigService) {
         this.contatoConfig$ = this.siteConfig.secoes$.pipe(
             map(secoes => secoes['contato_global'] || {})
         );
+        this.carregarFachada();
     }
 
     marcarTocado(campo: string): void {
@@ -146,5 +149,22 @@ export class Contato {
         this.erroEnvio = '';
         this.tocado = {};
         this.form = { nome: '', email: '', telefone: '', assunto: '', mensagem: '' };
+    }
+
+    carregarFachada() {
+        const configs = this.siteConfig.getConfig('fachadaUrl');
+        if (configs) {
+            this.fachadaUrl = configs;
+            this.cdr.markForCheck();
+        } else {
+            this.siteConfig.configs$.subscribe({
+                next: (confs) => {
+                    if (confs && confs['fachadaUrl']) {
+                        this.fachadaUrl = confs['fachadaUrl'];
+                        this.cdr.markForCheck();
+                    }
+                }
+            });
+        }
     }
 }

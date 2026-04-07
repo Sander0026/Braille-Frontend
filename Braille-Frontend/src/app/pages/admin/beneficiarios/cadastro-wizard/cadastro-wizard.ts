@@ -365,7 +365,7 @@ export class CadastroWizard extends BaseFormDescarte implements OnInit {
 
     const formValues = this.cadastroForm.value;
 
-    // ✅ FIX: Monta o payload SEM o campo laudoArquivo (campo exclusivo da UI)
+  // FIX: Monta o payload SEM o campo laudoArquivo (campo exclusivo da UI)
     // e SEM campos de endereço que não existem no grupo correto
     const { laudoArquivo, ...perfilDeficienciaSemArquivo } = formValues.perfilDeficiencia;
 
@@ -382,7 +382,7 @@ export class CadastroWizard extends BaseFormDescarte implements OnInit {
       ...formValues.socioeconomico,
     };
 
-    // ✅ FIX: Remove campos com string vazia para não falhar @IsEnum() do backend
+  // FIX: Remove campos com string vazia para não falhar @IsEnum() do backend
     // O backend usa @IsOptional() em todos os enums, então undefined é aceito
     const enumFields = ['tipoDeficiencia', 'causaDeficiencia', 'prefAcessibilidade'];
     for (const field of enumFields) {
@@ -391,7 +391,7 @@ export class CadastroWizard extends BaseFormDescarte implements OnInit {
       }
     }
 
-    // ✅ FIX: Remove strings vazias de campos opcionais para manter o banco limpo
+  // FIX: Remove strings vazias de campos opcionais para manter o banco limpo
     const optionalStringFields = [
       'genero', 'estadoCivil', 'corRaca', 'complemento', 'pontoReferencia', 'email',
       'contatoEmergencia', 'idadeOcorrencia', 'tecAssistivas', 'escolaridade',

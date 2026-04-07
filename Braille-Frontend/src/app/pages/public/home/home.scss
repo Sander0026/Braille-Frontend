@@ -125,6 +125,42 @@ $transition: 250ms ease;
         display: none !important;
         background-image: none !important;
     }
+
+    .sobre {
+        background: $black !important;
+
+        .mvv-titulo {
+            color: $primary !important;
+        }
+
+        .mvv-desc {
+            color: $primary !important;
+        }
+
+        .mvv-icon .material-symbols-rounded {
+            color: $primary !important;
+        }
+    }
+
+    .oficinas {
+        background: $black !important;
+
+        .section-title {
+            color: $primary !important;
+        }
+
+        .section-subtitle {
+            color: $primary !important;
+        }
+    }
+
+    .wave-transition svg path {
+        fill: $black !important;
+    }
+
+    .wave-transition-double svg path {
+        fill: $black !important;
+    }
 }
 
 .hero-inner {
@@ -275,6 +311,7 @@ $transition: 250ms ease;
             display: -webkit-box;
             background: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }

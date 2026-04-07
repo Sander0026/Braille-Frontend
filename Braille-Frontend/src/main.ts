@@ -27,11 +27,11 @@ bootstrapApplication(App, appConfig)
         
         // Função central que faz a auditoria (Agora reutilizável)
         const rodarAuditoria = () => {
-          console.log('%c⏳ Rodando auditoria do Axe-Core...', 'color: #1976d2;');
+          console.log('%cRodando auditoria do Axe-Core...', 'color: #1976d2;');
           axe.default.run().then((results) => {
             if (results.violations.length > 0) {
               console.log(
-                `%c🚨 [A11Y] ${results.violations.length} REGRA(S) DE ACESSIBILIDADE VIOLADA(S) NA TELA ATUAL`,
+                `%c[A11Y] ${results.violations.length} REGRA(S) DE ACESSIBILIDADE VIOLADA(S) NA TELA ATUAL`,
                 'color: white; background: #d32f2f; font-weight: bold; font-size: 14px; padding: 6px 12px; border-radius: 4px;'
               );
 
@@ -56,14 +56,14 @@ bootstrapApplication(App, appConfig)
                     curr = curr.parentElement;
                   }
 
-                  console.log(`   📍 Componente: <%c${angularComponent}%c>`, 'color: #e65100; font-weight: bold;', 'color: inherit;');
-                  console.log(`   📝 Problema: ${node.failureSummary}`);
-                  console.log('   🔍 Elemento HTML afetado:', domElement || selectorString);
+                  console.log(`   [Componente] <%c${angularComponent}%c>`, 'color: #e65100; font-weight: bold;', 'color: inherit;');
+                  console.log(`   [Problema] ${node.failureSummary}`);
+                  console.log('   [Elemento HTML afetado]:', domElement || selectorString);
                   console.log('   --------------------------------------------------');
                 });
               });
             } else {
-              console.log('%c✅ [A11Y] Axe-core: Nenhuma violação nesta tela/modal!', 'color: white; background: #2e7d32; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
+              console.log('%c[A11Y] Axe-core: Nenhuma violação nesta tela/modal!', 'color: white; background: #2e7d32; font-weight: bold; padding: 4px 8px; border-radius: 4px;');
             }
           });
         };

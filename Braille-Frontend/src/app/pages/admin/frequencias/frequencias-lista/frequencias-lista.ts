@@ -273,7 +273,7 @@ export class FrequenciasLista implements OnInit {
             det = Array.isArray(err.error.message) ? err.error.message[0] : err.error.message;
           }
 
-          this.feedbackSalvo = `⚠️ Erro Crítico: ${det}`;
+          this.feedbackSalvo = `Erro Crítico: ${det}`;
           this.cdr.detectChanges();
         }
       });
@@ -429,14 +429,14 @@ export class FrequenciasLista implements OnInit {
     this.frequenciasService.fecharDiario(turmaId, dataAula).subscribe({
       next: (res) => {
         this.fechandoDiario = false;
-        this.feedbackSalvo = `📕 ${res.mensagem ?? 'Diário fechado com sucesso!'}`;
+  this.feedbackSalvo = `${res.mensagem ?? 'Diário fechado com sucesso!'}`;
         this.carregarHistorico();
         this.cdr.detectChanges();
         setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 6000);
       },
       error: (err) => {
         this.fechandoDiario = false;
-        this.feedbackSalvo = `⚠️ Erro: ${err.error?.message ?? 'Não foi possível fechar o diário.'}`;
+  this.feedbackSalvo = `Erro: ${err.error?.message ?? 'Não foi possível fechar o diário.'}`;
         this.cdr.detectChanges();
       }
     });
@@ -448,14 +448,14 @@ export class FrequenciasLista implements OnInit {
     this.frequenciasService.reabrirDiario(turmaId, dataAula).subscribe({
       next: () => {
         this.fechandoDiario = false;
-        this.feedbackSalvo = '📗 Diário reaberto para retificação.';
+  this.feedbackSalvo = 'Diário reaberto para retificação.';
         this.carregarHistorico();
         this.cdr.detectChanges();
         setTimeout(() => { this.feedbackSalvo = ''; this.cdr.detectChanges(); }, 6000);
       },
       error: (err) => {
         this.fechandoDiario = false;
-        this.feedbackSalvo = `⚠️ Erro: ${err.error?.message ?? 'Não foi possível reabrir o diário.'}`;
+  this.feedbackSalvo = `Erro: ${err.error?.message ?? 'Não foi possível reabrir o diário.'}`;
         this.cdr.detectChanges();
       }
     });

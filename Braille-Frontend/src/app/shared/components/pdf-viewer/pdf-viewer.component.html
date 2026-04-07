@@ -12,7 +12,7 @@
 
 @if (erro) {
   <div class="pdf-error">
-    <span class="error-icon">⚠️</span>
+    <span class="error-icon material-symbols-rounded" aria-hidden="true">warning</span>
     <p>{{ erro }}</p>
     <button (click)="tentar()" class="btn-retry">Tentar Novamente</button>
   </div>
@@ -25,9 +25,9 @@
   
   <div class="pdf-controls">
     <div class="zoom-controls">
-      <button (click)="diminuirZoom()" [disabled]="escalaAtual <= escalaMinima" title="Reduzir Zoom">🔍 -</button>
+      <button (click)="diminuirZoom()" [disabled]="escalaAtual <= escalaMinima" title="Reduzir Zoom"><span class="material-symbols-rounded" aria-hidden="true">zoom_out</span></button>
       <span class="zoom-level">{{ porcentagemZoom }}%</span>
-      <button (click)="aumentarZoom()" [disabled]="escalaAtual >= escalaMaxima" title="Aumentar Zoom">🔍 +</button>
+      <button (click)="aumentarZoom()" [disabled]="escalaAtual >= escalaMaxima" title="Aumentar Zoom"><span class="material-symbols-rounded" aria-hidden="true">zoom_in</span></button>
     </div>
 
     <div class="separator"></div>

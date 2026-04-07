@@ -447,7 +447,7 @@
         </div><!-- /if previewBaseUrl -->
 
         <div *ngIf="!previewBaseUrl" style="padding: 3rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b;">
-          ⚠️ Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
+          Atenção: volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
         </div>
       </fieldset>
     </div>
@@ -474,7 +474,7 @@
                 class="btn btn-success"
                 [disabled]="isSalvando"
                 style="background: #16a34a; border-color: #16a34a; color: #fff; padding: 0.75rem 2.5rem; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);">
-          {{ isSalvando ? 'Salvando...' : '✅ Finalizar e Salvar' }}
+          {{ isSalvando ? 'Salvando...' : 'Finalizar e Salvar' }}
         </button>
       </div>
     </div>
