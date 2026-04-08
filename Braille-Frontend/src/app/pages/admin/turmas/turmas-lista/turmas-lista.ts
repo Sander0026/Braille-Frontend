@@ -269,11 +269,41 @@ export class TurmasLista implements OnInit {
       .subscribe({
         next: () => {
           this.toast.sucesso(`Oficina ${arquivada ? 'desarquivada' : 'arquivada'} com sucesso.`);
-          this.carregarTurmas();
+          // Optimistic UI Update: Mudamos localmente e os Signals recomputam a aba em 0.1ms 
+          this.turmas.update(lista => lista.map(t => t.id === turmaId ? { ...t, statusAtivo: arquivada } : t));
         },
         error: () => {
           this.toast.erro('Inconsistência de acesso para arquivamento.');
         }
+      });
+  }
+
+  // Soft Delete (Ocultar da Tela Visualmente mas reter relacionamentos)
+  async removerDaLista(turmaId: string, event: Event) {
+    event.stopPropagation();
+    
+    if (this.isProfessor()) {
+      this.toast.erro('Ação não permitida para o seu perfil.');
+      return;
+    }
+
+    const ok = await this.confirmDialog.confirmar({
+      titulo: 'Remover Permanentemente?',
+      mensagem: 'Tem certeza? A oficina será ocultada do sistema sem apagar o histórico ligado aos alunos.',
+      textoBotaoConfirmar: 'Sim, Remover',
+      textoBotaoCancelar: 'Cancelar'
+    });
+
+    if (!ok) return;
+
+    this.turmasService.ocultarDaAba(turmaId).pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.toast.sucesso('Oficina removida da lista com sucesso.');
+          // Optimistic UI Update: Aplicamos as chaves como Ocultas na memória do front.
+          this.turmas.update(lista => lista.map(t => t.id === turmaId ? { ...t, excluido: true, statusAtivo: false } : t));
+        },
+        error: () => this.toast.erro('Inconsistência de acesso para remoção visual.')
       });
   }
 
@@ -305,12 +335,15 @@ export class TurmasLista implements OnInit {
     this.turmasService.atualizar(turma.id, payload)
       .subscribe({
         next: () => {
-          this.toast.sucesso('Status atualizado.');
-          this.carregarTurmas(); // Atualiza a lista atomicamente pós-sucesso
+          this.carregando.set(false);
+          this.toast.sucesso(`Oficina alterada para ${novoStatus}`);
+          // Optimistic UI Update: Sem recarregamento N+1 no Postgre, pura reatividade.
+          this.turmas.update(lista => lista.map(t => t.id === turma.id ? { ...t, status: novoStatus } : t));
         },
         error: () => {
+          this.carregando.set(false);
           this.toast.erro('Erro ao aplicar alteração de status.');
-          this.carregarTurmas(); // Sincroniza em caso de falha da Mutação
+          this.turmas.update(t => [...t]); // Reverte UI
         }
       });
   }

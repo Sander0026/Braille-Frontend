@@ -63,12 +63,12 @@
     } @else {
       <div class="turmas-grid">
         @for (turma of turmasFiltradas(); track turma.id) {
-          <article class="turma-card" [class.arquivada]="turma.excluido" aria-label="Detalhes da Oficina">
+          <article class="turma-card" [class.arquivada]="!turma.statusAtivo" aria-label="Detalhes da Oficina">
             <div class="tcard-top-border"></div>
             <header class="tcard-header-new">
               <h3 class="tcard-title-main">{{ turma.nome }}</h3>
               <div class="tcard-badges">
-                @if (!turma.excluido) {
+                @if (turma.statusAtivo) {
                   <span class="badge-status outline-success">
                     <span class="material-symbols-rounded badge-ico">check_circle</span> Ativa
                   </span>
@@ -112,7 +112,7 @@
                   <span class="material-symbols-rounded">group</span>
                 </button>
                 <div class="inline-select-wrapper">
-                  <select class="form-input status-dropdown" [ngModel]="turma.status" (ngModelChange)="atualizarStatusRapido(turma, $event)" [disabled]="isProfessor() || turma.excluido">
+                  <select class="form-input status-dropdown" [ngModel]="turma.status" (ngModelChange)="atualizarStatusRapido(turma, $event)" [disabled]="isProfessor() || !turma.statusAtivo">
                     <option value="PREVISTA">Prevista</option>
                     <option value="ANDAMENTO">Em Andamento</option>
                     <option value="CONCLUIDA">Concluída</option>
@@ -123,10 +123,19 @@
 
               @if (!isProfessor()) {
                 <div class="footer-right">
-                  <button class="btn btn-outline btn-sm shadow-sm" (click)="abrirModalEditar(turma)">Editar</button>
-                  <button class="btn btn-sm btn-arquivar shadow-sm" (click)="alternarArquivamento(turma.id, !!turma.excluido, $event)">
-                    {{ turma.excluido ? 'Desarquivar' : 'Arquivar' }}
-                  </button>
+                  @if (turma.statusAtivo) {
+                    <button class="btn btn-outline btn-sm shadow-sm" (click)="abrirModalEditar(turma)">Editar</button>
+                    <button class="btn btn-sm btn-arquivar shadow-sm" (click)="alternarArquivamento(turma.id, false, $event)">
+                      Arquivar
+                    </button>
+                  } @else {
+                    <button class="btn btn-sm shadow-sm" style="background:#16a34a; color:#fff; border-color:#16a34a; font-weight:600;" (click)="alternarArquivamento(turma.id, true, $event)">
+                      Restaurar
+                    </button>
+                    <button class="btn btn-sm shadow-sm" style="background:#ef4444; color:#fff; border-color:#ef4444; font-weight:600;" (click)="removerDaLista(turma.id, $event)">
+                      Remover da Lista
+                    </button>
+                  }
                 </div>
               }
             </footer>
