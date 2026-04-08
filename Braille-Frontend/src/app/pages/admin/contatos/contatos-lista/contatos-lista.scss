@@ -210,6 +210,12 @@ $gray-900: #1f1f1f;
 }
 
 .modal {
+    // Reset native <dialog> styles that break Flexbox centering
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: none;
+
     background: #fff;
     border-radius: 0.875rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
@@ -284,10 +290,12 @@ $gray-900: #1f1f1f;
         max-width: 100%;
         border-radius: 0.75rem 0.75rem 0 0;
         max-height: 85vh;
+        width: 100%;
+        margin-top: auto; // Ensures it sticks to bottom
     }
 
     .modal-backdrop {
-        align-items: center; // No mobile, ancora o modal no rodapé como bottom-sheet
+        align-items: flex-end; // No mobile, ancora o modal no rodapé como bottom-sheet
         padding: 0;
     }
 

@@ -72,7 +72,7 @@
         @if (contato.assunto) {
         <p class="mensagem-assunto"><strong>Assunto: </strong>{{ contato.assunto }}</p>
         }
-        <p class="mensagem-preview">{{ contato.mensagem.slice(0, 100) }}{{ contato.mensagem.length > 100 ? '…' : '' }}</p>
+        <p class="mensagem-preview">{{ contato.mensagem?.slice(0, 100) || '' }}{{ (contato.mensagem?.length || 0) > 100 ? '…' : '' }}</p>
     </article>
     }
 </div>

@@ -89,7 +89,10 @@
           <p style="margin-bottom: 1rem; color: #4b5563;">
              Restaurar credenciais. No próximo login, ele deverá criar uma nova.
           </p>
-          <button class="btn btn-warning" (click)="resetarSenhaAdmin()" [disabled]="salvando()" aria-label="Forçar Reset de Senha do Usuário">
+          <button class="btn btn-warning" (click)="resetarSenhaAdmin()" 
+             [disabled]="salvando() || u.id === loggedUserSub" 
+             [attr.aria-label]="u.id === loggedUserSub ? 'Ação de segurança: Não é possível resetar a própria senha' : 'Forçar Reset de Senha do Usuário'"
+             [title]="u.id === loggedUserSub ? 'Ação bloqueada. Você não pode redefinir sua própria senha padrão.' : 'Forçar senha padrão para o usuário'">
             @if (salvando()) {
                <span class="loading-spinner" aria-hidden="true"></span>
                Processando...

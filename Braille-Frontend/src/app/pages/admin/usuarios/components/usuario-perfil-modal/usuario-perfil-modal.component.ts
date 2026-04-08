@@ -17,6 +17,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UsuariosService, Usuario } from '../../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-usuario-perfil-modal',
@@ -30,7 +31,11 @@ export class UsuarioPerfilModalComponent {
   private readonly usuariosService = inject(UsuariosService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
+  private readonly authConfig = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
+
+  // Exposto para a UI checar bloqueio de auto-reset
+  readonly loggedUserSub = this.authConfig.getUser()?.sub;
 
   @ViewChild('dialogPerfil') dialogRef!: ElementRef<HTMLDialogElement>;
 
@@ -159,6 +164,10 @@ export class UsuarioPerfilModalComponent {
         next: () => {
           this.salvando.set(false);
           this.toast.sucesso('Senha resetada com sucesso para Ilbes@123');
+          if (this._usuario) {
+            this._usuario = { ...this._usuario, precisaTrocarSenha: true };
+            this.atualizado.emit(this._usuario);
+          }
         },
         error: (err) => {
           this.salvando.set(false);
