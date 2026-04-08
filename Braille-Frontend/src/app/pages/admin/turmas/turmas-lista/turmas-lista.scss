@@ -362,6 +362,10 @@ $transition: 200ms ease;
 }
 
 .modal {
+    margin: 0;
+    padding: 0;
+    border: none;
+    position: relative;
     background: #fff;
     border-radius: $border-r;
     width: 100%;
