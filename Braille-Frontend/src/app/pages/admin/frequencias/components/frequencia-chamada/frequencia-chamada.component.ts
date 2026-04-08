@@ -6,7 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FrequenciasService } from '../../../../../core/services/frequencias.service';
 import { TurmasService, Turma } from '../../../../../core/services/turmas.service';
 import { AuthService } from '../../../../../core/services/auth.service';
-import { TabelaTrFocavelDirective } from '../../frequencias-lista/frequencias-lista';
+import { TabelaTrFocavelDirective } from '../tabela-tr-focavel.directive';
 
 // Otimiza e expõe os tipos pra cá
 export interface AlunoNaChamada {

@@ -12,20 +12,7 @@ import { FrequenciaChamadaComponent } from '../components/frequencia-chamada/fre
 import { FrequenciaHistoricoComponent } from '../components/frequencia-historico/frequencia-historico.component';
 import { FrequenciaRelatorioComponent } from '../components/frequencia-relatorio/frequencia-relatorio.component';
 
-// Diretiva de acessibilidade exposta para ser usada nas tabelas internas
-@Directive({
-  selector: '[appTabelaTrFocavel]',
-  standalone: true
-})
-export class TabelaTrFocavelDirective implements FocusableOption {
-  @Input() disabled = false;
-
-  constructor(public element: ElementRef<HTMLElement>) { }
-
-  focus(): void {
-    this.element.nativeElement.focus();
-  }
-}
+// Importando os filhos Isolados (Que antes causavam dependência circular ao retornar neste file para puxar a Diretiva)
 
 @Component({
   selector: 'app-frequencias-lista',

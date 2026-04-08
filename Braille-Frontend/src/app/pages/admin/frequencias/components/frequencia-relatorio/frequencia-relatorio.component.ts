@@ -5,7 +5,7 @@ import { A11yModule, FocusKeyManager } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FrequenciasService } from '../../../../../core/services/frequencias.service';
 import { TurmasService, Turma } from '../../../../../core/services/turmas.service';
-import { TabelaTrFocavelDirective } from '../../frequencias-lista/frequencias-lista';
+import { TabelaTrFocavelDirective } from '../tabela-tr-focavel.directive';
 
 @Component({
   selector: 'app-frequencia-relatorio',
