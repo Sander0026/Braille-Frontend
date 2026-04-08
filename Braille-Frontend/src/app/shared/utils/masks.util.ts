@@ -73,7 +73,24 @@ export function formatarTelefone(valorCru: string): string {
 }
 
 /**
- * @deprecated Use as funções diretamente (`formatarCpfCnpj`, `limparEmail`, `formatarTelefone`).
+ * Formata CEP brasileiro (8 dígitos).
+ *
+ * - CEP: 00000-000
+ *
+ * @param valorCru - String bruta podendo conter caracteres não numéricos
+ * @returns CEP formatado ou vazio se input inválido
+ */
+export function formatarCep(valorCru: string): string {
+  if (!valorCru) return '';
+  let valor = valorCru.replace(/\D/g, '').substring(0, 8);
+  if (valor.length > 5) {
+    valor = valor.replace(/^(\d{5})(\d{1,3}).*/, '$1-$2');
+  }
+  return valor;
+}
+
+/**
+ * @deprecated Use as funções diretamente (`formatarCpfCnpj`, `limparEmail`, `formatarTelefone`, `formatarCep`).
  * Mantido como alias de retrocompatibilidade para consumers existentes.
  */
-export const MasksUtil = { formatarCpfCnpj, limparEmail, formatarTelefone };
+export const MasksUtil = { formatarCpfCnpj, limparEmail, formatarTelefone, formatarCep };

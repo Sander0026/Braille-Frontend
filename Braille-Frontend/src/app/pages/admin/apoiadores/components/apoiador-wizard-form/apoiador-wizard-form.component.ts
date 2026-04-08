@@ -66,7 +66,13 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
         telefone: [''],
         contatoPessoa: [''],
         atividadeEspecialidade: [''],
-        endereco: ['']
+        cep: [''],
+        rua: [''],
+        numero: [''],
+        complemento: [''],
+        bairro: [''],
+        cidade: [''],
+        uf: ['']
       }),
       visualVisibilidade: this.fb.group({
         exibirNoSite: [false]
@@ -107,7 +113,13 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
         telefone: MasksUtil.formatarTelefone(res.telefone || ''),
         contatoPessoa: res.contatoPessoa,
         atividadeEspecialidade: res.atividadeEspecialidade,
-        endereco: res.endereco
+        cep: MasksUtil.formatarCep(res.cep || ''),
+        rua: res.rua,
+        numero: res.numero,
+        complemento: res.complemento,
+        bairro: res.bairro,
+        cidade: res.cidade,
+        uf: res.uf
       },
       visualVisibilidade: { exibirNoSite: res.exibirNoSite },
       gerenciamento: { observacoes: res.observacoes },
@@ -135,6 +147,37 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     const limpo = MasksUtil.formatarTelefone(event.target.value);
     event.target.value = limpo;
     this.apoiadorForm.get('contatoEndereco.telefone')?.setValue(limpo, { emitEvent: false });
+  }
+
+  onMaskCep(event: any): void {
+    const limpo = MasksUtil.formatarCep(event.target.value);
+    event.target.value = limpo;
+    this.apoiadorForm.get('contatoEndereco.cep')?.setValue(limpo, { emitEvent: false });
+    
+    if (limpo.length === 9) {
+      this.buscarCep(limpo.replace(/\D/g, ''));
+    }
+  }
+
+  async buscarCep(cepUnformatted: string): Promise<void> {
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cepUnformatted}/json/`);
+      const data = await response.json();
+      
+      if (!data.erro) {
+        this.apoiadorForm.patchValue({
+          contatoEndereco: {
+            rua: data.logradouro,
+            bairro: data.bairro,
+            cidade: data.localidade,
+            uf: data.uf
+          }
+        });
+        this.cdr.detectChanges();
+      }
+    } catch (e) {
+      console.error('Erro ao buscar CEP', e);
+    }
   }
 
   // Arrays Helper
@@ -233,7 +276,13 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
       contatoPessoa: formData.contatoEndereco.contatoPessoa || undefined,
       telefone: formData.contatoEndereco.telefone || undefined,
       email: formData.contatoEndereco.email || undefined,
-      endereco: formData.contatoEndereco.endereco || undefined,
+      cep: formData.contatoEndereco.cep ? formData.contatoEndereco.cep.replace(/\D/g, '') : undefined,
+      rua: formData.contatoEndereco.rua || undefined,
+      numero: formData.contatoEndereco.numero || undefined,
+      complemento: formData.contatoEndereco.complemento || undefined,
+      bairro: formData.contatoEndereco.bairro || undefined,
+      cidade: formData.contatoEndereco.cidade || undefined,
+      uf: formData.contatoEndereco.uf || undefined,
       atividadeEspecialidade: formData.contatoEndereco.atividadeEspecialidade || undefined,
       observacoes: formData.gerenciamento.observacoes || undefined,
       exibirNoSite: formData.visualVisibilidade.exibirNoSite,

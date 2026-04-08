@@ -80,7 +80,13 @@
 
                 <div class="profile-section" style="grid-column: 1 / -1; background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
                     <h4 style="margin-top: 0; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem;">Endereço e Observações</h4>
-                    <p><strong>Endereço:</strong> {{ apoiador.endereco || 'Endereço não cadastrado' }}</p>
+                    <p><strong>Endereço:</strong> 
+                        @if (apoiador.rua || apoiador.cep) {
+                            {{ apoiador.rua || '' }}{{ apoiador.numero ? ', ' + apoiador.numero : '' }}{{ apoiador.complemento ? ' (' + apoiador.complemento + ')' : '' }}{{ apoiador.bairro ? ', ' + apoiador.bairro : '' }}{{ apoiador.cidade ? ' - ' + apoiador.cidade : '' }}{{ apoiador.uf ? '/' + apoiador.uf : '' }}{{ apoiador.cep ? ' | CEP: ' + apoiador.cep : '' }}
+                        } @else {
+                            Endereço não cadastrado
+                        }
+                    </p>
                     <p class="mt-2" style="background: #fff; padding: 1rem; border-radius: 8px; border: 1px solid #e5e7eb;">
                         {{ apoiador.observacoes || 'Nenhuma observação registrada.' }}
                     </p>

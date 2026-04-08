@@ -14,6 +14,20 @@
         </div>
     </header>
 
+    <!-- Abas de Status Principal -->
+    <nav class="apoiadores-tabs" role="tablist" aria-label="Abas de Filtro de Status">
+        <button role="tab" class="tab-btn" [class.active]="abaAtiva() === 'ATIVOS'" 
+                (click)="mudarAba('ATIVOS')" [attr.aria-selected]="abaAtiva() === 'ATIVOS'"
+                (keydown.enter)="mudarAba('ATIVOS')" tabindex="0">
+            Apoiadores Ativos
+        </button>
+        <button role="tab" class="tab-btn" [class.active]="abaAtiva() === 'INATIVOS'" 
+                (click)="mudarAba('INATIVOS')" [attr.aria-selected]="abaAtiva() === 'INATIVOS'"
+                (keydown.enter)="mudarAba('INATIVOS')" tabindex="0">
+            Apoiadores Inativos
+        </button>
+    </nav>
+
     <!-- Filtros Inteligentes -->
     <div class="filters-bar" role="search" aria-label="Filtros de pesquisa de apoiadores">
         <div class="search-box">

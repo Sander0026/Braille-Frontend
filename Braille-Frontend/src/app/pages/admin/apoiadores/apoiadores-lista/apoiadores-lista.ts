@@ -30,6 +30,7 @@ import { ApoiadorCertificadosComponent } from '../components/apoiador-certificad
 })
 export class ApoiadoresLista implements OnInit, OnDestroy {
   // Estado da Listagem
+  abaAtiva = signal<'ATIVOS' | 'INATIVOS'>('ATIVOS');
   pesquisaTermo = '';
   filtroTipo = 'TODOS';
   apoiadoresOriginais: Apoiador[] = [];
@@ -76,7 +77,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.carregandoLista = true;
     this.cdr.detectChanges(); // forçar caso assincrono
 
-    this.apoiadoresService.listar()
+    this.apoiadoresService.listar(undefined, undefined, undefined, undefined, false, 'all')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (dados) => {
@@ -96,6 +97,10 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
 
   aplicarFiltros(): void {
     let result = this.apoiadoresOriginais;
+    const isAtivo = this.abaAtiva() === 'ATIVOS';
+    
+    // 1. Aba Principal (Status)
+    result = result.filter(a => a.ativo === isAtivo);
 
     if (this.filtroTipo !== 'TODOS') {
       result = result.filter(a => a.tipo === this.filtroTipo);
@@ -127,6 +132,11 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.aplicarFiltros();
   }
 
+  mudarAba(aba: 'ATIVOS' | 'INATIVOS'): void {
+    this.abaAtiva.set(aba);
+    this.aplicarFiltros();
+  }
+
   toggleStatus(apoiador: Apoiador): void {
     if (!apoiador.id) return;
     const novoStatus = !apoiador.ativo;
@@ -137,11 +147,14 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     
     this.apoiadoresService.atualizar(apoiador.id, { ativo: novoStatus })
       .subscribe({
+        next: () => {
+          this.aplicarFiltros(); // Re-renderizar lista sem o removido (Optimistic effect)
+        },
         error: () => {
           // Revert on fail
           apoiador.ativo = oldStatus;
           alert('Erro ao alterar status no servidor.');
-          this.cdr.detectChanges();
+          this.aplicarFiltros();
         }
       });
   }
