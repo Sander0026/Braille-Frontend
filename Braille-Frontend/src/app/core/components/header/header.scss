@@ -20,13 +20,13 @@ $primary-dk: #c9a300;
 // ============================================================
 :host {
   display: block;
-  z-index: 100;
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
 
 .site-header {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    width: 100%;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
