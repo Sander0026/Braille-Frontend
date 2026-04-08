@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { A11yModule } from '@angular/cdk/a11y';
 
-import { Turma, TurmasService, CreateTurmaDto } from '../../../../core/services/turmas.service';
+import { Turma, TurmasService, CreateTurmaDto, TurmaStatus } from '../../../../core/services/turmas.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
@@ -51,6 +51,7 @@ export class TurmasLista implements OnInit {
   readonly drawerAberto = signal(false);
   readonly tempProfessorId = signal<string>('');
   readonly tempStatus = signal<string>('');
+  readonly termoBusca = signal<string>('');
   
   // Estado dos Modais
   readonly turmaAtiva = signal<Turma | null>(null);
@@ -61,39 +62,41 @@ export class TurmasLista implements OnInit {
 
   readonly modalAlunosAberto = signal(false);
 
-  // Computeds
-  readonly turmasFiltradas = computed(() => {
+  // Todas as turmas que batem com os filtros do drawer + busca (ignorando qual aba tá aberta)
+  readonly turmasMatchesFilters = computed(() => {
     let t = this.turmas();
     
-    // 1. Aba
-    if (this.abaAtiva() === 'ATIVO') {
-      t = t.filter(x => !x.excluido);
-    } else {
-      t = t.filter(x => x.excluido);
-    }
-
-    // 2. Filtro de Professor
     const profId = this.tempProfessorId();
-    if (profId) {
-      t = t.filter(x => x.professor?.id === profId);
-    }
+    if (profId) t = t.filter(x => x.professor?.id === profId);
 
-    // 3. Filtro de Status
     const status = this.tempStatus();
-    if (status) {
-      t = t.filter(x => x.status === status);
-    }
+    if (status) t = t.filter(x => x.status === status);
+
+    const busca = (this.termoBusca() || '').toLowerCase().trim();
+    if (busca) t = t.filter(x => (x.nome || '').toLowerCase().includes(busca));
 
     return t;
   });
 
+  // Lista efetivamente renderizada (Aplica a separação da Aba atual sobre o Matcher)
+  readonly turmasFiltradas = computed(() => {
+    let t = this.turmasMatchesFilters();
+    if (this.abaAtiva() === 'ATIVO') {
+      return t.filter(x => x.statusAtivo);
+    } else {
+      return t.filter(x => !x.statusAtivo && !x.excluido);
+    }
+  });
+
+  // Contadores dinâmicos reais para as tabs
   readonly titleAtivo = computed(() => {
-    const total = this.turmasFiltradas().length;
+    const total = this.turmasMatchesFilters().filter(x => x.statusAtivo).length;
     return `Ativas (${total})`;
   });
 
   readonly titleArquivado = computed(() => {
-    return `Arquivadas (${this.statusCount()['arquivadas'] || 0})`;
+    const total = this.turmasMatchesFilters().filter(x => !x.statusAtivo && !x.excluido).length;
+    return `Arquivadas (${total})`;
   });
 
   ngOnInit(): void {
@@ -121,14 +124,14 @@ export class TurmasLista implements OnInit {
   carregarTurmas() {
     this.carregando.set(true);
 
-    // Chama o serviço de listar (supondo que ignore os excluídos se não filtrarmos propriamente, mas a API retorna todos? Vamos tentar)
-    this.turmasService.listar(1, 100, undefined, undefined, this.tempProfessorId() || undefined, this.tempStatus() || undefined)
+    // Bypassing exclusion & activity block to allow fetching both Active and Archived turmas simultaneously
+    this.turmasService.listar(1, 100, undefined, 'all', this.tempProfessorId() || undefined, this.tempStatus() || undefined, 'all')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.turmas.set(res.data);
           this.statusCount.set({
-            arquivadas: res.data.filter(t => t.excluido).length
+            arquivadas: res.data.filter(t => !t.statusAtivo && !t.excluido).length
           });
           this.carregando.set(false);
         },
@@ -270,6 +273,44 @@ export class TurmasLista implements OnInit {
         },
         error: () => {
           this.toast.erro('Inconsistência de acesso para arquivamento.');
+        }
+      });
+  }
+
+  // Mudança Rápida de Status via Selector do Card
+  async atualizarStatusRapido(turma: Turma, novoStatus: TurmaStatus) {
+    if (turma.status === novoStatus) return;
+
+    if (this.isProfessor()) {
+      this.toast.erro('Ação não permitida para o seu perfil.');
+      this.turmas.update(t => [...t]); // Reverte UI
+      return;
+    }
+
+    const ok = await this.confirmDialog.confirmar({
+      titulo: 'Alterar Status',
+      mensagem: `Confirma a alteração da oficina "${turma.nome}" para ${novoStatus}?`,
+      textoBotaoConfirmar: 'Sim, alterar',
+      textoBotaoCancelar: 'Cancelar'
+    });
+
+    if (!ok) {
+      this.turmas.update(t => [...t]); // Força re-render para reverter select
+      return;
+    }
+
+    this.carregando.set(true);
+    // Cast para bypass da DTO limpa preservando as restrições anti-any
+    const payload = { status: novoStatus } as unknown as Partial<CreateTurmaDto>;
+    this.turmasService.atualizar(turma.id, payload)
+      .subscribe({
+        next: () => {
+          this.toast.sucesso('Status atualizado.');
+          this.carregarTurmas(); // Atualiza a lista atomicamente pós-sucesso
+        },
+        error: () => {
+          this.toast.erro('Erro ao aplicar alteração de status.');
+          this.carregarTurmas(); // Sincroniza em caso de falha da Mutação
         }
       });
   }

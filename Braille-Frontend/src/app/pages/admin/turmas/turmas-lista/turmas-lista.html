@@ -1,27 +1,34 @@
 
 <main class="page-container" id="main-content">
-  <div class="page-header" style="flex-direction:row; justify-content:space-between; flex-wrap:wrap;">
-    <h1 class="page-title">Gestão de Oficinas</h1>
-
-    <div class="page-actions" style="display:flex; gap:1rem; align-items:center;">
-      <button class="btn btn-secondary btn-icon-text" (click)="abrirFiltros()"
-        [attr.aria-expanded]="drawerAberto()">
-        <span class="material-symbols-rounded" aria-hidden="true">tune</span>
-        Configurar Filtros
-        @if (tempProfessorId() || tempStatus()) {
-        <span class="badge" aria-label="filtros ativos">{{ (tempProfessorId() ? 1 : 0) + (tempStatus() ? 1 : 0) }}</span>
-        }
-      </button>
+  <header class="page-header" style="flex-direction:column; align-items: stretch; gap: 1rem; margin-bottom: 2rem;">
+    <div class="header-top" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
+      <div class="header-titles">
+        <h1 class="page-title" style="margin:0; font-size:1.5rem;">Oficinas / Turmas</h1>
+        <p class="page-subtitle" style="color: #64748b; font-size:0.9rem; margin:0.25rem 0 0 0;">Gerencie as oficinas e turmas do instituto</p>
+      </div>
 
       @if (!isProfessor()) {
-      <button class="btn btn-primary btn-icon-text" (click)="abrirModalCriar()"
-        aria-label="Adicionar nova oficina">
-        <span class="material-symbols-rounded">add</span>
-        Nova Oficina
-      </button>
+        <button class="btn btn-primary action-btn-nova shadow-sm" style="background:#eab308; border-color:#eab308; color:#fff; font-weight:600; padding:0.5rem 1rem;" (click)="abrirModalCriar()" aria-label="Adicionar nova oficina">
+          Nova Oficina
+        </button>
       }
     </div>
-  </div>
+
+    <div class="header-search-bar" style="display:flex; gap:1rem; align-items:center; width: 100%; flex-wrap:wrap;">
+      <div class="search-input-wrapper" style="flex:1; min-width: 250px;">
+        <input type="text" class="form-input search-input" style="width:100%; border-radius:0.5rem; padding:0.6rem 1rem;" placeholder="Buscar oficina por nome..." [ngModel]="termoBusca()" (ngModelChange)="termoBusca.set($event)">
+      </div>
+      
+      <button class="btn btn-icon-text shadow-sm hover-warning" style="border: 1px solid #eab308; color: #b45309; background:#fff; padding:0.5rem 1.25rem; border-radius:0.5rem; display:flex; align-items:center; gap:0.5rem; font-weight:600;" (click)="abrirFiltros()"
+        [attr.aria-expanded]="drawerAberto()">
+        <span class="material-symbols-rounded" aria-hidden="true" style="color:#eab308;">tune</span>
+        Filtros
+        @if (tempProfessorId() || tempStatus()) {
+          <span class="badge" style="background:#fef3c7; color:#b45309;" aria-label="filtros ativos">{{ (tempProfessorId() ? 1 : 0) + (tempStatus() ? 1 : 0) }}</span>
+        }
+      </button>
+    </div>
+  </header>
 
   <div class="tabs-container" role="tablist" aria-label="Status das Oficinas">
     <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ATIVO'"
@@ -57,60 +64,71 @@
       <div class="turmas-grid">
         @for (turma of turmasFiltradas(); track turma.id) {
           <article class="turma-card" [class.arquivada]="turma.excluido" aria-label="Detalhes da Oficina">
-            <header class="tcard-header">
-              <h3 class="tcard-title">
-                {{ turma.nome }}
-                @if (turma.excluido) {
-                  <span class="badge" style="background:#f1f5f9; color:#475569; font-size:10px;">ARQ</span>
+            <div class="tcard-top-border"></div>
+            <header class="tcard-header-new">
+              <h3 class="tcard-title-main">{{ turma.nome }}</h3>
+              <div class="tcard-badges">
+                @if (!turma.excluido) {
+                  <span class="badge-status outline-success">
+                    <span class="material-symbols-rounded badge-ico">check_circle</span> Ativa
+                  </span>
+                } @else {
+                  <span class="badge-status outline-neutral">
+                    <span class="material-symbols-rounded badge-ico">inventory_2</span> Arquivada
+                  </span>
                 }
-              </h3>
-              @if (!isProfessor()) {
-                <div class="tcard-actions">
-                  <button class="btn-icon" (click)="abrirModalEditar(turma)" aria-label="Editar" title="Editar informações da Turma">
-                    <span class="material-symbols-rounded">edit</span>
-                  </button>
-                  <button class="btn-icon btn-danger" (click)="alternarArquivamento(turma.id, !!turma.excluido, $event)"
-                    [attr.aria-label]="turma.excluido ? 'Desarquivar oficina' : 'Arquivar oficina'">
-                    <span class="material-symbols-rounded">{{ turma.excluido ? 'unarchive' : 'inventory_2' }}</span>
-                  </button>
-                </div>
-              }
+                <span class="badge-status bg" [ngClass]="turma.status ? 'badge-' + turma.status.toLowerCase() : ''">{{ turma.status }}</span>
+              </div>
             </header>
 
-            <div class="tcard-body">
+            <div class="tcard-body-new">
               <div class="tcard-info">
                 <span class="material-symbols-rounded text-icon">person</span>
                 <span class="truncated-text" [title]="turma.professor?.nome || 'N/A'">
-                  <strong>Tutor:</strong> {{ turma.professor?.nome || 'Não atribuído' }}
-                </span>
-              </div>
-              <div class="tcard-info">
-                <span class="material-symbols-rounded text-icon">groups</span>
-                <span>
-                  <strong>Qtd:</strong> 
-                  {{ turma.matriculasOficina?.length || 0 }}
-                  @if (turma.capacidadeMaxima) {
-                     / {{ turma.capacidadeMaxima }}
-                  }
+                  <strong>Professor:</strong> {{ turma.professor?.nome || 'Não atribuído' }}
                 </span>
               </div>
               <div class="tcard-info schedule-info" [title]="formatarGradeHoraria(turma.gradeHoraria)">
-                <span class="material-symbols-rounded text-icon">calendar_clock</span>
-                <span class="truncated-text"><strong>Hr:</strong> {{ formatarGradeHoraria(turma.gradeHoraria) }}</span>
+                <span class="material-symbols-rounded text-icon">schedule</span>
+                <span class="truncated-text"><strong>Horários:</strong> {{ formatarGradeHoraria(turma.gradeHoraria) }}</span>
               </div>
               <div class="tcard-info">
-                <span class="material-symbols-rounded text-icon">info</span>
-                <span><strong>Fase:</strong> {{ turma.status || '--' }}</span>
+                <span class="material-symbols-rounded text-icon">calendar_today</span>
+                <span class="truncated-text"><strong>Carga Horária Ofertada:</strong> {{ turma.cargaHoraria || 0 }}</span>
+              </div>
+              <div class="tcard-info">
+                <span class="material-symbols-rounded text-icon">group</span>
+                <span class="truncated-text">
+                  <strong>Alunos:</strong> 
+                  {{ turma.matriculasOficina?.length || 0 }}/{{ turma.capacidadeMaxima || 0 }} 
+                  ({{ turma.matriculasOficina?.length || 0 }} de {{ turma.capacidadeMaxima || 0 }} vagas)
+                </span>
               </div>
             </div>
 
-            <footer class="tcard-footer">
-              <button class="btn btn-secondary btn-sm abstract-btn" style="width:100%;" 
-                      (click)="abrirModalAlunos(turma)"
-                      [attr.aria-label]="isProfessor() ? 'Ver lista de alunos' : 'Gerenciar alunos'">
-                <span class="material-symbols-rounded">{{ isProfessor() ? 'group' : 'how_to_reg' }}</span>
-                {{ isProfessor() ? 'Lista de Frequência / Presença' : 'Gestão de Alunos' }}
-              </button>
+            <footer class="tcard-footer-new">
+              <div class="footer-left">
+                <button class="btn-icon-square" title="Gestão de Alunos" aria-label="Gestão de Alunos" (click)="abrirModalAlunos(turma)">
+                  <span class="material-symbols-rounded">group</span>
+                </button>
+                <div class="inline-select-wrapper">
+                  <select class="form-input status-dropdown" [ngModel]="turma.status" (ngModelChange)="atualizarStatusRapido(turma, $event)" [disabled]="isProfessor() || turma.excluido">
+                    <option value="PREVISTA">Prevista</option>
+                    <option value="ANDAMENTO">Em Andamento</option>
+                    <option value="CONCLUIDA">Concluída</option>
+                    <option value="CANCELADA">Cancelada</option>
+                  </select>
+                </div>
+              </div>
+
+              @if (!isProfessor()) {
+                <div class="footer-right">
+                  <button class="btn btn-outline btn-sm shadow-sm" (click)="abrirModalEditar(turma)">Editar</button>
+                  <button class="btn btn-sm btn-arquivar shadow-sm" (click)="alternarArquivamento(turma.id, !!turma.excluido, $event)">
+                    {{ turma.excluido ? 'Desarquivar' : 'Arquivar' }}
+                  </button>
+                </div>
+              }
             </footer>
           </article>
         }

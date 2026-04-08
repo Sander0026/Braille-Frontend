@@ -60,21 +60,25 @@ export class TurmasService {
         this.cache.clear();
     }
 
-    private buildCacheKey(page: number, limit: number, nome?: string, statusAtivo?: boolean, professorId?: string, status?: string): string {
-        return `${page}|${limit}|${nome ?? ''}|${statusAtivo ?? 'all'}|${professorId ?? ''}|${status ?? ''}`;
+    private buildCacheKey(page: number, limit: number, nome?: string, statusAtivo?: boolean | 'all', professorId?: string, status?: string, excluido?: boolean | 'all'): string {
+        return `${page}|${limit}|${nome ?? ''}|${statusAtivo ?? 'all'}|${professorId ?? ''}|${status ?? ''}|${excluido ?? 'false'}`;
     }
 
-    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean, professorId?: string, status?: string): Observable<PaginatedResponse<Turma>> {
-        const key = this.buildCacheKey(page, limit, nome, statusAtivo, professorId, status);
+    listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean | 'all', professorId?: string, status?: string, excluido?: boolean | 'all'): Observable<PaginatedResponse<Turma>> {
+        const key = this.buildCacheKey(page, limit, nome, statusAtivo, professorId, status, excluido);
         const now = Date.now();
 
         if (this.cache.has(key) && this.cache.get(key)!.expiresAt > now) {
             return this.cache.get(key)!.data$;
         }
 
-        let params = new HttpParams().set('page', page).set('limit', limit).set('excluido', 'false');
+        let params = new HttpParams().set('page', page).set('limit', limit);
+        if (excluido !== 'all') {
+            params = params.set('excluido', excluido !== undefined ? String(excluido) : 'false');
+        }
         if (nome) params = params.set('nome', nome);
-        if (statusAtivo !== undefined) params = params.set('statusAtivo', String(statusAtivo));
+        if (statusAtivo !== undefined && statusAtivo !== 'all') params = params.set('statusAtivo', String(statusAtivo));
+        else if (statusAtivo === 'all') params = params.set('statusAtivo', 'all');
         if (professorId) params = params.set('professorId', professorId);
         if (status) params = params.set('status', status);
 
