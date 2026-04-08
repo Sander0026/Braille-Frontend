@@ -1,6 +1,5 @@
 import { Component, Input, inject, OnInit } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SiteConfigService } from '../../services/site-config';
@@ -8,7 +7,7 @@ import { SiteConfigService } from '../../services/site-config';
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [CommonModule, AsyncPipe, RouterLink],
+  imports: [CommonModule, AsyncPipe],
   templateUrl: './footer.html',
   styleUrl: './footer.scss'
 })

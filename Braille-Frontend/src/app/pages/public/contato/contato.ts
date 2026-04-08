@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { HttpErrorResponse } from '@angular/common/http';
 import { SiteConfigService } from '../../../core/services/site-config';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 import { PhoneMaskDirective } from '../../../shared/directives/phone-mask.directive';
@@ -46,7 +47,9 @@ export class Contato {
     this.contatoForm = this.fb.group(
       {
         nome: ['', [Validators.required, Validators.minLength(2)]],
-        email: ['', [Validators.email]],
+        // Validators.email nativo do Angular é muito permissivo e não exige TLD (ponto domínio).
+        // Adicionado fallback de Regex para paridade exata com o class-validator do backend.
+        email: ['', [Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
         telefone: ['', [Validators.maxLength(15)]],
         assunto: ['', [Validators.required, Validators.minLength(3)]],
         mensagem: ['', [Validators.required, Validators.minLength(10)]],
@@ -96,7 +99,16 @@ export class Contato {
       .pipe(finalize(() => this.enviando.set(false)))
       .subscribe({
         next: () => this.enviado.set(true),
-        error: () => this.erroEnvio.set('Não foi possível processar sua mensagem neste momento. Tente novamente.'),
+        error: (err: HttpErrorResponse) => {
+          let msgErro = 'Não foi possível processar sua mensagem neste momento. Tente novamente.';
+          
+          // Trata especificamente erros de validação da API (400) para feedback claro e não opaco
+          if (err.status === 400 && err.error?.message) {
+            msgErro = Array.isArray(err.error.message) ? err.error.message[0] : err.error.message;
+          }
+          
+          this.erroEnvio.set(msgErro);
+        },
       });
   }
 
