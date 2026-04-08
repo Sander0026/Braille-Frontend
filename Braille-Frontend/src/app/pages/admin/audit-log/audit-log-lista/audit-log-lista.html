@@ -59,33 +59,31 @@
     <table class="audit-table" aria-label="Log de auditoria">
         <thead>
             <tr>
-                <th>Data/Hora</th>
-                <th>Ação</th>
-                <th>Entidade</th>
-                <th>Registro</th>
-                <th>Autor</th>
-                <th>Cargo</th>
-                <th>IP</th>
-                <th><span class="sr-only">Ações</span></th>
+                <th scope="col">Data/Hora</th>
+                <th scope="col">Ação</th>
+                <th scope="col">Descrição (Acessível)</th>
+                <th scope="col" class="sr-only">IP</th>
+                <th scope="col"><span class="sr-only">Visualizar</span></th>
             </tr>
         </thead>
         <tbody>
             @for (log of logs; track log.id) {
             <tr class="audit-row" 
                 tabindex="0"
+                aria-label="Selecionar evento"
                 (click)="abrirDetalhes(log)"
                 (keydown.enter)="abrirDetalhes(log)">
-                <td class="col-data">{{ formatarData(log.criadoEm) }}</td>
+                <td class="col-data" [attr.aria-label]="'Data do ocorrido: ' + formatarData(log.criadoEm)">{{ formatarData(log.criadoEm) }}</td>
                 <td>
-                    <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
+                    <span class="badge-acao" [ngClass]="acaoCor[log.acao]" [attr.aria-hidden]="true">{{ log.acao }}</span>
                 </td>
-                <td>{{ log.entidade }}</td>
-                <td class="col-id">{{ log.registroId ?? '—' }}</td>
-                <td>{{ log.autorNome ?? log.autorId ?? 'Sistema' }}</td>
-                <td><span class="badge-role">{{ log.autorRole ?? '—' }}</span></td>
-                <td class="col-ip">{{ log.ip ?? '—' }}</td>
+                <td class="col-desc">
+                    <span style="font-weight: 500; color: #1f2937;">{{ log | auditFriendly }}</span>
+                </td>
+                <td class="col-ip" [attr.aria-hidden]="true">{{ log.ip ?? '—' }}</td>
                 <td><button class="btn btn-ghost btn-xs"
-                        (click)="abrirDetalhes(log); $event.stopPropagation()">Ver</button></td>
+                        aria-label="Ver mais detalhes desta ação"
+                        (click)="abrirDetalhes(log); $event.stopPropagation()">Ver Diff</button></td>
             </tr>
             }
         </tbody>

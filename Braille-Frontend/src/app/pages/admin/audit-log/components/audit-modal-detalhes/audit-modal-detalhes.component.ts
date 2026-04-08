@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
 import { AuditLog } from '../../../../../core/services/audit-log.service';
 import { AuditDiffUtil, AuditDiff } from '../../../../../shared/utils/audit-diff.util';
+import { AuditFriendlyPipe } from '../../../../../shared/pipes/audit-friendly.pipe';
 
 @Component({
   selector: 'app-audit-modal-detalhes',
   standalone: true,
-  imports: [CommonModule, A11yModule],
+  imports: [CommonModule, A11yModule, AuditFriendlyPipe],
   templateUrl: './audit-modal-detalhes.component.html',
   styleUrls: ['./audit-modal-detalhes.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

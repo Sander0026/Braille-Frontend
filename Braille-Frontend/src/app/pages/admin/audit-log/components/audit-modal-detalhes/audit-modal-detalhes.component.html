@@ -2,14 +2,17 @@
 <div class="modal-overlay" (click)="fechar()" (keydown.enter)="fechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <dialog class="modal modal--lg" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-title" aria-modal="true">
         <header class="modal-header">
-            <h2 id="modal-title" class="modal-title">
+            <h2 id="modal-title" class="modal-title" style="margin-bottom: 0.25rem;">
                 <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
                 &nbsp;{{ log.entidade }}
             </h2>
+            <p id="modal-desc" class="modal-subtitle" style="font-size: 0.95rem; color: #4b5563; margin-top: 0.25rem;">
+                {{ log | auditFriendly }}
+            </p>
             <button class="modal-close" (click)="fechar()" aria-label="Fechar modal de detalhes">✕</button>
         </header>
 
-        <main class="modal-body">
+        <main class="modal-body" aria-describedby="modal-desc">
             <dl class="detail-grid">
                 <dt>ID do Log</dt>
                 <dd>{{ log.id }}</dd>
@@ -34,9 +37,9 @@
                     <table class="diff-table" aria-label="Tabela de diferenças">
                         <thead>
                             <tr>
-                                <th scope="col">Campo</th>
-                                <th scope="col">Valor Anterior</th>
-                                <th scope="col">Novo Valor</th>
+                                <th scope="col" style="width: 30%">Campo Modificado</th>
+                                <th scope="col" style="width: 35%"><span aria-hidden="true">[-] </span>Valor Anterior</th>
+                                <th scope="col" style="width: 35%"><span aria-hidden="true">[+] </span>Novo Valor</th>
                             </tr>
                         </thead>
                         <tbody>

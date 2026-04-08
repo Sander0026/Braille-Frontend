@@ -91,14 +91,16 @@ export class AuditLogService {
         }
 
         const obs$ = this.http
-            .get<PaginatedResponse<AuditLog>>(this.url, { params })
+            .get<any>(this.url, { params })
             .pipe(
-                // ✅ Normaliza o contrato na camada de serviço: garante que data seja sempre Array
-                // Protege contra backends que retornam objetos indexados ou shapes parciais
-                map(res => ({
-                    ...res,
-                    data: Array.isArray(res?.data) ? res.data : [],
-                })),
+                map(res => {
+                    // Se o backend envolveu em { success, data, message }
+                    const payload = (res && typeof res.success === 'boolean' && res.data) ? res.data : res;
+                    return {
+                        ...payload,
+                        data: Array.isArray(payload?.data) ? payload.data : [],
+                    };
+                }),
                 shareReplay(1),
             );
 
@@ -112,8 +114,11 @@ export class AuditLogService {
         }
 
         const obs$ = this.http
-            .get<AuditStats>(`${this.url}/stats`)
-            .pipe(shareReplay(1));
+            .get<any>(`${this.url}/stats`)
+            .pipe(
+                map(res => (res && typeof res.success === 'boolean' && res.data) ? res.data : res),
+                shareReplay(1)
+            );
 
         this.statsCache = { obs$, expiresAt: Date.now() + CACHE_TTL_MS };
         return obs$;
@@ -121,6 +126,9 @@ export class AuditLogService {
 
     historicoPorRegistro(entidade: string, registroId: string): Observable<AuditLog[]> {
         // Histórico por registro não é cacheado — sempre fresco
-        return this.http.get<AuditLog[]>(`${this.url}/${entidade}/${registroId}`);
+        return this.http.get<any>(`${this.url}/${entidade}/${registroId}`)
+            .pipe(
+                map(res => (res && typeof res.success === 'boolean' && res.data) ? res.data : res)
+            );
     }
 }

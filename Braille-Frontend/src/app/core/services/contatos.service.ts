@@ -9,7 +9,7 @@ export interface Contato {
     email: string;
     telefone?: string;
     assunto?: string;
-    mensagem: string;
+    mensagem?: string | null; // Proteção contra logs legado/corrompidos sem quebrar tipagem
     lida: boolean;
     criadoEm: string;
 }

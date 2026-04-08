@@ -8,12 +8,13 @@ import { AuditLogService, AuditLog, AuditStats, AuditAcao, QueryAuditDto, defaul
 
 import { AuditStatsComponent } from '../components/audit-stats/audit-stats.component';
 import { AuditModalDetalhesComponent } from '../components/audit-modal-detalhes/audit-modal-detalhes.component';
+import { AuditFriendlyPipe } from '../../../../shared/pipes/audit-friendly.pipe';
 
 @Component({
     selector: 'app-audit-log-lista',
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [CommonModule, FormsModule, A11yModule, AuditStatsComponent, AuditModalDetalhesComponent],
+    imports: [CommonModule, FormsModule, A11yModule, AuditStatsComponent, AuditModalDetalhesComponent, AuditFriendlyPipe],
     templateUrl: './audit-log-lista.html',
     styleUrl: './audit-log-lista.scss',
 })
