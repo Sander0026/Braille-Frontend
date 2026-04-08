@@ -42,9 +42,15 @@ describe('BeneficiaryFormComponent', () => {
   let httpMock:             any;
 
   beforeEach(async () => {
-    beneficiariosService = {criarBeneficiario: vi.fn(),atualizar: vi.fn(),uploadImagem: vi.fn(),uploadPdf: vi.fn(),checkCpfRg: vi.fn(),: vi.fn()};
-    router   = {navigate: vi.fn()};
-    httpMock = {get: vi.fn()};
+    beneficiariosService = {
+      criarBeneficiario: vi.fn(),
+      atualizar: vi.fn(),
+      uploadImagem: vi.fn(),
+      uploadPdf: vi.fn(),
+      checkCpfRg: vi.fn()
+    };
+    router = { navigate: vi.fn() };
+    httpMock = { get: vi.fn() };
 
     beneficiariosService.criarBeneficiario.and.returnValue(of({ id: 'novo-id' } as any));
     beneficiariosService.atualizar.and.returnValue(of({ ...mockAluno, nomeCompleto: 'Maria Atualizada' } as any));
@@ -159,13 +165,13 @@ describe('BeneficiaryFormComponent', () => {
 
   // ── Cancelamento ─────────────────────────────────────────────────────────
   it('deve emitir evento cancelou ao chamar emitirCancelamento()', () => {
-    spyOn(component.cancelou, 'emit');
+    vi.spyOn(component.cancelou, 'emit');
     component.emitirCancelamento();
     expect(component.cancelou.emit).toHaveBeenCalled();
   });
 
   it('deve emitir salvou após salvar com sucesso em modo CRIAÇÃO', fakeAsync(() => {
-    spyOn(component.salvou, 'emit');
+    vi.spyOn(component.salvou, 'emit');
     component.cadastroForm.patchValue({
       dadosPessoais:       { nomeCompleto: 'Novo Aluno', dataNascimento: '2000-01-01', cpf: '11111111111' },
       enderecoLocalizacao: { cep: '12345000', rua: 'Rua B', numero: '2', bairro: 'Bairro', cidade: 'Cidade', uf: 'RS', telefoneContato: '51999999999' },
