@@ -19,9 +19,10 @@ export class PdfViewerComponent {
   url = input.required<string>();
 
   /**
-   * Encapsulamento EventBus Nativo Substituto do antigo EventEmitter.
+   * Evento de fechamento. Renomeado para 'fecharModal' (era 'closed') para sincronizar perfeitamente
+   * com o @Output consumido nos parentes (Ex: beneficiary-list).
    */
-  closed = output<void>();
+  fecharModal = output<void>();
 
   /**
    * Setter Reativo Seguro e Cached.
@@ -32,18 +33,13 @@ export class PdfViewerComponent {
     const rawVal = this.url();
     if (!rawVal) return '';
 
-    let urlCorrigida = rawVal;
-    
-    // Normalize para extensões .pdf assegurando o disparo do Motor do Viewer do Google docs
-    if (!urlCorrigida.toLowerCase().endsWith('.pdf')) {
-      urlCorrigida += '.pdf';
-    }
-
-    // Gerador blindado
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(urlCorrigida)}&embedded=true`;
+    // Segurança (LGPD / OWASP): A renderização nativa substitui o Google Docs Viewer.
+    // O envio de URLs de certificados (e blobs locais) para um visualizador externo
+    // viola o sigilo dos dados do aluno e causa quebra em URLs 'blob:' (Resultando em Bad Request).
+    return rawVal;
   });
 
   onClose() {
-    this.closed.emit();
+    this.fecharModal.emit();
   }
 }

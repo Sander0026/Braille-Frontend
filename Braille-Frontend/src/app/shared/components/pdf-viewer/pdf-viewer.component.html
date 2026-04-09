@@ -1,34 +1,23 @@
-<!-- FLUXO REATIVO LIMPO - SUBSTITUIÇÃO DO *ngIf -->
 @if (urlVisualizadorPdf()) {
-<!-- ARIA Controls de segurança e foco em Popups -->
-<dialog 
-  open
-  class="mt-8 border border-gray-200 rounded-lg shadow-xl overflow-hidden bg-white w-full block"
-  aria-modal="true" 
-  aria-labelledby="pdf-viewer-title">
-  
-  <header class="bg-gray-800 text-white flex justify-between items-center p-4">
-    <h3 id="pdf-viewer-title" class="font-semibold text-sm md:text-base">Visualizador Interativo de Documento</h3>
-    
+  <header class="pdf-viewer-header">
+    <h3 id="pdf-viewer-title">Visualizador Interativo de Documento</h3>
     <button 
       (click)="onClose()" 
-      class="text-gray-300 hover:text-white focus:text-white font-bold text-2xl px-2 leading-none transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800 rounded"
+      class="btn-close"
       aria-label="Encerrar visualização do documento e fechar o modal"
       title="Fechar janela">
       <span aria-hidden="true">&times;</span>
     </button>
   </header>
 
-  <!-- RENDERIZAÇÃO ISOLADA DO IFRAME (Sandboxed Frame) -->
-  <div class="relative w-full" style="padding-top: 75%; min-height: 50vh;">
+  <!-- RENDERIZAÇÃO ESTRITA E ISOLADA -->
+  <!-- A classe style force garante a preservação do limite Flex -->
+  <div style="flex: 1; position: relative; width: 100%; min-height: 0; display: block; overflow: hidden; background-color: #f9fafb;">
+    <!-- Renderização Nativa e Segura com absolute binding para curar o Flex-1 Canvas Bug dos browsers -->
     <iframe 
       [src]="urlVisualizadorPdf() | safeUrl" 
-      class="absolute top-0 left-0 w-full h-full border-0 bg-gray-50"
-      title="Iframe de Visualização de Arquivo PDF Externo"
-      sandbox="allow-scripts allow-same-origin allow-popups"> 
-      <!-- OWASP: Sandbox restringe o frame contra vazamentos maliciosos limitando execuções top-level e submits -->
+      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+      title="Visualização Interna de Arquivo PDF">
     </iframe>
   </div>
-
-</dialog>
 }
