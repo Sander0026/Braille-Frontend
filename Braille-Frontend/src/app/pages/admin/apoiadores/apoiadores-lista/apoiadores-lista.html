@@ -182,9 +182,9 @@
     [isOpen]="modalPerfilAberto()"
     [apoiador]="apoiadorAtual"
     (formClosed)="onPerfilClosed()"
-    (editRequested)="editarApoiador($event)"
-    (viewActionsRequested)="abrirAcoes(apoiadorAtual.id!)"
-    (viewCertificatesRequested)="abrirCertificados(apoiadorAtual.id!)">
+    (editRequested)="editarApoiador($event, true)"
+    (viewActionsRequested)="abrirAcoes(apoiadorAtual.id!, true)"
+    (viewCertificatesRequested)="abrirCertificados(apoiadorAtual.id!, true)">
 </app-apoiador-perfil>
 
 <app-apoiador-acoes

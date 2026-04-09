@@ -43,6 +43,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   modalPerfilAberto = signal<boolean>(false);
   modalAcoesAberto = signal<boolean>(false);
   modalCertificadosAberto = signal<boolean>(false);
+  modalVoltarParaPerfil = signal<boolean>(false); // Flag de roteamento
 
   // Estados de Contexto (O Atual Selecionado)
   apoiadorAtual: Apoiador | null = null;
@@ -164,13 +165,15 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   // ==========================================
 
   abrirNovo(): void {
+    this.modalVoltarParaPerfil.set(false);
     this.fecharTodosModais();
     this.modoEdicao = false;
     this.apoiadorAtual = null;
     this.modalFormAberto.set(true);
   }
 
-  editarApoiador(id: string): void {
+  editarApoiador(id: string, fromPerfil = false): void {
+    this.modalVoltarParaPerfil.set(fromPerfil);
     this.fecharTodosModais(); // Garante sem memory leak de modais abertos no fundo
     this.modoEdicao = true;
     
@@ -180,19 +183,22 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   }
 
   abrirDados(apoiador: Apoiador): void {
+    this.modalVoltarParaPerfil.set(false);
     this.fecharTodosModais();
     this.apoiadorAtual = { ...apoiador };
     this.modalPerfilAberto.set(true);
   }
 
-  abrirAcoes(apoiadorId: string): void {
+  abrirAcoes(apoiadorId: string, fromPerfil = false): void {
+    this.modalVoltarParaPerfil.set(fromPerfil);
     this.fecharTodosModais();
     this.apoiadorAtual = this.apoiadoresOriginais.find(a => a.id === apoiadorId) || null;
     this.modalAcoesAberto.set(true);
     this.fetchAcoes(apoiadorId);
   }
 
-  abrirCertificados(apoiadorId: string): void {
+  abrirCertificados(apoiadorId: string, fromPerfil = false): void {
+    this.modalVoltarParaPerfil.set(fromPerfil);
     this.fecharTodosModais();
     this.apoiadorAtual = this.apoiadoresOriginais.find(a => a.id === apoiadorId) || null;
     this.modalCertificadosAberto.set(true);
@@ -217,6 +223,10 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
 
   onModalFormClosed(): void {
     this.modalFormAberto.set(false);
+    if (this.modalVoltarParaPerfil() && this.apoiadorAtual) {
+      this.modalPerfilAberto.set(true);
+      this.modalVoltarParaPerfil.set(false);
+    }
   }
 
   onPerfilClosed(): void {
@@ -225,10 +235,18 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
 
   onAcoesClosed(): void {
     this.modalAcoesAberto.set(false);
+    if (this.modalVoltarParaPerfil() && this.apoiadorAtual) {
+      this.modalPerfilAberto.set(true);
+      this.modalVoltarParaPerfil.set(false);
+    }
   }
 
   onCertificadosClosed(): void {
     this.modalCertificadosAberto.set(false);
+    if (this.modalVoltarParaPerfil() && this.apoiadorAtual) {
+      this.modalPerfilAberto.set(true);
+      this.modalVoltarParaPerfil.set(false);
+    }
   }
 
   // Fetches das tabelas filhas isolados.

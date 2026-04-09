@@ -12,53 +12,8 @@
 
         <div class="modal-body" tabindex="0" style="padding: 1.5rem; background: #f8fafc; display: flex; gap: 2rem; flex-wrap: wrap;">
             
-            <!-- PAINEL DE EMISSÃO -->
-            <div class="emissao-panel" style="flex: 1; min-width: 320px; background: #fff; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1.5rem;">
-                <h3 style="margin-top: 0; font-size: 1.25rem; color: #064e3b; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                    <span class="material-symbols-rounded">workspace_premium</span>
-                    Nova Emissão
-                </h3>
-
-                <form [formGroup]="certificadoForm" (ngSubmit)="gerarCertificado()" style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div class="form-group">
-                        <label class="form-label">Título da Honraria <span class="required">*</span></label>
-                        <select class="form-select" formControlName="tituloCertificado" [class.input-error]="certificadoForm.get('tituloCertificado')?.invalid && certificadoForm.get('tituloCertificado')?.touched">
-                            <option value="">Selecione...</option>
-                            <option value="Selo Empresa Amiga">Selo Empresa Amiga</option>
-                            <option value="Parceiro Anual">Parceiro Anual</option>
-                            <option value="Apoiador Extraordinário">Apoiador Extraordinário</option>
-                            <option value="Voluntário Destaque">Voluntário Destaque</option>
-                            <option value="Outro">Outro (Personalizado)</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group" *ngIf="certificadoForm.get('tituloCertificado')?.value === 'Outro'">
-                        <label class="form-label">Nome Específico</label>
-                        <input type="text" class="form-input" placeholder="Ex: Patrono da Tecnologia">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Data de Emissão <span class="required">*</span></label>
-                        <input type="date" class="form-input" formControlName="dataEmissao" [class.input-error]="certificadoForm.get('dataEmissao')?.invalid && certificadoForm.get('dataEmissao')?.touched">
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label">Texto Personalizado (Opcional)</label>
-                        <textarea class="form-textarea" formControlName="textoPersonalizado" rows="3" placeholder="Gostaríamos de agradecer publicamente a empresa X pela sua doação de Y..."></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem; background: #059669; border-color: #059669; height: 48px; font-size: 1rem;" [disabled]="certificadoForm.invalid || gerandoCertificado">
-                        @if (gerandoCertificado) {
-                            <span class="spinner material-symbols-rounded">sync</span> Emitindo PDF...
-                        } @else {
-                            Emitir Novo Certificado
-                        }
-                    </button>
-                </form>
-            </div>
-
             <!-- TABELA DE CERTIFICADOS GERADOS -->
-            <div class="lista-panel" style="flex: 2; min-width: 400px;">
+            <div class="lista-panel" style="width: 100%;">
                 <h3 style="margin-top: 0; font-size: 1.25rem; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
                     Histórico Emitido
                     @if (carregandoCertificados) {
@@ -94,11 +49,19 @@
                                         </td>
                                         <td style="padding: 1rem; border-bottom: 1px solid #e2e8f0; text-align: center; vertical-align: middle;">
                                             <div style="display: flex; gap: 0.5rem; justify-content: center;">
-                                                <button class="btn btn-sm" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; cursor: pointer; border-radius: 4px; padding: 0.4rem 0.6rem; display: inline-flex; align-items: center;" (click)="abrirPdf(cert)" title="Visualizar">
-                                                    <span class="material-symbols-rounded" style="font-size: 1.1rem;">visibility</span>
+                                                <button class="btn btn-sm" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; cursor: pointer; border-radius: 4px; padding: 0.4rem 0.6rem; display: inline-flex; align-items: center;" (click)="abrirPdf(cert)" title="Visualizar" [disabled]="processandoId === cert.id">
+                                                    @if (processandoId === cert.id) {
+                                                        <span class="spinner material-symbols-rounded" style="font-size: 1.1rem;">sync</span>
+                                                    } @else {
+                                                        <span class="material-symbols-rounded" style="font-size: 1.1rem;">visibility</span>
+                                                    }
                                                 </button>
-                                                <button class="btn btn-sm" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; cursor: pointer; border-radius: 4px; padding: 0.4rem 0.6rem; display: inline-flex; align-items: center;" (click)="baixarPdf(cert)" title="Fazer Download">
-                                                    <span class="material-symbols-rounded" style="font-size: 1.1rem;">download</span>
+                                                <button class="btn btn-sm" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; cursor: pointer; border-radius: 4px; padding: 0.4rem 0.6rem; display: inline-flex; align-items: center;" (click)="baixarPdf(cert)" title="Fazer Download" [disabled]="processandoId === cert.id">
+                                                    @if (processandoId === cert.id) {
+                                                        <span class="spinner material-symbols-rounded" style="font-size: 1.1rem;">sync</span>
+                                                    } @else {
+                                                        <span class="material-symbols-rounded" style="font-size: 1.1rem;">download</span>
+                                                    }
                                                 </button>
                                             </div>
                                         </td>
@@ -115,11 +78,36 @@
 </div>
 }
 
-<!-- Reutilizando o Componente de PDF Global já refatorado no Ajuda -->
+<!-- ── Overlay do Visualizador de PDF (nível raiz, padrão Aluno) ── -->
 @if (pdfAberto && pdfAtual) {
-    <app-pdf-viewer 
-        [src]="pdfAtual.url" 
-        [titulo]="pdfAtual.title" 
-        (closeRequested)="fecharPdf()">
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-label="Visualizador de documento PDF"
+  style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+  ">
+  <div style="
+    width: 90%;
+    max-width: 960px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  ">
+    <app-pdf-viewer
+      [url]="pdfAtual.url"
+      (fecharModal)="fecharPdf()">
     </app-pdf-viewer>
+  </div>
+</div>
 }

@@ -16,6 +16,7 @@ export interface TecnologiaItem {
 export interface EquipeItem {
   nome: string;
   papel: string;
+  github: string;
 }
 
 export const MANUAIS_AJUDA: ManualCard[] = [
@@ -33,7 +34,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     icon: 'school',
     cor: 'info',
     arquivo: null,
-    perfis: ['Professor', 'Admin']
+    perfis: ['Professor', 'Admin', 'Secretaria']
   },
   {
     titulo: 'Guia da Comunicação',
@@ -52,7 +53,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     perfis: ['Admin']
   }
 ];
-
+ 
 export const TECNOLOGIAS_SISTEMA: TecnologiaItem[] = [
   { nome: 'Angular 19', icon: 'code', descricao: 'Frontend' },
   { nome: 'NestJS', icon: 'api', descricao: 'Backend API' },
@@ -63,5 +64,7 @@ export const TECNOLOGIAS_SISTEMA: TecnologiaItem[] = [
 ];
 
 export const EQUIPE_SISTEMA: EquipeItem[] = [
-  { nome: 'Equipe PI-5', papel: 'Desenvolvimento e Arquitetura' },
+  { nome: 'Alexsander Ribeiro', papel: 'Dev', github: 'https://github.com/Sander0026' },
+  { nome: 'Nickolas Blendes', papel: 'Dev', github: 'https://github.com/NycollasBlenes-max' },
+  { nome: 'Victor Severiano', papel: 'Dev', github: 'https://github.com/VictorSeveriano' },
 ];

@@ -1,13 +1,12 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
-import { PdfViewerComponent } from '../../../ajuda/components/pdf-viewer/pdf-viewer.component';
+import { PdfViewerComponent } from '../../../../../shared/components/pdf-viewer/pdf-viewer.component';
 
 @Component({
   selector: 'app-apoiador-certificados',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, PdfViewerComponent],
+  imports: [CommonModule, PdfViewerComponent],
   templateUrl: './apoiador-certificados.component.html',
   styleUrl: './apoiador-certificados.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,85 +20,83 @@ export class ApoiadorCertificadosComponent implements OnInit {
   @Output() modalClosed = new EventEmitter<void>();
   @Output() certificatesUpdated = new EventEmitter<void>();
 
-  certificadoForm!: FormGroup;
-  gerandoCertificado = false;
+  // Track button states
+  processandoId: string | null = null;
 
   // View PDF
   pdfAberto = false;
   pdfAtual: { url: string; title: string } | null = null;
 
   constructor(
-    private readonly fb: FormBuilder,
     private readonly apoiadoresService: ApoiadoresService,
     private readonly cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.certificadoForm = this.fb.group({
-      tituloCertificado: ['', Validators.required],
-      dataEmissao: ['', Validators.required],
-      textoPersonalizado: ['']
-    });
+    // Empty initialization
   }
 
   fecharModal(): void {
-    this.certificadoForm.reset();
     this.modalClosed.emit();
   }
 
-  gerarCertificado(): void {
-    if (this.certificadoForm.invalid || !this.apoiador) {
-      this.certificadoForm.markAllAsTouched();
-      return;
-    }
+  abrirPdf(cert: any): void {
+    this.processandoId = cert.id;
+    this.cdr.detectChanges();
 
-    this.gerandoCertificado = true;
-    const dto = this.certificadoForm.value;
-
-    this.apoiadoresService.emitirCertificado(this.apoiador.id, {
-      modeloId: dto.tituloCertificado,
-      motivoPersonalizado: dto.textoPersonalizado,
-      dataEmissao: dto.dataEmissao
-    }).subscribe({
-      next: () => {
-        this.gerandoCertificado = false;
-        this.certificadoForm.reset();
-        this.certificatesUpdated.emit();
+    this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        this.pdfAtual = {
+          url: url,
+          title: `${cert.tituloCertificado} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
+        };
+        this.pdfAberto = true;
+        this.processandoId = null;
+        this.cdr.detectChanges();
       },
-      error: (err: any) => {
-        console.error('Erro ao gerar certificado', err);
-        alert('Falha ao gerar o certificado da honraria. Tente novamente.');
-        this.gerandoCertificado = false;
+      error: (err) => {
+        console.error('Erro ao abrir PDF', err);
+        alert('Erro ao carregar o PDF do servidor. Verifique sua conexão.');
+        this.processandoId = null;
         this.cdr.detectChanges();
       }
     });
   }
 
-  abrirPdf(cert: any): void {
-    if (!cert.pdfUrl) {
-      alert('PDF ainda em processamento interno ou indisponível.');
-      return;
-    }
-    this.pdfAtual = {
-      url: cert.pdfUrl,
-      title: `${cert.tituloCertificado} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
-    };
-    this.pdfAberto = true;
-    this.cdr.detectChanges();
-  }
-
   fecharPdf(): void {
     this.pdfAberto = false;
+    if (this.pdfAtual?.url) {
+      URL.revokeObjectURL(this.pdfAtual.url); // Memory leak prevention
+    }
     this.pdfAtual = null;
     this.cdr.detectChanges();
   }
 
   baixarPdf(cert: any): void {
-    if (!cert.pdfUrl) return;
-    const link = document.createElement('a');
-    link.href = cert.pdfUrl;
-    link.download = `Certificado_${this.apoiador.id}_${cert.id}.pdf`;
-    link.target = '_blank';
-    link.click();
+    this.processandoId = cert.id;
+    this.cdr.detectChanges();
+
+    this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        const dataStr = cert.dataEmissao ? String(cert.dataEmissao).substring(0, 10) : 'Doc';
+        link.download = `Certificado_${this.apoiador.id}_${dataStr}.pdf`;
+        link.target = '_blank';
+        link.click();
+        URL.revokeObjectURL(url); // Clean quickly for memory efficiency
+        
+        this.processandoId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Erro ao baixar PDF', err);
+        alert('Erro ao realizar o download do PDF.');
+        this.processandoId = null;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
