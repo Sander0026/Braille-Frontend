@@ -49,11 +49,16 @@
     <!-- Botão Exportar Lista -->
     @if (isAdmin) {
     <button type="button" class="btn btn-outline-primary filter-btn" (click)="exportarListaParaXlsx()"
-        [disabled]="exportando" aria-label="Exportar lista de alunos para planilha Excel"
+        [attr.aria-disabled]="exportando ? 'true' : null"
+        [attr.aria-busy]="exportando"
+        [class.opacity-50]="exportando"
+        [style.cursor]="exportando ? 'not-allowed' : 'pointer'"
+        aria-label="Exportar lista de alunos para planilha Excel"
         [title]="exportando ? 'Gerando planilha...' : 'Exportar a lista atual (com filtros) para Excel'">
         @if (exportando) {
         <span class="loading-spinner" style="width:14px;height:14px;border-width:2px;" aria-hidden="true"></span>
-        Exportando...
+        <span class="sr-only">Aguarde, gerando planilha excel</span>
+        <span aria-hidden="true">Exportando...</span>
         } @else {
         <span class="material-symbols-rounded">download</span>
         Exportar Lista
@@ -682,6 +687,8 @@
   role="dialog"
   aria-modal="true"
   aria-label="Visualizador de documento PDF"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
   style="
     position: fixed;
     inset: 0;
@@ -718,6 +725,8 @@
   aria-label="Visualizador de imagem do laudo"
   (click)="fecharModalImagem()"
   (keydown.escape)="fecharModalImagem()"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
   tabindex="-1"
   style="
     position: fixed;

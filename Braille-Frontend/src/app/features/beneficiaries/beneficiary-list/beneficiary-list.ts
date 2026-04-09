@@ -475,6 +475,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   aplicarFiltros(): void {
     this.drawerAberto = false;
     this.paginaAtual = 1;
+    this.liveAnnouncer.announce('Aplicando filtros avançados. Carregando...', 'polite');
     this.beneficiariosService.limparCache();
     this.carregar();
     this.cdr.markForCheck();
@@ -555,6 +556,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   exportarListaParaXlsx(): void {
     if (this.exportando) return;
     this.exportando = true;
+    this.liveAnnouncer.announce('Aguarde, gerando a planilha Excel...', 'assertive');
     this.cdr.markForCheck();
 
     const busca = this.buscaCtrl.value?.trim() || undefined;
@@ -577,11 +579,13 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           link.click();
           URL.revokeObjectURL(url);
           this.exportando = false;
+          this.liveAnnouncer.announce('Planilha exportada com sucesso.', 'assertive');
           this.cdr.markForCheck();
         },
         error: () => {
           this.toast.erro('Erro ao exportar a lista. Tente novamente.');
           this.exportando = false;
+          this.liveAnnouncer.announce('Ocorreu um erro ao exportar a planilha.', 'assertive');
           this.cdr.markForCheck();
         },
       });
@@ -757,6 +761,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!file || !this.alunoSelecionado) return;
 
     this.uploadingImage = true;
+    this.liveAnnouncer.announce('Iniciando o envio do documento. Por favor, aguarde.', 'assertive');
     this.cdr.detectChanges();
 
     const ehPdf = file.type === 'application/pdf';
@@ -783,6 +788,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
             setTimeout(() => {
               this.alunoSelecionado = alunoAtualizado;
               this.uploadingImage = false;
+              this.liveAnnouncer.announce('Documento salvo e atualizado com sucesso!', 'assertive');
               this.toast.sucesso('Documento salvo com sucesso!');
               this.carregar();
             }, 0);
@@ -790,6 +796,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           error: () => {
             setTimeout(() => {
               this.uploadingImage = false;
+              this.liveAnnouncer.announce('Falha ao processar e salvar o documento.', 'assertive');
               this.toast.erro('Erro ao vincular documento ao aluno.');
               this.cdr.detectChanges();
             }, 0);

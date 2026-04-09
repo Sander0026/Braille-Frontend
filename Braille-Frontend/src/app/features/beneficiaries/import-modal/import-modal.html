@@ -31,7 +31,7 @@
                 (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
                 (click)="fileInput.click()" role="button" tabindex="0" (keydown.enter)="fileInput.click()"
                 aria-label="Área de upload. Arraste um arquivo ou clique para selecionar.">
-                <input #fileInput type="file" accept=".xlsx,.xls,.csv" (change)="onFileInput($event)" hidden />
+                <input #fileInput type="file" accept=".xlsx,.xls,.csv" (change)="onFileInput($event)" class="sr-only" />
 
                 @if (!arquivoSelecionado) {
                 <span class="material-symbols-rounded dropzone-icon">upload_file</span>
@@ -108,10 +108,15 @@
 
         <!-- Rodapé -->
         <div class="modal-footer">
-            <button class="btn btn-ghost" (click)="fechar()" [disabled]="processando">Fechar</button>
+            <button class="btn btn-ghost" (click)="fechar()" 
+                [attr.aria-disabled]="processando ? 'true' : null" 
+                [class.opacity-50]="processando">Fechar</button>
 
             @if (!resultado) {
-            <button class="btn btn-primary" (click)="importar()" [disabled]="!arquivoSelecionado || processando">
+            <button class="btn btn-primary" (click)="importar()" 
+                [attr.aria-disabled]="(!arquivoSelecionado || processando) ? 'true' : null"
+                [attr.aria-busy]="processando"
+                [class.disabled-style]="!arquivoSelecionado || processando">
                 <span class="material-symbols-rounded">cloud_upload</span>
                 Processar Importação
             </button>

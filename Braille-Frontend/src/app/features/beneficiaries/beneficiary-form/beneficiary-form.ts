@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { BeneficiariosService, Beneficiario, ReativacaoAluno } from '../../../core/services/beneficiarios.service';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 
@@ -31,6 +31,9 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   isSalvando = false;
   mensagemFeedback = '';
   tipoFeedback: 'sucesso' | 'erro' | '' = '';
+  fotoFocused = false;
+  termoFocused = false;
+  laudoFocused = false;
 
   // Modal de Reativação de Aluno
   modalReativacao = false;
@@ -49,6 +52,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     private readonly beneficiariosService: BeneficiariosService,
     private readonly cdr: ChangeDetectorRef,
     private readonly router: Router,
+    private readonly liveAnnouncer: LiveAnnouncer,
   ) {
     super();
     this.iniciarFormulario();
@@ -402,9 +406,8 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
      }
   }
 
-  anunciarParaLeitorDeTela(mensagem: string) {
-    const anuncio = document.getElementById('leitor-tela-anuncio');
-    if (anuncio) anuncio.textContent = mensagem;
+  anunciarParaLeitorDeTela(mensagem: string, assertivo: boolean = false) {
+    this.liveAnnouncer.announce(mensagem, assertivo ? 'assertive' : 'polite');
   }
 
   salvarCadastro() {

@@ -1,5 +1,3 @@
-<div id="leitor-tela-anuncio" aria-live="polite" class="sr-only"></div>
-
 <!-- ══════════════════════════════════════════════════════════════════════ -->
 <!-- MODO EDIÇÃO — Modal flat com seções scrolláveis                       -->
 <!-- ══════════════════════════════════════════════════════════════════════ -->
@@ -31,9 +29,11 @@
         <label for="e-nomeCompleto" class="edit-label">Nome Completo</label>
         <input id="e-nomeCompleto" type="text" class="edit-input" formControlName="nomeCompleto"
           [class.edit-input--error]="isCampoInvalido('dadosPessoais','nomeCompleto')"
-          placeholder="Nome completo" autocomplete="name">
+          placeholder="Nome completo" autocomplete="name"
+          [attr.aria-invalid]="isCampoInvalido('dadosPessoais', 'nomeCompleto') ? 'true' : null"
+          [attr.aria-describedby]="isCampoInvalido('dadosPessoais', 'nomeCompleto') ? 'erro-nome-completo-edit' : null">
         @if (isCampoInvalido('dadosPessoais','nomeCompleto')) {
-        <span class="edit-error" role="alert">Nome obrigatório (mínimo 3 caracteres).</span>
+        <span id="erro-nome-completo-edit" class="edit-error" role="alert">Nome obrigatório (mínimo 3 caracteres).</span>
         }
       </div>
 
@@ -359,12 +359,14 @@
       Cancelar
     </button>
     <button type="submit" class="btn btn-primary edit-modal__save"
-      [disabled]="cadastroForm.invalid || isSalvando"
+      [attr.aria-disabled]="cadastroForm.invalid || isSalvando"
+      [attr.aria-busy]="isSalvando"
       aria-label="Salvar alterações do aluno">
       @if (isSalvando) {
         <span class="loading-spinner" aria-hidden="true"
           style="width:14px; height:14px; border-width:2px; margin-right:6px;"></span>
-        Salvando...
+        <span class="sr-only">Processando salvamento...</span>
+        <span aria-hidden="true">Salvando...</span>
       } @else {
         Salvar
       }
@@ -406,19 +408,21 @@
         <label for="nomeCompleto" class="form-label">Nome Completo <span class="required" aria-hidden="true">*</span></label>
         <input type="text" id="nomeCompleto" class="form-input" formControlName="nomeCompleto"
           [class.input-error]="isCampoInvalido('dadosPessoais', 'nomeCompleto')" placeholder="Digite o nome completo"
-          aria-required="true" autocomplete="name">
+          aria-required="true" autocomplete="name"
+          [attr.aria-invalid]="isCampoInvalido('dadosPessoais', 'nomeCompleto') ? 'true' : null"
+          [attr.aria-describedby]="isCampoInvalido('dadosPessoais', 'nomeCompleto') ? 'erro-nome-completo' : null">
         @if (isCampoInvalido('dadosPessoais', 'nomeCompleto')) {
-        <span class="error-text" role="alert">O nome completo é obrigatório (mínimo 3 caracteres).</span>
+        <span id="erro-nome-completo" class="error-text" role="alert">O nome completo é obrigatório (mínimo 3 caracteres).</span>
         }
       </div>
       <div class="form-group" style="margin-bottom: 1.5rem">
         <label for="fotoUpload" class="form-label">Foto 3x4 <span class="optional-badge">opcional</span></label>
         <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
-          <label for="fotoUpload" class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+          <label for="fotoUpload" class="btn btn-secondary btn-sm" [class.focus-visible]="fotoFocused" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">photo_camera</span>
             Selecionar Foto
           </label>
-          <input id="fotoUpload" type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFotoSelecionada($event)" style="display: none;" />
+          <input id="fotoUpload" type="file" accept=".jpg,.jpeg,.png,.webp" (change)="onFotoSelecionada($event)" (focus)="fotoFocused = true" (blur)="fotoFocused = false" class="sr-only" />
           <span class="file-name" *ngIf="arquivoFotoSelecionado">{{ arquivoFotoSelecionado.name }}</span>
         </div>
         <p class="helper-text" style="margin-top: 0.35rem;">Pode ser adicionada posteriormente.</p>
@@ -426,11 +430,11 @@
       <div class="form-group" style="margin-bottom: 1.5rem">
         <label for="termoUpload" class="form-label">Termo LGPD <span class="optional-badge">opcional</span></label>
         <div class="file-upload" style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap;">
-          <label for="termoUpload" class="btn btn-secondary btn-sm" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+          <label for="termoUpload" class="btn btn-secondary btn-sm" [class.focus-visible]="termoFocused" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span>
             Selecionar PDF
           </label>
-          <input id="termoUpload" type="file" accept=".pdf" (change)="onTermoSelecionado($event)" style="display: none;" />
+          <input id="termoUpload" type="file" accept=".pdf" (change)="onTermoSelecionado($event)" (focus)="termoFocused = true" (blur)="termoFocused = false" class="sr-only" />
           <span class="file-name" *ngIf="arquivoTermoSelecionado">{{ arquivoTermoSelecionado.name }}</span>
         </div>
       </div>
@@ -645,8 +649,8 @@
       </div>
       @if (cadastroForm.get('perfilDeficiencia.possuiLaudo')?.value) {
       <div class="laudo-upload-area">
-        <label for="laudoArquivo">Anexar Imagem do Laudo</label>
-        <input type="file" id="laudoArquivo" accept="image/*" (change)="onLaudoSelecionado($event)" class="file-input">
+        <label for="laudoArquivo" [class.focus-visible]="laudoFocused">Anexar Imagem do Laudo</label>
+        <input type="file" id="laudoArquivo" accept="image/*" (change)="onLaudoSelecionado($event)" (focus)="laudoFocused = true" (blur)="laudoFocused = false" class="sr-only">
       </div>
       }
     </fieldset>
@@ -716,16 +720,19 @@
 
     <footer class="wizard-footer">
       @if (passoAtual > 1) {
-      <button type="button" class="btn btn-secondary" (click)="voltarPasso()">← Voltar</button>
+      <button type="button" class="btn btn-secondary" (click)="voltarPasso()" aria-label="Voltar para a etapa anterior">← Voltar</button>
       }
       @if (passoAtual < 4) {
-      <button type="button" class="btn btn-primary" (click)="avancarPasso()">Avançar →</button>
+      <button type="button" class="btn btn-primary" (click)="avancarPasso()" aria-label="Avançar para a próxima etapa">Avançar →</button>
       }
       @if (passoAtual === 4) {
       <div style="display:flex; gap: 0.75rem;">
-        <button type="submit" class="btn btn-primary" [disabled]="cadastroForm.invalid || isSalvando">
-          @if (isSalvando) { <span class="loading-spinner" aria-hidden="true"
-            style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> Salvando... }
+        <button type="submit" class="btn btn-primary" [attr.aria-disabled]="cadastroForm.invalid || isSalvando" [attr.aria-busy]="isSalvando">
+          @if (isSalvando) { 
+            <span class="loading-spinner" aria-hidden="true" style="width:14px; height:14px; border-width:2px; margin-right: 8px;"></span> 
+            <span class="sr-only">Processando cadastro...</span>
+            <span aria-hidden="true">Salvando...</span> 
+          }
           @else { Concluir Cadastro }
         </button>
       </div>
@@ -756,9 +763,13 @@
     </p>
     <p>Deseja <strong>reativar</strong> este aluno?</p>
     <div class="modal-reativ-actions">
-      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [disabled]="isSalvando">Não, cancelar</button>
-      <button class="btn-reativ-confirmar" (click)="confirmarReativacao()" [disabled]="isSalvando">
-        @if (isSalvando) { Reativando... } @else { Sim, reativar aluno }
+      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [attr.aria-disabled]="isSalvando">Não, cancelar</button>
+      <button class="btn-reativ-confirmar" (click)="confirmarReativacao()" [attr.aria-disabled]="isSalvando" [attr.aria-busy]="isSalvando">
+        @if (isSalvando) { 
+          <span class="sr-only">Deseja reativar o aluno? Reativando o aluno...</span>
+          <span aria-hidden="true">Reativando...</span> 
+        } 
+        @else { Sim, reativar aluno }
       </button>
     </div>
   </div>
