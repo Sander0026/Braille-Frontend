@@ -6,7 +6,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs/operators';
 import { QuillModule } from 'ngx-quill';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-conteudo-sobre',
@@ -49,6 +49,7 @@ export class ConteudoSobreComponent implements OnInit {
   private readonly siteConfig = inject(SiteConfigService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor() {
     this.formSobreHero = this.fb.group({
@@ -109,6 +110,7 @@ export class ConteudoSobreComponent implements OnInit {
       }
       
       this.carregando.set(false);
+      this.announcer.announce('Página sobre nós carregada com sucesso.', 'polite');
     });
   }
 
@@ -129,8 +131,14 @@ export class ConteudoSobreComponent implements OnInit {
     });
   }
 
-  adicionarItemTimeline() { this.timelineArray.push(this.criarTimelineForm()); }
-  adicionarMembroEquipe() { this.equipeArray.push(this.criarEquipeForm()); }
+  adicionarItemTimeline() { 
+    this.timelineArray.push(this.criarTimelineForm()); 
+    this.announcer.announce('Novo marco histórico incluído na lista da linha de tempo.', 'polite');
+  }
+  adicionarMembroEquipe() { 
+    this.equipeArray.push(this.criarEquipeForm()); 
+    this.announcer.announce('Novo membro adicionado a lista de equipe.', 'polite');
+  }
 
   pedirExclusao(index: number, tipo: 'timeline' | 'equipe') {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
@@ -149,6 +157,7 @@ export class ConteudoSobreComponent implements OnInit {
     if (item.tipo === 'timeline') this.timelineArray.removeAt(item.index);
     if (item.tipo === 'equipe') this.equipeArray.removeAt(item.index);
 
+    this.announcer.announce('Item apagado da tela. Para confirmar as alterações da página clique em Salvar.', 'polite');
     this.cancelarExclusao();
   }
 
@@ -186,11 +195,13 @@ export class ConteudoSobreComponent implements OnInit {
       next: () => {
         loadingSignal.set(false);
         this.toast.sucesso(msgSucesso);
+        this.announcer.announce(msgSucesso, 'polite');
         this.siteConfig.carregarSecoes().pipe(take(1)).subscribe();
       },
       error: () => {
         loadingSignal.set(false);
         this.toast.erro(`Erro ao salvar ${secaoNome}.`);
+        this.announcer.announce(`Falha ao conectar com o servidor para gravar as mudanças.`, 'assertive');
       }
     });
   }

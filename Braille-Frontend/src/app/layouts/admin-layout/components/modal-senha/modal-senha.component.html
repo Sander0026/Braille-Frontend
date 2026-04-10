@@ -1,6 +1,6 @@
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-senha-titulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-senha-titulo" 
+  (click)="onBackdropClick($event)" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card">
 
     <div class="modal-header">
       <h2 id="modal-senha-titulo" class="modal-title">Trocar Senha</h2>

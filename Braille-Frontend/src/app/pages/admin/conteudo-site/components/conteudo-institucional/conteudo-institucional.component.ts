@@ -6,11 +6,12 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs/operators';
 import { QuillModule } from 'ngx-quill';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-conteudo-institucional',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, QuillModule],
+  imports: [CommonModule, ReactiveFormsModule, QuillModule, A11yModule],
   templateUrl: './conteudo-institucional.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -27,6 +28,7 @@ export class ConteudoInstitucionalComponent implements OnInit {
   private readonly siteConfig = inject(SiteConfigService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor() {
     this.formHero = this.fb.group({
@@ -65,6 +67,7 @@ export class ConteudoInstitucionalComponent implements OnInit {
       if (secoes['hero']) this.formHero.patchValue(secoes['hero']);
       if (secoes['missao']) this.formMissao.patchValue(secoes['missao']);
       this.carregando.set(false);
+      this.announcer.announce('Textos institucionais carregados para edição.', 'polite');
     });
   }
 
@@ -86,11 +89,13 @@ export class ConteudoInstitucionalComponent implements OnInit {
       next: () => {
         this.salvando.set(false);
         this.toast.sucesso(msgSucesso);
+        this.announcer.announce(msgSucesso, 'polite');
         this.siteConfig.carregarSecoes().pipe(take(1)).subscribe();
       },
       error: () => {
         this.salvando.set(false);
         this.toast.erro(`Erro ao salvar ${secaoNome}.`);
+        this.announcer.announce(`Erro ao conectar com o servidor para salvar a seção.`, 'assertive');
       }
     });
   }

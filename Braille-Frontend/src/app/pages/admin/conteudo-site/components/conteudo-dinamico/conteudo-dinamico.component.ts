@@ -6,7 +6,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs/operators';
 import { QuillModule } from 'ngx-quill';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-conteudo-dinamico',
@@ -42,6 +42,7 @@ export class ConteudoDinamicoComponent implements OnInit {
   private readonly siteConfig = inject(SiteConfigService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor() {
     this.formOficinas = this.fb.group({ lista: this.fb.array([]) });
@@ -82,6 +83,7 @@ export class ConteudoDinamicoComponent implements OnInit {
         lista.forEach((f: any) => this.faqArray.push(this.criarFaqForm(f)));
       }
       this.carregando.set(false);
+      this.announcer.announce('Sessão interativa carregada para edição.', 'polite');
     });
   }
 
@@ -110,9 +112,18 @@ export class ConteudoDinamicoComponent implements OnInit {
   }
 
   // --- Handlers de Adição ---
-  adicionarOficina() { this.oficinasArray.push(this.criarOficinaForm()); }
-  adicionarDepoimento() { this.depoimentosArray.push(this.criarDepoimentoForm()); }
-  adicionarFaq() { this.faqArray.push(this.criarFaqForm()); }
+  adicionarOficina() { 
+    this.oficinasArray.push(this.criarOficinaForm()); 
+    this.announcer.announce('Novo formulário de oficina incluído.', 'polite');
+  }
+  adicionarDepoimento() { 
+    this.depoimentosArray.push(this.criarDepoimentoForm()); 
+    this.announcer.announce('Novo formulário de depoimento incluído.', 'polite');
+  }
+  adicionarFaq() { 
+    this.faqArray.push(this.criarFaqForm()); 
+    this.announcer.announce('Nova pergunta frequente incluída.', 'polite');
+  }
 
   // --- Handlers de Exclusão UI ---
   pedirExclusao(index: number, tipo: 'oficina' | 'depoimento' | 'faq') {
@@ -133,6 +144,7 @@ export class ConteudoDinamicoComponent implements OnInit {
     if (item.tipo === 'depoimento') this.depoimentosArray.removeAt(item.index);
     if (item.tipo === 'faq') this.faqArray.removeAt(item.index);
 
+    this.announcer.announce(`A ${item.tipo} foi removida da tela. Salve o formulário para efetivar a remoção.`, 'polite');
     this.cancelarExclusao();
   }
 
@@ -160,11 +172,13 @@ export class ConteudoDinamicoComponent implements OnInit {
       next: () => {
         this.salvando.set(false);
         this.toast.sucesso(msgSucesso);
+        this.announcer.announce(msgSucesso, 'polite');
         this.siteConfig.carregarSecoes().pipe(take(1)).subscribe();
       },
       error: () => {
         this.salvando.set(false);
         this.toast.erro(`Erro ao salvar ${secaoNome}.`);
+        this.announcer.announce(`Ocorreu um erro no servidor ao processar sua alteração.`, 'assertive');
       }
     });
   }

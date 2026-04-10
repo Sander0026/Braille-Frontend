@@ -1,6 +1,6 @@
 @if (carregando()) {
-<div class="loading-state">
-    <span class="material-symbols-rounded spinner">sync</span>
+<div class="loading-state" role="status" aria-live="polite">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
     <p>Carregando dados da seção...</p>
 </div>
 } @else {

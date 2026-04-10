@@ -1,4 +1,4 @@
-<div class="apoiadores-container" role="main" aria-label="Gerenciamento de Apoiadores">
+<div class="apoiadores-container" aria-label="Gerenciamento de Apoiadores">
     <!-- Header -->
     <header class="page-header">
         <div class="header-content">
@@ -47,7 +47,7 @@
     </div>
 
     <!-- Tabela Responsiva -->
-    <main class="table-container" [attr.aria-busy]="carregandoLista">
+    <div class="table-container" [attr.aria-busy]="carregandoLista">
         @if (carregandoLista) {
         <div class="loading-state text-center p-5 mt-5">
             <span class="material-symbols-rounded spinner text-primary mb-3" style="font-size: 3rem; display: block;" aria-hidden="true">sync</span>
@@ -120,12 +120,12 @@
                         <!-- Coluna 4: Status (Toggles Integrados) -->
                         <td class="text-center">
                             <div class="status-stack">
-                                <!-- Ativo/Inativo via visualização direta do checkbox (Acessível) -->
-                                <label class="status-toggle-label" (click)="toggleStatus(ap)" (keydown.enter)="toggleStatus(ap)" tabindex="0">
-                                    <div class="toggle-indicator" [class.active]="ap.ativo"></div>
+                                <!-- Ativo/Inativo via visualização direta (Acessível) -->
+                                <button type="button" class="status-toggle-label" role="switch" [attr.aria-checked]="ap.ativo" (click)="toggleStatus(ap)" style="border:none;background:transparent;">
+                                    <div class="toggle-indicator" [class.active]="ap.ativo" aria-hidden="true"></div>
                                     <span class="sr-only">{{ ap.ativo ? 'Desativar' : 'Ativar' }} Apoiador</span>
-                                    {{ ap.ativo ? 'ATIVO' : 'INATIVO' }}
-                                </label>
+                                    <span aria-hidden="true">{{ ap.ativo ? 'ATIVO' : 'INATIVO' }}</span>
+                                </button>
                                 
                                 <div class="public-visibility mt-1" *ngIf="ap.exibirNoSite" title="Visível no site público">
                                     <span class="material-symbols-rounded icon-xs text-primary" aria-hidden="true">public</span> Publicado
@@ -156,11 +156,11 @@
                 </tbody>
             </table>
         </div>
-        <div class="table-footer mt-3 mb-2 d-flex justify-content-between align-items-center" style="padding: 0 1rem; color: #64748b; font-size: 0.85rem;">
+        <div class="table-footer mt-3 mb-2 d-flex justify-content-between align-items-center" style="padding: 0 1rem; color: #64748b; font-size: 0.85rem;" aria-live="polite">
             <span>Total localizados: {{ apoiadoresFiltrados.length }}</span>
         </div>
         }
-    </main>
+    </div>
 </div>
 
 <!-- ============================================== -->

@@ -7,7 +7,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-conteudo-config',
@@ -33,6 +33,7 @@ export class ConteudoConfigComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor() {
     this.formConfig = this.fb.group({
@@ -66,6 +67,7 @@ export class ConteudoConfigComponent implements OnInit {
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
         this.toast.erro('A imagem deve ter no máximo 2MB');
+        this.announcer.announce('Erro: O arquivo selecionado ultrapassa o limite de 2 megabytes.', 'assertive');
         return;
       }
       this.fileSelecionado = file;
@@ -81,8 +83,10 @@ export class ConteudoConfigComponent implements OnInit {
         this.fachadaPreview.set(res.url);
         this.formConfig.patchValue({ fachadaUrl: res.url });
         this.toast.sucesso('Upload realizado. Clique em "Salvar Configurações" para confirmar.');
+        this.announcer.announce('Upload processado com sucesso. Salve as configurações do site para efetivar o fundo.', 'polite');
       } catch (err) {
         this.toast.erro('Erro ao fazer upload da fachada.');
+        this.announcer.announce('Houve um erro no navegador ao enviar a imagem. Tente outro arquivo.', 'assertive');
       } finally {
         this.uploadandoFachada.set(false);
       }
@@ -104,6 +108,7 @@ export class ConteudoConfigComponent implements OnInit {
     this.fachadaPreview.set(null);
     this.formConfig.patchValue({ fachadaUrl: '' });
     this.toast.sucesso('Foto removida. Em seguida, Salve as Configurações.');
+    this.announcer.announce('A foto foi removida do preview. Pressione "Salvar Configurações" para confirmar.', 'polite');
     this.cancelarExclusaoFachada();
   }
 
@@ -121,11 +126,13 @@ export class ConteudoConfigComponent implements OnInit {
       next: () => {
         this.salvando.set(false);
         this.toast.sucesso('Configurações salvas com sucesso!');
+        this.announcer.announce('Suas configurações de site foram aplicadas instantaneamente.', 'polite');
         this.siteConfig.carregarConfigs().pipe(take(1)).subscribe();
       },
       error: () => { 
         this.salvando.set(false);
         this.toast.erro('Erro ao salvar as configurações.');
+        this.announcer.announce('Erro no servidor ao tentar processar as configurações.', 'assertive');
       }
     });
   }

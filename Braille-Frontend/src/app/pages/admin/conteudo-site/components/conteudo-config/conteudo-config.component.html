@@ -25,13 +25,11 @@
             }
 
             <!-- Upload -->
-            <label class="upload-label" [class.uploading]="uploadandoFachada()">
+            <label class="upload-label btn btn-secondary" [class.uploading]="uploadandoFachada()" style="display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer;" [style.opacity]="uploadandoFachada() ? '0.6' : '1'">
                 <input type="file" accept="image/png, image/jpeg, image/webp" (change)="onFachadaChange($event)"
-                    [disabled]="uploadandoFachada()" style="display:none" #fachadaInput>
-                <span class="material-symbols-rounded">{{ uploadandoFachada() ? 'cloud_sync' : 'add_photo_alternate' }}</span>
-                {{ uploadandoFachada() ? 'Enviando...' : (fachadaPreview() ? 'Substituir foto da fachada' : 'Escolher foto da fachada') }}
-                <button type="button" class="upload-trigger" (click)="fachadaInput.click()"
-                    [disabled]="uploadandoFachada()" aria-label="Selecionar foto da fachada"></button>
+                    [disabled]="uploadandoFachada()" class="sr-only" #fachadaInput>
+                <span class="material-symbols-rounded" aria-hidden="true">{{ uploadandoFachada() ? 'cloud_sync' : 'add_photo_alternate' }}</span>
+                <span>{{ uploadandoFachada() ? 'Enviando...' : (fachadaPreview() ? 'Substituir foto da fachada' : 'Escolher foto da fachada') }}</span>
             </label>
             <!-- Campo oculto que guarda a URL para o formGroup -->
             <input type="hidden" formControlName="fachadaUrl">
@@ -47,9 +45,8 @@
 
 <!-- Modal Remover Foto da Fachada -->
 @if (fachadaParaExcluir()) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Foto da Fachada" 
-    (click)="cancelarExclusaoFachada()" (keydown.escape)="cancelarExclusaoFachada()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<div class="modal-backdrop" (click)="cancelarExclusaoFachada()" (keydown.escape)="cancelarExclusaoFachada()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Remover Foto da Fachada">
         <div class="modal-header">
             <h2 style="color: #b91c1c;">Remover Foto da Fachada</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoFachada()" aria-label="Cancelar exclusão da fachada">✕</button>

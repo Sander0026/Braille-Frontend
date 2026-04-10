@@ -1,8 +1,9 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { ApoiadoresService, Apoiador, AcaoApoiador } from '../apoiadores.service';
 import { MasksUtil } from '../../../../shared/utils/masks.util';
 
@@ -55,6 +56,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   carregandoContextoFilho = false;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly apoiadoresService: ApoiadoresService,
@@ -149,12 +151,13 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.apoiadoresService.atualizar(apoiador.id, { ativo: novoStatus })
       .subscribe({
         next: () => {
+          this.announcer.announce(`Status alterado com sucesso para ${novoStatus ? 'Ativo' : 'Inativo'}.`, 'polite');
           this.aplicarFiltros(); // Re-renderizar lista sem o removido (Optimistic effect)
         },
         error: () => {
           // Revert on fail
           apoiador.ativo = oldStatus;
-          alert('Erro ao alterar status no servidor.');
+          this.announcer.announce('Erro ao alterar status no servidor.', 'assertive');
           this.aplicarFiltros();
         }
       });

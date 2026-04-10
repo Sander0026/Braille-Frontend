@@ -1,6 +1,6 @@
 @if (isOpen) {
 <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalCertificadosTitulo"
-    (click)="fecharModal()">
+    (click)="fecharModal()" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content modal-xl" (click)="$event.stopPropagation()">
         <div class="modal-header" style="background: linear-gradient(to right, #065f46, #047857); color: white; border-top-left-radius: 8px; border-top-right-radius: 8px;">
             <div>
@@ -84,6 +84,8 @@
   role="dialog"
   aria-modal="true"
   aria-label="Visualizador de documento PDF"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+  (keydown.escape)="fecharPdf()"
   style="
     position: fixed;
     inset: 0;

@@ -50,7 +50,8 @@
                 <div>
                     <strong class="remetente-nome">
                         @if (!contato.lida) {
-                        <span class="badge-nao-lida" aria-label="Mensagem não lida"></span>
+                        <span class="badge-nao-lida" aria-hidden="true"></span>
+                        <span class="sr-only">Mensagem não lida. </span>
                         }
                         {{ contato.nome }}
                     </strong>
@@ -58,7 +59,7 @@
                 </div>
             </div>
             <div class="mensagem-acoes">
-                <span class="mensagem-data" aria-label="Data Válida">{{ formatarData(contato.criadoEm) }}</span>
+                <span class="mensagem-data" [attr.aria-label]="'Recebida em: ' + formatarData(contato.criadoEm)">{{ formatarData(contato.criadoEm) }}</span>
                 <button class="btn btn-sm btn-secondary" (click)="abrirMensagem(contato)"
                     [attr.aria-label]="'Ler mensagem completa de ' + contato.nome">
                     Ler
@@ -96,9 +97,8 @@
 
 <!-- Modal leitura completa WCAG Avançada com Dialog Html5 -->
 @if (contatoSelecionado() !== null) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" [attr.aria-label]="'Lendo Mensagem de ' + contatoSelecionado()?.nome"
-    (click)="fecharMensagem()" (keydown.escape)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal" open (click)="$event.stopPropagation()">
+<div class="modal-backdrop" (click)="fecharMensagem()" (keydown.escape)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open tabindex="-1" role="dialog" aria-modal="true" [attr.aria-label]="'Lendo Mensagem de ' + contatoSelecionado()?.nome" (click)="$event.stopPropagation()">
         <div class="modal-header d-flex justify-content-between">
             <div class="d-flex flex-column">
                 <h2 style="margin: 0;">{{ contatoSelecionado()?.nome }}</h2>

@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, map } from 'rxjs/operators';
@@ -43,6 +43,7 @@ export class AuditLogLista implements OnInit, OnDestroy {
     logSelecionado = signal<AuditLog | null>(null);
 
     private readonly destroy$ = new Subject<void>();
+    private readonly announcer = inject(LiveAnnouncer);
 
     readonly acoes: AuditAcao[] = [
         'CRIAR', 'ATUALIZAR', 'EXCLUIR', 'ARQUIVAR', 'RESTAURAR',
@@ -123,24 +124,31 @@ export class AuditLogLista implements OnInit, OnDestroy {
                     this.logs  = data;
                     this.total = total;
                     this.isLoading = false;
+                    this.announcer.announce(`Exibindo ${data.length} de ${total} registros de auditoria, página ${this.pagina}.`, 'polite');
                     this.cdr.markForCheck();
                 },
                 error: (err: { error?: { message?: string } }) => {
                     // ✅ Nunca expõe stack trace — apenas mensagem segura (OWASP A3)
                     this.erro = err.error?.message ?? 'Erro ao carregar logs de auditoria.';
+                    this.announcer.announce(this.erro, 'assertive');
                     this.isLoading = false;
                     this.cdr.markForCheck();
                 },
             });
     }
 
-    aplicarFiltros(): void { this.carregarLogs(1); }
+    aplicarFiltros(): void { 
+      this.announcer.announce('Aplicando filtros de auditoria...', 'polite');
+      this.carregarLogs(1); 
+    }
+    
     limparFiltros(): void {
         this.filtroEntidade = '';
         this.filtroAcao = '';
         this.filtroAutorId = '';
         this.filtroDe = '';
         this.filtroAte = '';
+        this.announcer.announce('Filtros de auditoria limpos. Trazendo carga geral.', 'polite');
         this.carregarLogs(1);
     }
 

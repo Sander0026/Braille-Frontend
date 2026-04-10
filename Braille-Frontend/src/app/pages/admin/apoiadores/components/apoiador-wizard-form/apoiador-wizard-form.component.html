@@ -1,6 +1,6 @@
 @if (isOpen) {
 <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalFormTitulo"
-    (click)="fecharFormSeguro()">
+    (click)="fecharFormSeguro()" (keydown.escape)="fecharFormSeguro()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content modal-lg wizard-container" style="padding: 0" (click)="$event.stopPropagation()">
 
         <!-- ====== CABEÇALHO + BARRA DE PROGRESSO ====== -->
@@ -203,7 +203,7 @@
                                         style="font-size:16px;">image</span>
                                     Selecionar Logo
                                     <input type="file" (change)="onLogoSelected($event)"
-                                        accept="image/png, image/jpeg, image/webp" style="display: none;" />
+                                        accept="image/png, image/jpeg, image/webp" class="sr-only" />
                                 </label>
                                 <span class="file-name" *ngIf="logoFile">{{ logoFile.name }}</span>
                             </div>

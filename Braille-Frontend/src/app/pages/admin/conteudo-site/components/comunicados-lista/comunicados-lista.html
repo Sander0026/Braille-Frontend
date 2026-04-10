@@ -66,8 +66,8 @@
 
 <!-- Modal criar / editar -->
 @if (mostrarModal()) {
-<div class="modal-backdrop" (click)="fecharModal()" (keydown.enter)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal modal-lg" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-titulo" aria-modal="true">
+<div class="modal-backdrop" (click)="fecharModal()" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal modal-lg" open (click)="$event.stopPropagation()" aria-labelledby="modal-titulo" aria-modal="true">
         <div class="modal-header">
             <h2 id="modal-titulo">{{ editando() ? 'Editar Comunicado' : 'Novo Comunicado' }}</h2>
             <button class="btn btn-icon btn-ghost" (click)="fecharModal()" aria-label="Fechar modal">✕</button>
@@ -154,8 +154,8 @@
 
 <!-- Modal de Confirmação de Exclusão -->
 @if (comunicadoParaExcluir()) {
-<div class="modal-backdrop" (click)="cancelarExclusao()" (keydown.enter)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-titulo-exclusao" aria-modal="true">
+<div class="modal-backdrop" (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" aria-labelledby="modal-titulo-exclusao" aria-modal="true">
         <div class="modal-header">
             <h2 id="modal-titulo-exclusao" style="color: #ef4444;">Excluir Comunicado</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()"

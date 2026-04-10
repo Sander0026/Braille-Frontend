@@ -10,7 +10,7 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { QuillModule } from 'ngx-quill';
 import { BaseFormDescarte } from '../../../../../shared/classes/base-form-descarte';
 import { HtmlSanitizerUtil } from '../../../../../shared/utils/html-sanitizer.util';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-comunicados-lista',
@@ -44,6 +44,7 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly route = inject(ActivatedRoute);
   private readonly toast = inject(ToastService);
+  private readonly announcer = inject(LiveAnnouncer);
 
   readonly CATEGORIAS = [
     { valor: 'NOTICIA', label: 'Notícia' },
@@ -87,9 +88,11 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
       next: (res: any) => {
         this.comunicados.set(res.data || res);
         this.isLoading.set(false);
+        this.announcer.announce(`Mural carregado com ${this.comunicados().length} comunicados.`, 'polite');
       },
       error: () => { 
         this.erro.set('Erro ao carregar comunicados.'); 
+        this.announcer.announce('Erro ao carregar os comunicados.', 'assertive');
         this.isLoading.set(false); 
       }
     });
@@ -124,6 +127,7 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
     if (file) {
       if (file.size > 2 * 1024 * 1024) { 
         this.toast.erro('A imagem deve ter no máximo 2MB'); 
+        this.announcer.announce('Erro: A imagem excede o tamanho máximo de 2 megabytes.', 'assertive');
         return; 
       }
       this.fotoSelecionada = file;
@@ -185,9 +189,11 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
       if (ed) {
         await firstValueFrom(this.comunicadosService.atualizar(ed.id, payload));
         this.toast.sucesso('Comunicado atualizado com sucesso!');
+        this.announcer.announce('Comunicado atualizado com sucesso!', 'polite');
       } else {
         await firstValueFrom(this.comunicadosService.criar(payload));
         this.toast.sucesso('Comunicado publicado com sucesso!');
+        this.announcer.announce('Comunicado publicado com sucesso no mural!', 'polite');
       }
 
       this.salvando.set(false);
@@ -220,11 +226,13 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
     .subscribe({
       next: () => {
         this.toast.sucesso('Comunicado excluído com sucesso!');
+        this.announcer.announce('Comunicado excluído com sucesso!', 'polite');
         this.comunicadoParaExcluir.set(null);
         this.carregar();
       },
       error: () => {
         this.toast.erro('Erro ao excluir comunicado.');
+        this.announcer.announce('Houve um erro ao tentar excluir o comunicado.', 'assertive');
         this.comunicadoParaExcluir.set(null);
       }
     });

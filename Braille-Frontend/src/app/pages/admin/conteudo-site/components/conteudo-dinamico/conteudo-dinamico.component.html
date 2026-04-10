@@ -1,6 +1,6 @@
 @if (carregando()) {
-<div class="loading-state">
-    <span class="material-symbols-rounded spinner">sync</span>
+<div class="loading-state" role="status" aria-live="polite">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
     <p>Carregando dados da seção...</p>
 </div>
 } @else {
@@ -19,9 +19,9 @@
         <div [formGroupName]="i" class="form-card dynamic-card">
             <div class="dynamic-card-header">
                 <span class="card-badge">Card {{ i + 1 }}</span>
-                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'oficina')" aria-label="Remover card"
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'oficina')" [attr.aria-label]="'Remover card da oficina número ' + (i + 1)"
                     title="Remover card">
-                    <span class="material-symbols-rounded">delete</span>
+                    <span class="material-symbols-rounded" aria-hidden="true">delete</span>
                 </button>
             </div>
 
@@ -76,8 +76,8 @@
             <div class="dynamic-card-header">
                 <span class="card-badge">Depoimento {{ i + 1 }}</span>
                 <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'depoimento')"
-                    aria-label="Remover depoimento" title="Remover depoimento">
-                    <span class="material-symbols-rounded">delete</span>
+                    [attr.aria-label]="'Remover depoimento número ' + (i + 1)" title="Remover depoimento">
+                    <span class="material-symbols-rounded" aria-hidden="true">delete</span>
                 </button>
             </div>
 
@@ -127,9 +127,9 @@
         <div [formGroupName]="i" class="form-card dynamic-card">
             <div class="dynamic-card-header">
                 <span class="card-badge">Pergunta {{ i + 1 }}</span>
-                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'faq')" aria-label="Remover pergunta"
+                <button type="button" class="btn-icon danger" (click)="pedirExclusao(i, 'faq')" [attr.aria-label]="'Remover pergunta frequente número ' + (i + 1)"
                     title="Remover pergunta">
-                    <span class="material-symbols-rounded">delete</span>
+                    <span class="material-symbols-rounded" aria-hidden="true">delete</span>
                 </button>
             </div>
 
@@ -166,9 +166,8 @@
 
 <!-- Modal Excluir Item Dinâmico -->
 @if (itemParaExcluir() !== null) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Item"
-    (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<div class="modal-backdrop" (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Remover Item">
         <div class="modal-header">
             <h2 style="color: #b91c1c; text-transform: capitalize;">Excluir {{ itemParaExcluir()?.tipo }}</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()" aria-label="Cancelar">✕</button>

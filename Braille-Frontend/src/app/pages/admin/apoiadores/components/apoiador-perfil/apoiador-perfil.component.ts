@@ -1,11 +1,12 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-apoiador-perfil',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, A11yModule],
   templateUrl: './apoiador-perfil.component.html',
   styleUrl: './apoiador-perfil.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,6 +22,8 @@ export class ApoiadorPerfilComponent {
   @Output() viewCertificatesRequested = new EventEmitter<void>();
 
   carregandoLogoInline = false;
+
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly apoiadoresService: ApoiadoresService,
@@ -47,13 +50,14 @@ export class ApoiadorPerfilComponent {
         const url = res.logoUrl || res.url;
         if (url) {
           this.apoiador.logoUrl = url;
+          this.announcer.announce('Logotipo processado e alterado com sucesso.', 'polite');
         }
         this.carregandoLogoInline = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erro no upload inline da logo', err);
-        alert('Falha ao subir logotipo. Verifique o tamanho ou tente novamente.');
+        this.announcer.announce('Falha ao subir logotipo. O arquivo pode ser inválido ou exceder o tamanho definido.', 'assertive');
         this.carregandoLogoInline = false;
         this.cdr.detectChanges();
       }

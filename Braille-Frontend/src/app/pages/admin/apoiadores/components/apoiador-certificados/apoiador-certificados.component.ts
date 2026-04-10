@@ -1,12 +1,13 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { PdfViewerComponent } from '../../../../../shared/components/pdf-viewer/pdf-viewer.component';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-apoiador-certificados',
   standalone: true,
-  imports: [CommonModule, PdfViewerComponent],
+  imports: [CommonModule, PdfViewerComponent, A11yModule],
   templateUrl: './apoiador-certificados.component.html',
   styleUrl: './apoiador-certificados.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,6 +27,8 @@ export class ApoiadorCertificadosComponent implements OnInit {
   // View PDF
   pdfAberto = false;
   pdfAtual: { url: string; title: string } | null = null;
+  
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly apoiadoresService: ApoiadoresService,
@@ -53,11 +56,12 @@ export class ApoiadorCertificadosComponent implements OnInit {
         };
         this.pdfAberto = true;
         this.processandoId = null;
+        this.announcer.announce('Certificado aberto no visualizador.', 'polite');
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erro ao abrir PDF', err);
-        alert('Erro ao carregar o PDF do servidor. Verifique sua conexão.');
+        this.announcer.announce('Erro ao carregar o PDF do servidor. Verifique sua conexão.', 'assertive');
         this.processandoId = null;
         this.cdr.detectChanges();
       }
@@ -89,11 +93,12 @@ export class ApoiadorCertificadosComponent implements OnInit {
         URL.revokeObjectURL(url); // Clean quickly for memory efficiency
         
         this.processandoId = null;
+        this.announcer.announce('Download da honraria iniciado com sucesso.', 'polite');
         this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Erro ao baixar PDF', err);
-        alert('Erro ao realizar o download do PDF.');
+        this.announcer.announce('Erro ao realizar o download do PDF.', 'assertive');
         this.processandoId = null;
         this.cdr.detectChanges();
       }

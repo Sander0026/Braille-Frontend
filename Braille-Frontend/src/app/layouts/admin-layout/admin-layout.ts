@@ -172,7 +172,12 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   // ── Modais Orchestrator ──────────────────────────────
   abrirModal(modal: ModalType): void {
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    // Proteção LIFO de Acessibilidade:
+    // Se pularmos direto do Modal Perfil para o Modal Foto, NÃO sobreescrevemos a âncora original (Botão do Header).
+    // Caso contrário, ao fechar a Foto, o foco tentaria ir para um botão do Perfil que já não existe mais no DOM.
+    if (this.modalAtivo === 'none') {
+      this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    }
     this.modalAtivo = modal;
     this.cdr.markForCheck();
   }
@@ -180,6 +185,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   fecharModal(): void {
     this.modalAtivo = 'none';
     this.cdr.markForCheck();
+    // Devolve o foco à âncora raiz de forma segura após o DOM desmanchar os Modais
     setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 

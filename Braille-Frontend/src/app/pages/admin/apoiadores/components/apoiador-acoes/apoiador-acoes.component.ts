@@ -1,12 +1,13 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Apoiador, AcaoApoiador, ApoiadoresService } from '../../apoiadores.service';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-apoiador-acoes',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, A11yModule],
   templateUrl: './apoiador-acoes.component.html',
   styleUrl: './apoiador-acoes.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -22,6 +23,8 @@ export class ApoiadorAcoesComponent implements OnInit {
 
   acaoForm!: FormGroup;
   salvandoAcao = false;
+
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -54,12 +57,13 @@ export class ApoiadorAcoesComponent implements OnInit {
     this.apoiadoresService.adicionarAcao(this.apoiador.id, dto).subscribe({
       next: () => {
         this.salvandoAcao = false;
+        this.announcer.announce('Nova interação registrada com sucesso.', 'polite');
         this.acaoForm.reset();
         this.actionsUpdated.emit();
       },
       error: (err: any) => {
         console.error('Erro ao adicionar acao', err);
-        alert('Falha ao registrar ação. Tente novamente.');
+        this.announcer.announce('Falha ao registrar ação. Verifique a conexão.', 'assertive');
         this.salvandoAcao = false;
         this.cdr.detectChanges();
       }
@@ -74,11 +78,12 @@ export class ApoiadorAcoesComponent implements OnInit {
     
     this.apoiadoresService.removerAcao(this.apoiador.id, acaoId).subscribe({
       next: () => {
+        this.announcer.announce('Interação removida do histórico.', 'polite');
         this.actionsUpdated.emit();
       },
       error: (err: any) => {
         console.error('Erro ao remover acao', err);
-        alert('Falha ao remover a ação.');
+        this.announcer.announce('Falha ao remover a ação via servidor.', 'assertive');
         this.carregandoAcoes = false;
         this.cdr.detectChanges();
       }

@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Output, OnDestroy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Output, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Subject, takeUntil, finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -22,6 +22,7 @@ export class ModalSenhaComponent implements OnInit, OnDestroy {
   carregandoSenha = false;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -35,6 +36,12 @@ export class ModalSenhaComponent implements OnInit, OnDestroy {
   fecharModal(): void {
     if (!this.carregandoSenha) {
       this.close.emit();
+    }
+  }
+
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).tagName === 'DIALOG') {
+      this.fecharModal();
     }
   }
 
@@ -77,12 +84,14 @@ export class ModalSenhaComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.senhaSucesso = true;
+          this.announcer.announce('Senha alterada com sucesso!', 'polite');
           this.formSenha.reset();
           // Timeout sem causar leak de memória 
           setTimeout(() => this.fecharModal(), 1800);
         },
         error: (err: any) => {
           this.senhaErro = err?.error?.message ?? 'Erro ao trocar a senha. Verifique a senha atual e tente novamente.';
+          this.announcer.announce(this.senhaErro!, 'assertive');
         }
       });
   }

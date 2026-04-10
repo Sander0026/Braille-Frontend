@@ -1,6 +1,6 @@
 @if (isOpen && log) {
-<div class="modal-overlay" (click)="fechar()" (keydown.enter)="fechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal modal--lg" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" aria-labelledby="modal-title" aria-modal="true">
+<div class="modal-overlay" (click)="fechar()" (keydown.escape)="fechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal modal--lg" open (click)="$event.stopPropagation()" aria-labelledby="modal-title" aria-modal="true">
         <header class="modal-header">
             <h2 id="modal-title" class="modal-title" style="margin-bottom: 0.25rem;">
                 <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>

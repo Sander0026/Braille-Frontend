@@ -6,7 +6,8 @@ import { ConteudoDinamicoComponent } from './components/conteudo-dinamico/conteu
 import { ConteudoSobreComponent } from './components/conteudo-sobre/conteudo-sobre.component';
 import { ConteudoContatoComponent } from './components/conteudo-contato/conteudo-contato.component';
 import { ComunicadosLista } from './components/comunicados-lista/comunicados-lista';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
+import { inject } from '@angular/core';
 
 type AbaAtiva = 'config' | 'hero' | 'missao' | 'oficinas' | 'depoimentos' | 'sobre' | 'comunicados' | 'faq' | 'contato';
 
@@ -29,9 +30,24 @@ type AbaAtiva = 'config' | 'hero' | 'missao' | 'oficinas' | 'depoimentos' | 'sob
 })
 export class ConteudoSite {
   abaAtiva = signal<AbaAtiva>('config');
+  private readonly announcer = inject(LiveAnnouncer);
 
   setAba(aba: AbaAtiva) {
     this.abaAtiva.set(aba);
+    
+    // Feedback orgânico (Screen Readers) de mudança de painel ativo.
+    const titulos: Record<string, string> = {
+      config: 'Configurações Globais',
+      hero: 'Apresentação Principal',
+      missao: 'Missão e Valores',
+      oficinas: 'Oficinas',
+      depoimentos: 'Depoimentos',
+      sobre: 'Página Sobre Nós',
+      comunicados: 'Painel de Noticias',
+      faq: 'Perguntas Frequentes',
+      contato: 'Visão de Contatos'
+    };
+    this.announcer.announce(`Aba de navegação alternada para: ${titulos[aba] ?? aba}.`, 'polite');
   }
 
   // Acessibilidade WCAG - Seleção de Tabs via Teclado

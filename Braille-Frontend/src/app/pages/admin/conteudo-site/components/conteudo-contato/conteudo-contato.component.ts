@@ -6,11 +6,12 @@ import { ToastService } from '../../../../../core/services/toast.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, take } from 'rxjs/operators';
 import { QuillModule } from 'ngx-quill';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-conteudo-contato',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, QuillModule],
+  imports: [CommonModule, ReactiveFormsModule, QuillModule, A11yModule],
   templateUrl: './conteudo-contato.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -24,6 +25,7 @@ export class ConteudoContatoComponent implements OnInit {
   private readonly siteConfig = inject(SiteConfigService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly toast = inject(ToastService);
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor() {
     this.formContato = this.fb.group({
@@ -54,6 +56,7 @@ export class ConteudoContatoComponent implements OnInit {
         this.formContato.patchValue(secoes['contato_global']);
       }
       this.carregando.set(false);
+      this.announcer.announce('Formulário de configurações de contato carregado.', 'polite');
     });
   }
 
@@ -67,12 +70,14 @@ export class ConteudoContatoComponent implements OnInit {
     this.siteConfig.salvarSecao('contato_global', array).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.salvando.set(false);
-        this.toast.sucesso('Informações de contato e redes sociais salvas com sucesso!');
+        this.toast.sucesso('Informações de contato salvas com sucesso!');
+        this.announcer.announce('Todas as informações de Contato e Redes Sociais foram sincronizadas com o banco.', 'polite');
         this.siteConfig.carregarSecoes().pipe(take(1)).subscribe();
       },
       error: () => {
         this.salvando.set(false);
         this.toast.erro('Erro ao salvar as configurações de contato.');
+        this.announcer.announce('Ocorreu um erro no servidor ao tentar atualizar os Contatos.', 'assertive');
       }
     });
   }

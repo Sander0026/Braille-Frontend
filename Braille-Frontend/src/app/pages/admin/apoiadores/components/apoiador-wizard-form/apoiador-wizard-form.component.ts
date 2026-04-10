@@ -1,13 +1,14 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { MasksUtil } from '../../../../../shared/utils/masks.util';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-apoiador-wizard-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, A11yModule],
   templateUrl: './apoiador-wizard-form.component.html',
   styleUrl: './apoiador-wizard-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,6 +32,8 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
   logoFeedback: string | null = null;
   logoFeedbackType: 'success' | 'error' = 'success';
   salvando = false;
+
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -211,14 +214,17 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     const grupo = this.apoiadorForm.get(this.getGroupName(this.passoAtual));
     if (grupo && grupo.valid) {
       this.passoAtual++;
+      this.announcer.announce(`Avançado para a etapa ${this.passoAtual} de 4`, 'polite');
     } else {
       grupo?.markAllAsTouched();
+      this.announcer.announce('Por favor, preencha os campos obrigatórios corretamente antes de avançar.', 'assertive');
     }
   }
 
   voltarPasso() {
     if (this.passoAtual > 1) {
       this.passoAtual--;
+      this.announcer.announce(`Retornado para a etapa ${this.passoAtual} de 4`, 'polite');
     }
   }
 
@@ -262,6 +268,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
   onSubmitForm(): void {
     if (this.apoiadorForm.invalid) {
       this.apoiadorForm.markAllAsTouched();
+      this.announcer.announce('O formulário contém erros de validação. Revise antes de salvar.', 'assertive');
       return;
     }
 
@@ -302,6 +309,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
             next: () => this.sucessoForm(),
             error: (err) => {
               console.error('Erro no upload logo', err);
+              this.announcer.announce('Apoiador salvo, mas houve uma falha ao enviar o logotipo.', 'assertive');
               this.sucessoForm(); // Finaliza do mesmo modo
             }
           });
@@ -311,7 +319,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
       },
       error: (err) => {
         console.error('Erro ao salvar apoiador', err);
-        alert('Erro ao salvar no servidor. Verifique os dados e tente novamente.');
+        this.announcer.announce('Erro ao salvar no servidor. Verifique os dados e tente novamente.', 'assertive');
         this.salvando = false;
         this.cdr.detectChanges();
       }
@@ -320,6 +328,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
 
   private sucessoForm(): void {
     this.salvando = false;
+    this.announcer.announce('Apoiador cadastrado ou atualizado com sucesso.', 'polite');
     this.cdr.detectChanges();
     this.formSaved.emit();
   }

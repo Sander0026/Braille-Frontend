@@ -69,11 +69,8 @@
         <tbody>
             @for (log of logs; track log.id) {
             <tr class="audit-row" 
-                tabindex="0"
-                aria-label="Selecionar evento"
-                (click)="abrirDetalhes(log)"
-                (keydown.enter)="abrirDetalhes(log)">
-                <td class="col-data" [attr.aria-label]="'Data do ocorrido: ' + formatarData(log.criadoEm)">{{ formatarData(log.criadoEm) }}</td>
+                (click)="abrirDetalhes(log)">
+                <td class="col-data">{{ formatarData(log.criadoEm) }}</td>
                 <td>
                     <span class="badge-acao" [ngClass]="acaoCor[log.acao]" [attr.aria-hidden]="true">{{ log.acao }}</span>
                 </td>

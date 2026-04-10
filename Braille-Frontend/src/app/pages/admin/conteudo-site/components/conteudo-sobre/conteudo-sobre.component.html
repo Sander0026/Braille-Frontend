@@ -1,6 +1,6 @@
 @if (carregando()) {
-<div class="loading-state">
-    <span class="material-symbols-rounded spinner">sync</span>
+<div class="loading-state" role="status" aria-live="polite">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span>
     <p>Carregando dados da seção Sobre...</p>
 </div>
 } @else {
@@ -84,8 +84,8 @@
             <div class="dynamic-card-header">
                 <span class="card-badge">Marco {{ $index + 1 }}</span>
                 <button type="button" class="btn-icon danger" (click)="pedirExclusao($index, 'timeline')"
-                    aria-label="Remover marco" title="Remover marco histórico">
-                    <span class="material-symbols-rounded">delete</span>
+                    [attr.aria-label]="'Remover marco histórico número ' + ($index + 1)" title="Remover marco histórico">
+                    <span class="material-symbols-rounded" aria-hidden="true">delete</span>
                 </button>
             </div>
             
@@ -136,8 +136,8 @@
             <div class="dynamic-card-header">
                 <span class="card-badge">Membro / Área {{ $index + 1 }}</span>
                 <button type="button" class="btn-icon danger" (click)="pedirExclusao($index, 'equipe')"
-                    aria-label="Remover membro">
-                    <span class="material-symbols-rounded">delete</span>
+                    [attr.aria-label]="'Remover membro ou área da equipe número ' + ($index + 1)">
+                    <span class="material-symbols-rounded" aria-hidden="true">delete</span>
                 </button>
             </div>
             <div class="flex-row mt-3" style="gap: 1rem;">
@@ -210,9 +210,8 @@
 
 <!-- Modal Excluir Item Dinâmico -->
 @if (itemParaExcluir() !== null) {
-<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Remover Item"
-    (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal" open (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<div class="modal-backdrop" (click)="cancelarExclusao()" (keydown.escape)="cancelarExclusao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Remover Item">
         <div class="modal-header">
             <h2 style="color: #b91c1c; text-transform: capitalize;">Excluir {{ itemParaExcluir()?.tipo }}</h2>
             <button class="btn btn-icon btn-ghost" (click)="cancelarExclusao()" aria-label="Cancelar">✕</button>

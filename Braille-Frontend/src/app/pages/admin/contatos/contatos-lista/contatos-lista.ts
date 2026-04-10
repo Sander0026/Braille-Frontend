@@ -138,9 +138,11 @@ export class ContatosLista implements OnInit {
         this.contatosService.excluir(contato.id)
       );
       this.fecharMensagem();
+      this.liveAnnouncer.announce('Mensagem excluída permanentemente com sucesso.', 'polite');
       this.carregar();
     } catch (e: any) {
       this.erro.set('Houve um erro indesejado ao tentar excluir a mensagem.');
+      this.liveAnnouncer.announce('Houve um erro indesejado ao tentar excluir a mensagem.', 'assertive');
     }
   }
 
