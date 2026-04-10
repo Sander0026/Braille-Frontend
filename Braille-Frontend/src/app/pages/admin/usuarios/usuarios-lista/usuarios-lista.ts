@@ -58,7 +58,7 @@ export class UsuariosLista implements OnInit, AfterViewInit {
     readonly usuarioEmEdicao = signal<Usuario | null>(null);
 
     // Controle de Acessibilidade
-    lastFocusBeforeModal: HTMLElement | null = null;
+    private trFocusOrigin: HTMLElement | null = null;
     @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
     public keyManager!: FocusKeyManager<TabelaTrFocavelDirective>;
 
@@ -147,17 +147,23 @@ export class UsuariosLista implements OnInit, AfterViewInit {
 
     // --- Controles de Modais Delegados ---
     abrirPerfil(u: Usuario): void {
-        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+        if (!this.usuarioVisualizado() && !this.usuarioEmEdicao()) {
+            this.trFocusOrigin = document.activeElement as HTMLElement;
+        }
         this.usuarioVisualizado.set(u);
     }
 
     fecharPerfil(): void {
         this.usuarioVisualizado.set(null);
-        setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+        if (!this.usuarioEmEdicao()) {
+            setTimeout(() => this.trFocusOrigin?.focus(), 50);
+        }
     }
 
     abrirModal(u: Usuario): void {
-        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+        if (!this.usuarioVisualizado() && !this.usuarioEmEdicao()) {
+            this.trFocusOrigin = document.activeElement as HTMLElement;
+        }
         this.usuarioEmEdicao.set(u);
     }
 
@@ -171,17 +177,17 @@ export class UsuariosLista implements OnInit, AfterViewInit {
             });
             if (ok) {
                 this.usuarioEmEdicao.set(null);
-                setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+                if (!this.usuarioVisualizado()) setTimeout(() => this.trFocusOrigin?.focus(), 50);
             }
         } else {
             this.usuarioEmEdicao.set(null);
-            setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+            if (!this.usuarioVisualizado()) setTimeout(() => this.trFocusOrigin?.focus(), 50);
         }
     }
 
     onFormFechado(): void {
        this.usuarioEmEdicao.set(null);
-       setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+       if (!this.usuarioVisualizado()) setTimeout(() => this.trFocusOrigin?.focus(), 50);
     }
 
     onFormAtualizado() {

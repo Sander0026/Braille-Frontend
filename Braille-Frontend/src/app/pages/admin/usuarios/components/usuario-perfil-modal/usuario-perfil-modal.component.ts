@@ -89,6 +89,13 @@ export class UsuarioPerfilModalComponent {
     }
   }
 
+  onAvatarKeydown(event: Event, fileInput: HTMLInputElement): void {
+    event.preventDefault();
+    if (!this.salvando()) {
+      fileInput.click();
+    }
+  }
+
   onFileSelected(event: any): void {
     const file = event.target.files?.[0];
     const uId = this._usuario?.id;

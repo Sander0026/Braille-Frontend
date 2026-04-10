@@ -5,6 +5,7 @@ import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 /**
  * Interceptor de Autenticação.
@@ -19,6 +20,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
   const router = inject(Router);
   const toast = inject(ToastService);
+  const announcer = inject(LiveAnnouncer);
   const token = authService.getToken();
 
   // Rotas públicas mapeadas rigorosamente que não admitem Tokens na Criação/Registro
@@ -45,6 +47,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           if (isRefreshRoute) {
              authService.logout();
              toast.aviso('Sua sessão expirou perfeitamente. Faça seu login novamente.');
+             announcer.announce('Redirecionado para o login: A sessão expirou.', 'assertive');
              router.navigate(['/login']);
              return throwError(() => error);
           }
@@ -75,6 +78,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
                   isRefreshing = false;
                   authService.logout();
                   toast.aviso('Falha grave na estabilização. Sua conta foi desconectada por segurança.');
+                  announcer.announce('Redirecionado para o login: Falha de segurança na conexão.', 'assertive');
                   router.navigate(['/login']);
                   return throwError(() => refreshError);
                 })
@@ -83,6 +87,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
           } else {
             // D) Sem tokens sobreviventes. Direto pra degola.
             authService.logout();
+            toast.aviso('Sessão expirada. Faça login novamente para acessar.');
+            announcer.announce('Redirecionado para o login: Sem tokens de acesso.', 'assertive');
             router.navigate(['/login']);
           }
       }

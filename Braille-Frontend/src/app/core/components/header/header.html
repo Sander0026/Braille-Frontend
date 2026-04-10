@@ -17,15 +17,16 @@
         </a>
       </nav>
 
-      <fieldset class="a11y-controls public-a11y" aria-label="Controles de acessibilidade">
+      <fieldset class="a11y-controls public-a11y">
+        <legend class="sr-only">Controles de acessibilidade</legend>
         <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="a11y.fonteAtual === 'padrao'"
-          aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
+          [attr.aria-pressed]="a11y.fonteAtual === 'padrao' ? 'true' : 'false'" aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
         <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="a11y.fonteAtual === 'grande'"
-          aria-label="Aumentar fonte" title="Fonte grande">A+</button>
+          [attr.aria-pressed]="a11y.fonteAtual === 'grande' ? 'true' : 'false'" aria-label="Aumentar fonte" title="Fonte grande">A+</button>
         <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="a11y.fonteAtual === 'extragrande'"
-          aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
+          [attr.aria-pressed]="a11y.fonteAtual === 'extragrande' ? 'true' : 'false'" aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
         <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="a11y.isAltoContraste"
-          aria-label="Alternar alto contraste" title="Alto contraste">
+          [attr.aria-pressed]="a11y.isAltoContraste ? 'true' : 'false'" aria-label="Alternar alto contraste" title="Alto contraste">
           <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
         </button>
       </fieldset>
@@ -46,22 +47,23 @@
 
     <div class="header-right">
       <!-- ── Controles de Acessibilidade ── -->
-      <fieldset class="a11y-controls" aria-label="Controles de acessibilidade">
+      <fieldset class="a11y-controls">
+        <legend class="sr-only">Controles de acessibilidade</legend>
         <button class="a11y-btn" (click)="setFonte('padrao')" [class.active]="a11y.fonteAtual === 'padrao'"
-          aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
+          [attr.aria-pressed]="a11y.fonteAtual === 'padrao' ? 'true' : 'false'" aria-label="Tamanho de fonte padrão" title="Fonte padrão">A</button>
         <button class="a11y-btn" (click)="setFonte('grande')" [class.active]="a11y.fonteAtual === 'grande'"
-          aria-label="Aumentar fonte" title="Fonte grande">A+</button>
+          [attr.aria-pressed]="a11y.fonteAtual === 'grande' ? 'true' : 'false'" aria-label="Aumentar fonte" title="Fonte grande">A+</button>
         <button class="a11y-btn" (click)="setFonte('extragrande')" [class.active]="a11y.fonteAtual === 'extragrande'"
-          aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
+          [attr.aria-pressed]="a11y.fonteAtual === 'extragrande' ? 'true' : 'false'" aria-label="Fonte extra grande" title="Fonte extra grande">A++</button>
         <button class="a11y-btn a11y-contraste" (click)="toggleAltoContraste()" [class.active]="a11y.isAltoContraste"
-          aria-label="Ativar ou desativar alto contraste" title="Alto contraste">
+          [attr.aria-pressed]="a11y.isAltoContraste ? 'true' : 'false'" aria-label="Ativar ou desativar alto contraste" title="Alto contraste">
           <span class="material-symbols-rounded" aria-hidden="true">contrast</span>
         </button>
       </fieldset>
 
-      <div class="user-menu-wrapper" (click)="fecharMenoExterno()" (keydown.enter)="fecharMenoExterno()">
+      <div class="user-menu-wrapper" (click)="fecharMenoExterno()">
         <button class="user-menu-btn" (click)="toggleUserMenu($event)"
-          [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="menu">
+          [attr.aria-expanded]="menuAberto ? 'true' : 'false'" aria-haspopup="true">
 
           <!-- Avatar: foto ou iniciais -->
           @if (fotoPerfil) {
@@ -81,14 +83,14 @@
 
         <!-- Dropdown -->
         @if (menuAberto) {
-        <div class="user-dropdown" role="menu" aria-label="Menu de perfil" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+        <div class="user-dropdown" aria-label="Opções de perfil" (click)="$event.stopPropagation()">
 
           <!-- Cabeçalho com avatar grande -->
           <div class="dropdown-header">
             @if (fotoPerfil) {
               <img [src]="fotoPerfil" class="dropdown-avatar-img" [alt]="'Foto de ' + nomeDisplay" />
             } @else {
-              <div class="dropdown-avatar">{{ iniciaisDisplay }}</div>
+              <div class="dropdown-avatar" aria-hidden="true">{{ iniciaisDisplay }}</div>
             }
             <div class="dropdown-user-info">
               <p class="dropdown-nome">{{ nomeDisplay }}</p>
@@ -101,24 +103,24 @@
 
           <hr class="dropdown-divider" />
 
-          <button class="dropdown-item" role="menuitem" (click)="emitUserAction('perfil')">
+          <button class="dropdown-item" (click)="emitUserAction('perfil')">
             <span class="material-symbols-rounded" aria-hidden="true">person</span>
             Meu Perfil
           </button>
 
-          <button class="dropdown-item" role="menuitem" (click)="emitUserAction('foto')">
+          <button class="dropdown-item" (click)="emitUserAction('foto')">
             <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
             Trocar Foto
           </button>
 
-          <button class="dropdown-item" role="menuitem" (click)="emitUserAction('senha')">
+          <button class="dropdown-item" (click)="emitUserAction('senha')">
             <span class="material-symbols-rounded" aria-hidden="true">lock</span>
             Trocar Senha
           </button>
 
           <hr class="dropdown-divider" />
 
-          <button class="dropdown-item danger" role="menuitem" (click)="emitUserAction('sair')">
+          <button class="dropdown-item danger" (click)="emitUserAction('sair')">
             <span class="material-symbols-rounded" aria-hidden="true">logout</span>
             Sair
           </button>

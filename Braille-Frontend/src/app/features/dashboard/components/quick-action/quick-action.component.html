@@ -1,5 +1,5 @@
 <a [routerLink]="action.rota" [queryParams]="action.queryParams || null" class="action-btn"
-    [attr.aria-label]="action.ariaLabel">
+    [attr.aria-label]="action.ariaLabel || null">
     <span class="material-symbols-rounded" aria-hidden="true">{{ action.icon }}</span>
     <span>{{ action.label }}</span>
 </a>

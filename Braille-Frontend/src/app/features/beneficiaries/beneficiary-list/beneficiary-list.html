@@ -49,6 +49,7 @@
     <!-- Botão Exportar Lista -->
     @if (isAdmin) {
     <button type="button" class="btn btn-outline-primary filter-btn" (click)="exportarListaParaXlsx()"
+        [disabled]="exportando"
         [attr.aria-disabled]="exportando ? 'true' : null"
         [attr.aria-busy]="exportando"
         [class.opacity-50]="exportando"
@@ -773,7 +774,7 @@
 <!-- MODAL DE GERENCIAMENTO DE ATESTADOS -->
 @if (gerenciandoAtestados) {
 <div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-atestado-title"
-    (click)="fecharModalGerenciamentoAtestados($event)">
+    (click)="fecharModalGerenciamentoAtestados($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h3 id="modal-atestado-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
@@ -919,7 +920,7 @@
 <!-- MODAL DE GERENCIAMENTO DE LAUDOS -->
 @if (gerenciandoLaudos) {
 <div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-laudo-title"
-    (click)="fecharModalGerenciamentoLaudos($event)">
+    (click)="fecharModalGerenciamentoLaudos($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h3 id="modal-laudo-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">

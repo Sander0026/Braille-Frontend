@@ -9,10 +9,10 @@ import { ConfirmDialogService } from '../../services/confirm-dialog.service';
   imports: [CommonModule, A11yModule],
   styleUrl: './confirm-dialog.component.scss',
   template: `
-    <dialog #confirmDialog class="cd-backdrop" (cancel)="onCancel($event)" (click)="onBackdropClick($event)">
+    <dialog #confirmDialog class="cd-backdrop" (cancel)="onCancel($event)" (click)="onBackdropClick($event)"
+            role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-message">
       @if (svc.dialogData(); as dialog) {
-        <div class="cd-card" cdkTrapFocus cdkTrapFocusAutoCapture (click)="$event.stopPropagation()"
-             role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-message">
+        <div class="cd-card" (click)="$event.stopPropagation()">
 
           <!-- Ícone por tipo -->
           <div class="cd-icon" [class]="'cd-icon tipo-' + (dialog.tipo || 'danger')" aria-hidden="true">
@@ -65,13 +65,6 @@ export class ConfirmDialog {
         dlg.close();
       }
     });
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscapeKey() {
-    if (this.svc.dialogData()) {
-      this.svc._cancelar();
-    }
   }
 
   onCancel(event: Event) {

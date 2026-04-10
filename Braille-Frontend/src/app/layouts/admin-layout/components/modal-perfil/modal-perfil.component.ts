@@ -1,7 +1,7 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output, OnDestroy, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Subject, takeUntil, finalize } from 'rxjs';
 import { AuthService, PerfilUsuario, UserInfo } from '../../../../core/services/auth.service';
 
@@ -31,6 +31,7 @@ export class ModalPerfilComponent implements OnInit, OnDestroy {
   carregandoPerfil = false;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -46,6 +47,12 @@ export class ModalPerfilComponent implements OnInit, OnDestroy {
 
   fecharModal(): void {
     this.close.emit();
+  }
+
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).tagName === 'DIALOG') {
+      this.fecharModal();
+    }
   }
 
   emitAction(tipo: 'foto' | 'removerFoto'): void {
@@ -84,6 +91,7 @@ export class ModalPerfilComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (p: PerfilUsuario) => {
           this.perfilSucesso = true;
+          this.announcer.announce('Perfil atualizado com sucesso!', 'polite');
           this.perfilAtualizado.emit(p);
           
           setTimeout(() => {
@@ -92,6 +100,7 @@ export class ModalPerfilComponent implements OnInit, OnDestroy {
         },
         error: (err: any) => {
           this.perfilErro = err?.error?.message ?? 'Erro ao atualizar o perfil. Tente novamente.';
+          this.announcer.announce(this.perfilErro!, 'assertive');
         }
       });
   }

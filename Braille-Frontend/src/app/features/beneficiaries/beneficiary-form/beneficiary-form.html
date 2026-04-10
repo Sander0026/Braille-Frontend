@@ -2,11 +2,12 @@
 <!-- MODO EDIÇÃO — Modal flat com seções scrolláveis                       -->
 <!-- ══════════════════════════════════════════════════════════════════════ -->
 @if (isModoEdicao) {
-<form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" novalidate class="edit-modal">
+<form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" (keydown.enter)="handleEnter($event)" novalidate class="edit-modal"
+  role="dialog" aria-modal="true" aria-labelledby="modal-edicao-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
 
   <!-- ── Header fixo ──────────────────────────────────────────────── -->
   <div class="edit-modal__header">
-    <h2 class="edit-modal__title">Editar Aluno</h2>
+    <h2 id="modal-edicao-titulo" class="edit-modal__title">Editar Aluno</h2>
     <button type="button" class="edit-modal__close" (click)="emitirCancelamento()"
       aria-label="Fechar modal de edição">×</button>
   </div>
@@ -355,10 +356,11 @@
   <!-- ── Footer fixo ──────────────────────────────────────────────── -->
   <div class="edit-modal__footer">
     <button type="button" class="btn btn-secondary" (click)="emitirCancelamento()"
-      aria-label="Cancelar edição">
+      aria-label="Cancelar edição" [disabled]="isSalvando">
       Cancelar
     </button>
     <button type="submit" class="btn btn-primary edit-modal__save"
+      [disabled]="cadastroForm.invalid || isSalvando"
       [attr.aria-disabled]="cadastroForm.invalid || isSalvando"
       [attr.aria-busy]="isSalvando"
       aria-label="Salvar alterações do aluno">
@@ -399,11 +401,11 @@
     </div>
   </header>
 
-  <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" class="wizard-form" novalidate>
+  <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" (keydown.enter)="handleEnter($event)" class="wizard-form" novalidate>
 
     @if (passoAtual === 1) {
     <fieldset formGroupName="dadosPessoais">
-      <legend>Passo 1: Dados Identificadores</legend>
+      <legend class="wizard-step-title" tabindex="-1">Passo 1: Dados Identificadores</legend>
       <div class="form-group" style="margin-bottom: 1.5rem">
         <label for="nomeCompleto" class="form-label">Nome Completo <span class="required" aria-hidden="true">*</span></label>
         <input type="text" id="nomeCompleto" class="form-input" formControlName="nomeCompleto"
@@ -470,9 +472,11 @@
         <div class="form-group">
           <label for="dataNascimento" class="form-label">Data de Nascimento <span class="required" aria-hidden="true">*</span></label>
           <input type="date" id="dataNascimento" class="form-input" formControlName="dataNascimento"
-            [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true">
+            [class.input-error]="isCampoInvalido('dadosPessoais', 'dataNascimento')" aria-required="true"
+            [attr.aria-invalid]="isCampoInvalido('dadosPessoais', 'dataNascimento') ? 'true' : null"
+            [attr.aria-describedby]="isCampoInvalido('dadosPessoais', 'dataNascimento') ? 'err-bd' : null">
           @if (isCampoInvalido('dadosPessoais', 'dataNascimento')) {
-          <span class="error-text" role="alert">Data obrigatória.</span>
+          <span id="err-bd" class="error-text" role="alert">Data obrigatória.</span>
           }
         </div>
         <div class="form-group">
@@ -516,22 +520,26 @@
 
     @if (passoAtual === 2) {
     <fieldset formGroupName="enderecoLocalizacao">
-      <legend>Passo 2: Contato e Localização</legend>
+      <legend class="wizard-step-title" tabindex="-1">Passo 2: Contato e Localização</legend>
       <div class="form-row">
         <div class="form-group form-group--small">
           <label for="cep" class="form-label">CEP <span class="required" aria-hidden="true">*</span></label>
           <input type="tel" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9">
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9"
+            [attr.aria-invalid]="isCampoInvalido('enderecoLocalizacao', 'cep') ? 'true' : null"
+            [attr.aria-describedby]="isCampoInvalido('enderecoLocalizacao', 'cep') ? 'err-cep' : null">
           @if (isCampoInvalido('enderecoLocalizacao', 'cep')) {
-          <span class="error-text" role="alert">CEP inválido.</span>
+          <span id="err-cep" class="error-text" role="alert">CEP inválido.</span>
           }
         </div>
         <div class="form-group">
           <label for="rua" class="form-label">Rua <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="rua" formControlName="rua" class="form-input"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')" placeholder="Logradouro">
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'rua')" placeholder="Logradouro"
+            [attr.aria-invalid]="isCampoInvalido('enderecoLocalizacao', 'rua') ? 'true' : null"
+            [attr.aria-describedby]="isCampoInvalido('enderecoLocalizacao', 'rua') ? 'err-rua' : null">
           @if (isCampoInvalido('enderecoLocalizacao', 'rua')) {
-          <span class="error-text" role="alert">Rua obrigatória.</span>
+          <span id="err-rua" class="error-text" role="alert">Rua obrigatória.</span>
           }
         </div>
       </div>
@@ -572,9 +580,11 @@
           <label for="telefoneContato" class="form-label">Telefone <span class="required" aria-hidden="true">*</span></label>
           <input type="tel" id="telefoneContato" class="form-input" formControlName="telefoneContato"
             (input)="formatarTelefone($event)" maxlength="15"
-            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" placeholder="(00) 00000-0000">
+            [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato')" placeholder="(00) 00000-0000"
+            [attr.aria-invalid]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato') ? 'true' : null"
+            [attr.aria-describedby]="isCampoInvalido('enderecoLocalizacao', 'telefoneContato') ? 'err-tel' : null">
           @if (isCampoInvalido('enderecoLocalizacao', 'telefoneContato')) {
-          <span class="error-text" role="alert">Telefone obrigatório.</span>
+          <span id="err-tel" class="error-text" role="alert">Telefone obrigatório.</span>
           }
         </div>
         <div class="form-group">
@@ -592,19 +602,21 @@
 
     @if (passoAtual === 3) {
     <fieldset formGroupName="perfilDeficiencia">
-      <legend>Passo 3: Perfil da Deficiência Visual</legend>
+      <legend class="wizard-step-title" tabindex="-1">Passo 3: Perfil da Deficiência Visual</legend>
       <div class="form-row">
         <div class="form-group">
           <label for="tipoDeficiencia" class="form-label">Tipo <span class="required" aria-hidden="true">*</span></label>
           <select id="tipoDeficiencia" formControlName="tipoDeficiencia" class="form-select"
-            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')">
+            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')"
+            [attr.aria-invalid]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia') ? 'true' : null"
+            [attr.aria-describedby]="isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia') ? 'err-td' : null">
             <option value="">Selecione...</option>
             <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
             <option value="BAIXA_VISAO">Baixa Visão</option>
             <option value="VISAO_MONOCULAR">Visão Monocular</option>
           </select>
           @if (isCampoInvalido('perfilDeficiencia', 'tipoDeficiencia')) {
-          <span class="error-text" role="alert">Campo obrigatório.</span>
+          <span id="err-td" class="error-text" role="alert">Campo obrigatório.</span>
           }
         </div>
         <div class="form-group">
@@ -626,7 +638,9 @@
         <div class="form-group">
           <label for="prefAcessibilidade" class="form-label">Pref. Comunicação <span class="required" aria-hidden="true">*</span></label>
           <select id="prefAcessibilidade" formControlName="prefAcessibilidade" class="form-select"
-            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')">
+            [class.input-error]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')"
+            [attr.aria-invalid]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade') ? 'true' : null"
+            [attr.aria-describedby]="isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade') ? 'err-pref' : null">
             <option value="">Selecione...</option>
             <option value="BRAILLE">Braille</option>
             <option value="FONTE_AMPLIADA">Fonte Ampliada</option>
@@ -634,7 +648,7 @@
             <option value="AUDIO">Áudio</option>
           </select>
           @if (isCampoInvalido('perfilDeficiencia', 'prefAcessibilidade')) {
-          <span class="error-text" role="alert">Campo obrigatório.</span>
+          <span id="err-pref" class="error-text" role="alert">Campo obrigatório.</span>
           }
         </div>
       </div>
@@ -658,7 +672,7 @@
 
     @if (passoAtual === 4) {
     <fieldset formGroupName="socioeconomico">
-      <legend>Passo 4: Situação Socioeconômica e Saúde</legend>
+      <legend class="wizard-step-title" tabindex="-1">Passo 4: Situação Socioeconômica e Saúde</legend>
       <div class="form-row">
         <div class="form-group">
           <label for="escolaridade" class="form-label">Escolaridade</label>
@@ -746,7 +760,8 @@
 <!-- ── Modal de Reativação ──────────────────────────────────── -->
 @if (modalReativacao && dadosReativacao) {
 <dialog open class="modal-reativacao-overlay" (keydown.escape)="cancelarReativacao()" (click)="cancelarReativacao()"
-  aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  aria-labelledby="modal-reativ-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+  role="dialog" aria-modal="true">
   <div class="modal-reativacao-box" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
     <div class="modal-reativ-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -763,8 +778,8 @@
     </p>
     <p>Deseja <strong>reativar</strong> este aluno?</p>
     <div class="modal-reativ-actions">
-      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [attr.aria-disabled]="isSalvando">Não, cancelar</button>
-      <button class="btn-reativ-confirmar" (click)="confirmarReativacao()" [attr.aria-disabled]="isSalvando" [attr.aria-busy]="isSalvando">
+      <button class="btn-reativ-cancelar" (click)="cancelarReativacao()" [disabled]="isSalvando" [attr.aria-disabled]="isSalvando">Não, cancelar</button>
+      <button class="btn-reativ-confirmar" (click)="confirmarReativacao()" [disabled]="isSalvando" [attr.aria-disabled]="isSalvando" [attr.aria-busy]="isSalvando">
         @if (isSalvando) { 
           <span class="sr-only">Deseja reativar o aluno? Reativando o aluno...</span>
           <span aria-hidden="true">Reativando...</span> 
@@ -774,4 +789,4 @@
     </div>
   </div>
 </dialog>
-}
+} 

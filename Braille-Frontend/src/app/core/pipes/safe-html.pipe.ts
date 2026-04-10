@@ -24,7 +24,7 @@ export class SafeHtmlPipe implements PipeTransform {
         // OWASP DOMPurify: Limpa handlers injetados (Script injection/Prototype pollution prevention)
         const cleanHtml = DOMPurify.sanitize(html, {
             ALLOWED_TAGS: ['b', 'i', 'em', 'strong', 'a', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'ul', 'ol', 'li', 'br', 'span', 'div', 'img', 's', 'u', 'blockquote', 'pre'],
-            ALLOWED_ATTR: ['href', 'title', 'target', 'src', 'alt', 'width', 'height', 'style', 'class']
+            ALLOWED_ATTR: ['href', 'title', 'target', 'src', 'alt', 'width', 'height', 'style', 'class', 'aria-label', 'aria-hidden', 'aria-describedby', 'role', 'tabindex', 'aria-live']
         });
 
         // WCAG 2.1 AA: Injection Forçado de Atributos Decorativos e Descritivos de Imagem
@@ -33,6 +33,17 @@ export class SafeHtmlPipe implements PipeTransform {
         doc.querySelectorAll('img').forEach(img => {
             if (!img.hasAttribute('alt')) {
                 img.setAttribute('alt', ''); // Esconde nativamente do Screen Reader
+            }
+        });
+
+        // WCAG 3.2.5: Injecta alertas semânticos em links do CMS criados como "_blank" para evitar mudança brusca
+        doc.querySelectorAll('a').forEach(anchor => {
+            if (anchor.getAttribute('target') === '_blank') {
+                if (!anchor.hasAttribute('aria-label') && !anchor.hasAttribute('title')) {
+                    const text = anchor.textContent?.trim() || 'Link externo';
+                    anchor.setAttribute('aria-label', `${text} - Abre em nova aba`);
+                    anchor.setAttribute('title', `${text} (Abre em nova aba)`);
+                }
             }
         });
 

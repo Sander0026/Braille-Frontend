@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common'; 
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 
@@ -15,12 +15,19 @@ export class BeneficiaryDetails {
   // Controle de estado enxuto e explícito
   exibirTermo: boolean = false;
 
+  // Acoplamento seguro na DOM
+  @ViewChild('btnTermoLgpd') btnTermoLgpd!: ElementRef<HTMLButtonElement>;
+
   abrirPdf() {
     this.exibirTermo = true;
   }
 
   fecharPdf() {
     this.exibirTermo = false;
+    // Roteamento seguro de WCAG para ancorar o topo do leitor
+    setTimeout(() => {
+      this.btnTermoLgpd?.nativeElement.focus();
+    }, 100);
   }
 }
 

@@ -1,6 +1,6 @@
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-foto-titulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-foto-titulo" 
+  (click)="onBackdropClick($event)" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card">
 
     <div class="modal-header">
       <h2 id="modal-foto-titulo" class="modal-title">Trocar Foto de Perfil</h2>
@@ -25,10 +25,10 @@
 
       <!-- Controles de Seleção / Remoção -->
       <div class="action-grid">
-        <label class="foto-upload-btn" for="input-foto">
+        <button type="button" class="foto-upload-btn" (click)="inputFoto.click()">
           <span class="material-symbols-rounded" aria-hidden="true">upload</span>
           @if (fotoSelecionada) { Alterar } @else { Selecionar foto }
-        </label>
+        </button>
         
         @if (fotoPerfil && !removerFotoFlag) {
         <button class="btn btn-secondary btn-remover" (click)="marcarParaRemoverFoto()" title="Remover minha foto atual">
@@ -37,7 +37,7 @@
         </button>
         }
       </div>
-      <input id="input-foto" type="file" accept="image/jpeg,image/png,image/webp" class="sr-only"
+      <input #inputFoto id="input-foto" type="file" accept="image/jpeg,image/png,image/webp" style="display: none;"
         (change)="onFotoSelecionada($event)" />
 
       <p class="foto-hint">Formatos: JPG, PNG, WebP. Máx: 2 MB.</p>

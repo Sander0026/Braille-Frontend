@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { PdfViewerComponent } from './pdf-viewer.component';
 import { SafeUrlPipe } from '../../../core/pipes/safe-url.pipe';
 import { ComponentRef } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('PdfViewerComponent', () => {
   let component: PdfViewerComponent;
@@ -33,7 +34,7 @@ describe('PdfViewerComponent', () => {
   });
 
   it('deve emitir o evento fecharModal ao acionar onClose()', () => {
-    spyOn(component.fecharModal, 'emit');
+    vi.spyOn(component.fecharModal, 'emit');
     component.onClose();
     expect(component.fecharModal.emit).toHaveBeenCalled();
   });

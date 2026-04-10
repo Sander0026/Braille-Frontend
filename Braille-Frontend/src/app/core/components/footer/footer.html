@@ -4,7 +4,7 @@
 ══════════════════════════════════════════════════════════════ -->
 
 @if (theme === 'public') {
-  <footer class="site-footer public-footer" role="contentinfo" aria-label="Rodapé do site braillix" *ngIf="contatoConfig$ | async as config">
+  <footer class="site-footer public-footer" role="contentinfo" aria-label="Rodapé do Instituto Luiz Braille" *ngIf="contatoConfig$ | async as config">
     <div class="footer-inner">
       <div class="footer-top">
         <div class="footer-brand">
@@ -17,25 +17,25 @@
       </div>
 
       <!-- Redes Sociais -->
-      <nav class="footer-social" aria-label="Redes sociais" role="navigation">
+      <nav class="footer-social" aria-label="Redes sociais">
         @if (config?.instagram) {
-          <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram">
-            <span class="social-icon">Instagram</span>
+          <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram - Abre em nova aba" title="Instagram (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">Instagram</span>
           </a>
         }
         @if (config?.facebook) {
-          <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook">
-            <span class="social-icon">Facebook</span>
+          <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook - Abre em nova aba" title="Facebook (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">Facebook</span>
           </a>
         }
         @if (config?.youtube) {
-          <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube">
-            <span class="social-icon">YouTube</span>
+          <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube - Abre em nova aba" title="YouTube (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">YouTube</span>
           </a>
         }
         @if (config?.linkedin) {
-          <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn">
-            <span class="social-icon">LinkedIn</span>
+          <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn - Abre em nova aba" title="LinkedIn (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">LinkedIn</span>
           </a>
         }
       </nav>

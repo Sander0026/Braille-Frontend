@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 /**
  * Guard funcional que protege rotas específicas baseadas no perfil (role) do usuário.
@@ -11,10 +12,13 @@ export const roleGuard: CanActivateFn = (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
     const toastService = inject(ToastService);
+    const announcer = inject(LiveAnnouncer);
 
     // O auth.guard já deve ter garantido o login, mas checamos por segurança
     const user = authService.getUser();
     if (!user) {
+        toastService.erro('Sessão expirada. Faça login para acessar esta página.');
+        announcer.announce('Redirecionado: Sessão de usuário não encontrada.', 'assertive');
         router.navigate(['/login']);
         return false;
     }

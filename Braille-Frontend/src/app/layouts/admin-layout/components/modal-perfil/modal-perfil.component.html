@@ -1,6 +1,6 @@
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-perfil-titulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card modal-card-wide" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modal-perfil-titulo" 
+  (click)="onBackdropClick($event)" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card modal-card-wide">
 
     <div class="modal-header">
       <h2 id="modal-perfil-titulo" class="modal-title">Meu Perfil</h2>

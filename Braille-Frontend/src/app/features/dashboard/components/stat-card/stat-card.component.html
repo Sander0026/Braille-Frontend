@@ -1,9 +1,9 @@
-<a [routerLink]="card.rota" [queryParams]="card.queryParams" class="stat-card stat-card--{{ card.cor }}" [attr.aria-label]="card.ariaLabel">
+<a [routerLink]="card.rota" [queryParams]="card.queryParams || null" class="stat-card stat-card--{{ card.cor }}" [attr.aria-label]="card.ariaLabel || null">
     <div class="stat-icon" aria-hidden="true">
         <span class="material-symbols-rounded">{{ card.icon }}</span>
     </div>
     <div class="stat-info">
-        <span class="stat-valor" aria-live="polite">{{ card.valor ?? '...' }}</span>
+        <span class="stat-valor">{{ card.valor ?? '...' }}</span>
         <span class="stat-label">{{ card.label }}</span>
     </div>
     <div class="stat-arrow" aria-hidden="true">

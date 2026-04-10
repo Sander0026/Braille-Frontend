@@ -19,7 +19,7 @@
 </div>
 } @else {
     @if (uiState$ | async; as state) {
-        <section class="stats-grid" role="region" aria-label="Resumo de estatísticas" aria-live="polite">
+        <section class="stats-grid" role="region" aria-label="Resumo de estatísticas">
             @for (card of state.cards; track card.label) {
                 <app-stat-card [card]="card"></app-stat-card>
             }

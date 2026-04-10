@@ -60,7 +60,7 @@ describe('UsuariosLista', () => {
     expect(component).toBeTruthy();
     expect(mockUsuariosService.listar).toHaveBeenCalledWith(1, 10, undefined, false);
     expect(component.usuarios()).toEqual([mockUsuario]);
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBe(false);
   });
 
   it('deve formatar label de cargos corretamente', () => {
@@ -78,7 +78,7 @@ describe('UsuariosLista', () => {
   it('falha graciosa da API exibe mensagem de erro e inibe o loading state', () => {
     mockUsuariosService.listar.and.returnValue(throwError(() => new Error('API Timeout')));
     component.carregar();
-    expect(component.isLoading()).toBeFalse();
+    expect(component.isLoading()).toBe(false);
     expect(component.erro()).toBe('Erro ao carregar usuários.');
   });
 

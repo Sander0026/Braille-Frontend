@@ -39,6 +39,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   modalReativacao = false;
   dadosReativacao: ReativacaoAluno | null = null;
   _payloadPendente: Record<string, unknown> | null = null;
+  elementoFocoAnterior: HTMLElement | null = null;
 
   // Validação CPF/RG em tempo real
   cpfStatus: 'livre' | 'ativo' | 'inativo' | 'verificando' | '' = '';
@@ -230,20 +231,24 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   }
 
   verificarObrigatoriedadeCpfRg() {
-    const cpf = this.cadastroForm.get('dadosPessoais.cpf')?.value;
-    const rg = this.cadastroForm.get('dadosPessoais.rg')?.value;
+    const cpfCtrl = this.cadastroForm.get('dadosPessoais.cpf');
+    const rgCtrl = this.cadastroForm.get('dadosPessoais.rg');
+    const cpf = cpfCtrl?.value;
+    const rg = rgCtrl?.value;
     
     if (!cpf && !rg) {
-       this.cadastroForm.get('dadosPessoais.cpf')?.setErrors({ required: true });
-       this.cadastroForm.get('dadosPessoais.rg')?.setErrors({ required: true });
+       cpfCtrl?.setErrors({ required: true });
+       rgCtrl?.setErrors({ required: true });
     } else {
-       if (this.cadastroForm.get('dadosPessoais.cpf')?.hasError('required')) {
-         this.cadastroForm.get('dadosPessoais.cpf')?.setErrors(null);
+       if (cpfCtrl?.hasError('required')) {
+         cpfCtrl?.setErrors(null);
        }
-       if (this.cadastroForm.get('dadosPessoais.rg')?.hasError('required')) {
-         this.cadastroForm.get('dadosPessoais.rg')?.setErrors(null);
+       if (rgCtrl?.hasError('required')) {
+         rgCtrl?.setErrors(null);
        }
     }
+    cpfCtrl?.updateValueAndValidity({ emitEvent: false, onlySelf: false });
+    rgCtrl?.updateValueAndValidity({ emitEvent: false, onlySelf: false });
   }
 
   private atualizarStatusDocumento(tipo: 'cpf' | 'rg', status: 'livre' | 'ativo' | 'inativo' | 'verificando' | '', conflito: any = null) {
@@ -305,6 +310,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
             excluido: res.excluido,
             message: 'Aluno inativo/excluído encontrado',
           };
+          this.elementoFocoAnterior = document.activeElement as HTMLElement;
           this.modalReativacao = true;
           this.anunciarParaLeitorDeTela(`Aluno inativo encontrado: ${res.nomeCompleto}. Deseja reativar?`);
         }
@@ -315,19 +321,14 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
 
   formatarDocumento(event: any) {
     const input = event.target;
-    let valor = input.value.replaceAll(/\D/g, '');
+    let valor = input.value.replace(/\D/g, '');
+    
     if (valor.length > 11) valor = valor.substring(0, 11);
-    if (valor.length <= 9) {
-      if (valor.length === 9) {
-        valor = valor.replaceAll(/(\d{2})(\d{3})(\d{3})(\d)/g, '$1.$2.$3-$4');
-      } else {
-        valor = valor.replaceAll(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-      }
-    } else {
-      valor = valor.replaceAll(/(\d{3})(\d)/g, '$1.$2');
-      valor = valor.replaceAll(/(\d{3})(\d)/g, '$1.$2');
-      valor = valor.replaceAll(/(\d{3})(\d{1,2})$/g, '$1-$2');
-    }
+    
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    
     input.value = valor;
     this.cadastroForm.get('dadosPessoais.cpf')?.setValue(valor, { emitEvent: false });
     this.verificarObrigatoriedadeCpfRg();
@@ -335,28 +336,33 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
 
   formatarRg(event: Event) {
     const input = event.target as HTMLInputElement;
-    let digitos = input.value.replaceAll(/\D/g, '');
-    if (digitos.length > 8) digitos = digitos.substring(0, 8);
-    let mascara = '';
-    if (digitos.length <= 7) {
-      mascara = digitos.replaceAll(/(\d)(\d)/g, '$1.$2').replaceAll(/(\d{3})(\d)/g, '$1.$2');
-    } else {
-      mascara = digitos.replaceAll(/(\d{2})(\d)/g, '$1.$2').replaceAll(/(\d{3})(\d)/g, '$1.$2');
-    }
-    input.value = mascara;
-    this.cadastroForm.get('dadosPessoais.rg')?.setValue(mascara, { emitEvent: false });
+    let valor = input.value.replace(/\D/g, '');
+    
+    if (valor.length > 8) valor = valor.substring(0, 8);
+    
+    // Formato ##.###.###
+    valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    
+    input.value = valor;
+    this.cadastroForm.get('dadosPessoais.rg')?.setValue(valor, { emitEvent: false });
     this.verificarObrigatoriedadeCpfRg();
   }
 
   formatarTelefone(event: any) {
     const input = event.target;
-    let valor = input.value.replaceAll(/\D/g, '');
+    let valor = input.value.replace(/\D/g, '');
+    
     if (valor.length > 11) valor = valor.substring(0, 11);
+    
     if (valor.length <= 10) {
-      valor = valor.replaceAll(/(\d{2})(\d)/g, '($1) $2').replaceAll(/(\d{4})(\d)/g, '$1-$2');
+      valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
+      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
     } else {
-      valor = valor.replaceAll(/(\d{2})(\d)/g, '($1) $2').replaceAll(/(\d{5})(\d)/g, '$1-$2');
+      valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
+      valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
     }
+    
     input.value = valor;
     this.cadastroForm.get('enderecoLocalizacao.telefoneContato')?.setValue(valor, { emitEvent: false });
   }
@@ -371,6 +377,30 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     return grupos[passo - 1];
   }
 
+  handleEnter(event: Event) {
+    const target = event.target as HTMLElement;
+    
+    // Ignora textareas para permitir quebra de linha normal
+    if (target.tagName.toLowerCase() === 'textarea') {
+      return;
+    }
+    
+    // Ignora botões para que o (click) original do botão lidere a ação
+    if (target.tagName.toLowerCase() === 'button') {
+      return;
+    }
+    
+    // Ignora campo de arquivo para poder abrir a seleção via teclado (Espaço/Enter)
+    if (target.tagName.toLowerCase() === 'input' && (target as HTMLInputElement).type === 'file') {
+      return;
+    }
+    
+    if (!this.isModoEdicao && this.passoAtual < 4) {
+      event.preventDefault(); // Evita salvarCadastro no ngSubmit prematuro
+      this.avancarPasso();
+    }
+  }
+
   avancarPasso() {
     const grupoAtual = this.getGroupName(this.passoAtual);
     const formGrupo = this.cadastroForm.get(grupoAtual);
@@ -381,13 +411,51 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     if (this.passoAtual === 1) {
        this.verificarObrigatoriedadeCpfRg();
     }
+    
+    // Atualiza o formGroup pai inteiro para garantir que a propriedade valid reflita a remoção de setErrors
+    formGrupo?.updateValueAndValidity();
+
     if (formGrupo?.valid) {
       this.passoAtual++;
       this.anunciarParaLeitorDeTela(`Avançou para a etapa ${this.passoAtual} de 4.`);
-      document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const legendTitle = document.querySelector('.wizard-step-title') as HTMLElement;
+        if (legendTitle) {
+          legendTitle.focus();
+        }
+      }, 100);
     } else {
+      const invalidFields: string[] = [];
+      const formG = formGrupo as FormGroup;
+      if (formG && formG.controls) {
+         Object.keys(formG.controls).forEach(key => {
+            const ctrl = formG.get(key);
+            if (ctrl?.invalid) {
+               // Translate common errors to user-friendly text
+               let errorDesc = Object.keys(ctrl.errors || {}).join(', ');
+               if (ctrl?.hasError('maxlength')) {
+                  const req = ctrl.errors?.['maxlength'].requiredLength;
+                  const act = ctrl.errors?.['maxlength'].actualLength;
+                  errorDesc = `Passou do número de caracteres permitidos (Máx: ${req}, Atual: ${act})`;
+               } else if (ctrl?.hasError('required')) {
+                  errorDesc = `Campo vazio`;
+               } else if (ctrl?.hasError('minlength')) {
+                  errorDesc = `Muito curto`;
+               }
+               invalidFields.push(`- ${key}: ${errorDesc}`);
+            }
+         });
+      }
+      
+      // We log the details but show a minimal alert so it's not a giant JSON block.
+      console.log('Wizard Bloqueado por validação:', invalidFields);
+      // Removemos o alert para não atrapalhar o fluxo final do usuário se houver erros na formatação, 
+      // mas se quiser ligar de volta pode usar o console.
+      
       formGrupo?.markAllAsTouched();
       this.anunciarParaLeitorDeTela('Existem campos obrigatórios não preenchidos nesta etapa.');
+      this.focarPrimeiroCampoInvalido();
     }
   }
 
@@ -395,7 +463,13 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     if (this.passoAtual > 1) {
       this.passoAtual--;
       this.anunciarParaLeitorDeTela(`Voltou para a etapa ${this.passoAtual} de 4.`);
-      document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const legendTitle = document.querySelector('.wizard-step-title') as HTMLElement;
+        if (legendTitle) {
+          legendTitle.focus();
+        }
+      }, 100);
     }
   }
 
@@ -410,11 +484,21 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     this.liveAnnouncer.announce(mensagem, assertivo ? 'assertive' : 'polite');
   }
 
+  private focarPrimeiroCampoInvalido() {
+    setTimeout(() => {
+      const primeiroInvalido = document.querySelector('input.ng-invalid, select.ng-invalid, textarea.ng-invalid');
+      if (primeiroInvalido && primeiroInvalido instanceof HTMLElement) {
+        primeiroInvalido.focus();
+      }
+    }, 100);
+  }
+
   salvarCadastro() {
     if (this.isSalvando) return;
     if (this.cadastroForm.invalid) {
       this.cadastroForm.markAllAsTouched();
       this.anunciarParaLeitorDeTela('Erro. Verifique os campos em vermelho antes de continuar.');
+      this.focarPrimeiroCampoInvalido();
       return;
     }
 
@@ -497,6 +581,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
           this.isSalvando = false;
           this.dadosReativacao = resp as ReativacaoAluno;
           this._payloadPendente = dados;
+          this.elementoFocoAnterior = document.activeElement as HTMLElement;
           this.modalReativacao = true;
           this.cdr.detectChanges();
           return;
@@ -537,6 +622,10 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         this.modalReativacao = false;
         this.dadosReativacao = null;
         this._payloadPendente = null;
+        if (this.elementoFocoAnterior) {
+          this.elementoFocoAnterior.focus();
+          this.elementoFocoAnterior = null;
+        }
         this.exibirFeedback(`Aluno reativado com sucesso!`, 'sucesso');
         this.cadastroForm.reset();
         this.passoAtual = 1;
@@ -562,6 +651,10 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     this.modalReativacao = false;
     this.dadosReativacao = null;
     this._payloadPendente = null;
+    if (this.elementoFocoAnterior) {
+      this.elementoFocoAnterior.focus();
+      this.elementoFocoAnterior = null;
+    }
   }
 
   private exibirFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {

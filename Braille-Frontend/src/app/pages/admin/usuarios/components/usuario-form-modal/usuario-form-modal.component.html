@@ -1,4 +1,4 @@
-<dialog #dialogForm class="modal-content modal-lg" aria-labelledby="modal-titulo" 
+<dialog #dialogForm class="modal-content modal-lg" aria-labelledby="modal-titulo" aria-modal="true" 
   (cancel)="$event.preventDefault(); onCancelBtn()" 
   cdkTrapFocus 
   [cdkTrapFocusAutoCapture]="true">
@@ -22,15 +22,18 @@
       </div>
 
       <!-- Seção: Dados Básicos -->
-      <p class="section-label">Dados Básicos</p>
+      <fieldset style="border: none; padding: 0; margin: 0; min-width: 0;">
+      <legend class="section-label">Dados Básicos</legend>
       <div class="form-grid">
         <div class="form-group">
           <label for="edit-nome" class="form-label">Nome completo <span class="required" aria-hidden="true">*</span></label>
           <input id="edit-nome" type="text" class="form-input"
             [class.is-invalid]="editForm.get('nome')?.invalid && editForm.get('nome')?.touched"
-            formControlName="nome" autocomplete="name" />
+            formControlName="nome" [attr.aria-invalid]="editForm.get('nome')?.invalid && editForm.get('nome')?.touched ? 'true' : null"
+            [attr.aria-describedby]="(editForm.get('nome')?.invalid && editForm.get('nome')?.touched) ? 'err-nome' : null"
+            autocomplete="name" />
           @if (editForm.get('nome')?.invalid && editForm.get('nome')?.touched) {
-            <span class="form-error" role="alert">Nome obrigatório (mín. 3 caracteres)</span>
+            <span id="err-nome" class="form-error" role="alert">Nome obrigatório (mín. 3 caracteres)</span>
           }
         </div>
 
@@ -38,9 +41,11 @@
           <label for="edit-cpf" class="form-label">CPF <span class="required" aria-hidden="true">*</span></label>
           <input id="edit-cpf" type="text" class="form-input"
             [class.is-invalid]="(editForm.get('cpf')?.invalid && editForm.get('cpf')?.touched) || (cpfStatus() !== '' && cpfStatus() !== 'livre' && cpfStatus() !== 'verificando')"
-            formControlName="cpf" maxlength="14" (input)="formatarCpf($event)" (blur)="verificarCpfBlur()" autocomplete="off" />
+            formControlName="cpf" maxlength="14" (input)="formatarCpf($event)" (blur)="verificarCpfBlur()" [attr.aria-invalid]="(editForm.get('cpf')?.invalid && editForm.get('cpf')?.touched) || (cpfStatus() !== '' && cpfStatus() !== 'livre' && cpfStatus() !== 'verificando') ? 'true' : null"
+            [attr.aria-describedby]="((editForm.get('cpf')?.invalid && editForm.get('cpf')?.touched) || (cpfStatus() !== '' && cpfStatus() !== 'livre' && cpfStatus() !== 'verificando')) ? 'err-cpf cpf-status-msg' : 'cpf-status-msg'"
+            autocomplete="off" />
           
-          <div class="cpf-status-indicator" style="margin-top: 5px; font-size: 0.85rem;" aria-live="polite">
+          <div id="cpf-status-msg" class="cpf-status-indicator" style="margin-top: 5px; font-size: 0.85rem;" aria-live="polite">
             @if (cpfStatus() === 'verificando') {
         <span style="color: #6b7280;">Verificando no sistema...</span>
             }
@@ -53,7 +58,7 @@
           </div>
 
           @if (editForm.get('cpf')?.invalid && editForm.get('cpf')?.touched) {
-            <span class="form-error" role="alert">CPF obrigatório (11 dígitos).</span>
+            <span id="err-cpf" class="form-error" role="alert">CPF obrigatório (11 dígitos).</span>
           }
         </div>
 
@@ -61,19 +66,26 @@
           <label for="edit-email" class="form-label">E-mail</label>
           <input id="edit-email" type="email" class="form-input"
             [class.is-invalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched"
-            formControlName="email" autocomplete="email" />
+            formControlName="email" [attr.aria-invalid]="editForm.get('email')?.invalid && editForm.get('email')?.touched ? 'true' : null"
+            [attr.aria-describedby]="(editForm.get('email')?.invalid && editForm.get('email')?.touched) ? 'err-email' : null"
+            autocomplete="email" />
           @if (editForm.get('email')?.invalid && editForm.get('email')?.touched) {
-            <span class="form-error" role="alert">E-mail inválido</span>
+            <span id="err-email" class="form-error" role="alert">E-mail inválido</span>
           }
         </div>
 
         <div class="form-group">
           <label for="edit-role" class="form-label">Função <span class="required" aria-hidden="true">*</span></label>
-          <select id="edit-role" class="form-select" formControlName="role">
+          <select id="edit-role" class="form-select" formControlName="role"
+            [attr.aria-invalid]="editForm.get('role')?.invalid && editForm.get('role')?.touched ? 'true' : null"
+            [attr.aria-describedby]="(editForm.get('role')?.invalid && editForm.get('role')?.touched) ? 'err-role' : null">
             @for (r of roles; track r.value) {
               <option [value]="r.value">{{ r.label }}</option>
             }
           </select>
+          @if (editForm.get('role')?.invalid && editForm.get('role')?.touched) {
+            <span id="err-role" class="form-error" role="alert">Função obrigatória</span>
+          }
         </div>
 
         <div class="form-group">
@@ -83,9 +95,11 @@
             maxlength="15" (input)="formatarTelefone($event)" />
         </div>
       </div>
+      </fieldset>
 
       <!-- Seção: Endereço -->
-      <p class="section-label">Endereço</p>
+      <fieldset style="border: none; padding: 0; margin: 0; min-width: 0;">
+        <legend class="section-label">Endereço</legend>
       <div class="form-grid">
         <div class="form-group">
           <label for="edit-cep" class="form-label">CEP</label>
@@ -123,12 +137,13 @@
           <input id="edit-uf" type="text" class="form-input" formControlName="uf" maxlength="2" placeholder="SP" style="text-transform:uppercase" />
         </div>
       </div>
+      </fieldset>
     </form>
   }
 
   <div class="modal-footer">
-    <button class="btn btn-secondary" type="button" (click)="onCancelBtn()" [disabled]="salvando()">Cancelar</button>
-    <button class="btn btn-primary" type="button" (click)="onSaveForm()" [disabled]="editForm.invalid || salvando()">
+    <button class="btn btn-secondary" type="button" (click)="onCancelBtn()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">Cancelar</button>
+    <button class="btn btn-primary" type="button" (click)="onSaveForm()" [disabled]="editForm.invalid || salvando()" [attr.aria-disabled]="editForm.invalid || salvando()">
         @if (salvando()) { 
           <span class="loading-spinner" aria-hidden="true"></span> Salvando... 
         } @else { 

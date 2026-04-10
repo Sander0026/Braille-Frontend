@@ -1,6 +1,6 @@
-<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modalHotkeysTitulo" (click)="fecharModal()"
-  (keydown.enter)="fecharModal()" (keydown.space)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-  <div class="modal-card modal-md" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()">
+<dialog class="modal-overlay" open aria-modal="true" aria-labelledby="modalHotkeysTitulo" 
+  (click)="onBackdropClick($event)" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <div class="modal-card modal-md">
     
     <div class="modal-header">
       <h2 id="modalHotkeysTitulo" class="modal-title" style="display:flex; align-items:center; gap:0.5rem">
@@ -21,8 +21,8 @@
         @for (hotkey of hotkeysDisponiveis; track hotkey.combo) {
         <li class="hotkey-item">
           <strong class="hotkey-desc">{{ hotkey.description }}</strong>
-          <kbd class="hotkey-combo" [attr.aria-label]="'Atalho: ' + hotkey.combo.toUpperCase().replace('.', ' mais ')">
-            {{ hotkey.combo.toUpperCase().replace('.', ' + ') }}
+          <kbd class="hotkey-combo" [attr.aria-label]="'Atalho: ' + hotkey.combo.toUpperCase().split('.').join(' mais ')">
+            {{ hotkey.combo.toUpperCase().split('.').join(' + ') }}
           </kbd>
         </li>
         }

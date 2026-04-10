@@ -105,7 +105,20 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
 
   // Acessibilidade: restaurar foco após fechar modal (WCAG 2.4.3)
-  private lastFocusBeforeModal: HTMLElement | null = null;
+  private focusStack: HTMLElement[] = [];
+
+  private pushFocus(): void {
+    const el = document.activeElement as HTMLElement;
+    if (el) this.focusStack.push(el);
+  }
+
+  private popFocus(): void {
+    const fn = () => {
+      const el = this.focusStack.pop();
+      if (el && document.body.contains(el)) el.focus();
+    };
+    setTimeout(fn, 50);
+  }
 
   // ── Filtros Avançados (Drawer) ──────────────────────────────────
   drawerAberto = false;
@@ -279,7 +292,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     const a = this.alunoSelecionado;
     if (!a) return;
 
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    this.pushFocus();
 
     const fmtData = (v?: string | Date | null) => {
       if (!v) return 'Não informado';
@@ -452,7 +465,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.mostrarModalFicha = false;
     this.fichaHtml = null;
     this.cdr.detectChanges();
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    this.popFocus();
   }
 
   // ── Filtros Avançados ────────────────────────────────────────────
@@ -519,7 +532,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Modal de Edição ────────────────────────────────────────────
   abrirModalEdicao(aluno: Beneficiario): void {
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    this.pushFocus();
 
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
@@ -543,7 +556,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   fecharModalEdicao(): void {
     this.modalEdicaoAberto = false;
     this.alunoEmEdicao = null;
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    this.popFocus();
   }
 
   aoSalvarEdicao(): void {
@@ -592,10 +605,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   inativar(aluno: Beneficiario): void {
+    this.pushFocus();
     this.alunoParaInativar = aluno;
   }
 
   cancelarInativacao(): void {
+    this.popFocus();
     this.alunoParaInativar = null;
   }
 
@@ -615,6 +630,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       error: () => {
         setTimeout(() => {
           this.salvando = false;
+          this.popFocus();
           this.toast.erro('Erro ao inativar aluno.');
           this.cdr.markForCheck();
         }, 0);
@@ -631,10 +647,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Lógica de Exclusão Definitiva
   excluirDefinitivamente(aluno: Beneficiario): void {
+    this.pushFocus();
     this.alunoParaExcluirDefinitivo = aluno;
   }
 
   cancelarExclusaoDefinitiva(): void {
+    this.popFocus();
     this.alunoParaExcluirDefinitivo = null;
   }
 
@@ -654,6 +672,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       error: () => {
         setTimeout(() => {
           this.salvando = false;
+          this.popFocus();
           this.toast.erro('Erro ao excluir aluno definitivamente.');
           this.cdr.detectChanges();
         }, 0);
@@ -663,10 +682,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Lógica de Restauração
   restaurarConta(aluno: Beneficiario): void {
+    this.pushFocus();
     this.alunoParaRestaurar = aluno;
   }
 
   cancelarRestauracao(): void {
+    this.popFocus();
     this.alunoParaRestaurar = null;
   }
 
@@ -686,6 +707,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       error: () => {
         setTimeout(() => {
           this.salvando = false;
+          this.popFocus();
           this.toast.erro('Erro ao restaurar aluno.');
           this.cdr.detectChanges();
         }, 0);
@@ -695,7 +717,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Visualização de Perfil Inteiro
   abrirModal(aluno: Beneficiario): void {
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    this.pushFocus();
     this.modalAberto = true;
     this.carregandoDetalhes = true;
     this.alunoSelecionado = null;
@@ -744,7 +766,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   fecharModal(): void {
     this.modalAberto = false;
     this.alunoSelecionado = null;
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    this.popFocus();
   }
 
   getAvatarUrl(aluno: Beneficiario): string {
@@ -812,6 +834,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): void {
+    this.pushFocus();
     if (!this.alunoSelecionado) return;
     const urlAtual = this.alunoSelecionado[tipo];
     if (!urlAtual) return;
@@ -820,6 +843,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   cancelarExclusaoDocumento(): void {
+    this.popFocus();
     this.documentoParaExcluir = null;
   }
 
@@ -851,6 +875,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           error: () => {
             setTimeout(() => {
               this.deletandoImage = false;
+              this.popFocus();
               this.toast.erro('Erro ao desvincular documento do aluno.');
               this.cdr.detectChanges();
             }, 0);
@@ -880,6 +905,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── PDF Viewer ────────────────────────────────────────────────────────
   abrirVisualizadorPdf(urlDocumento: string | undefined): void {
+    this.pushFocus();
     if (!urlDocumento) return;
     this.urlPdfParaVisualizar = urlDocumento;
     this.mostrarVisualizadorPdf = true;
@@ -887,6 +913,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharVisualizadorPdf(): void {
+    this.popFocus();
     if (this.urlPdfParaVisualizar && this.urlPdfParaVisualizar.startsWith('blob:')) {
       window.URL.revokeObjectURL(this.urlPdfParaVisualizar);
     }
@@ -936,12 +963,14 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────
   abrirModalImagem(url: string): void {
+    this.pushFocus();
     this.urlImagemParaVisualizar = url;
     this.mostrarModalImagem = true;
     this.cdr.detectChanges();
   }
 
   fecharModalImagem(): void {
+    this.popFocus();
     this.mostrarModalImagem = false;
     this.urlImagemParaVisualizar = null;
     this.cdr.detectChanges();
@@ -963,6 +992,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Módulo Atestados (Modal e CRUD) ──────────────────────────────
   abrirModalGerenciamentoAtestados(): void {
+    this.pushFocus();
     if (!this.alunoSelecionado) return;
     this.gerenciandoAtestados = true;
     this.carregarAtestados();
@@ -970,6 +1000,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalGerenciamentoAtestados(event?: Event): void {
+    this.popFocus();
     if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
     this.gerenciandoAtestados = false;
     this.fecharModalAtestadoForm();
@@ -977,6 +1008,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   abrirModalAtestadoForm(atestado?: Atestado): void {
+    this.pushFocus();
     this.modalAtestadoAberto = true;
     this.atestadoEmEdicao = atestado || null;
     if (atestado) {
@@ -995,6 +1027,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalAtestadoForm(): void {
+    this.popFocus();
     this.modalAtestadoAberto = false;
     this.atestadoEmEdicao = null;
     this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
@@ -1130,6 +1163,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Módulo Laudos Médicos (Modal e CRUD) ──────────────────────────────
   abrirModalGerenciamentoLaudos(): void {
+    this.pushFocus();
     if (!this.alunoSelecionado) return;
     this.gerenciandoLaudos = true;
     this.carregarLaudos();
@@ -1137,6 +1171,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalGerenciamentoLaudos(event?: Event): void {
+    this.popFocus();
     if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
     this.gerenciandoLaudos = false;
     this.fecharModalLaudoForm();
@@ -1144,6 +1179,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   abrirModalLaudoForm(laudo?: LaudoMedico): void {
+    this.pushFocus();
     this.modalLaudoAberto = true;
     this.laudoEmEdicao = laudo || null;
     if (laudo) {
@@ -1161,6 +1197,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalLaudoForm(): void {
+    this.popFocus();
     this.modalLaudoAberto = false;
     this.laudoEmEdicao = null;
     this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
@@ -1282,6 +1319,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // ============== TERMO LGPD ==============
 
   abrirModalLgpd(): void {
+    this.pushFocus();
     this.modalLgpdAberto = true;
     this.novoLgpdUrl = '';
     this.erroLgpd = '';
@@ -1289,6 +1327,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalLgpd(): void {
+    this.popFocus();
     this.modalLgpdAberto = false;
     this.novoLgpdUrl = '';
     this.erroLgpd = '';

@@ -21,12 +21,6 @@ export class ToastService {
     mostrar(mensagem: string, tipo: ToastTipo = 'sucesso', duracaoMs = 6000): void {
         const id = ++this.nextId;
 
-        // Narrar via ARIA Live Region para leitores de tela (NVDA, VoiceOver, JAWS)
-        // 'assertive' para erros: interrompe o leitor de tela imediatamente
-        // 'polite' para o restante: narra quando o leitor terminar a sentença atual
-        const politeness = tipo === 'erro' ? 'assertive' : 'polite';
-        this.liveAnnouncer.announce(mensagem, politeness);
-
         // Isola completamente do Change Detection do Angular (Zone.js)
         this.ngZone.runOutsideAngular(() => {
             this._toasts.update(lista => [...lista, { id, mensagem, tipo }]);

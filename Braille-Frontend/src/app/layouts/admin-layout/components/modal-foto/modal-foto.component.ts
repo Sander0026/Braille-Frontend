@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output, OnDestroy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, EventEmitter, Input, Output, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Subject, takeUntil, finalize } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -24,12 +24,19 @@ export class ModalFotoComponent implements OnDestroy {
   removerFotoFlag = false;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly announcer = inject(LiveAnnouncer);
 
   constructor(private readonly authService: AuthService) {}
 
   fecharModal(): void {
     if (!this.carregandoFoto) {
       this.close.emit();
+    }
+  }
+
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).tagName === 'DIALOG') {
+      this.fecharModal();
     }
   }
 
@@ -44,12 +51,14 @@ export class ModalFotoComponent implements OnDestroy {
     const extensoesValidas = ['image/jpeg', 'image/png', 'image/webp'];
     if (!extensoesValidas.includes(file.type)) {
       this.fotoErro = 'Formato inválido. Use JPG, PNG ou WebP.';
+      this.announcer.announce(this.fotoErro, 'assertive');
       return;
     }
     
     // Limite máximo de tamanho OWASP
     if (file.size > 2 * 1024 * 1024) {
       this.fotoErro = 'A imagem deve ter no máximo 2 MB.';
+      this.announcer.announce(this.fotoErro, 'assertive');
       return;
     }
 

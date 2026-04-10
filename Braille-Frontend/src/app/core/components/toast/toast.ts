@@ -22,6 +22,16 @@ export class ToastComponent {
     }
   }
 
+  labelTipo(tipo: string): string {
+    switch (tipo) {
+      case 'sucesso': return 'Sucesso';
+      case 'erro': return 'Erro';
+      case 'aviso': return 'Aviso';
+      case 'info': return 'Informação';
+      default: return 'Alerta';
+    }
+  }
+
   remover(id: number): void {
     this.toastService.remover(id);
   }

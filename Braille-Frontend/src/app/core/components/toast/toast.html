@@ -1,11 +1,12 @@
 <div class="toast-container" aria-live="polite" aria-atomic="true">
   @for (toast of toastService.toasts(); track toast.id) {
-    <div class="toast-message" [ngClass]="toast.tipo" role="alert">
+    <div class="toast-message" [ngClass]="toast.tipo" [attr.role]="toast.tipo === 'erro' ? 'alert' : 'status'">
       
       <!-- Ícone Visual Decorativo -->
       <span class="material-symbols-rounded toast-icon" aria-hidden="true">
         {{ getIcon(toast.tipo) }}
       </span>
+      <span class="sr-only">{{ labelTipo(toast.tipo) }}:</span>
       
       <!-- Mensagem Principal -->
       <span class="toast-text">{{ toast.mensagem }}</span>

@@ -18,4 +18,10 @@ export class ModalHotkeysComponent {
   fecharModal(): void {
     this.close.emit();
   }
+
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).tagName === 'DIALOG') {
+      this.fecharModal();
+    }
+  }
 }

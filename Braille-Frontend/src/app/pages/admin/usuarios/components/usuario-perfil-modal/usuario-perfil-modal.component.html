@@ -1,4 +1,4 @@
-<dialog #dialogPerfil class="modal-content modal-lg" aria-labelledby="perfil-titulo" 
+<dialog #dialogPerfil class="modal-content modal-lg" aria-labelledby="perfil-titulo" aria-modal="true"
   (cancel)="fecharModal(true)" 
   cdkTrapFocus 
   [cdkTrapFocusAutoCapture]="true">
@@ -24,12 +24,12 @@
           <!-- Botões Trocar/Remover Foto -->
           <div class="avatar-actions">
             <!-- Label encapsula o file input implicitamente ligado -->
-            <label class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" tabindex="0" (keydown.enter)="$event.preventDefault(); fileInput.click()">
+            <label class="btn btn-sm btn-primary btn-icon" role="button" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" [attr.tabindex]="salvando() ? -1 : 0" [attr.aria-disabled]="salvando() ? 'true' : null" (keydown.enter)="onAvatarKeydown($event, fileInput)">
               <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
-              <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" />
+              <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" [disabled]="salvando()" />
             </label>
             @if (u.fotoPerfil) {
-              <button class="btn btn-sm btn-danger btn-icon" title="Remover Foto" aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin()">
+              <button class="btn btn-sm btn-danger btn-icon" title="Remover Foto" aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">
                 <span class="material-symbols-rounded" aria-hidden="true">delete</span>
               </button>
             }
@@ -91,6 +91,7 @@
           </p>
           <button class="btn btn-warning" (click)="resetarSenhaAdmin()" 
              [disabled]="salvando() || u.id === loggedUserSub" 
+             [attr.aria-disabled]="salvando() || u.id === loggedUserSub"
              [attr.aria-label]="u.id === loggedUserSub ? 'Ação de segurança: Não é possível resetar a própria senha' : 'Forçar Reset de Senha do Usuário'"
              [title]="u.id === loggedUserSub ? 'Ação bloqueada. Você não pode redefinir sua própria senha padrão.' : 'Forçar senha padrão para o usuário'">
             @if (salvando()) {
@@ -106,8 +107,8 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn btn-ghost" (click)="fecharModal()">Fechar</button>
-      <button class="btn btn-primary" (click)="editar.emit(u); fecharModal()">
+      <button class="btn btn-ghost" (click)="fecharModal()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">Fechar</button>
+      <button class="btn btn-primary" (click)="editar.emit(u); fecharModal()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">
         <span class="material-symbols-rounded" aria-hidden="true">edit</span>
         Editar Dados
       </button>
