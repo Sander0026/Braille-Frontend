@@ -1,9 +1,9 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-
 import { Router, RouterModule } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { TurmasService, CreateTurmaDto, GradeHorariaDto } from '../../../../core/services/turmas.service';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { ModelosCertificadosService, ModeloCertificado } from '../../../../core/services/modelos-certificados.service';
@@ -12,50 +12,52 @@ import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte'
 /** Dias da semana para o seletor de grade horária */
 const DIAS: { valor: string; label: string }[] = [
     { valor: 'SEG', label: 'Segunda' },
-    { valor: 'TER', label: 'Terça' },
-    { valor: 'QUA', label: 'Quarta' },
-    { valor: 'QUI', label: 'Quinta' },
-    { valor: 'SEX', label: 'Sexta' },
-    { valor: 'SAB', label: 'Sábado' },
+    { valor: 'TER', label: 'Terça'   },
+    { valor: 'QUA', label: 'Quarta'  },
+    { valor: 'QUI', label: 'Quinta'  },
+    { valor: 'SEX', label: 'Sexta'   },
+    { valor: 'SAB', label: 'Sábado'  },
     { valor: 'DOM', label: 'Domingo' },
 ];
+
+/** Mapa de rótulos de etapa para anúncios de screen reader */
+const ETAPA_LABELS: Record<number, string> = {
+    1: 'Dados Básicos',
+    2: 'Grade Horária',
+};
 
 @Component({
     selector: 'app-cadastro-turma-wizard',
     standalone: true,
     imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
-
     templateUrl: './cadastro-turma-wizard.html',
-    styleUrls: ['./cadastro-turma-wizard.scss']
+    styleUrls: ['./cadastro-turma-wizard.scss'],
 })
-export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
+export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit, AfterViewInit {
 
-    etapaAtual = 1;
-    totalEtapas = 2;
+    etapaAtual   = 1;
+    totalEtapas  = 2;
     formTurma!: FormGroup;
-    isSalvando = false;
+    isSalvando   = false;
     mensagemFeedback: string | null = null;
     tipoFeedback: 'sucesso' | 'erro' | null = null;
 
-    // Lista de professores carregada da API
     professores: Usuario[] = [];
     carregandoProfessores = false;
 
-    // Lista de modelos acadêmicos para o dropdown
     modelosAcademicos: ModeloCertificado[] = [];
     carregandoModelos = false;
 
-    // Grade horária — estrutura auxiliar gerenciada na UI
     dias = DIAS;
-
-    /** Turnos adicionados pelo usuário: { dia, horaInicio (HH:mm string), horaFim (HH:mm string) } */
     gradeHoraria: { dia: string; horaInicio: string; horaFim: string }[] = [];
 
-    // Formulário do novo turno (inline — não faz parte do formTurma principal)
-    diaNovoTurno = '';
+    diaNovoTurno        = '';
     horaInicioNovoTurno = '';
-    horaFimNovoTurno = '';
-    erroTurno = '';
+    horaFimNovoTurno    = '';
+    erroTurno           = '';
+
+    /** Referência ao primeiro input da etapa 1 para foco após erro de validação (WCAG 2.4.3) */
+    @ViewChild('primeiroInputEtapa1') primeiroInputEtapa1!: ElementRef<HTMLInputElement>;
 
     constructor(
         private fb: FormBuilder,
@@ -63,40 +65,38 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         private turmasService: TurmasService,
         private usuariosService: UsuariosService,
         private modelosService: ModelosCertificadosService,
-        private cdr: ChangeDetectorRef
-    ) {
-        super();
-    }
+        private cdr: ChangeDetectorRef,
+        /** LiveAnnouncer do Angular CDK — anuncia mudanças de etapa para screen readers (WCAG 4.1.3) */
+        private liveAnnouncer: LiveAnnouncer,
+    ) { super(); }
 
     isFormDirty(): boolean {
-        // Retorna true se o form principal estiver dirty, ou se houver turnos adicionados mas não salvos
-        const isFormDirty = !!this.formTurma?.dirty;
-        const hasTurnos = this.gradeHoraria.length > 0;
-        return (isFormDirty || hasTurnos) && !this.isSalvando;
+        return (!!this.formTurma?.dirty || this.gradeHoraria.length > 0) && !this.isSalvando;
     }
 
     ngOnInit(): void {
         this.formTurma = this.fb.group({
-            nome: ['', Validators.required],
-            professorId: ['', Validators.required],
-            descricao: [''],
-            capacidadeMaxima: [null],
-            cargaHoraria: [''],
-            dataInicio: [''],
-            dataFim: [''],
-            modeloCertificadoId: [''],
+            nome:                 ['', Validators.required],
+            professorId:          ['', Validators.required],
+            descricao:            [''],
+            capacidadeMaxima:     [null],
+            cargaHoraria:         [''],
+            dataInicio:           [''],
+            dataFim:              [''],
+            modeloCertificadoId:  [''],
         });
 
         this.carregarProfessores();
         this.carregarModelosAcademicos();
     }
 
-    carregarProfessores() {
+    ngAfterViewInit(): void {}
+
+    carregarProfessores(): void {
         this.carregandoProfessores = true;
-        // Puxa toda a base (até 100), porém filtrando apenas quem tem o ROLE 'PROFESSOR'
         this.usuariosService.listar(1, 100, undefined, false, 'PROFESSOR').subscribe({
             next: (resp) => {
-                this.professores = resp.data;
+                this.professores          = resp.data;
                 this.carregandoProfessores = false;
             },
             error: () => { this.carregandoProfessores = false; }
@@ -111,12 +111,13 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
                 this.carregandoModelos = false;
                 this.cdr.markForCheck();
             },
-            error: () => this.carregandoModelos = false
+            error: () => { this.carregandoModelos = false; }
         });
     }
 
-    // ─── Grade Horária ─────────────────────────────────────────────────
-    adicionarTurno() {
+    // ─── Grade Horária ───────────────────────────────────────────────────────
+
+    adicionarTurno(): void {
         this.erroTurno = '';
 
         if (!this.diaNovoTurno || !this.horaInicioNovoTurno || !this.horaFimNovoTurno) {
@@ -125,34 +126,35 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         }
 
         const inicioMin = this.hmParaMinutos(this.horaInicioNovoTurno);
-        const fimMin = this.hmParaMinutos(this.horaFimNovoTurno);
+        const fimMin    = this.hmParaMinutos(this.horaFimNovoTurno);
 
         if (fimMin <= inicioMin) {
             this.erroTurno = 'A hora de fim deve ser posterior à hora de início.';
             return;
         }
 
-        // Impede dois turnos no mesmo dia
-        const jaTem = this.gradeHoraria.some(t => t.dia === this.diaNovoTurno);
-        if (jaTem) {
+        if (this.gradeHoraria.some(t => t.dia === this.diaNovoTurno)) {
             this.erroTurno = 'Já existe um turno cadastrado para este dia.';
             return;
         }
 
         this.gradeHoraria.push({
-            dia: this.diaNovoTurno,
+            dia:        this.diaNovoTurno,
             horaInicio: this.horaInicioNovoTurno,
-            horaFim: this.horaFimNovoTurno,
+            horaFim:    this.horaFimNovoTurno,
         });
 
-        // Limpar campos do novo turno
-        this.diaNovoTurno = '';
+        this.diaNovoTurno        = '';
         this.horaInicioNovoTurno = '';
-        this.horaFimNovoTurno = '';
+        this.horaFimNovoTurno    = '';
+
+        this.liveAnnouncer.announce(`Turno adicionado. Total de ${this.gradeHoraria.length} turno(s) na grade.`);
     }
 
-    removerTurno(index: number) {
+    removerTurno(index: number): void {
+        const turno = this.gradeHoraria[index];
         this.gradeHoraria.splice(index, 1);
+        this.liveAnnouncer.announce(`Turno de ${this.labelDia(turno.dia)} removido.`);
     }
 
     labelDia(valor: string): string {
@@ -164,21 +166,38 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         return h * 60 + m;
     }
 
-    // ─── Navegação ─────────────────────────────────────────────────────
-    proximaEtapa() {
-        if (this.etapaAtual === 1) {
-            const campos1 = ['nome', 'professorId'];
-            const grupo1Invalido = campos1.some(c => this.formTurma.get(c)?.invalid);
-            if (grupo1Invalido) {
-                this.formTurma.markAllAsTouched();
-                return;
-            }
-            this.etapaAtual = 2;
+    // ─── Navegação ───────────────────────────────────────────────────────────
+
+    proximaEtapa(): void {
+        if (this.etapaAtual !== 1) return;
+
+        const campos1 = ['nome', 'professorId'];
+        const primeiroInvalido = campos1.find(c => this.formTurma.get(c)?.invalid);
+
+        if (primeiroInvalido) {
+            this.formTurma.markAllAsTouched();
+            this.cdr.detectChanges();
+
+            // WCAG 2.4.3: move o foco para o primeiro campo inválido
+            setTimeout(() => {
+                const el = document.getElementById(
+                    primeiroInvalido === 'nome' ? 'input-nome' : 'input-professor'
+                ) as HTMLElement | null;
+                el?.focus();
+            });
+            return;
         }
+
+        this.etapaAtual = 2;
+        // WCAG 4.1.3: anuncia a nova etapa para screen readers
+        this.liveAnnouncer.announce(`Passo 2 de ${this.totalEtapas}: ${ETAPA_LABELS[2]}.`);
     }
 
-    etapaAnterior() {
-        if (this.etapaAtual > 1) this.etapaAtual--;
+    etapaAnterior(): void {
+        if (this.etapaAtual > 1) {
+            this.etapaAtual--;
+            this.liveAnnouncer.announce(`Passo ${this.etapaAtual} de ${this.totalEtapas}: ${ETAPA_LABELS[this.etapaAtual]}.`);
+        }
     }
 
     isFieldInvalid(fieldName: string): boolean {
@@ -186,9 +205,11 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         return !!(field && field.invalid && (field.dirty || field.touched));
     }
 
-    // ─── Submit ────────────────────────────────────────────────────────
-    finalizarCadastro() {
+    // ─── Submit ──────────────────────────────────────────────────────────────
+
+    finalizarCadastro(): void {
         if (this.isSalvando) return;
+
         if (this.formTurma.invalid) {
             this.formTurma.markAllAsTouched();
             this.mostrarFeedback('Preencha os campos obrigatórios da etapa 1.', 'erro');
@@ -199,56 +220,52 @@ export class CadastroTurmaWizard extends BaseFormDescarte implements OnInit {
         const v = this.formTurma.value;
 
         const gradeConvertida: GradeHorariaDto[] = this.gradeHoraria.map(t => ({
-            dia: t.dia as any,
+            dia:        t.dia as any,
             horaInicio: this.hmParaMinutos(t.horaInicio),
-            horaFim: this.hmParaMinutos(t.horaFim),
+            horaFim:    this.hmParaMinutos(t.horaFim),
         }));
 
         const payload: CreateTurmaDto = {
-            nome: v.nome,
-            professorId: v.professorId,
-            descricao: v.descricao || undefined,
-            capacidadeMaxima: v.capacidadeMaxima ? +v.capacidadeMaxima : undefined,
+            nome:                v.nome,
+            professorId:         v.professorId,
+            descricao:           v.descricao || undefined,
+            capacidadeMaxima:    v.capacidadeMaxima ? +v.capacidadeMaxima : undefined,
             modeloCertificadoId: v.modeloCertificadoId || undefined,
-            gradeHoraria: gradeConvertida.length ? gradeConvertida : undefined,
-            dataInicio: v.dataInicio ? new Date(v.dataInicio).toISOString() : undefined,
-            dataFim: v.dataFim ? new Date(v.dataFim).toISOString() : undefined
+            gradeHoraria:        gradeConvertida.length ? gradeConvertida : undefined,
+            dataInicio:          v.dataInicio ? new Date(v.dataInicio).toISOString() : undefined,
+            dataFim:             v.dataFim    ? new Date(v.dataFim).toISOString()    : undefined,
         };
 
         this.turmasService.criar(payload).subscribe({
             next: () => {
                 this.isSalvando = false;
-                this.formTurma.reset(); // evita o guard de descarte ao navegar
+                this.formTurma.reset();
                 this.mostrarFeedback('Turma cadastrada com sucesso!', 'sucesso');
                 setTimeout(() => this.router.navigate(['/admin/turmas']), 2000);
             },
             error: (err: HttpErrorResponse) => {
                 this.isSalvando = false;
-
-                // O backend pode retornar um array (validação de schema) ou string simples (regra de colisão)
                 let msg = 'Erro ao salvar. Tente novamente.';
                 if (err.status === 400 && err.error?.message) {
-                    msg = Array.isArray(err.error.message) ? err.error.message.join(', ') : err.error.message;
+                    msg = Array.isArray(err.error.message)
+                        ? err.error.message.join(', ')
+                        : err.error.message;
                 }
-
                 this.mostrarFeedback(msg, 'erro');
             },
         });
     }
 
-    mostrarFeedback(mensagem: string, tipo: 'sucesso' | 'erro') {
+    mostrarFeedback(mensagem: string, tipo: 'sucesso' | 'erro'): void {
         this.mensagemFeedback = mensagem;
-        this.tipoFeedback = tipo;
+        this.tipoFeedback     = tipo;
 
-        // Força a atualização da tela, vital quando chamadas saem fora da zona do Angular.
         this.cdr.detectChanges();
-
-        // Rola a tela para garantir que o usuário veja a faixa de erro/sucesso.
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         setTimeout(() => {
             this.mensagemFeedback = null;
-            this.tipoFeedback = null;
+            this.tipoFeedback     = null;
             this.cdr.detectChanges();
         }, 6000);
     }

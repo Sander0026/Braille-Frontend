@@ -2,9 +2,11 @@
 
   <!-- ── Feedback Banner ──────────────────────────────────── -->
   @if (mensagemFeedback) {
+  <!-- role="alert" + aria-live="assertive" anuncia feedback imediatamente (WCAG 4.1.3) -->
   <div class="feedback-banner" [class.sucesso]="tipoFeedback === 'sucesso'" [class.erro]="tipoFeedback === 'erro'"
-    role="alert">
-    <span class="banner-icon material-symbols-rounded">{{ tipoFeedback === 'sucesso' ? 'check_circle' : 'warning' }}</span>
+    role="alert" aria-live="assertive">
+    <!-- aria-hidden: ícone é decorativo; texto adjacente já descreve o tipo (WCAG 1.1.1) -->
+    <span class="banner-icon material-symbols-rounded" aria-hidden="true">{{ tipoFeedback === 'sucesso' ? 'check_circle' : 'warning' }}</span>
     {{ mensagemFeedback }}
   </div>
   }
@@ -14,9 +16,12 @@
     <h1>Nova Oficina / Turma</h1>
     <p>Preencha as informações abaixo para cadastrar uma nova oficina no sistema.</p>
 
-    <!-- Progress bar -->
-    <div class="progress-bar" role="progressbar" [attr.aria-valuenow]="etapaAtual" aria-valuemin="1"
-      [attr.aria-valuemax]="totalEtapas" [attr.aria-label]="'Passo ' + etapaAtual + ' de ' + totalEtapas">
+    <!-- Progress bar com aria-label dinâmico (WCAG 4.1.2) -->
+    <div class="progress-bar" role="progressbar"
+      [attr.aria-valuenow]="etapaAtual"
+      aria-valuemin="1"
+      [attr.aria-valuemax]="totalEtapas"
+      [attr.aria-label]="'Passo ' + etapaAtual + ' de ' + totalEtapas + ': ' + (etapaAtual === 1 ? 'Dados Básicos' : 'Grade Horária')">
       <div class="progress-fill" [style.width.%]="(etapaAtual / totalEtapas) * 100"></div>
     </div>
   </div>
@@ -37,9 +42,11 @@
               placeholder="Ex: Braille Básico — Turma A"
               [class.input-error]="isFieldInvalid('nome')"
               aria-required="true"
-              [attr.aria-invalid]="isFieldInvalid('nome')">
+              [attr.aria-invalid]="isFieldInvalid('nome')"
+              [attr.aria-describedby]="isFieldInvalid('nome') ? 'erro-nome' : null">
             @if (isFieldInvalid('nome')) {
-            <span class="error-text" role="alert">O nome é obrigatório.</span>
+            <!-- id para aria-describedby no input (WCAG 1.3.1) -->
+            <span id="erro-nome" class="error-text" role="alert">O nome é obrigatório.</span>
             }
           </div>
         </div>
@@ -48,19 +55,21 @@
           <div class="form-group">
             <label for="input-professor">Professor Responsável <span aria-hidden="true">*</span></label>
             @if (carregandoProfessores) {
-            <p class="loading-hint">Carregando professores...</p>
+            <!-- aria-live="polite" anuncia ao SR quando o carregamento terminar (WCAG 4.1.3) -->
+            <p class="loading-hint" aria-live="polite" aria-busy="true">Carregando professores...</p>
             } @else {
             <select id="input-professor" formControlName="professorId"
               [class.input-error]="isFieldInvalid('professorId')"
               aria-required="true"
-              [attr.aria-invalid]="isFieldInvalid('professorId')">
+              [attr.aria-invalid]="isFieldInvalid('professorId')"
+              [attr.aria-describedby]="isFieldInvalid('professorId') ? 'erro-professor' : null">
               <option value="">Selecione um professor...</option>
               @for (prof of professores; track prof.id) {
               <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
               }
             </select>
             @if (isFieldInvalid('professorId')) {
-            <span class="error-text" role="alert">Selecione o professor responsável.</span>
+            <span id="erro-professor" class="error-text" role="alert">Selecione o professor responsável.</span>
             }
             }
           </div>
@@ -90,6 +99,7 @@
           </div>
         </div>
       </div>
+
       <div class="row mt-3">
         <div class="col-lg-6">
           <div class="form-group">
@@ -103,7 +113,7 @@
           <div class="form-group">
             <label for="input-modelo">Template de Certificado <span class="badge-opt">opcional</span></label>
             @if (carregandoModelos) {
-              <p class="loading-hint">Carregando modelos...</p>
+              <p class="loading-hint" aria-live="polite" aria-busy="true">Carregando modelos...</p>
             } @else {
               <select id="input-modelo" formControlName="modeloCertificadoId" class="form-input">
                 <option value="">Nenhum (Emissão Indisponível)</option>
@@ -118,8 +128,10 @@
     </fieldset>
 
     <div class="wizard-actions">
-      <a routerLink="/admin/turmas" class="btn btn-secondary">Cancelar</a>
-      <button type="button" class="btn btn-primary" (click)="proximaEtapa()">
+      <a routerLink="/admin/turmas" class="btn btn-secondary" aria-label="Cancelar cadastro e voltar para lista de turmas">Cancelar</a>
+      <button type="button" class="btn btn-primary"
+        (click)="proximaEtapa()"
+        aria-label="Avançar para o passo 2: Grade Horária">
         Próximo →
       </button>
     </div>
@@ -135,11 +147,11 @@
       </p>
 
       <!-- Formulário inline de novo turno -->
-      <div class="turno-form">
+      <div class="turno-form" role="group" aria-label="Adicionar novo turno de aula">
         <div class="form-group-inline">
           <label for="input-dia">Dia da Semana</label>
           <select id="input-dia" [(ngModel)]="diaNovoTurno" [ngModelOptions]="{standalone: true}"
-            class="form-input" aria-label="Dia da Semana">
+            class="form-input">
             <option value="">Dia...</option>
             @for (d of dias; track d.valor) {
             <option [value]="d.valor">{{ d.label }}</option>
@@ -150,22 +162,25 @@
         <div class="form-group-inline">
           <label for="input-hora-inicio">Início</label>
           <input type="time" id="input-hora-inicio" [(ngModel)]="horaInicioNovoTurno"
-            [ngModelOptions]="{standalone: true}" class="form-input" aria-label="Hora de início">
+            [ngModelOptions]="{standalone: true}" class="form-input">
         </div>
 
         <div class="form-group-inline">
           <label for="input-hora-fim">Fim</label>
           <input type="time" id="input-hora-fim" [(ngModel)]="horaFimNovoTurno"
-            [ngModelOptions]="{standalone: true}" class="form-input" aria-label="Hora de fim">
+            [ngModelOptions]="{standalone: true}" class="form-input">
         </div>
 
-        <button type="button" class="btn btn-secondary btn-incluir-turno" (click)="adicionarTurno()">
+        <button type="button" class="btn btn-secondary btn-incluir-turno"
+          (click)="adicionarTurno()"
+          aria-label="Incluir este turno na grade horária">
           + Incluir
         </button>
       </div>
 
       @if (erroTurno) {
-      <span class="error-text error-with-icon" role="alert">
+      <!-- role="alert" garante anúncio imediato do erro de turno (WCAG 4.1.3) -->
+      <span class="error-text error-with-icon" role="alert" id="erro-turno">
         <span class="material-symbols-rounded" aria-hidden="true">error</span>
         {{ erroTurno }}
       </span>
@@ -174,29 +189,32 @@
       <!-- Lista de turnos adicionados -->
       @if (gradeHoraria.length > 0) {
       <div class="grade-lista">
-        <h4>Turnos cadastrados</h4>
-        <ul>
+        <h4 id="grade-titulo">Turnos cadastrados ({{ gradeHoraria.length }})</h4>
+        <!-- aria-labelledby associa a lista ao título (WCAG 1.3.1) -->
+        <ul aria-labelledby="grade-titulo">
           @for (turno of gradeHoraria; track turno.dia; let i = $index) {
           <li class="turno-item">
             <span class="turno-dia">{{ labelDia(turno.dia) }}</span>
             <span>{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
             <button type="button" class="btn-remove-turno" (click)="removerTurno(i)"
-              [attr.aria-label]="'Remover turno de ' + labelDia(turno.dia)">✕</button>
+              [attr.aria-label]="'Remover turno de ' + labelDia(turno.dia) + ' (' + turno.horaInicio + ' até ' + turno.horaFim + ')'">✕</button>
           </li>
           }
         </ul>
       </div>
       } @else {
-      <p class="grade-vazio">Nenhum turno adicionado. A grade horária é opcional.</p>
+      <p class="grade-vazio" role="status" aria-live="polite">Nenhum turno adicionado. A grade horária é opcional.</p>
       }
     </fieldset>
 
     <div class="wizard-actions">
-      <button type="button" class="btn btn-secondary" (click)="etapaAnterior()">← Voltar</button>
+      <button type="button" class="btn btn-secondary" (click)="etapaAnterior()"
+        aria-label="Voltar para o passo 1: Dados Básicos">← Voltar</button>
       <button type="button" class="btn btn-primary"
         (click)="finalizarCadastro()"
         [disabled]="isSalvando"
-        [attr.aria-busy]="isSalvando">
+        [attr.aria-busy]="isSalvando"
+        [attr.aria-label]="isSalvando ? 'Salvando a oficina, aguarde...' : 'Finalizar e cadastrar a oficina'">
         {{ isSalvando ? 'Salvando...' : 'Cadastrar Oficina ✓' }}
       </button>
     </div>
