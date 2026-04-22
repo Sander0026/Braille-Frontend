@@ -77,7 +77,8 @@ export const routes: Routes = [
       {
         path: 'turmas',
         loadComponent: () => import('./pages/admin/turmas/turmas-lista/turmas-lista').then(m => m.TurmasLista),
-        title: 'Turmas — ILBES'
+        title: 'Turmas — ILBES',
+        canDeactivate: [descarteGuard]
       },
       {
         path: 'turmas/cadastro',

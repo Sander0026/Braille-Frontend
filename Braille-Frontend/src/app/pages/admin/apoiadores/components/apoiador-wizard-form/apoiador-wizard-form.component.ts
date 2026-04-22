@@ -330,11 +330,17 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     this.salvando = false;
     this.announcer.announce('Apoiador cadastrado ou atualizado com sucesso.', 'polite');
     this.cdr.detectChanges();
+    this.apoiadorForm.reset(); // clear form so guard won't trigger on close
     this.formSaved.emit();
   }
 
+  isFormDirty(): boolean {
+    if (!this.apoiadorForm) return false;
+    return this.apoiadorForm.dirty && !this.salvando;
+  }
+
   fecharFormSeguro(): void {
-    // Para simplificar a logica isolada do guard, podemos so emitir a requisicao de close
+    // Apenas emite evento para o componente pai (ApoiadoresLista) tratar via injectFormDescarte
     this.formClosed.emit();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnDestroy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, ChangeDetectorRef, OnInit, OnDestroy, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -12,6 +12,8 @@ import { ApoiadorWizardFormComponent } from '../components/apoiador-wizard-form/
 import { ApoiadorPerfilComponent } from '../components/apoiador-perfil/apoiador-perfil.component';
 import { ApoiadorAcoesComponent } from '../components/apoiador-acoes/apoiador-acoes.component';
 import { ApoiadorCertificadosComponent } from '../components/apoiador-certificados/apoiador-certificados.component';
+import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
+import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 @Component({
   selector: 'app-apoiadores-lista',
@@ -29,7 +31,7 @@ import { ApoiadorCertificadosComponent } from '../components/apoiador-certificad
   styleUrl: './apoiadores-lista.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ApoiadoresLista implements OnInit, OnDestroy {
+export class ApoiadoresLista implements OnInit, OnDestroy, ComponenteComDescarte {
   // Estado da Listagem
   abaAtiva = signal<'ATIVOS' | 'INATIVOS'>('ATIVOS');
   pesquisaTermo = '';
@@ -54,6 +56,13 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
   acoesFiltradas: AcaoApoiador[] = [];
   certificadosEmitidos: any[] = [];
   carregandoContextoFilho = false;
+
+  @ViewChild(ApoiadorWizardFormComponent) formModal?: ApoiadorWizardFormComponent;
+
+  podeDescartar = injectFormDescarte(() => {
+    if (!this.modalFormAberto() || !this.formModal) return false;
+    return this.formModal.isFormDirty();
+  });
 
   private readonly destroy$ = new Subject<void>();
   private readonly announcer = inject(LiveAnnouncer);
@@ -224,7 +233,10 @@ export class ApoiadoresLista implements OnInit, OnDestroy {
     this.carregarApoiadores(); 
   }
 
-  onModalFormClosed(): void {
+  async onModalFormClosed(): Promise<void> {
+    const podeFechar = await this.podeDescartar();
+    if (!podeFechar) return;
+
     this.modalFormAberto.set(false);
     if (this.modalVoltarParaPerfil() && this.apoiadorAtual) {
       this.modalPerfilAberto.set(true);

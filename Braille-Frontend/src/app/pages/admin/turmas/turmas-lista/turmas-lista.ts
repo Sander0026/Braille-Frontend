@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectionStrategy, DestroyRef, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -13,6 +13,8 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { TurmaFiltroDrawerComponent } from '../components/turma-filtro-drawer/turma-filtro-drawer.component';
 import { TurmaFormModalComponent } from '../components/turma-form-modal/turma-form-modal.component';
 import { TurmaAlunosModalComponent } from '../components/turma-alunos-modal/turma-alunos-modal.component';
+import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
+import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
 @Component({
   selector: 'app-turmas-lista',
@@ -29,7 +31,7 @@ import { TurmaAlunosModalComponent } from '../components/turma-alunos-modal/turm
   styleUrl: './turmas-lista.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TurmasLista implements OnInit {
+export class TurmasLista implements OnInit, ComponenteComDescarte {
   private readonly turmasService = inject(TurmasService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
@@ -61,6 +63,13 @@ export class TurmasLista implements OnInit {
   readonly erroSalvarTurma = signal<string>('');
 
   readonly modalAlunosAberto = signal(false);
+
+  @ViewChild(TurmaFormModalComponent) formModal?: TurmaFormModalComponent;
+
+  podeDescartar = injectFormDescarte(() => {
+    if (!this.modalEditarAberto() || !this.formModal) return false;
+    return this.formModal.isFormDirty();
+  });
 
   // Todas as turmas que batem com os filtros do drawer + busca (ignorando qual aba tá aberta)
   readonly turmasMatchesFilters = computed(() => {
@@ -198,15 +207,8 @@ export class TurmasLista implements OnInit {
   }
 
   async tentarFecharSujo(dirty: boolean) {
-    if (dirty) {
-      const p = await this.confirmDialog.confirmar({
-        titulo: 'Descartar alterações?',
-        mensagem: 'Você tem mudanças não salvas. Deseja sair sem salvar?',
-        textoBotaoConfirmar: 'Descartar',
-        textoBotaoCancelar: 'Continuar editando'
-      });
-      if (p) this.modalEditarAberto.set(false);
-    } else {
+    const podeFechar = await this.podeDescartar();
+    if (podeFechar) {
       this.modalEditarAberto.set(false);
     }
   }
