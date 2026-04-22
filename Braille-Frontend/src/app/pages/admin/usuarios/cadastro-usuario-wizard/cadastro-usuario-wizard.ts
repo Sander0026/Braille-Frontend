@@ -45,6 +45,9 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
     readonly modalReaproveitarAberto = signal(false);
     readonly dadosReaproveitar = signal<any>(null);
 
+    private lastFocusBeforeReativacao: HTMLElement | null = null;
+    private lastFocusBeforeReaproveitar: HTMLElement | null = null;
+
     cadastroUsuarioForm!: FormGroup;
 
     override isFormDirty(): boolean {
@@ -143,9 +146,11 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
                             excluido: false,
                             message: 'Funcionário inativo encontrado',
                         });
+                        this.lastFocusBeforeReativacao = document.activeElement as HTMLElement;
                         this.modalReativacaoAberto.set(true);
                     } else if (res.status === 'excluido') {
                         this.dadosReaproveitar.set(res);
+                        this.lastFocusBeforeReaproveitar = document.activeElement as HTMLElement;
                         this.modalReaproveitarAberto.set(true);
                     }
                 },
@@ -241,6 +246,7 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
                     if ('_reativacao' in resp && resp._reativacao && 'id' in resp && 'nome' in resp && 'username' in resp && 'message' in resp && 'excluido' in resp) {
                         this.dadosReativacao.set(resp as ReativacaoResponse);
                         this._payloadPendente = payload;
+                        this.lastFocusBeforeReativacao = document.activeElement as HTMLElement;
                         this.modalReativacaoAberto.set(true);
                         return;
                     }
@@ -307,6 +313,10 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
         this.modalReativacaoAberto.set(false);
         this.dadosReativacao.set(null);
         this._payloadPendente = null;
+        if (this.lastFocusBeforeReativacao) {
+            this.lastFocusBeforeReativacao.focus();
+            this.lastFocusBeforeReativacao = null;
+        }
     }
 
     // --- Modal Reaproveitar ---
@@ -346,6 +356,10 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
         this.dadosReaproveitar.set(null);
         this.cadastroUsuarioForm.get('dadosPessoais.cpf')?.setValue('');
         this.cpfStatus.set('');
+        if (this.lastFocusBeforeReaproveitar) {
+            this.lastFocusBeforeReaproveitar.focus();
+            this.lastFocusBeforeReaproveitar = null;
+        }
     }
 
     irParaLista() {

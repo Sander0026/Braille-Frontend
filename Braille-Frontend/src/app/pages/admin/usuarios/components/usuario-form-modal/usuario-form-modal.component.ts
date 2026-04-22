@@ -55,6 +55,8 @@ export class UsuarioFormModalComponent {
   @Output() tentarFecharSujo = new EventEmitter<boolean>();
   @Output() salvar = new EventEmitter<any>();
 
+  private lastFocusBeforeModal: HTMLElement | null = null;
+
   editForm!: FormGroup;
   readonly salvando = signal(false);
   
@@ -111,6 +113,7 @@ export class UsuarioFormModalComponent {
   }
 
   abrirModal(): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     const d = this.dialogRef?.nativeElement;
     if (d && !d.open) {
       d.showModal();
@@ -121,6 +124,11 @@ export class UsuarioFormModalComponent {
     const d = this.dialogRef?.nativeElement;
     if (d && d.open) {
       d.close();
+    }
+    // WCAG 2.4.3: Retorna o foco para o elemento disparador
+    if (this.lastFocusBeforeModal) {
+      this.lastFocusBeforeModal.focus();
+      this.lastFocusBeforeModal = null;
     }
     if (emit) {
       this.fechar.emit();
