@@ -58,10 +58,10 @@
 @if (missaoConfig$ | async; as missaoConfig) {
 <!-- ══════════ MISSÃO, VISÃO E VALORES ══════════ -->
 <section class="sobre" aria-label="Diretrizes Estratégicas: Nossa Missão, Visão e Valores">
-    <div class="section-inner mvv-grid">
+    <div class="section-inner mvv-grid" role="list">
 
         <!-- MISSÃO -->
-        <article class="mvv-card animate-on-scroll" appAnimateOnScroll>
+        <article class="mvv-card animate-on-scroll" appAnimateOnScroll role="listitem">
             <div class="mvv-icon" aria-hidden="true">
                 <span class="material-symbols-rounded">flag</span>
             </div>
@@ -70,7 +70,7 @@
         </article>
 
         <!-- VISÃO -->
-        <article class="mvv-card animate-on-scroll delay-100" appAnimateOnScroll>
+        <article class="mvv-card animate-on-scroll delay-100" appAnimateOnScroll role="listitem">
             <div class="mvv-icon" aria-hidden="true">
                 <span class="material-symbols-rounded">wb_sunny</span>
             </div>
@@ -79,7 +79,7 @@
         </article>
 
         <!-- VALORES -->
-        <article class="mvv-card animate-on-scroll delay-200" appAnimateOnScroll>
+        <article class="mvv-card animate-on-scroll delay-200" appAnimateOnScroll role="listitem">
             <div class="mvv-icon" aria-hidden="true">
                 <span class="material-symbols-rounded">public</span>
             </div>
@@ -263,7 +263,9 @@
                 } @else {
                 <div class="parceiro-placeholder">
                     <span aria-hidden="true">{{ (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)?.charAt(0) | uppercase }}</span>
-                    <p class="parceiro-nome-fallback" aria-label="Nome do parceiro">{{ parceiro.nomeFantasia || parceiro.nomeRazaoSocial }}</p>
+                    <p class="parceiro-nome-fallback">
+                        <span class="sr-only">Parceiro: </span>{{ parceiro.nomeFantasia || parceiro.nomeRazaoSocial }}
+                    </p>
                 </div>
                 }
             </div>
