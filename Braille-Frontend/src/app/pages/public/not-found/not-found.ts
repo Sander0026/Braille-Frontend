@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, Inject, PLATFORM_ID, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Inject, PLATFORM_ID, signal, OnInit, inject } from '@angular/core';
 import { CommonModule, Location, isPlatformBrowser } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-not-found',
@@ -14,6 +15,7 @@ export class NotFound implements OnInit {
 
   // Signal Reativo puro com alocação O(1) e leitura rápida na DOM
   possuiHistorico = signal<boolean>(false);
+  private liveAnnouncer = inject(LiveAnnouncer);
 
   constructor(
     private location: Location, 
@@ -23,6 +25,7 @@ export class NotFound implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.liveAnnouncer.announce('Erro 404: Página não encontrada.', 'assertive');
     if (isPlatformBrowser(this.platformId)) {
       // Quando navigationId > 1 detectamos firmemente o Router interno rodando.
       // Acima de 2 detectamos firmemente saltos via Referência Nativa de Browser sem Router SPA
