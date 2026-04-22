@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
@@ -19,6 +19,7 @@ import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@an
 import { AtestadosService, Atestado, PreviewAtestado } from '../../../core/services/atestados.service';
 import { LaudosService, LaudoMedico } from '../../../core/services/laudos.service';
 import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
+import { ComponenteComDescarte } from '../../../core/interfaces/componente-com-descarte.interface';
 
 
 @Directive({
@@ -43,7 +44,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
-export class BeneficiaryList implements OnInit, OnDestroy {
+export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte {
   alunos: Beneficiario[] = [];
   isLoading = true;
   erro = '';
@@ -98,6 +99,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // Modal de Edição
   modalEdicaoAberto = false;
   alunoEmEdicao: Beneficiario | null = null;
+  @ViewChild(BeneficiaryFormComponent) formEdicaoComponent?: BeneficiaryFormComponent;
 
   // Modal de Importação
   modalImportAberto = false;
@@ -228,7 +230,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
     // C-05: Escape fecha qualquer modal aberto (WCAG 2.1.2)
     if (event.key === 'Escape') {
-      if (this.modalEdicaoAberto) { this.fecharModalEdicao(); event.preventDefault(); }
+      if (this.modalEdicaoAberto) { this.tentarFecharModalEdicao(); event.preventDefault(); }
       else if (this.modalAberto) { this.fecharModal(); event.preventDefault(); }
       else if (this.drawerAberto) { this.drawerAberto = false; this.cdr.markForCheck(); event.preventDefault(); }
       return;
@@ -557,6 +559,19 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.modalEdicaoAberto = false;
     this.alunoEmEdicao = null;
     this.popFocus();
+  }
+
+  async tentarFecharModalEdicao(): Promise<void> {
+    const podeFechar = await this.podeDescartar();
+    if (!podeFechar) return;
+    this.fecharModalEdicao();
+  }
+
+  async podeDescartar(): Promise<boolean> {
+    if (this.modalEdicaoAberto && this.formEdicaoComponent) {
+      return await this.formEdicaoComponent.podeDescartar();
+    }
+    return true;
   }
 
   aoSalvarEdicao(): void {

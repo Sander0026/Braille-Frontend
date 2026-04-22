@@ -62,6 +62,7 @@ export const routes: Routes = [
         path: 'alunos',
         loadComponent: () => import('./features/beneficiaries/beneficiary-list/beneficiary-list').then(m => m.BeneficiaryList),
         title: 'Alunos — ILBES',
+        canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
       {

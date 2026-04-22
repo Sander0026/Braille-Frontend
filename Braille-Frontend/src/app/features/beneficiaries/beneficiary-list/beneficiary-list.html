@@ -1184,13 +1184,13 @@
 <!-- ══════════ MODAL DE EDIÇÃO ══════════ -->
 @if (modalEdicaoAberto && alunoEmEdicao) {
 <div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true"
-    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="fecharModalEdicao()"
+    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="tentarFecharModalEdicao()"
     cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="display: flex; align-items: center; justify-content: center; z-index: 1050;">
     <div style="max-width: 820px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" (click)="$event.stopPropagation()">
         <app-beneficiary-form 
            [alunoEmEdicao]="alunoEmEdicao" 
            (salvou)="aoSalvarEdicao()" 
-           (cancelou)="fecharModalEdicao()">
+           (cancelou)="tentarFecharModalEdicao()">
         </app-beneficiary-form>
     </div>
 </div>
