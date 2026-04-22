@@ -70,6 +70,15 @@ export class UsuarioFormModalComponent {
     { value: 'COMUNICACAO', label: 'Comunicação' }
   ];
 
+  private beforeUnloadHandler = (e: BeforeUnloadEvent) => {
+    if (this.editForm && this.editForm.dirty && !this.salvando()) {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    }
+    return undefined;
+  };
+
   constructor() {
     this.editForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
@@ -84,6 +93,10 @@ export class UsuarioFormModalComponent {
       bairro: [''],
       cidade: [''],
       uf: ['', [Validators.maxLength(2)]],
+    });
+
+    this.destroyRef.onDestroy(() => {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     });
   }
 
@@ -108,11 +121,13 @@ export class UsuarioFormModalComponent {
         cidade: u.cidade ?? '',
         uf: u.uf ?? '',
     });
+    this.editForm.markAsPristine();
     this.cpfStatus.set('livre');
     this.cpfConflito.set(null);
   }
 
   abrirModal(): void {
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     const d = this.dialogRef?.nativeElement;
     if (d && !d.open) {
@@ -121,6 +136,7 @@ export class UsuarioFormModalComponent {
   }
 
   fecharModal(emit = true): void {
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     const d = this.dialogRef?.nativeElement;
     if (d && d.open) {
       d.close();
