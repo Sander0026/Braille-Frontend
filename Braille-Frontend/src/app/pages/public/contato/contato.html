@@ -134,11 +134,13 @@
                       <label for="cNome">
                           Nome completo <span class="req-mark" aria-hidden="true">*</span>
                       </label>
-                      <input type="text" id="cNome" formControlName="nome"
+                      <input type="text" id="cNome" #nomeInput formControlName="nome"
                           class="form-input" [class.invalid]="isCampoInvalido('nome')" placeholder="Seu nome completo"
-                          autocomplete="name" aria-required="true" [attr.aria-invalid]="isCampoInvalido('nome')" />
+                          autocomplete="name" aria-required="true" 
+                          [attr.aria-invalid]="isCampoInvalido('nome') ? 'true' : null" 
+                          [attr.aria-describedby]="isCampoInvalido('nome') ? 'err-nome' : null" />
                       @if (isCampoInvalido('nome')) {
-                        <span class="field-error" role="alert" aria-live="polite">Informe seu nome (mínimo 2 caracteres).</span>
+                        <span id="err-nome" class="field-error" role="alert" aria-live="polite">Informe seu nome (mínimo 2 caracteres).</span>
                       }
                   </div>
 
@@ -149,8 +151,8 @@
                           <input type="email" id="cEmail" formControlName="email"
                               class="form-input" [class.invalid]="isCampoInvalido('email')"
                               placeholder="seu@email.com" autocomplete="email"
-                              aria-describedby="contato-hint"
-                              [attr.aria-invalid]="isCampoInvalido('email')" />
+                              [attr.aria-describedby]="isCampoInvalido('email') || isContatoObrigatorioInvalido() ? 'contato-hint err-email' : 'contato-hint'"
+                              [attr.aria-invalid]="isCampoInvalido('email') || isContatoObrigatorioInvalido() ? 'true' : null" />
                       </div>
 
                       <div class="form-group">
@@ -158,8 +160,8 @@
                           <input type="tel" id="cTelefone" formControlName="telefone"
                               appPhoneMask
                               class="form-input" [class.invalid]="isCampoInvalido('telefone')" placeholder="(XX) XXXXX-XXXX" autocomplete="tel" inputmode="numeric"
-                              aria-describedby="contato-hint"
-                              [attr.aria-invalid]="isCampoInvalido('telefone')"
+                              [attr.aria-describedby]="isCampoInvalido('telefone') || isContatoObrigatorioInvalido() ? 'contato-hint err-telefone' : 'contato-hint'"
+                              [attr.aria-invalid]="isCampoInvalido('telefone') || isContatoObrigatorioInvalido() ? 'true' : null"
                               maxlength="15" />
                       </div>
                   </div>
@@ -168,9 +170,10 @@
                   </p>
                   
                   @if (isContatoObrigatorioInvalido()) {
-                    <span class="field-error" role="alert" aria-live="polite">É necessário informar ao menos um e-mail ou telefone.</span>
+                    <span id="err-email" class="field-error" role="alert" aria-live="polite">É necessário informar ao menos um e-mail ou telefone.</span>
+                    <span id="err-telefone" class="sr-only">É necessário informar ao menos um e-mail ou telefone.</span>
                   } @else if (isCampoInvalido('email')) {
-                    <span class="field-error" role="alert" aria-live="polite">E-mail inválido. Verifique o formato (ex: usuario&#64;email.com).</span>
+                    <span id="err-email" class="field-error" role="alert" aria-live="polite">E-mail inválido. Verifique o formato (ex: usuario&#64;email.com).</span>
                   }
 
                   <!-- Assunto -->
@@ -181,9 +184,10 @@
                       <input type="text" id="cAssunto" formControlName="assunto"
                           class="form-input" [class.invalid]="isCampoInvalido('assunto')"
                           placeholder="Ex: Informações sobre as oficinas" aria-required="true"
-                          [attr.aria-invalid]="isCampoInvalido('assunto')" />
+                          [attr.aria-invalid]="isCampoInvalido('assunto') ? 'true' : null"
+                          [attr.aria-describedby]="isCampoInvalido('assunto') ? 'err-assunto' : null" />
                       @if (isCampoInvalido('assunto')) {
-                        <span class="field-error" role="alert" aria-live="polite">Informe o assunto (mínimo 3 caracteres).</span>
+                        <span id="err-assunto" class="field-error" role="alert" aria-live="polite">Informe o assunto (mínimo 3 caracteres).</span>
                       }
                   </div>
 
@@ -196,9 +200,10 @@
                           class="form-input"
                           [class.invalid]="isCampoInvalido('mensagem')" rows="5"
                           placeholder="Descreva sua dúvida, solicitação ou comentário..." aria-required="true"
-                          [attr.aria-invalid]="isCampoInvalido('mensagem')" tabEscape></textarea>
+                          [attr.aria-invalid]="isCampoInvalido('mensagem') ? 'true' : null"
+                          [attr.aria-describedby]="isCampoInvalido('mensagem') ? 'err-mensagem' : null" tabEscape></textarea>
                       @if (isCampoInvalido('mensagem')) {
-                        <span class="field-error" role="alert" aria-live="polite">Sua mensagem deve conter no mínimo 10 caracteres.</span>
+                        <span id="err-mensagem" class="field-error" role="alert" aria-live="polite">Sua mensagem deve conter no mínimo 10 caracteres.</span>
                       }
                   </div>
 

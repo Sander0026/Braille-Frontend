@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, ViewChild, ElementRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SiteConfigService } from '../../../core/services/site-config';
@@ -39,6 +40,9 @@ export class Contato {
   // Cache e Prevenção de Leak via ShareReplay
   contatoConfig$: Observable<any>;
 
+  @ViewChild('nomeInput') nomeInput?: ElementRef<HTMLInputElement>;
+  private liveAnnouncer = inject(LiveAnnouncer);
+
   constructor(
     private fb: FormBuilder,
     private contatoService: ContatoService,
@@ -76,6 +80,7 @@ export class Contato {
   enviar(): void {
     if (this.contatoForm.invalid) {
       this.contatoForm.markAllAsTouched();
+      this.liveAnnouncer.announce('O formulário contém erros. Verifique os campos destacados em vermelho antes de reenviar.', 'assertive');
       return;
     }
 
@@ -83,6 +88,7 @@ export class Contato {
 
     this.enviando.set(true);
     this.erroEnvio.set('');
+    this.liveAnnouncer.announce('Enviando mensagem, por favor aguarde...', 'polite');
 
     const rawForm = this.contatoForm.value;
     const payload: ContatoPayload = {
@@ -98,7 +104,10 @@ export class Contato {
       .enviarContato(payload)
       .pipe(finalize(() => this.enviando.set(false)))
       .subscribe({
-        next: () => this.enviado.set(true),
+        next: () => {
+          this.enviado.set(true);
+          this.liveAnnouncer.announce('Mensagem enviada com sucesso! A nossa secretaria entrará em contato.', 'polite');
+        },
         error: (err: HttpErrorResponse) => {
           let msgErro = 'Não foi possível processar sua mensagem neste momento. Tente novamente.';
           
@@ -108,6 +117,7 @@ export class Contato {
           }
           
           this.erroEnvio.set(msgErro);
+          this.liveAnnouncer.announce(`Erro ao enviar: ${msgErro}`, 'assertive');
         },
       });
   }
@@ -116,5 +126,9 @@ export class Contato {
     this.enviado.set(false);
     this.erroEnvio.set('');
     this.contatoForm.reset();
+    setTimeout(() => {
+      this.nomeInput?.nativeElement?.focus();
+      this.liveAnnouncer.announce('O formulário foi limpo. Você pode digitar uma nova mensagem.', 'polite');
+    }, 0);
   }
 }
