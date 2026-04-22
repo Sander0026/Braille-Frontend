@@ -25,7 +25,7 @@
 <div class="alert danger" role="alert"><span class="material-symbols-rounded" aria-hidden="true">error</span> {{
     erroHistorico() }}</div>
 } @else if (historico().length === 0) {
-<div class="empty-state">
+<div class="empty-state" role="status" aria-live="polite">
     <span class="material-symbols-rounded empty-icon" aria-hidden="true"
         style="font-size: 3rem; color: #9ca3af;">bar_chart</span>
     <h2>Nenhum registro encontrado</h2>
@@ -51,9 +51,11 @@
                 <td>{{ resumo.turmaNome }}</td>
                 <td class="text-center">{{ resumo.totalAlunos }}</td>
                 <td class="text-center">
-                    <span class="badge badge-success" style="margin-right: 4px;" title="Presentes">{{ resumo.presentes
+                    <span class="badge badge-success" style="margin-right: 4px;"
+                        [attr.aria-label]="resumo.presentes + ' alunos presentes'">{{ resumo.presentes
                         }}</span>
-                    <span class="badge badge-danger" title="Faltas">{{ resumo.faltas }}</span>
+                    <span class="badge badge-danger"
+                        [attr.aria-label]="resumo.faltas + ' faltas'">{{ resumo.faltas }}</span>
                 </td>
                 <td class="text-center">
                     <button class="btn btn-sm btn-ghost" (click)="abrirDetalhes(resumo)"
@@ -131,7 +133,8 @@
             }
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="fecharDetalhes()">Sair</button>
+            <button class="btn btn-secondary" (click)="fecharDetalhes()"
+                aria-label="Fechar janela de detalhes">Sair</button>
         </div>
     </dialog>
 </div>
