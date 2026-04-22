@@ -53,6 +53,13 @@ $transition: 200ms ease;
 /* ============================================================ */
 /* PROGRESS BAR & STEPS                                         */
 /* ============================================================ */
+.wizard-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
 .progress-bar {
   height: 6px;
   background: $gray-200;
