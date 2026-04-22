@@ -1,8 +1,10 @@
 import { Component, ChangeDetectionStrategy, input, output, effect, ElementRef, ViewChild } from '@angular/core';
+import { A11yModule } from '@angular/cdk/a11y';
 
 @Component({
   selector: 'app-ui-modal',
   standalone: true,
+  imports: [A11yModule],
   changeDetection: ChangeDetectionStrategy.OnPush, // Bloqueio extremo de Vazamentos de Memória (UI Lock)
   template: `
     <!-- Motor Reativo @if protege contra renderizações sujas -->
@@ -20,11 +22,14 @@ import { Component, ChangeDetectionStrategy, input, output, effect, ElementRef, 
       <dialog 
         #modalDialog
         [open]="isOpen()"
+        tabindex="-1"
+        cdkTrapFocus
+        cdkTrapFocusAutoCapture
         class="fixed inset-0 z-50 m-auto flex flex-col bg-white rounded-xl shadow-2xl p-0 overflow-hidden outline-none break-words
                w-[95%] sm:w-[500px] md:max-w-[700px] max-h-[90vh]"
         aria-modal="true" 
-        [attr.aria-labelledby]="ariaLabelledBy() || 'modal-title'"
-        [attr.aria-describedby]="ariaDescribedBy()"
+        [attr.aria-labelledby]="ariaLabelledBy() || null"
+        [attr.aria-describedby]="ariaDescribedBy() || null"
         (keydown.escape)="onEscape($event)">
         
         <!-- Slot Transcluso: Cabeçalho -->
@@ -83,11 +88,11 @@ export class UiModal {
   // Notificador de Eventos Angular Model CVA-Like
   closed = output<void>();
 
-  // Efeito reativo para focalizar o Modal assim que ele abre (Requiremento crítico WCAG de Navegação por Teclado)
+  // Efeito reativo para focalizar o Modal assim que ele abre
   constructor() {
     effect(() => {
       if (this.isOpen() && this.dialogRef) {
-        // Envia foco ao corpo do modal para blindar navegação por TAB (Trap Focus Nativo do Browser)
+        // Envia foco ao modal caso o cdkTrapFocus não encontre um elemento interno (fallback)
         requestAnimationFrame(() => this.dialogRef?.nativeElement?.focus());
       }
     });
