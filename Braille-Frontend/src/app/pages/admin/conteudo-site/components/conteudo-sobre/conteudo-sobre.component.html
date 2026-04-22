@@ -6,12 +6,12 @@
 } @else {
 
 <!-- Hero do Sobre -->
-<form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form mb-5">
+<form [formGroup]="formSobreHero" (ngSubmit)="salvarSobreHero()" class="cms-form">
     <div class="form-header">
         <h2>Apresentação da Página Sobre</h2>
         <p>Texto de destaque que aparece no topo da página /sobre.</p>
     </div>
-    <div class="form-grid">
+    <div class="form-section">
         <div class="form-group full-width">
             <label for="sobreEyebrow">Pequeno Título Superior</label>
             <input type="text" id="sobreEyebrow" formControlName="eyebrow" class="form-input"
@@ -28,7 +28,7 @@
                 placeholder="Breve descrição exibida abaixo do título…"></quill-editor>
         </div>
     </div>
-    <div class="form-actions mt-3">
+    <div class="form-footer">
         <button type="submit" class="btn btn-primary" [disabled]="salvandoHero() || formSobreHero.invalid">
             <span class="material-symbols-rounded">{{ salvandoHero() ? 'sync' : 'save' }}</span>
             {{ salvandoHero() ? 'Salvando…' : 'Salvar Apresentação' }}
@@ -37,12 +37,12 @@
 </form>
 
 <!-- Nossa História -->
-<form [formGroup]="formSobreHistoria" (ngSubmit)="salvarSobreHistoria()" class="cms-form mb-5">
+<form [formGroup]="formSobreHistoria" (ngSubmit)="salvarSobreHistoria()" class="cms-form">
     <div class="form-header">
         <h2>Nossa História</h2>
         <p>Texto da seção de história do instituto.</p>
     </div>
-    <div class="form-grid">
+    <div class="form-section">
         <div class="form-group full-width">
             <label for="historiaTitulo">Título da Seção</label>
             <input type="text" id="historiaTitulo" formControlName="titulo" class="form-input"
@@ -64,7 +64,7 @@
                 placeholder="Terceiro parágrafo (deixe em branco para ocultar)…"></quill-editor>
         </div>
     </div>
-    <div class="form-actions mt-3">
+    <div class="form-footer">
         <button type="submit" class="btn btn-primary" [disabled]="salvandoHistoria() || formSobreHistoria.invalid">
             <span class="material-symbols-rounded">{{ salvandoHistoria() ? 'sync' : 'save' }}</span>
             {{ salvandoHistoria() ? 'Salvando…' : 'Salvar História' }}
@@ -73,7 +73,7 @@
 </form>
 
 <!-- Linha do Tempo -->
-<form [formGroup]="formSobreTimeline" (ngSubmit)="salvarSobreTimeline()" class="cms-form mb-5">
+<form [formGroup]="formSobreTimeline" (ngSubmit)="salvarSobreTimeline()" class="cms-form">
     <div class="form-header">
         <h2>Linha do Tempo</h2>
         <p>Marcos históricos exibidos ao lado do texto "Nossa História".</p>
@@ -89,7 +89,7 @@
                 </button>
             </div>
             
-            <div class="flex-row mt-3" style="gap: 1rem;">
+            <div class="flex-row mt-3" style="gap: 2rem;">
                 <div class="form-group flex-1 pt-1">
                     <label [for]="'tlAno' + $index">Ano / Período</label>
                     <input type="text" [id]="'tlAno' + $index" formControlName="ano" class="form-input w-100"
@@ -116,7 +116,7 @@
         </button>
     </div>
 
-    <div class="form-actions mt-3">
+    <div class="form-footer">
         <button type="submit" class="btn btn-primary" [disabled]="salvandoTimeline() || formSobreTimeline.invalid">
             <span class="material-symbols-rounded">{{ salvandoTimeline() ? 'sync' : 'save' }}</span>
             {{ salvandoTimeline() ? 'Salvando…' : 'Salvar Linha do Tempo' }}
@@ -125,7 +125,7 @@
 </form>
 
 <!-- Nossa Equipe -->
-<form [formGroup]="formSobreEquipe" (ngSubmit)="salvarSobreEquipe()" class="cms-form mb-5">
+<form [formGroup]="formSobreEquipe" (ngSubmit)="salvarSobreEquipe()" class="cms-form">
     <div class="form-header">
         <h2>Nossa Equipe</h2>
         <p>Cards de membros ou áreas da equipe exibidos na seção "Nossa Equipe".</p>
@@ -140,7 +140,7 @@
                     <span class="material-symbols-rounded" aria-hidden="true">delete</span>
                 </button>
             </div>
-            <div class="flex-row mt-3" style="gap: 1rem;">
+            <div class="flex-row mt-3" style="gap: 2rem;">
                 <div class="form-group flex-1 pt-1">
                     <label [for]="'eqEmoji' + $index">Ícone Corporativo</label>
                     <select [id]="'eqEmoji' + $index" class="form-input w-100" formControlName="emoji" aria-label="Selecione o Ícone corporativo" style="padding: 10px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;">
@@ -172,7 +172,7 @@
         </button>
     </div>
     
-    <div class="form-actions mt-3">
+    <div class="form-footer">
         <button type="submit" class="btn btn-primary" [disabled]="salvandoEquipe() || formSobreEquipe.invalid">
             <span class="material-symbols-rounded">{{ salvandoEquipe() ? 'sync' : 'save' }}</span>
             {{ salvandoEquipe() ? 'Salvando…' : 'Salvar Equipe' }}
@@ -181,12 +181,12 @@
 </form>
 
 <!-- CTA / Rodapé -->
-<form [formGroup]="formSobreCta" (ngSubmit)="salvarSobreCta()" class="cms-form mb-5">
+<form [formGroup]="formSobreCta" (ngSubmit)="salvarSobreCta()" class="cms-form">
     <div class="form-header">
         <h2>Chamada para Ação (Rodapé)</h2>
         <p>Texto do bloco de CTA exibido no final da página /sobre.</p>
     </div>
-    <div class="form-grid">
+    <div class="form-section">
         <div class="form-group full-width">
             <label for="sobreCtaTitulo">Título</label>
             <input type="text" id="sobreCtaTitulo" formControlName="titulo" class="form-input"
@@ -198,7 +198,7 @@
                 placeholder="Ex: Entre em contato com nossa secretaria…"></quill-editor>
         </div>
     </div>
-    <div class="form-actions mt-3">
+    <div class="form-footer">
         <button type="submit" class="btn btn-primary" [disabled]="salvandoCta() || formSobreCta.invalid">
             <span class="material-symbols-rounded">{{ salvandoCta() ? 'sync' : 'save' }}</span>
             {{ salvandoCta() ? 'Salvando…' : 'Salvar Chamada à Ação' }}

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConteudoConfigComponent } from './components/conteudo-config/conteudo-config.component';
 import { ConteudoInstitucionalComponent } from './components/conteudo-institucional/conteudo-institucional.component';
