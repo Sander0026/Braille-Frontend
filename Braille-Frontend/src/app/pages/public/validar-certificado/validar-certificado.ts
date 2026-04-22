@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -30,6 +31,7 @@ export class ValidarCertificado {
   private readonly route               = inject(ActivatedRoute);
   private readonly certificadosService = inject(ModelosCertificadosService);
   private readonly destroyRef          = inject(DestroyRef);
+  private readonly liveAnnouncer       = inject(LiveAnnouncer);
 
   // ── Estado reativo ───────────────────────────────────────────────────────────
   resultadoValidacao = signal<any>(null);
@@ -61,12 +63,14 @@ export class ValidarCertificado {
   validar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.liveAnnouncer.announce('Informe um código de validação com pelo menos 5 caracteres válidos.', 'assertive');
       return;
     }
 
     this.buscando.set(true);
     this.resultadoValidacao.set(null);
     this.erroValidacao.set(false);
+    this.liveAnnouncer.announce('Buscando autenticidade, por favor aguarde...', 'polite');
 
     // Sanitização do código (sem XSS/Injection — apenas trim + uppercase)
     const codigoLimpo: string = (this.form.value.codigo as string).trim().toUpperCase();
@@ -82,6 +86,7 @@ export class ValidarCertificado {
           this.erroValidacao.set(true);
           this.resultadoValidacao.set(null);
           this.buscando.set(false);
+          this.liveAnnouncer.announce('Certificado Inválido ou Inexistente. Verifique se digitou a credencial corretamente.', 'assertive');
           return of(null); // Aborto silencioso — sem stack traces expostos (OWASP)
         }),
       )
@@ -89,6 +94,7 @@ export class ValidarCertificado {
         if (result) {
           this.resultadoValidacao.set(result);
           this.erroValidacao.set(false);
+          this.liveAnnouncer.announce(`Certificado Válido! Emitido para ${result.nome}.`, 'polite');
         }
         this.buscando.set(false);
       });
