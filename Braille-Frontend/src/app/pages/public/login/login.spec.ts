@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -52,63 +52,58 @@ describe('Login Component', () => {
     expect(authServiceMock.login).not.toHaveBeenCalled();
   });
 
-  it('deve chamar authService.login() com payload limpo', fakeAsync(() => {
+  it('deve chamar authService.login() com payload limpo', () => {
     authServiceMock.login.mockReturnValue(of({}));
     authServiceMock.getUser.mockReturnValue({ precisaTrocarSenha: false });
 
     component.loginForm.setValue({ username: '  admin  ', senha: 'senha123' });
     component.fazerLogin();
-    tick();
 
     expect(authServiceMock.login).toHaveBeenCalledWith({ username: 'admin', senha: 'senha123' });
-  }));
+  });
 
-  it('deve navegar para /admin ao fazer login com sucesso', fakeAsync(() => {
+  it('deve navegar para /admin ao fazer login com sucesso', () => {
     authServiceMock.login.mockReturnValue(of({}));
     authServiceMock.getUser.mockReturnValue({ precisaTrocarSenha: false });
 
     component.loginForm.setValue({ username: 'admin', senha: 'pass' });
     component.fazerLogin();
-    tick();
 
     expect(routerMock.navigate).toHaveBeenCalledWith(['/admin']);
-  }));
+  });
 
-  it('deve exibir tela de troca de senha quando precisaTrocarSenha = true', fakeAsync(() => {
+  it('deve exibir tela de troca de senha quando precisaTrocarSenha = true', () => {
     authServiceMock.login.mockReturnValue(of({}));
     authServiceMock.getUser.mockReturnValue({ precisaTrocarSenha: true });
 
     component.loginForm.setValue({ username: 'admin', senha: 'Pass@123' });
     component.fazerLogin();
-    tick();
 
     expect(component.precisaTrocarSenha()).toBe(true);
     expect(component.senhaAntigaTemp()).toBe('Pass@123');
-  }));
+  });
 
   // ── Error handling ────────────────────────────────────────────────────────
-  it('deve exibir mensagem amigável em erro 401', fakeAsync(() => {
+  it('deve exibir mensagem amigável em erro 401', () => {
     const err = new HttpErrorResponse({ status: 401, error: { message: 'Credenciais inválidas' } });
     authServiceMock.login.mockReturnValue(throwError(() => err));
 
     component.loginForm.setValue({ username: 'x', senha: 'y' });
     component.fazerLogin();
-    tick();
 
     expect(component.erroLogin()).toBe('Credenciais inválidas');
     expect(component.carregando()).toBe(false);
-  }));
+  });
 
-  it('deve exibir mensagem de conexão em erro status 0', fakeAsync(() => {
+  it('deve exibir mensagem de conexão em erro status 0', () => {
     const err = new HttpErrorResponse({ status: 0 });
     authServiceMock.login.mockReturnValue(throwError(() => err));
 
     component.loginForm.setValue({ username: 'x', senha: 'y' });
     component.fazerLogin();
-    tick();
 
     expect(component.erroLogin()).toContain('conectar ao servidor');
-  }));
+  });
 
   // ── confirmarNovaSenha ────────────────────────────────────────────────────
   it('não deve chamar trocarSenha se novaSenhaForm for inválido', () => {
@@ -116,17 +111,16 @@ describe('Login Component', () => {
     expect(authServiceMock.trocarSenha).not.toHaveBeenCalled();
   });
 
-  it('deve definir senhaAlteradaOk=true e fazer logout após trocar senha', fakeAsync(() => {
+  it('deve definir senhaAlteradaOk=true e fazer logout após trocar senha', () => {
     authServiceMock.trocarSenha.mockReturnValue(of({}));
 
     component.novaSenhaForm.setValue({ novaSenha: 'Nova@Senha1', confirmarSenha: 'Nova@Senha1' });
     component.confirmarNovaSenha();
-    tick();
 
     expect(component.senhaAlteradaOk()).toBe(true);
     expect(authServiceMock.logout).toHaveBeenCalled();
     expect(component.precisaTrocarSenha()).toBe(false);
-  }));
+  });
 
   // ── toggleSenha ───────────────────────────────────────────────────────────
   it('deve alternar mostrarSenha a cada chamada', () => {
