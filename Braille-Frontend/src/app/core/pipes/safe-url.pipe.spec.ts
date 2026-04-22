@@ -42,10 +42,11 @@ describe('SafeUrlPipe', () => {
   });
 
   it('deve bloquear URIs maliciosos de injeção (javascript: e data: base64)', () => {
-    spyOn(console, 'warn');
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const result = pipe.transform('javascript:alert(1)');
     expect(result).toBe('safe-'); // Bypassa o empty fallback seguro
-    expect(console.warn).toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 
   it('deve devolver fallback encasulado ao receber valores nulos', () => {

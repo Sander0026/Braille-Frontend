@@ -1,3 +1,7 @@
+/**
+ * usuarios-lista.spec.ts — Migrado de Jasmine para Vitest (runner do projeto)
+ * jasmine.SpyObj → vi.fn() | jasmine.createSpyObj → vi mock object | .and.returnValue → mockReturnValue
+ */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { UsuariosLista } from './usuarios-lista';
 import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
@@ -5,16 +9,20 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { ToastService } from '../../../../core/services/toast.service';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { of, throwError } from 'rxjs';
-import { signal } from '@angular/core';
 
 describe('UsuariosLista', () => {
   let component: UsuariosLista;
   let fixture: ComponentFixture<UsuariosLista>;
-  
-  let mockUsuariosService: jasmine.SpyObj<UsuariosService>;
-  let mockConfirmDialog: jasmine.SpyObj<ConfirmDialogService>;
-  let mockToastService: jasmine.SpyObj<ToastService>;
-  let mockLiveAnnouncer: jasmine.SpyObj<LiveAnnouncer>;
+
+  const mockUsuariosService = {
+    listar:            vi.fn(),
+    excluir:           vi.fn(),
+    excluirDefinitivo: vi.fn(),
+    restaurar:         vi.fn(),
+  };
+  const mockConfirmDialog  = { confirmar: vi.fn() };
+  const mockToastService   = { sucesso: vi.fn(), erro: vi.fn() };
+  const mockLiveAnnouncer  = { announce: vi.fn() };
 
   const mockUsuario: Usuario = {
     id: 'u1',
@@ -22,36 +30,32 @@ describe('UsuariosLista', () => {
     username: 'maria123',
     email: 'maria@braille.com',
     role: 'ADMIN',
-    statusAtivo: true
+    statusAtivo: true,
   };
 
   const mockResponse = {
     data: [mockUsuario],
-    meta: { total: 1, lastPage: 1 }
+    meta: { total: 1, lastPage: 1 },
   };
 
   beforeEach(async () => {
-    mockUsuariosService = jasmine.createSpyObj('UsuariosService', ['listar', 'excluir', 'excluirDefinitivo', 'restaurar']);
-    mockConfirmDialog = jasmine.createSpyObj('ConfirmDialogService', ['confirmar']);
-    mockToastService = jasmine.createSpyObj('ToastService', ['sucesso', 'erro']);
-    mockLiveAnnouncer = jasmine.createSpyObj('LiveAnnouncer', ['announce']);
-
-    mockUsuariosService.listar.and.returnValue(of(mockResponse as any));
-    mockUsuariosService.excluir.and.returnValue(of({}));
-    mockUsuariosService.excluirDefinitivo.and.returnValue(of({}));
-    mockUsuariosService.restaurar.and.returnValue(of({}));
+    vi.clearAllMocks();
+    mockUsuariosService.listar.mockReturnValue(of(mockResponse as any));
+    mockUsuariosService.excluir.mockReturnValue(of({}));
+    mockUsuariosService.excluirDefinitivo.mockReturnValue(of({}));
+    mockUsuariosService.restaurar.mockReturnValue(of({}));
 
     await TestBed.configureTestingModule({
       imports: [UsuariosLista],
       providers: [
-        { provide: UsuariosService, useValue: mockUsuariosService },
-        { provide: ConfirmDialogService, useValue: mockConfirmDialog },
-        { provide: ToastService, useValue: mockToastService },
-        { provide: LiveAnnouncer, useValue: mockLiveAnnouncer }
-      ]
+        { provide: UsuariosService,       useValue: mockUsuariosService },
+        { provide: ConfirmDialogService,  useValue: mockConfirmDialog   },
+        { provide: ToastService,          useValue: mockToastService    },
+        { provide: LiveAnnouncer,         useValue: mockLiveAnnouncer   },
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UsuariosLista);
+    fixture   = TestBed.createComponent(UsuariosLista);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -76,7 +80,7 @@ describe('UsuariosLista', () => {
   });
 
   it('falha graciosa da API exibe mensagem de erro e inibe o loading state', () => {
-    mockUsuariosService.listar.and.returnValue(throwError(() => new Error('API Timeout')));
+    mockUsuariosService.listar.mockReturnValue(throwError(() => new Error('API Timeout')));
     component.carregar();
     expect(component.isLoading()).toBe(false);
     expect(component.erro()).toBe('Erro ao carregar usuários.');
@@ -90,25 +94,25 @@ describe('UsuariosLista', () => {
     expect(component.usuarioVisualizado()).toBeNull();
   });
 
-  it('teste seguro de exclusão (Safe Delete) - Inativar usuário ao confirmar prompt', fakeAsync(() => {
-    mockConfirmDialog.confirmar.and.resolveTo(true);
+  it('Safe Delete — inativar usuário ao confirmar prompt', fakeAsync(() => {
+    mockConfirmDialog.confirmar.mockResolvedValue(true);
     component.excluir(mockUsuario);
-    tick(); // Wait for prompt resolution
-    
+    tick();
+
     expect(mockUsuariosService.excluir).toHaveBeenCalledWith(mockUsuario.id);
     expect(mockToastService.sucesso).toHaveBeenCalled();
   }));
 
-  it('teste seguro de exclusão (Safe Delete) - Cancelamento', fakeAsync(() => {
-    mockConfirmDialog.confirmar.and.resolveTo(false);
+  it('Safe Delete — cancelamento não exclui', fakeAsync(() => {
+    mockConfirmDialog.confirmar.mockResolvedValue(false);
     component.excluir(mockUsuario);
     tick();
-    
+
     expect(mockUsuariosService.excluir).not.toHaveBeenCalled();
   }));
 
   it('exclusão definitiva engatilha cascata no backend', fakeAsync(() => {
-    mockConfirmDialog.confirmar.and.resolveTo(true);
+    mockConfirmDialog.confirmar.mockResolvedValue(true);
     component.excluirDefinitivamente(mockUsuario);
     tick();
 
@@ -116,8 +120,8 @@ describe('UsuariosLista', () => {
     expect(mockToastService.sucesso).toHaveBeenCalled();
   }));
 
-  it('restaurar dados do usuário e notificar toast', fakeAsync(() => {
-    mockConfirmDialog.confirmar.and.resolveTo(true);
+  it('restaurar conta notifica toast', fakeAsync(() => {
+    mockConfirmDialog.confirmar.mockResolvedValue(true);
     component.restaurarConta(mockUsuario);
     tick();
 
