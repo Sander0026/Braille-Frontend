@@ -10,7 +10,7 @@ export type CardVariant = 'elevated' | 'outline' | 'flat';
   template: `
     <!-- Semântica de Tag section obriga leitores de tela a isolarem o contexto e aria-label -->
     <section 
-      [attr.aria-label]="ariaLabel() || 'Cartão de Informação'"
+      [attr.aria-label]="ariaLabel() || null"
       [class]="cardClasses()">
       
       <!-- Slot Protegido para Injeção de Cabeçalhos -->
