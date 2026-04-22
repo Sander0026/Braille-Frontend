@@ -11,7 +11,7 @@ export type ButtonType = 'button' | 'submit';
     <button
       [type]="type()"
       [disabled]="disabled()"
-      [attr.aria-label]="ariaLabel() || label()"
+      [attr.aria-label]="ariaLabel() || label() || null"
       [class]="botaoClasses()"
     >
       <!-- Transclusão SRP -->
