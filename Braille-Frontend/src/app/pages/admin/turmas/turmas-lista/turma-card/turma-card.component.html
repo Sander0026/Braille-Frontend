@@ -1,0 +1,83 @@
+<article class="turma-card" [class.arquivada]="!turma.statusAtivo" [attr.aria-labelledby]="'tcard-title-' + turma.id">
+  <div class="tcard-top-border"></div>
+  <header class="tcard-header-new">
+    <h3 class="tcard-title-main" [id]="'tcard-title-' + turma.id">{{ turma.nome }}</h3>
+    <div class="tcard-badges">
+      @if (turma.statusAtivo) {
+        <span class="badge-status outline-success" aria-hidden="true">
+          <span class="material-symbols-rounded badge-ico" aria-hidden="true">check_circle</span> Ativa
+        </span>
+        <span class="sr-only">Status: Ativa.</span>
+      } @else {
+        <span class="badge-status outline-neutral" aria-hidden="true">
+          <span class="material-symbols-rounded badge-ico" aria-hidden="true">inventory_2</span> Arquivada
+        </span>
+        <span class="sr-only">Status: Arquivada.</span>
+      }
+      <span class="badge-status bg" [ngClass]="turma.status ? 'badge-' + turma.status.toLowerCase() : ''" [attr.aria-label]="'Situação geral: ' + turma.status">
+        {{ turma.status }}
+      </span>
+    </div>
+  </header>
+
+  <div class="tcard-body-new">
+    <div class="tcard-info">
+      <span class="material-symbols-rounded text-icon" aria-hidden="true">person</span>
+      <span class="truncated-text" [title]="turma.professor?.nome || 'N/A'">
+        <strong>Professor:</strong> {{ turma.professor?.nome || 'Não atribuído' }}
+      </span>
+    </div>
+    <div class="tcard-info schedule-info" [title]="formatarGradeHoraria(turma.gradeHoraria)">
+      <span class="material-symbols-rounded text-icon" aria-hidden="true">schedule</span>
+      <span class="truncated-text"><strong>Horários:</strong> {{ formatarGradeHoraria(turma.gradeHoraria) }}</span>
+    </div>
+    <div class="tcard-info">
+      <span class="material-symbols-rounded text-icon" aria-hidden="true">calendar_today</span>
+      <span class="truncated-text"><strong>Carga Horária Ofertada:</strong> {{ turma.cargaHoraria || 0 }}</span>
+    </div>
+    <div class="tcard-info">
+      <span class="material-symbols-rounded text-icon" aria-hidden="true">group</span>
+      <span class="truncated-text">
+        <strong>Alunos:</strong> 
+        {{ turma.matriculasOficina?.length || 0 }}/{{ turma.capacidadeMaxima || 0 }} 
+        <span class="sr-only">({{ turma.matriculasOficina?.length || 0 }} matriculados de {{ turma.capacidadeMaxima || 0 }} vagas totais)</span>
+        <span aria-hidden="true">({{ turma.matriculasOficina?.length || 0 }} de {{ turma.capacidadeMaxima || 0 }} vagas)</span>
+      </span>
+    </div>
+  </div>
+
+  <footer class="tcard-footer-new">
+    <div class="footer-left">
+      <button class="btn-icon-square" [title]="'Gestão de Alunos da oficina ' + turma.nome" [attr.aria-label]="'Gerenciar alunos da oficina ' + turma.nome" (click)="abrirModalAlunos.emit(turma)">
+        <span class="material-symbols-rounded" aria-hidden="true">group</span>
+      </button>
+      <div class="inline-select-wrapper">
+        <label [for]="'status-select-' + turma.id" class="sr-only">Mudar status da oficina {{ turma.nome }}</label>
+        <select [id]="'status-select-' + turma.id" class="form-input status-dropdown" [ngModel]="turma.status" (ngModelChange)="onStatusChange($event)" [disabled]="isProfessor || !turma.statusAtivo">
+          <option value="PREVISTA">Prevista</option>
+          <option value="ANDAMENTO">Em Andamento</option>
+          <option value="CONCLUIDA">Concluída</option>
+          <option value="CANCELADA">Cancelada</option>
+        </select>
+      </div>
+    </div>
+
+    @if (!isProfessor) {
+      <div class="footer-right">
+        @if (turma.statusAtivo) {
+          <button class="btn btn-outline btn-sm shadow-sm" [attr.aria-label]="'Editar oficina ' + turma.nome" (click)="abrirModalEditar.emit(turma)">Editar</button>
+          <button class="btn btn-sm btn-arquivar shadow-sm" [attr.aria-label]="'Arquivar oficina ' + turma.nome" (click)="alternarArquivamento.emit({id: turma.id, arquivada: false, event: $event})">
+            Arquivar
+          </button>
+        } @else {
+          <button class="btn btn-sm shadow-sm" style="background:#16a34a; color:#fff; border-color:#16a34a; font-weight:600;" [attr.aria-label]="'Restaurar oficina ' + turma.nome" (click)="alternarArquivamento.emit({id: turma.id, arquivada: true, event: $event})">
+            Restaurar
+          </button>
+          <button class="btn btn-sm shadow-sm" style="background:#ef4444; color:#fff; border-color:#ef4444; font-weight:600;" [attr.aria-label]="'Remover oficina ' + turma.nome + ' da lista definitivamente'" (click)="removerDaLista.emit({id: turma.id, event: $event})">
+            Remover da Lista
+          </button>
+        }
+      </div>
+    }
+  </footer>
+</article>

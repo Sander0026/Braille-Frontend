@@ -16,7 +16,8 @@
 
     <div class="header-search-bar" style="display:flex; gap:1rem; align-items:center; width: 100%; flex-wrap:wrap;">
       <div class="search-input-wrapper" style="flex:1; min-width: 250px;">
-        <input type="text" class="form-input search-input" style="width:100%; border-radius:0.5rem; padding:0.6rem 1rem;" placeholder="Buscar oficina por nome..." [ngModel]="termoBusca()" (ngModelChange)="termoBusca.set($event)">
+        <label for="buscar-oficinas" class="sr-only">Buscar oficina por nome</label>
+        <input id="buscar-oficinas" type="text" class="form-input search-input" style="width:100%; border-radius:0.5rem; padding:0.6rem 1rem;" placeholder="Buscar oficina por nome..." [ngModel]="termoBusca()" (ngModelChange)="termoBusca.set($event)">
       </div>
       
       <button class="btn btn-icon-text shadow-sm hover-warning" style="border: 1px solid #eab308; color: #b45309; background:#fff; padding:0.5rem 1.25rem; border-radius:0.5rem; display:flex; align-items:center; gap:0.5rem; font-weight:600;" (click)="abrirFiltros()"
@@ -31,25 +32,25 @@
   </header>
 
   <div class="tabs-container" role="tablist" aria-label="Status das Oficinas">
-    <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ATIVO'"
+    <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ATIVO'" [id]="'tab-ativo'" [attr.aria-controls]="'tabpanel-ativo'"
       [class.active]="abaAtiva() === 'ATIVO'" (click)="mudarAba('ATIVO')">
       {{ titleAtivo() }}
     </button>
-    <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ARQUIVADO'"
+    <button class="tab-btn" role="tab" [attr.aria-selected]="abaAtiva() === 'ARQUIVADO'" [id]="'tab-arquivado'" [attr.aria-controls]="'tabpanel-arquivado'"
       [class.active]="abaAtiva() === 'ARQUIVADO'" (click)="mudarAba('ARQUIVADO')">
       {{ titleArquivado() }}
     </button>
   </div>
 
-  <section class="content-section" aria-live="polite" aria-label="Lista de Oficinas">
+  <section class="content-section" aria-label="Lista de Oficinas" [id]="abaAtiva() === 'ATIVO' ? 'tabpanel-ativo' : 'tabpanel-arquivado'" role="tabpanel">
     
     @if (carregando()) {
-      <div class="empty-state" aria-busy="true">
+      <div class="empty-state" aria-busy="true" role="status" aria-live="polite">
         <div class="spinner"></div>
         <p>Buscando turmas...</p>
       </div>
     } @else if (turmasFiltradas().length === 0) {
-      <div class="empty-state">
+      <div class="empty-state" role="status" aria-live="polite">
         <span class="material-symbols-rounded empty-icon" aria-hidden="true">folder_off</span>
         <h3 class="empty-title">Nenhuma {{ abaAtiva() === 'ARQUIVADO' ? 'arquivada' : 'turma' }} encontrada.</h3>
         <p class="empty-desc">
@@ -63,83 +64,15 @@
     } @else {
       <div class="turmas-grid">
         @for (turma of turmasFiltradas(); track turma.id) {
-          <article class="turma-card" [class.arquivada]="!turma.statusAtivo" aria-label="Detalhes da Oficina">
-            <div class="tcard-top-border"></div>
-            <header class="tcard-header-new">
-              <h3 class="tcard-title-main">{{ turma.nome }}</h3>
-              <div class="tcard-badges">
-                @if (turma.statusAtivo) {
-                  <span class="badge-status outline-success">
-                    <span class="material-symbols-rounded badge-ico">check_circle</span> Ativa
-                  </span>
-                } @else {
-                  <span class="badge-status outline-neutral">
-                    <span class="material-symbols-rounded badge-ico">inventory_2</span> Arquivada
-                  </span>
-                }
-                <span class="badge-status bg" [ngClass]="turma.status ? 'badge-' + turma.status.toLowerCase() : ''">{{ turma.status }}</span>
-              </div>
-            </header>
-
-            <div class="tcard-body-new">
-              <div class="tcard-info">
-                <span class="material-symbols-rounded text-icon">person</span>
-                <span class="truncated-text" [title]="turma.professor?.nome || 'N/A'">
-                  <strong>Professor:</strong> {{ turma.professor?.nome || 'Não atribuído' }}
-                </span>
-              </div>
-              <div class="tcard-info schedule-info" [title]="formatarGradeHoraria(turma.gradeHoraria)">
-                <span class="material-symbols-rounded text-icon">schedule</span>
-                <span class="truncated-text"><strong>Horários:</strong> {{ formatarGradeHoraria(turma.gradeHoraria) }}</span>
-              </div>
-              <div class="tcard-info">
-                <span class="material-symbols-rounded text-icon">calendar_today</span>
-                <span class="truncated-text"><strong>Carga Horária Ofertada:</strong> {{ turma.cargaHoraria || 0 }}</span>
-              </div>
-              <div class="tcard-info">
-                <span class="material-symbols-rounded text-icon">group</span>
-                <span class="truncated-text">
-                  <strong>Alunos:</strong> 
-                  {{ turma.matriculasOficina?.length || 0 }}/{{ turma.capacidadeMaxima || 0 }} 
-                  ({{ turma.matriculasOficina?.length || 0 }} de {{ turma.capacidadeMaxima || 0 }} vagas)
-                </span>
-              </div>
-            </div>
-
-            <footer class="tcard-footer-new">
-              <div class="footer-left">
-                <button class="btn-icon-square" title="Gestão de Alunos" aria-label="Gestão de Alunos" (click)="abrirModalAlunos(turma)">
-                  <span class="material-symbols-rounded">group</span>
-                </button>
-                <div class="inline-select-wrapper">
-                  <select class="form-input status-dropdown" [ngModel]="turma.status" (ngModelChange)="atualizarStatusRapido(turma, $event)" [disabled]="isProfessor() || !turma.statusAtivo">
-                    <option value="PREVISTA">Prevista</option>
-                    <option value="ANDAMENTO">Em Andamento</option>
-                    <option value="CONCLUIDA">Concluída</option>
-                    <option value="CANCELADA">Cancelada</option>
-                  </select>
-                </div>
-              </div>
-
-              @if (!isProfessor()) {
-                <div class="footer-right">
-                  @if (turma.statusAtivo) {
-                    <button class="btn btn-outline btn-sm shadow-sm" (click)="abrirModalEditar(turma)">Editar</button>
-                    <button class="btn btn-sm btn-arquivar shadow-sm" (click)="alternarArquivamento(turma.id, false, $event)">
-                      Arquivar
-                    </button>
-                  } @else {
-                    <button class="btn btn-sm shadow-sm" style="background:#16a34a; color:#fff; border-color:#16a34a; font-weight:600;" (click)="alternarArquivamento(turma.id, true, $event)">
-                      Restaurar
-                    </button>
-                    <button class="btn btn-sm shadow-sm" style="background:#ef4444; color:#fff; border-color:#ef4444; font-weight:600;" (click)="removerDaLista(turma.id, $event)">
-                      Remover da Lista
-                    </button>
-                  }
-                </div>
-              }
-            </footer>
-          </article>
+          <app-turma-card
+            [turma]="turma"
+            [isProfessor]="isProfessor()"
+            (abrirModalAlunos)="abrirModalAlunos($event)"
+            (atualizarStatusRapido)="atualizarStatusRapido($event.turma, $event.status)"
+            (abrirModalEditar)="abrirModalEditar($event)"
+            (alternarArquivamento)="alternarArquivamento($event.id, $event.arquivada, $event.event)"
+            (removerDaLista)="removerDaLista($event.id, $event.event)">
+          </app-turma-card>
         }
       </div>
     }
