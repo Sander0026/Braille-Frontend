@@ -1,21 +1,42 @@
 @if (aberto) {
-<div class="filter-overlay" (click)="fecharDrawer()" (keydown.enter)="fecharDrawer()" tabindex="-1" aria-hidden="true" style="animation: fadeIn 0.2s ease;"></div>
+<!-- Overlay decorativo: aria-hidden oculta do SR, click/enter fecha (WCAG 2.1.1) -->
+<div class="filter-overlay" (click)="fecharDrawer()" tabindex="-1" aria-hidden="true"
+  style="animation: fadeIn 0.2s ease;"></div>
 }
 
-<dialog open id="turmas-filter-drawer" class="filter-drawer" [class.filter-drawer--open]="aberto"
-  aria-label="Filtros avançados" [formGroup]="filterForm">
+<!--
+  <dialog> nativo já provê role="dialog" e aria-modal implícito em browsers modernos.
+  Adicionamos aria-modal="true" explicitamente para compatibilidade com SRs legados (WCAG 4.1.2).
+  cdkTrapFocus garante que Tab/Shift+Tab não escapam do drawer (WCAG 2.1.2).
+-->
+<dialog
+  open
+  id="turmas-filter-drawer"
+  class="filter-drawer"
+  [class.filter-drawer--open]="aberto"
+  aria-modal="true"
+  aria-label="Filtros avançados de turmas"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="aberto"
+  [formGroup]="filterForm">
 
   <div class="filter-drawer__header">
     <h2 class="filter-drawer__title">
-      <span class="material-symbols-rounded">tune</span>
+      <!-- Ícone decorativo: aria-hidden evita leitura literal de "tune" pelo SR (WCAG 1.1.1) -->
+      <span class="material-symbols-rounded" aria-hidden="true">tune</span>
       Filtros Avançados
     </h2>
-    <button type="button" class="btn btn-icon btn-ghost" (click)="fecharDrawer()" aria-label="Fechar filtros">✕</button>
+    <button
+      type="button"
+      class="btn btn-icon btn-ghost"
+      (click)="fecharDrawer()"
+      aria-label="Fechar painel de filtros avançados">✕</button>
   </div>
 
   <div class="filter-drawer__body">
-    <section class="filter-section">
-      <h3 class="filter-section__title">Situação / Ciclo</h3>
+    <!-- aria-labelledby associa a section ao h3 (WCAG 1.3.1) -->
+    <section class="filter-section" aria-labelledby="filtro-situacao-titulo">
+      <h3 id="filtro-situacao-titulo" class="filter-section__title">Situação / Ciclo</h3>
       <div class="filter-field">
         <label class="form-label" for="f-status">Fase da Execução</label>
         <select id="f-status" class="form-input" formControlName="status">
@@ -28,8 +49,8 @@
       </div>
     </section>
 
-    <section class="filter-section">
-      <h3 class="filter-section__title">Responsabilidade</h3>
+    <section class="filter-section" aria-labelledby="filtro-responsabilidade-titulo">
+      <h3 id="filtro-responsabilidade-titulo" class="filter-section__title">Responsabilidade</h3>
       <div class="filter-field">
         <label class="form-label" for="f-prof">Professor / Orientador</label>
         <select id="f-prof" class="form-input" formControlName="professorId">
@@ -43,7 +64,10 @@
   </div>
 
   <div class="filter-drawer__footer">
-    <button type="button" class="btn btn-secondary" (click)="limparFiltros()">Limpar</button>
-    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">Aplicar Filtros</button>
+    <!-- Texto visível é suficientemente descritivo (WCAG 2.5.3) -->
+    <button type="button" class="btn btn-secondary" (click)="limparFiltros()"
+      aria-label="Limpar todos os filtros aplicados">Limpar</button>
+    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()"
+      aria-label="Aplicar filtros selecionados e fechar painel">Aplicar Filtros</button>
   </div>
 </dialog>

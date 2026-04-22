@@ -1,9 +1,9 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, signal, effect, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, signal, OnChanges, SimpleChanges } from '@angular/core';
+import { CommonModule }       from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Turma, CreateTurmaDto } from '../../../../../core/services/turmas.service';
-import { Usuario } from '../../../../../core/services/usuarios.service';
+import { Usuario }            from '../../../../../core/services/usuarios.service';
 
 const DIAS: { valor: string; label: string }[] = [
   { valor: 'SEG', label: 'Segunda' },
@@ -47,7 +47,14 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
 
   gradeOriginalStr = '';
 
-  constructor(private fb: FormBuilder) {}
+  /** Elemento que abriu o modal — foco retorna a ele ao fechar (WCAG 2.4.3) */
+  private lastFocusBeforeModal: HTMLElement | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    /** Anuncia turno adicionado/removido para screen readers (WCAG 4.1.3) */
+    private liveAnnouncer: LiveAnnouncer,
+  ) {}
 
   ngOnInit(): void {
     this.iniciarFormulario();
@@ -55,7 +62,9 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['aberto'] && changes['aberto'].currentValue) {
-        // Ao abrir, inicializa ou patching
+        // WCAG 2.4.3: salva elemento focado antes de abrir o modal
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+
         this.iniciarFormulario();
         
         if (this.turmaEdicao) {
@@ -138,17 +147,23 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
     }
 
     this.gradeHoraria.set([...grade, { dia, horaInicio: hIn, horaFim: hFm }]);
-    
+
+    // WCAG 4.1.3: anuncia turno adicionado ao screen reader
+    this.liveAnnouncer.announce(`Turno de ${this.labelDia(dia)} adicionado: ${hIn} às ${hFm}.`);
+
     // Limpar os campos apos insercao
     this.diaNovoTurno.set('');
     this.horaInicioNovoTurno.set('');
     this.horaFimNovoTurno.set('');
   }
 
-  removerTurno(index: number) {
-    const arr = [...this.gradeHoraria()];
+  removerTurno(index: number): void {
+    const arr  = [...this.gradeHoraria()];
+    const turno = arr[index];
     arr.splice(index, 1);
     this.gradeHoraria.set(arr);
+    // WCAG 4.1.3: anuncia remoção ao screen reader
+    this.liveAnnouncer.announce(`Turno de ${this.labelDia(turno.dia)} removido.`);
   }
 
   hmParaMinutos(hm: string): number {
@@ -168,11 +183,13 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
     return (this.turmaForm.dirty || gradeDirty) && !this.salvando;
   }
 
-  aoFechar() {
+  aoFechar(): void {
     if (this.isFormDirty()) {
       this.tentarFecharSujo.emit(true);
     } else {
       this.fechar.emit();
+      // WCAG 2.4.3: restaura foco ao elemento que abriu o modal
+      setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
     }
   }
 
