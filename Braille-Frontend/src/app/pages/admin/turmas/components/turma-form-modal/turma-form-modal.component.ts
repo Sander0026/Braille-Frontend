@@ -162,9 +162,14 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
-  aoFechar() {
+  isFormDirty(): boolean {
+    if (!this.turmaForm) return false;
     const gradeDirty = this.gradeOriginalStr !== JSON.stringify(this.gradeHoraria());
-    if ((this.turmaForm.dirty || gradeDirty) && !this.salvando) {
+    return (this.turmaForm.dirty || gradeDirty) && !this.salvando;
+  }
+
+  aoFechar() {
+    if (this.isFormDirty()) {
       this.tentarFecharSujo.emit(true);
     } else {
       this.fechar.emit();
