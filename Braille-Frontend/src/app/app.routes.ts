@@ -73,19 +73,12 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
-      // Turmas
+      // Turmas — criação e edição gerenciadas pelo TurmaFormModal dentro da TurmasLista
       {
         path: 'turmas',
         loadComponent: () => import('./pages/admin/turmas/turmas-lista/turmas-lista').then(m => m.TurmasLista),
         title: 'Turmas — ILBES',
         canDeactivate: [descarteGuard]
-      },
-      {
-        path: 'turmas/cadastro',
-        loadComponent: () => import('./pages/admin/turmas/cadastro-turma-wizard/cadastro-turma-wizard').then(m => m.CadastroTurmaWizard),
-        title: 'Nova Oficina — ILBES',
-        canDeactivate: [descarteGuard],
-        data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
       // Frequências

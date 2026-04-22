@@ -1,9 +1,21 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, signal, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule }       from '@angular/common';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  signal,
+  OnChanges,
+  SimpleChanges,
+  inject
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Turma, CreateTurmaDto } from '../../../../../core/services/turmas.service';
-import { Usuario }            from '../../../../../core/services/usuarios.service';
+import { Usuario } from '../../../../../core/services/usuarios.service';
+import { ModelosCertificadosService, ModeloCertificado } from '../../../../../core/services/modelos-certificados.service';
 
 const DIAS: { valor: string; label: string }[] = [
   { valor: 'SEG', label: 'Segunda' },
@@ -14,6 +26,16 @@ const DIAS: { valor: string; label: string }[] = [
   { valor: 'SAB', label: 'Sábado' },
   { valor: 'DOM', label: 'Domingo' },
 ];
+
+/** Converte data ISO (ou string de data) para formato YYYY-MM-DD esperado pelo input[type=date] */
+function isoParaInputDate(valor?: string | null): string {
+  if (!valor) return '';
+  try {
+    return valor.substring(0, 10); // 'YYYY-MM-DD'
+  } catch {
+    return '';
+  }
+}
 
 @Component({
   selector: 'app-turma-form-modal',
@@ -32,12 +54,20 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
 
   @Output() fechar = new EventEmitter<void>();
   @Output() salvar = new EventEmitter<CreateTurmaDto>();
-  @Output() tentarFecharSujo = new EventEmitter<boolean>(); // Emite 'true' se estiver sujo
+  @Output() tentarFecharSujo = new EventEmitter<boolean>();
+
+  private readonly fb = inject(FormBuilder);
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
+  private readonly modelosService = inject(ModelosCertificadosService);
 
   turmaForm!: FormGroup;
   modoEdicao = false;
-  
-  // Grade
+
+  // Modelos de Certificado
+  readonly modelos = signal<ModeloCertificado[]>([]);
+  readonly carregandoModelos = signal(false);
+
+  // Grade Horária
   dias = DIAS;
   gradeHoraria = signal<{ dia: string; horaInicio: string; horaFim: string }[]>([]);
   diaNovoTurno = signal<string>('');
@@ -50,48 +80,46 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
   /** Elemento que abriu o modal — foco retorna a ele ao fechar (WCAG 2.4.3) */
   private lastFocusBeforeModal: HTMLElement | null = null;
 
-  constructor(
-    private fb: FormBuilder,
-    /** Anuncia turno adicionado/removido para screen readers (WCAG 4.1.3) */
-    private liveAnnouncer: LiveAnnouncer,
-  ) {}
-
   ngOnInit(): void {
     this.iniciarFormulario();
+    this.carregarModelos();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['aberto'] && changes['aberto'].currentValue) {
-        // WCAG 2.4.3: salva elemento focado antes de abrir o modal
-        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+      // WCAG 2.4.3: salva elemento focado antes de abrir o modal
+      this.lastFocusBeforeModal = document.activeElement as HTMLElement;
 
-        this.iniciarFormulario();
-        
-        if (this.turmaEdicao) {
-            this.modoEdicao = true;
-            this.turmaForm.patchValue({
-                nome: this.turmaEdicao.nome,
-                descricao: this.turmaEdicao.descricao ?? '',
-                capacidadeMaxima: this.turmaEdicao.capacidadeMaxima ?? null,
-                professorId: this.turmaEdicao.professor?.id ?? '',
-            });
+      this.iniciarFormulario();
 
-            if (this.turmaEdicao.gradeHoraria && this.turmaEdicao.gradeHoraria.length > 0) {
-                this.gradeHoraria.set(this.turmaEdicao.gradeHoraria.map(turno => ({
-                    dia: turno.dia,
-                    horaInicio: this.minutosParaHmTemplate(turno.horaInicio),
-                    horaFim: this.minutosParaHmTemplate(turno.horaFim)
-                })));
-            } else {
-                this.gradeHoraria.set([]);
-            }
+      if (this.turmaEdicao) {
+        this.modoEdicao = true;
+        this.turmaForm.patchValue({
+          nome: this.turmaEdicao.nome,
+          descricao: this.turmaEdicao.descricao ?? '',
+          capacidadeMaxima: this.turmaEdicao.capacidadeMaxima ?? null,
+          professorId: this.turmaEdicao.professor?.id ?? '',
+          dataInicio: isoParaInputDate(this.turmaEdicao.dataInicio),
+          dataFim: isoParaInputDate(this.turmaEdicao.dataFim),
+          modeloCertificadoId: (this.turmaEdicao as any).modeloCertificadoId ?? '',
+        });
+
+        if (this.turmaEdicao.gradeHoraria && this.turmaEdicao.gradeHoraria.length > 0) {
+          this.gradeHoraria.set(this.turmaEdicao.gradeHoraria.map(turno => ({
+            dia: turno.dia,
+            horaInicio: this.minutosParaHmTemplate(turno.horaInicio),
+            horaFim: this.minutosParaHmTemplate(turno.horaFim)
+          })));
         } else {
-            this.modoEdicao = false;
-            this.gradeHoraria.set([]);
+          this.gradeHoraria.set([]);
         }
+      } else {
+        this.modoEdicao = false;
+        this.gradeHoraria.set([]);
+      }
 
-        this.gradeOriginalStr = JSON.stringify(this.gradeHoraria());
-        setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
+      this.gradeOriginalStr = JSON.stringify(this.gradeHoraria());
+      setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
     }
   }
 
@@ -102,6 +130,11 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
         descricao: [''],
         capacidadeMaxima: [null],
         professorId: ['', Validators.required],
+        // Campos de período — usados no cálculo de carga horária no backend
+        dataInicio: [''],
+        dataFim: [''],
+        // Template de certificado (opcional)
+        modeloCertificadoId: [''],
       });
     } else {
       this.turmaForm.reset();
@@ -110,6 +143,20 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
     this.diaNovoTurno.set('');
     this.horaInicioNovoTurno.set('');
     this.horaFimNovoTurno.set('');
+  }
+
+  carregarModelos(): void {
+    this.carregandoModelos.set(true);
+    this.modelosService.listar().subscribe({
+      next: (lista) => {
+        // Exibe apenas modelos do tipo ACADEMICO — mesma regra do Wizard original
+        this.modelos.set(lista.filter(m => m.tipo === 'ACADEMICO'));
+        this.carregandoModelos.set(false);
+      },
+      error: () => {
+        this.carregandoModelos.set(false);
+      }
+    });
   }
 
   isCampoInvalido(campo: string): boolean {
@@ -151,14 +198,13 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
     // WCAG 4.1.3: anuncia turno adicionado ao screen reader
     this.liveAnnouncer.announce(`Turno de ${this.labelDia(dia)} adicionado: ${hIn} às ${hFm}.`);
 
-    // Limpar os campos apos insercao
     this.diaNovoTurno.set('');
     this.horaInicioNovoTurno.set('');
     this.horaFimNovoTurno.set('');
   }
 
   removerTurno(index: number): void {
-    const arr  = [...this.gradeHoraria()];
+    const arr = [...this.gradeHoraria()];
     const turno = arr[index];
     arr.splice(index, 1);
     this.gradeHoraria.set(arr);
@@ -196,14 +242,28 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
   submeter() {
     if (this.turmaForm.invalid || this.salvando) {
       this.turmaForm.markAllAsTouched();
+
+      // WCAG 2.4.3: foca o primeiro campo inválido
+      setTimeout(() => {
+        const firstInvalid = document.querySelector(
+          '.modal .form-input.is-invalid, .modal input[aria-invalid="true"], .modal select[aria-invalid="true"]'
+        ) as HTMLElement | null;
+        firstInvalid?.focus();
+      }, 50);
       return;
     }
 
+    const v = this.turmaForm.value;
+
     const payload: CreateTurmaDto = {
-      nome: this.turmaForm.value.nome,
-      descricao: this.turmaForm.value.descricao,
-      capacidadeMaxima: this.turmaForm.value.capacidadeMaxima || undefined,
-      professorId: this.turmaForm.value.professorId,
+      nome: v.nome,
+      descricao: v.descricao || undefined,
+      capacidadeMaxima: v.capacidadeMaxima || undefined,
+      professorId: v.professorId,
+      // Datas do período — o backend calcula cargaHoraria a partir delas e da grade
+      dataInicio: v.dataInicio ? new Date(v.dataInicio).toISOString() : undefined,
+      dataFim: v.dataFim ? new Date(v.dataFim).toISOString() : undefined,
+      modeloCertificadoId: v.modeloCertificadoId || undefined,
       gradeHoraria: this.gradeHoraria().map(h => ({
         dia: h.dia as any,
         horaInicio: this.hmParaMinutos(h.horaInicio),
