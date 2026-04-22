@@ -25,7 +25,7 @@
                 </button>
             </div>
 
-            <div class="flex-row align-items-end pt-1" style="gap: 1rem;">
+            <div class="flex-row align-items-end pt-1" style="gap: 2rem;">
                 <div class="form-group flex-1 mb-0 pb-2">
                     <label class="form-label mb-1" [for]="'of-icone-' + i">Ícone Corporativo</label>
                     <select [id]="'of-icone-' + i" class="form-input w-100" formControlName="icon" aria-label="Selecione o Ícone da oficina" style="padding: 10px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;">
@@ -84,7 +84,7 @@
             <quill-editor formControlName="texto" [styles]="{height: '100px', marginBottom: '1rem'}"
                 placeholder="O que o aluno disse..." aria-label="Texto do depoimento"></quill-editor>
             
-            <div class="flex-row" style="gap: 1rem;">
+            <div class="flex-row" style="gap: 2rem;">
                 <div class="form-group flex-3 mb-0">
                     <label class="sr-only" [for]="'dp-nome-' + i">Nome do Depoente</label>
                     <input type="text" [id]="'dp-nome-' + i" class="form-input" formControlName="nome" placeholder="Nome Completo"
