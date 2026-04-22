@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, ElementRef, ViewChild, inject, DestroyRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
@@ -12,7 +13,7 @@ import { CertificadoPreviewComponent, DragEndEvent } from '../components/certifi
 @Component({
   selector: 'app-modelos-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule, CertificadoPreviewComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule, FormsModule, CertificadoPreviewComponent, A11yModule],
   templateUrl: './modelos-form.html',
   styleUrl: './modelos-form.scss' 
 })
@@ -49,6 +50,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
 
   constructor() {
     super();
@@ -252,11 +254,13 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
         this.formModelo.get('nome')?.markAsTouched();
         this.formModelo.get('tipo')?.markAsTouched();
         this.toast.aviso('Por favor, preencha o nome e a categoria antes de prosseguir.');
+        this.liveAnnouncer.announce('Erro na etapa atual. Preencha os campos obrigatórios antes de prosseguir.');
         return;
       }
     }
     if (this.passoAtual() < 4) {
       this.passoAtual.update(p => p + 1);
+      this.liveAnnouncer.announce(`Avançou para o passo ${this.passoAtual()}.`);
       window.scrollTo(0, 0);
     }
   }
@@ -264,6 +268,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   passoAnterior() {
     if (this.passoAtual() > 1) {
       this.passoAtual.update(p => p - 1);
+      this.liveAnnouncer.announce(`Voltou para o passo ${this.passoAtual()}.`);
       window.scrollTo(0, 0);
     }
   }

@@ -38,8 +38,9 @@
               <input type="text" id="input-nome" formControlName="nome" class="form-input"
                 placeholder="Ex: Certificado Braille Padrão 2024"
                 [class.is-invalid]="isFieldInvalid('nome')"
-                [attr.aria-invalid]="isFieldInvalid('nome')">
-              @if (isFieldInvalid('nome')) { <span class="error-text" role="alert">Obrigatório. Mínimo 3 caracteres.</span> }
+                [attr.aria-invalid]="isFieldInvalid('nome') ? 'true' : null"
+                [attr.aria-describedby]="isFieldInvalid('nome') ? 'err-nome' : null">
+              @if (isFieldInvalid('nome')) { <span id="err-nome" class="error-text" role="alert">Obrigatório. Mínimo 3 caracteres.</span> }
             </div>
           </div>
           <div class="col-lg-4">
@@ -159,8 +160,10 @@
           <textarea #textoTemplateInput id="textoTemplate" formControlName="textoTemplate" class="form-textarea fixed-font" rows="12"
                   style="font-size: 1.05rem; line-height: 1.8; border-radius: 8px; width: 100%;"
                   [placeholder]="'Ex:\nO Instituto Luiz Braille certifica que ' + '{' + '{ALUNO}' + '}' + ' concluiu com êxito...'"
-                  [class.is-invalid]="isFieldInvalid('textoTemplate')"></textarea>
-          @if (isFieldInvalid('textoTemplate')) { <span class="error-text" role="alert">O texto deve ter pelo menos 20 caracteres.</span> }
+                  [class.is-invalid]="isFieldInvalid('textoTemplate')"
+                  [attr.aria-invalid]="isFieldInvalid('textoTemplate') ? 'true' : null"
+                  [attr.aria-describedby]="isFieldInvalid('textoTemplate') ? 'err-texto' : null"></textarea>
+          @if (isFieldInvalid('textoTemplate')) { <span id="err-texto" class="error-text" role="alert">O texto deve ter pelo menos 20 caracteres.</span> }
         </div>
         <p style="font-size:0.8rem; color:#94a3b8; margin-top: 0.5rem;" aria-live="polite">
           Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
@@ -216,18 +219,22 @@
                     <label style="font-size:0.7rem; font-weight:600; color:#64748b;">ALINHAMENTO</label>
                     <div style="display:flex; gap:0.3rem; margin-top:0.25rem;">
                       <button type="button" aria-label="Alinhar à esquerda" (click)="setTextAlign('left')"
+                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'left'"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'left' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'left' ? '#fff' : '#374151'"
                               style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Esquerda">←</button>
                       <button type="button" aria-label="Alinhar ao centro" (click)="setTextAlign('center')"
+                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'center'"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'center' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'center' ? '#fff' : '#374151'"
                               style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Centro">≡</button>
                       <button type="button" aria-label="Alinhar à direita" (click)="setTextAlign('right')"
+                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'right'"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'right' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'right' ? '#fff' : '#374151'"
                               style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Direita">→</button>
                       <button type="button" aria-label="Texto justificado" (click)="setTextAlign('justify')"
+                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'justify'"
                               [style.background]="layoutConfig.textoPronto.textAlign === 'justify' ? '#3b82f6' : '#f1f5f9'"
                               [style.color]="layoutConfig.textoPronto.textAlign === 'justify' ? '#fff' : '#374151'"
                               style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Justificado">⊟</button>
