@@ -36,7 +36,7 @@
                 <li>
                     <button type="button" class="chip" [class.active]="categoriaSelecionada() === cat.valor"
                         (click)="filtrarPorCategoria(cat.valor)"
-                        [attr.aria-pressed]="categoriaSelecionada() === cat.valor">
+                        [attr.aria-pressed]="categoriaSelecionada() === cat.valor ? 'true' : 'false'">
                         {{ cat.label }}
                     </button>
                 </li>

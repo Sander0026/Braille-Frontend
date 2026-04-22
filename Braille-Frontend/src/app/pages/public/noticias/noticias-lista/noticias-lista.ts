@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 import { CloudinaryPipe } from '../../../../core/pipes/cloudinary.pipe';
@@ -37,6 +38,7 @@ export class NoticiasLista implements OnInit {
   // ── Infraestrutura de DI (campo-level = injection context válido) ────────────
   private readonly comunicadosService = inject(ComunicadosService);
   private readonly destroyRef          = inject(DestroyRef);
+  private readonly liveAnnouncer       = inject(LiveAnnouncer);
 
   // ── Estado reativo ───────────────────────────────────────────────────────────
   comunicados          = signal<Comunicado[]>([]);
@@ -95,10 +97,17 @@ export class NoticiasLista implements OnInit {
           this.totalItems.set(res.total      ?? items.length);
           this.temMais.set(this.paginaAtual() < (res.totalPages ?? 1));
           this.carregando.set(false);
+
+          if (reset) {
+            this.liveAnnouncer.announce(`${this.totalItems()} notícias encontradas.`, 'polite');
+          } else {
+            this.liveAnnouncer.announce(`Mais comunicados carregados. Total visível: ${this.comunicados().length}.`, 'polite');
+          }
         },
         error: () => {
           // Silencia o erro de rede para não travar o UI público (DevSecOps: sem stack-trace exposto)
           this.carregando.set(false);
+          this.liveAnnouncer.announce('Erro ao carregar os comunicados.', 'assertive');
         },
       });
   }
@@ -106,10 +115,12 @@ export class NoticiasLista implements OnInit {
   filtrarPorCategoria(cat: string | null): void {
     if (this.categoriaSelecionada() === cat) return;
     this.categoriaSelecionada.set(cat);
+    this.liveAnnouncer.announce('Aplicando filtro de categoria...', 'polite');
     this.carregarComunicados(true);
   }
 
   executarBuscar(): void {
+    this.liveAnnouncer.announce('Buscando comunicados...', 'polite');
     this.carregarComunicados(true);
   }
 
