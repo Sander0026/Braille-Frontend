@@ -99,32 +99,36 @@
 @if (contatoSelecionado() !== null) {
 <div class="modal-backdrop" (click)="fecharMensagem()" (keydown.escape)="fecharMensagem()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <dialog class="modal" open tabindex="-1" role="dialog" aria-modal="true" [attr.aria-label]="'Lendo Mensagem de ' + contatoSelecionado()?.nome" (click)="$event.stopPropagation()">
-        <div class="modal-header d-flex justify-content-between">
-            <div class="d-flex flex-column">
-                <h2 style="margin: 0;">{{ contatoSelecionado()?.nome }}</h2>
-                <div class="small-text-hint mt-1" style="color:#737373;">
-                    <span>{{ contatoSelecionado()?.telefone || 'Celular não informado' }}</span>
-                    <span> · </span>
-                    <time [attr.datetime]="contatoSelecionado()?.criadoEm">{{ formatarData(contatoSelecionado()?.criadoEm!) }}</time>
+        <div class="modal-header">
+            <div class="modal-header-content">
+                <h2>{{ contatoSelecionado()?.nome }}</h2>
+                <div class="remetente-info">
+                    <div class="remetente-contato-data">
+                        <span>{{ contatoSelecionado()?.telefone || 'Celular não informado' }}</span>
+                        <span aria-hidden="true"> · </span>
+                        <time [attr.datetime]="contatoSelecionado()?.criadoEm">{{ formatarData(contatoSelecionado()?.criadoEm!) }}</time>
+                    </div>
+                    <div class="remetente-email">
+                        <span>{{ contatoSelecionado()?.email || 'E-mail não informado' }}</span>
+                    </div>
                 </div>
             </div>
-            <button class="btn btn-icon btn-ghost align-self-start" (click)="fecharMensagem()" aria-label="Fechar janela de leitura">✕</button>
+            <button class="btn btn-icon btn-ghost btn-close" (click)="fecharMensagem()" aria-label="Fechar janela de leitura">✕</button>
         </div>
         <div class="modal-body">
             @if (contatoSelecionado()?.assunto) {
-            <p class="mensagem-assunto-full" style="font-weight: 600; font-size: 1.1rem; color: #111827;">
-                Assunto: {{ contatoSelecionado()?.assunto }}
-            </p>
+            <div class="mensagem-assunto-full">
+                <strong>Assunto:</strong> {{ contatoSelecionado()?.assunto }}
+            </div>
             }
-            <div class="mensagem-texto" style="color: #4b5563; line-height: 1.6; white-space: pre-wrap;">
+            <div class="mensagem-texto">
                 {{ contatoSelecionado()?.mensagem }}
             </div>
         </div>
-        <div class="modal-footer" style="gap:1rem; padding-top:1.5rem;">
-            <button class="btn btn-secondary" style="border:1px solid #d1d5db;" (click)="fecharMensagem()">Fechar Leitura</button>
-            <button class="btn btn-danger" (click)="excluir(contatoSelecionado()!)"
-                [attr.aria-label]="'Excluir permanentemente mensagem de ' + contatoSelecionado()?.nome"
-                style="background-color: #b91c1c; color: white; border: none;">
+        <div class="modal-footer">
+            <button class="btn btn-secondary btn-fechar-leitura" (click)="fecharMensagem()">Fechar Leitura</button>
+            <button class="btn btn-danger btn-excluir-definitivo" (click)="excluir(contatoSelecionado()!)"
+                [attr.aria-label]="'Excluir permanentemente mensagem de ' + contatoSelecionado()?.nome">
                 Excluir Definitivamente
             </button>
         </div>

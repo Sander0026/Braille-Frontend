@@ -89,6 +89,17 @@ export class ContatosLista implements OnInit {
   abrirMensagem(contato: Contato): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.contatoSelecionado.set(contato);
+    
+    // Busca os dados completos, incluindo a propriedade `mensagem` 
+    this.contatosService.buscarPorId(contato.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (contatoCompleto) => {
+          this.contatoSelecionado.set(contatoCompleto);
+        },
+        error: () => console.error('Falha ao carregar a mensagem completa')
+      });
+
     if (!contato.lida) {
       this.marcarLida(contato);
     }

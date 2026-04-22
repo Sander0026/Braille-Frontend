@@ -177,17 +177,22 @@ $gray-900: #1f1f1f;
 }
 
 .mensagem-assunto-full {
-    font-weight: 700;
-    font-size: 1rem;
-    color: $gray-900;
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: #111827;
+    margin-bottom: 1.5rem; // Quebra de linha e espaço nítido entre assunto e texto
+
+    strong {
+        font-weight: 700;
+    }
 }
 
 .mensagem-texto {
     font-size: 0.9rem;
-    color: #333;
+    color: #4b5563;
     line-height: 1.6;
     white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 // ── Modal ────────────────────────────────────────────────────
@@ -234,15 +239,41 @@ $gray-900: #1f1f1f;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 1.25rem 1.5rem 1rem;
+    padding: 1.25rem 1.5rem 1.5rem; // Aumentado padding-bottom de 1rem para 1.5rem para mais respiro
     border-bottom: 1px solid #e5e5e5;
     gap: 1rem;
 
+    .modal-header-content {
+        display: flex;
+        flex-direction: column;
+    }
+
     h2 {
-        font-size: 1rem;
+        font-size: 1.25rem; // Tamanho levemente ajustado
         font-weight: 700;
         color: $gray-900;
         margin: 0;
+    }
+
+    .remetente-info {
+        margin-top: 0.5rem;
+        color: #737373;
+        font-size: 0.875rem;
+
+        .remetente-contato-data {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .remetente-email {
+            margin-top: 0.25rem;
+            color: #4b5563;
+        }
+    }
+
+    .btn-close {
+        align-self: flex-start;
     }
 }
 
@@ -255,10 +286,24 @@ $gray-900: #1f1f1f;
 .modal-footer {
     display: flex;
     justify-content: flex-end;
-    gap: 0.75rem;
-    padding: 1rem 1.5rem;
+    gap: 1rem;
+    padding: 1.5rem;
     border-top: 1px solid #e5e5e5;
     flex-wrap: wrap; // Em telas muito pequenas os botões quebram linha
+
+    .btn-fechar-leitura {
+        border: 1px solid #d1d5db;
+    }
+
+    .btn-excluir-definitivo {
+        background-color: #b91c1c;
+        color: white;
+        border: none;
+
+        &:hover {
+            background-color: #991b1b;
+        }
+    }
 }
 
 // Animações
