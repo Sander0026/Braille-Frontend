@@ -1,4 +1,5 @@
-<div id="freq-anuncio" aria-live="polite" class="sr-only"></div>
+<!-- Live region: anuncia trocas de aba para leitores de tela (WCAG 4.1.3) -->
+<div #anuncio id="freq-anuncio" aria-live="polite" aria-atomic="true" class="sr-only"></div>
 
 <div class="page-header">
     <div>
@@ -7,23 +8,44 @@
     </div>
 </div>
 
-<!-- ── Abas ──────────────────────────────────────────────── -->
+<!-- ── Abas (WCAG 4.1.2 — Name, Role, Value + aria-controls completo) ──────── -->
 <nav class="tabs-nav" role="tablist" aria-label="Seções de frequência">
-    <button role="tab" class="tab-btn" [class.active]="abaAtiva() === 'chamada'"
-        [attr.aria-selected]="abaAtiva() === 'chamada'" (click)="mudarAba('chamada')">
+    <button
+        id="tab-chamada"
+        role="tab"
+        class="tab-btn"
+        [class.active]="abaAtiva() === 'chamada'"
+        [attr.aria-selected]="abaAtiva() === 'chamada'"
+        [attr.tabindex]="abaAtiva() === 'chamada' ? 0 : -1"
+        aria-controls="painel-chamada"
+        (click)="mudarAba('chamada')">
         <span class="material-symbols-rounded" aria-hidden="true">fact_check</span> Fazer Chamada
     </button>
-    <button role="tab" class="tab-btn" [class.active]="abaAtiva() === 'historico'"
-        [attr.aria-selected]="abaAtiva() === 'historico'" (click)="mudarAba('historico')">
+    <button
+        id="tab-historico"
+        role="tab"
+        class="tab-btn"
+        [class.active]="abaAtiva() === 'historico'"
+        [attr.aria-selected]="abaAtiva() === 'historico'"
+        [attr.tabindex]="abaAtiva() === 'historico' ? 0 : -1"
+        aria-controls="painel-historico"
+        (click)="mudarAba('historico')">
         <span class="material-symbols-rounded" aria-hidden="true">history</span> Histórico
     </button>
-    <button role="tab" class="tab-btn" [class.active]="abaAtiva() === 'relatorio'"
-        [attr.aria-selected]="abaAtiva() === 'relatorio'" (click)="mudarAba('relatorio')">
+    <button
+        id="tab-relatorio"
+        role="tab"
+        class="tab-btn"
+        [class.active]="abaAtiva() === 'relatorio'"
+        [attr.aria-selected]="abaAtiva() === 'relatorio'"
+        [attr.tabindex]="abaAtiva() === 'relatorio' ? 0 : -1"
+        aria-controls="painel-relatorio"
+        (click)="mudarAba('relatorio')">
         <span class="material-symbols-rounded" aria-hidden="true">monitoring</span> Relatório Individual
     </button>
 </nav>
 
-<!-- Erro transversal de turmas se houver -->
+<!-- Erro transversal -->
 @if (erroCarregamento()) {
 <div class="alert danger" role="alert">
     <span class="material-symbols-rounded" aria-hidden="true">error</span>
@@ -31,25 +53,40 @@
 </div>
 }
 
-<!-- Orquestração dos Micro-Frontends -->
+<!-- Painéis de conteúdo com role="tabpanel" + aria-labelledby (WCAG 4.1.2) -->
 <div class="aba-content" [ngSwitch]="abaAtiva()">
 
-    <!-- ABA 1: Chamada Diária -->
-    <app-frequencia-chamada 
-        *ngSwitchCase="'chamada'" 
-        [turmas]="turmas()">
-    </app-frequencia-chamada>
+    <div
+        id="painel-chamada"
+        role="tabpanel"
+        aria-labelledby="tab-chamada"
+        [attr.hidden]="abaAtiva() !== 'chamada' ? true : null">
+        <app-frequencia-chamada
+            *ngSwitchCase="'chamada'"
+            [turmas]="turmas()">
+        </app-frequencia-chamada>
+    </div>
 
-    <!-- ABA 2: Histórico de Frequência -->
-    <app-frequencia-historico 
-        *ngSwitchCase="'historico'" 
-        [turmas]="turmas()">
-    </app-frequencia-historico>
+    <div
+        id="painel-historico"
+        role="tabpanel"
+        aria-labelledby="tab-historico"
+        [attr.hidden]="abaAtiva() !== 'historico' ? true : null">
+        <app-frequencia-historico
+            *ngSwitchCase="'historico'"
+            [turmas]="turmas()">
+        </app-frequencia-historico>
+    </div>
 
-    <!-- ABA 3: Regressão Estatística Individual -->
-    <app-frequencia-relatorio 
-        *ngSwitchCase="'relatorio'" 
-        [turmas]="turmas()">
-    </app-frequencia-relatorio>
+    <div
+        id="painel-relatorio"
+        role="tabpanel"
+        aria-labelledby="tab-relatorio"
+        [attr.hidden]="abaAtiva() !== 'relatorio' ? true : null">
+        <app-frequencia-relatorio
+            *ngSwitchCase="'relatorio'"
+            [turmas]="turmas()">
+        </app-frequencia-relatorio>
+    </div>
 
 </div>

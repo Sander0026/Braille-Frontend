@@ -1,20 +1,31 @@
+/**
+ * usuario-form-modal.component.spec.ts — Migrado de Jasmine para Vitest
+ * HttpClientTestingModule → provideHttpClientTesting() (Angular 17+)
+ * spyOn → vi.spyOn | jasmine.objectContaining → expect.objectContaining
+ */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { provideHttpClient }        from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { ReactiveFormsModule } from '@angular/forms';
+import { of } from 'rxjs';
+
 import { UsuarioFormModalComponent } from './usuario-form-modal.component';
 import { UsuariosService, Usuario } from '../../../../../core/services/usuarios.service';
-import { ConfirmDialogService } from '../../../../../core/services/confirm-dialog.service';
-import { ToastService } from '../../../../../core/services/toast.service';
-import { LiveAnnouncer } from '@angular/cdk/a11y';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
+import { ConfirmDialogService }      from '../../../../../core/services/confirm-dialog.service';
+import { ToastService }              from '../../../../../core/services/toast.service';
+import { LiveAnnouncer }             from '@angular/cdk/a11y';
 
 describe('UsuarioFormModalComponent', () => {
   let component: UsuarioFormModalComponent;
   let fixture: ComponentFixture<UsuarioFormModalComponent>;
-  let mockUsuariosService: jasmine.SpyObj<UsuariosService>;
-  let mockConfirmDialog: jasmine.SpyObj<ConfirmDialogService>;
-  let mockToastService: jasmine.SpyObj<ToastService>;
   let httpTestingController: HttpTestingController;
+
+  const mockUsuariosService = {
+    verificarCpf: vi.fn(),
+    atualizar:    vi.fn(),
+  };
+  const mockConfirmDialog = { confirmar: vi.fn() };
+  const mockToastService  = { sucesso: vi.fn(), erro: vi.fn() };
 
   const mockUsuario: Usuario = {
     id: '123',
@@ -22,27 +33,26 @@ describe('UsuarioFormModalComponent', () => {
     username: 'carlos',
     cpf: '11122233344',
     email: 'carlos@braille.com',
-    role: 'SECRETARIA'
+    role: 'SECRETARIA',
   };
 
   beforeEach(async () => {
-    mockUsuariosService = jasmine.createSpyObj('UsuariosService', ['verificarCpf', 'atualizar']);
-    mockConfirmDialog = jasmine.createSpyObj('ConfirmDialogService', ['confirmar']);
-    mockToastService = jasmine.createSpyObj('ToastService', ['sucesso', 'erro']);
-
-    mockUsuariosService.atualizar.and.returnValue(of({} as any));
+    vi.clearAllMocks();
+    mockUsuariosService.atualizar.mockReturnValue(of({} as any));
 
     await TestBed.configureTestingModule({
-      imports: [UsuarioFormModalComponent, ReactiveFormsModule, HttpClientTestingModule],
+      imports: [UsuarioFormModalComponent, ReactiveFormsModule],
       providers: [
-        { provide: UsuariosService, useValue: mockUsuariosService },
-        { provide: ConfirmDialogService, useValue: mockConfirmDialog },
-        { provide: ToastService, useValue: mockToastService },
-        LiveAnnouncer
-      ]
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: UsuariosService,      useValue: mockUsuariosService },
+        { provide: ConfirmDialogService, useValue: mockConfirmDialog   },
+        { provide: ToastService,         useValue: mockToastService    },
+        LiveAnnouncer,
+      ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(UsuarioFormModalComponent);
+    fixture   = TestBed.createComponent(UsuarioFormModalComponent);
     component = fixture.componentInstance;
     httpTestingController = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
@@ -59,53 +69,54 @@ describe('UsuarioFormModalComponent', () => {
     expect(component.editForm.get('role')?.value).toBe('SECRETARIA');
   });
 
-  it('valida emissão segura para fechamento "sujo" (Dirty Form) interceptada pelo Dialog', fakeAsync(() => {
-    component.usuarioEdicao = mockUsuario; // reseta
+  it('deve emitir evento ao tentar fechar modal com dados não salvos', fakeAsync(() => {
+    component.usuarioEdicao = mockUsuario;
     component.editForm.get('nome')?.setValue('Carlos Editado');
     component.editForm.get('nome')?.markAsDirty();
 
-    spyOn(component.tentarFecharSujo, 'emit');
+    const emitSpy = vi.spyOn(component.tentarFecharSujo, 'emit');
     component.onCancelBtn();
 
-    expect(component.tentarFecharSujo.emit).toHaveBeenCalledWith(true);
+    expect(emitSpy).toHaveBeenCalledWith(true);
   }));
 
-  it('deve realizar busca cirurgica de CEP com Sanitização segura de Observables', () => {
+  it('deve buscar CEP e preencher endereço', () => {
     component.editForm.get('cep')?.setValue('01001-000');
     component.buscarCep();
 
     const req = httpTestingController.expectOne('https://viacep.com.br/ws/01001000/json/');
     expect(req.request.method).toBe('GET');
-    
-    // Simula sucesso da request OpenSource ViaCep
+
     req.flush({ logradouro: 'Praça da Sé', bairro: 'Sé', localidade: 'São Paulo', uf: 'SP' });
 
     expect(component.editForm.get('rua')?.value).toBe('Praça da Sé');
     expect(component.editForm.get('cidade')?.value).toBe('São Paulo');
   });
 
-  it('garantir Atomicidade em chamadas Save (Bloquear Requests Incorretas/CPF em conflito)', () => {
+  it('deve bloquear submissão quando CPF está em conflito', () => {
     component.usuarioEdicao = mockUsuario;
-    // Força um conflito no CPF
     component.cpfStatus.set('ativo');
-    
+
     component.onSaveForm();
     expect(mockUsuariosService.atualizar).not.toHaveBeenCalled();
-    expect(component.editForm.touched).toBeTrue();
+    expect(component.editForm.touched).toBe(true);
   });
 
-  it('Submissão validada deve notificar camada pai e emitir Toast limpo (Happy Path)', fakeAsync(() => {
+  it('submissão válida deve notificar camada pai e emitir Toast', fakeAsync(() => {
     component.usuarioEdicao = mockUsuario;
     component.cpfStatus.set('livre');
 
-    spyOn(component.salvar, 'emit');
-    spyOn(component, 'fecharModal');
-    
+    const salvarSpy  = vi.spyOn(component.salvar, 'emit');
+    const fecharSpy  = vi.spyOn(component, 'fecharModal');
+
     component.onSaveForm();
     tick();
 
-    expect(mockUsuariosService.atualizar).toHaveBeenCalledWith('123', jasmine.objectContaining({ nome: 'Carlos Silva' }));
+    expect(mockUsuariosService.atualizar).toHaveBeenCalledWith(
+      '123',
+      expect.objectContaining({ nome: 'Carlos Silva' }),
+    );
     expect(mockToastService.sucesso).toHaveBeenCalled();
-    expect(component.salvar.emit).toHaveBeenCalled();
+    expect(salvarSpy).toHaveBeenCalled();
   }));
 });

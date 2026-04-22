@@ -3,13 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TabelaTrFocavelDirective } from './tabela-tr-focavel.directive';
 
 @Component({
-  template: `<tr appTabelaTrFocavel #trDir="read"></tr>`,
+  template: `<tr appTabelaTrFocavel></tr>`,
   standalone: true,
   imports: [TabelaTrFocavelDirective]
 })
 class TestComponent {
   @ViewChild(TabelaTrFocavelDirective) directive!: TabelaTrFocavelDirective;
-  @ViewChild('trDir', { read: ElementRef }) elementRef!: ElementRef;
+  @ViewChild(TabelaTrFocavelDirective, { read: ElementRef }) elementRef!: ElementRef;
 }
 
 describe('TabelaTrFocavelDirective (SecDevOps Test)', () => {

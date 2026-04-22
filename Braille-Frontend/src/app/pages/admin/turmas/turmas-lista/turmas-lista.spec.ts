@@ -75,8 +75,8 @@ describe('TurmasLista Component', () => {
     mockUsuariosService.listar.mockReturnValue(of({ data: [{ id: '1', nome: 'Prof 1', statusAtivo: true }] }));
     mockTurmasService.listar.mockReturnValue(of({ 
       data: [
-        { id: '100', nome: 'Oficina Ativa', excluido: false, status: 'ANDAMENTO', professor: { id: '1', nome: 'Prof 1' } },
-        { id: '101', nome: 'Oficina Inativa', excluido: true, status: 'CONCLUIDA', professor: { id: '2', nome: 'Prof 2' } }
+        { id: '100', nome: 'Oficina Ativa', excluido: false, statusAtivo: true, status: 'ANDAMENTO', professor: { id: '1', nome: 'Prof 1' } },
+        { id: '101', nome: 'Oficina Inativa', excluido: false, statusAtivo: false, status: 'CONCLUIDA', professor: { id: '2', nome: 'Prof 2' } }
       ] 
     }));
   });
@@ -122,7 +122,7 @@ describe('TurmasLista Component', () => {
       expect(component.drawerAberto()).toBe(false);
 
       // Garante a Atuação Segura nas requisições ao Back-end (Sem N+1, apenas nova requisição parametrizada)
-      expect(mockTurmasService.listar).toHaveBeenCalledWith(1, 100, undefined, undefined, '1', 'ANDAMENTO');
+      expect(mockTurmasService.listar).toHaveBeenCalledWith(1, 100, undefined, 'all', '1', 'ANDAMENTO', 'all');
     });
 
     it('deve limpar filtros visuais e restabelecer lista original', () => {
@@ -132,7 +132,7 @@ describe('TurmasLista Component', () => {
       component.limparFiltrosDrawer();
       expect(component.tempProfessorId()).toBe('');
       expect(component.tempStatus()).toBe('');
-      expect(mockTurmasService.listar).toHaveBeenCalledWith(1, 100, undefined, undefined, undefined, undefined);
+      expect(mockTurmasService.listar).toHaveBeenCalledWith(1, 100, undefined, 'all', undefined, undefined, 'all');
     });
   });
 

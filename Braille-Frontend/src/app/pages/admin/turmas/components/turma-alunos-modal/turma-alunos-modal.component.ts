@@ -55,14 +55,17 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   @Output() fechar = new EventEmitter<void>();
   @Output() recarregarGrade = new EventEmitter<void>(); // Se houve alterações bem sucedidas
 
-  readonly abaAtual = signal<'adicionar' | 'remover'>('remover');
-  readonly carregandoDetalhes = signal<boolean>(false);
-  readonly buscandoAlunos = signal<boolean>(false);
-  readonly operacaoEmProgresso = signal<boolean>(false);
+  readonly abaAtual              = signal<'adicionar' | 'remover'>('remover');
+  readonly carregandoDetalhes     = signal<boolean>(false);
+  readonly buscandoAlunos         = signal<boolean>(false);
+  readonly operacaoEmProgresso    = signal<boolean>(false);
 
-  readonly turmaDetalhes = signal<Turma | null>(null);
-  readonly alunosBuscaRestado = signal<Beneficiario[]>([]);
-  readonly alunosSelecionadosParaMatricula = signal<string[]>([]);
+  readonly turmaDetalhes                    = signal<Turma | null>(null);
+  readonly alunosBuscaRestado               = signal<Beneficiario[]>([]);
+  readonly alunosSelecionadosParaMatricula  = signal<string[]>([]);
+
+  /** Elemento que abriu o modal — foco retorna a ele ao fechar (WCAG 2.4.3) */
+  private lastFocusBeforeModal: HTMLElement | null = null;
 
   buscaAlunoCtrl = new FormControl('');
 
@@ -82,6 +85,8 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['aberto']) {
       if (this.aberto && this.turmaOriginal) {
+        // WCAG 2.4.3: salva elemento focado antes de abrir o modal
+        this.lastFocusBeforeModal = document.activeElement as HTMLElement;
         this.verAlunos(this.turmaOriginal.id);
       } else {
         this.turmaDetalhes.set(null);
@@ -291,7 +296,9 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
     URL.revokeObjectURL(url);
   }
 
-  aoFechar() {
+  aoFechar(): void {
     this.fechar.emit();
+    // WCAG 2.4.3: retorna o foco ao elemento que abriu o modal
+    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
   }
 }
