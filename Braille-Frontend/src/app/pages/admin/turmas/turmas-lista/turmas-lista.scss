@@ -905,6 +905,65 @@ $transition: 200ms ease;
   }
 }
 
+// ── Fieldsets Semânticos do Modal ──────────────────────────
+.section-fieldset {
+  border: 1px solid $gray-200;
+  border-radius: $border-r;
+  padding: 1rem 1.25rem 0.25rem;
+  margin-bottom: 1.25rem;
+
+  .section-legend {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $gray-600;
+    padding: 0 0.4rem;
+    background: #fff;
+  }
+}
+
+// ── Grid de 3 colunas para datas + capacidade ──────────────
+.row-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  // align-items: end ancora os inputs na base quando os labels
+  // têm alturas diferentes por quebra de linha (ex: "Data de Encerramento")
+  align-items: end;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+}
+
+// ── Hint de campo ──────────────────────────────────────────
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  color: $gray-600;
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  line-height: 1.4;
+
+  .hint-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+    opacity: 0.7;
+  }
+}
+
+// ── Loading Hint ───────────────────────────────────────────
+.loading-hint {
+  font-size: 0.875rem;
+  color: $gray-600;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
 // ── Select de Status no Card ────────────────────────────────
 .status-select {
   padding: 0.3rem 0.5rem;

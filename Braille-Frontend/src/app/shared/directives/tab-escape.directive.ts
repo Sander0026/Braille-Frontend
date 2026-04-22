@@ -33,11 +33,15 @@ export class TabEscapeDirective {
       'select:not([disabled]), textarea:not([disabled]), ' +
       '[tabindex]:not([tabindex="-1"])';
 
+    const current = event.target as HTMLElement;
+
+    // A11Y FIX: Limita a busca ao escopo mais próximo (Modal/Trap) para não quebrar o Focus Trap do CDK.
+    const container = current.closest('dialog, [cdkTrapFocus], form') || document;
+
     const focusable = Array.from(
-      document.querySelectorAll<HTMLElement>(focusableSelector)
+      container.querySelectorAll<HTMLElement>(focusableSelector)
     ).filter(el => !el.closest('[aria-hidden="true"]') && el.offsetParent !== null);
 
-    const current      = event.target as HTMLElement;
     const currentIndex = focusable.indexOf(current);
     if (currentIndex === -1) return;
 

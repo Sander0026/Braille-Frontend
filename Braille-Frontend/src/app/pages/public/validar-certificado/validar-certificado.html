@@ -9,7 +9,7 @@
           <p>Verifique a autenticidade de um certificado emitido pelo Instituto Luiz Braille.</p>
         </header>
 
-        <form [formGroup]="form" (ngSubmit)="validar()" class="validar-form" aria-live="polite">
+        <form [formGroup]="form" (ngSubmit)="validar()" class="validar-form">
           <div class="form-group">
             <label for="codigoInput" class="sr-only">Código Único do Certificado</label>
             <div class="input-group">
@@ -20,7 +20,7 @@
                      class="form-control form-control-lg text-center" 
                      placeholder="Digite o código (Ex: D9E7F1A)" 
                      style="text-transform: uppercase;"
-                     [attr.aria-invalid]="form.get('codigo')?.invalid && form.get('codigo')?.touched"
+                     [attr.aria-invalid]="(form.get('codigo')?.invalid && form.get('codigo')?.touched) ? 'true' : 'false'"
                      aria-describedby="codigo-erro">
                      
               <button class="btn btn-primary btn-lg" type="submit" [disabled]="buscando()"

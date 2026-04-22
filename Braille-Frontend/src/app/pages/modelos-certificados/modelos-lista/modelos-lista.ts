@@ -26,6 +26,8 @@ export class ModelosLista implements OnInit {
 
   @ViewChild('previewDialog') previewDialog?: ElementRef<HTMLDialogElement>;
 
+  private lastFocusBeforeModal: HTMLElement | null = null;
+
   // Dependências
   private readonly modelosService = inject(ModelosCertificadosService);
   private readonly confirmDialog = inject(ConfirmDialogService);
@@ -64,6 +66,7 @@ export class ModelosLista implements OnInit {
   }
 
   abrirPreview(modelo: ModeloCertificado): void {
+    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.modeloPreview.set(modelo);
     setTimeout(() => {
       if (this.previewDialog?.nativeElement) {
@@ -81,6 +84,10 @@ export class ModelosLista implements OnInit {
 
   onDialogClosed(): void {
     this.modeloPreview.set(null);
+    if (this.lastFocusBeforeModal) {
+      this.lastFocusBeforeModal.focus();
+      this.lastFocusBeforeModal = null;
+    }
   }
 
   async excluirModelo(modelo: ModeloCertificado): Promise<void> {

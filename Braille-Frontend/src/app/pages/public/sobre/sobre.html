@@ -29,11 +29,10 @@
                 </div>
             </div>
 
-            <!-- TIMELINE -->
             <div class="timeline delay-100" appAnimateOnScroll role="list" aria-label="Linha do tempo histórica do instituto">
                 @for (item of timeline(); track item.ano) {
                 <div class="timeline-item" role="listitem">
-                    <div class="timeline-year" aria-label="Ano do acontecimento">{{ item.ano }}</div>
+                    <div class="timeline-year"><span class="sr-only">Ano: </span>{{ item.ano }}</div>
                     <div class="timeline-content">
                         <strong>{{ item.titulo }}</strong>
                         <div [innerHTML]="item.descricao | safeHtml"></div>
@@ -72,7 +71,7 @@
                 <div class="equipe-icon" aria-hidden="true">
                     <span class="material-symbols-rounded">{{ membro.emoji }}</span>
                 </div>
-                <h3 aria-label="Cargo e departamento da equipe">{{ membro.cargo }}</h3>
+                <h3><span class="sr-only">Cargo: </span>{{ membro.cargo }}</h3>
                 <div class="equipe-desc" [innerHTML]="membro.descricao | safeHtml"></div>
             </div>
             }

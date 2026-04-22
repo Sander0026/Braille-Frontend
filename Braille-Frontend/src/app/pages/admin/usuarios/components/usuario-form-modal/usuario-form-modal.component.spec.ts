@@ -40,6 +40,18 @@ describe('UsuarioFormModalComponent', () => {
     vi.clearAllMocks();
     mockUsuariosService.atualizar.mockReturnValue(of({} as any));
 
+    // Mock HTMLDialogElement for JSDOM
+    if (!HTMLDialogElement.prototype.showModal) {
+      HTMLDialogElement.prototype.showModal = function() {
+        this.setAttribute('open', '');
+      };
+    }
+    if (!HTMLDialogElement.prototype.close) {
+      HTMLDialogElement.prototype.close = function() {
+        this.removeAttribute('open');
+      };
+    }
+
     await TestBed.configureTestingModule({
       imports: [UsuarioFormModalComponent, ReactiveFormsModule],
       providers: [
@@ -69,7 +81,7 @@ describe('UsuarioFormModalComponent', () => {
     expect(component.editForm.get('role')?.value).toBe('SECRETARIA');
   });
 
-  it('deve emitir evento ao tentar fechar modal com dados não salvos', fakeAsync(() => {
+  it('deve emitir evento ao tentar fechar modal com dados não salvos', () => {
     component.usuarioEdicao = mockUsuario;
     component.editForm.get('nome')?.setValue('Carlos Editado');
     component.editForm.get('nome')?.markAsDirty();
@@ -78,7 +90,7 @@ describe('UsuarioFormModalComponent', () => {
     component.onCancelBtn();
 
     expect(emitSpy).toHaveBeenCalledWith(true);
-  }));
+  });
 
   it('deve buscar CEP e preencher endereço', () => {
     component.editForm.get('cep')?.setValue('01001-000');
@@ -95,6 +107,7 @@ describe('UsuarioFormModalComponent', () => {
 
   it('deve bloquear submissão quando CPF está em conflito', () => {
     component.usuarioEdicao = mockUsuario;
+    component.editForm.get('cpf')?.setValue('999.888.777-66'); // Um CPF diferente
     component.cpfStatus.set('ativo');
 
     component.onSaveForm();
@@ -102,7 +115,7 @@ describe('UsuarioFormModalComponent', () => {
     expect(component.editForm.touched).toBe(true);
   });
 
-  it('submissão válida deve notificar camada pai e emitir Toast', fakeAsync(() => {
+  it('submissão válida deve notificar camada pai e emitir Toast', () => {
     component.usuarioEdicao = mockUsuario;
     component.cpfStatus.set('livre');
 
@@ -110,7 +123,6 @@ describe('UsuarioFormModalComponent', () => {
     const fecharSpy  = vi.spyOn(component, 'fecharModal');
 
     component.onSaveForm();
-    tick();
 
     expect(mockUsuariosService.atualizar).toHaveBeenCalledWith(
       '123',
@@ -118,5 +130,5 @@ describe('UsuarioFormModalComponent', () => {
     );
     expect(mockToastService.sucesso).toHaveBeenCalled();
     expect(salvarSpy).toHaveBeenCalled();
-  }));
+  });
 });

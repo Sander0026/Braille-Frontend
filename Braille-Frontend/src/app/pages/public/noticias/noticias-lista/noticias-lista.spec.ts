@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { vi, describe, it, beforeEach, expect, afterEach } from 'vitest';
 import { of, throwError } from 'rxjs';
+import { provideRouter } from '@angular/router';
 
 import { NoticiasLista } from './noticias-lista';
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
@@ -45,6 +46,7 @@ describe('NoticiasLista', () => {
         { provide: ComunicadosService, useValue: comunicadosServiceSpy },
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
       ],
     }).compileComponents();
 

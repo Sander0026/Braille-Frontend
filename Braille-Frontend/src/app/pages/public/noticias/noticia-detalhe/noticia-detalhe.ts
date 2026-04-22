@@ -9,6 +9,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { Title, Meta } from '@angular/platform-browser';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { ComunicadosService, Comunicado } from '../../../../core/services/comunicados.service';
 import { SafeHtmlPipe } from '../../../../core/pipes/safe-html.pipe';
@@ -32,6 +33,7 @@ export class NoticiaDetalhe {
   private readonly titleService        = inject(Title);
   private readonly metaService         = inject(Meta);
   private readonly destroyRef          = inject(DestroyRef);
+  private readonly liveAnnouncer       = inject(LiveAnnouncer);
 
   // ── Estado reativo ────────────────────────────────────────────────────────────
   noticia    = signal<Comunicado | null>(null);
@@ -62,6 +64,7 @@ export class NoticiaDetalhe {
     this.carregando.set(true);
     this.erro.set(null);
     this.noticia.set(null);
+    this.liveAnnouncer.announce('Carregando notícia...', 'polite');
 
     /**
      * CORREÇÃO NG0203: carregarNoticia() é um método regular —
@@ -74,6 +77,7 @@ export class NoticiaDetalhe {
         next: res => {
           this.noticia.set(res);
           this.carregando.set(false);
+          this.liveAnnouncer.announce(`Notícia carregada: ${res.titulo}`, 'polite');
 
           this.titleService.setTitle(`${res.titulo} — Instituto Luiz Braille`);
 
@@ -90,6 +94,7 @@ export class NoticiaDetalhe {
           // Silencia stack trace nativos (OWASP A05 - Security Misconfiguration)
           this.erro.set('Não foi possível carregar essa notícia. Ela pode ter sido removida temporariamente.');
           this.carregando.set(false);
+          this.liveAnnouncer.announce('Erro ao carregar a notícia. Ela pode ter sido removida.', 'assertive');
           this.titleService.setTitle('Notícia não encontrada — Instituto Luiz Braille');
         },
       });

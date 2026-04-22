@@ -237,7 +237,7 @@
 </div>
 
 <!-- ── Modais de Reativação e Reaproveitamento (HTML5 nativo <dialog>) ── -->
-<dialog [open]="modalReativacaoAberto()" class="modal-box p-6" aria-labelledby="modal-reativacao-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="border:none; border-radius:12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1)">
+<dialog [open]="modalReativacaoAberto()" class="modal-box p-6" aria-labelledby="modal-reativacao-titulo" aria-modal="true" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="border:none; border-radius:12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1)">
     <div class="modal-icon-warn">
         <span class="material-symbols-rounded" aria-hidden="true">person_alert</span>
     </div>
@@ -259,7 +259,7 @@
     </div>
 </dialog>
 
-<dialog [open]="modalReaproveitarAberto()" class="modal-box p-6" aria-labelledby="modal-reaproveitar-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="border:none; border-radius:12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1)">
+<dialog [open]="modalReaproveitarAberto()" class="modal-box p-6" aria-labelledby="modal-reaproveitar-titulo" aria-modal="true" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="border:none; border-radius:12px; box-shadow:0 10px 25px -5px rgba(0,0,0,0.1)">
     <div class="modal-icon-warn" style="background: rgba(234, 179, 8, 0.1); color: #eab308; margin-bottom:1rem; display:inline-flex; border-radius:50%; padding:0.5rem">
         <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 2rem;">manage_search</span>
     </div>

@@ -29,6 +29,9 @@
          [class.is-draggable]="isDraggable"
          [class.nome-aluno-outline]="isDraggable"
          [cdkDragDisabled]="!isDraggable"
+         [attr.tabindex]="isDraggable ? 0 : null"
+         role="button"
+         aria-label="Posicionar Nome do Aluno no certificado. Use o mouse ou o teclado para mover."
          cdkDrag (cdkDragEnded)="onDragEnded($event, 'nomeAluno')">
       {{ applyMocks ? 'Maria da Silva Santos' : 'Nome do Aluno' }}
     </div>
@@ -49,6 +52,9 @@
          [class.is-draggable]="isDraggable"
          [class.texto-pronto-outline]="isDraggable"
          [cdkDragDisabled]="!isDraggable"
+         [attr.tabindex]="isDraggable ? 0 : null"
+         role="button"
+         aria-label="Posicionar Texto Principal do certificado. Use o mouse ou o teclado para mover."
          cdkDrag (cdkDragEnded)="onDragEnded($event, 'textoPronto')">
       {{ displayTextoTemplate }}
     </div>
@@ -65,6 +71,9 @@
          [class.is-draggable]="isDraggable"
          [class.assinatura1-outline]="isDraggable"
          [cdkDragDisabled]="!isDraggable"
+         [attr.tabindex]="isDraggable ? 0 : null"
+         role="button"
+         aria-label="Posicionar Assinatura 1. Use o mouse ou o teclado para mover."
          cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura1')">
       <img [src]="assinaturaUrl" alt="Assinatura" class="assinatura-img">
       <div class="assinatura-texto">
@@ -85,6 +94,9 @@
          [class.is-draggable]="isDraggable"
          [class.assinatura2-outline]="isDraggable"
          [cdkDragDisabled]="!isDraggable"
+         [attr.tabindex]="isDraggable ? 0 : null"
+         role="button"
+         aria-label="Posicionar Assinatura 2. Use o mouse ou o teclado para mover."
          cdkDrag (cdkDragEnded)="onDragEnded($event, 'assinatura2')">
       <img [src]="assinaturaUrl2" alt="Assinatura 2" class="assinatura-img">
       <div class="assinatura-texto">
@@ -105,6 +117,9 @@
          [class.is-draggable]="isDraggable"
          [class.qr-outline]="isDraggable"
          [cdkDragDisabled]="!isDraggable"
+         [attr.tabindex]="isDraggable ? 0 : null"
+         role="button"
+         aria-label="Posicionar QR Code de autenticidade. Use o mouse ou o teclado para mover."
          cdkDrag (cdkDragEnded)="onDragEnded($event, 'qrCode')">
          
       <svg *ngIf="applyMocks" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;opacity:.85;">

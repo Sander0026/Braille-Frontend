@@ -35,7 +35,7 @@ import { CommonModule } from '@angular/common';
           [value]="value()"
           (input)="onInput($event)"
           (blur)="onTouched()"
-          [attr.aria-label]="ariaLabel() || label()"
+          [attr.aria-label]="ariaLabel() || null"
           [attr.aria-invalid]="hasError() ? 'true' : 'false'"
           [attr.aria-describedby]="hasError() ? id() + '-error' : null"
           class="block w-full rounded-md border-gray-300 px-4 py-2 text-gray-900 border

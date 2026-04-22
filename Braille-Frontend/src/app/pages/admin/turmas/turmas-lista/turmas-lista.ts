@@ -13,6 +13,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { TurmaFiltroDrawerComponent } from '../components/turma-filtro-drawer/turma-filtro-drawer.component';
 import { TurmaFormModalComponent } from '../components/turma-form-modal/turma-form-modal.component';
 import { TurmaAlunosModalComponent } from '../components/turma-alunos-modal/turma-alunos-modal.component';
+import { TurmaCardComponent } from './turma-card/turma-card.component';
 import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
 import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
 
@@ -25,7 +26,8 @@ import { injectFormDescarte } from '../../../../shared/classes/base-form-descart
     A11yModule,
     TurmaFiltroDrawerComponent,
     TurmaFormModalComponent,
-    TurmaAlunosModalComponent
+    TurmaAlunosModalComponent,
+    TurmaCardComponent
   ],
   templateUrl: './turmas-lista.html',
   styleUrl: './turmas-lista.scss',

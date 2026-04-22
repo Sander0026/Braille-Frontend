@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject, DestroyRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -22,6 +23,7 @@ export class Login {
   private readonly router       = inject(Router);
   // DestroyRef vincula o ciclo de vida do componente a subscrições fora do constructor
   private readonly destroyRef   = inject(DestroyRef);
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
 
   loginForm:    FormGroup;
   novaSenhaForm: FormGroup;
@@ -80,11 +82,14 @@ export class Login {
   fazerLogin(): void {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
+      this.liveAnnouncer.announce('Preencha os campos obrigatórios para acessar.', 'assertive');
       return;
     }
 
     this.carregando.set(true);
     this.erroLogin.set('');
+    this.senhaAlteradaOk.set(false);
+    this.liveAnnouncer.announce('Acessando o sistema...', 'polite');
 
     const payload = {
       username: (this.loginForm.value.username as string)?.trim(),
@@ -101,13 +106,19 @@ export class Login {
           this.precisaTrocarSenha.set(true);
           this.senhaAntigaTemp.set(payload.senha);
           this.carregando.set(false);
+          this.liveAnnouncer.announce('Ação Necessária: Você precisa criar uma nova senha pessoal.', 'assertive');
         } else {
-          void this.router.navigate(['/admin']).then(() => this.carregando.set(false));
+          void this.router.navigate(['/admin']).then(() => {
+            this.carregando.set(false);
+            this.liveAnnouncer.announce('Login realizado com sucesso. Carregando painel...', 'polite');
+          });
         }
       },
       error: (err: HttpErrorResponse) => {
         this.carregando.set(false);
-        this.erroLogin.set(this.resolveErrorMessage(err));
+        const errorMsg = this.resolveErrorMessage(err);
+        this.erroLogin.set(errorMsg);
+        this.liveAnnouncer.announce(`Erro de login: ${errorMsg}`, 'assertive');
       },
     });
   }
@@ -115,11 +126,13 @@ export class Login {
   confirmarNovaSenha(): void {
     if (this.novaSenhaForm.invalid) {
       this.novaSenhaForm.markAllAsTouched();
+      this.liveAnnouncer.announce('A senha digitada não cumpre os requisitos mínimos ou não coincide.', 'assertive');
       return;
     }
 
     this.carregando.set(true);
     this.erroLogin.set('');
+    this.liveAnnouncer.announce('Salvando nova senha...', 'polite');
 
     const novaSenha = this.novaSenhaForm.value.novaSenha as string;
 
@@ -134,10 +147,12 @@ export class Login {
         this.loginForm.reset();
         this.novaSenhaForm.reset();
         this.carregando.set(false);
+        this.liveAnnouncer.announce('Senha alterada com sucesso! Faça login novamente com a nova senha.', 'polite');
       },
       error: () => {
         this.carregando.set(false);
         this.erroLogin.set('Erro ao alterar a senha. A senha não atende aos requisitos ou expirou.');
+        this.liveAnnouncer.announce('Erro ao alterar a senha.', 'assertive');
       },
     });
   }

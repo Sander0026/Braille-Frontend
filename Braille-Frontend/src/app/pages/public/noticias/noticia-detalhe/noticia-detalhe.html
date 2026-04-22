@@ -1,5 +1,5 @@
 <a href="/noticias" class="voltar-link" aria-label="Voltar para a listagem completa de todas as notícias do mural">
-    <span class="material-symbols-rounded">arrow_back</span>
+    <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
     Voltar para as Notícias
 </a>
 
@@ -69,8 +69,7 @@
             <hr class="divisor" aria-hidden="true" />
 
             <!-- CONTEÚDO RICO HTML (Renderizado Seguramente por DomSanitizer custom via SafeHtml) -->
-            <div class="article-body ql-content" [innerHTML]="item.conteudo | safeHtml"
-                aria-label="Conteúdo completo da leitura do artigo e notícia">
+            <div class="article-body ql-content" [innerHTML]="item.conteudo | safeHtml">
             </div>
 
             <!-- RODAPÉ -->
