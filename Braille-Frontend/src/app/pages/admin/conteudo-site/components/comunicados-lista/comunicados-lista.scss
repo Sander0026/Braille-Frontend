@@ -4,6 +4,35 @@ $gray-200: #e5e5e5;
 $gray-600: #5c5c5c;
 $gray-900: #1f1f1f;
 
+// sobrescrevendo o flexbox do modal backdrop para centralizar o elemento
+.modal-backdrop {
+    .modal {
+        // Reset de estilos nativos do <dialog> que quebram o Flexbox do pai
+        position: relative;
+        margin: 0;
+        padding: 0;
+        border: none;
+
+        // Garante que o modal ocupe largura total disponível até o max-width
+        width: 100%;
+
+        // Animação de entrada
+        animation: comunicadoSlideUp 200ms ease-out;
+    }
+}
+
+@keyframes comunicadoSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .loading-container {
     display: flex;
     align-items: center;
