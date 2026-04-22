@@ -4,8 +4,8 @@
         <h1 class="page-title">Usuários</h1>
         <p class="page-subtitle">Gerencie os usuários e suas permissões</p>
     </div>
-    <a routerLink="/admin/usuarios/cadastro" class="btn btn-primary" aria-label="Cadastrar novo usuário">
-        <span class="material-symbols-rounded">person_add</span>
+    <a routerLink="/admin/usuarios/cadastro" class="btn btn-primary">
+        <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
         Novo Usuário
     </a>
 </div>
@@ -96,13 +96,13 @@
                                 </td>
                                 <td class="acoes-cell">
                                     @if (abaAtiva() === 'ativos') {
-                                        <button class="btn btn-sm btn-ghost" (click)="abrirPerfil(usuario)" aria-label="Ver perfil">Ver</button>
-                                        <button class="btn btn-sm btn-secondary" (click)="abrirModal(usuario)" aria-label="Editar">Editar</button>
-                                        <button class="btn btn-sm btn-danger" (click)="excluir(usuario)" aria-label="Excluir">Excluir</button>
+                                        <button class="btn btn-sm btn-ghost" (click)="abrirPerfil(usuario)" [attr.aria-label]="'Ver perfil de ' + usuario.nome">Ver</button>
+                                        <button class="btn btn-sm btn-secondary" (click)="abrirModal(usuario)" [attr.aria-label]="'Editar perfil de ' + usuario.nome">Editar</button>
+                                        <button class="btn btn-sm btn-danger" (click)="excluir(usuario)" [attr.aria-label]="'Inativar usuário ' + usuario.nome">Excluir</button>
                                     } @else {
                                         <button class="btn btn-sm" style="background-color: #047857; color: white; border: none; margin-right: 0.5rem;"
-                                            (click)="restaurarConta(usuario)" aria-label="Restaurar usuário">Restaurar</button>
-                                        <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(usuario)" aria-label="Excluir definitivamente">Excluir</button>
+                                            (click)="restaurarConta(usuario)" [attr.aria-label]="'Restaurar acesso de ' + usuario.nome">Restaurar</button>
+                                        <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(usuario)" [attr.aria-label]="'Excluir permanentemente ' + usuario.nome">Excluir</button>
                                     }
                                 </td>
                             </tr>
