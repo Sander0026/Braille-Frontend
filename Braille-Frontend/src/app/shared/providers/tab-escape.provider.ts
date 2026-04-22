@@ -25,9 +25,12 @@ function isEditableTarget(el: HTMLElement): boolean {
   return el.tagName === 'TEXTAREA' || el.contentEditable === 'true';
 }
 
-function getFocusableElements(): HTMLElement[] {
+function getFocusableElements(currentElement: HTMLElement): HTMLElement[] {
+  // A11Y FIX: Limita a busca ao escopo mais próximo (Modal/Trap) para não quebrar o Focus Trap do CDK.
+  const container = currentElement.closest('dialog, [cdkTrapFocus], form') || document;
+
   return Array.from(
-    document.querySelectorAll<HTMLElement>(
+    container.querySelectorAll<HTMLElement>(
       'a[href], button:not([disabled]), input:not([disabled]), ' +
       'select:not([disabled]), textarea:not([disabled]), ' +
       '[contenteditable="true"], [tabindex]:not([tabindex="-1"])',
@@ -56,7 +59,7 @@ function registerTabEscape(): void {
 
       event.preventDefault();
 
-      const focusable = getFocusableElements();
+      const focusable = getFocusableElements(target);
       const currentIndex = focusable.indexOf(target);
       if (currentIndex === -1) return;
 
