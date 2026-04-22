@@ -8,7 +8,7 @@ import { Turma, TurmaStatus } from '../../../../../core/services/turmas.service'
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './turma-card.component.html',
-  styles: ``
+  styleUrl: '../turmas-lista.scss'
 })
 export class TurmaCardComponent {
   @Input({ required: true }) turma!: Turma;
