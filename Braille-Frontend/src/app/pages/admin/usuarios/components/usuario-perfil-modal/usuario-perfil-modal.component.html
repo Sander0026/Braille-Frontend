@@ -23,11 +23,11 @@
 
           <!-- Botões Trocar/Remover Foto -->
           <div class="avatar-actions">
-            <!-- Label encapsula o file input implicitamente ligado -->
-            <label class="btn btn-sm btn-primary btn-icon" role="button" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" [attr.tabindex]="salvando() ? -1 : 0" [attr.aria-disabled]="salvando() ? 'true' : null" (keydown.enter)="onAvatarKeydown($event, fileInput)">
+            <!-- Botão nativo aciona o file input oculto. Restaura eventos de teclado nativos (Enter/Space) -->
+            <button class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" [disabled]="salvando()" (click)="fileInput.click()">
               <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
-              <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" [disabled]="salvando()" />
-            </label>
+            </button>
+            <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" [disabled]="salvando()" aria-hidden="true" />
             @if (u.fotoPerfil) {
               <button class="btn btn-sm btn-danger btn-icon" title="Remover Foto" aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">
                 <span class="material-symbols-rounded" aria-hidden="true">delete</span>
