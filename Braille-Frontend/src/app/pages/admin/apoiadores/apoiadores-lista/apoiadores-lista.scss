@@ -100,28 +100,36 @@ $gray-600: vars.$color-gray-600;
   border-radius: 12px;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   padding: 1rem;
+  // Habilita scroll horizontal quando o conteúdo (tabela) ultrapassa
+  // a largura disponível — essencial para acessibilidade com zoom de fonte
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; // scroll suave em iOS
 }
 
 
 // ── Tabela Principal ─────────────────────────────────────────────────────────
 // table-layout: fixed garante que th e td de mesma coluna compartilhem
 // exatamente a mesma largura, eliminando desalinhamentos horizontais.
+// min-width: 700px garante que o scroll horizontal seja ativado quando
+// a fonte é ampliada via zoom de acessibilidade (nunca colapsa abaixo de 700px).
 .table {
   width: 100%;
+  min-width: 700px; // ativa o scroll no .table-container quando necessário
   border-collapse: collapse;
-  table-layout: fixed; // chave para o alinhamento perfeito
+  table-layout: fixed;
 
-  // Widths das colunas (soma = 100%)
-  // Col 1 – Identificação  : 28%
-  // Col 2 – Contato        : 22%
-  // Col 3 – Vínculo        : 14%
-  // Col 4 – Status         : 18%
-  // Col 5 – Gerenciar      : 18%
-  th:nth-child(1), td:nth-child(1) { width: 28%; }
-  th:nth-child(2), td:nth-child(2) { width: 22%; }
-  th:nth-child(3), td:nth-child(3) { width: 14%; text-align: center; }
-  th:nth-child(4), td:nth-child(4) { width: 18%; text-align: center; }
-  th:nth-child(5), td:nth-child(5) { width: 18%; text-align: center; }
+  // Larguras absolutas (px) – estáveis mesmo com zoom de acessibilidade
+  // Col 1 – Identificação  : 220px
+  // Col 2 – Contato        : 180px
+  // Col 3 – Vínculo        : 110px
+  // Col 4 – Status         : 115px
+  // Col 5 – Gerenciar      : 115px
+  //                          = 740px (> min-width, tabela cresce com o conteúdo)
+  th:nth-child(1), td:nth-child(1) { width: 220px; }
+  th:nth-child(2), td:nth-child(2) { width: 180px; }
+  th:nth-child(3), td:nth-child(3) { width: 110px; text-align: center; }
+  th:nth-child(4), td:nth-child(4) { width: 115px; text-align: center; }
+  th:nth-child(5), td:nth-child(5) { width: 115px; text-align: center; }
 
   th {
     text-align: left;
@@ -140,6 +148,13 @@ $gray-600: vars.$color-gray-600;
     vertical-align: middle;
     overflow: hidden;
   }
+}
+
+// Garante scroll caso a classe Angular .table-responsive não receba
+// overflow do framework global (ex: Bootstrap ausente ou sobrescrito)
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 // ── Identidade (Col 1) ───────────────────────────────────────────────────────
