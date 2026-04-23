@@ -66,8 +66,9 @@ $transition: 250ms ease;
     /* padding-bottom extra garante que o ultimo item nao fica cortado
        pelo nav bar do browser mobile ou pelo home indicator do iOS */
     padding-bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
-    overflow-y: auto; // scroll vertical — so aqui
-    overflow-x: hidden; // tabelas containidas — sem scroll lateral
+    overflow-y: auto;  // scroll vertical — só aqui
+    overflow-x: auto;  // permite scroll horizontal em páginas com tabelas largas (ex: zoom de fonte)
+                       // o scroll só aparece quando o conteúdo genuinamente ultrapassa a largura
 
     @media (max-width: 768px) {
         padding: 1rem;
