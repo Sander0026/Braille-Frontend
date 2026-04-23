@@ -114,7 +114,8 @@ $gray-600: vars.$color-gray-600;
 // a fonte é ampliada via zoom de acessibilidade (nunca colapsa abaixo de 700px).
 .table {
   width: 100%;
-  min-width: 700px; // ativa o scroll no .table-container quando necessário
+  min-width: 800px; // ativa o scroll no .page-content e .table-container quando necessário
+                    // (220 + 180 + 110 + 120 + 175 = 805px)
   border-collapse: collapse;
   table-layout: fixed;
 
@@ -128,8 +129,8 @@ $gray-600: vars.$color-gray-600;
   th:nth-child(1), td:nth-child(1) { width: 220px; }
   th:nth-child(2), td:nth-child(2) { width: 180px; }
   th:nth-child(3), td:nth-child(3) { width: 110px; text-align: center; }
-  th:nth-child(4), td:nth-child(4) { width: 115px; text-align: center; }
-  th:nth-child(5), td:nth-child(5) { width: 115px; text-align: center; }
+  th:nth-child(4), td:nth-child(4) { width: 120px; text-align: center; }
+  th:nth-child(5), td:nth-child(5) { width: 175px; text-align: center; } // 4 botões + divisor ≈ 157px
 
   th {
     text-align: left;
@@ -146,7 +147,8 @@ $gray-600: vars.$color-gray-600;
     padding: 0.875rem 1rem;
     border-bottom: 1px solid #e2e8f0;
     vertical-align: middle;
-    overflow: hidden;
+    // Removido overflow:hidden — causava corte dos botões na coluna Gerenciar.
+    // O scroll horizontal do .page-content e .table-container garantem a contenção.
   }
 }
 
