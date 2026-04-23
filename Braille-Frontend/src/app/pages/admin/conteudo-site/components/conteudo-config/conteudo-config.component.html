@@ -1,0 +1,67 @@
+<form [formGroup]="formConfig" (ngSubmit)="salvarConfig()" class="cms-form">
+    <div class="form-header">
+        <h2>Configurações Globais</h2>
+    </div>
+    
+    <!-- Foto da Fachada -->
+    <div class="form-section">
+        <h3>Foto da Fachada (Fundo do Hero)</h3>
+        <p class="form-hint" style="margin-bottom: 1rem;">
+            Esta imagem aparece como fundo da seção principal (hero) na página inicial pública.
+            Recomendado: JPG ou PNG com pelo menos 1920x600px.
+        </p>
+
+        <div class="form-group">
+            <!-- Preview da fachada atual -->
+            @if (fachadaPreview()) {
+            <div class="logo-preview-wrapper" style="width: 100%; max-width: 480px; margin-bottom: 0.75rem;">
+                <img [src]="fachadaPreview()" alt="Preview da foto da fachada"
+                    style="flex: 1; height: 160px; object-fit: cover; border-radius: 0.5rem; display: block; min-width: 0;">
+                <button type="button" class="btn btn-secondary btn-sm btn-remover-logo"
+                    (click)="removerFachada()" style="flex-shrink: 0;">
+                    <span class="material-symbols-rounded">delete</span> Remover foto
+                </button>
+            </div>
+            }
+
+            <!-- Upload -->
+            <label class="upload-label btn btn-secondary" [class.uploading]="uploadandoFachada()" style="display:inline-flex; align-items:center; gap:0.5rem; cursor:pointer;" [style.opacity]="uploadandoFachada() ? '0.6' : '1'">
+                <input type="file" accept="image/png, image/jpeg, image/webp" (change)="onFachadaChange($event)"
+                    [disabled]="uploadandoFachada()" class="sr-only" #fachadaInput>
+                <span class="material-symbols-rounded" aria-hidden="true">{{ uploadandoFachada() ? 'cloud_sync' : 'add_photo_alternate' }}</span>
+                <span>{{ uploadandoFachada() ? 'Enviando...' : (fachadaPreview() ? 'Substituir foto da fachada' : 'Escolher foto da fachada') }}</span>
+            </label>
+            <!-- Campo oculto que guarda a URL para o formGroup -->
+            <input type="hidden" formControlName="fachadaUrl">
+        </div>
+    </div>
+
+    <div class="form-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="salvando() || formConfig.invalid">
+            @if(salvando()) { Salvando... } @else { Salvar Configurações }
+        </button>
+    </div>
+</form>
+
+<!-- Modal Remover Foto da Fachada -->
+@if (fachadaParaExcluir()) {
+<div class="modal-backdrop" (click)="cancelarExclusaoFachada()" (keydown.escape)="cancelarExclusaoFachada()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-label="Remover Foto da Fachada">
+        <div class="modal-header">
+            <h2 style="color: #b91c1c;">Remover Foto da Fachada</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoFachada()" aria-label="Cancelar exclusão da fachada">✕</button>
+        </div>
+        <div class="modal-body">
+            <p>Você está prestes a remover a foto personalizada do hero da página inicial.</p>
+            <p>Ao remover, o sistema voltará a exibir a <strong>imagem padrão do Instituto</strong>. Deseja continuar?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoFachada()">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoFachada()"
+                style="background-color: #b91c1c; color: white; border: none;">
+                Remover Foto
+            </button>
+        </div>
+    </dialog>
+</div>
+}

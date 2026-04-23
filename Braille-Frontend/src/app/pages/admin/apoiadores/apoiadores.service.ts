@@ -24,7 +24,13 @@ export interface Apoiador {
   contatoPessoa?: string;
   telefone?: string;
   email?: string;
-  endereco?: string;
+  cep?: string;
+  rua?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;
   atividadeEspecialidade?: string;
   observacoes?: string;
   logoUrl?: string;
@@ -56,7 +62,7 @@ export class ApoiadoresService {
     this.cachePublicos = null;
   }
 
-  listar(skip?: number, take?: number, tipo?: string, search?: string, forceRefresh = false, ativo?: boolean): Observable<PaginatedResult<Apoiador>> {
+  listar(skip?: number, take?: number, tipo?: string, search?: string, forceRefresh = false, ativo?: boolean | 'all'): Observable<PaginatedResult<Apoiador>> {
     const cacheKey = `${skip}-${take}-${tipo}-${search}-${ativo}`;
 
     if (!forceRefresh && this.cacheLista[cacheKey]) {

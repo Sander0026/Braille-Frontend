@@ -1,0 +1,68 @@
+:host {
+    display: contents;
+}
+
+dialog {
+    &::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+    }
+}
+
+.info-row-readonly {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+
+    .info-label {
+        font-size: 0.875rem;
+        color: #6b7280;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #111827;
+    }
+}
+
+.section-label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #4b5563;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 0.5rem;
+    margin: 1.5rem 0 1rem 0;
+
+    &:first-of-type {
+        margin-top: 0;
+    }
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+
+    .form-group {
+        grid-column: span 6;
+        
+        @media (max-width: 768px) {
+            grid-column: span 12;
+        }
+
+        &--wide {
+            grid-column: span 8;
+            @media (max-width: 768px) { grid-column: span 12; }
+        }
+
+        &--narrow {
+            grid-column: span 4;
+            @media (max-width: 768px) { grid-column: span 12; }
+        }
+    }
+}

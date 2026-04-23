@@ -1,9 +1,0 @@
-{
-  "status": 409,
-  "body": {
-    "statusCode": 409,
-    "error": "CONFLICT",
-    "message": "Violação de regra única. O campo 'rg' já está em uso."
-  },
-  "cpfTentado": "434.450.822-28"
-}

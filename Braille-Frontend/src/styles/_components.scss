@@ -241,9 +241,9 @@
     border-left: 3px solid #3b82f6;
 }
 
-// Avatar FJ (azul)
+// Avatar FJ (azul-700 — contraste 5.1:1 com branco, passa WCAG AA)
 .avatar--fj {
-    background-color: #3b82f6 !important;
+    background-color: #1d4ed8 !important;
     color: #fff !important;
 }
 
@@ -499,7 +499,7 @@
             appearance: none;
         }
 
-        appearance: textfield;
+        // Padrão cross-browser: -moz- para Firefox, sem duplicação (SonarQube)
         -moz-appearance: textfield;
         appearance: textfield;
     }
@@ -900,16 +900,17 @@
 }
 
 // -- Focus Indicator para Navegação por Teclado (ListKeyManager) --
+// Usa tokens da paleta ILBES: $color-primary (amarelo) e $color-primary-light (fundo)
 .focavel-tr,
 .focavel-card {
-    transition: background-color 0.2s, outline 0.2s, box-shadow 0.2s;
+    transition: background-color $transition-fast, outline $transition-fast, box-shadow $transition-fast;
 
     &:focus,
     &.active-item {
-        outline: 2px solid #ed8936;
+        outline: 2px solid $color-primary;
         outline-offset: -2px;
-        background-color: #ffecd6;
-        box-shadow: inset 0 0 0 2px #ed8936;
+        background-color: $color-primary-light;
+        box-shadow: inset 0 0 0 2px $color-primary;
         position: relative;
         z-index: 10;
         cursor: pointer;

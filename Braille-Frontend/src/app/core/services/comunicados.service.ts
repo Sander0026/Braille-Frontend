@@ -30,9 +30,10 @@ export class ComunicadosService {
 
     constructor(private http: HttpClient) { }
 
-    listar(page = 1, limit = 50, categoria?: string): Observable<ComunicadoResponse | Comunicado[]> {
+    listar(page = 1, limit = 50, categoria?: string, titulo?: string): Observable<ComunicadoResponse | Comunicado[]> {
         let qs = `?page=${page}&limit=${limit}`;
         if (categoria) qs += `&categoria=${categoria}`;
+        if (titulo) qs += `&titulo=${encodeURIComponent(titulo)}`;
         return this.http.get<ComunicadoResponse | Comunicado[]>(`${this.url}${qs}`);
     }
 

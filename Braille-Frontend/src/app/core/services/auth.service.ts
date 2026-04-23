@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { StorageService } from './storage.service';
 
 export interface UserInfo {
   sub: string;
@@ -29,7 +30,10 @@ export class AuthService {
   private readonly TOKEN_KEY = 'token_braille';
   private readonly REFRESH_KEY = 'refresh_braille';
 
-  constructor(private http: HttpClient) { }
+  constructor(
+      private readonly http: HttpClient,
+      private readonly storage: StorageService
+  ) { }
 
   login(credenciais: { username: string; senha: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credenciais).pipe(
@@ -109,13 +113,21 @@ export class AuthService {
   }
 
   uploadFoto(file: File): Observable<{ url: string }> {
-    const form = new FormData();
-    form.append('file', file);
-    return this.http.post<{ url: string }>('/api/upload', form);
+    return this.storage.uploadGlobalImage(file);
   }
 
   private decodeToken(token: string): any {
-    const payload = token.split('.')[1];
-    return JSON.parse(atob(payload));
+    try {
+        const payload = token.split('.')[1];
+        // Snyk Mitigation: Normalizar Base64Url para Base64 standard e usar decodeURIComponent contra UTF-8 Crashes
+        const base64 = payload.replaceAll('-', '+').replaceAll('_', '/');
+        const jsonPayload = decodeURIComponent(globalThis.atob(base64).split('').map(function (c) {
+            return '%' + ('00' + c.codePointAt(0)!.toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+    } catch {
+        // SonarQube / Falback Control (Evita crash total caso de corrupção massiva)
+        return {};
+    }
   }
 }

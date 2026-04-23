@@ -1,0 +1,143 @@
+@use '../../../../styles/variables' as *;
+
+.toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    pointer-events: none;
+    /* Deixa os cliques passarem se não for no toast */
+}
+
+.toast-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 300px;
+    max-width: 450px;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    pointer-events: auto;
+    /* Reativa cliques dentro do toast */
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
+    
+    // Glassmorphism Moderno
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    // Tipos de Notificações com alpha 0.90 para Glass e Border leve
+    &.sucesso {
+        background: rgba(240, 253, 244, 0.90);
+        border: 1px solid rgba(34, 197, 94, 0.2);
+        border-left: 4px solid #16a34a; // Green 600 em WCAG constraste 4.5+
+        color: #14532d; // Green 900 alto contraste
+
+        .toast-icon {
+            color: #16a34a;
+        }
+    }
+
+    &.erro {
+        background: rgba(254, 242, 242, 0.90);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-left: 4px solid #dc2626; // Red 600 WCAG
+        color: #7f1d1d; // Red 900
+
+        .toast-icon {
+            color: #dc2626;
+        }
+    }
+
+    &.aviso {
+        background: rgba(255, 251, 235, 0.90);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-left: 4px solid #d97706; // Amber 600
+        color: #78350f; // Amber 900
+
+        .toast-icon {
+            color: #d97706;
+        }
+    }
+
+    &.info {
+        background: rgba(239, 246, 255, 0.90);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+        border-left: 4px solid #2563eb; // Blue 600
+        color: #1e3a8a; // Blue 900
+
+        .toast-icon {
+            color: #2563eb;
+        }
+    }
+}
+
+.toast-text {
+    flex: 1;
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    border-radius: 4px;
+
+    &:hover, &:focus-visible {
+        opacity: 1;
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+    }
+
+    .material-symbols-rounded {
+        font-size: 1.25rem;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+// Suporte nativo ao Distúrbio Vestibular ou Modo Leitor Fixo (WCAG AAA)
+@media (prefers-reduced-motion: reduce) {
+    .toast-message {
+        animation: none;
+        transition: none;
+    }
+    .toast-close {
+        transition: none;
+    }
+}
+
+// Responsividade
+@media (max-width: 640px) {
+    .toast-container {
+        bottom: 1rem;
+        right: 1rem;
+        left: 1rem;
+    }
+
+    .toast-message {
+        min-width: 100%;
+    }
+}

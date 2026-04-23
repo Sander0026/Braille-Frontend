@@ -1,0 +1,146 @@
+@use '../modal-shared.scss' as *;
+
+.perfil-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0;
+}
+
+.perfil-avatar-img {
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid $primary;
+    flex-shrink: 0;
+}
+
+.perfil-avatar-iniciais {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: $primary;
+    color: $primary-text;
+    font-weight: 800;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.perfil-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+
+    .perfil-nome {
+        font-size: 1rem;
+        font-weight: 700;
+        color: $gray-900;
+        margin: 0;
+    }
+
+    .perfil-cargo {
+        font-size: 0.8rem;
+        color: $gray-600;
+        margin: 0;
+    }
+}
+
+.perfil-actions-buttons {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-start;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.perfil-trocar-foto-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    color: #0b5e40; // improved contrast from $primary (#f5c800) against white
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 0.95rem;
+    }
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.perfil-remover-foto-link {
+    color: #dc2626;
+}
+
+.perfil-divider {
+    border-top: 1px solid $gray-200;
+    margin: 1rem 0;
+}
+
+.perfil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.875rem;
+
+    @media (max-width: 480px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-input-readonly {
+    background: $gray-50;
+    color: $gray-600;
+    cursor: default;
+    border: 1px solid $gray-200;
+}
+
+.form-hint {
+    font-size: 0.7rem;
+    color: $gray-600;
+    margin: 0;
+}
+
+.perfil-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: $gray-600;
+    padding: 0.375rem 0;
+
+    span {
+        font-family: 'Material Symbols Rounded', sans-serif;
+        font-size: 1.1rem;
+        color: $gray-400;
+    }
+
+    &.ativo {
+        color: #15803d; // improved contrast from #16a34a
+
+        span {
+            color: #15803d;
+        }
+    }
+}
+
+.profile-error {
+    margin-top: 0.5rem;
+}
+
+.profile-sucesso {
+    margin-top: 0.75rem;
+}

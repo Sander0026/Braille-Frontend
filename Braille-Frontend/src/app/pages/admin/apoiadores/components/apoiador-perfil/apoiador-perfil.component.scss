@@ -1,0 +1,145 @@
+@use "../../../../../../styles/variables.scss" as vars;
+
+$primary: vars.$color-primary;
+$gray-200: #e5e5e5;
+$gray-600: vars.$color-gray-600;
+$gray-900: #1f1f1f;
+$border-r: 0.5rem;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid $gray-200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: $gray-900;
+  }
+
+  .btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: $gray-600;
+    cursor: pointer;
+    line-height: 1;
+
+    &:hover {
+      color: $gray-900;
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* ============================================================ */
+/* PROFILE SPECIFICS                                            */
+/* ============================================================ */
+.profile-header {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: #f8fafc;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+
+  @media (max-width: 576px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.avatar-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 4px solid #fff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .avatar-actions {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border-radius: 50%;
+  }
+
+  &:hover .avatar-actions {
+    opacity: 1;
+  }
+}
+
+.profile-title {
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    color: #0f172a;
+  }
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  &.badge-primary { background: #dbeafe; color: #1e40af; }
+  &.badge-info { background: #cffafe; color: #0f766e; }
+  &.badge-neutral { background: #f1f5f9; color: #475569; }
+}
+
+@media (max-width: 640px) {
+  .profile-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

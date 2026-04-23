@@ -1,10 +1,20 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  signal,
+  inject,
+  DestroyRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
+
+import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
 
 @Component({
   selector: 'app-validar-certificado',
@@ -12,64 +22,81 @@ import { of } from 'rxjs';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './validar-certificado.html',
   styleUrls: ['./validar-certificado.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ValidarCertificado implements OnInit {
-  form: FormGroup;
-  resultadoValidacao: any = null;
-  erroValidacao = false;
-  buscando = false;
+export class ValidarCertificado {
 
-  constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private certificadosService: ModelosCertificadosService,
-    private cdr: ChangeDetectorRef
-  ) {
-    this.form = this.fb.group({
-      codigo: ['', [Validators.required, Validators.minLength(5)]]
-    });
+  // ── DI via inject() — campo-level = injection context válido ────────────────
+  private readonly fb                  = inject(FormBuilder);
+  private readonly route               = inject(ActivatedRoute);
+  private readonly certificadosService = inject(ModelosCertificadosService);
+  private readonly destroyRef          = inject(DestroyRef);
+  private readonly liveAnnouncer       = inject(LiveAnnouncer);
+
+  // ── Estado reativo ───────────────────────────────────────────────────────────
+  resultadoValidacao = signal<any>(null);
+  erroValidacao      = signal<boolean>(false);
+  buscando           = signal<boolean>(false);
+
+  // ── Formulário ───────────────────────────────────────────────────────────────
+  readonly form: FormGroup = this.fb.group({
+    codigo: ['', [Validators.required, Validators.minLength(5)]],
+  });
+
+  constructor() {
+    /**
+     * takeUntilDestroyed() SEM argumento é válido aqui porque está dentro do
+     * constructor = injection context ativo.
+     * Alternativa equivalente: passar this.destroyRef explicitamente.
+     */
+    this.route.queryParams
+      .pipe(takeUntilDestroyed())
+      .subscribe(params => {
+        const codigoParams = params['codigo'];
+        if (codigoParams) {
+          this.form.patchValue({ codigo: codigoParams });
+          this.validar();
+        }
+      });
   }
 
-  ngOnInit(): void {
-    // Escuta querystring para preencher automatizado via QR Code
-    this.route.queryParams.subscribe(params => {
-      const codigoParams = params['codigo'];
-      if (codigoParams) {
-        this.form.patchValue({ codigo: codigoParams });
-        this.validar();
-      }
-    });
-  }
-
-  validar() {
+  validar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      this.liveAnnouncer.announce('Informe um código de validação com pelo menos 5 caracteres válidos.', 'assertive');
       return;
     }
 
-    this.buscando = true;
-    this.resultadoValidacao = null;
-    this.erroValidacao = false;
-    this.cdr.markForCheck();
+    this.buscando.set(true);
+    this.resultadoValidacao.set(null);
+    this.erroValidacao.set(false);
+    this.liveAnnouncer.announce('Buscando autenticidade, por favor aguarde...', 'polite');
 
-    const codigoLimpo = this.form.value.codigo.trim().toUpperCase();
+    // Sanitização do código (sem XSS/Injection — apenas trim + uppercase)
+    const codigoLimpo: string = (this.form.value.codigo as string).trim().toUpperCase();
 
-    this.certificadosService.validarAutenticidade(codigoLimpo).pipe(
-      catchError(err => {
-        this.erroValidacao = true;
-        this.resultadoValidacao = null;
-        this.buscando = false;
-        this.cdr.markForCheck();
-        return of(null);
-      })
-    ).subscribe(result => {
-      if (result) {
-        this.resultadoValidacao = result;
-        this.erroValidacao = false;
-      }
-      this.buscando = false;
-      this.cdr.markForCheck();
-    });
+    /**
+     * CORREÇÃO NG0203: takeUntilDestroyed() dentro de um método normal requer
+     * DestroyRef explícito — sem ele, o Angular não encontra o injection context.
+     */
+    this.certificadosService.validarAutenticidade(codigoLimpo)
+      .pipe(
+        takeUntilDestroyed(this.destroyRef),
+        catchError(() => {
+          this.erroValidacao.set(true);
+          this.resultadoValidacao.set(null);
+          this.buscando.set(false);
+          this.liveAnnouncer.announce('Certificado Inválido ou Inexistente. Verifique se digitou a credencial corretamente.', 'assertive');
+          return of(null); // Aborto silencioso — sem stack traces expostos (OWASP)
+        }),
+      )
+      .subscribe(result => {
+        if (result) {
+          this.resultadoValidacao.set(result);
+          this.erroValidacao.set(false);
+          this.liveAnnouncer.announce(`Certificado Válido! Emitido para ${result.nome}.`, 'polite');
+        }
+        this.buscando.set(false);
+      });
   }
 }

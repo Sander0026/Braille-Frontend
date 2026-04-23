@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { PaginatedResponse } from './beneficiarios.service';
+import { StorageService } from './storage.service';
 
 export interface Usuario {
     id: string;
@@ -69,10 +70,13 @@ export interface CreateUsuarioDto {
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
     private readonly url = '/api/users';
-    private cache = new Map<string, Observable<PaginatedResponse<Usuario>>>();
+    private readonly cache = new Map<string, { data$: Observable<PaginatedResponse<Usuario>>, expiresAt: number }>();
     private readonly cacheTimeMs = 2 * 60 * 1000;
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private readonly http: HttpClient,
+        private readonly storage: StorageService
+    ) { }
 
     limparCache(): void { this.cache.clear(); }
 
@@ -88,17 +92,21 @@ export class UsuariosService {
 
     listar(page = 1, limit = 10, nome?: string, inativos = false, role?: string): Observable<PaginatedResponse<Usuario>> {
         const key = this.buildCacheKey(page, limit, nome, inativos, role);
-        if (!this.cache.has(key)) {
-            let params = new HttpParams().set('page', page).set('limit', limit);
-            if (nome) params = params.set('nome', nome);
-            if (inativos) params = params.set('inativos', 'true');
-            if (role) params = params.set('role', role);
-            
-            const req$ = this.http.get<PaginatedResponse<Usuario>>(this.url, { params }).pipe(shareReplay(1));
-            this.cache.set(key, req$);
-            setTimeout(() => this.cache.delete(key), this.cacheTimeMs);
+        const now = Date.now();
+
+        if (this.cache.has(key) && this.cache.get(key)!.expiresAt > now) {
+            return this.cache.get(key)!.data$;
         }
-        return this.cache.get(key)!;
+
+        let params = new HttpParams().set('page', page).set('limit', limit);
+        if (nome) params = params.set('nome', nome);
+        if (inativos) params = params.set('inativos', 'true');
+        if (role) params = params.set('role', role);
+        
+        const req$ = this.http.get<PaginatedResponse<Usuario>>(this.url, { params }).pipe(shareReplay(1));
+        this.cache.set(key, { data$: req$, expiresAt: now + this.cacheTimeMs });
+        
+        return req$;
     }
 
     /** Cria um novo usuário. O backend retorna `_reativacao: true` se o CPF já existir inativo. */
@@ -139,8 +147,6 @@ export class UsuariosService {
     }
 
     uploadFoto(file: File): Observable<{ url: string }> {
-        const formData = new FormData();
-        formData.append('file', file);
-        return this.http.post<{ url: string }>('/api/upload', formData);
+        return this.storage.uploadGlobalImage(file);
     }
 }

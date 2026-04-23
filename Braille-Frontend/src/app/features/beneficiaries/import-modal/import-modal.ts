@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Output, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { A11yModule } from '@angular/cdk/a11y';
+import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { BeneficiariosService, ImportResult } from '../../../core/services/beneficiarios.service';
 import { ToastService } from '../../../core/services/toast.service';
 
@@ -24,7 +24,8 @@ export class ImportModalComponent {
     constructor(
         private beneficiariosService: BeneficiariosService,
         private toast: ToastService,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private liveAnnouncer: LiveAnnouncer
     ) { }
 
     // ── Drag & Drop ───────────────────────────────────────────────
@@ -64,6 +65,7 @@ export class ImportModalComponent {
         this.erro = '';
         this.resultado = null;
         this.arquivoSelecionado = file;
+        this.liveAnnouncer.announce(`Arquivo ${file.name} selecionado.`, 'polite');
         this.cdr.markForCheck();
     }
 
@@ -84,6 +86,7 @@ export class ImportModalComponent {
         this.processando = true;
         this.erro = '';
         this.resultado = null;
+        this.liveAnnouncer.announce('Iniciando processamento da planilha. Por favor, aguarde.', 'assertive');
         this.cdr.markForCheck();
 
         this.beneficiariosService.importar(this.arquivoSelecionado).subscribe({
@@ -91,14 +94,18 @@ export class ImportModalComponent {
                 this.resultado = res;
                 this.processando = false;
                 if (res.importados > 0) {
+                    this.liveAnnouncer.announce(`Importação concluída. ${res.importados} aluno(s) importado(s) com sucesso.`, 'assertive');
                     this.toast.sucesso(`${res.importados} aluno(s) importado(s) com sucesso!`);
                     this.beneficiariosService.limparCache();
+                } else {
+                    this.liveAnnouncer.announce('Importação concluída, mas nenhum aluno novo foi importado.', 'assertive');
                 }
                 this.cdr.markForCheck();
             },
             error: (err) => {
                 this.erro = err?.error?.message || 'Erro ao processar a planilha. Tente novamente.';
                 this.processando = false;
+                this.liveAnnouncer.announce('Erro na importação: ' + this.erro, 'assertive');
                 this.cdr.markForCheck();
             }
         });
