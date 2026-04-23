@@ -70,16 +70,16 @@
                     <tr>
                         <th scope="col" aria-sort="none">Identificação</th>
                         <th scope="col">Contato Principal</th>
-                        <th scope="col">Vínculo</th>
+                        <th scope="col" class="text-center">Vínculo</th>
                         <th scope="col" class="text-center">Status / Site Público</th>
-                        <th scope="col" class="text-right">Gerenciar</th>
+                        <th scope="col" class="text-center">Gerenciar</th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (ap of apoiadoresFiltrados; track ap.id) {
                     <tr>
                         <!-- Coluna 1: Logo e Identidade -->
-                        <td>
+                        <td data-label="Identificação">
                             <div class="td-flex-group">
                                 <div class="mini-avatar">
                                     @if (ap.logoUrl) {
@@ -101,7 +101,7 @@
                         </td>
 
                         <!-- Coluna 2: Contato -->
-                        <td>
+                        <td data-label="Contato Principal">
                             <div class="contact-info">
                                 <div class="text-truncate" style="max-width: 200px;" [title]="ap.email || 'N/A'">
                                     <span class="material-symbols-rounded icon-sm" aria-hidden="true">mail</span>
@@ -114,8 +114,8 @@
                             </div>
                         </td>
 
-                        <!-- Coluna 3: Tipo -->
-                        <td>
+                        <!-- Coluna 3: Vínculo -->
+                        <td data-label="Vínculo">
                             <span class="badge" [class.badge-primary]="ap.tipo === 'EMPRESA'"
                                 [class.badge-info]="ap.tipo === 'PROFISSIONAL_LIBERAL'"
                                 [class.badge-neutral]="ap.tipo === 'ONG' || ap.tipo === 'VOLUNTARIO'">
@@ -124,7 +124,7 @@
                         </td>
 
                         <!-- Coluna 4: Status (Toggles Integrados) -->
-                        <td class="text-center">
+                        <td data-label="Status / Site Público" class="text-center">
                             <div class="status-stack">
                                 <!-- Ativo/Inativo via visualização direta (Acessível) -->
                                 <button type="button" class="status-toggle-label" role="switch"
@@ -143,7 +143,7 @@
                         </td>
 
                         <!-- Coluna 5: Ações Avançadas -->
-                        <td class="text-center">
+                        <td data-label="Gerenciar" class="text-center">
                             <div class="action-buttons">
                                 <button class="btn btn-icon btn-sm btn-light" (click)="abrirDados(ap)"
                                     title="Visualizar Ficha" aria-label="Visualizar Ficha">
