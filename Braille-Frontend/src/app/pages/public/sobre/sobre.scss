@@ -10,13 +10,30 @@ $gray-900: #1a1a1a;
 // ── Page hero (shared with Sobre/Contato) ─────────────────
 .page-hero {
     background: $black;
+    background-image: url('/fachada_ilbes.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
     padding: 4rem 1.5rem 3.5rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.52) 100%);
+        z-index: 0;
+        pointer-events: none;
+    }
 }
 
 .page-hero-inner {
     max-width: 700px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .page-eyebrow {
@@ -37,16 +54,18 @@ $gray-900: #1a1a1a;
 }
 
 .page-hero-desc {
-    font-size: 1rem;
-    color: color.change(#fff, $alpha: .7);
+    font-size: 1.1rem;
+    color: color.change(#fff, $alpha: .9);
     line-height: 1.7;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 600px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 // ── Content section ───────────────────────────────────────
 .content-section {
-    background: $gray-100;
-    padding: 5rem 0;
+    background: #f8fafc;
+    padding: clamp(3.4rem, 5.5vw, 5rem) 0;
 }
 
 .content-inner {
@@ -57,8 +76,8 @@ $gray-900: #1a1a1a;
 
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: clamp(2rem, 4vw, 3.5rem);
     align-items: start;
 
     @media (max-width: 768px) {
@@ -67,10 +86,10 @@ $gray-900: #1a1a1a;
 }
 
 .content-title {
-    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
     font-weight: 800;
     color: $gray-900;
-    margin: 0 0 1.25rem;
+    margin: 0 0 1.05rem;
 }
 
 .text-center {
@@ -78,95 +97,136 @@ $gray-900: #1a1a1a;
 }
 
 .content-text p {
-    font-size: 0.95rem;
+    font-size: 0.96rem;
     color: $gray-600;
-    line-height: 1.75;
-    margin-bottom: 1rem;
+    line-height: 1.78;
+    margin-bottom: 0.95rem;
+}
+
+.section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #7a6000;
+    margin-bottom: 0.75rem;
+
+    .material-symbols-rounded {
+        font-size: 1.05rem;
+        font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+}
+
+.historia-body {
+    div + div {
+        margin-top: 0.25rem;
+    }
 }
 
 // ── Timeline ──────────────────────────────────────────────
 .timeline {
     display: flex;
     flex-direction: column;
-    gap: 0;
+    gap: 0.35rem;
     position: relative;
 
     &::before {
         content: '';
         position: absolute;
-        left: 4rem;
+        left: 4.25rem;
         top: 0;
         bottom: 0;
         width: 2px;
-        background: $gray-200;
+        background: #d8dee6;
     }
 }
 
 .timeline-item {
     display: grid;
-    grid-template-columns: 5rem 1fr;
-    gap: 1rem;
-    padding: 1rem 0;
+    grid-template-columns: 4.8rem 1fr;
+    gap: 1.05rem;
+    padding: 0.65rem 0;
     position: relative;
 
     &::after {
         content: '';
         position: absolute;
-        left: calc(4rem - 5px);
-        top: 1.5rem;
-        width: 12px;
-        height: 12px;
+        left: calc(4.25rem - 5px);
+        top: 1.2rem;
+        width: 11px;
+        height: 11px;
         border-radius: 50%;
         background: $primary;
         border: 2px solid #fff;
-        box-shadow: 0 0 0 2px $primary;
+        box-shadow: 0 0 0 2px color.change($primary, $alpha: 0.38);
     }
 }
 
 .timeline-year {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 800;
     color: #7a6000;
-    padding-top: 0.1rem;
+    padding-top: 0.9rem;
     text-align: right;
-    padding-right: 1.5rem;
+    padding-right: 1rem;
 }
 
 .timeline-content {
+    background: #fff;
+    border: 1px solid #e7ebf0;
+    border-left: 3px solid $primary;
+    border-radius: 0.75rem;
+    padding: 0.9rem 1rem;
+
     strong {
-        font-size: 0.9rem;
+        font-size: 0.88rem;
         color: $gray-900;
         display: block;
-        margin-bottom: 0.15rem;
+        margin-bottom: 0.2rem;
     }
 
     p {
         font-size: 0.8rem;
         color: $gray-600;
         margin: 0;
-        line-height: 1.5;
+        line-height: 1.58;
     }
 }
 
 // ── Equipe ────────────────────────────────────────────────
 .equipe-section {
     background: #fff;
-    padding: 5rem 0;
+    padding: clamp(4rem, 6vw, 5.5rem) 0;
     text-align: center;
 }
 
-.equipe-desc {
-    text-align: center;
-    color: $gray-600;
-    font-size: 0.95rem;
-    margin: 0 auto 2.5rem;
-    max-width: 500px;
+.equipe-section {
+    .section-header {
+        margin-bottom: 2.25rem;
+    }
+
+    .section-title {
+        margin: 0 0 0.75rem;
+        font-size: clamp(1.5rem, 3vw, 2.1rem);
+        color: $gray-900;
+    }
+
+    .section-subtitle {
+        margin: 0 auto;
+        max-width: 640px;
+        color: $gray-600;
+        line-height: 1.7;
+        font-size: 1rem;
+    }
 }
 
 .equipe-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 1.25rem;
+    gap: 1.4rem;
 }
 
 .equipe-card {
@@ -182,6 +242,22 @@ $gray-900: #1a1a1a;
         box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
     }
 
+    .equipe-icon {
+        width: 3.35rem;
+        height: 3.35rem;
+        margin: 0 auto 0.75rem;
+        border-radius: 0.875rem;
+        background: color.change($primary, $alpha: 0.16);
+        display: grid;
+        place-items: center;
+
+        .material-symbols-rounded {
+            font-size: 1.75rem;
+            color: #7a6000;
+            font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 24;
+        }
+    }
+
     h3 {
         font-size: 0.9rem;
         font-weight: 700;
@@ -189,7 +265,8 @@ $gray-900: #1a1a1a;
         margin: 0.5rem 0 0.375rem;
     }
 
-    p {
+    .equipe-desc,
+    .equipe-desc p {
         font-size: 0.78rem;
         color: $gray-600;
         margin: 0;
@@ -197,35 +274,44 @@ $gray-900: #1a1a1a;
     }
 }
 
-.equipe-avatar {
-    font-size: 2.5rem;
-    line-height: 1;
-}
-
 // ── CTA footer ────────────────────────────────────────────
 .sobre-cta {
     background: $primary;
-    padding: 4rem 0;
+    padding: clamp(3.5rem, 5vw, 4.5rem) 0;
     text-align: center;
 }
 
 .sobre-cta-inner {
+    max-width: 820px;
+
+    .cta-icon {
+        font-size: 2.4rem;
+        color: $black;
+        display: inline-block;
+        margin-bottom: 0.9rem;
+        font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 48;
+    }
+
     h2 {
         font-size: clamp(1.4rem, 3vw, 2rem);
         font-weight: 900;
         color: $black;
-        margin: 0 0 0.5rem;
+        margin: 0 0 0.65rem;
     }
 
-    p {
+    .cta-desc,
+    .cta-desc p {
         font-size: 0.9rem;
         color: color.change($black, $alpha: .7);
         margin: 0 0 1.5rem;
+        line-height: 1.7;
     }
 }
 
 .btn-cta {
     display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
     padding: 0.75rem 2rem;
     background: $black;
     color: $primary;
@@ -237,5 +323,46 @@ $gray-900: #1a1a1a;
 
     &:hover {
         transform: translateY(-2px);
+    }
+}
+
+@media (max-width: 640px) {
+    .equipe-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .equipe-card {
+        max-width: 420px;
+        margin: 0 auto;
+    }
+}
+
+// ── Separador entre seções (default) ───────────────────────
+.wave-sep {
+    line-height: 0;
+
+    svg {
+        display: block;
+        width: 100%;
+    }
+}
+
+// ── Alto contraste: preto sólido entre seções ──────────────
+:host-context(html.alto-contraste) {
+    .page-hero,
+    .content-section,
+    .wave-sep,
+    .equipe-section,
+    .wave-sep svg {
+        background: #000 !important;
+        background-image: none !important;
+    }
+
+    .page-hero::before {
+        display: none !important;
+    }
+
+    .wave-sep svg path {
+        fill: #000 !important;
     }
 }

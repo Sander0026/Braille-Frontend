@@ -104,6 +104,12 @@
 
 // Card do modal (dentro do .modal-backdrop)
 .modal {
+    // Reset native <dialog> styles that break Flexbox centering
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: none;
+
     background: #fff;
     border-radius: 0.875rem;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
@@ -118,6 +124,8 @@
     @media (max-width: 480px) {
         max-width: 100%;
         max-height: 88vh;
+        width: 100%;
+        margin-top: auto; // Ensures it sticks to bottom like a bottom sheet
     }
 }
 
@@ -133,14 +141,41 @@
     }
 }
 
+@keyframes slideUpModalContent {
+    from {
+        transform: translate(-50%, calc(-50% + 12px));
+        opacity: 0;
+    }
 
-.modal-content {
+    to {
+        transform: translate(-50%, -50%);
+        opacity: 1;
+    }
+}
+
+:host ::ng-deep {
+    .modal-content {
+        // Força centralização absoluta blindando contra quebras nativas do <dialog> e flexbox
+        position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    border: none;
+
     background-color: #ffffff;
     border-radius: 8px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-    display: flex;
+    
+    // Protege contra sobreposição visível de dialogos não acionados
+    display: none;
+    &[open] {
+        display: flex;
+    }
+    
     flex-direction: column;
     max-height: 90vh;
+    animation: slideUpModalContent 200ms ease-out;
     overflow: hidden;
     box-sizing: border-box;
     min-width: 0;
@@ -442,6 +477,7 @@
             font-size: 0.85rem;
         }
     }
+}
 }
 
 // --- Abas Estilos ---

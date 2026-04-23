@@ -26,12 +26,12 @@ export const routes: Routes = [
       },
       {
         path: 'noticias',
-        loadComponent: () => import('./pages/public/noticias-lista/noticias-lista').then(m => m.NoticiasLista),
+        loadComponent: () => import('./pages/public/noticias/noticias-lista/noticias-lista').then(m => m.NoticiasLista),
         title: 'Notícias e Comunicados — ILBES'
       },
       {
         path: 'noticias/:id',
-        loadComponent: () => import('./pages/public/noticia-detalhe/noticia-detalhe').then(m => m.NoticiaDetalhe),
+        loadComponent: () => import('./pages/public/noticias/noticia-detalhe/noticia-detalhe').then(m => m.NoticiaDetalhe),
         title: 'Notícia — Instituto Luiz Braille'
       },
       {
@@ -53,7 +53,7 @@ export const routes: Routes = [
       // Dashboard
       {
         path: 'dashboard',
-        loadComponent: () => import('./pages/admin/dashboard/dashboard').then(m => m.Dashboard),
+        loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard),
         title: 'Dashboard — ILBES'
       },
 
@@ -62,28 +62,23 @@ export const routes: Routes = [
         path: 'alunos',
         loadComponent: () => import('./features/beneficiaries/beneficiary-list/beneficiary-list').then(m => m.BeneficiaryList),
         title: 'Alunos — ILBES',
+        canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
       {
         path: 'alunos/cadastro',
-        loadComponent: () => import('./pages/admin/beneficiarios/cadastro-wizard/cadastro-wizard').then(m => m.CadastroWizard),
+        loadComponent: () => import('./features/beneficiaries/beneficiary-form/beneficiary-form').then(m => m.BeneficiaryFormComponent),
         title: 'Novo Aluno — ILBES',
         canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
 
-      // Turmas
+      // Turmas — criação e edição gerenciadas pelo TurmaFormModal dentro da TurmasLista
       {
         path: 'turmas',
         loadComponent: () => import('./pages/admin/turmas/turmas-lista/turmas-lista').then(m => m.TurmasLista),
-        title: 'Turmas — ILBES'
-      },
-      {
-        path: 'turmas/cadastro',
-        loadComponent: () => import('./pages/admin/turmas/cadastro-turma-wizard/cadastro-turma-wizard').then(m => m.CadastroTurmaWizard),
-        title: 'Nova Oficina — ILBES',
-        canDeactivate: [descarteGuard],
-        data: { roles: ['ADMIN', 'SECRETARIA'] }
+        title: 'Turmas — ILBES',
+        canDeactivate: [descarteGuard]
       },
 
       // Frequências
@@ -97,6 +92,7 @@ export const routes: Routes = [
       {
         path: 'apoiadores',
         loadComponent: () => import('./pages/admin/apoiadores/apoiadores-lista/apoiadores-lista').then(m => m.ApoiadoresLista),
+        title: 'Apoiadores — ILBES',
         canActivate: [roleGuard],
         canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN', 'EDITOR'] }
@@ -157,6 +153,13 @@ export const routes: Routes = [
         title: 'Novo Usuário — ILBES',
         canDeactivate: [descarteGuard],
         data: { roles: ['ADMIN'] }
+      },
+
+      // Ajuda e Documentação — visível para todos os perfis autenticados
+      {
+        path: 'ajuda',
+        loadComponent: () => import('./pages/admin/ajuda/ajuda').then(m => m.Ajuda),
+        title: 'Central de Ajuda — ILBES'
       },
 
       // Auditoria — Fase 5

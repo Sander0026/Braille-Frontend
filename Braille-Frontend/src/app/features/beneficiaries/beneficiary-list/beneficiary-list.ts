@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -9,16 +9,17 @@ import { BeneficiariosService, Beneficiario } from '../../../core/services/benef
 import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { FormatDatePipe } from '../../../shared/pipes/data-braille.pipe';
+import { DataBraillePipe } from '../../../shared/pipes/data-braille.pipe';
 import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
+import { BeneficiaryFormComponent } from '../beneficiary-form/beneficiary-form';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
-import { FormsModule } from '@angular/forms';
-import { AtestadosService, Atestado, PreviewAtestado, CriarAtestadoDto } from '../../../core/services/atestados.service';
-import { LaudosService, LaudoMedico, CriarLaudoDto } from '../../../core/services/laudos.service';
+import { AtestadosService, Atestado, PreviewAtestado } from '../../../core/services/atestados.service';
+import { LaudosService, LaudoMedico } from '../../../core/services/laudos.service';
 import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
+import { ComponenteComDescarte } from '../../../core/interfaces/componente-com-descarte.interface';
 
 
 @Directive({
@@ -39,11 +40,11 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, FormatDatePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
-export class BeneficiaryList implements OnInit, OnDestroy {
+export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte {
   alunos: Beneficiario[] = [];
   isLoading = true;
   erro = '';
@@ -93,13 +94,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // Busca
   buscaCtrl = new FormControl('');
 
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
 
   // Modal de Edição
   modalEdicaoAberto = false;
   alunoEmEdicao: Beneficiario | null = null;
-  salvandoEdicao = false;
-  editForm!: FormGroup;
+  @ViewChild(BeneficiaryFormComponent) formEdicaoComponent?: BeneficiaryFormComponent;
 
   // Modal de Importação
   modalImportAberto = false;
@@ -107,7 +107,20 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
 
   // Acessibilidade: restaurar foco após fechar modal (WCAG 2.4.3)
-  private lastFocusBeforeModal: HTMLElement | null = null;
+  private focusStack: HTMLElement[] = [];
+
+  private pushFocus(): void {
+    const el = document.activeElement as HTMLElement;
+    if (el) this.focusStack.push(el);
+  }
+
+  private popFocus(): void {
+    const fn = () => {
+      const el = this.focusStack.pop();
+      if (el && document.body.contains(el)) el.focus();
+    };
+    setTimeout(fn, 50);
+  }
 
   // ── Filtros Avançados (Drawer) ──────────────────────────────────
   drawerAberto = false;
@@ -148,54 +161,21 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   novoLgpdUrl = '';
 
   constructor(
-    private beneficiariosService: BeneficiariosService,
-    private cdr: ChangeDetectorRef,
-    private confirmDialog: ConfirmDialogService,
-    private toast: ToastService,
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private frequenciasService: FrequenciasService,
-    private liveAnnouncer: LiveAnnouncer,
-    private sanitizer: DomSanitizer,
-    private atestadosService: AtestadosService,
-    private laudosService: LaudosService,
-    private http: HttpClient,
-    private modelosCertificadosService: ModelosCertificadosService
+    private readonly beneficiariosService: BeneficiariosService,
+    private readonly cdr: ChangeDetectorRef,
+    private readonly confirmDialog: ConfirmDialogService,
+    private readonly toast: ToastService,
+    private readonly fb: FormBuilder,
+    private readonly authService: AuthService,
+    private readonly frequenciasService: FrequenciasService,
+    private readonly liveAnnouncer: LiveAnnouncer,
+    private readonly sanitizer: DomSanitizer,
+    private readonly atestadosService: AtestadosService,
+    private readonly laudosService: LaudosService,
+    private readonly http: HttpClient,
+    private readonly modelosCertificadosService: ModelosCertificadosService
   ) {
-    this.editForm = this.fb.group({
-      nomeCompleto: [''],
-      cpf: [''],
-      rg: [''],
-      dataNascimento: [''],
-      genero: [''],
-      corRaca: [''],
-      email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],
-      telefoneContato: [''],
-      // Endereço
-      cep: [''],
-      rua: [''],
-      numero: [''],
-      complemento: [''],
-      bairro: [''],
-      cidade: [''],
-      uf: [''],
-      // Deficiência
-      tipoDeficiencia: [''],
-      causaDeficiencia: [''],
-      idadeOcorrencia: [''],
-      tecAssistivas: [''],
-      prefAcessibilidade: [''],
-      outrasComorbidades: [''],
-      // Socioeconômico
-      escolaridade: [''],
-      profissao: [''],
-      rendaFamiliar: [''],
-      beneficiosGov: [''],
-      composicaoFamiliar: [''],
-      precisaAcompanhante: [false],
-      acompOftalmologico: [false],
-      contatoEmergencia: [''],
-    });
+
     this.filterForm = this.fb.group({
       tipoDeficiencia: [''],
       causaDeficiencia: [''],
@@ -213,44 +193,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     });
   }
 
-  // --- MÁSCARAS ---
-  formatarCpf(event: any) {
-    let v = event.target.value.replace(/\D/g, '').substring(0, 11);
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    event.target.value = v;
-    this.editForm.get('cpf')?.setValue(v, { emitEvent: false });
-  }
 
-  formatarRg(event: any) {
-    let v = event.target.value.replace(/\D/g, '').substring(0, 9);
-    let parts = [];
-    while (v.length > 3) {
-      parts.unshift(v.substring(v.length - 3));
-      v = v.substring(0, v.length - 3);
-    }
-    if (v.length > 0) parts.unshift(v);
-    
-    let result = parts.join('.');
-    event.target.value = result;
-    this.editForm.get('rg')?.patchValue(result);
-  }
-
-  formatarEmail(event: any) {
-    let v = event.target.value.replace(/\s/g, '').toLowerCase();
-    event.target.value = v;
-    this.editForm.get('email')?.setValue(v, { emitEvent: false });
-  }
-
-  formatarTelefone(event: any) {
-    let v = event.target.value.replace(/\D/g, '').substring(0, 11);
-    v = v.length <= 10
-        ? v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
-        : v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
-    event.target.value = v;
-    this.editForm.get('telefoneContato')?.setValue(v, { emitEvent: false });
-  }
 
   ngOnInit(): void {
     this.buscaCtrl.valueChanges.pipe(
@@ -287,7 +230,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
     // C-05: Escape fecha qualquer modal aberto (WCAG 2.1.2)
     if (event.key === 'Escape') {
-      if (this.modalEdicaoAberto) { this.fecharModalEdicao(); event.preventDefault(); }
+      if (this.modalEdicaoAberto) { this.tentarFecharModalEdicao(); event.preventDefault(); }
       else if (this.modalAberto) { this.fecharModal(); event.preventDefault(); }
       else if (this.drawerAberto) { this.drawerAberto = false; this.cdr.markForCheck(); event.preventDefault(); }
       return;
@@ -351,7 +294,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     const a = this.alunoSelecionado;
     if (!a) return;
 
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    this.pushFocus();
 
     const fmtData = (v?: string | Date | null) => {
       if (!v) return 'Não informado';
@@ -524,7 +467,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     this.mostrarModalFicha = false;
     this.fichaHtml = null;
     this.cdr.detectChanges();
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    this.popFocus();
   }
 
   // ── Filtros Avançados ────────────────────────────────────────────
@@ -547,6 +490,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   aplicarFiltros(): void {
     this.drawerAberto = false;
     this.paginaAtual = 1;
+    this.liveAnnouncer.announce('Aplicando filtros avançados. Carregando...', 'polite');
     this.beneficiariosService.limparCache();
     this.carregar();
     this.cdr.markForCheck();
@@ -590,121 +534,57 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Modal de Edição ────────────────────────────────────────────
   abrirModalEdicao(aluno: Beneficiario): void {
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
-    this.alunoEmEdicao = aluno;
-    this.modalEdicaoAberto = true;
-    this.cdr.markForCheck();
+    this.pushFocus();
 
-    // C-06: Mover foco para o primeiro campo do modal ao abrir (WCAG 2.4.3)
-    setTimeout(() => {
-      const primeiroFocavel = document.querySelector<HTMLElement>(
-        '.modal-edicao input:not([disabled]), .modal-edicao select:not([disabled]), .modal-edicao textarea:not([disabled]), .modal-edicao button'
-      );
-      primeiroFocavel?.focus();
-    }, 80);
-
-    // Carrega dados completos do aluno para preencher o form
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
-        // Formata a data de nascimento para yyyy-MM-dd (formato do input[type=date])
-        const dataNasc = dadosCompletos.dataNascimento
-          ? dadosCompletos.dataNascimento.substring(0, 10)
-          : '';
-        this.editForm.patchValue({ ...dadosCompletos, dataNascimento: dataNasc });
-        
-        // Aplica formatação visual
-        if (dadosCompletos.cpf) this.formatarCpf({ target: { value: dadosCompletos.cpf } });
-        if (dadosCompletos.rg) this.formatarRg({ target: { value: dadosCompletos.rg } });
-        if (dadosCompletos.telefoneContato) this.formatarTelefone({ target: { value: dadosCompletos.telefoneContato } });
-
+        // ✅ Ordem atômica garantida:
+        // 1. Popula alunoEmEdicao PRIMEIRO
+        // 2. Só ENTÃO abre o modal
+        // Isso elimina o race condition onde modalEdicaoAberto=true chegava
+        // antes de alunoEmEdicao ser definido, fazendo o form iniciar em modo CRIAÇÃO.
+        this.alunoEmEdicao = dadosCompletos;
+        this.modalEdicaoAberto = true;
         this.cdr.markForCheck();
-      }
-    });
-  }
-
-  async fecharModalEdicao(forcar = false): Promise<void> {
-    if (!forcar && this.editForm.dirty && !this.salvandoEdicao) {
-        const ok = await this.confirmDialog.confirmar({
-            titulo: 'Sair sem salvar?',
-            mensagem: 'Você tem alterações não salvas. Se sair agora, todos os dados preenchidos serão perdidos.',
-            textoBotaoConfirmar: 'Sair e perder dados',
-            textoBotaoCancelar: 'Continuar editando',
-            tipo: 'warning'
-        });
-        if (!ok) return;
-    }
-    this.modalEdicaoAberto = false;
-    this.alunoEmEdicao = null;
-    this.editForm.reset();
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
-  }
-
-  salvarEdicao(): void {
-    if (!this.alunoEmEdicao || this.salvandoEdicao) return;
-    this.salvandoEdicao = true;
-
-    const rawVal = this.editForm.value;
-    const payload = {
-      ...rawVal,
-      cpf: rawVal.cpf ? String(rawVal.cpf).replace(/\D/g, '') : rawVal.cpf,
-      rg: rawVal.rg ? String(rawVal.rg).replace(/\D/g, '') : rawVal.rg,
-      telefoneContato: rawVal.telefoneContato ? rawVal.telefoneContato.replace(/\D/g, '') : rawVal.telefoneContato,
-      cep: rawVal.cep ? rawVal.cep.replace(/\D/g, '') : rawVal.cep
-    };
-    this.beneficiariosService.atualizar(this.alunoEmEdicao.id, payload).subscribe({
-      next: () => {
-        setTimeout(() => {
-          this.salvandoEdicao = false;
-          this.fecharModalEdicao(true);
-          this.toast.sucesso('Aluno atualizado com sucesso!');
-          this.carregar();
-        }, 0);
       },
       error: () => {
-        setTimeout(() => {
-          this.salvandoEdicao = false;
-          this.toast.erro('Erro ao atualizar os dados do aluno.');
-          this.cdr.markForCheck();
-        }, 0);
-      }
+        this.toast.erro('Não foi possível carregar os dados do aluno. Tente novamente.');
+        this.cdr.markForCheck();
+      },
     });
   }
 
-  buscarCep(): void {
-    let cep = this.editForm.get('cep')?.value;
-    if (!cep) return;
-    cep = cep.replace(/\D/g, '');
-    if (cep.length === 8) {
-      this.liveAnnouncer.announce('Buscando endereço pelo CEP...');
-      this.http.get(`https://viacep.com.br/ws/${cep}/json/`).subscribe({
-        next: (dados: any) => {
-          if (dados.erro) {
-            this.toast.erro('CEP não encontrado. Verifique a digitação.');
-            this.liveAnnouncer.announce('CEP não encontrado. Verifique a digitação.');
-          } else {
-            this.editForm.patchValue({
-              rua: dados.logradouro,
-              bairro: dados.bairro,
-              cidade: dados.localidade,
-              uf: dados.uf
-            });
-            this.liveAnnouncer.announce('Endereço preenchido automaticamente.');
-            this.cdr.markForCheck();
-          }
-        },
-        error: () => {
-          this.toast.erro('Erro ao conectar com o serviço de CEP.');
-          this.liveAnnouncer.announce('Erro ao conectar com o serviço de CEP.');
-          this.cdr.markForCheck();
-        }
-      });
+
+  fecharModalEdicao(): void {
+    this.modalEdicaoAberto = false;
+    this.alunoEmEdicao = null;
+    this.popFocus();
+  }
+
+  async tentarFecharModalEdicao(): Promise<void> {
+    const podeFechar = await this.podeDescartar();
+    if (!podeFechar) return;
+    this.fecharModalEdicao();
+  }
+
+  async podeDescartar(): Promise<boolean> {
+    if (this.modalEdicaoAberto && this.formEdicaoComponent) {
+      return await this.formEdicaoComponent.podeDescartar();
     }
+    return true;
+  }
+
+  aoSalvarEdicao(): void {
+    this.fecharModalEdicao();
+    this.toast.sucesso('Aluno atualizado com sucesso!');
+    this.carregar();
   }
 
   // ── Exportar Lista para Excel ─────────────────────────────────────
   exportarListaParaXlsx(): void {
     if (this.exportando) return;
     this.exportando = true;
+    this.liveAnnouncer.announce('Aguarde, gerando a planilha Excel...', 'assertive');
     this.cdr.markForCheck();
 
     const busca = this.buscaCtrl.value?.trim() || undefined;
@@ -727,21 +607,25 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           link.click();
           URL.revokeObjectURL(url);
           this.exportando = false;
+          this.liveAnnouncer.announce('Planilha exportada com sucesso.', 'assertive');
           this.cdr.markForCheck();
         },
         error: () => {
           this.toast.erro('Erro ao exportar a lista. Tente novamente.');
           this.exportando = false;
+          this.liveAnnouncer.announce('Ocorreu um erro ao exportar a planilha.', 'assertive');
           this.cdr.markForCheck();
         },
       });
   }
 
   inativar(aluno: Beneficiario): void {
+    this.pushFocus();
     this.alunoParaInativar = aluno;
   }
 
   cancelarInativacao(): void {
+    this.popFocus();
     this.alunoParaInativar = null;
   }
 
@@ -761,6 +645,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       error: () => {
         setTimeout(() => {
           this.salvando = false;
+          this.popFocus();
           this.toast.erro('Erro ao inativar aluno.');
           this.cdr.markForCheck();
         }, 0);
@@ -777,10 +662,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Lógica de Exclusão Definitiva
   excluirDefinitivamente(aluno: Beneficiario): void {
+    this.pushFocus();
     this.alunoParaExcluirDefinitivo = aluno;
   }
 
   cancelarExclusaoDefinitiva(): void {
+    this.popFocus();
     this.alunoParaExcluirDefinitivo = null;
   }
 
@@ -800,6 +687,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       error: () => {
         setTimeout(() => {
           this.salvando = false;
+          this.popFocus();
           this.toast.erro('Erro ao excluir aluno definitivamente.');
           this.cdr.detectChanges();
         }, 0);
@@ -809,10 +697,12 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Lógica de Restauração
   restaurarConta(aluno: Beneficiario): void {
+    this.pushFocus();
     this.alunoParaRestaurar = aluno;
   }
 
   cancelarRestauracao(): void {
+    this.popFocus();
     this.alunoParaRestaurar = null;
   }
 
@@ -832,6 +722,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
       error: () => {
         setTimeout(() => {
           this.salvando = false;
+          this.popFocus();
           this.toast.erro('Erro ao restaurar aluno.');
           this.cdr.detectChanges();
         }, 0);
@@ -841,7 +732,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // Visualização de Perfil Inteiro
   abrirModal(aluno: Beneficiario): void {
-    this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+    this.pushFocus();
     this.modalAberto = true;
     this.carregandoDetalhes = true;
     this.alunoSelecionado = null;
@@ -860,8 +751,8 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           );
 
           forkJoin(requests).subscribe({
-            next: (resultados) => {
-              resultados.forEach((res, index) => {
+            next: (resultados: any[]) => {
+              resultados.forEach((res: any, index: number) => {
                 const turmaId = matriculasAtivas[index].turma.id;
                 this.frequenciasMap.set(turmaId, res.estatisticas);
               });
@@ -890,7 +781,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   fecharModal(): void {
     this.modalAberto = false;
     this.alunoSelecionado = null;
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    this.popFocus();
   }
 
   getAvatarUrl(aluno: Beneficiario): string {
@@ -907,6 +798,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
     if (!file || !this.alunoSelecionado) return;
 
     this.uploadingImage = true;
+    this.liveAnnouncer.announce('Iniciando o envio do documento. Por favor, aguarde.', 'assertive');
     this.cdr.detectChanges();
 
     const ehPdf = file.type === 'application/pdf';
@@ -933,6 +825,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
             setTimeout(() => {
               this.alunoSelecionado = alunoAtualizado;
               this.uploadingImage = false;
+              this.liveAnnouncer.announce('Documento salvo e atualizado com sucesso!', 'assertive');
               this.toast.sucesso('Documento salvo com sucesso!');
               this.carregar();
             }, 0);
@@ -940,6 +833,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           error: () => {
             setTimeout(() => {
               this.uploadingImage = false;
+              this.liveAnnouncer.announce('Falha ao processar e salvar o documento.', 'assertive');
               this.toast.erro('Erro ao vincular documento ao aluno.');
               this.cdr.detectChanges();
             }, 0);
@@ -955,6 +849,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   excluirDocumento(tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): void {
+    this.pushFocus();
     if (!this.alunoSelecionado) return;
     const urlAtual = this.alunoSelecionado[tipo];
     if (!urlAtual) return;
@@ -963,6 +858,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   cancelarExclusaoDocumento(): void {
+    this.popFocus();
     this.documentoParaExcluir = null;
   }
 
@@ -994,6 +890,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
           error: () => {
             setTimeout(() => {
               this.deletandoImage = false;
+              this.popFocus();
               this.toast.erro('Erro ao desvincular documento do aluno.');
               this.cdr.detectChanges();
             }, 0);
@@ -1023,6 +920,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── PDF Viewer ────────────────────────────────────────────────────────
   abrirVisualizadorPdf(urlDocumento: string | undefined): void {
+    this.pushFocus();
     if (!urlDocumento) return;
     this.urlPdfParaVisualizar = urlDocumento;
     this.mostrarVisualizadorPdf = true;
@@ -1030,6 +928,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharVisualizadorPdf(): void {
+    this.popFocus();
     if (this.urlPdfParaVisualizar && this.urlPdfParaVisualizar.startsWith('blob:')) {
       window.URL.revokeObjectURL(this.urlPdfParaVisualizar);
     }
@@ -1079,12 +978,14 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────
   abrirModalImagem(url: string): void {
+    this.pushFocus();
     this.urlImagemParaVisualizar = url;
     this.mostrarModalImagem = true;
     this.cdr.detectChanges();
   }
 
   fecharModalImagem(): void {
+    this.popFocus();
     this.mostrarModalImagem = false;
     this.urlImagemParaVisualizar = null;
     this.cdr.detectChanges();
@@ -1106,6 +1007,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Módulo Atestados (Modal e CRUD) ──────────────────────────────
   abrirModalGerenciamentoAtestados(): void {
+    this.pushFocus();
     if (!this.alunoSelecionado) return;
     this.gerenciandoAtestados = true;
     this.carregarAtestados();
@@ -1113,6 +1015,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalGerenciamentoAtestados(event?: Event): void {
+    this.popFocus();
     if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
     this.gerenciandoAtestados = false;
     this.fecharModalAtestadoForm();
@@ -1120,6 +1023,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   abrirModalAtestadoForm(atestado?: Atestado): void {
+    this.pushFocus();
     this.modalAtestadoAberto = true;
     this.atestadoEmEdicao = atestado || null;
     if (atestado) {
@@ -1138,6 +1042,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalAtestadoForm(): void {
+    this.popFocus();
     this.modalAtestadoAberto = false;
     this.atestadoEmEdicao = null;
     this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
@@ -1273,6 +1178,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
 
   // ── Módulo Laudos Médicos (Modal e CRUD) ──────────────────────────────
   abrirModalGerenciamentoLaudos(): void {
+    this.pushFocus();
     if (!this.alunoSelecionado) return;
     this.gerenciandoLaudos = true;
     this.carregarLaudos();
@@ -1280,6 +1186,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalGerenciamentoLaudos(event?: Event): void {
+    this.popFocus();
     if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
     this.gerenciandoLaudos = false;
     this.fecharModalLaudoForm();
@@ -1287,6 +1194,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   abrirModalLaudoForm(laudo?: LaudoMedico): void {
+    this.pushFocus();
     this.modalLaudoAberto = true;
     this.laudoEmEdicao = laudo || null;
     if (laudo) {
@@ -1304,6 +1212,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalLaudoForm(): void {
+    this.popFocus();
     this.modalLaudoAberto = false;
     this.laudoEmEdicao = null;
     this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
@@ -1425,6 +1334,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   // ============== TERMO LGPD ==============
 
   abrirModalLgpd(): void {
+    this.pushFocus();
     this.modalLgpdAberto = true;
     this.novoLgpdUrl = '';
     this.erroLgpd = '';
@@ -1432,6 +1342,7 @@ export class BeneficiaryList implements OnInit, OnDestroy {
   }
 
   fecharModalLgpd(): void {
+    this.popFocus();
     this.modalLgpdAberto = false;
     this.novoLgpdUrl = '';
     this.erroLgpd = '';

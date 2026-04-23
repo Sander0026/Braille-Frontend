@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { PaginatedResponse } from './beneficiarios.service';
 
 export type AuditAcao =
@@ -19,15 +19,20 @@ export interface AuditLog {
     autorRole: string | null;
     ip: string | null;
     userAgent: string | null;
-    oldValue: any;
-    newValue: any;
+    oldValue: unknown;
+    newValue: unknown;
     criadoEm: string;
 }
 
 export interface AuditStats {
     totalLogs: number;
     logsHoje: number;
-    topAcoes: { acao: AuditAcao; total: number }[];
+    topAcoes: { acao: AuditAcao; total: number }[]; // backend garante array, mas a interface defende contra shape inesperado
+}
+
+/** Cria um AuditStats seguro com valores padrão — evita crash por resposta parcial da API. */
+export function defaultAuditStats(): AuditStats {
+    return { totalLogs: 0, logsHoje: 0, topAcoes: [] };
 }
 
 export interface QueryAuditDto {
@@ -54,12 +59,12 @@ export class AuditLogService {
     private readonly url = '/api/audit-log';
 
     // Cache da listagem: chave = query serializada
-    private listarCache = new Map<string, CacheEntry<PaginatedResponse<AuditLog>>>();
+    private readonly listarCache = new Map<string, CacheEntry<PaginatedResponse<AuditLog>>>();
 
     // Cache das stats (única entrada)
     private statsCache: CacheEntry<AuditStats> | null = null;
 
-    constructor(private http: HttpClient) { }
+    constructor(private readonly http: HttpClient) { }
 
     /** Limpa todo o cache (chamar após operações que alteram logs). */
     limparCache(): void {
@@ -86,8 +91,18 @@ export class AuditLogService {
         }
 
         const obs$ = this.http
-            .get<PaginatedResponse<AuditLog>>(this.url, { params })
-            .pipe(shareReplay(1));
+            .get<any>(this.url, { params })
+            .pipe(
+                map(res => {
+                    // Se o backend envolveu em { success, data, message }
+                    const payload = (res && typeof res.success === 'boolean' && res.data) ? res.data : res;
+                    return {
+                        ...payload,
+                        data: Array.isArray(payload?.data) ? payload.data : [],
+                    };
+                }),
+                shareReplay(1),
+            );
 
         this.listarCache.set(key, { obs$, expiresAt: Date.now() + CACHE_TTL_MS });
         return obs$;
@@ -99,8 +114,11 @@ export class AuditLogService {
         }
 
         const obs$ = this.http
-            .get<AuditStats>(`${this.url}/stats`)
-            .pipe(shareReplay(1));
+            .get<any>(`${this.url}/stats`)
+            .pipe(
+                map(res => (res && typeof res.success === 'boolean' && res.data) ? res.data : res),
+                shareReplay(1)
+            );
 
         this.statsCache = { obs$, expiresAt: Date.now() + CACHE_TTL_MS };
         return obs$;
@@ -108,6 +126,9 @@ export class AuditLogService {
 
     historicoPorRegistro(entidade: string, registroId: string): Observable<AuditLog[]> {
         // Histórico por registro não é cacheado — sempre fresco
-        return this.http.get<AuditLog[]>(`${this.url}/${entidade}/${registroId}`);
+        return this.http.get<any>(`${this.url}/${entidade}/${registroId}`)
+            .pipe(
+                map(res => (res && typeof res.success === 'boolean' && res.data) ? res.data : res)
+            );
     }
 }

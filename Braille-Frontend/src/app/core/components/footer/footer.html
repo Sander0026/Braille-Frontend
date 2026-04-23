@@ -1,1 +1,52 @@
-<p>footer works!</p>
+<!-- ══════════════════════════════════════════════════════════════
+  FOOTER POLIMÓRFICO
+  Alterna entre Layout Público Institucional e Layout Privado Admin
+══════════════════════════════════════════════════════════════ -->
+
+@if (theme === 'public') {
+  <footer class="site-footer public-footer" role="contentinfo" aria-label="Rodapé do Instituto Luiz Braille" *ngIf="contatoConfig$ | async as config">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="logo-icon" aria-hidden="true">⬡</span>
+          <span>Instituto Luiz Braille</span>
+        </div>
+        <p class="footer-tagline">
+          Inclusão, educação e autonomia para pessoas com deficiência visual.
+        </p>
+      </div>
+
+      <!-- Redes Sociais -->
+      <nav class="footer-social" aria-label="Redes sociais">
+        @if (config?.instagram) {
+          <a [href]="config.instagram" target="_blank" rel="noopener" aria-label="Instagram - Abre em nova aba" title="Instagram (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">Instagram</span>
+          </a>
+        }
+        @if (config?.facebook) {
+          <a [href]="config.facebook" target="_blank" rel="noopener" aria-label="Facebook - Abre em nova aba" title="Facebook (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">Facebook</span>
+          </a>
+        }
+        @if (config?.youtube) {
+          <a [href]="config.youtube" target="_blank" rel="noopener" aria-label="YouTube - Abre em nova aba" title="YouTube (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">YouTube</span>
+          </a>
+        }
+        @if (config?.linkedin) {
+          <a [href]="config.linkedin" target="_blank" rel="noopener" aria-label="LinkedIn - Abre em nova aba" title="LinkedIn (Abre em nova aba)">
+            <span class="social-icon" aria-hidden="true">LinkedIn</span>
+          </a>
+        }
+      </nav>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          {{ config?.footerDireitos || '&copy; ' + currentYear + ' Instituto Luiz Braille. Todos os direitos reservados.' }}
+        </p>
+      </div>
+    </div>
+  </footer>
+}
+
+

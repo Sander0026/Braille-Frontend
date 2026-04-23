@@ -1,0 +1,95 @@
+.preview-wrapper {
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  background-color: #f1f5f9;
+}
+
+.preview-container {
+  position: relative;
+  transform-origin: top left;
+  background: #fff;
+  overflow: hidden;
+}
+
+.arte-base {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none; // Evita conflitos de drag com a imagem de fundo
+}
+
+.cert-element {
+  position: absolute;
+  white-space: nowrap;
+}
+
+.cert-text-element {
+  white-space: pre-wrap;
+  line-height: 1.75;
+}
+
+.is-draggable {
+  cursor: move;
+  padding: 4px;
+}
+
+.cert-assinatura {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .assinatura-img {
+    width: 100%;
+    max-height: 80px;
+    object-fit: contain;
+    mix-blend-mode: darken; // importante para tornar fundo branco transparente visualmente
+  }
+
+  .assinatura-texto {
+    width: 80%;
+    border-top: 1px solid #5a4a00;
+    margin-top: 4px;
+    text-align: center;
+
+    strong {
+      display: block;
+      font-size: 11px;
+      color: #1a1a00;
+    }
+
+    span {
+      display: block;
+      font-size: 9px;
+      color: #555;
+    }
+  }
+}
+
+.cert-qr {
+  background: white;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+// Estilos de Destaque apenas em Modo Edição
+.draggable-mode {
+  .nome-aluno-outline {
+    outline: 2px dashed rgba(168, 85, 247, 0.7);
+  }
+  .texto-pronto-outline {
+    outline: 2px dashed rgba(59, 130, 246, 0.6);
+  }
+  .assinatura1-outline {
+    outline: 2px dashed rgba(34, 197, 94, 0.7);
+  }
+  .assinatura2-outline {
+    outline: 2px dashed rgba(239, 68, 68, 0.7);
+  }
+  .qr-outline {
+    outline: 2px dashed rgba(234, 88, 12, 0.7);
+  }
+}

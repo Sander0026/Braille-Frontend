@@ -275,6 +275,7 @@ $transition: 250ms ease;
             display: -webkit-box;
             background: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -1150,5 +1151,25 @@ $transition: 250ms ease;
             border-color: $black;
             color: $black;
         }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────
+// ALTO CONTRASTE (HOME): remover vazios claros entre seções
+// ─────────────────────────────────────────────────────────────
+:host-context(html.alto-contraste) {
+    .sobre,
+    .oficinas,
+    .depoimentos,
+    .wave-transition,
+    .wave-transition svg,
+    .wave-transition-double,
+    .wave-transition-double svg {
+        background: #000 !important;
+    }
+
+    .wave-transition svg path,
+    .wave-transition-double svg path {
+        fill: #000 !important;
     }
 }

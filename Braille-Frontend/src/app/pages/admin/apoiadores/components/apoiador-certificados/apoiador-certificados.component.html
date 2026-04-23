@@ -1,0 +1,115 @@
+@if (isOpen) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalCertificadosTitulo"
+    (click)="fecharModal()" (keydown.escape)="fecharModal()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal-content modal-xl" (click)="$event.stopPropagation()">
+        <div class="modal-header" style="background: linear-gradient(to right, #065f46, #047857); color: white; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+            <div>
+                <h2 id="modalCertificadosTitulo" style="margin-bottom: 0.25rem; color: white;">Certificados e Honrarias</h2>
+                <p style="margin: 0; font-size: 0.85rem; opacity: 0.9;" *ngIf="apoiador">Apoiador: <strong>{{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}</strong></p>
+            </div>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar modal de Certificados" style="color: white; opacity: 0.8;">×</button>
+        </div>
+
+        <div class="modal-body" tabindex="0" style="padding: 1.5rem; background: #f8fafc; display: flex; gap: 2rem; flex-wrap: wrap;">
+            
+            <!-- TABELA DE CERTIFICADOS GERADOS -->
+            <div class="lista-panel" style="width: 100%;">
+                <h3 style="margin-top: 0; font-size: 1.25rem; color: #1e293b; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between;">
+                    Histórico Emitido
+                    @if (carregandoCertificados) {
+                        <span class="spinner material-symbols-rounded text-primary" style="font-size: 1.25rem;">sync</span>
+                    }
+                </h3>
+
+                @if (!carregandoCertificados && certificados.length === 0) {
+                    <div class="empty-state text-center p-5" style="background: #fff; border-radius: 8px; border: 1px dashed #cbd5e1;">
+                        <span class="material-symbols-rounded" style="color: #94a3b8; font-size: 3rem; margin-bottom: 1rem; display: block;">verified</span>
+                        <h5>Nenhum certificado emitido</h5>
+                        <p class="text-muted" style="max-width: 300px; margin: 0 auto;">Nenhuma emissão de selo ou certificado de reconhecimento foi gerada para este apoiador.</p>
+                    </div>
+                } @else {
+                    <div class="table-responsive" style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <table class="table" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #f1f5f9; text-align: left;">
+                                    <th style="padding: 1rem; border-bottom: 1px solid #e2e8f0; color: #475569;">Título/Honraria</th>
+                                    <th style="padding: 1rem; border-bottom: 1px solid #e2e8f0; color: #475569;">Data de Emissão</th>
+                                    <th style="padding: 1rem; border-bottom: 1px solid #e2e8f0; text-align: center; color: #475569;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (cert of certificados; track cert.id) {
+                                    <tr>
+                                        <td style="padding: 1rem; border-bottom: 1px solid #e2e8f0;">
+                                            <div style="font-weight: 600; color: #0f172a;">{{ cert.tituloCertificado }}</div>
+                                            <div style="font-size: 0.8rem; color: #64748b;">Emitido por: {{ cert.emitidoPor?.nomeCompleto || 'Sistema' }}</div>
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle;">
+                                            {{ cert.dataEmissao | date:'dd/MM/yyyy' }}
+                                        </td>
+                                        <td style="padding: 1rem; border-bottom: 1px solid #e2e8f0; text-align: center; vertical-align: middle;">
+                                            <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                                <button class="btn btn-sm" style="background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; cursor: pointer; border-radius: 4px; padding: 0.4rem 0.6rem; display: inline-flex; align-items: center;" (click)="abrirPdf(cert)" title="Visualizar" [disabled]="processandoId === cert.id">
+                                                    @if (processandoId === cert.id) {
+                                                        <span class="spinner material-symbols-rounded" style="font-size: 1.1rem;">sync</span>
+                                                    } @else {
+                                                        <span class="material-symbols-rounded" style="font-size: 1.1rem;">visibility</span>
+                                                    }
+                                                </button>
+                                                <button class="btn btn-sm" style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; cursor: pointer; border-radius: 4px; padding: 0.4rem 0.6rem; display: inline-flex; align-items: center;" (click)="baixarPdf(cert)" title="Fazer Download" [disabled]="processandoId === cert.id">
+                                                    @if (processandoId === cert.id) {
+                                                        <span class="spinner material-symbols-rounded" style="font-size: 1.1rem;">sync</span>
+                                                    } @else {
+                                                        <span class="material-symbols-rounded" style="font-size: 1.1rem;">download</span>
+                                                    }
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+
+        </div>
+    </div>
+</div>
+}
+
+<!-- ── Overlay do Visualizador de PDF (nível raiz, padrão Aluno) ── -->
+@if (pdfAberto && pdfAtual) {
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-label="Visualizador de documento PDF"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true"
+  (keydown.escape)="fecharPdf()"
+  style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+  ">
+  <div style="
+    width: 90%;
+    max-width: 960px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  ">
+    <app-pdf-viewer
+      [url]="pdfAtual.url"
+      (fecharModal)="fecharPdf()">
+    </app-pdf-viewer>
+  </div>
+</div>
+}

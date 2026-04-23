@@ -1,0 +1,74 @@
+// ============================================================
+// floating-cta.component.scss
+// ============================================================
+
+@use 'sass:color';
+
+$primary: #f5c800;
+$primary-dk: #c9a300;
+$gray-700: #3d3d3d;
+$transition: 200ms ease;
+
+.floating-cta {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 99;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.5rem;
+    background: $primary;
+    border: 2px solid $primary;
+    color: #111111;
+    font-size: 0.95rem;
+    font-weight: 800;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: all $transition;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(245, 200, 0, 0.3);
+    min-height: 50px;
+
+    /* Acessibilidade WCAG - Contraste e Focus */
+    &:hover {
+        background: $primary-dk;
+        border-color: $primary-dk;
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(245, 200, 0, 0.4);
+    }
+
+    &:focus-visible {
+        outline: 3px solid #111111;
+        outline-offset: 3px;
+        box-shadow: 0 0 0 5px rgba(245, 200, 0, 0.5);
+    }
+
+    .material-symbols-rounded {
+        font-size: 1.5rem;
+    }
+
+    .floating-cta-text {
+        display: inline;
+    }
+}
+
+// ── Responsivo: Mobile First Approach ──────────────────────
+@media (max-width: 850px) {
+    .floating-cta {
+        padding: 0.75rem 1rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+
+        .floating-cta-text {
+            display: none; // Esconde o label no mobile, focando no aria para screen readers
+        }
+
+        .material-symbols-rounded {
+            font-size: 1.25rem;
+        }
+    }
+}

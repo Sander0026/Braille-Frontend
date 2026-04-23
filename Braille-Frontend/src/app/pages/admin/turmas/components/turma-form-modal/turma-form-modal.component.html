@@ -1,0 +1,228 @@
+@if (aberto) {
+<div class="modal-overlay"
+  role="dialog"
+  [attr.aria-label]="modoEdicao ? 'Editar oficina existente' : 'Criar nova oficina'"
+  aria-modal="true"
+  (click)="aoFechar()"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true">
+
+  <dialog class="modal" open (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-turma-titulo">
+        {{ modoEdicao ? 'Editar Oficina' : 'Nova Oficina' }}
+      </h2>
+      <!-- aria-label contextual com modo (criação ou edição) (WCAG 2.5.3) -->
+      <button class="modal-close" (click)="aoFechar()"
+        [attr.aria-label]="modoEdicao ? 'Fechar edição de oficina' : 'Fechar criação de nova oficina'">✕</button>
+    </div>
+
+    <form [formGroup]="turmaForm" (ngSubmit)="submeter()" class="modal-body" novalidate
+      aria-describedby="modal-turma-titulo">
+
+      @if (erroAPI) {
+      <div class="error-banner" role="alert" aria-live="assertive">{{ erroAPI }}</div>
+      }
+
+      <!-- ── Campos Obrigatórios ─────────────────────────────── -->
+      <fieldset class="section-fieldset">
+        <legend class="section-legend">Dados da Oficina</legend>
+
+        <div class="form-group">
+          <label for="modalNomeTurma">Nome da Oficina <span class="required" aria-hidden="true">*</span></label>
+          <input type="text" id="modalNomeTurma" formControlName="nome" class="form-input"
+            [class.is-invalid]="isCampoInvalido('nome')"
+            placeholder="Ex: Oficina de Braille"
+            aria-required="true"
+            [attr.aria-invalid]="isCampoInvalido('nome')"
+            [attr.aria-describedby]="isCampoInvalido('nome') ? 'erro-nome-turma' : null" />
+          @if (isCampoInvalido('nome')) {
+          <!-- id para aria-describedby no input (WCAG 1.3.1) -->
+          <span id="erro-nome-turma" class="error-text" role="alert">Nome é obrigatório (mínimo 3 caracteres).</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="modalProfessor">Professor Responsável <span class="required" aria-hidden="true">*</span></label>
+          <select id="modalProfessor" formControlName="professorId" class="form-input"
+            [class.is-invalid]="isCampoInvalido('professorId')"
+            aria-required="true"
+            [attr.aria-invalid]="isCampoInvalido('professorId')"
+            [attr.aria-describedby]="isCampoInvalido('professorId') ? 'erro-professor-turma' : null">
+            <option value="">Selecione um professor...</option>
+            @for (prof of professores; track prof.id) {
+            <option [value]="prof.id">{{ prof.nome }} ({{ prof.role }})</option>
+            }
+          </select>
+          @if (isCampoInvalido('professorId')) {
+          <span id="erro-professor-turma" class="error-text" role="alert">Selecione o professor responsável.</span>
+          }
+        </div>
+      </fieldset>
+
+      <!-- ── Período e Capacidade ───────────────────────────── -->
+      <fieldset class="section-fieldset">
+        <legend class="section-legend">
+          Período e Capacidade
+        </legend>
+
+        <div class="row-grid">
+          <!-- Data de Início -->
+          <div class="form-group">
+            <label for="modalDataInicio">
+              Data de Início
+              <span class="badge-opt">opcional</span>
+            </label>
+            <input type="date" id="modalDataInicio" formControlName="dataInicio" class="form-input"
+              aria-describedby="hint-datas" />
+          </div>
+
+          <!-- Data de Encerramento -->
+          <div class="form-group">
+            <label for="modalDataFim">
+              Data de Encerramento
+              <span class="badge-opt">opcional</span>
+            </label>
+            <input type="date" id="modalDataFim" formControlName="dataFim" class="form-input"
+              aria-describedby="hint-datas" />
+          </div>
+
+          <!-- Capacidade -->
+          <div class="form-group">
+            <label for="modalCapacidade">
+              Capacidade Máxima
+              <span class="badge-opt">opcional</span>
+            </label>
+            <input type="number" id="modalCapacidade" formControlName="capacidadeMaxima" class="form-input"
+              placeholder="Ex: 20" min="1" />
+          </div>
+        </div>
+
+        <!-- Hint acessível explicando o uso das datas (WCAG 1.3.1) -->
+        <p id="hint-datas" class="field-hint">
+          <span class="material-symbols-rounded hint-icon" aria-hidden="true">info</span>
+          As datas de início e encerramento são usadas para calcular a carga horária do curso.
+        </p>
+      </fieldset>
+
+      <!-- ── Informações Complementares ────────────────────── -->
+      <fieldset class="section-fieldset">
+        <legend class="section-legend">
+          Informações Complementares
+        </legend>
+
+        <div class="form-group">
+          <label for="modalDescricao">Descrição</label>
+          <input type="text" id="modalDescricao" formControlName="descricao" class="form-input"
+            placeholder="Resumo, sala, observações..." />
+        </div>
+
+        <div class="form-group">
+          <label for="modalModeloCertificado">Template de Certificado</label>
+          @if (carregandoModelos()) {
+          <!-- aria-live="polite" anuncia ao SR quando o carregamento terminar (WCAG 4.1.3) -->
+          <p class="loading-hint" aria-live="polite" aria-busy="true">Carregando modelos...</p>
+          } @else {
+          <select id="modalModeloCertificado" formControlName="modeloCertificadoId" class="form-input"
+            aria-describedby="hint-modelo">
+            <option value="">Nenhum (Emissão de certificado indisponível)</option>
+            @for (modelo of modelos(); track modelo.id) {
+            <option [value]="modelo.id">{{ modelo.nome }} ({{ modelo.nomeAssinante }})</option>
+            }
+          </select>
+          <p id="hint-modelo" class="field-hint">
+            Selecione um template para habilitar a emissão de certificados para esta oficina.
+          </p>
+          }
+        </div>
+      </fieldset>
+
+      <!-- ── Grade Horária ──────────────────────────────────── -->
+      <fieldset class="grade-horaria-fieldset">
+        <legend>Grade Horária</legend>
+        <p class="grade-helper" id="grade-helper-hint">
+          Adicione os dias e horas para evitar conflitos (ex: Seg 14:00 às 16:00).
+        </p>
+
+        <!-- role=group agrupa os controles de novo turno para o SR (WCAG 1.3.1) -->
+        <div class="turno-form" role="group" aria-label="Adicionar novo turno de aula"
+          aria-describedby="grade-helper-hint">
+
+          <div class="form-group-inline">
+            <!-- label sr-only + id para <select> de dia (WCAG 1.3.1) -->
+            <label for="turno-dia" class="sr-only">Dia da Semana</label>
+            <select id="turno-dia"
+              [ngModel]="diaNovoTurno()" (ngModelChange)="diaNovoTurno.set($event)"
+              [ngModelOptions]="{standalone: true}" class="form-input">
+              <option value="">Dia...</option>
+              @for (d of dias; track d.valor) {
+              <option [value]="d.valor">{{ d.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group-inline">
+            <label for="turno-hora-inicio" class="sr-only">Hora de início</label>
+            <input type="time" id="turno-hora-inicio"
+              [ngModel]="horaInicioNovoTurno()" (ngModelChange)="horaInicioNovoTurno.set($event)"
+              [ngModelOptions]="{standalone: true}" class="form-input"
+              aria-label="Hora de início do turno" />
+          </div>
+
+          <div class="form-group-inline">
+            <label for="turno-hora-fim" class="sr-only">Hora de fim</label>
+            <input type="time" id="turno-hora-fim"
+              [ngModel]="horaFimNovoTurno()" (ngModelChange)="horaFimNovoTurno.set($event)"
+              [ngModelOptions]="{standalone: true}" class="form-input"
+              aria-label="Hora de fim do turno" />
+          </div>
+
+          <button type="button" class="btn btn-secondary btn-sm btn-incluir-turno"
+            (click)="adicionarTurno()"
+            aria-label="Incluir este turno na grade horária">+ Incluir</button>
+        </div>
+
+        @if (erroTurno()) {
+        <!-- role=alert anuncia o erro de turno imediatamente (WCAG 4.1.3) -->
+        <span class="error-text error-with-icon" role="alert" id="erro-turno-grade">
+          <!-- aria-hidden: ícone decorativo; texto já descreve o erro (WCAG 1.1.1) -->
+          <span class="material-symbols-rounded" aria-hidden="true">error</span>
+          {{ erroTurno() }}
+        </span>
+        }
+
+        @if (gradeHoraria().length > 0) {
+        <ul class="grade-list" aria-label="Turnos cadastrados na grade horária">
+          @for (turno of gradeHoraria(); track turno.dia; let i = $index) {
+          <li class="grade-item">
+            <span class="dia-label">{{ labelDia(turno.dia) }}</span>
+            <span>{{ turno.horaInicio }} → {{ turno.horaFim }}</span>
+            <!-- aria-label contextual com dia e horário (WCAG 2.5.3) -->
+            <button type="button" class="btn-remove" (click)="removerTurno(i)"
+              [attr.aria-label]="'Remover turno de ' + labelDia(turno.dia) + ' (' + turno.horaInicio + ' às ' + turno.horaFim + ')'">✕</button>
+          </li>
+          }
+        </ul>
+        } @else {
+        <!-- role=status anuncia dinamicamente que a grade está vazia (WCAG 4.1.3) -->
+        <p class="grade-vazia" role="status" aria-live="polite">
+          Nenhum turno adicionado ainda.
+        </p>
+        }
+      </fieldset>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="aoFechar()"
+          aria-label="Cancelar e fechar sem salvar">Cancelar</button>
+        <button type="submit" class="btn btn-primary"
+          [disabled]="turmaForm.invalid || salvando"
+          [attr.aria-busy]="salvando"
+          [attr.aria-label]="salvando ? 'Salvando, aguarde...' : (modoEdicao ? 'Confirmar atualização da oficina' : 'Criar nova oficina')">
+          {{ salvando ? 'Salvando...' : (modoEdicao ? 'Atualizar' : 'Criar Oficina') }}
+        </button>
+      </div>
+
+    </form>
+  </dialog>
+</div>
+}

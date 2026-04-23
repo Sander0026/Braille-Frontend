@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { fromEvent, Subject, Subscription } from 'rxjs';
 import { filter, tap } from 'rxjs/operators';
 import { ToastService } from './toast.service';
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 export interface HotkeyAction {
     combo: string; // Ex: 'alt.n'
@@ -27,7 +28,8 @@ export class HotkeysService implements OnDestroy {
     constructor(
         @Inject(PLATFORM_ID) private platformId: Object,
         private router: Router,
-        private toast: ToastService
+        private toast: ToastService,
+        private announcer: LiveAnnouncer
     ) {
         if (isPlatformBrowser(this.platformId)) {
             this.initDefaultHotkeys();
@@ -36,39 +38,39 @@ export class HotkeysService implements OnDestroy {
     }
 
     private initDefaultHotkeys() {
-        // Alt + N: Novo Aluno
+        // Alt + Shift + N: Novo Aluno
         this.addHotkey({
-            combo: 'alt.n',
+            combo: 'alt.shift.n',
             description: 'Novo Cadastro de Aluno',
             action: () => {
                 this.router.navigate(['/admin/alunos/cadastro']);
             }
         });
 
-        // Alt + O: Oficinas
+        // Alt + Shift + O: Oficinas
         this.addHotkey({
-            combo: 'alt.o',
-            description: 'Ir para Oficinas/Turmas',
+            combo: 'alt.shift.o',
+            description: 'Ir para Oficinas ou Turmas',
             action: () => this.router.navigate(['/admin/turmas'])
         });
 
-        // Alt + F: Frequências
+        // Alt + Shift + F: Frequências
         this.addHotkey({
-            combo: 'alt.f',
-            description: 'Ir para Chamada (Frequências)',
+            combo: 'alt.shift.f',
+            description: 'Ir para Chamada de Frequências',
             action: () => this.router.navigate(['/admin/frequencias'])
         });
 
-        // Alt + H: Ajuda / Lista de Atalhos
+        // Alt + Shift + H: Ajuda
         this.addHotkey({
-            combo: 'alt.h',
+            combo: 'alt.shift.h',
             description: 'Mostrar Lista de Atalhos',
             action: () => this.onHelpRequested$.next()
         });
 
-        // Alt + D: Dashboard
+        // Alt + Shift + D: Dashboard
         this.addHotkey({
-            combo: 'alt.d',
+            combo: 'alt.shift.d',
             description: 'Ir para o Dashboard',
             action: () => this.router.navigate(['/admin/dashboard'])
         });
@@ -94,9 +96,10 @@ export class HotkeysService implements OnDestroy {
                     if (hotkey) {
                         event.preventDefault(); // Evita comportamento nativo do browser como menus
                         hotkey.action();
-                        // Feedback discreto caso mude repentinamente
-                        if (comboStr !== 'alt.h') {
+                        // Feedback discreto e narrado caso mude repentinamente de tela
+                        if (comboStr !== 'alt.shift.h') {
                             this.toast.sucesso(`Atalho executado: ${hotkey.description}`);
+                            this.announcer.announce(`Atalho pelo teclado acionado: ${hotkey.description}.`, 'polite');
                         }
                     }
                 })
@@ -105,14 +108,15 @@ export class HotkeysService implements OnDestroy {
     }
 
     private isHotkey(event: KeyboardEvent): boolean {
-        return event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey;
+        // Alt + Shift protege contra a usurpação acidental de atalhos embutidos do navegador (ex: Alt+D foca na Barra de Endereços)
+        return event.altKey && event.shiftKey && !event.ctrlKey && !event.metaKey;
     }
 
     private getComboString(event: KeyboardEvent): string {
         let key = event.key.toLowerCase();
         // Normalizar espaços ou teclas especiais se houver
         if (key === ' ') key = 'space';
-        return `alt.${key}`;
+        return `alt.shift.${key}`;
     }
 
     private isInsideInputForm(event: KeyboardEvent): boolean {

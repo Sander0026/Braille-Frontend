@@ -7,13 +7,31 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
-    animation: cd-fade-in 150ms ease-out;
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+    
+    // Configura o canvas quando ativo
+    display: none;
+    &[open] {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+        animation: cd-fade-in 150ms ease-out;
+    }
+
+    // Camada nativa da API Top-Layer do navegador
+    &::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        animation: cd-fade-in 150ms ease-out;
+    }
 }
 
 // Card do modal
@@ -48,17 +66,17 @@
     // Por tipo (definimos via classes)
     &.tipo-danger {
         background: #fee2e2;
-        color: #dc2626;
+        color: #991b1b; // WCAG AA Pass
     }
 
     &.tipo-warning {
-        background: #fff8d6; // $color-primary-light
-        color: #d4a800; // $color-primary-dark
+        background: #fef08a;
+        color: #854d0e; // WCAG AA Pass
     }
 
     &.tipo-info {
         background: #dbeafe;
-        color: #2563eb;
+        color: #1e40af; // WCAG AA Pass
     }
 }
 
@@ -102,6 +120,11 @@
         &:hover {
             background: #b91c1c;
         }
+
+        &:focus-visible {
+            outline: 2px solid #dc2626;
+            outline-offset: 4px;
+        }
     }
 
     &.tipo-warning {
@@ -110,6 +133,11 @@
 
         &:hover {
             background: #d4a800; // $color-primary-dark
+        }
+
+        &:focus-visible {
+            outline: 2px solid #d4a800;
+            outline-offset: 4px;
         }
     }
 
@@ -120,6 +148,11 @@
         &:hover {
             background: #1d4ed8;
         }
+
+        &:focus-visible {
+            outline: 2px solid #2563eb;
+            outline-offset: 4px;
+        }
     }
 }
 
@@ -129,6 +162,11 @@
 
     &:hover {
         background: #e5e7eb;
+    }
+
+    &:focus-visible {
+        outline: 2px solid #374151;
+        outline-offset: 4px;
     }
 }
 
@@ -163,9 +201,19 @@
 
     .cd-acoes {
         flex-direction: column-reverse;
+        gap: 0.5rem;
     }
 
     .cd-btn {
         max-width: 100%;
+        padding: 0.8rem 1rem; /* Target touch maior para Mobile (WCAG) */
+    }
+}
+
+// Respeito ao usuário com Sensibilidade ao Movimento
+@media (prefers-reduced-motion: reduce) {
+    .cd-backdrop, .cd-card {
+        animation: none !important;
+        transition: none !important;
     }
 }

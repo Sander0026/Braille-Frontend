@@ -1,0 +1,19 @@
+@if (stats) {
+<section class="stats-grid" aria-label="Estatísticas de auditoria">
+    <div class="stat-card stat-total">
+        <span class="stat-label">Total de Logs</span>
+        <span class="stat-value" aria-live="polite">{{ stats.totalLogs | number }}</span>
+    </div>
+    <div class="stat-card stat-hoje">
+        <span class="stat-label">Hoje</span>
+        <span class="stat-value" aria-live="polite">{{ stats.logsHoje | number }}</span>
+    </div>
+    <!-- Exibe apenas o Top 3 ações mais realizadas -->
+    @for (item of stats.topAcoes.slice(0, 3); track item.acao) {
+    <div class="stat-card stat-acao">
+        <span class="stat-label">{{ item.acao }}</span>
+        <span class="stat-value">{{ item.total | number }}</span>
+    </div>
+    }
+</section>
+}

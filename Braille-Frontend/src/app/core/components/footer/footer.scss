@@ -1,1 +1,158 @@
-// Component-level styles - use global tokens from styles.scss
+@use 'sass:color';
+
+$primary: #f5c800;
+$primary-dk: #c9a300;
+$black: #1a1a00;
+$white: #ffffff;
+$gray-100: #f7f7f7;
+$gray-600: #5c5c5c;
+$gray-700: #3d3d3d;
+$gray-900: #1a1a1a;
+$transition: 200ms ease;
+
+// ── Base do Footer ──────────────────────────────────────────
+.site-footer {
+  width: 100%;
+  
+  &.public-footer {
+    background: $gray-900;
+    border-top: 3px solid $primary;
+    padding: 3rem 1.5rem 2rem;
+  }
+
+  &.admin-footer {
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    padding: 1.5rem;
+    margin-top: auto; // Alinha o Footer de Admin embaixo na main-area
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.02);
+  }
+}
+
+// ── Footer Público ──────────────────────────────────────────
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  text-align: center;
+}
+
+.footer-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $white;
+
+  .logo-icon {
+      font-size: 1.5rem;
+      color: $primary;
+  }
+}
+
+.footer-tagline {
+  font-size: 0.9rem;
+  color: color.change($white, $alpha: 0.7);
+  margin: 0;
+}
+
+.footer-social {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+
+  a {
+      text-decoration: none;
+      color: $primary;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color $transition, transform $transition;
+
+      &:hover {
+          color: $white;
+          transform: translateY(-2px);
+      }
+
+      &:focus-visible {
+          outline: 2px dashed $primary;
+          outline-offset: 4px;
+      }
+  }
+}
+
+.footer-bottom {
+  margin-top: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid color.change($white, $alpha: 0.1);
+  width: 100%;
+}
+
+.footer-copy {
+  font-size: 0.8rem;
+  color: color.change($white, $alpha: 0.5);
+  margin: 0;
+}
+
+// ── Footer Admin ────────────────────────────────────────────
+.footer-inner-admin {
+  max-width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+
+  .footer-copy {
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  .footer-admin-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color $transition;
+
+    .material-symbols-rounded {
+      font-size: 1rem;
+    }
+
+    &:hover {
+      color: #3730a3;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #4f46e5;
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+}
+
+// ── Responsivo (Comum) ──────────────────────────────────────
+@media (max-width: 640px) {
+  .footer-inner-admin {
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+  }
+}

@@ -1,0 +1,79 @@
+@use "../../../../../../styles/variables.scss" as vars;
+
+$primary: vars.$color-primary;
+$gray-200: #e5e5e5;
+$gray-600: vars.$color-gray-600;
+$gray-900: #1f1f1f;
+$border-r: 0.5rem;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid $gray-200;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  h2 { margin: 0; font-size: 1.25rem; }
+  .btn-close {
+    background: none; border: none; font-size: 1.5rem; color: $gray-600; cursor: pointer;
+  }
+}
+
+.modal-body {
+  overflow-y: auto;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  @media (min-width: 576px) { grid-template-columns: 1fr 1fr; }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  label { font-size: 0.8rem; font-weight: 600; color: $gray-600; }
+  .required { color: #ef4444; }
+}
+
+.form-input {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid $gray-200;
+  border-radius: $border-r;
+  font-size: 0.875rem;
+  &.input-error { border-color: #ef4444; }
+  &:focus { outline: none; border-color: $primary; }
+}
+
+.btn-primary {
+  background: $primary; color: #fff; border: none; border-radius: $border-r; font-weight: 600; cursor: pointer;
+  &:disabled { opacity: 0.7; cursor: not-allowed; }
+}
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+.spinner { animation: spin 1s linear infinite; }

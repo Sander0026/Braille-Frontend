@@ -1,24 +1,36 @@
-import { provideAppInitializer } from '@angular/core';
+import { inject, PLATFORM_ID, provideAppInitializer } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 /**
- * Acessibilidade de Teclado — Tab em Textareas e Editores Ricos
+ * Provider de Acessibilidade de Teclado — Tab em Textareas e Editores Ricos
  *
- * Listener global (capture=true) que intercepta Tab/Shift+Tab dentro de:
- * - <textarea> nativo
- * - div[contenteditable="true"] — usado pelo Quill, TipTap, ProseMirror etc.
+ * Registra um listener global (capture=true) que intercepta Tab/Shift+Tab dentro de:
+ *  - <textarea> nativo
+ *  - div[contenteditable="true"] — Quill, TipTap, ProseMirror, etc.
  *
- * Move o foco para o próximo/anterior elemento focável sem travar o usuário.
+ * Move o foco para o próximo/anterior elemento focável sem prender o usuário.
  * WCAG 2.1 SC 2.1.1 (Teclado) e SC 2.1.2 (Sem armadilha de teclado).
+ *
+ * SINGLETON: Inclua apenas UMA vez no `app.config.ts`.
+ *    O provider contém proteção interna contra registros duplicados.
+ *
+ * SSR-SAFE: O listener é registrado apenas em ambientes browser.
  */
+
+/** Flag singleton: garante que o listener seja registrado apenas uma vez */
+let tabEscapeRegistered = false;
+
+/** KISS: verifica em linha única se o elemento deve capturar o TAB */
 function isEditableTarget(el: HTMLElement): boolean {
-  if (el.tagName === 'TEXTAREA') return true;
-  if (el.contentEditable === 'true') return true;
-  return false;
+  return el.tagName === 'TEXTAREA' || el.contentEditable === 'true';
 }
 
-function getFocusableElements(): HTMLElement[] {
+function getFocusableElements(currentElement: HTMLElement): HTMLElement[] {
+  // A11Y FIX: Limita a busca ao escopo mais próximo (Modal/Trap) para não quebrar o Focus Trap do CDK.
+  const container = currentElement.closest('dialog, [cdkTrapFocus], form') || document;
+
   return Array.from(
-    document.querySelectorAll<HTMLElement>(
+    container.querySelectorAll<HTMLElement>(
       'a[href], button:not([disabled]), input:not([disabled]), ' +
       'select:not([disabled]), textarea:not([disabled]), ' +
       '[contenteditable="true"], [tabindex]:not([tabindex="-1"])',
@@ -32,6 +44,11 @@ function getFocusableElements(): HTMLElement[] {
 }
 
 function registerTabEscape(): void {
+  // CORREÇÃO CRÍTICA: document não existe em SSR (Node.js).
+  // Verificado via flag singleton para evitar registros duplicados acidentais.
+  if (tabEscapeRegistered) return;
+  tabEscapeRegistered = true;
+
   document.addEventListener(
     'keydown',
     (event: KeyboardEvent) => {
@@ -42,7 +59,7 @@ function registerTabEscape(): void {
 
       event.preventDefault();
 
-      const focusable = getFocusableElements();
+      const focusable = getFocusableElements(target);
       const currentIndex = focusable.indexOf(target);
       if (currentIndex === -1) return;
 
@@ -52,12 +69,25 @@ function registerTabEscape(): void {
 
       focusable[nextIndex]?.focus();
     },
-    true, // capture=true: intercepta antes de qualquer stopPropagation do Quill
+    true, // capture=true: intercepta antes de qualquer stopPropagation do Quill/TipTap
   );
 }
 
-/** Registra o listener global de Tab — inclua no app.config.ts */
+/**
+ * Registra o listener global de Tab em modo browser-only.
+ * Inclua no providers do `app.config.ts`:
+ * @example
+ *   providers: [...provideTabEscapeForTextareas()]
+ */
 export function provideTabEscapeForTextareas() {
-  return [provideAppInitializer(registerTabEscape)];
-}
+  return [
+    provideAppInitializer(() => {
+      // Injeção de PLATFORM_ID dentro do initializer — contexto de injeção válido
+      const platformId = inject(PLATFORM_ID);
 
+      if (isPlatformBrowser(platformId)) {
+        registerTabEscape();
+      }
+    }),
+  ];
+}

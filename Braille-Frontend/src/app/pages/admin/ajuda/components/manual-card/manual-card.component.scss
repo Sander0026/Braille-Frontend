@@ -1,0 +1,118 @@
+.manual-card {
+  background: #fff;
+  border: 1.5px solid var(--color-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  height: 100%; // Ensure cards in grid stretch vertically if they have diff amounts of text
+
+  &.disponivel {
+    cursor: default;
+
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+  }
+
+  &.em-breve {
+    opacity: 0.75;
+  }
+}
+
+.manual-card-icon {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .material-symbols-rounded {
+    font-size: 1.75rem;
+    color: #fff;
+  }
+}
+
+:host ::ng-deep {
+  .card-primary .manual-card-icon  { background: #2563eb; }
+  .card-info .manual-card-icon     { background: #0891b2; }
+  .card-success .manual-card-icon  { background: #16a34a; }
+  .card-warning .manual-card-icon  { background: #d97706; }
+}
+
+.manual-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.manual-titulo {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.manual-descricao {
+  font-size: 0.875rem;
+  color: #6b7280;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.manual-perfis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+}
+
+.perfil-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.manual-card-footer {
+  display: flex;
+  align-items: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border, #f3f4f6);
+}
+
+.badge-em-breve {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  font-style: italic;
+
+  .material-symbols-rounded {
+    font-size: 1rem;
+  }
+}
+
+/* utilitário */
+.btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.82rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  .material-symbols-rounded {
+    font-size: 1rem;
+  }
+}

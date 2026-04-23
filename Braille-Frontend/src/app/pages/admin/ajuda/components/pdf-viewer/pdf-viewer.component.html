@@ -1,0 +1,12 @@
+<section class="pdf-viewer-wrapper" aria-label="Visualizador de manual" aria-live="polite">
+  <div class="pdf-viewer-header">
+    <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+    <h3 class="pdf-titulo">{{ titulo }}</h3>
+    <button #closeBtn class="btn btn-secondary btn-sm" (click)="onClose()" aria-label="Fechar visualizador de PDF e voltar">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      Fechar
+    </button>
+  </div>
+  <!-- Application OWASP Security Mitigation (SafeUrlPipe bypasses validation locally and securely) -->
+  <iframe [src]="src | safeUrl" class="pdf-frame" title="Visualizador de manual PDF" aria-label="Conteúdo do manual em PDF"></iframe>
+</section>

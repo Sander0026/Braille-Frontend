@@ -15,13 +15,30 @@ $gray-900: #1a1a1a;
 // ── Page hero (reutiliza classes do sobre.scss via :host) ──
 .page-hero {
     background: $black;
+    background-image: url('/fachada_ilbes.png');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
     padding: 4rem 1.5rem 3.5rem;
     text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.52) 100%);
+        z-index: 0;
+        pointer-events: none;
+    }
 }
 
 .page-hero-inner {
     max-width: 700px;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
 }
 
 .page-eyebrow {
@@ -42,10 +59,12 @@ $gray-900: #1a1a1a;
 }
 
 .page-hero-desc {
-    font-size: 1rem;
-    color: color.change(#fff, $alpha: .7);
+    font-size: 1.1rem;
+    color: color.change(#fff, $alpha: .9);
     line-height: 1.7;
-    margin: 0;
+    margin: 0 auto;
+    max-width: 600px;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 // ── Seção principal ───────────────────────────────────────
@@ -348,4 +367,15 @@ textarea.form-input {
     font-size: 3.5rem;
     line-height: 1;
     margin-bottom: 0.5rem;
+}
+
+:host-context(html.alto-contraste) {
+    .page-hero {
+        background: #000 !important;
+        background-image: none !important;
+    }
+
+    .page-hero::before {
+        display: none !important;
+    }
 }
