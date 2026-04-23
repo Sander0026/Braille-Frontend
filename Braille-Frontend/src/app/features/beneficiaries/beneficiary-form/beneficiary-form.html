@@ -663,8 +663,18 @@
       </div>
       @if (cadastroForm.get('perfilDeficiencia.possuiLaudo')?.value) {
       <div class="laudo-upload-area">
-        <label for="laudoArquivo" [class.focus-visible]="laudoFocused">Anexar Imagem do Laudo</label>
-        <input type="file" id="laudoArquivo" accept="image/*" (change)="onLaudoSelecionado($event)" (focus)="laudoFocused = true" (blur)="laudoFocused = false" class="sr-only">
+        <label for="laudoArquivo" class="form-label">Anexar Laudo Médico <span class="optional-badge">Imagem ou PDF</span></label>
+        <div style="display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; margin-top:0.35rem;">
+          <label for="laudoArquivo" class="btn btn-secondary btn-sm" [class.focus-visible]="laudoFocused" style="cursor:pointer; display:flex; align-items:center; gap:0.3rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">upload_file</span>
+            Selecionar Arquivo
+          </label>
+          <input type="file" id="laudoArquivo" accept=".jpg,.jpeg,.png,.webp,.pdf" (change)="onLaudoSelecionado($event)" (focus)="laudoFocused = true" (blur)="laudoFocused = false" class="sr-only">
+          @if (arquivoLaudoSelecionado) {
+          <span class="file-name">{{ arquivoLaudoSelecionado.name }}</span>
+          }
+        </div>
+        <p class="helper-text" style="margin-top:0.35rem;">Formatos aceitos: JPG, PNG, WebP ou PDF.</p>
       </div>
       }
     </fieldset>

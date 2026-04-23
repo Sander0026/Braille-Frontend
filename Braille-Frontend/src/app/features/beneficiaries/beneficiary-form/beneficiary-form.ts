@@ -543,7 +543,11 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
       uploadTasks.push(this.beneficiariosService.uploadImagem(this.arquivoFotoSelecionado).pipe(map((res) => ({ tipo: 'fotoPerfil', url: res.url }))));
     }
     if (this.arquivoLaudoSelecionado) {
-      uploadTasks.push(this.beneficiariosService.uploadImagem(this.arquivoLaudoSelecionado).pipe(map((res) => ({ tipo: 'laudoUrl', url: res.url }))));
+      const ehPdfLaudo = this.arquivoLaudoSelecionado.type === 'application/pdf';
+      const uploadLaudo$ = ehPdfLaudo
+        ? this.beneficiariosService.uploadPdf(this.arquivoLaudoSelecionado, 'laudo')
+        : this.beneficiariosService.uploadImagem(this.arquivoLaudoSelecionado);
+      uploadTasks.push(uploadLaudo$.pipe(map((res) => ({ tipo: 'laudoUrl', url: res.url }))));
     }
     if (this.arquivoTermoSelecionado) {
       uploadTasks.push(this.beneficiariosService.uploadPdf(this.arquivoTermoSelecionado, 'lgpd').pipe(map((res) => ({ tipo: 'termoLgpdUrl', url: res.url }))));
