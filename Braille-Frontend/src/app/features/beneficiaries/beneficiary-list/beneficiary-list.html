@@ -965,13 +965,21 @@
                         <label>Documento (PDF / Imagem) <span class="required" aria-hidden="true">*</span></label>
                         <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
                             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
-                            {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado' : 'Selecionar Arquivo') }}
-                            <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" />
+                            {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado ✓' : 'Selecionar Arquivo') }}
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" />
                         </label>
-                        @if (novoLaudo.arquivoUrl) {
-                        <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoLaudo.arquivoUrl!)" aria-label="Ver arquivo enviado">
-                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">open_in_new</span> Ver arquivo
-                        </button>
+                        @if (novoLaudo.arquivoUrl && !uploadingLaudo) {
+                        <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">
+                            @if (tipoDocumento(novoLaudo.arquivoUrl) === 'pdf') {
+                            <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoLaudo.arquivoUrl!)" aria-label="Visualizar PDF do laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">picture_as_pdf</span> Ver PDF
+                            </button>
+                            } @else {
+                            <button class="btn btn-ghost btn-sm" (click)="abrirModalImagem(novoLaudo.arquivoUrl!)" aria-label="Visualizar imagem do laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">image</span> Ver Imagem
+                            </button>
+                            }
+                        </div>
                         }
                     </div>
                     @if (erroLaudo) {
@@ -1015,8 +1023,13 @@
                         <td>{{ ld.medicoResponsavel || '—' }}</td>
                         <td>{{ ld.descricao || '—' }}</td>
                         <td>
-                            <button class="btn btn-outline-primary btn-sm" (click)="abrirVisualizadorPdf(ld.arquivoUrl)" aria-label="Ver Laudo">
-                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span> PDF/IMG
+                            <button class="btn btn-outline-primary btn-sm"
+                                (click)="tipoDocumento(ld.arquivoUrl) === 'pdf' ? abrirVisualizadorPdf(ld.arquivoUrl) : abrirModalImagem(ld.arquivoUrl!)"
+                                aria-label="Ver Laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">
+                                    {{ tipoDocumento(ld.arquivoUrl) === 'pdf' ? 'picture_as_pdf' : 'image' }}
+                                </span>
+                                {{ tipoDocumento(ld.arquivoUrl) === 'pdf' ? 'PDF' : 'Imagem' }}
                             </button>
                         </td>
                         @if (isAdmin) {
