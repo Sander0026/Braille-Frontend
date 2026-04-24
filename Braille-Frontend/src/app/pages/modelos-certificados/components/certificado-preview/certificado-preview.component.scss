@@ -1,5 +1,12 @@
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
 .preview-wrapper {
   width: 100%;
+  max-width: 100%;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   border-radius: 6px;
