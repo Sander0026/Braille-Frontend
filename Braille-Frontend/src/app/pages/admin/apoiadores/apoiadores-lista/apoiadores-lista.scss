@@ -368,8 +368,15 @@ $gray-600: vars.$color-gray-600;
 
 @media (max-width: 900px) {
   .table {
-    min-width: 100%; /* Reseta o min-width de 800px para evitar scroll horizontal indesejado */
+    display: block;
+    width: 100%;
+    min-width: 0 !important;
     
+    tbody {
+      display: block;
+      width: 100%;
+    }
+
     thead {
       display: none;
     }
@@ -439,6 +446,7 @@ $gray-600: vars.$color-gray-600;
       width: 100%;
       padding-top: 0.5rem;
       margin-top: 0;
+      flex-wrap: wrap;
     }
   }
 }
