@@ -823,10 +823,13 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
           next: (alunoAtualizado) => {
             setTimeout(() => {
-              this.alunoSelecionado = alunoAtualizado;
+              // Faz merge para preservar relações (matriculasOficina) que o PATCH não retorna
+              // e chama markForCheck() pois o componente usa ChangeDetectionStrategy.OnPush
+              this.alunoSelecionado = { ...this.alunoSelecionado!, ...alunoAtualizado };
               this.uploadingImage = false;
               this.liveAnnouncer.announce('Documento salvo e atualizado com sucesso!', 'assertive');
               this.toast.sucesso('Documento salvo com sucesso!');
+              this.cdr.markForCheck();
               this.carregar();
             }, 0);
           },
@@ -872,18 +875,21 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
 
     this.beneficiariosService.excluirArquivo(url).subscribe({
       next: () => {
-        const updatePayload: Partial<Beneficiario> = {};
-        updatePayload[tipo] = '';
+        // Envia null (não '' string vazia) — o DTO tem @IsUrl() que rejeita '' com 400
+        // @IsOptional() aceita null e o backend interpreta como "limpar o campo"
+        const updatePayload = { [tipo]: null } as unknown as Partial<Beneficiario>;
 
         this.beneficiariosService.atualizar(this.alunoSelecionado!.id, updatePayload).subscribe({
           next: () => {
             setTimeout(() => {
               if (this.alunoSelecionado) {
-                this.alunoSelecionado[tipo] = '';
+                // Limpa o campo localmente e força re-render (OnPush precisa de markForCheck)
+                (this.alunoSelecionado as any)[tipo] = null;
               }
               this.deletandoImage = false;
               this.documentoParaExcluir = null;
               this.toast.sucesso('Documento excluído com sucesso!');
+              this.cdr.markForCheck();
               this.carregar();
             }, 0);
           },
