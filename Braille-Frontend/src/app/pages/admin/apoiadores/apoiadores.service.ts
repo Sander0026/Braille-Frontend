@@ -184,10 +184,9 @@ export class ApoiadoresService {
     );
   }
 
-  gerarPdfCertificado(apoiadorId: string, certId: string): Observable<Blob> {
-    return this.http.get(
-      `${this.apiUrl}/${apoiadorId}/certificados/${certId}/pdf`,
-      { responseType: 'blob' }
+  gerarPdfCertificado(apoiadorId: string, certId: string): Observable<{ pdfUrl: string; codigoValidacao: string }> {
+    return this.http.get<{ pdfUrl: string; codigoValidacao: string }>(
+      `${this.apiUrl}/${apoiadorId}/certificados/${certId}/pdf`
     );
   }
 }

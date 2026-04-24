@@ -2,6 +2,7 @@ import { Component, signal, inject, afterNextRender, Injector } from '@angular/c
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
+import { SwUpdate } from '@angular/service-worker';
 
 import { SiteConfigService } from './core/services/site-config';
 
@@ -17,11 +18,24 @@ export class App {
   private readonly siteConfig = inject(SiteConfigService);
   private readonly router     = inject(Router);
   private readonly injector   = inject(Injector);
+  private readonly swUpdate   = inject(SwUpdate, { optional: true });
 
   constructor() {
     // Carrega configurações globais do site na inicialização
     this.siteConfig.carregarConfigs().subscribe();
     this.siteConfig.carregarSecoes().subscribe();
+
+    // ── Prevenção de PWA Deadlock (CSP Antigo) ──
+    // Se o SW baixar uma nova versão em background, força o reload imediatamente.
+    // Isso garante que o index.html novo (com CSP atualizado) seja carregado.
+    if (this.swUpdate && this.swUpdate.isEnabled) {
+      this.swUpdate.versionUpdates.pipe(
+        filter(evt => evt.type === 'VERSION_READY'),
+        takeUntilDestroyed()
+      ).subscribe(() => {
+        window.location.reload();
+      });
+    }
 
     // WCAG 2.1 SC 2.4.3 — Anúncio de Mudança de Rota para Leitores de Tela.
     // takeUntilDestroyed() garante cancelamento automático — Zero Memory Leak.
