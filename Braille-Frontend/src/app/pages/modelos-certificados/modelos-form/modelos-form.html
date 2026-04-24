@@ -374,27 +374,24 @@
     </div>
 
     <!-- Barra de Navegação Inferior -->
-    <div class="wizard-footer" style="margin-top: 2.5rem; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 1rem 0; border-top: 1px solid #e2e8f0; position: sticky; bottom: 0; z-index: 10;">
+    <div class="wizard-footer">
       <button type="button" (click)="passoAnterior()" *ngIf="passoAtual() > 1"
-              class="btn btn-secondary"
-              style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem;">
+              class="btn btn-secondary btn-voltar">
         ← Voltar
       </button>
-      <div *ngIf="passoAtual() === 1"></div>
+      <div *ngIf="passoAtual() === 1" class="spacer"></div>
 
-      <div style="display: flex; gap: 1rem; align-items: center;">
-        <a routerLink="/admin/modelos-certificados" style="color: #64748b; text-decoration: none; padding: 0.75rem 1rem;">Cancelar Edição</a>
+      <div class="wizard-footer-actions">
+        <a routerLink="/admin/modelos-certificados" class="btn-cancelar">Cancelar Edição</a>
 
         <button type="button" (click)="proximoPasso()" *ngIf="passoAtual() < 4"
-                class="btn btn-primary"
-                style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 2rem;">
+                class="btn btn-primary btn-avancar">
           Avançar →
         </button>
 
         <button type="submit" *ngIf="passoAtual() === 4"
-                class="btn btn-success"
-                [disabled]="isSalvando()"
-                style="background: #16a34a; border-color: #16a34a; color: #fff; padding: 0.75rem 2.5rem; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);">
+                class="btn btn-success btn-salvar"
+                [disabled]="isSalvando()">
           {{ isSalvando() ? 'Salvando...' : 'Salvar Modelo' }}
         </button>
       </div>
