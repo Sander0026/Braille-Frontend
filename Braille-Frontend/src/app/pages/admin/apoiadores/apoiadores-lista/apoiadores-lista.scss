@@ -383,39 +383,59 @@ $gray-600: vars.$color-gray-600;
 
     td {
       border: none;
-      padding: 0.5rem 0;
+      padding: 0.75rem 0;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      text-align: right;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      text-align: left;
+      gap: 0.5rem;
     }
 
     td::before {
       content: attr(data-label);
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: #64748b;
-      flex: 1;
+      width: 100%;
       text-align: left;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.25rem;
     }
 
     .td-flex-group {
       flex-direction: row;
-      text-align: right;
-      justify-content: flex-end;
+      text-align: left;
+      justify-content: flex-start;
+      width: 100%;
+      
+      .item-title, .item-subtitle {
+        white-space: normal;
+        word-break: break-all;
+      }
     }
 
     .contact-info {
-      align-items: flex-end;
+      align-items: flex-start;
+      width: 100%;
+      
+      .text-truncate {
+        max-width: 100% !important;
+        white-space: normal;
+        word-break: break-all;
+      }
+    }
+
+    .status-stack {
+      align-items: flex-start;
     }
 
     .action-buttons {
-      justify-content: flex-end;
+      justify-content: flex-start;
       width: 100%;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 1rem;
-      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      margin-top: 0;
     }
   }
 }
