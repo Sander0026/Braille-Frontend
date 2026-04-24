@@ -325,10 +325,10 @@
         min-width: 0;
 
         h3 {
-            font-size: 0.9rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.95rem;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.3;
         }
     }
 
@@ -369,6 +369,21 @@
     /* ── Botões de foto: sempre visíveis em touch ── */
     .avatar-actions {
         opacity: 1 !important;
+    }
+
+    /* ── Wrapper para tabela responsiva no mobile ── */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-top: 0.5rem;
+        border: 1px solid #f3f4f6;
+        border-radius: 6px;
+        
+        .historico-table {
+            margin-top: 0;
+            min-width: 600px; /* Garante que a tabela não fique espremida */
+        }
     }
 }
 
