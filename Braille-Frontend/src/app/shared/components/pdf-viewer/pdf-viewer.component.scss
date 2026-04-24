@@ -27,11 +27,29 @@
   width: 100%;
 }
 
+.header-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
 .pdf-viewer-header h3 {
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
   color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-zoom-hint {
+  display: none; /* Oculto no desktop */
+  font-size: 0.75rem;
+  color: #6b7280;
+  font-style: italic;
 }
 
 .btn-close {
@@ -217,6 +235,10 @@ canvas {
     width: 1.5rem;
     height: 1.5rem;
     font-size: 1.25rem;
+  }
+
+  .mobile-zoom-hint {
+    display: block; /* Mostra a dica no mobile */
   }
 
   .pdf-scroll-area {

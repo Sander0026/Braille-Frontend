@@ -1,6 +1,9 @@
 @if (urlVisualizadorPdf()) {
   <header class="pdf-viewer-header">
-    <h3 id="pdf-viewer-title">Visualizador Interativo de Documento</h3>
+    <div class="header-titles">
+      <h3 id="pdf-viewer-title">Visualizador Interativo de Documento</h3>
+      <span class="mobile-zoom-hint">Dica: Use os dois dedos na tela (pinça) para dar zoom</span>
+    </div>
     <button 
       (click)="onClose()" 
       class="btn-close"
