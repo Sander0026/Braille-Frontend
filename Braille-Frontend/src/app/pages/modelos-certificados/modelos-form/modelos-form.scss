@@ -21,10 +21,13 @@ $error-text: #991b1b;
     padding: 2.5rem;
     border: 1px solid $border-color;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    box-sizing: border-box;
 
     @media (max-width: 640px) {
-        margin: 1rem auto;
+        margin: 1rem;
         padding: 1rem;
+        max-width: calc(100vw - 2rem);
+        overflow-x: hidden;
     }
 }
 
