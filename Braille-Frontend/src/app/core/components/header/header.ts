@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AccessibilityService, FonteSize } from '../../services/accessibility.service';
@@ -56,14 +56,23 @@ export class HeaderComponent {
     this.menuAberto = !this.menuAberto;
   }
 
-  emitUserAction(action: 'perfil' | 'foto' | 'senha' | 'sair'): void {
-    this.menuAberto = false; // Fecha o menu ao clicar
-    this.userAction.emit(action);
+  // Fecha o dropdown ao clicar em qualquer lugar da página (fora do menu)
+  // O stopPropagation() no botão e no dropdown impede que este listener
+  // dispare ao clicar dentro do menu — só fecha quando clica fora.
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.menuAberto) this.menuAberto = false;
   }
 
-  // Fecha dropdown se o layout em cima fechar por blur (event handler no layout cuida disso, mas podemos forçar daqui também)
-  fecharMenoExterno(): void {
+  // Fecha o dropdown com Escape (acessibilidade WCAG 2.1)
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
     if (this.menuAberto) this.menuAberto = false;
+  }
+
+  emitUserAction(action: 'perfil' | 'foto' | 'senha' | 'sair'): void {
+    this.menuAberto = false;
+    this.userAction.emit(action);
   }
 
   // ── Ações Acessibilidade (Comuns) ─────────────────────────

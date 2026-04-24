@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 import { StorageService } from './storage.service';
 
 export interface UserInfo {
@@ -101,7 +101,11 @@ export class AuthService {
   }
 
   getMe(): Observable<PerfilUsuario> {
-    return this.http.get<PerfilUsuario>(`${this.apiUrl}/me`);
+    // A API retorna ApiResponse<PerfilUsuario> ({ success, data, message })
+    // O map extrai apenas o payload real para não quebrar o binding de fotoPerfil no header
+    return this.http.get<{ data: PerfilUsuario }>(`${this.apiUrl}/me`).pipe(
+      map(r => r.data)
+    );
   }
 
   atualizarFoto(fotoPerfil: string | null): Observable<any> {
@@ -109,7 +113,9 @@ export class AuthService {
   }
 
   atualizarPerfil(dados: { nome?: string; email?: string }): Observable<PerfilUsuario> {
-    return this.http.patch<PerfilUsuario>(`${this.apiUrl}/perfil`, dados);
+    return this.http.patch<{ data: PerfilUsuario }>(`${this.apiUrl}/perfil`, dados).pipe(
+      map(r => r.data)
+    );
   }
 
   uploadFoto(file: File): Observable<{ url: string }> {
