@@ -368,6 +368,8 @@ $gray-600: vars.$color-gray-600;
 
 @media (max-width: 900px) {
   .table {
+    min-width: 100%; /* Reseta o min-width de 800px para evitar scroll horizontal indesejado */
+    
     thead {
       display: none;
     }
@@ -390,6 +392,7 @@ $gray-600: vars.$color-gray-600;
       align-items: flex-start;
       text-align: left;
       gap: 0.5rem;
+      width: 100% !important; /* Sobrescreve as larguras fixas dos nth-child da versão desktop */
     }
 
     td::before {
