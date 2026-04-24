@@ -319,6 +319,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
           </tr></thead>
           <tbody>${a.matriculasOficina.map(m => {
               const s = this.frequenciasMap.get(m.turma.id);
+              const statusEfetivo = (m.status === 'ATIVA' && m.turma.status === 'CONCLUIDA') ? 'CONCLUIDA' : m.status;
+              const statusDisplay = statusEfetivo === 'ATIVA' ? 'Em Curso' : statusEfetivo === 'CONCLUIDA' ? 'Concluída' : statusEfetivo === 'EVADIDA' ? 'Evadido(a)' : 'Cancelada';
               return `<tr>
                 <td style="padding:6px;border:1px solid #d1d5db;">${m.turma.nome}</td>
                 <td style="padding:6px;border:1px solid #d1d5db;">${fmtData(m.dataEntrada)}</td>
@@ -326,7 +328,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
                 <td style="padding:6px;border:1px solid #d1d5db;text-align:center;">${s?.presentes ?? '—'}</td>
                 <td style="padding:6px;border:1px solid #d1d5db;text-align:center;">${s?.faltas ?? '—'}</td>
                 <td style="padding:6px;border:1px solid #d1d5db;text-align:center;">${s?.taxaPresenca != null ? s.taxaPresenca + '%' : '—'}</td>
-                <td style="padding:6px;border:1px solid #d1d5db;">${m.status === 'ATIVA' ? 'Em Curso' : m.status}</td>
+                <td style="padding:6px;border:1px solid #d1d5db;">${statusDisplay}</td>
               </tr>`;
             }).join('')}
           </tbody>
