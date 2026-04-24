@@ -48,11 +48,10 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.cdr.detectChanges();
 
     this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
+      next: (res) => {
         this.pdfAtual = {
-          url: url,
-          title: `${cert.tituloCertificado} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
+          url: res.pdfUrl,
+          title: `${cert.tituloCertificado || 'Certificado'} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
         };
         this.pdfAberto = true;
         this.processandoId = null;
@@ -70,9 +69,6 @@ export class ApoiadorCertificadosComponent implements OnInit {
 
   fecharPdf(): void {
     this.pdfAberto = false;
-    if (this.pdfAtual?.url) {
-      URL.revokeObjectURL(this.pdfAtual.url); // Memory leak prevention
-    }
     this.pdfAtual = null;
     this.cdr.detectChanges();
   }
@@ -82,15 +78,9 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.cdr.detectChanges();
 
     this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        const dataStr = cert.dataEmissao ? String(cert.dataEmissao).substring(0, 10) : 'Doc';
-        link.download = `Certificado_${this.apoiador.id}_${dataStr}.pdf`;
-        link.target = '_blank';
-        link.click();
-        URL.revokeObjectURL(url); // Clean quickly for memory efficiency
+      next: (res) => {
+        // Redireciona para Cloudinary com target _blank para iniciar o download ou visualização nativa
+        window.open(res.pdfUrl, '_blank');
         
         this.processandoId = null;
         this.announcer.announce('Download da honraria iniciado com sucesso.', 'polite');
