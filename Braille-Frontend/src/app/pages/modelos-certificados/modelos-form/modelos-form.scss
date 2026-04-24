@@ -21,6 +21,11 @@ $error-text: #991b1b;
     padding: 2.5rem;
     border: 1px solid $border-color;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+
+    @media (max-width: 640px) {
+        margin: 1rem auto;
+        padding: 1rem;
+    }
 }
 
 .wizard-header {
@@ -473,5 +478,16 @@ $error-text: #991b1b;
                 box-sizing: border-box;
             }
         }
+    }
+}
+
+// ── Painel de Controles (Grid Passo 4) ────────────────────
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+        grid-template-columns: 1fr;
     }
 }
