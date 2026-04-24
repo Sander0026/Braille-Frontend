@@ -57,7 +57,10 @@ export class ModelosCertificadosService {
     return this.http.post(`${this.apiUrl}/teste`, payload, { responseType: 'blob' });
   }
 
-  emitirAcademico(turmaId: string, alunoId: string): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/emitir-academico`, { turmaId, alunoId }, { responseType: 'blob' });
+  emitirAcademico(turmaId: string, alunoId: string): Observable<{ pdfUrl: string; codigoValidacao: string }> {
+    return this.http.post<{ pdfUrl: string; codigoValidacao: string }>(
+      `${this.apiUrl}/emitir-academico`,
+      { turmaId, alunoId },
+    );
   }
 }
