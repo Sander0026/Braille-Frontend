@@ -61,6 +61,12 @@ $border-r: 0.5rem;
   .required { color: #ef4444; }
 }
 
+.form-group-full {
+  @media (min-width: 576px) {
+    grid-column: span 2;
+  }
+}
+
 .form-input {
   padding: 0.625rem 0.75rem;
   border: 1px solid $gray-200;
@@ -77,3 +83,36 @@ $border-r: 0.5rem;
 
 @keyframes spin { 100% { transform: rotate(360deg); } }
 .spinner { animation: spin 1s linear infinite; }
+
+.timeline-item {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+
+  &:last-child {
+    padding-bottom: 0;
+    margin-bottom: 0;
+    border-bottom: none;
+  }
+
+  @media (max-width: 576px) {
+    gap: 0.5rem;
+  }
+}
+
+.timeline-date {
+  flex: 0 0 100px;
+  text-align: right;
+
+  @media (max-width: 576px) {
+    flex: 0 0 80px;
+  }
+}
+
+.timeline-content {
+  flex: 1;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
