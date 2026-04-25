@@ -330,25 +330,26 @@ $gray-900: #1f1f1f;
 }
 
 // Responsividade mobile (telas até 480px)
+// Responsividade mobile (telas até 480px)
 @media (max-width: 480px) {
     .modal {
         max-width: 100%;
-        border-radius: 0.75rem 0.75rem 0 0;
-        max-height: 85vh;
+        border-radius: 0.75rem;
+        max-height: 90vh;
         width: 100%;
-        margin-top: auto; // Ensures it sticks to bottom
     }
 
     .modal-backdrop {
-        align-items: flex-end; // No mobile, ancora o modal no rodapé como bottom-sheet
-        padding: 0;
+        align-items: center;
+        padding: 1rem;
     }
 
     .modal-footer {
-        justify-content: stretch;
+        flex-direction: column;
+        gap: 0.75rem;
 
         .btn {
-            flex: 1; // Botões ocupam largura total no mobile
+            width: 100%;
         }
     }
 }
