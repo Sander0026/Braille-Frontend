@@ -99,25 +99,23 @@
                 <div class="profile-section" style="grid-column: 1 / -1; padding-top: 1.5rem; border-top: 1px solid #e5e7eb;">
                     <h4 style="margin-bottom: 1rem;">Gerenciamento do Relacionamento</h4>
 
-                    <div style="display: flex; gap: 1rem;">
+                    <div class="action-cards">
                         <button
-                            class="btn btn-outline-primary d-flex align-items-center gap-2 justify-content-center"
-                            style="flex: 1; border: 2px solid #2563eb; padding: 1rem; background: transparent; cursor: pointer; border-radius: 8px; color: #2563eb;" 
+                            class="btn btn-outline-primary action-card-btn"
                             (click)="viewActionsRequested.emit()">
-                            <span class="material-symbols-rounded" style="font-size: 1.5rem;">history</span>
-                            <div style="text-align: left;">
-                                <div style="font-weight: bold;">Histórico de Ações</div>
-                                <div style="font-size: 0.8rem; font-weight: normal; color: #4b5563;">Eventos, doações e relacionamento</div>
+                            <span class="material-symbols-rounded icon">history</span>
+                            <div class="text-content">
+                                <div class="title">Histórico de Ações</div>
+                                <div class="subtitle">Eventos, doações e relacionamento</div>
                             </div>
                         </button>
                         <button
-                            class="btn btn-outline-success d-flex align-items-center gap-2 justify-content-center"
-                            style="flex: 1; border: 2px solid #059669; padding: 1rem; background: transparent; cursor: pointer; border-radius: 8px; color: #059669;"
+                            class="btn btn-outline-success action-card-btn"
                             (click)="viewCertificatesRequested.emit()">
-                            <span class="material-symbols-rounded" style="font-size: 1.5rem;">workspace_premium</span>
-                            <div style="text-align: left;">
-                                <div style="font-weight: bold;">Certificados e Honrarias</div>
-                                <div style="font-size: 0.8rem; font-weight: normal; color: #4b5563;">Emitir e visualizar reconhecimentos</div>
+                            <span class="material-symbols-rounded icon">workspace_premium</span>
+                            <div class="text-content">
+                                <div class="title">Certificados e Honrarias</div>
+                                <div class="subtitle">Emitir e visualizar reconhecimentos</div>
                             </div>
                         </button>
                     </div>

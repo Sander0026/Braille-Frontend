@@ -143,3 +143,70 @@ $border-r: 0.5rem;
     grid-template-columns: 1fr !important;
   }
 }
+
+.profile-section {
+  p {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    margin-bottom: 0.5rem;
+  }
+}
+
+/* ============================================================ */
+/* ACTION CARDS (Responsiveness for Gerenciamento)              */
+/* ============================================================ */
+.action-cards {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .action-card-btn {
+    flex: 1;
+    min-width: 250px; /* Force to wrap when there is not enough space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    border: 2px solid transparent;
+
+    &.btn-outline-primary {
+      border-color: #2563eb;
+      color: #2563eb;
+    }
+
+    &.btn-outline-success {
+      border-color: #059669;
+      color: #059669;
+    }
+
+    .icon {
+      font-size: 1.5rem;
+    }
+
+    .text-content {
+      text-align: left;
+
+      .title {
+        font-weight: bold;
+      }
+
+      .subtitle {
+        font-size: 0.8rem;
+        font-weight: normal;
+        color: #4b5563;
+      }
+    }
+  }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    
+    .action-card-btn {
+      width: 100%;
+    }
+  }
+}
