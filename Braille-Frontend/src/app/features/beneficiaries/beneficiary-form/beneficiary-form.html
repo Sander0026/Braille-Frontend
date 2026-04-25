@@ -2,8 +2,8 @@
 <!-- MODO EDIÇÃO — Modal flat com seções scrolláveis                       -->
 <!-- ══════════════════════════════════════════════════════════════════════ -->
 @if (isModoEdicao) {
-<form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" (keydown.enter)="handleEnter($event)" novalidate class="edit-modal"
-  role="dialog" aria-modal="true" aria-labelledby="modal-edicao-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+<div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="modal-edicao-titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <form [formGroup]="cadastroForm" (ngSubmit)="salvarCadastro()" (keydown.enter)="handleEnter($event)" novalidate style="display: contents;">
 
   <!-- ── Header fixo ──────────────────────────────────────────────── -->
   <div class="edit-modal__header">
@@ -375,7 +375,8 @@
     </button>
   </div>
 
-</form>
+  </form>
+</div>
 }
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
