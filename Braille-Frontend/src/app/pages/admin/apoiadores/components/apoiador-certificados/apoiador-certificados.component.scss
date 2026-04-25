@@ -74,4 +74,69 @@ $border-r: 0.5rem;
 @media (max-width: 768px) {
   .modal-body { flex-direction: column; }
   .emissao-panel, .lista-panel { flex: none; width: 100%; min-width: 0 !important; }
+
+  .table-responsive {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .table {
+    display: block;
+    width: 100%;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e2e8f0;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100% !important;
+      padding: 1rem !important;
+      border-bottom: 1px solid #f1f5f9 !important;
+      text-align: right !important;
+      box-sizing: border-box;
+
+      &:last-child {
+        border-bottom: none !important;
+        justify-content: flex-end !important;
+      }
+
+      &::before {
+        content: attr(data-label);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #64748b;
+        text-align: left;
+        margin-right: 1rem;
+      }
+
+      > div:not(.btn) {
+        text-align: right;
+        align-items: flex-end;
+      }
+    }
+  }
 }
