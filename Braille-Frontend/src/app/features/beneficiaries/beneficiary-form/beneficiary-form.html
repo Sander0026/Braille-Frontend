@@ -148,7 +148,7 @@
         <div class="edit-field edit-field--sm">
           <label for="e-cep" class="edit-label">CEP</label>
           <input id="e-cep" type="tel" class="edit-input" formControlName="cep"
-            (blur)="buscarCep()" maxlength="9" placeholder="00000-000" autocomplete="off"
+            (input)="formatarCepLocal($event)" (blur)="buscarCep()" maxlength="9" placeholder="00000-000" autocomplete="off"
             [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','cep')">
           @if (isCampoInvalido('enderecoLocalizacao','cep')) {
           <span class="edit-error" role="alert">CEP inválido.</span>
@@ -524,7 +524,7 @@
       <div class="form-row">
         <div class="form-group form-group--small">
           <label for="cep" class="form-label">CEP <span class="required" aria-hidden="true">*</span></label>
-          <input type="tel" id="cep" formControlName="cep" (blur)="buscarCep()" class="form-input"
+          <input type="tel" id="cep" formControlName="cep" (input)="formatarCepLocal($event)" (blur)="buscarCep()" class="form-input"
             [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'cep')" placeholder="00000-000" maxlength="9"
             [attr.aria-invalid]="isCampoInvalido('enderecoLocalizacao', 'cep') ? 'true' : null"
             [attr.aria-describedby]="isCampoInvalido('enderecoLocalizacao', 'cep') ? 'err-cep' : null">

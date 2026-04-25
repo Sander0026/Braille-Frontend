@@ -9,6 +9,7 @@ import { BeneficiariosService, Beneficiario, ReativacaoAluno } from '../../../co
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
+import { formatarCpfCnpj, formatarRg, formatarTelefone, formatarCep } from '../../../shared/utils/masks.util';
 
 @Component({
   selector: 'app-beneficiary-form',
@@ -87,14 +88,14 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
       dadosPessoais: {
         nomeCompleto: aluno.nomeCompleto,
         dataNascimento: aluno.dataNascimento ? new Date(aluno.dataNascimento).toISOString().substring(0, 10) : '',
-        cpf: aluno.cpf,
-        rg: aluno.rg,
+        cpf: formatarCpfCnpj(aluno.cpf || ''),
+        rg: formatarRg(aluno.rg || ''),
         genero: aluno.genero,
         estadoCivil: aluno.estadoCivil,
         corRaca: aluno.corRaca,
       },
       enderecoLocalizacao: {
-        cep: aluno.cep,
+        cep: formatarCep(aluno.cep || ''),
         rua: aluno.rua,
         numero: aluno.numero,
         complemento: aluno.complemento,
@@ -102,7 +103,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         cidade: aluno.cidade,
         uf: aluno.uf,
         pontoReferencia: aluno.pontoReferencia,
-        telefoneContato: aluno.telefoneContato,
+        telefoneContato: formatarTelefone(aluno.telefoneContato || ''),
         email: aluno.email,
         contatoEmergencia: aluno.contatoEmergencia,
       },
@@ -321,50 +322,34 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
 
   formatarDocumento(event: any) {
     const input = event.target;
-    let valor = input.value.replace(/\D/g, '');
-    
-    if (valor.length > 11) valor = valor.substring(0, 11);
-    
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    
-    input.value = valor;
-    this.cadastroForm.get('dadosPessoais.cpf')?.setValue(valor, { emitEvent: false });
+    const valorFormatado = formatarCpfCnpj(input.value);
+    input.value = valorFormatado;
+    this.cadastroForm.get('dadosPessoais.cpf')?.setValue(valorFormatado, { emitEvent: false });
     this.verificarObrigatoriedadeCpfRg();
   }
 
   formatarRg(event: Event) {
     const input = event.target as HTMLInputElement;
     let valor = input.value.replace(/\D/g, '');
-    
-    if (valor.length > 8) valor = valor.substring(0, 8);
-    
-    // Formato ##.###.###
-    valor = valor.replace(/(\d{2})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-    
-    input.value = valor;
-    this.cadastroForm.get('dadosPessoais.rg')?.setValue(valor, { emitEvent: false });
+    if (valor.length > 10) valor = valor.substring(0, 10);
+    const valorFormatado = formatarRg(valor);
+    input.value = valorFormatado;
+    this.cadastroForm.get('dadosPessoais.rg')?.setValue(valorFormatado, { emitEvent: false });
     this.verificarObrigatoriedadeCpfRg();
   }
 
   formatarTelefone(event: any) {
     const input = event.target;
-    let valor = input.value.replace(/\D/g, '');
-    
-    if (valor.length > 11) valor = valor.substring(0, 11);
-    
-    if (valor.length <= 10) {
-      valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
-      valor = valor.replace(/(\d{4})(\d)/, '$1-$2');
-    } else {
-      valor = valor.replace(/(\d{2})(\d)/, '($1) $2');
-      valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
-    }
-    
-    input.value = valor;
-    this.cadastroForm.get('enderecoLocalizacao.telefoneContato')?.setValue(valor, { emitEvent: false });
+    const valorFormatado = formatarTelefone(input.value);
+    input.value = valorFormatado;
+    this.cadastroForm.get('enderecoLocalizacao.telefoneContato')?.setValue(valorFormatado, { emitEvent: false });
+  }
+
+  formatarCepLocal(event: any) {
+    const input = event.target;
+    const valorFormatado = formatarCep(input.value);
+    input.value = valorFormatado;
+    this.cadastroForm.get('enderecoLocalizacao.cep')?.setValue(valorFormatado, { emitEvent: false });
   }
 
   isCampoInvalido(grupo: string, campo: string): boolean {

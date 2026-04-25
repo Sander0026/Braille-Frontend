@@ -11,6 +11,9 @@ import { ConfirmDialogService } from '../../../core/services/confirm-dialog.serv
 import { ToastService } from '../../../core/services/toast.service';
 import { DataBraillePipe } from '../../../shared/pipes/data-braille.pipe';
 import { CpfRgPipe } from '../../../shared/pipes/cpf-rg.pipe';
+import { TelefonePipe } from '../../../shared/pipes/telefone.pipe';
+import { CepPipe } from '../../../shared/pipes/cep.pipe';
+import { formatarTelefone, formatarCep } from '../../../shared/utils/masks.util';
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { BeneficiaryFormComponent } from '../beneficiary-form/beneficiary-form';
@@ -40,7 +43,7 @@ export class TabelaTrFocavelDirective implements FocusableOption {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, TelefonePipe, CepPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -370,7 +373,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
             <p style="font-size:9pt;margin:3px 0;"><strong>Nascimento:</strong> ${fmtData(a.dataNascimento)}</p>
             <p style="font-size:9pt;margin:3px 0;"><strong>Gênero:</strong> ${ni(a.genero)}</p>
             <p style="font-size:9pt;margin:3px 0;"><strong>Estado Civil:</strong> ${ni(a.estadoCivil)}</p>
-            <p style="font-size:9pt;margin:3px 0;"><strong>Telefone:</strong> ${ni(a.telefoneContato)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>Telefone:</strong> ${ni(formatarTelefone(a.telefoneContato || ''))}</p>
             <p style="font-size:9pt;margin:3px 0;"><strong>E-mail:</strong> ${ni(a.email)}</p>
             <p style="font-size:9pt;margin:3px 0;"><strong>Contato Emergência:</strong> ${ni(a.contatoEmergencia)}</p>
           </div>
@@ -390,7 +393,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
               border-bottom:1px solid #e5e7eb;padding-bottom:4px;margin-bottom:6px;">Endereço</h4>
             <p style="font-size:9pt;margin:3px 0;">${ni(a.rua)}${a.numero ? ', ' + a.numero : ''}${a.complemento ? ' — ' + a.complemento : ''}</p>
             <p style="font-size:9pt;margin:3px 0;">${ni(a.bairro)} — ${ni(a.cidade)} / ${ni(a.uf)}</p>
-            <p style="font-size:9pt;margin:3px 0;"><strong>CEP:</strong> ${ni(a.cep)}</p>
+            <p style="font-size:9pt;margin:3px 0;"><strong>CEP:</strong> ${ni(formatarCep(a.cep || ''))}</p>
           </div>
           <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:6px;padding:8px 10px;">
             <h4 style="font-size:9pt;text-transform:uppercase;letter-spacing:.05em;color:#374151;

@@ -90,7 +90,17 @@ export function formatarCep(valorCru: string): string {
 }
 
 /**
+ * Formata RG (pontua a cada milhar da direita para a esquerda).
+ * Ex: 1111111 -> 1.111.111
+ */
+export function formatarRg(valorCru: string): string {
+  if (!valorCru) return '';
+  const doc = valorCru.replace(/\D/g, '');
+  return doc.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+/**
  * @deprecated Use as funções diretamente (`formatarCpfCnpj`, `limparEmail`, `formatarTelefone`, `formatarCep`).
  * Mantido como alias de retrocompatibilidade para consumers existentes.
  */
-export const MasksUtil = { formatarCpfCnpj, limparEmail, formatarTelefone, formatarCep };
+export const MasksUtil = { formatarCpfCnpj, formatarRg, limparEmail, formatarTelefone, formatarCep };

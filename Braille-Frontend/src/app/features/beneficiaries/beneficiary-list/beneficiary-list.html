@@ -327,7 +327,7 @@
                     <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
                     } @else { <span>—</span> }
                 </td>
-                <td>{{ aluno.telefoneContato || '—' }}</td>
+                <td>{{ (aluno.telefoneContato | telefone) || '—' }}</td>
                 <td class="acoes-cell">
                     @if (abaAtiva === 'ativos') {
                     <button class="btn btn-sm btn-ghost" (click)="abrirModalEdicao(aluno)"
@@ -501,7 +501,7 @@
                         alunoSelecionado.corRaca === 'NAO_DECLARADO' ? 'Não Declarado' : 
                         (alunoSelecionado.corRaca | titlecase) || 'Não informado' 
                     }}</p>
-                    <p><strong>Contato:</strong> {{ alunoSelecionado.telefoneContato || 'N/I' }}</p>
+                    <p><strong>Contato:</strong> {{ (alunoSelecionado.telefoneContato | telefone) || 'N/I' }}</p>
                     <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
                     <p><strong>Contato Emergência:</strong> {{ alunoSelecionado.contatoEmergencia || 'N/I' }}</p>
                 </div>
@@ -533,7 +533,7 @@
                         {{ alunoSelecionado.bairro || 'Bairro' }} - {{ alunoSelecionado.cidade || 'Cidade' }}/{{
                         alunoSelecionado.uf || 'UF' }}
                         <br>
-                        <strong>CEP:</strong> {{ alunoSelecionado.cep || 'N/I' }}
+                        <strong>CEP:</strong> {{ (alunoSelecionado.cep | cep) || 'N/I' }}
                     </p>
                 </div>
 
