@@ -283,6 +283,8 @@ $primary-dk: #c9a300;
             &.active {
                 background: color.change($primary, $alpha: 0.1);
                 border-radius: 8px;
+            }
+        }
     }
 }
 
