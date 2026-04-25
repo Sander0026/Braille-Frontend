@@ -103,7 +103,8 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="edit-cep" class="form-label">CEP</label>
-          <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep" (blur)="buscarCep()"
+          <input id="edit-cep" type="tel" inputmode="numeric" class="form-input" formControlName="cep" 
+            (input)="formatarCepLocal($event)" (blur)="buscarCep()"
             placeholder="00000-000" maxlength="9" />
         </div>
 

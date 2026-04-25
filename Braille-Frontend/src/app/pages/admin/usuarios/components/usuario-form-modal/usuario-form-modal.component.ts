@@ -19,6 +19,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { UsuariosService, Usuario } from '../../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { formatarCpfCnpj, formatarTelefone, formatarCep } from '../../../../../shared/utils/masks.util';
 
 @Component({
   selector: 'app-usuario-form-modal',
@@ -101,19 +102,13 @@ export class UsuarioFormModalComponent {
   }
 
   iniciarFormulario(u: Usuario): void {
-    const telFormated = u.telefone
-        ? u.telefone.replace(/\D/g, '').length <= 10
-            ? u.telefone.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
-            : u.telefone.replace(/\D/g, '').replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2')
-        : '';
-
     this.editForm.patchValue({
         nome: u.nome,
-        cpf: u.cpf ? u.cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4') : '',
+        cpf: formatarCpfCnpj(u.cpf || ''),
         email: u.email ?? '',
         role: u.role,
-        telefone: telFormated,
-        cep: u.cep ?? '',
+        telefone: formatarTelefone(u.telefone || ''),
+        cep: formatarCep(u.cep || ''),
         rua: u.rua ?? '',
         numero: u.numero ?? '',
         complemento: u.complemento ?? '',
@@ -160,10 +155,7 @@ export class UsuarioFormModalComponent {
   }
 
   formatarCpf(event: any) {
-    let v = event.target.value.replace(/\D/g, '').substring(0, 11);
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d)/, '$1.$2');
-    v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    const v = formatarCpfCnpj(event.target.value);
     event.target.value = v;
     this.editForm.get('cpf')?.setValue(v, { emitEvent: false });
     
@@ -174,12 +166,15 @@ export class UsuarioFormModalComponent {
   }
 
   formatarTelefone(event: any) {
-    let v = event.target.value.replace(/\D/g, '').substring(0, 11);
-    v = v.length <= 10
-        ? v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{4})(\d)/, '$1-$2')
-        : v.replace(/(\d{2})(\d)/, '($1) $2').replace(/(\d{5})(\d)/, '$1-$2');
+    const v = formatarTelefone(event.target.value);
     event.target.value = v;
     this.editForm.get('telefone')?.setValue(v, { emitEvent: false });
+  }
+
+  formatarCepLocal(event: any) {
+    const v = formatarCep(event.target.value);
+    event.target.value = v;
+    this.editForm.get('cep')?.setValue(v, { emitEvent: false });
   }
 
   verificarCpfBlur() {

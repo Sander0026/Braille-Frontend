@@ -14,6 +14,10 @@ import { CommonModule } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+import { CpfRgPipe } from '../../../../../shared/pipes/cpf-rg.pipe';
+import { TelefonePipe } from '../../../../../shared/pipes/telefone.pipe';
+import { CepPipe } from '../../../../../shared/pipes/cep.pipe';
+
 import { UsuariosService, Usuario } from '../../../../../core/services/usuarios.service';
 import { ConfirmDialogService } from '../../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../../core/services/toast.service';
@@ -22,7 +26,7 @@ import { AuthService } from '../../../../../core/services/auth.service';
 @Component({
   selector: 'app-usuario-perfil-modal',
   standalone: true,
-  imports: [CommonModule, A11yModule],
+  imports: [CommonModule, A11yModule, CpfRgPipe, TelefonePipe, CepPipe],
   templateUrl: './usuario-perfil-modal.component.html',
   styleUrl: './usuario-perfil-modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

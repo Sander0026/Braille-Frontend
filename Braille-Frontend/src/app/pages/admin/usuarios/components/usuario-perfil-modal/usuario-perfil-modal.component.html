@@ -66,8 +66,8 @@
 
         <div class="profile-section">
           <h4>Contato</h4>
-          <p><strong>Telefone:</strong> {{ u.telefone || 'Não informado' }}</p>
-          <p><strong>CPF:</strong> {{ u.cpf || 'Não informado' }}</p>
+          <p><strong>Telefone:</strong> {{ (u.telefone | telefone) || 'Não informado' }}</p>
+          <p><strong>CPF:</strong> {{ (u.cpf | cpfRg) || 'Não informado' }}</p>
         </div>
 
         <div class="profile-section profile-section--full">
@@ -80,7 +80,7 @@
             {{ u.bairro || '' }}{{ u.bairro && u.cidade ? ' · ' : '' }}
             {{ u.cidade || '' }}{{ u.uf ? ' / ' + u.uf : '' }}
           </p>
-          <p><strong>CEP:</strong> {{ u.cep || 'Não informado' }}</p>
+          <p><strong>CEP:</strong> {{ (u.cep | cep) || 'Não informado' }}</p>
         </div>
 
         <!-- Segurança -->
