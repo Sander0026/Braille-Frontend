@@ -576,7 +576,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
 
   private enviarDadosParaBanco(dados: Record<string, unknown>) {
     const call$: Observable<any> = this.isModoEdicao && this.alunoEmEdicao
-       ? this.beneficiariosService.atualizar(this.alunoEmEdicao.id, { ...this.alunoEmEdicao, ...dados })
+       ? this.beneficiariosService.atualizar(this.alunoEmEdicao.id, dados)
        : this.beneficiariosService.criarBeneficiario(dados);
 
     call$.subscribe({
