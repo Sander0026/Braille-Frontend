@@ -31,11 +31,17 @@
 
 .modal-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid #e5e7eb;
     flex-shrink: 0;
+    gap: 1rem;
+
+    .modal-header-content {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .modal-title {
@@ -135,6 +141,7 @@
 
 .diff-table {
     width: 100%;
+    min-width: 500px;
     border-collapse: collapse;
     font-size: 0.85rem;
 

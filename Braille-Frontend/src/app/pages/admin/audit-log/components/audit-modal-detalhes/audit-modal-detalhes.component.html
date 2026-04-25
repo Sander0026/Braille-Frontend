@@ -2,13 +2,15 @@
 <div class="modal-overlay" (click)="fechar()" (keydown.escape)="fechar()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <dialog class="modal modal--lg" open (click)="$event.stopPropagation()" aria-labelledby="modal-title" aria-modal="true">
         <header class="modal-header">
-            <h2 id="modal-title" class="modal-title" style="margin-bottom: 0.25rem;">
-                <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
-                &nbsp;{{ log.entidade }}
-            </h2>
-            <p id="modal-desc" class="modal-subtitle" style="font-size: 0.95rem; color: #4b5563; margin-top: 0.25rem;">
-                {{ log | auditFriendly }}
-            </p>
+            <div class="modal-header-content">
+                <h2 id="modal-title" class="modal-title" style="margin-bottom: 0.25rem;">
+                    <span class="badge-acao" [ngClass]="acaoCor[log.acao]">{{ log.acao }}</span>
+                    &nbsp;{{ log.entidade }}
+                </h2>
+                <p id="modal-desc" class="modal-subtitle" style="font-size: 0.95rem; color: #4b5563; margin-top: 0.25rem;">
+                    {{ log | auditFriendly }}
+                </p>
+            </div>
             <button class="modal-close" (click)="fechar()" aria-label="Fechar modal de detalhes">✕</button>
         </header>
 
