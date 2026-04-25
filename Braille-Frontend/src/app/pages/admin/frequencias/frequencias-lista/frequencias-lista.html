@@ -63,7 +63,7 @@
         [attr.hidden]="abaAtiva() !== 'chamada' ? true : null">
         <app-frequencia-chamada
             *ngSwitchCase="'chamada'"
-            [turmas]="turmas()">
+            [turmas]="turmasParaChamada()">
         </app-frequencia-chamada>
     </div>
 

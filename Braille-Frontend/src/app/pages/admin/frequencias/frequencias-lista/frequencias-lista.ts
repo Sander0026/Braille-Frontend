@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   OnInit,
   signal,
+  computed,
   inject,
   DestroyRef,
   ViewEncapsulation,
@@ -58,6 +59,8 @@ export class FrequenciasLista implements OnInit, AfterViewInit {
   readonly isProfessor    = signal<boolean>(false);
   readonly userId         = signal<string>('');
   readonly erroCarregamento = signal<string>('');
+
+  readonly turmasParaChamada = computed(() => this.turmas().filter(t => t.status === 'ANDAMENTO'));
 
   ngOnInit(): void {
     const user = this.authService.getUser();

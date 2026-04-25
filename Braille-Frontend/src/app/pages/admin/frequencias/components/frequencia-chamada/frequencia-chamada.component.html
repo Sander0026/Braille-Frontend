@@ -5,9 +5,13 @@
             <label for="turmaSelect">Oficina / Turma</label>
             <select id="turmaSelect" [ngModel]="turmaSelecionadaId()" (ngModelChange)="updateTurma($event)"
                 class="form-input" aria-required="true">
-                <option value="">Selecione uma oficina...</option>
-                @for (turma of turmas; track turma.id) {
-                <option [value]="turma.id">{{ turma.nome }}</option>
+                @if (turmas.length === 0) {
+                    <option value="" disabled>Nenhuma oficina em andamento</option>
+                } @else {
+                    <option value="">Selecione uma oficina...</option>
+                    @for (turma of turmas; track turma.id) {
+                        <option [value]="turma.id">{{ turma.nome }}</option>
+                    }
                 }
             </select>
         </div>
