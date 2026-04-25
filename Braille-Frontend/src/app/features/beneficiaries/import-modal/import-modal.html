@@ -27,11 +27,12 @@
 
             <!-- Área de Upload -->
             @if (!resultado) {
+            <input #fileInput id="upload-planilha-input" type="file" accept=".xlsx,.xls,.csv" (change)="onFileInput($event)" class="sr-only" tabindex="-1" aria-hidden="true" aria-label="Selecionar planilha" />
+
             <div class="dropzone" [class.drag-over]="isDragOver" [class.has-file]="arquivoSelecionado"
                 (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
                 (click)="fileInput.click()" role="button" tabindex="0" (keydown.enter)="fileInput.click()"
                 aria-label="Área de upload. Arraste um arquivo ou clique para selecionar.">
-                <input #fileInput type="file" accept=".xlsx,.xls,.csv" (change)="onFileInput($event)" class="sr-only" />
 
                 @if (!arquivoSelecionado) {
                 <span class="material-symbols-rounded dropzone-icon">upload_file</span>
