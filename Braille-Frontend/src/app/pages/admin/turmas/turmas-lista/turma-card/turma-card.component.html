@@ -1,7 +1,7 @@
 <article class="turma-card" [class.arquivada]="!turma.statusAtivo" [attr.aria-labelledby]="'tcard-title-' + turma.id">
   <div class="tcard-top-border"></div>
   <header class="tcard-header-new">
-    <h3 class="tcard-title-main" [id]="'tcard-title-' + turma.id">{{ turma.nome }}</h3>
+    <h2 class="tcard-title-main" [id]="'tcard-title-' + turma.id">{{ turma.nome }}</h2>
     <div class="tcard-badges">
       @if (turma.statusAtivo) {
         <span class="badge-status outline-success" aria-hidden="true">
