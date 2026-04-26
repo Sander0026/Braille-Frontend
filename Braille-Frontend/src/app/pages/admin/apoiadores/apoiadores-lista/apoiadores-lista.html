@@ -129,6 +129,7 @@
                                 <!-- Ativo/Inativo via visualização direta (Acessível) -->
                                 <button type="button" class="status-toggle-label" role="switch"
                                     [attr.aria-checked]="ap.ativo" (click)="toggleStatus(ap)"
+                                    [attr.aria-label]="ap.ativo ? 'Desativar apoiador ' + ap.nome : 'Ativar apoiador ' + ap.nome"
                                     style="border:none;background:transparent;">
                                     <div class="toggle-indicator" [class.active]="ap.ativo" aria-hidden="true"></div>
                                     <span class="sr-only">{{ ap.ativo ? 'Desativar' : 'Ativar' }} Apoiador</span>

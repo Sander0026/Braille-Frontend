@@ -52,7 +52,7 @@ $gray-600: vars.$color-gray-600;
     }
 
     &.active {
-      color: $primary;
+      color: #0f172a; // melhorado o contraste de $primary (#f5c800)
       border-bottom-color: $primary;
     }
   }
