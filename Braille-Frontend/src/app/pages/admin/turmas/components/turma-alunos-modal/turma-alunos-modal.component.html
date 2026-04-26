@@ -61,29 +61,29 @@
       }
 
       <!-- Navegação Interna — padrão ARIA tabs (WCAG 4.1.2) -->
-      <div class="abas-switcher" role="tablist" aria-label="Navegação interna do perfil da oficina"
+      <div class="tabs-container" role="tablist" aria-label="Navegação interna do perfil da oficina"
         style="margin-bottom: 1.5rem;">
         @if (!isProfessor) {
         <button
           id="tab-adicionar"
-          class="aba-btn"
+          class="tab-btn"
           role="tab"
           [attr.aria-selected]="abaAtual() === 'adicionar'"
           [attr.tabindex]="abaAtual() === 'adicionar' ? 0 : -1"
           aria-controls="painel-adicionar"
-          [class.ativa]="abaAtual() === 'adicionar'"
+          [class.active]="abaAtual() === 'adicionar'"
           (click)="alterarAba('adicionar')">
           Adicionar Alunos
         </button>
         }
         <button
           id="tab-remover"
-          class="aba-btn"
+          class="tab-btn"
           role="tab"
           [attr.aria-selected]="abaAtual() === 'remover'"
           [attr.tabindex]="abaAtual() === 'remover' ? 0 : -1"
           aria-controls="painel-remover"
-          [class.ativa]="abaAtual() === 'remover'"
+          [class.active]="abaAtual() === 'remover'"
           (click)="alterarAba('remover')">
           Alunos Matriculados
         </button>
