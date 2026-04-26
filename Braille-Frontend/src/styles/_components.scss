@@ -209,12 +209,12 @@
 
     &.badge-danger {
         background-color: $color-danger-light;
-        color: $color-danger;
+        color: #b91c1c; // improved contrast from $color-danger (#dc2626)
     }
 
     &.badge-warning {
         background-color: $color-warning-light;
-        color: $color-warning;
+        color: #92400e; // improved contrast from $color-warning
     }
 
     &.badge-info {
