@@ -165,7 +165,7 @@
                   [attr.aria-describedby]="isFieldInvalid('textoTemplate') ? 'err-texto' : null"></textarea>
           @if (isFieldInvalid('textoTemplate')) { <span id="err-texto" class="error-text" role="alert">O texto deve ter pelo menos 20 caracteres.</span> }
         </div>
-        <p style="font-size:0.8rem; color:#94a3b8; margin-top: 0.5rem;" aria-live="polite">
+        <p style="font-size:0.8rem; color:#64748b; margin-top: 0.5rem;" aria-live="polite">
           Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
         </p>
       </fieldset>
@@ -343,7 +343,7 @@
                          (input)="layoutConfig.assinatura2.width = +$any($event.target).value; formModelo.markAsDirty()"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
-                <p style="font-size:0.72rem; color:#94a3b8; margin:0;">Arraste cada assinatura na prévia para posicioná-la no lugar correto.</p>
+                <p style="font-size:0.72rem; color:#64748b; margin:0;">Arraste cada assinatura na prévia para posicioná-la no lugar correto.</p>
               </div>
             </div>
 
@@ -360,7 +360,7 @@
                          (input)="layoutConfig.qrCode.size = +$any($event.target).value; formModelo.markAsDirty()"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
-                <p style="font-size:0.72rem; color:#94a3b8; margin:0;">O QR Code será gerado automaticamente no backend durante a emissão com o link de validação pública.</p>
+                <p style="font-size:0.72rem; color:#64748b; margin:0;">O QR Code será gerado automaticamente no backend durante a emissão com o link de validação pública.</p>
               </div>
             </div>
 
