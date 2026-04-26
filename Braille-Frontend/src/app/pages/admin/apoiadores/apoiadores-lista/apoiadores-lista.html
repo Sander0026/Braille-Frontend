@@ -130,7 +130,7 @@
                                 <button type="button" class="status-toggle-label" role="switch"
                                     [attr.aria-checked]="ap.ativo" (click)="toggleStatus(ap)"
                                     title="{{ ap.ativo ? 'Desativar' : 'Ativar' }} apoiador"
-                                    aria-label="{{ ap.ativo ? 'Desativar' : 'Ativar' }} apoiador {{ ap.nome }}"
+                                    aria-label="{{ ap.ativo ? 'Desativar' : 'Ativar' }} apoiador {{ ap.nomeFantasia || ap.nomeRazaoSocial }}"
                                     style="border:none;background:transparent;">
                                     <div class="toggle-indicator" [class.active]="ap.ativo" aria-hidden="true"></div>
                                     <span class="sr-only">{{ ap.ativo ? 'Desativar' : 'Ativar' }} Apoiador</span>
