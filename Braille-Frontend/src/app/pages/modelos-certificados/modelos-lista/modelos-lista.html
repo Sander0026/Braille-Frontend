@@ -32,7 +32,7 @@
       <div class="card-body">
         <div class="card-title-row">
           <h2 class="turma-nome">{{ modelo.nome }}</h2>
-          <span class="badge" [class.badge--success]="modelo.tipo === 'ACADEMICO'" [class.badge--neutral]="modelo.tipo === 'HONRARIA'">
+          <span class="badge" [class.badge-success]="modelo.tipo === 'ACADEMICO'" [class.badge-neutral]="modelo.tipo === 'HONRARIA'">
             {{ modelo.tipo === 'ACADEMICO' ? 'Acadêmico' : 'Honraria' }}
           </span>
         </div>
@@ -82,7 +82,7 @@
       <div class="dialog-title-group">
         <span class="material-symbols-rounded auth-icon" aria-hidden="true">workspace_premium</span>
         <h2 id="dialog-title">{{ modeloPreview()?.nome }}</h2>
-        <span class="badge" [class.badge--success]="modeloPreview()?.tipo === 'ACADEMICO'" [class.badge--neutral]="modeloPreview()?.tipo === 'HONRARIA'">
+        <span class="badge" [class.badge-success]="modeloPreview()?.tipo === 'ACADEMICO'" [class.badge-neutral]="modeloPreview()?.tipo === 'HONRARIA'">
           {{ modeloPreview()?.tipo === 'ACADEMICO' ? 'Acadêmico' : 'Honraria' }}
         </span>
         <span class="muted-text">— simulação de impressão</span>
