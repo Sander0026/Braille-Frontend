@@ -174,13 +174,13 @@ $border-r: 0.5rem;
     border: 2px solid transparent;
 
     &.btn-outline-primary {
-      border-color: #2563eb;
-      color: #2563eb;
+      border-color: #1d4ed8; // melhorado o contraste de #2563eb
+      color: #1d4ed8;
     }
 
     &.btn-outline-success {
-      border-color: #059669;
-      color: #059669;
+      border-color: #047857; // melhorado o contraste de #059669
+      color: #047857;
     }
 
     .icon {
