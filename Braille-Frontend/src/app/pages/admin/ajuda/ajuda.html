@@ -132,6 +132,7 @@
       @for (arquivo of arquivosDoCardAtivo(); track arquivo.arquivo) {
       <button
         type="button"
+        [id]="idManualLista(arquivo)"
         class="manual-list-item"
         role="listitem"
         (click)="abrirManual(arquivo)"
