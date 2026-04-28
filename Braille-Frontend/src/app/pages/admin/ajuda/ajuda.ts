@@ -96,6 +96,12 @@ export class Ajuda {
   abrirManual(arquivo: ManualArquivo): void {
     this.ultimoElementoFocado = document.activeElement as HTMLElement;
     this.arquivoAbertoDaLista = arquivo;
+
+    if (this.deveAbrirPdfEmNovaAba()) {
+      this.abrirPdfEmNovaAba(arquivo);
+      return;
+    }
+
     this.modalManuaisAberto.set(false);
     this.arquivoAtivo.set(arquivo);
     this.statusLeitorTela.set(`Abrindo manual ${arquivo.titulo}.`);
@@ -170,5 +176,26 @@ export class Ajuda {
     }
 
     document.querySelector<HTMLElement>('#modal-lista-manuais button')?.focus();
+  }
+
+  private deveAbrirPdfEmNovaAba(): boolean {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+  }
+
+  private abrirPdfEmNovaAba(arquivo: ManualArquivo): void {
+    const url = arquivo.arquivo.startsWith('assets/') ? `/${arquivo.arquivo}` : arquivo.arquivo;
+    const janela = window.open(url, '_blank', 'noopener,noreferrer');
+
+    if (janela) {
+      this.statusLeitorTela.set(`Manual ${arquivo.titulo} aberto em uma nova aba.`);
+      this.liveAnnouncer.announce(`Manual ${arquivo.titulo} aberto em uma nova aba.`, 'polite');
+      return;
+    }
+
+    this.modalManuaisAberto.set(false);
+    this.arquivoAtivo.set(arquivo);
+    this.statusLeitorTela.set(`Abrindo manual ${arquivo.titulo} no visualizador.`);
+    this.liveAnnouncer.announce(`Nao foi possivel abrir nova aba. Manual ${arquivo.titulo} aberto no visualizador.`, 'polite');
   }
 }
