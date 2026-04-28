@@ -14,6 +14,7 @@ export class PdfViewerComponent {
   url = input.required<string>();
   fecharModal = output<void>();
 
+  urlDocumento = signal('');
   urlVisualizadorPdf = signal('');
   carregando = signal(false);
   mensagemErro = signal('');
@@ -39,6 +40,7 @@ export class PdfViewerComponent {
     const urlLimpa = this.normalizarUrl(url);
 
     this.revogarObjectUrl();
+    this.urlDocumento.set(urlLimpa);
     this.urlVisualizadorPdf.set('');
     this.mensagemErro.set('');
 
