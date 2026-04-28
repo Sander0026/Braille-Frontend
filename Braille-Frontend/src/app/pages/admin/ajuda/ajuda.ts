@@ -36,6 +36,7 @@ export class Ajuda {
 
   private ultimoElementoFocado: HTMLElement | null = null;
   private gatilhoModalManuais: HTMLElement | null = null;
+  private arquivoAbertoDaLista: ManualArquivo | null = null;
   private readonly roleAtual: ManualRole | null;
 
   constructor(
@@ -61,6 +62,10 @@ export class Ajuda {
     return this.arquivosDoCardAtivo().length > 0;
   }
 
+  idManualLista(arquivo: ManualArquivo): string {
+    return `manual-ajuda-${arquivo.nomeArquivo.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+  }
+
   abrirModalManuais(manual: ManualCard): void {
     const arquivos = this.arquivosPermitidos(manual);
 
@@ -80,6 +85,7 @@ export class Ajuda {
   fecharModalManuais(): void {
     this.modalManuaisAberto.set(false);
     this.cardAtivo.set(null);
+    this.arquivoAbertoDaLista = null;
     this.statusLeitorTela.set('');
     setTimeout(() => {
       this.gatilhoModalManuais?.focus();
@@ -89,6 +95,7 @@ export class Ajuda {
 
   abrirManual(arquivo: ManualArquivo): void {
     this.ultimoElementoFocado = document.activeElement as HTMLElement;
+    this.arquivoAbertoDaLista = arquivo;
     this.modalManuaisAberto.set(false);
     this.arquivoAtivo.set(arquivo);
     this.statusLeitorTela.set(`Abrindo manual ${arquivo.titulo}.`);
@@ -96,7 +103,17 @@ export class Ajuda {
   }
 
   fecharPdf(): void {
+    const arquivoParaRestaurar = this.arquivoAbertoDaLista;
     this.arquivoAtivo.set(null);
+
+    if (this.cardAtivo()) {
+      this.modalManuaisAberto.set(true);
+      this.statusLeitorTela.set('Visualizador fechado. Retornando para a lista de manuais.');
+      this.liveAnnouncer.announce('Visualizador fechado. Voce voltou para a lista de manuais.', 'polite');
+      setTimeout(() => this.restaurarFocoNaListaDeManuais(arquivoParaRestaurar), 0);
+      return;
+    }
+
     if (this.ultimoElementoFocado) {
       setTimeout(() => {
         this.ultimoElementoFocado?.focus();
@@ -141,5 +158,17 @@ export class Ajuda {
     };
 
     return normalizada ? aliases[normalizada] ?? null : null;
+  }
+
+  private restaurarFocoNaListaDeManuais(arquivo: ManualArquivo | null): void {
+    if (arquivo) {
+      const itemManual = document.getElementById(this.idManualLista(arquivo));
+      if (itemManual) {
+        itemManual.focus();
+        return;
+      }
+    }
+
+    document.querySelector<HTMLElement>('#modal-lista-manuais button')?.focus();
   }
 }
