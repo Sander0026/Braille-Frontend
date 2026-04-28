@@ -1,26 +1,17 @@
 <div class="page-wrapper">
 
-  <!-- Cabeçalho da Página -->
   <header class="page-header">
     <div class="page-header-content">
       <span class="material-symbols-rounded page-header-icon" aria-hidden="true">help</span>
       <div>
         <h1 class="page-title">Central de Ajuda</h1>
-        <p class="page-subtitle">Manuais, guias de uso e informações sobre o sistema ILBES.</p>
+        <p class="page-subtitle">Manuais, guias de uso e informacoes sobre o sistema ILBES.</p>
       </div>
     </div>
   </header>
 
-  <!-- ── Visualizador de PDF Embutido ── -->
-  @if (manualAtivo()) {
-    <app-pdf-viewer
-      [titulo]="manualAtivo()!.titulo"
-      [src]="manualAtivo()!.arquivo!"
-      (close)="fecharPdf()">
-    </app-pdf-viewer>
-  }
+  <p class="sr-only" aria-live="polite">{{ statusLeitorTela() }}</p>
 
-  <!-- ── Seção: Manuais ── -->
   <section class="ajuda-section" aria-labelledby="manuais-titulo">
     <h2 id="manuais-titulo" class="section-title">
       <span class="material-symbols-rounded" aria-hidden="true">menu_book</span>
@@ -29,18 +20,16 @@
 
     <div class="manuais-grid">
       @for (manual of manuais; track manual.titulo) {
-        <app-manual-card 
-          [manual]="manual" 
-          (openManual)="abrirManual($event)">
+        <app-manual-card
+          [manual]="manual"
+          (openManualList)="abrirModalManuais($event)">
         </app-manual-card>
       }
     </div>
   </section>
 
-  <!-- ── Separador ── -->
   <hr class="section-divider" aria-hidden="true" />
 
-  <!-- ── Seção: Sobre o Sistema ── -->
   <section class="ajuda-section" aria-labelledby="sobre-titulo">
     <h2 id="sobre-titulo" class="section-title">
       <span class="material-symbols-rounded" aria-hidden="true">info</span>
@@ -49,22 +38,20 @@
 
     <div class="sobre-grid">
 
-      <!-- Card: Identidade -->
       <div class="sobre-card identidade-card">
         <div class="sistema-logo" aria-label="Logo ILBES">IB</div>
         <h3 class="sistema-nome">Instituto Luiz Braille</h3>
-        <p class="sistema-subtitulo">Sistema de Gestão Escolar — ILBES</p>
+        <p class="sistema-subtitulo">Sistema de Gestao Escolar - ILBES</p>
         <div class="sistema-versao">
           <span class="material-symbols-rounded" aria-hidden="true">tag</span>
-          Versão <strong>v1.0.0-RC</strong>
+          Versao <strong>v1.0.0-RC</strong>
         </div>
         <p class="sistema-descricao">
-          Sistema desenvolvido para apoiar a administração escolar do Instituto Luiz Braille,
-          voltado ao atendimento de pessoas com deficiência visual.
+          Sistema desenvolvido para apoiar a administracao escolar do Instituto Luiz Braille,
+          voltado ao atendimento de pessoas com deficiencia visual.
         </p>
       </div>
- 
-      <!-- Card: Stack Tecnológica -->
+
       <div class="sobre-card">
         <h3 class="sobre-card-titulo">
           <span class="material-symbols-rounded" aria-hidden="true">code</span>
@@ -83,7 +70,6 @@
         </ul>
       </div>
 
-      <!-- Card: Equipe -->
       <div class="sobre-card">
         <h3 class="sobre-card-titulo">
           <span class="material-symbols-rounded" aria-hidden="true">groups</span>
@@ -97,9 +83,9 @@
             </div>
             <div>
               <strong>
-                <a [href]="membro.github" target="_blank" rel="noopener noreferrer" [attr.aria-label]="membro.nome + ', página do GitHub, abre em nova aba'" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                <a [href]="membro.github" target="_blank" rel="noopener noreferrer" [attr.aria-label]="membro.nome + ', pagina do GitHub, abre em nova aba'" class="equipe-link">
                   {{ membro.nome }}
-                  <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 0.9em; opacity: 0.7;">open_in_new</span>
+                  <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
                 </a>
               </strong>
               <span class="equipe-papel">{{ membro.papel }}</span>
@@ -109,7 +95,7 @@
         </ul>
         <div class="projeto-info">
           <span class="material-symbols-rounded" aria-hidden="true">school</span>
-          Projeto Integrador — 5º Semestre
+          Projeto Integrador - 5o Semestre
         </div>
       </div>
 
@@ -117,3 +103,72 @@
   </section>
 
 </div>
+
+@if (modalManuaisAberto()) {
+<div
+  id="modal-lista-manuais"
+  class="modal-backdrop"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-manuais-titulo"
+  aria-describedby="modal-manuais-descricao"
+  (click)="fecharModalManuais()"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true">
+
+  <div class="modal-card modal-card--manual-list" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 id="modal-manuais-titulo">{{ cardAtivo()?.titulo }}</h2>
+        <p id="modal-manuais-descricao">Selecione um arquivo para abrir no visualizador.</p>
+      </div>
+      <button type="button" class="btn-icon" (click)="fecharModalManuais()" aria-label="Fechar lista de manuais">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </div>
+
+    @if (temArquivosNoCardAtivo()) {
+    <div class="manual-list" role="list" aria-label="Manuais disponíveis">
+      @for (arquivo of arquivosDoCardAtivo(); track arquivo.arquivo) {
+      <button
+        type="button"
+        class="manual-list-item"
+        role="listitem"
+        (click)="abrirManual(arquivo)"
+        [attr.aria-label]="'Abrir manual ' + arquivo.titulo + ' em PDF'">
+        <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+        <span class="manual-list-text">
+          <strong>{{ arquivo.titulo }}</strong>
+          <span>{{ arquivo.nomeArquivo }}</span>
+          <small>{{ arquivo.descricao }}</small>
+        </span>
+        <span class="material-symbols-rounded" aria-hidden="true">chevron_right</span>
+      </button>
+      }
+    </div>
+    } @else {
+    <div class="manual-list-empty" role="status" aria-live="polite">
+      <span class="material-symbols-rounded" aria-hidden="true">info</span>
+      <p>Nenhum manual disponível para este perfil neste card.</p>
+    </div>
+    }
+  </div>
+</div>
+}
+
+@if (arquivoAtivo()) {
+<div
+  class="modal-backdrop modal-backdrop--viewer"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'Visualizador do manual ' + arquivoAtivo()!.titulo"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true">
+  <div class="pdf-modal-card">
+    <app-pdf-viewer
+      [url]="arquivoAtivo()!.arquivo"
+      (fecharModal)="fecharPdf()">
+    </app-pdf-viewer>
+  </div>
+</div>
+}

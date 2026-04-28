@@ -15,7 +15,13 @@ export class SafeUrlPipe implements PipeTransform {
     // OWASP A03:2021 Security Misconfiguration & XSS Mitigation
     // Validação restrita de Whitelisting. Só aceita Protocolos Identificados (Evita scripts injetados)
     const urlLimpa = url.trim();
-    if (urlLimpa.startsWith('http://') || urlLimpa.startsWith('https://') || urlLimpa.startsWith('assets/') || urlLimpa.startsWith('blob:')) {
+    if (
+      urlLimpa.startsWith('http://') ||
+      urlLimpa.startsWith('https://') ||
+      urlLimpa.startsWith('/assets/') ||
+      urlLimpa.startsWith('assets/') ||
+      urlLimpa.startsWith('blob:')
+    ) {
         return this.sanitizer.bypassSecurityTrustResourceUrl(urlLimpa);
     }
     
