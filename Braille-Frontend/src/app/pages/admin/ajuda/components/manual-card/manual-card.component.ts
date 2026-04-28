@@ -12,11 +12,9 @@ import { ManualCard } from '../../ajuda.constants';
 })
 export class ManualCardComponent {
   @Input({ required: true }) manual!: ManualCard;
-  @Output() openManual = new EventEmitter<ManualCard>();
+  @Output() openManualList = new EventEmitter<ManualCard>();
 
-  onAbrirManual(): void {
-    if (this.manual.arquivo) {
-      this.openManual.emit(this.manual);
-    }
+  onAbrirLista(): void {
+    this.openManualList.emit(this.manual);
   }
 }
