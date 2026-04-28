@@ -125,6 +125,81 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     setTimeout(fn, 50);
   }
 
+  private anunciarStatusModal(area: 'atestados' | 'laudos' | 'lgpd', mensagem: string, politeness: 'polite' | 'assertive' = 'polite'): void {
+    if (area === 'atestados') this.statusAtestados = mensagem;
+    if (area === 'laudos') this.statusLaudos = mensagem;
+    if (area === 'lgpd') this.statusLgpd = mensagem;
+    this.liveAnnouncer.announce(mensagem, politeness);
+  }
+
+  private limparFormularioAtestado(restaurarFoco = true): void {
+    if (restaurarFoco) this.popFocus();
+    this.modalAtestadoAberto = false;
+    this.atestadoEmEdicao = null;
+    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
+    this.atestadoPreview = null;
+    this.erroAtestado = '';
+    this.statusAtestados = '';
+  }
+
+  private limparFormularioLaudo(restaurarFoco = true): void {
+    if (restaurarFoco) this.popFocus();
+    this.modalLaudoAberto = false;
+    this.laudoEmEdicao = null;
+    this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
+    this.erroLaudo = '';
+    this.statusLaudos = '';
+  }
+
+  private fecharCamadaSuperiorPorEscape(): boolean {
+    if (this.mostrarModalImagem) {
+      this.fecharModalImagem();
+      return true;
+    }
+    if (this.mostrarVisualizadorPdf) {
+      this.fecharVisualizadorPdf();
+      return true;
+    }
+    if (this.modalLgpdAberto) {
+      this.fecharModalLgpd();
+      return true;
+    }
+    if (this.modalLaudoAberto) {
+      this.fecharModalLaudoForm();
+      return true;
+    }
+    if (this.gerenciandoLaudos) {
+      this.fecharModalGerenciamentoLaudos();
+      return true;
+    }
+    if (this.modalAtestadoAberto) {
+      this.fecharModalAtestadoForm();
+      return true;
+    }
+    if (this.gerenciandoAtestados) {
+      this.fecharModalGerenciamentoAtestados();
+      return true;
+    }
+    if (this.mostrarModalFicha) {
+      this.fecharModalFicha();
+      return true;
+    }
+    if (this.modalEdicaoAberto) {
+      this.tentarFecharModalEdicao();
+      return true;
+    }
+    if (this.modalAberto) {
+      this.fecharModal();
+      return true;
+    }
+    if (this.drawerAberto) {
+      this.drawerAberto = false;
+      this.cdr.markForCheck();
+      return true;
+    }
+    return false;
+  }
+
   // ── Filtros Avançados (Drawer) ──────────────────────────────────
   drawerAberto = false;
   filterForm!: FormGroup;
@@ -162,6 +237,9 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   salvandoLgpd = false;
   erroLgpd = '';
   novoLgpdUrl = '';
+  statusAtestados = '';
+  statusLaudos = '';
+  statusLgpd = '';
 
   constructor(
     private readonly beneficiariosService: BeneficiariosService,
@@ -226,31 +304,37 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   }
 
   @HostListener('keydown', ['$event'])
-  onKeydown(event: KeyboardEvent) {
+  onKeydown(event: Event) {
+    const kbEvent = event as KeyboardEvent;
     const algumModalAberto = this.modalAberto || this.modalEdicaoAberto || this.drawerAberto ||
       this.modalImportAberto || !!this.alunoParaInativar || !!this.alunoParaRestaurar ||
-      !!this.alunoParaExcluirDefinitivo || !!this.documentoParaExcluir;
+      !!this.alunoParaExcluirDefinitivo || !!this.documentoParaExcluir ||
+      this.gerenciandoAtestados || this.modalAtestadoAberto ||
+      this.gerenciandoLaudos || this.modalLaudoAberto ||
+      this.modalLgpdAberto || this.mostrarVisualizadorPdf ||
+      this.mostrarModalImagem || this.mostrarModalFicha;
 
     // C-05: Escape fecha qualquer modal aberto (WCAG 2.1.2)
-    if (event.key === 'Escape') {
-      if (this.modalEdicaoAberto) { this.tentarFecharModalEdicao(); event.preventDefault(); }
-      else if (this.modalAberto) { this.fecharModal(); event.preventDefault(); }
-      else if (this.drawerAberto) { this.drawerAberto = false; this.cdr.markForCheck(); event.preventDefault(); }
+    if (kbEvent.key === 'Escape') {
+      if (this.fecharCamadaSuperiorPorEscape()) {
+        kbEvent.preventDefault();
+        kbEvent.stopPropagation();
+      }
       return;
     }
 
     if (this.keyManager && !algumModalAberto) {
-      if (['ArrowUp', 'ArrowDown'].includes(event.key)) {
-        this.keyManager.onKeydown(event);
-        event.preventDefault();
+      if (['ArrowUp', 'ArrowDown'].includes(kbEvent.key)) {
+        this.keyManager.onKeydown(kbEvent);
+        kbEvent.preventDefault();
       }
       // C-03: Enter na linha focada abre o modal de edição (WCAG 2.1.1)
-      if (event.key === 'Enter') {
+      if (kbEvent.key === 'Enter') {
         const activeIndex = this.keyManager.activeItemIndex ?? -1;
         if (activeIndex >= 0 && activeIndex < this.alunos.length) {
           const aluno = this.alunos[activeIndex];
           this.abrirModalEdicao(aluno);
-          event.preventDefault();
+          kbEvent.preventDefault();
         }
       }
     }
@@ -784,6 +868,14 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   }
 
   fecharModal(): void {
+    this.gerenciandoAtestados = false;
+    this.modalAtestadoAberto = false;
+    this.gerenciandoLaudos = false;
+    this.modalLaudoAberto = false;
+    this.modalLgpdAberto = false;
+    this.statusAtestados = '';
+    this.statusLaudos = '';
+    this.statusLgpd = '';
     this.modalAberto = false;
     this.alunoSelecionado = null;
     this.popFocus();
@@ -801,6 +893,13 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   async processarUploadArquivo(event: any, tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'): Promise<void> {
     const file = event.target.files[0];
     if (!file || !this.alunoSelecionado) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      event.target.value = '';
+      return;
+    }
 
     this.uploadingImage = true;
     this.liveAnnouncer.announce('Iniciando o envio do documento. Por favor, aguarde.', 'assertive');
@@ -1006,15 +1105,20 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.pushFocus();
     if (!this.alunoSelecionado) return;
     this.gerenciandoAtestados = true;
+    this.statusAtestados = 'Janela de gerenciamento de atestados aberta.';
     this.carregarAtestados();
+    this.liveAnnouncer.announce('Gerenciamento de atestados aberto. Pressione Tab para navegar e Escape para voltar ao perfil.', 'polite');
     this.cdr.detectChanges();
   }
 
   fecharModalGerenciamentoAtestados(event?: Event): void {
-    this.popFocus();
     if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
+    if (this.modalAtestadoAberto) {
+      this.limparFormularioAtestado(false);
+    }
     this.gerenciandoAtestados = false;
-    this.fecharModalAtestadoForm();
+    this.statusAtestados = '';
+    this.popFocus();
     this.cdr.detectChanges();
   }
 
@@ -1034,16 +1138,12 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     }
     this.atestadoPreview = null;
     this.erroAtestado = '';
+    this.anunciarStatusModal('atestados', atestado ? 'Formulário de edição de atestado aberto.' : 'Formulário de novo atestado aberto.');
     this.cdr.detectChanges();
   }
 
   fecharModalAtestadoForm(): void {
-    this.popFocus();
-    this.modalAtestadoAberto = false;
-    this.atestadoEmEdicao = null;
-    this.novoAtestado = { dataInicio: '', dataFim: '', motivo: '', arquivoUrl: undefined };
-    this.atestadoPreview = null;
-    this.erroAtestado = '';
+    this.limparFormularioAtestado(true);
     this.cdr.detectChanges();
   }
 
@@ -1062,7 +1162,16 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   uploadArquivoAtestado(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
     this.uploadingAtestado = true;
+    this.anunciarStatusModal('atestados', `Enviando arquivo ${file.name}. Aguarde.`);
     this.cdr.detectChanges();
 
     const ehPdf = file.type === 'application/pdf';
@@ -1072,11 +1181,13 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       next: (res: any) => {
         this.novoAtestado.arquivoUrl = res.url ?? res.secure_url ?? res;
         this.uploadingAtestado = false;
+        this.anunciarStatusModal('atestados', `Arquivo ${file.name} anexado ao atestado com sucesso.`);
         this.cdr.detectChanges();
       },
       error: () => {
         this.erroAtestado = 'Erro ao enviar arquivo. Tente novamente.';
         this.uploadingAtestado = false;
+        this.anunciarStatusModal('atestados', this.erroAtestado, 'assertive');
         this.cdr.detectChanges();
       }
     });
@@ -1098,6 +1209,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
 
     this.salvandoAtestado = true;
     this.erroAtestado = '';
+    this.anunciarStatusModal('atestados', 'Salvando atestado. Aguarde.');
 
     if (this.atestadoEmEdicao) {
       // Editar
@@ -1113,6 +1225,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         error: (err) => {
           this.salvandoAtestado = false;
           this.erroAtestado = err?.error?.message ?? 'Erro ao atualizar atestado.';
+          this.anunciarStatusModal('atestados', this.erroAtestado, 'assertive');
           this.cdr.detectChanges();
         }
       });
@@ -1129,6 +1242,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         error: (err) => {
           this.salvandoAtestado = false;
           this.erroAtestado = err?.error?.message ?? 'Erro ao salvar atestado.';
+          this.anunciarStatusModal('atestados', this.erroAtestado, 'assertive');
           this.cdr.detectChanges();
         }
       });
@@ -1159,14 +1273,17 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   carregarAtestados(): void {
     if (!this.alunoSelecionado) return;
     this.carregandoAtestados = true;
+    this.statusAtestados = 'Buscando histórico de atestados.';
     this.atestadosService.listar(this.alunoSelecionado.id).subscribe({
       next: (lista: Atestado[]) => {
         this.atestadosDoAluno = lista;
         this.carregandoAtestados = false;
+        this.statusAtestados = `${lista.length} atestado(s) carregado(s).`;
         this.cdr.detectChanges();
       },
       error: () => {
         this.carregandoAtestados = false;
+        this.statusAtestados = 'Não foi possível carregar o histórico de atestados.';
         this.cdr.detectChanges();
       }
     });
@@ -1177,15 +1294,20 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.pushFocus();
     if (!this.alunoSelecionado) return;
     this.gerenciandoLaudos = true;
+    this.statusLaudos = 'Janela de histórico de laudos médicos aberta.';
     this.carregarLaudos();
+    this.liveAnnouncer.announce('Histórico de laudos médicos aberto. Pressione Tab para navegar e Escape para voltar ao perfil.', 'polite');
     this.cdr.detectChanges();
   }
 
   fecharModalGerenciamentoLaudos(event?: Event): void {
-    this.popFocus();
     if (event && (event.target as HTMLElement).classList.contains('modal-content')) return;
+    if (this.modalLaudoAberto) {
+      this.limparFormularioLaudo(false);
+    }
     this.gerenciandoLaudos = false;
-    this.fecharModalLaudoForm();
+    this.statusLaudos = '';
+    this.popFocus();
     this.cdr.detectChanges();
   }
 
@@ -1204,22 +1326,28 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
     }
     this.erroLaudo = '';
+    this.anunciarStatusModal('laudos', laudo ? 'Formulário de edição de laudo aberto.' : 'Formulário de novo laudo aberto.');
     this.cdr.detectChanges();
   }
 
   fecharModalLaudoForm(): void {
-    this.popFocus();
-    this.modalLaudoAberto = false;
-    this.laudoEmEdicao = null;
-    this.novoLaudo = { dataEmissao: '', medicoResponsavel: '', descricao: '', arquivoUrl: '' };
-    this.erroLaudo = '';
+    this.limparFormularioLaudo(true);
     this.cdr.detectChanges();
   }
 
   uploadArquivoLaudo(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
     this.uploadingLaudo = true;
+    this.anunciarStatusModal('laudos', `Enviando arquivo ${file.name}. Aguarde.`);
     this.cdr.detectChanges();
 
     const ehPdf = file.type === 'application/pdf';
@@ -1229,11 +1357,13 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       next: (res: any) => {
         this.novoLaudo.arquivoUrl = res.url ?? res.secure_url ?? res;
         this.uploadingLaudo = false;
+        this.anunciarStatusModal('laudos', `Arquivo ${file.name} anexado ao laudo com sucesso.`);
         this.cdr.detectChanges();
       },
       error: () => {
         this.erroLaudo = 'Erro ao enviar arquivo. Tente novamente.';
         this.uploadingLaudo = false;
+        this.anunciarStatusModal('laudos', this.erroLaudo, 'assertive');
         this.cdr.detectChanges();
       }
     });
@@ -1248,6 +1378,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     }
     this.salvandoLaudo = true;
     this.erroLaudo = '';
+    this.anunciarStatusModal('laudos', 'Salvando laudo médico. Aguarde.');
 
     if (this.laudoEmEdicao) {
       // Editar
@@ -1268,6 +1399,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         error: (err) => {
           this.salvandoLaudo = false;
           this.erroLaudo = err?.error?.message ?? 'Erro ao atualizar laudo.';
+          this.anunciarStatusModal('laudos', this.erroLaudo, 'assertive');
           this.cdr.detectChanges();
         }
       });
@@ -1284,6 +1416,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         error: (err) => {
           this.salvandoLaudo = false;
           this.erroLaudo = err?.error?.message ?? 'Erro ao salvar laudo.';
+          this.anunciarStatusModal('laudos', this.erroLaudo, 'assertive');
           this.cdr.detectChanges();
         }
       });
@@ -1314,14 +1447,17 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   carregarLaudos(): void {
     if (!this.alunoSelecionado) return;
     this.carregandoLaudos = true;
+    this.statusLaudos = 'Buscando histórico de laudos médicos.';
     this.laudosService.listarPorAluno(this.alunoSelecionado.id).subscribe({
       next: (lista: LaudoMedico[]) => {
         this.laudosDoAluno = lista;
         this.carregandoLaudos = false;
+        this.statusLaudos = `${lista.length} laudo(s) carregado(s).`;
         this.cdr.detectChanges();
       },
       error: () => {
         this.carregandoLaudos = false;
+        this.statusLaudos = 'Não foi possível carregar o histórico de laudos médicos.';
         this.cdr.detectChanges();
       }
     });
@@ -1334,6 +1470,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.modalLgpdAberto = true;
     this.novoLgpdUrl = '';
     this.erroLgpd = '';
+    this.statusLgpd = 'Janela de termo LGPD aberta.';
+    this.liveAnnouncer.announce('Janela de termo LGPD aberta. Pressione Tab para navegar e Escape para voltar ao perfil.', 'polite');
     this.cdr.detectChanges();
   }
 
@@ -1342,13 +1480,23 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.modalLgpdAberto = false;
     this.novoLgpdUrl = '';
     this.erroLgpd = '';
+    this.statusLgpd = '';
     this.cdr.detectChanges();
   }
 
   uploadArquivoLgpd(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
     this.uploadingLgpd = true;
+    this.anunciarStatusModal('lgpd', `Enviando arquivo ${file.name}. Aguarde.`);
     this.cdr.detectChanges();
 
     const ehPdf = file.type === 'application/pdf';
@@ -1358,11 +1506,13 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       next: (res: any) => {
         this.novoLgpdUrl = res.url ?? res.secure_url ?? res;
         this.uploadingLgpd = false;
+        this.anunciarStatusModal('lgpd', `Arquivo ${file.name} pronto para salvar no termo LGPD.`);
         this.cdr.detectChanges();
       },
       error: () => {
         this.erroLgpd = 'Erro ao enviar arquivo. Tente novamente.';
         this.uploadingLgpd = false;
+        this.anunciarStatusModal('lgpd', this.erroLgpd, 'assertive');
         this.cdr.detectChanges();
       }
     });
@@ -1377,6 +1527,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     
     this.salvandoLgpd = true;
     this.erroLgpd = '';
+    this.anunciarStatusModal('lgpd', 'Salvando termo LGPD. Aguarde.');
     const dadosAtualizar = { termoLgpdUrl: this.novoLgpdUrl };
 
     this.beneficiariosService.atualizar(this.alunoSelecionado.id, dadosAtualizar).subscribe({
@@ -1397,6 +1548,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       error: (err) => {
         this.salvandoLgpd = false;
         this.erroLgpd = err?.error?.message ?? 'Erro ao salvar o termo LGPD.';
+        this.anunciarStatusModal('lgpd', this.erroLgpd, 'assertive');
         this.cdr.detectChanges();
       }
     });

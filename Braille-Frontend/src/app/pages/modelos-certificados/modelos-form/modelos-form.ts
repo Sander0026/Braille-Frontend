@@ -113,6 +113,13 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   onFileChange(event: any, field: 'arteBase' | 'assinatura' | 'assinatura2'): void {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+        this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+        event.target.value = '';
+        return;
+      }
+
       if (field === 'arteBase') {
         this.arteBaseFile = file;
         const reader = new FileReader();

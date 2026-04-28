@@ -776,7 +776,8 @@
 <!-- MODAL DE GERENCIAMENTO DE ATESTADOS -->
 @if (gerenciandoAtestados) {
 <div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-atestado-title"
-    (click)="fecharModalGerenciamentoAtestados($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    aria-describedby="modal-atestado-instrucoes modal-atestado-status"
+    (click)="fecharModalGerenciamentoAtestados($event)" (keydown.escape)="onKeydown($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h3 id="modal-atestado-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
@@ -787,10 +788,12 @@
                 <span class="material-symbols-rounded" aria-hidden="true">close</span>
             </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" [attr.aria-busy]="carregandoAtestados || salvandoAtestado || uploadingAtestado ? 'true' : 'false'">
+            <p id="modal-atestado-instrucoes" class="sr-only">Janela de gerenciamento de atestados. Pressione Tab para percorrer os controles e Escape para voltar à tela anterior.</p>
+            <p id="modal-atestado-status" class="sr-only" aria-live="polite">{{ statusAtestados }}</p>
             @if (!modalAtestadoAberto) {
             <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
-                <button class="btn btn-primary" (click)="abrirModalAtestadoForm()">
+                <button class="btn btn-primary" (click)="abrirModalAtestadoForm()" aria-haspopup="dialog" aria-label="Abrir formulário para registrar novo atestado">
                     <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;">add</span> Registrar Novo Atestado
                 </button>
             </div>
@@ -824,10 +827,10 @@
                     </div>
                     <div class="form-group">
                         <label>Arquivo (PDF / Imagem)</label>
-                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;" [attr.aria-busy]="uploadingAtestado ? 'true' : 'false'">
                             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
                             {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo anexado' : 'Selecionar Arquivo') }}
-                            <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" />
+                            <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" aria-label="Selecionar arquivo do atestado" />
                         </label>
                         @if (novoAtestado.arquivoUrl) {
                         <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoAtestado.arquivoUrl!)" aria-label="Ver arquivo enviado">
@@ -838,10 +841,10 @@
                     @if (atestadoPreview) {
                     <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; display:flex; gap:0.5rem; align-items:flex-start;" role="status">
                         <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">info</span>
-                        @if (atestadoPreview.totalFaltasNoperiodo === 0) {
+                        @if (atestadoPreview.totalFaltasNoPeriodo === 0) {
                         <span>Nenhuma falta encontrada no período para justificar.</span>
                         } @else {
-                        <span>Serão justificadas <strong>{{ atestadoPreview.totalFaltasNoperiodo }}</strong> falta(s) no período selecionado.</span>
+                        <span>Serão justificadas <strong>{{ atestadoPreview.totalFaltasNoPeriodo }}</strong> falta(s) no período selecionado.</span>
                         }
                     </div>
                     }
@@ -851,7 +854,7 @@
                 </div>
                 <div class="atestado-form-footer">
                     <button class="btn btn-secondary btn-sm" (click)="fecharModalAtestadoForm()">Cancelar</button>
-                    <button class="btn btn-primary btn-sm" (click)="salvarAtestado()" [disabled]="salvandoAtestado || (!atestadoEmEdicao && (!novoAtestado.dataInicio || !novoAtestado.dataFim)) || !novoAtestado.motivo">
+                    <button class="btn btn-primary btn-sm" (click)="salvarAtestado()" [disabled]="salvandoAtestado || (!atestadoEmEdicao && (!novoAtestado.dataInicio || !novoAtestado.dataFim)) || !novoAtestado.motivo" [attr.aria-busy]="salvandoAtestado ? 'true' : 'false'">
                         @if (salvandoAtestado) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
                         @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> {{ atestadoEmEdicao ? 'Salvar Edição' : 'Salvar Atestado' }} }
                     </button>
@@ -922,7 +925,8 @@
 <!-- MODAL DE GERENCIAMENTO DE LAUDOS -->
 @if (gerenciandoLaudos) {
 <div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-laudo-title"
-    (click)="fecharModalGerenciamentoLaudos($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    aria-describedby="modal-laudo-instrucoes modal-laudo-status"
+    (click)="fecharModalGerenciamentoLaudos($event)" (keydown.escape)="onKeydown($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
     <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
         <div class="modal-header">
             <h3 id="modal-laudo-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
@@ -933,10 +937,12 @@
                 <span class="material-symbols-rounded" aria-hidden="true">close</span>
             </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" [attr.aria-busy]="carregandoLaudos || salvandoLaudo || uploadingLaudo ? 'true' : 'false'">
+            <p id="modal-laudo-instrucoes" class="sr-only">Janela de histórico de laudos médicos. Pressione Tab para percorrer os controles e Escape para voltar à tela anterior.</p>
+            <p id="modal-laudo-status" class="sr-only" aria-live="polite">{{ statusLaudos }}</p>
             @if (!modalLaudoAberto) {
             <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
-                <button class="btn btn-primary" (click)="abrirModalLaudoForm()">
+                <button class="btn btn-primary" (click)="abrirModalLaudoForm()" aria-haspopup="dialog" aria-label="Abrir formulário para anexar novo laudo">
                     <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;">add</span> Anexar Novo Laudo
                 </button>
             </div>
@@ -965,10 +971,10 @@
                     </div>
                     <div class="form-group">
                         <label>Documento (PDF / Imagem) <span class="required" aria-hidden="true">*</span></label>
-                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;">
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;" [attr.aria-busy]="uploadingLaudo ? 'true' : 'false'">
                             <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
                             {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado ✓' : 'Selecionar Arquivo') }}
-                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" />
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" aria-label="Selecionar arquivo do laudo" />
                         </label>
                         @if (novoLaudo.arquivoUrl && !uploadingLaudo) {
                         <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">
@@ -990,7 +996,7 @@
                 </div>
                 <div class="atestado-form-footer">
                     <button class="btn btn-secondary btn-sm" (click)="fecharModalLaudoForm()">Cancelar</button>
-                    <button class="btn btn-primary btn-sm" (click)="salvarLaudo()" [disabled]="salvandoLaudo || !novoLaudo.dataEmissao || !novoLaudo.arquivoUrl">
+                    <button class="btn btn-primary btn-sm" (click)="salvarLaudo()" [disabled]="salvandoLaudo || !novoLaudo.dataEmissao || !novoLaudo.arquivoUrl" [attr.aria-busy]="salvandoLaudo ? 'true' : 'false'">
                         @if (salvandoLaudo) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
                         @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> {{ laudoEmEdicao ? 'Salvar Edição' : 'Salvar Laudo' }} }
                     </button>
@@ -1259,7 +1265,9 @@
 
 <!-- ── Modal para Anexar/Editar Termo LGPD ── -->
 @if (modalLgpdAberto) {
-<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-label="Termo LGPD" (click)="fecharModalLgpd()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="z-index: 100000;">
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-label="Termo LGPD"
+    aria-describedby="modal-lgpd-instrucoes modal-lgpd-status"
+    (click)="fecharModalLgpd()" (keydown.escape)="onKeydown($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="z-index: 100000;">
     <div class="modal modal--large" (click)="$event.stopPropagation()" style="max-width: 500px; width: 95%;" tabindex="-1">
         <div class="modal-header">
             <h2 style="color: #10b981; display:flex; align-items:center; gap:0.5rem;">
@@ -1268,16 +1276,18 @@
             </h2>
             <button class="btn btn-icon btn-ghost" (click)="fecharModalLgpd()" aria-label="Fechar">✕</button>
         </div>
-        <div class="modal-body" style="padding: 1.5rem;">
+        <div class="modal-body" style="padding: 1.5rem;" [attr.aria-busy]="uploadingLgpd || salvandoLgpd ? 'true' : 'false'">
+            <p id="modal-lgpd-instrucoes" class="sr-only">Janela de termo LGPD. Pressione Tab para percorrer os controles e Escape para voltar à tela anterior.</p>
+            <p id="modal-lgpd-status" class="sr-only" aria-live="polite">{{ statusLgpd }}</p>
             <p style="font-size: 0.95rem; margin-bottom: 1.5rem; color:#4b5563;">Faça o upload do documento assinado (PDF ou Imagem).</p>
             
             <div class="form-group" style="margin-bottom: 1.5rem;">
                 <label>Selecionar Arquivo <span class="required" aria-hidden="true">*</span></label>
                 <div style="margin-top:0.5rem;">
-                    <label class="btn btn-outline-primary" style="cursor:pointer; display:inline-flex; width:100%; justify-content:center; align-items:center; gap:8px;">
+                    <label class="btn btn-outline-primary" style="cursor:pointer; display:inline-flex; width:100%; justify-content:center; align-items:center; gap:8px;" [attr.aria-busy]="uploadingLgpd ? 'true' : 'false'">
                         <span class="material-symbols-rounded" aria-hidden="true">upload_file</span>
                         {{ uploadingLgpd ? 'Enviando...' : (novoLgpdUrl ? 'Substituir Arquivo' : 'Escolher Arquivo...') }}
-                        <input type="file" accept="image/jpeg,image/png,application/pdf" style="display:none;" (change)="uploadArquivoLgpd($event)" [disabled]="uploadingLgpd">
+                        <input type="file" accept="image/jpeg,image/png,application/pdf" style="display:none;" (change)="uploadArquivoLgpd($event)" [disabled]="uploadingLgpd" aria-label="Selecionar arquivo do termo LGPD">
                     </label>
                 </div>
                 
@@ -1297,7 +1307,7 @@
         </div>
         <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid #e5e7eb;">
             <button class="btn btn-secondary" (click)="fecharModalLgpd()">Cancelar</button>
-            <button class="btn btn-primary" (click)="salvarLgpd()" [disabled]="salvandoLgpd || !novoLgpdUrl || uploadingLgpd" style="background-color: #10b981; border: none; color: white;">
+            <button class="btn btn-primary" (click)="salvarLgpd()" [disabled]="salvandoLgpd || !novoLgpdUrl || uploadingLgpd" [attr.aria-busy]="salvandoLgpd ? 'true' : 'false'" style="background-color: #10b981; border: none; color: white;">
                 @if (salvandoLgpd) {
                     <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 14px;">sync</span>
                     Salvando...

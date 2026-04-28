@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
@@ -84,6 +84,36 @@ describe('BeneficiaryList', () => {
       expect(drawer.hasAttribute('cdkTrapFocus')).toBe(true);
       expect(drawer.getAttribute('role')).toBe('dialog');
       expect(drawer.getAttribute('aria-modal')).toBe('true');
+    });
+
+    it('deve fechar o modal de LGPD antes do modal de perfil ao pressionar Escape', () => {
+      component.modalAberto = true;
+      component.modalLgpdAberto = true;
+
+      const fecharLgpdSpy = vi.spyOn(component, 'fecharModalLgpd');
+      const fecharPerfilSpy = vi.spyOn(component, 'fecharModal');
+      const preventDefault = vi.fn();
+      const stopPropagation = vi.fn();
+
+      component.onKeydown({ key: 'Escape', preventDefault, stopPropagation } as any);
+
+      expect(fecharLgpdSpy).toHaveBeenCalledTimes(1);
+      expect(fecharPerfilSpy).not.toHaveBeenCalled();
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(stopPropagation).toHaveBeenCalledTimes(1);
+    });
+
+    it('deve fechar o formulário de atestado antes da janela de gerenciamento ao pressionar Escape', () => {
+      component.gerenciandoAtestados = true;
+      component.modalAtestadoAberto = true;
+
+      const fecharFormularioSpy = vi.spyOn(component, 'fecharModalAtestadoForm');
+      const fecharGerenciamentoSpy = vi.spyOn(component, 'fecharModalGerenciamentoAtestados');
+
+      component.onKeydown({ key: 'Escape', preventDefault: vi.fn(), stopPropagation: vi.fn() } as any);
+
+      expect(fecharFormularioSpy).toHaveBeenCalledTimes(1);
+      expect(fecharGerenciamentoSpy).not.toHaveBeenCalled();
     });
   });
 });
