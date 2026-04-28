@@ -802,6 +802,13 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     const file = event.target.files[0];
     if (!file || !this.alunoSelecionado) return;
 
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      event.target.value = '';
+      return;
+    }
+
     this.uploadingImage = true;
     this.liveAnnouncer.announce('Iniciando o envio do documento. Por favor, aguarde.', 'assertive');
     this.cdr.detectChanges();
@@ -1062,6 +1069,14 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   uploadArquivoAtestado(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
     this.uploadingAtestado = true;
     this.cdr.detectChanges();
 
@@ -1219,6 +1234,14 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   uploadArquivoLaudo(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
     this.uploadingLaudo = true;
     this.cdr.detectChanges();
 
@@ -1348,6 +1371,14 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   uploadArquivoLgpd(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.liveAnnouncer.announce('Erro: O arquivo selecionado excede o limite de 10 megabytes.', 'assertive');
+      (event.target as HTMLInputElement).value = '';
+      return;
+    }
+
     this.uploadingLgpd = true;
     this.cdr.detectChanges();
 

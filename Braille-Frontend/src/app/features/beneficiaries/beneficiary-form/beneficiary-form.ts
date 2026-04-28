@@ -659,6 +659,11 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   onFotoSelecionada(event: any) {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.anunciarParaLeitorDeTela('Erro: O arquivo selecionado excede o limite de 10 megabytes.');
+        event.target.value = '';
+        return;
+      }
       this.arquivoFotoSelecionado = file;
       this.anunciarParaLeitorDeTela(`Foto selecionada: ${file.name}`);
     }
@@ -667,6 +672,11 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   onTermoSelecionado(event: any) {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.anunciarParaLeitorDeTela('Erro: O arquivo selecionado excede o limite de 10 megabytes.');
+        event.target.value = '';
+        return;
+      }
       this.arquivoTermoSelecionado = file;
       this.anunciarParaLeitorDeTela(`Termo selecionado: ${file.name}`);
     }
@@ -675,6 +685,11 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   onLaudoSelecionado(event: any) {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.anunciarParaLeitorDeTela('Erro: O arquivo selecionado excede o limite de 10 megabytes.');
+        event.target.value = '';
+        return;
+      }
       this.arquivoLaudoSelecionado = file;
       this.anunciarParaLeitorDeTela(`Laudo selecionado: ${file.name}`);
     }

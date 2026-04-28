@@ -55,10 +55,11 @@ export class ModalFotoComponent implements OnDestroy {
       return;
     }
     
-    // Limite máximo de tamanho OWASP
-    if (file.size > 2 * 1024 * 1024) {
-      this.fotoErro = 'A imagem deve ter no máximo 2 MB.';
+    // Limite máximo de tamanho Cloudinary free tier (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      this.fotoErro = 'O arquivo selecionado excede o limite de 10MB. Escolha uma imagem menor.';
       this.announcer.announce(this.fotoErro, 'assertive');
+      input.value = '';
       return;
     }
 
