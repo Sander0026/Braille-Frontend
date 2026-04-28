@@ -1,7 +1,7 @@
 <header class="pdf-viewer-header">
   <div class="header-titles">
     <h3 id="pdf-viewer-title">Visualizador Interativo de Documento</h3>
-    <span class="mobile-zoom-hint">Dica: use os dois dedos na tela para dar zoom</span>
+    <span class="mobile-zoom-hint">Use os controles para navegar pelo documento.</span>
   </div>
   <button
     type="button"
@@ -22,15 +22,55 @@
   <div class="pdf-error" role="alert" aria-live="assertive">
     <span class="error-icon material-symbols-rounded" aria-hidden="true">error</span>
     <p>{{ mensagemErro() }}</p>
-    <a class="btn-retry" [href]="url()" target="_blank" rel="noopener noreferrer">
+    <a class="btn-retry" [href]="urlDocumento()" target="_blank" rel="noopener noreferrer">
       Abrir em nova aba
     </a>
   </div>
-} @else if (urlVisualizadorPdf()) {
-  <div class="pdf-frame-area">
-    <iframe
-      [src]="urlVisualizadorPdf() | safeUrl"
-      title="Visualizacao interna de arquivo PDF">
-    </iframe>
+} @else {
+  <div
+    class="pdf-scroll-area"
+    role="region"
+    aria-label="Pagina atual do documento PDF">
+    <canvas
+      #pdfCanvas
+      aria-label="Pagina {{ paginaAtual() }} de {{ totalPaginas() }} do documento PDF">
+    </canvas>
+  </div>
+
+  <div class="pdf-controls" aria-label="Controles do visualizador de PDF">
+    <div class="pagination-controls">
+      <button
+        type="button"
+        (click)="paginaAnterior()"
+        [disabled]="paginaAtual() <= 1"
+        aria-label="Ir para pagina anterior">
+        Anterior
+      </button>
+      <span aria-live="polite">Pagina {{ paginaAtual() }} de {{ totalPaginas() }}</span>
+      <button
+        type="button"
+        (click)="proximaPagina()"
+        [disabled]="paginaAtual() >= totalPaginas()"
+        aria-label="Ir para proxima pagina">
+        Proxima
+      </button>
+    </div>
+
+    <span class="separator" aria-hidden="true"></span>
+
+    <div class="zoom-controls">
+      <button type="button" (click)="diminuirZoom()" aria-label="Diminuir zoom">-</button>
+      <span class="zoom-level">{{ (zoom() * 100).toFixed(0) }}%</span>
+      <button type="button" (click)="aumentarZoom()" aria-label="Aumentar zoom">+</button>
+    </div>
+
+    <a
+      class="btn-download"
+      [href]="urlDocumento()"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Abrir documento PDF em nova aba">
+      Abrir PDF
+    </a>
   </div>
 }
