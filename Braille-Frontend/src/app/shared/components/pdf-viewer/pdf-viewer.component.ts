@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SafeUrlPipe } from '../../../core/pipes/safe-url.pipe';
 
@@ -8,38 +8,91 @@ import { SafeUrlPipe } from '../../../core/pipes/safe-url.pipe';
   imports: [CommonModule, SafeUrlPipe],
   templateUrl: './pdf-viewer.component.html',
   styleUrls: ['./pdf-viewer.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush // Desbloqueando performance maxima de renderização
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PdfViewerComponent {
-  
-  /**
-   * Entrada Funcional Type-Safe Integrada aos Signals.
-   * Totalmente retrocompatível com a injeção pai `[url]="..."`
-   */
   url = input.required<string>();
-
-  /**
-   * Evento de fechamento. Renomeado para 'fecharModal' (era 'closed') para sincronizar perfeitamente
-   * com o @Output consumido nos parentes (Ex: beneficiary-list).
-   */
   fecharModal = output<void>();
 
-  /**
-   * Setter Reativo Seguro e Cached.
-   * Elimina Shadow Updates do antigo `@Input() set url()` que disparavam renders paralelos.
-   * Contém proteção OWASP Sanitizante com o encodeURIComponent e Parser Automático.
-   */
-  urlVisualizadorPdf = computed<string>(() => {
-    const rawVal = this.url();
-    if (!rawVal) return '';
+  urlVisualizadorPdf = signal('');
+  carregando = signal(false);
+  mensagemErro = signal('');
 
-    // Segurança (LGPD / OWASP): A renderização nativa substitui o Google Docs Viewer.
-    // O envio de URLs de certificados (e blobs locais) para um visualizador externo
-    // viola o sigilo dos dados do aluno e causa quebra em URLs 'blob:' (Resultando em Bad Request).
-    return rawVal;
-  });
+  private readonly destroyRef = inject(DestroyRef);
+  private objectUrl: string | null = null;
 
-  onClose() {
+  constructor() {
+    effect((onCleanup) => {
+      const controller = new AbortController();
+      void this.prepararPdf(this.url(), controller.signal);
+      onCleanup(() => controller.abort());
+    });
+
+    this.destroyRef.onDestroy(() => this.revogarObjectUrl());
+  }
+
+  onClose(): void {
     this.fecharModal.emit();
+  }
+
+  private async prepararPdf(url: string, signal: AbortSignal): Promise<void> {
+    const urlLimpa = this.normalizarUrl(url);
+
+    this.revogarObjectUrl();
+    this.urlVisualizadorPdf.set('');
+    this.mensagemErro.set('');
+
+    if (!urlLimpa) return;
+
+    if (!this.deveRenderizarComoBlob(urlLimpa)) {
+      this.urlVisualizadorPdf.set(urlLimpa);
+      return;
+    }
+
+    this.carregando.set(true);
+
+    try {
+      const response = await fetch(urlLimpa, {
+        signal,
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Falha ao carregar PDF: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+      if (signal.aborted) return;
+
+      const pdfBlob = blob.type === 'application/pdf'
+        ? blob
+        : new Blob([blob], { type: 'application/pdf' });
+
+      this.objectUrl = URL.createObjectURL(pdfBlob);
+      this.urlVisualizadorPdf.set(this.objectUrl);
+    } catch (error) {
+      if (signal.aborted) return;
+      console.error('[PdfViewerComponent] Erro ao preparar PDF para visualizacao:', error);
+      this.mensagemErro.set('Nao foi possivel carregar o documento no visualizador.');
+    } finally {
+      if (!signal.aborted) {
+        this.carregando.set(false);
+      }
+    }
+  }
+
+  private normalizarUrl(url: string): string {
+    const urlLimpa = url?.trim() ?? '';
+    return urlLimpa.startsWith('assets/') ? `/${urlLimpa}` : urlLimpa;
+  }
+
+  private deveRenderizarComoBlob(url: string): boolean {
+    return url.startsWith('/assets/');
+  }
+
+  private revogarObjectUrl(): void {
+    if (!this.objectUrl) return;
+    URL.revokeObjectURL(this.objectUrl);
+    this.objectUrl = null;
   }
 }
