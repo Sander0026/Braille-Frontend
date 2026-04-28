@@ -100,6 +100,12 @@ export class UsuarioPerfilModalComponent {
     const uId = this._usuario?.id;
     if (!file || !uId) return;
 
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      event.target.value = '';
+      return;
+    }
+
     this.salvando.set(true);
     this.usuariosService.uploadFoto(file)
       .pipe(takeUntilDestroyed(this.destroyRef))

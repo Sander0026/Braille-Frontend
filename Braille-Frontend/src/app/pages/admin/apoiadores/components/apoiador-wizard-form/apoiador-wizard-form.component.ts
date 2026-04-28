@@ -4,6 +4,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } fr
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { MasksUtil } from '../../../../../shared/utils/masks.util';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
+import { ToastService } from '../../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-apoiador-wizard-form',
@@ -34,6 +35,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
   salvando = false;
 
   private readonly announcer = inject(LiveAnnouncer);
+  private readonly toast = inject(ToastService);
 
   constructor(
     private readonly fb: FormBuilder,
@@ -236,6 +238,13 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
   onLogoSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      if (file.size > 10 * 1024 * 1024) {
+        this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+        this.announcer.announce('Erro: O logotipo excede o limite de 10 megabytes.', 'assertive');
+        event.target.value = '';
+        return;
+      }
+
       this.carregandoLogo = true;
       this.logoFeedback = null;
       this.cdr.detectChanges();

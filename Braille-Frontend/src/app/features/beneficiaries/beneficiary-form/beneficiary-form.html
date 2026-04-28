@@ -168,7 +168,12 @@
           <label for="e-numero" class="edit-label">Número</label>
           <input id="e-numero" type="text" class="edit-input" formControlName="numero"
             placeholder="Ex: 18" autocomplete="off"
+            [readOnly]="getControl('enderecoLocalizacao.semNumero').value"
             [class.edit-input--error]="isCampoInvalido('enderecoLocalizacao','numero')">
+          <label class="edit-check edit-check--sn">
+            <input type="checkbox" formControlName="semNumero">
+            <span>S/N</span>
+          </label>
         </div>
         <div class="edit-field">
           <label for="e-complemento" class="edit-label">Complemento</label>
@@ -548,7 +553,12 @@
         <div class="form-group form-group--xsmall">
           <label for="numero" class="form-label">Número <span class="required" aria-hidden="true">*</span></label>
           <input type="text" id="numero" formControlName="numero" class="form-input"
+            [readOnly]="getControl('enderecoLocalizacao.semNumero').value"
             [class.input-error]="isCampoInvalido('enderecoLocalizacao', 'numero')" placeholder="123">
+          <label class="checkbox-group checkbox-group--inline" for="semNumero">
+            <input type="checkbox" id="semNumero" formControlName="semNumero">
+            <span>S/N</span>
+          </label>
         </div>
         <div class="form-group form-group--small">
           <label for="complemento" class="form-label">Complemento</label>

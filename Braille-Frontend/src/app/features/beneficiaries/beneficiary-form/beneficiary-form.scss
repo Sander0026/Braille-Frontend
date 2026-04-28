@@ -236,6 +236,10 @@ $transition: 200ms ease;
   }
 }
 
+.edit-check--sn {
+  margin-top: 0.45rem;
+}
+
 
 // ── Feedback Banner ────────────────────────────────────────
 .feedback-banner {
@@ -443,6 +447,10 @@ $transition: 200ms ease;
     cursor: pointer;
     font-weight: 500;
   }
+}
+
+.checkbox-group--inline {
+  padding: 0.2rem 0 0;
 }
 
 // ── Divisor de seção ───────────────────────────────────────

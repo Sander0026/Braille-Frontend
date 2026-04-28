@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, Change
 import { CommonModule } from '@angular/common';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
+import { ToastService } from '../../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-apoiador-perfil',
@@ -24,6 +25,7 @@ export class ApoiadorPerfilComponent {
   carregandoLogoInline = false;
 
   private readonly announcer = inject(LiveAnnouncer);
+  private readonly toast = inject(ToastService);
 
   constructor(
     private readonly apoiadoresService: ApoiadoresService,
@@ -41,6 +43,13 @@ export class ApoiadorPerfilComponent {
   onLogoSelectedAdmin(event: any): void {
     const file = event.target.files?.[0];
     if (!file || !this.apoiador) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+      this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+      this.announcer.announce('Erro: O logotipo excede o limite de 10 megabytes.', 'assertive');
+      event.target.value = '';
+      return;
+    }
 
     this.carregandoLogoInline = true;
     this.cdr.detectChanges();

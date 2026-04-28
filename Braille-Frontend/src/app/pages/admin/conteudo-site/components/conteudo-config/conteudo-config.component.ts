@@ -65,9 +65,10 @@ export class ConteudoConfigComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        this.toast.erro('A imagem deve ter no máximo 2MB');
-        this.announcer.announce('Erro: O arquivo selecionado ultrapassa o limite de 2 megabytes.', 'assertive');
+      if (file.size > 10 * 1024 * 1024) {
+        this.toast.aviso('O arquivo selecionado excede o limite de 10MB permitido. Escolha um arquivo menor.');
+        this.announcer.announce('Erro: O arquivo selecionado ultrapassa o limite de 10 megabytes.', 'assertive');
+        input.value = '';
         return;
       }
       this.fileSelecionado = file;

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 export interface Atestado {
   id: string;
@@ -39,8 +39,14 @@ export interface ResultadoCriacaoAtestado {
 }
 
 export interface PreviewAtestado {
-  totalFaltasNoperiodo: number;
+  totalFaltasNoPeriodo: number;
   faltas: { id: string; dataAula: string; turma: { nome: string } }[];
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -51,27 +57,39 @@ export class AtestadosService {
   constructor(private readonly http: HttpClient) {}
 
   criar(alunoId: string, dto: CriarAtestadoDto): Observable<ResultadoCriacaoAtestado> {
-    return this.http.post<ResultadoCriacaoAtestado>(`${this.baseUrl}/${alunoId}/atestados`, dto);
+    return this.http
+      .post<ApiResponse<ResultadoCriacaoAtestado>>(`${this.baseUrl}/${alunoId}/atestados`, dto)
+      .pipe(map((response) => response.data));
   }
 
   listar(alunoId: string): Observable<Atestado[]> {
-    return this.http.get<Atestado[]>(`${this.baseUrl}/${alunoId}/atestados`);
+    return this.http
+      .get<ApiResponse<Atestado[]>>(`${this.baseUrl}/${alunoId}/atestados`)
+      .pipe(map((response) => Array.isArray(response.data) ? response.data : []));
   }
 
   preview(alunoId: string, dataInicio: string, dataFim: string): Observable<PreviewAtestado> {
     const params = new HttpParams().set('dataInicio', dataInicio).set('dataFim', dataFim);
-    return this.http.get<PreviewAtestado>(`${this.baseUrl}/${alunoId}/atestados/preview`, { params });
+    return this.http
+      .get<ApiResponse<PreviewAtestado>>(`${this.baseUrl}/${alunoId}/atestados/preview`, { params })
+      .pipe(map((response) => response.data));
   }
 
   findOne(id: string): Observable<Atestado> {
-    return this.http.get<Atestado>(`${this.atestadosUrl}/${id}`);
+    return this.http
+      .get<ApiResponse<Atestado>>(`${this.atestadosUrl}/${id}`)
+      .pipe(map((response) => response.data));
   }
 
   remover(id: string): Observable<{ mensagem: string }> {
-    return this.http.delete<{ mensagem: string }>(`${this.atestadosUrl}/${id}`);
+    return this.http
+      .delete<ApiResponse<{ id: string; revertidas: number }>>(`${this.atestadosUrl}/${id}`)
+      .pipe(map((response) => ({ mensagem: response.message ?? 'Atestado removido com sucesso.' })));
   }
 
   atualizar(id: string, dto: AtualizarAtestadoDto): Observable<Atestado> {
-    return this.http.patch<Atestado>(`${this.atestadosUrl}/${id}`, dto);
+    return this.http
+      .patch<ApiResponse<Atestado>>(`${this.atestadosUrl}/${id}`, dto)
+      .pipe(map((response) => response.data));
   }
 }
