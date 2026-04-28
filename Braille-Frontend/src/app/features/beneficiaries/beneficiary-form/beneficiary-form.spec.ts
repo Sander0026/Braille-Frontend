@@ -190,6 +190,37 @@ describe('BeneficiaryFormComponent', () => {
     expect(component.salvou.emit).toHaveBeenCalled();
   }));
 
+  it('deve preencher o número com S/N quando a flag semNumero for marcada', () => {
+    component.cadastroForm.get('enderecoLocalizacao.semNumero')?.setValue(true);
+
+    expect(component.cadastroForm.get('enderecoLocalizacao.numero')?.value).toBe('S/N');
+  });
+
+  it('deve enviar número como S/N no payload quando a flag semNumero estiver marcada', fakeAsync(() => {
+    component.cadastroForm.patchValue({
+      dadosPessoais:       { nomeCompleto: 'Novo Aluno', dataNascimento: '2000-01-01', cpf: '11111111111' },
+      enderecoLocalizacao: {
+        cep: '12345000',
+        rua: 'Rua B',
+        numero: '',
+        semNumero: true,
+        bairro: 'Bairro',
+        cidade: 'Cidade',
+        uf: 'RS',
+        telefoneContato: '51999999999'
+      },
+      perfilDeficiencia:   { tipoDeficiencia: 'CEGUEIRA_TOTAL', prefAcessibilidade: 'BRAILLE' },
+      socioeconomico:      {},
+    });
+
+    component.salvarCadastro();
+    tick();
+
+    expect(beneficiariosService.criarBeneficiario).toHaveBeenCalledWith(
+      expect.objectContaining({ numero: 'S/N' })
+    );
+  }));
+
   // ── Acessibilidade e Usabilidade (a11y) ──────────────────────────────────
   describe('Acessibilidade (a11y)', () => {
     it('deve anunciar para o leitor de tela (aria-live) e indicar processamento (aria-busy) ao salvar cadastro', fakeAsync(() => {

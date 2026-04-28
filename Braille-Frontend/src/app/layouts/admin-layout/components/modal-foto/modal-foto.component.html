@@ -40,7 +40,7 @@
       <input #inputFoto id="input-foto" type="file" accept="image/jpeg,image/png,image/webp" style="display: none;"
         (change)="onFotoSelecionada($event)" />
 
-      <p class="foto-hint">Formatos: JPG, PNG, WebP. Máx: 2 MB.</p>
+      <p class="foto-hint">Formatos: JPG, PNG, WebP. Máx: 10 MB.</p>
 
       @if (fotoErro) {
       <p class="form-error" role="alert">{{ fotoErro }}</p>

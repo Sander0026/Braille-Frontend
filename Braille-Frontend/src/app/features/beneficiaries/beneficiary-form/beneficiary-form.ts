@@ -62,6 +62,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
 
   ngOnInit(): void {
     this.monitorarCausaDeficiencia();
+    this.monitorarSemNumero();
     if (this.alunoEmEdicao) {
       this.aplicarModoEdicao(this.alunoEmEdicao);
     }
@@ -82,6 +83,8 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   }
 
   private aplicarModoEdicao(aluno: any) {
+    const semNumero = this.ehSemNumero(aluno.numero);
+
     this.isModoEdicao = true;
     this.passoAtual = 1;
     this.cadastroForm.patchValue({
@@ -97,7 +100,8 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
       enderecoLocalizacao: {
         cep: formatarCep(aluno.cep || ''),
         rua: aluno.rua,
-        numero: aluno.numero,
+        numero: semNumero ? 'S/N' : aluno.numero,
+        semNumero,
         complemento: aluno.complemento,
         bairro: aluno.bairro,
         cidade: aluno.cidade,
@@ -152,6 +156,30 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     causaCtrl.valueChanges.subscribe(aplicar);
   }
 
+  private monitorarSemNumero(): void {
+    const semNumeroCtrl = this.cadastroForm.get('enderecoLocalizacao.semNumero');
+    const numeroCtrl = this.cadastroForm.get('enderecoLocalizacao.numero');
+    if (!semNumeroCtrl || !numeroCtrl) return;
+
+    const aplicar = (semNumero: boolean) => {
+      if (semNumero) {
+        numeroCtrl.setValue('S/N', { emitEvent: false });
+      } else if (this.ehSemNumero(numeroCtrl.value)) {
+        numeroCtrl.setValue('', { emitEvent: false });
+      }
+
+      numeroCtrl.updateValueAndValidity({ emitEvent: false });
+      this.cdr.detectChanges();
+    };
+
+    aplicar(!!semNumeroCtrl.value);
+    semNumeroCtrl.valueChanges.subscribe((valor) => aplicar(!!valor));
+  }
+
+  private ehSemNumero(valor: unknown): boolean {
+    return String(valor ?? '').trim().toUpperCase() === 'S/N';
+  }
+
   iniciarFormulario() {
     this.cadastroForm = this.fb.group({
       dadosPessoais: this.fb.group({
@@ -167,6 +195,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         cep: ['', [Validators.required, Validators.minLength(8)]],
         rua: ['', Validators.required],
         numero: ['', Validators.required],
+        semNumero: [false],
         complemento: [''],
         bairro: ['', Validators.required],
         cidade: ['', Validators.required],
@@ -492,13 +521,16 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     this.anunciarParaLeitorDeTela('Salvando cadastro, por favor aguarde...');
     const formValues = this.cadastroForm.value;
     const { laudoArquivo, ...perfilDeficienciaSemArquivo } = formValues.perfilDeficiencia;
+    const { semNumero, ...enderecoSemFlag } = formValues.enderecoLocalizacao;
     const limparSinais = (val: string | null | undefined) => val ? val.replaceAll(/\D/g, '') : val;
+    const numeroFinal = semNumero ? 'S/N' : enderecoSemFlag.numero;
 
     const payloadBackend = {
       ...formValues.dadosPessoais,
       cpf: limparSinais(formValues.dadosPessoais.cpf),
       rg: formValues.dadosPessoais.rg?.trim(),
-      ...formValues.enderecoLocalizacao,
+      ...enderecoSemFlag,
+      numero: numeroFinal,
       cep: limparSinais(formValues.enderecoLocalizacao.cep),
       telefoneContato: limparSinais(formValues.enderecoLocalizacao.telefoneContato),
       ...perfilDeficienciaSemArquivo,
@@ -513,6 +545,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     }
 
     const optionalStringFields = [
+      'cpf', 'rg',
       'genero', 'estadoCivil', 'corRaca', 'complemento', 'pontoReferencia', 'email',
       'contatoEmergencia', 'idadeOcorrencia', 'tecAssistivas', 'escolaridade',
       'profissao', 'rendaFamiliar', 'beneficiosGov', 'composicaoFamiliar', 'outrasComorbidades',
@@ -522,6 +555,57 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         delete payloadBackend[field];
       }
     }
+
+    if (!this.isModoEdicao) {
+      this.beneficiariosService.checkCpfRg(
+        typeof payloadBackend.cpf === 'string' ? payloadBackend.cpf : '',
+        typeof payloadBackend.rg === 'string' ? payloadBackend.rg : '',
+      ).subscribe({
+        next: (res) => {
+          if (res.status === 'ativo') {
+            const documento = payloadBackend.cpf ? 'CPF' : 'RG';
+            this.atualizarStatusDocumento(payloadBackend.cpf ? 'cpf' : 'rg', 'ativo', {
+              nomeCompleto: res.nomeCompleto,
+              matricula: res.matricula,
+            });
+            this.exibirFeedback(`Já existe um aluno ativo com este ${documento}.`, 'erro');
+            return;
+          }
+
+          if (res.status === 'inativo') {
+            this.isSalvando = false;
+            this.dadosReativacao = {
+              _reativacao: true,
+              id: res.id,
+              nomeCompleto: res.nomeCompleto,
+              matricula: res.matricula ?? undefined,
+              statusAtivo: false,
+              excluido: res.excluido,
+              message: 'Já existe um aluno inativo/arquivado com este CPF/RG.',
+            };
+            this._payloadPendente = payloadBackend;
+            this.elementoFocoAnterior = document.activeElement as HTMLElement;
+            this.modalReativacao = true;
+            this.cdr.detectChanges();
+            return;
+          }
+
+          this.processarUploadsESalvar(payloadBackend);
+        },
+        error: () => {
+          this.exibirFeedback('Não foi possível validar CPF/RG antes de salvar. Tente novamente.', 'erro');
+        },
+      });
+      return;
+    }
+
+    this.processarUploadsESalvar(payloadBackend);
+  }
+
+  private processarUploadsESalvar(payloadBackend: Record<string, unknown>) {
+    this.isSalvando = true;
+    this.mensagemFeedback = '';
+    this.anunciarParaLeitorDeTela('Salvando cadastro, por favor aguarde...');
 
     const uploadTasks: Array<Observable<{ tipo: string; url: string }>> = [];
     if (this.arquivoFotoSelecionado) {
@@ -566,7 +650,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
 
     call$.subscribe({
       next: (resp) => {
-        if (!this.isModoEdicao && 'reativacao' in resp && resp._reativacao) {
+        if (!this.isModoEdicao && '_reativacao' in resp && resp._reativacao) {
           this.isSalvando = false;
           this.dadosReativacao = resp as ReativacaoAluno;
           this._payloadPendente = dados;
