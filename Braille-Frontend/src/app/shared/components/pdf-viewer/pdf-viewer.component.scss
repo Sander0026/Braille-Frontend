@@ -121,6 +121,35 @@
   border: none;
 }
 
+.mobile-pdf-fallback {
+  display: none;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  color: #374151;
+  text-align: left;
+}
+
+.mobile-pdf-fallback .material-symbols-rounded {
+  color: #b91c1c;
+  font-size: 2.5rem;
+}
+
+.mobile-pdf-fallback h4 {
+  margin: 0 0 0.35rem;
+  color: #111827;
+  font-size: 1rem;
+}
+
+.mobile-pdf-fallback p {
+  margin: 0 0 1rem;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
 .error-icon {
   font-size: 2rem;
 }
@@ -288,6 +317,14 @@ canvas {
 @media (max-width: 768px) {
   :host {
     height: 90vh; 
+  }
+
+  .pdf-frame-area {
+    display: none;
+  }
+
+  .mobile-pdf-fallback {
+    display: flex;
   }
 
   .pdf-viewer-header {

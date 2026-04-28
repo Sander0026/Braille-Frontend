@@ -1,7 +1,7 @@
 <header class="pdf-viewer-header">
   <div class="header-titles">
     <h3 id="pdf-viewer-title">Visualizador Interativo de Documento</h3>
-    <span class="mobile-zoom-hint">Dica: use os dois dedos na tela para dar zoom</span>
+    <span class="mobile-zoom-hint">No celular, abra o PDF em uma nova aba para melhor leitura.</span>
   </div>
   <button
     type="button"
@@ -22,11 +22,22 @@
   <div class="pdf-error" role="alert" aria-live="assertive">
     <span class="error-icon material-symbols-rounded" aria-hidden="true">error</span>
     <p>{{ mensagemErro() }}</p>
-    <a class="btn-retry" [href]="url()" target="_blank" rel="noopener noreferrer">
+    <a class="btn-retry" [href]="urlDocumento()" target="_blank" rel="noopener noreferrer">
       Abrir em nova aba
     </a>
   </div>
 } @else if (urlVisualizadorPdf()) {
+  <div class="mobile-pdf-fallback" role="region" aria-labelledby="mobile-pdf-title">
+    <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+    <div>
+      <h4 id="mobile-pdf-title">Abrir manual em nova aba</h4>
+      <p>Alguns navegadores de celular bloqueiam PDF dentro da janela do sistema.</p>
+      <a class="btn-retry" [href]="urlDocumento()" target="_blank" rel="noopener noreferrer">
+        Abrir PDF
+      </a>
+    </div>
+  </div>
+
   <div class="pdf-frame-area">
     <iframe
       [src]="urlVisualizadorPdf() | safeUrl"
