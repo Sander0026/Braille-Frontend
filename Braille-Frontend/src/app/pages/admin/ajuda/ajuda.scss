@@ -289,8 +289,12 @@
 }
 
 .modal-backdrop--viewer {
-  z-index: 10001;
+  z-index: 10002;
   background: rgba(17, 24, 39, 0.72);
+}
+
+.modal-backdrop--manual {
+  z-index: 10001;
 }
 
 .modal-card {
@@ -373,7 +377,7 @@
   cursor: pointer;
 
   > .material-symbols-rounded:first-child {
-    color: #b91c1c;
+    color: #1d4ed8;
     font-size: 1.6rem;
   }
 
@@ -466,13 +470,19 @@
   }
 
   .modal-card,
-  .pdf-modal-card {
+  .pdf-modal-card,
+  app-manual-viewer {
     width: 100%;
     max-height: none;
     height: auto;
   }
 
   .pdf-modal-card {
+    height: 92vh;
+  }
+
+  app-manual-viewer {
+    display: flex;
     height: 92vh;
   }
 }

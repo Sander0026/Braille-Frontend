@@ -8,6 +8,7 @@ export interface ManualArquivo {
   nomeArquivo: string;
   cardIds: ManualCardId[];
   roles: ManualRole[];
+  conteudo?: ManualConteudoAcessivel;
 }
 
 export interface ManualCard {
@@ -18,6 +19,18 @@ export interface ManualCard {
   cor: string;
   arquivo: string | null;
   perfis: string[];
+}
+
+export interface ManualConteudoAcessivel {
+  introducao: string[];
+  secoes: ManualSecaoAcessivel[];
+}
+
+export interface ManualSecaoAcessivel {
+  titulo: string;
+  textos: string[];
+  itens?: string[];
+  alerta?: string;
 }
 
 export interface TecnologiaItem {
@@ -85,7 +98,75 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
     arquivo: '/assets/manuais/cadastrar_um_novo_aluno.pdf',
     nomeArquivo: 'cadastrar_um_novo_aluno.pdf',
     cardIds: ['secretaria', 'administrador'],
-    roles: ['SECRETARIA']
+    roles: ['SECRETARIA'],
+    conteudo: {
+      introducao: [
+        'Aprenda a fazer o cadastro de novos alunos no Sistema Administrativo ILBES.',
+        'Este guia orienta o preenchimento das informacoes pessoais, de contato, educacionais e medicas para que o cadastro seja concluido com seguranca.'
+      ],
+      secoes: [
+        {
+          titulo: 'Iniciar o cadastro',
+          textos: [
+            'Na tela Alunos, selecione o botao Novo Aluno para iniciar o cadastro.',
+            'O sistema abrira o formulario de cadastro dividido em quatro etapas.'
+          ]
+        },
+        {
+          titulo: 'Preencher os dados iniciais',
+          textos: [
+            'Siga cada etapa preenchendo as informacoes solicitadas nos campos do formulario.',
+            'Para adicionar Foto 3x4 ou Termo LGPD opcional, selecione o campo correspondente e escolha o arquivo quando o sistema solicitar.'
+          ],
+          alerta: 'Arquivos enviados ao sistema devem respeitar o limite de 10 MB.'
+        },
+        {
+          titulo: 'Avancar com seguranca',
+          textos: [
+            'Depois de preencher a primeira etapa, selecione Avancar para continuar.',
+            'Se voce tentar recarregar a pagina ou acessar outra tela durante o cadastro, o sistema exibira uma confirmacao de descarte.'
+          ],
+          itens: [
+            'Para continuar preenchendo, selecione Continuar editando.',
+            'Para sair e perder as alteracoes ainda nao salvas, confirme o descarte.'
+          ]
+        },
+        {
+          titulo: 'Informar contato e localizacao',
+          textos: [
+            'Na segunda etapa, preencha as informacoes de endereco e contato do aluno.',
+            'Campos marcados como obrigatorios precisam ser preenchidos antes de avancar para a proxima etapa.'
+          ],
+          itens: [
+            'Informe CEP, rua, numero ou marque S/N quando o aluno nao tiver numero residencial.',
+            'Preencha bairro, cidade, UF, telefone e demais dados disponiveis.'
+          ]
+        },
+        {
+          titulo: 'Informar perfil da deficiencia visual',
+          textos: [
+            'Na etapa seguinte, informe os dados relacionados ao perfil da deficiencia visual do aluno.',
+            'Quando a opcao Possui laudo medico for marcada, um campo de envio de arquivo sera exibido.'
+          ],
+          itens: [
+            'Selecione o arquivo do laudo medico quando houver.',
+            'Revise as informacoes antes de avancar.'
+          ],
+          alerta: 'O envio de laudo tambem deve respeitar o limite de 10 MB por arquivo.'
+        },
+        {
+          titulo: 'Informar saude, autonomia e concluir',
+          textos: [
+            'Na ultima etapa, preencha as informacoes de situacao socioeconomica, saude e autonomia.',
+            'Marque as opcoes quando o aluno necessita de acompanhante ou realiza acompanhamento oftalmologico.'
+          ],
+          itens: [
+            'Se houver outras comorbidades, descreva no campo Descrever outras condicoes.',
+            'Depois de revisar todas as informacoes, selecione Concluir cadastro.'
+          ]
+        }
+      ]
+    }
   },
   {
     titulo: 'Cadastrar um novo apoiador',

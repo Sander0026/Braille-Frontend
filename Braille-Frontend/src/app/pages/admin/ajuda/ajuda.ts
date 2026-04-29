@@ -14,12 +14,13 @@ import {
 } from './ajuda.constants';
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ManualCardComponent } from './components/manual-card/manual-card.component';
+import { ManualViewerComponent } from './components/manual-viewer/manual-viewer.component';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-ajuda',
   standalone: true,
-  imports: [CommonModule, RouterModule, A11yModule, PdfViewerComponent, ManualCardComponent],
+  imports: [CommonModule, RouterModule, A11yModule, PdfViewerComponent, ManualCardComponent, ManualViewerComponent],
   templateUrl: './ajuda.html',
   styleUrl: './ajuda.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +31,7 @@ export class Ajuda {
   readonly equipe = EQUIPE_SISTEMA;
 
   arquivoAtivo = signal<ManualArquivo | null>(null);
+  manualAtivo = signal<ManualArquivo | null>(null);
   cardAtivo = signal<ManualCard | null>(null);
   modalManuaisAberto = signal(false);
   statusLeitorTela = signal('');
@@ -97,26 +99,55 @@ export class Ajuda {
     this.ultimoElementoFocado = document.activeElement as HTMLElement;
     this.arquivoAbertoDaLista = arquivo;
 
+    this.modalManuaisAberto.set(false);
+    this.manualAtivo.set(arquivo);
+    this.statusLeitorTela.set(`Manual ${arquivo.titulo} aberto em formato de texto acessivel.`);
+    this.liveAnnouncer.announce(`Manual ${arquivo.titulo} aberto em formato de texto acessivel.`, 'polite');
+  }
+
+  abrirPdfDoManual(arquivo: ManualArquivo): void {
+    this.ultimoElementoFocado = document.activeElement as HTMLElement;
+
     if (this.deveAbrirPdfEmNovaAba()) {
       this.abrirPdfEmNovaAba(arquivo);
       return;
     }
 
-    this.modalManuaisAberto.set(false);
     this.arquivoAtivo.set(arquivo);
-    this.statusLeitorTela.set(`Abrindo manual ${arquivo.titulo}.`);
-    this.liveAnnouncer.announce(`Manual ${arquivo.titulo} aberto no visualizador.`, 'polite');
+    this.statusLeitorTela.set(`Abrindo versao em PDF do manual ${arquivo.titulo}.`);
+    this.liveAnnouncer.announce(`Versao em PDF do manual ${arquivo.titulo} aberta.`, 'polite');
+  }
+
+  fecharManual(): void {
+    const arquivoParaRestaurar = this.arquivoAbertoDaLista;
+    this.manualAtivo.set(null);
+
+    if (this.cardAtivo()) {
+      this.reabrirListaDeManuais(arquivoParaRestaurar, 'Manual fechado. Voce voltou para a lista de manuais.');
+      return;
+    }
+
+    if (this.ultimoElementoFocado) {
+      setTimeout(() => {
+        this.ultimoElementoFocado?.focus();
+        this.ultimoElementoFocado = null;
+      }, 0);
+    }
   }
 
   fecharPdf(): void {
-    const arquivoParaRestaurar = this.arquivoAbertoDaLista;
     this.arquivoAtivo.set(null);
 
+    if (this.manualAtivo()) {
+      this.statusLeitorTela.set('PDF fechado. Voce voltou para o manual em texto acessivel.');
+      this.liveAnnouncer.announce('PDF fechado. Voce voltou para o manual em texto acessivel.', 'polite');
+      setTimeout(() => this.ultimoElementoFocado?.focus(), 0);
+      return;
+    }
+
+    const arquivoParaRestaurar = this.arquivoAbertoDaLista;
     if (this.cardAtivo()) {
-      this.modalManuaisAberto.set(true);
-      this.statusLeitorTela.set('Visualizador fechado. Retornando para a lista de manuais.');
-      this.liveAnnouncer.announce('Visualizador fechado. Voce voltou para a lista de manuais.', 'polite');
-      setTimeout(() => this.restaurarFocoNaListaDeManuais(arquivoParaRestaurar), 0);
+      this.reabrirListaDeManuais(arquivoParaRestaurar, 'Visualizador fechado. Voce voltou para a lista de manuais.');
       return;
     }
 
@@ -139,11 +170,25 @@ export class Ajuda {
       return;
     }
 
+    if (this.manualAtivo()) {
+      this.fecharManual();
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+
     if (this.modalManuaisAberto()) {
       this.fecharModalManuais();
       event.preventDefault();
       event.stopPropagation();
     }
+  }
+
+  private reabrirListaDeManuais(arquivo: ManualArquivo | null, mensagem: string): void {
+    this.modalManuaisAberto.set(true);
+    this.statusLeitorTela.set(mensagem);
+    this.liveAnnouncer.announce(mensagem, 'polite');
+    setTimeout(() => this.restaurarFocoNaListaDeManuais(arquivo), 0);
   }
 
   private normalizarRole(role?: string): ManualRole | null {
