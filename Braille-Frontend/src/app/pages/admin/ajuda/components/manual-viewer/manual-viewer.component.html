@@ -1,0 +1,104 @@
+<article class="manual-viewer" aria-labelledby="manual-viewer-title">
+  <p class="sr-only" aria-live="polite">{{ statusLeitorTela() }}</p>
+
+  <header class="manual-viewer-header">
+    <div class="manual-heading">
+      <p class="manual-kicker">Manual de uso</p>
+      <h2 id="manual-viewer-title">{{ manual.titulo }}</h2>
+      <p>{{ manual.descricao }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn-icon"
+      (click)="onFechar()"
+      aria-label="Fechar manual e voltar para a lista de manuais">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
+  </header>
+
+  <div class="manual-actions" aria-label="Acoes do manual">
+    <button
+      type="button"
+      class="btn-action btn-action-primary"
+      (click)="onAbrirPdf()"
+      [attr.aria-label]="'Abrir versao em PDF do manual ' + manual.titulo">
+      <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+      Abrir PDF
+    </button>
+
+    <a
+      class="btn-action"
+      [href]="urlPdf()"
+      [download]="manual.nomeArquivo"
+      [attr.aria-label]="'Baixar versao em PDF do manual ' + manual.titulo">
+      <span class="material-symbols-rounded" aria-hidden="true">download</span>
+      Baixar PDF
+    </a>
+  </div>
+
+  @if (temConteudoAcessivel()) {
+    <div class="manual-body">
+      <section class="manual-intro" aria-label="Resumo do manual">
+        @for (paragrafo of manual.conteudo!.introducao; track paragrafo) {
+          <p>{{ paragrafo }}</p>
+        }
+      </section>
+
+      <nav class="manual-index" aria-label="Indice do manual">
+        <h3>Indice</h3>
+        <ol>
+          @for (secao of manual.conteudo!.secoes; track trackSecao($index, secao)) {
+            <li>
+              <button
+                type="button"
+                class="manual-index-button"
+                (click)="navegarParaSecao($index, secao.titulo)"
+                [attr.aria-label]="'Ir para o topico ' + ($index + 1) + ': ' + secao.titulo">
+                {{ secao.titulo }}
+              </button>
+            </li>
+          }
+        </ol>
+      </nav>
+
+      <div class="manual-sections">
+        @for (secao of manual.conteudo!.secoes; track trackSecao($index, secao)) {
+          <section class="manual-section" [id]="idSecao($index)" [attr.aria-labelledby]="idTituloSecao($index)">
+            <h3 [id]="idTituloSecao($index)" tabindex="-1">
+              <span aria-hidden="true">{{ $index + 1 }}</span>
+              {{ secao.titulo }}
+            </h3>
+
+            @for (texto of secao.textos; track texto) {
+              <p>{{ texto }}</p>
+            }
+
+            @if (secao.itens?.length) {
+              <ul>
+                @for (item of secao.itens; track item) {
+                  <li>{{ item }}</li>
+                }
+              </ul>
+            }
+
+            @if (secao.alerta) {
+              <p class="manual-alert" role="note">
+                <span class="material-symbols-rounded" aria-hidden="true">info</span>
+                <span>{{ secao.alerta }}</span>
+              </p>
+            }
+          </section>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="manual-empty" role="status">
+      <span class="material-symbols-rounded" aria-hidden="true">menu_book</span>
+      <div>
+        <h3>Manual em formato PDF</h3>
+        <p>Este manual ainda nao possui versao em texto acessivel. Use as acoes acima para abrir ou baixar o PDF.</p>
+      </div>
+    </div>
+  }
+</article>
