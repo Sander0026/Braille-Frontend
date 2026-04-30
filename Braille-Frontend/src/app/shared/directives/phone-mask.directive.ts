@@ -10,7 +10,7 @@ import { isPlatformBrowser } from '@angular/common';
   host: { '(input)': 'onInput($event)' }
 })
 export class PhoneMaskDirective {
-  private readonly ngControl  = inject(NgControl);
+  private readonly ngControl  = inject(NgControl, { optional: true });
   private readonly platformId = inject(PLATFORM_ID);
 
   onInput(event: Event): void {
@@ -19,11 +19,12 @@ export class PhoneMaskDirective {
 
     const target = event.target as HTMLInputElement;
     if (target) {
-      this.applyMask(target.value);
+      this.applyMask(target);
     }
   }
 
-  private applyMask(value: string): void {
+  private applyMask(input: HTMLInputElement): void {
+    const value = input.value;
     if (!value) return;
 
     // Remove tudo que não é dígito e limita ao máximo de 11 dígitos (celular BR)
@@ -39,7 +40,11 @@ export class PhoneMaskDirective {
     }
 
     // Atualiza o controle apenas se o valor sofreu transformação — previne loops infinitos
-    if (this.ngControl.control && this.ngControl.control.value !== digits) {
+    if (input.value !== digits) {
+      input.value = digits;
+    }
+
+    if (this.ngControl?.control && this.ngControl.control.value !== digits) {
       this.ngControl.control.setValue(digits, { emitEvent: false, emitModelToViewChange: true });
     }
   }

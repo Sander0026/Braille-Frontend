@@ -195,8 +195,8 @@ Nao acessa banco. Utilitarios formatam dados vindos da API.
 * `ToastService` anuncia mensagens via `LiveAnnouncer`, usando `assertive` para erros e `polite` para demais avisos.
 * `UiModal` usa SVG inline para icone de fechar; poderia padronizar com biblioteca de icones se houver.
 * `SafeUrlPipe` valida recursos locais, mesma origem, `blob:` e Cloudinary antes de usar `bypassSecurityTrustResourceUrl`.
-* `PhoneMaskDirective` depende de `NgControl`; uso fora de form control pode falhar.
-* Manipulacao direta de `document`/`window` deve continuar recebendo guardas em qualquer ponto novo com possibilidade de SSR.
+* `PhoneMaskDirective` aceita uso com ou sem `NgControl`, mantendo mascara no elemento e sincronizando o form control quando existir.
+* `AccessibilityService` aplica guardas para `document` e `localStorage`; novos usos diretos de browser APIs devem seguir o mesmo padrao.
 
 ---
 
