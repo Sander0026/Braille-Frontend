@@ -2,6 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import {
+  CertificadoLayoutConfig,
+  TesteGeracaoCertificadoPayload,
+  TipoModeloCertificado
+} from '../interfaces/certificados.interface';
 
 export interface ModeloCertificado {
   id: string;
@@ -14,8 +19,8 @@ export interface ModeloCertificado {
   cargoAssinante: string;
   nomeAssinante2?: string;
   cargoAssinante2?: string;
-  layoutConfig?: any;
-  tipo: 'ACADEMICO' | 'HONRARIA';
+  layoutConfig?: CertificadoLayoutConfig;
+  tipo: TipoModeloCertificado;
   dataCriacao: string;
   dataAtualizacao: string;
 }
@@ -53,7 +58,7 @@ export class ModelosCertificadosService {
     return this.http.get<{ valido: boolean, nome: string, curso: string, data: string, tipo: string }>(`${this.certificadosUrl}/validar/${codigo}`);
   }
 
-  testarGeracaoGeometrica(payload: any): Observable<Blob> {
+  testarGeracaoGeometrica(payload: TesteGeracaoCertificadoPayload): Observable<Blob> {
     return this.http.post(`${this.apiUrl}/teste`, payload, { responseType: 'blob' });
   }
 

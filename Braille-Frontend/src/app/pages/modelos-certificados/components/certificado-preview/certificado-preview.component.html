@@ -16,7 +16,7 @@
     }
 
     <!-- Nome do Aluno -->
-    @if (layoutConfig?.nomeAluno) {
+    @if (layoutConfig.nomeAluno) {
     <div [ngStyle]="{
            'left':       layoutConfig.nomeAluno.x + '%',
            'top':        layoutConfig.nomeAluno.y + '%',
@@ -38,7 +38,7 @@
     }
 
     <!-- Texto Principal -->
-    @if (layoutConfig?.textoPronto) {
+    @if (layoutConfig.textoPronto) {
     <div [ngStyle]="{
            'left':       layoutConfig.textoPronto.x + '%',
            'top':        layoutConfig.textoPronto.y + '%',
@@ -61,7 +61,7 @@
     }
 
     <!-- Assinatura 1 -->
-    @if (layoutConfig?.assinatura1 && assinaturaUrl) {
+    @if (layoutConfig.assinatura1 && assinaturaUrl) {
     <div [ngStyle]="{
            'left':  layoutConfig.assinatura1.x + '%',
            'top':   layoutConfig.assinatura1.y + '%',
@@ -84,7 +84,7 @@
     }
 
     <!-- Assinatura 2 -->
-    @if (layoutConfig?.assinatura2 && assinaturaUrl2 && nomeAssinante2) {
+    @if (layoutConfig.assinatura2 && assinaturaUrl2 && nomeAssinante2) {
     <div [ngStyle]="{
            'left':  layoutConfig.assinatura2.x + '%',
            'top':   layoutConfig.assinatura2.y + '%',
@@ -107,7 +107,7 @@
     }
 
     <!-- QR Code -->
-    @if (layoutConfig?.qrCode) {
+    @if (layoutConfig.qrCode) {
     <div [ngStyle]="{
            'left':  layoutConfig.qrCode.x + '%',
            'top':   layoutConfig.qrCode.y + '%',

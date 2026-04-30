@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { PdfViewerComponent } from '../../../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
+import { CertificadoEmitido } from '../../../../../core/interfaces/certificados.interface';
 
 @Component({
   selector: 'app-apoiador-certificados',
@@ -15,7 +16,7 @@ import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 export class ApoiadorCertificadosComponent implements OnInit {
   @Input({ required: true }) isOpen = false;
   @Input({ required: true }) apoiador!: Apoiador;
-  @Input() certificados: any[] = [];
+  @Input() certificados: CertificadoEmitido[] = [];
   @Input() carregandoCertificados = false;
 
   @Output() modalClosed = new EventEmitter<void>();
@@ -43,7 +44,7 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.modalClosed.emit();
   }
 
-  abrirPdf(cert: any): void {
+  abrirPdf(cert: CertificadoEmitido): void {
     this.processandoId = cert.id;
     this.cdr.detectChanges();
 
@@ -73,7 +74,7 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  baixarPdf(cert: any): void {
+  baixarPdf(cert: CertificadoEmitido): void {
     this.processandoId = cert.id;
     this.cdr.detectChanges();
 

@@ -210,10 +210,10 @@ Entidades refletidas: apoiadores, acoes_apoiador, certificados, modelos_certific
 
 # 8. Pontos de Atencao
 
-* Rota de apoiadores usa `EDITOR` em `app.routes.ts`, enquanto layout usa `COMUNICACAO`; corrigir.
-* `layoutConfig?: any` e payloads `any` de certificados reduzem confiabilidade.
-* PDFs/base64 podem ter alto peso; considerar streaming/download controlado.
-* Publicacao de apoiadores deve respeitar consentimento institucional.
+* Rota de apoiadores foi alinhada para `ADMIN`, `SECRETARIA` e `COMUNICACAO`, conforme menu lateral.
+* `layoutConfig` e payloads/respostas de certificados foram tipados em contrato compartilhado.
+* PDFs devem priorizar `pdfUrl`/Blob e download controlado; `pdfBase64` permanece apenas como compatibilidade de contrato quando o backend retornar.
+* Publicacao de apoiadores exige confirmacao explicita de autorizacao no frontend antes de ativar exibicao no site publico. Para rastreabilidade juridica completa, persistir consentimento em campo proprio no backend.
 
 ---
 
@@ -229,4 +229,3 @@ Entidades refletidas: apoiadores, acoes_apoiador, certificados, modelos_certific
 # 10. Resumo Tecnico Final
 
 Apoiadores e certificados possuem criticidade media-alta: apoiadores afetam relacionamento institucional e certificados afetam autenticidade documental. A complexidade e alta pelo uso de arquivos, PDF, modelos geometricos e validacao publica. A arquitetura e funcional, mas deve reforcar tipagem de `layoutConfig` e corrigir divergencia de roles.
-

@@ -95,7 +95,7 @@ export const routes: Routes = [
         title: 'Apoiadores — ILBES',
         canActivate: [roleGuard],
         canDeactivate: [descarteGuard],
-        data: { roles: ['ADMIN', 'EDITOR'] }
+        data: { roles: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] }
       },
 
       // Certificados

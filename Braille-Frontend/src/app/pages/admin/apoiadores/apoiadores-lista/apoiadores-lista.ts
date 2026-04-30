@@ -6,6 +6,7 @@ import { takeUntil } from 'rxjs/operators';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { ApoiadoresService, Apoiador, AcaoApoiador } from '../apoiadores.service';
 import { MasksUtil } from '../../../../shared/utils/masks.util';
+import { CertificadoEmitido } from '../../../../core/interfaces/certificados.interface';
 
 // Importa os sub-componentes modulares (Micro-frontends)
 import { ApoiadorWizardFormComponent } from '../components/apoiador-wizard-form/apoiador-wizard-form.component';
@@ -54,7 +55,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy, ComponenteComDescarte
   
   // Dependências de contexto (Modais Filhos)
   acoesFiltradas: AcaoApoiador[] = [];
-  certificadosEmitidos: any[] = [];
+  certificadosEmitidos: CertificadoEmitido[] = [];
   carregandoContextoFilho = false;
 
   @ViewChild(ApoiadorWizardFormComponent) formModal?: ApoiadorWizardFormComponent;
@@ -293,7 +294,7 @@ export class ApoiadoresLista implements OnInit, OnDestroy, ComponenteComDescarte
     this.cdr.detectChanges();
 
     this.apoiadoresService.listarCertificados(target).subscribe({
-      next: (cert: any[]) => {
+      next: (cert: CertificadoEmitido[]) => {
         this.certificadosEmitidos = cert;
         this.carregandoContextoFilho = false;
         this.cdr.detectChanges();

@@ -46,7 +46,7 @@ export class ModelosLista implements OnInit {
     this.modelosService.listar()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res: any) => {
+        next: (res: ModeloCertificado[]) => {
           this.modelos.set(res || []);
           this.isLoading.set(false);
         },
@@ -107,7 +107,7 @@ export class ModelosLista implements OnInit {
           this.toast.sucesso('Modelo excluído com sucesso!');
           this.carregarModelos();
         },
-        error: (err: any) => {
+        error: (err: { error?: { message?: string | string[] } }) => {
           const msg = err.error?.message || 'Erro ao excluir. O modelo pode estar em uso.';
           this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
         }

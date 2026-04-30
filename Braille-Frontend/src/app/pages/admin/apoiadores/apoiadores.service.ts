@@ -2,6 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import {
+  CertificadoEmitido,
+  EmitirCertificadoApoiadorPayload,
+  EmitirCertificadoApoiadorResponse,
+  PdfCertificadoResponse
+} from '../../../core/interfaces/certificados.interface';
 
 export interface AcaoApoiador {
   id: string;
@@ -168,24 +174,22 @@ export class ApoiadoresService {
 
   // ---- Certificados de Honraria ---- //
 
-  listarCertificados(apoiadorId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/${apoiadorId}/certificados`);
+  listarCertificados(apoiadorId: string): Observable<CertificadoEmitido[]> {
+    return this.http.get<CertificadoEmitido[]>(`${this.apiUrl}/${apoiadorId}/certificados`);
   }
 
-  emitirCertificado(apoiadorId: string, payload: {
-    modeloId: string;
-    acaoId?: string;
-    motivoPersonalizado?: string;
-    dataEmissao?: string;
-  }): Observable<{ certificado: any; pdfBase64: string }> {
-    return this.http.post<{ certificado: any; pdfBase64: string }>(
+  emitirCertificado(
+    apoiadorId: string,
+    payload: EmitirCertificadoApoiadorPayload
+  ): Observable<EmitirCertificadoApoiadorResponse> {
+    return this.http.post<EmitirCertificadoApoiadorResponse>(
       `${this.apiUrl}/${apoiadorId}/certificados`,
       payload
     );
   }
 
-  gerarPdfCertificado(apoiadorId: string, certId: string): Observable<{ pdfUrl: string; codigoValidacao: string }> {
-    return this.http.get<{ pdfUrl: string; codigoValidacao: string }>(
+  gerarPdfCertificado(apoiadorId: string, certId: string): Observable<PdfCertificadoResponse> {
+    return this.http.get<PdfCertificadoResponse>(
       `${this.apiUrl}/${apoiadorId}/certificados/${certId}/pdf`
     );
   }

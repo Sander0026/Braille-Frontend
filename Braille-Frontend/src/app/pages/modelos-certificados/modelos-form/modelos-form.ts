@@ -9,6 +9,11 @@ import { ModelosCertificadosService, ModeloCertificado } from '../../../core/ser
 import { ToastService } from '../../../core/services/toast.service';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 import { CertificadoPreviewComponent, DragEndEvent } from '../components/certificado-preview/certificado-preview.component';
+import {
+  CertificadoLayoutConfig,
+  CertificadoTextAlign,
+  normalizarCertificadoLayoutConfig
+} from '../../../core/interfaces/certificados.interface';
 
 @Component({
   selector: 'app-modelos-form',
@@ -32,13 +37,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   assinaturaPreviewUrl = signal<string | ArrayBuffer | null>(null);
   assinatura2PreviewUrl = signal<string | ArrayBuffer | null>(null);
 
-  layoutConfig: any = {
-    textoPronto: { x: 10, y: 20, fontSize: 32, color: '#1a1a00', maxWidth: 80, fontFamily: 'Helvetica' },
-    nomeAluno:   { x: 10, y: 45, fontSize: 60, color: '#000000', maxWidth: 80, fontFamily: 'Great Vibes' },
-    assinatura1: { x: 20, y: 70, width: 20 },
-    assinatura2: { x: 60, y: 70, width: 20 },
-    qrCode:      { x: 80, y: 80, size: 10 },
-  };
+  layoutConfig: CertificadoLayoutConfig = normalizarCertificadoLayoutConfig();
 
   @ViewChild('textoTemplateInput') textoTemplateInput!: ElementRef<HTMLTextAreaElement>;
 
@@ -103,7 +102,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
           }
 
           if (modelo.layoutConfig) {
-            this.layoutConfig = { ...this.layoutConfig, ...modelo.layoutConfig };
+            this.layoutConfig = normalizarCertificadoLayoutConfig(modelo.layoutConfig);
           }
         },
         error: () => this.toast.erro('Não foi possível encontrar o modelo solicitado.')
@@ -208,7 +207,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
           this.toast.sucesso(`Modelo de certificado ${this.modoEdicao() ? 'atualizado' : 'criado'} com sucesso!`);
           this.router.navigate(['/admin/modelos-certificados']);
         },
-        error: (err: any) => {
+        error: (err: { error?: { message?: string | string[] } }) => {
           this.isSalvando.set(false);
           const msg = err.error?.message || 'Erro ao comunicar com o servidor.';
           this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
@@ -224,7 +223,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     }
   }
 
-  setTextAlign(align: 'left' | 'center' | 'right' | 'justify') {
+  setTextAlign(align: CertificadoTextAlign) {
     this.layoutConfig.textoPronto.textAlign = align;
     this.formModelo.markAsDirty();
   }

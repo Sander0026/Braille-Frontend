@@ -1,13 +1,18 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, ElementRef, ViewChild, AfterViewInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
+import {
+  CertificadoLayoutCampo,
+  CertificadoLayoutConfig,
+  normalizarCertificadoLayoutConfig
+} from '../../../../core/interfaces/certificados.interface';
 
 /** Dimensões fixas do canvas de preview A4 landscape @ 96 dpi */
 export const CERT_CANVAS_W = 1122;
 export const CERT_CANVAS_H = 794;
 
 export interface DragEndEvent {
-  field: string;
+  field: CertificadoLayoutCampo;
   x: number;
   y: number;
 }
@@ -31,7 +36,15 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
   @Input() nomeAssinante2 = '';
   @Input() cargoAssinante2 = '';
   @Input() textoTemplate = '';
-  @Input() layoutConfig: any = {};
+  private layoutConfigNormalizado = normalizarCertificadoLayoutConfig();
+
+  @Input() set layoutConfig(value: Partial<CertificadoLayoutConfig> | null | undefined) {
+    this.layoutConfigNormalizado = normalizarCertificadoLayoutConfig(value);
+  }
+
+  get layoutConfig(): CertificadoLayoutConfig {
+    return this.layoutConfigNormalizado;
+  }
   
   /** Se true, os elementos podem ser arrastados. */
   @Input() isDraggable = false;
@@ -91,7 +104,7 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
     return t || (this.isDraggable ? '(texto do certificado aparecerá aqui)' : '');
   }
 
-  onDragEnded(event: CdkDragEnd, field: string) {
+  onDragEnded(event: CdkDragEnd, field: CertificadoLayoutCampo) {
     if (!this.isDraggable) return;
 
     const element = event.source.element.nativeElement;
