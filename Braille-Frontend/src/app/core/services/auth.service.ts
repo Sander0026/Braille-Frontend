@@ -38,12 +38,7 @@ export class AuthService {
   login(credenciais: { username: string; senha: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, credenciais).pipe(
       tap((resposta: any) => {
-        if (resposta.access_token) {
-          localStorage.setItem(this.TOKEN_KEY, resposta.access_token);
-        }
-        if (resposta.refresh_token) {
-          localStorage.setItem(this.REFRESH_KEY, resposta.refresh_token);
-        }
+        this.salvarTokens(resposta);
       })
     );
   }
@@ -67,9 +62,7 @@ export class AuthService {
 
     return this.http.post(`${this.apiUrl}/refresh`, { userId: subId, refreshToken }).pipe(
       tap((resposta: any) => {
-        if (resposta.access_token) {
-          localStorage.setItem(this.TOKEN_KEY, resposta.access_token);
-        }
+        this.salvarTokens(resposta);
       })
     );
   }
@@ -120,6 +113,16 @@ export class AuthService {
 
   uploadFoto(file: File): Observable<{ url: string }> {
     return this.storage.uploadGlobalImage(file);
+  }
+
+  private salvarTokens(resposta: { access_token?: string; refresh_token?: string }): void {
+    if (resposta.access_token) {
+      localStorage.setItem(this.TOKEN_KEY, resposta.access_token);
+    }
+
+    if (resposta.refresh_token) {
+      localStorage.setItem(this.REFRESH_KEY, resposta.refresh_token);
+    }
   }
 
   private decodeToken(token: string): any {
