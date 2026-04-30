@@ -27,17 +27,17 @@
 
             <!-- Área de Upload -->
             @if (!resultado) {
-            <input #fileInput id="upload-planilha-input" type="file" accept=".xlsx,.xls,.csv" (change)="onFileInput($event)" class="sr-only" tabindex="-1" aria-hidden="true" aria-label="Selecionar planilha" />
+            <input #fileInput id="upload-planilha-input" type="file" accept=".xlsx" (change)="onFileInput($event)" class="sr-only" tabindex="-1" aria-hidden="true" aria-label="Selecionar planilha modelo .xlsx" />
 
             <div class="dropzone" [class.drag-over]="isDragOver" [class.has-file]="arquivoSelecionado"
                 (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)"
                 (click)="fileInput.click()" role="button" tabindex="0" (keydown.enter)="fileInput.click()"
-                aria-label="Área de upload. Arraste um arquivo ou clique para selecionar.">
+                aria-label="Área de upload. Arraste a planilha modelo .xlsx ou clique para selecionar.">
 
                 @if (!arquivoSelecionado) {
                 <span class="material-symbols-rounded dropzone-icon">upload_file</span>
                 <p class="dropzone-text">Arraste o arquivo aqui ou <strong>clique para selecionar</strong></p>
-                <span class="dropzone-hint">Formatos aceitos: .xlsx, .xls, .csv · Máximo 5 MB</span>
+                <span class="dropzone-hint">Formato aceito: .xlsx · Máximo 5 MB</span>
                 } @else {
                 <span class="material-symbols-rounded dropzone-icon file-ok">check_circle</span>
                 <p class="dropzone-text file-name">{{ arquivoSelecionado.name }}</p>
