@@ -193,8 +193,8 @@ Entidade refletida: `audit_log`, contendo snapshots antigos/novos, autor e metad
 
 # 8. Pontos de Atencao
 
-* Logs podem expor dados pessoais; avaliar mascaramento por campo.
-* `oldValue`/`newValue` como `unknown` exige guards antes de exibir.
+* DiferenÃ§as de auditoria mascaram campos sensiveis como CPF, RG, telefone, e-mail, documentos, senhas e tokens.
+* `oldValue`/`newValue` como `unknown` passam por guards antes de gerar diferencas visiveis.
 * Cobertura Cypress parece focada em alguns fluxos; ampliar para certificados, contatos, turmas e frequencias.
 * Sentry esta desativado enquanto DSN estiver vazio.
 * O output de axe em desenvolvimento nao substitui gating de CI.
@@ -213,4 +213,3 @@ Entidade refletida: `audit_log`, contendo snapshots antigos/novos, autor e metad
 # 10. Resumo Tecnico Final
 
 Auditoria e qualidade possuem criticidade alta para governanca, seguranca e confiabilidade. Ajuda possui criticidade media por reduzir erro operacional. A complexidade e media-alta pela combinacao de logs, diffs, acessibilidade e testes. A implementacao e robusta em normalizacao e foco WCAG, mas deve evoluir em mascaramento de dados sensiveis, cobertura E2E e ativacao de observabilidade em producao.
-

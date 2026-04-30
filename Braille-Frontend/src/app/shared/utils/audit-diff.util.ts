@@ -3,74 +3,102 @@ export interface AuditDiff {
   de: string;
   para: string;
   alterado: boolean;
+  sensivel: boolean;
 }
 
-/**
- * Mapa de labels amigáveis para campos de auditoria.
- * Exportado como const para reutilização em testes e outros contextos sem importar funções.
- */
 export const AUDIT_FIELD_LABELS: Record<string, string> = {
-  presente:        'Presença',
-  dataAula:        'Data da Aula',
-  fechado:         'Diário Fechado',
-  fechadoEm:       'Data de Fechamento',
-  fechadoPor:      'Fechado por',
-  observacao:      'Observação',
-  nome:            'Nome',
-  nomeCompleto:    'Nome Completo',
-  dataNascimento:  'Data de Nascimento',
-  email:           'E-mail',
-  telefone:        'Telefone',
-  status:          'Situação',
-  cpf:             'CPF',
-  rg:              'RG',
+  presente: 'Presenca',
+  dataAula: 'Data da Aula',
+  fechado: 'Diario Fechado',
+  fechadoEm: 'Data de Fechamento',
+  fechadoPor: 'Fechado por',
+  observacao: 'Observacao',
+  nome: 'Nome',
+  nomeCompleto: 'Nome Completo',
+  dataNascimento: 'Data de Nascimento',
+  email: 'E-mail',
+  telefone: 'Telefone',
+  status: 'Situacao',
+  cpf: 'CPF',
+  rg: 'RG',
+  cpfCnpj: 'CPF/CNPJ',
+  documento: 'Documento',
 };
 
-/**
- * Campos técnicos que não devem aparecer no diff de auditoria.
- * Exportado para uso em filtros externos e testes.
- */
 export const AUDIT_IGNORED_FIELDS: ReadonlySet<string> = new Set([
-  'id', 'alunoId', 'turmaId', 'criadoEm', 'atualizadoEm', 'senhaHash', 'professorId',
+  'id',
+  'alunoId',
+  'turmaId',
+  'criadoEm',
+  'atualizadoEm',
+  'senhaHash',
+  'professorId',
 ]);
 
-/** Type guard: verifica se um valor é uma string ISO 8601 com parte de data e hora */
+const SENSITIVE_FIELD_PATTERNS = [
+  /cpf/i,
+  /cnpj/i,
+  /\brg\b/i,
+  /documento/i,
+  /telefone/i,
+  /email/i,
+  /senha/i,
+  /token/i,
+];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 function isIsoDateString(value: unknown): value is string {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value);
 }
 
-/**
- * Formata um valor bruto em string amigável para exibição em diffs de auditoria.
- * Usa `unknown` no lugar de `any` — obriga type guards explícitos (SonarQube).
- */
+function isCampoSensivel(chave: string): boolean {
+  return SENSITIVE_FIELD_PATTERNS.some(pattern => pattern.test(chave));
+}
+
 function formatarValorAmigavel(chave: string, valor: unknown): string {
-  if (valor === null || valor === undefined) return '—';
-  if (typeof valor === 'boolean') return valor ? 'Sim' : 'Não';
+  if (valor === null || valor === undefined) return '-';
+  if (typeof valor === 'boolean') return valor ? 'Sim' : 'Nao';
+
+  if (isCampoSensivel(chave)) {
+    return mascararValorSensivel(chave, valor);
+  }
 
   if (isIsoDateString(valor)) {
-    const d = new Date(valor);
+    const data = new Date(valor);
     if (chave.toLowerCase().includes('data') && valor.includes('T00:00:00')) {
-      return d.toLocaleDateString('pt-BR');
+      return data.toLocaleDateString('pt-BR');
     }
-    return d.toLocaleString('pt-BR');
+    return data.toLocaleString('pt-BR');
   }
 
   if (valor === '') return 'Vazio';
   return String(valor);
 }
 
-/**
- * Identifica e normaliza graficamente os deltas JSON de payload dos Logs de Auditoria.
- *
- * @param oldVal - Estado anterior do objeto (pode ser null em ações de CRIAR)
- * @param newVal - Estado novo do objeto
- * @returns Lista de diferenças com labels amigáveis e flag de alteração
- */
-export function gerarDiferencas(oldVal: Record<string, unknown> | null, newVal: Record<string, unknown> | null): AuditDiff[] {
-  const oldObj: Record<string, unknown> = oldVal ?? {};
-  const newObj: Record<string, unknown> = newVal ?? {};
+function mascararValorSensivel(chave: string, valor: unknown): string {
+  const texto = String(valor).trim();
+  if (!texto) return 'Vazio';
 
-  // Proteção anti-Prototype Pollution: Object.keys() é seguro (não percorre protótipo)
+  if (/email/i.test(chave)) {
+    const [usuario, dominio] = texto.split('@');
+    if (!usuario || !dominio) return 'Valor protegido';
+    return `${usuario.slice(0, 1)}***@${dominio}`;
+  }
+
+  const digitos = texto.replace(/\D/g, '');
+  if (digitos.length >= 4) {
+    return `Final ${digitos.slice(-4)}`;
+  }
+
+  return 'Valor protegido';
+}
+
+export function gerarDiferencas(oldVal: unknown, newVal: unknown): AuditDiff[] {
+  const oldObj = isRecord(oldVal) ? oldVal : {};
+  const newObj = isRecord(newVal) ? newVal : {};
   const allKeys = new Set([...Object.keys(oldObj), ...Object.keys(newObj)]);
   const diferencas: AuditDiff[] = [];
 
@@ -78,27 +106,22 @@ export function gerarDiferencas(oldVal: Record<string, unknown> | null, newVal: 
     if (AUDIT_IGNORED_FIELDS.has(key)) continue;
 
     const valNovo = newObj[key];
+    if (!isRecord(oldVal) && (valNovo === null || valNovo === undefined || valNovo === '')) continue;
 
-    // Em ações de CRIAR, ignora campos sem valor para não poluir o diff
-    if (!oldVal && (valNovo === null || valNovo === undefined || valNovo === '')) continue;
-
-    const labelAmigavel = AUDIT_FIELD_LABELS[key] ?? `${key.charAt(0).toUpperCase()}${key.slice(1)}`;
+    const sensivel = isCampoSensivel(key);
     const strAntigo = formatarValorAmigavel(key, oldObj[key]);
-    const strNovo   = formatarValorAmigavel(key, valNovo);
+    const strNovo = formatarValorAmigavel(key, valNovo);
 
     diferencas.push({
-      campo:    labelAmigavel,
-      de:       strAntigo,
-      para:     strNovo,
+      campo: AUDIT_FIELD_LABELS[key] ?? `${key.charAt(0).toUpperCase()}${key.slice(1)}`,
+      de: strAntigo,
+      para: strNovo,
       alterado: strAntigo !== strNovo,
+      sensivel,
     });
   }
 
   return diferencas;
 }
 
-/**
- * @deprecated Use a função `gerarDiferencas` diretamente.
- * Mantido como alias de retrocompatibilidade para consumers existentes.
- */
 export const AuditDiffUtil = { gerarDiferencas };

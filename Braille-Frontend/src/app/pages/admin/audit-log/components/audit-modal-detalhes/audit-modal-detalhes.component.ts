@@ -24,9 +24,7 @@ export class AuditModalDetalhesComponent implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['log'] && this.log) {
-      const oldVal = (this.log.oldValue ?? null) as Record<string, unknown> | null;
-      const newVal = (this.log.newValue ?? null) as Record<string, unknown> | null;
-      this.diferencas = AuditDiffUtil.gerarDiferencas(oldVal, newVal);
+      this.diferencas = AuditDiffUtil.gerarDiferencas(this.log.oldValue, this.log.newValue);
     } else if (changes['log'] && !this.log) {
       this.diferencas = [];
     }

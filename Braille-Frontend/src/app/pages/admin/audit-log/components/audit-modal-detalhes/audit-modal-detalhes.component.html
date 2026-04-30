@@ -47,7 +47,12 @@
                         <tbody>
                             @for (diff of diferencas; track diff.campo) {
                             <tr [class.is-changed]="diff.alterado">
-                                <td class="diff-campo">{{ diff.campo }}</td>
+                                <td class="diff-campo">
+                                    {{ diff.campo }}
+                                    @if (diff.sensivel) {
+                                    <span class="sr-only">, valor sensivel mascarado</span>
+                                    }
+                                </td>
                                 <td class="diff-old" [class.empty]="diff.de === '—'">{{ diff.de }}</td>
                                 <td class="diff-new" [class.empty]="diff.para === '—'">
                                     @if(diff.alterado) {
