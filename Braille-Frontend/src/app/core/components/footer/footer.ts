@@ -2,7 +2,7 @@ import { Component, Input, inject, OnInit } from '@angular/core';
 import { CommonModule, AsyncPipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { SiteConfigService } from '../../services/site-config';
+import { ContatoGlobalConfig, SecoesMap, SiteConfigService } from '../../services/site-config';
 
 @Component({
   selector: 'app-footer',
@@ -18,11 +18,11 @@ export class FooterComponent implements OnInit {
   currentYear = new Date().getFullYear();
 
   private readonly siteConfig = inject(SiteConfigService);
-  contatoConfig$!: Observable<any>;
+  contatoConfig$!: Observable<ContatoGlobalConfig>;
 
   ngOnInit() {
     this.contatoConfig$ = this.siteConfig.secoes$.pipe(
-      map((secoes: Record<string, any>) => secoes['contato_global'] || {})
+      map((secoes: SecoesMap) => secoes['contato_global'] as ContatoGlobalConfig || {})
     );
   }
 }

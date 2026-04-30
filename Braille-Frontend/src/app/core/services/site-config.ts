@@ -9,6 +9,19 @@ export interface SiteConfigMap {
 
 export type SecoesMap = Record<string, Record<string, string>>;
 
+export interface ContatoGlobalConfig {
+  heroDescricaoContato?: string;
+  enderecoCompleto?: string;
+  telefoneCentral?: string;
+  emailOficial?: string;
+  instagram?: string;
+  facebook?: string;
+  youtube?: string;
+  linkedin?: string;
+  footerDireitos?: string;
+  [chave: string]: string | undefined;
+}
+
 @Injectable({
   providedIn: 'root'
 })

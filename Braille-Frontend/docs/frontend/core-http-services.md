@@ -306,7 +306,7 @@ Sem acesso direto. As entidades refletidas indicam tabelas/recursos provaveis no
 * `ComunicadosService.listar` foi migrado para `HttpParams`, evitando concatenacao manual de filtros.
 * `LaudosService`, `ModelosCertificadosService`, `SiteConfigService` e `ApoiadoresService` foram padronizados para rotas relativas `/api`, mantendo interceptacao uniforme.
 * Caches em memoria nao sao compartilhados entre abas e podem mostrar dados defasados ate TTL.
-* Alguns retornos ainda usam `any`, especialmente relatorios e pontos legados; certificados ja possuem contratos compartilhados.
+* Alguns retornos ainda usam `any`, especialmente relatorios e pontos legados; autenticacao, usuarios e certificados ja possuem contratos compartilhados.
 * Upload/delete dependem de comportamento do backend para autorizacao e sanitizacao de arquivo.
 
 ---

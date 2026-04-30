@@ -5,7 +5,7 @@
           <p class="page-eyebrow">Fale Conosco</p>
           <h1 id="contato-titulo" class="page-hero-title">Entre em contato</h1>
           @if (config?.heroDescricaoContato) {
-          <div class="page-hero-desc" [innerHTML]="config.heroDescricaoContato"></div>
+          <div class="page-hero-desc" [innerHTML]="config.heroDescricaoContato | safeHtml"></div>
           } @else {
           <p class="page-hero-desc">
               Preencha o formulário e nossa secretaria entrará em contato com você

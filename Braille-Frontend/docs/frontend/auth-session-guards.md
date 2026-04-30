@@ -184,7 +184,7 @@ Nao acessa diretamente. O impacto no banco ocorre via backend de autenticacao, u
 # 8. Pontos de Atencao
 
 * Tokens em `localStorage` sao vulneraveis a exfiltracao se XSS ocorrer.
-* `AuthService.decodeToken` retorna `{}` em falha; consumidores devem tratar ausencia de campos.
+* `AuthService.decodeToken` retorna `null` em falha e `getUser()` valida os campos minimos do payload antes de expor dados do usuario.
 * `publicPaths` foi revisado para reconhecer caminhos com e sem `/api`, reduzindo acoplamento com a ordem dos interceptadores.
 * Mistura de roles `EDITOR` e `COMUNICACAO` foi corrigida na rota de apoiadores.
 * `StorageService.deleteCloudFile` envia URL via query com `HttpParams`, preservando encoding de caracteres especiais.

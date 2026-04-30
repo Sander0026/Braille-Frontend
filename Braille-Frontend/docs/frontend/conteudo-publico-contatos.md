@@ -196,7 +196,7 @@ Entidades refletidas: site_config, secoes_conteudo, comunicados/noticias e conta
 # 8. Pontos de Atencao
 
 * `ComunicadosService.listar` usa `HttpParams` para pagina, limite, categoria e titulo.
-* Renderizacao de HTML rico exige sanitizacao consistente.
+* Renderizacao de HTML rico em paginas publicas usa `SafeHtmlPipe` para sanitizacao consistente.
 * `aplicarCorPrimaria` normaliza hexadecimal, aplica guarda de documento e calcula canais RGB em ordem correta para escurecimento.
 * Conteudo publico depende da disponibilidade da API; ideal ter fallback local.
 

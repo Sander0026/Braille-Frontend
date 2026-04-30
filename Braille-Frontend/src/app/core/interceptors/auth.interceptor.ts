@@ -1,6 +1,7 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { AuthService } from '../services/auth.service';
+import type { AuthTokens } from '../services/auth.service';
 import { ToastService } from '../services/toast.service';
 import { Router } from '@angular/router';
 import { BehaviorSubject, throwError } from 'rxjs';
@@ -69,7 +70,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               refreshTokenSubject.next(null); // Congela a fila (Image loading, Profile fetch)
               
               return authService.renovarToken().pipe(
-                switchMap((tokenResponse: any) => {
+                switchMap((tokenResponse: AuthTokens) => {
                   isRefreshing = false;
                   refreshTokenSubject.next(tokenResponse.access_token);
                   // Refaz a request que tomou o primeiro Tiro 401 agora com Colete Prova-De-Balas
@@ -102,7 +103,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
 function getRequestPath(url: string): string {
   try {
-    return new URL(url, window.location.origin).pathname;
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+    return new URL(url, origin).pathname;
   } catch {
     return url.split('?')[0];
   }

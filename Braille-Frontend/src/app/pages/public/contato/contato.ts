@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
-import { SiteConfigService } from '../../../core/services/site-config';
+import { ContatoGlobalConfig, SiteConfigService } from '../../../core/services/site-config';
+import { SafeHtmlPipe } from '../../../core/pipes/safe-html.pipe';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 import { PhoneMaskDirective } from '../../../shared/directives/phone-mask.directive';
 import { ContatoService, ContatoPayload } from './contato.service';
@@ -24,7 +25,7 @@ function contatoObrigatorioValidator(control: AbstractControl): ValidationErrors
 @Component({
   selector: 'app-contato',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TabEscapeDirective, PhoneMaskDirective],
+  imports: [CommonModule, ReactiveFormsModule, SafeHtmlPipe, TabEscapeDirective, PhoneMaskDirective],
   templateUrl: './contato.html',
   styleUrl: './contato.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,7 +39,7 @@ export class Contato {
   erroEnvio = signal<string>('');
 
   // Cache e Prevenção de Leak via ShareReplay
-  contatoConfig$: Observable<any>;
+  contatoConfig$: Observable<ContatoGlobalConfig>;
 
   @ViewChild('nomeInput') nomeInput?: ElementRef<HTMLInputElement>;
   private liveAnnouncer = inject(LiveAnnouncer);
@@ -62,7 +63,7 @@ export class Contato {
     );
 
     this.contatoConfig$ = this.siteConfig.secoes$.pipe(
-      map(secoes => secoes['contato_global'] || {}),
+      map(secoes => secoes['contato_global'] as ContatoGlobalConfig || {}),
       shareReplay(1)
     );
   }
