@@ -3,8 +3,12 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { A11yModule, FocusKeyManager } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FrequenciasService } from '../../../../../core/services/frequencias.service';
-import { TurmasService, Turma } from '../../../../../core/services/turmas.service';
+import {
+  FrequenciaRelatorioEstatisticas,
+  FrequenciaRelatorioHistoricoItem,
+  FrequenciasService
+} from '../../../../../core/services/frequencias.service';
+import { AlunoMatriculadoResumo, TurmasService, Turma } from '../../../../../core/services/turmas.service';
 import { TabelaTrFocavelDirective } from '../tabela-tr-focavel.directive';
 
 @Component({
@@ -25,10 +29,16 @@ export class FrequenciaRelatorioComponent implements OnInit, AfterViewInit {
 
   readonly turmaSelecionadaId = signal<string>('');
   readonly alunoSelecionadoId = signal<string>('');
-  readonly alunosRelatorio = signal<any[]>([]);
+  readonly alunosRelatorio = signal<AlunoMatriculadoResumo[]>([]);
 
-  readonly relatorioEstatisticas = signal<any>(null);
-  readonly relatorioHistorico = signal<any[]>([]);
+  readonly relatorioDisponivel = signal<boolean>(false);
+  readonly relatorioEstatisticas = signal<FrequenciaRelatorioEstatisticas>({
+    totalAulas: 0,
+    presentes: 0,
+    faltas: 0,
+    taxaPresenca: 0
+  });
+  readonly relatorioHistorico = signal<FrequenciaRelatorioHistoricoItem[]>([]);
   readonly carregandoRelatorio = signal<boolean>(false);
   readonly erroRelatorio = signal<string>('');
 
@@ -64,7 +74,7 @@ export class FrequenciaRelatorioComponent implements OnInit, AfterViewInit {
   onTurmaRelatorioChange(turmaId: string): void {
     this.turmaSelecionadaId.set(turmaId);
     this.alunoSelecionadoId.set('');
-    this.relatorioEstatisticas.set(null);
+    this.relatorioDisponivel.set(false);
     this.relatorioHistorico.set([]);
     this.alunosRelatorio.set([]);
 
@@ -74,8 +84,10 @@ export class FrequenciaRelatorioComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (turma) => {
-          const m = (turma.matriculasOficina ?? []).map((mb: any) => mb.aluno).filter(Boolean);
-          this.alunosRelatorio.set(m);
+          const alunos = (turma.matriculasOficina ?? [])
+            .map(matricula => matricula.aluno)
+            .filter((aluno): aluno is AlunoMatriculadoResumo => !!aluno);
+          this.alunosRelatorio.set(alunos);
         }
       });
   }
@@ -98,6 +110,7 @@ export class FrequenciaRelatorioComponent implements OnInit, AfterViewInit {
         next: (res) => {
           this.relatorioEstatisticas.set(res.estatisticas);
           this.relatorioHistorico.set(res.historico);
+          this.relatorioDisponivel.set(true);
           this.carregandoRelatorio.set(false);
         },
         error: () => {

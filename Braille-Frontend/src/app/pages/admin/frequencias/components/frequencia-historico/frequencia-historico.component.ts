@@ -38,7 +38,7 @@ export class FrequenciaHistoricoComponent implements OnInit, AfterViewInit {
 
   // Detalhes / Modal
   readonly modalDetalhesAberto = signal<boolean>(false);
-  readonly detalhesResumo = signal<any>(null);
+  readonly detalhesResumo = signal<ResumoFrequencia | null>(null);
   readonly detalhesAlunos = signal<Frequencia[]>([]);
   readonly carregandoDetalhes = signal<boolean>(false);
   private lastFocusBeforeModal: HTMLElement | null = null;
@@ -76,7 +76,7 @@ export class FrequenciaHistoricoComponent implements OnInit, AfterViewInit {
     }
   }
 
-  formatarData(iso: string): string {
+  formatarData(iso: string | null | undefined): string {
     if (!iso) return '—';
     const partes = iso.substring(0, 10).split('-');
     if (partes.length !== 3) return iso;
@@ -127,7 +127,7 @@ export class FrequenciaHistoricoComponent implements OnInit, AfterViewInit {
   }
 
   // ── Modal Histórico com Dialog Semântico ─────────────────────────────────
-  abrirDetalhes(resumo: any): void {
+  abrirDetalhes(resumo: ResumoFrequencia): void {
     this.lastFocusBeforeModal = document.activeElement as HTMLElement;
     this.detalhesResumo.set(resumo);
     this.carregandoDetalhes.set(true);

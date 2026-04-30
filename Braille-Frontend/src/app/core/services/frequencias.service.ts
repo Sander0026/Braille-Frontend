@@ -26,6 +26,24 @@ export interface ResumoFrequencia {
     fechadoEm: string | null;
 }
 
+export interface FrequenciaRelatorioEstatisticas {
+    totalAulas: number;
+    presentes: number;
+    faltas: number;
+    taxaPresenca: number;
+}
+
+export interface FrequenciaRelatorioHistoricoItem {
+    id: string;
+    dataAula: string;
+    presente: boolean;
+}
+
+export interface FrequenciaRelatorioAluno {
+    estatisticas: FrequenciaRelatorioEstatisticas;
+    historico: FrequenciaRelatorioHistoricoItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class FrequenciasService {
     private readonly url = '/api/frequencias';
@@ -66,8 +84,8 @@ export class FrequenciasService {
         return this.http.get<PaginatedResponse<ResumoFrequencia>>(`${this.url}/resumo`, { params });
     }
 
-    obterRelatorioAluno(turmaId: string, alunoId: string): Observable<any> {
-        return this.http.get<any>(`${this.url}/relatorio/turma/${turmaId}/aluno/${alunoId}`);
+    obterRelatorioAluno(turmaId: string, alunoId: string): Observable<FrequenciaRelatorioAluno> {
+        return this.http.get<FrequenciaRelatorioAluno>(`${this.url}/relatorio/turma/${turmaId}/aluno/${alunoId}`);
     }
 
     registrar(dados: { alunoId: string; turmaId: string; dataAula: string; presente: boolean }): Observable<Frequencia> {
@@ -102,13 +120,7 @@ export class FrequenciasService {
         return this.http.post(`${this.url}/diario/reabrir/${turmaId}/${dataAula}`, {});
     }
 
-    getRelatorioAluno(turmaId: string, alunoId: string): Observable<{
-        estatisticas: { totalAulas: number; presentes: number; faltas: number; taxaPresenca: number };
-        historico: any[];
-    }> {
-        return this.http.get<{
-            estatisticas: { totalAulas: number; presentes: number; faltas: number; taxaPresenca: number };
-            historico: any[];
-        }>(`${this.url}/relatorio/turma/${turmaId}/aluno/${alunoId}`);
+    getRelatorioAluno(turmaId: string, alunoId: string): Observable<FrequenciaRelatorioAluno> {
+        return this.obterRelatorioAluno(turmaId, alunoId);
     }
 }

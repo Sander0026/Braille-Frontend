@@ -121,6 +121,9 @@ Turmas e frequencias possuem fluxo operacional frequente. Dividir lista, card, f
 * `CreateTurmaDto`
 * `Frequencia`
 * `ResumoFrequencia`
+* `FrequenciaRelatorioAluno`
+* `FrequenciaRelatorioEstatisticas`
+* `FrequenciaRelatorioHistoricoItem`
 * `PaginatedResponse<T>`
 
 ---
@@ -201,7 +204,7 @@ Nao ha integracao externa direta.
 * Conflitos de concorrencia podem ocorrer se duas pessoas editarem a mesma chamada; backend deve arbitrar.
 * Status e `statusAtivo` coexistem; documentar diferenca operacional para usuarios.
 * `excluido='all'` e `statusAtivo='all'` exigem suporte backend consistente.
-* Relatorios usam `any[]` em historico; tipagem mais forte melhoraria manutencao.
+* Relatorio individual de frequencia possui contrato tipado para estatisticas e historico, reduzindo dependencia de `any[]`.
 
 ---
 
@@ -218,4 +221,3 @@ Nao ha integracao externa direta.
 # 10. Resumo Tecnico Final
 
 Turmas e frequencias possuem criticidade alta para operacao pedagogica. A complexidade e alta por status, matriculas, chamada em lote, relatorios e fechamento de diario. A divisao por servicos e componentes esta adequada. Os riscos principais sao concorrencia operacional, regras de permissao por professor e tipagem incompleta de historicos.
-

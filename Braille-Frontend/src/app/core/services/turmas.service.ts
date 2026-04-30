@@ -11,6 +11,19 @@ export interface GradeHorariaDto {
 
 export type TurmaStatus = 'PREVISTA' | 'ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
 
+export interface AlunoMatriculadoResumo {
+    id: string;
+    nomeCompleto: string;
+    matricula?: string;
+}
+
+export interface MatriculaOficinaResumo {
+    id: string;
+    status: string;
+    dataEntrada: string;
+    aluno: AlunoMatriculadoResumo;
+}
+
 export interface Turma {
     id: string;
     nome: string;
@@ -25,12 +38,7 @@ export interface Turma {
     status: TurmaStatus;         
     professor?: { id: string; nome: string; email: string };
     gradeHoraria?: GradeHorariaDto[];
-    matriculasOficina?: {
-        id: string;
-        status: string;
-        dataEntrada: string;
-        aluno: { id: string; nomeCompleto: string; matricula?: string };
-    }[];
+    matriculasOficina?: MatriculaOficinaResumo[];
     _count?: { matriculasOficina: number };
 }
 
