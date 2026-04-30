@@ -5,11 +5,15 @@ import { FormBuilder, FormGroup, FormControl, Validators, ReactiveFormsModule } 
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { BeneficiariosService, Beneficiario, ReativacaoAluno } from '../../../core/services/beneficiarios.service';
+import { BeneficiariosService, Beneficiario, BeneficiarioPayload, ReativacaoAluno } from '../../../core/services/beneficiarios.service';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 import { formatarCpfCnpj, formatarRg, formatarTelefone, formatarCep } from '../../../shared/utils/masks.util';
+
+type CampoUploadBeneficiario = 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl';
+type ResultadoUploadBeneficiario = { tipo: CampoUploadBeneficiario; url: string };
+type RespostaSalvarBeneficiario = Beneficiario | ReativacaoAluno;
 
 @Component({
   selector: 'app-beneficiary-form',
@@ -39,7 +43,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   // Modal de Reativação de Aluno
   modalReativacao = false;
   dadosReativacao: ReativacaoAluno | null = null;
-  _payloadPendente: Record<string, unknown> | null = null;
+  _payloadPendente: BeneficiarioPayload | null = null;
   elementoFocoAnterior: HTMLElement | null = null;
 
   // Validação CPF/RG em tempo real
@@ -82,7 +86,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     return !!this.cadastroForm?.dirty && !this.isSalvando;
   }
 
-  private aplicarModoEdicao(aluno: any) {
+  private aplicarModoEdicao(aluno: Beneficiario): void {
     const semNumero = this.ehSemNumero(aluno.numero);
 
     this.isModoEdicao = true;
@@ -525,7 +529,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     const limparSinais = (val: string | null | undefined) => val ? val.replaceAll(/\D/g, '') : val;
     const numeroFinal = semNumero ? 'S/N' : enderecoSemFlag.numero;
 
-    const payloadBackend = {
+    const payloadBackend: BeneficiarioPayload = {
       ...formValues.dadosPessoais,
       cpf: limparSinais(formValues.dadosPessoais.cpf),
       rg: formValues.dadosPessoais.rg?.trim(),
@@ -537,14 +541,14 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
       ...formValues.socioeconomico,
     };
 
-    const enumFields = ['tipoDeficiencia', 'causaDeficiencia', 'prefAcessibilidade'];
+    const enumFields: Array<keyof BeneficiarioPayload> = ['tipoDeficiencia', 'causaDeficiencia', 'prefAcessibilidade'];
     for (const field of enumFields) {
       if (payloadBackend[field] === '' || payloadBackend[field] === null) {
         delete payloadBackend[field];
       }
     }
 
-    const optionalStringFields = [
+    const optionalStringFields: Array<keyof BeneficiarioPayload> = [
       'cpf', 'rg',
       'genero', 'estadoCivil', 'corRaca', 'complemento', 'pontoReferencia', 'email',
       'contatoEmergencia', 'idadeOcorrencia', 'tecAssistivas', 'escolaridade',
@@ -602,12 +606,12 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     this.processarUploadsESalvar(payloadBackend);
   }
 
-  private processarUploadsESalvar(payloadBackend: Record<string, unknown>) {
+  private processarUploadsESalvar(payloadBackend: BeneficiarioPayload): void {
     this.isSalvando = true;
     this.mensagemFeedback = '';
     this.anunciarParaLeitorDeTela('Salvando cadastro, por favor aguarde...');
 
-    const uploadTasks: Array<Observable<{ tipo: string; url: string }>> = [];
+    const uploadTasks: Array<Observable<ResultadoUploadBeneficiario>> = [];
     if (this.arquivoFotoSelecionado) {
       uploadTasks.push(this.beneficiariosService.uploadImagem(this.arquivoFotoSelecionado).pipe(map((res) => ({ tipo: 'fotoPerfil', url: res.url }))));
     }
@@ -626,10 +630,10 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
       forkJoin(uploadTasks).subscribe({
         next: (results) => {
           results.forEach((r) => {
-            payloadBackend[r.tipo] = r.url;
+            this.aplicarUrlUpload(payloadBackend, r);
             if (r.tipo === 'termoLgpdUrl') {
-              payloadBackend['termoLgpdAceito'] = true;
-              payloadBackend['termoLgpdAceitoEm'] = new Date().toISOString();
+              payloadBackend.termoLgpdAceito = true;
+              payloadBackend.termoLgpdAceitoEm = new Date().toISOString();
             }
           });
           this.enviarDadosParaBanco(payloadBackend);
@@ -643,16 +647,20 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     }
   }
 
-  private enviarDadosParaBanco(dados: Record<string, unknown>) {
-    const call$: Observable<any> = this.isModoEdicao && this.alunoEmEdicao
+  private aplicarUrlUpload(payload: BeneficiarioPayload, resultado: ResultadoUploadBeneficiario): void {
+    payload[resultado.tipo] = resultado.url;
+  }
+
+  private enviarDadosParaBanco(dados: BeneficiarioPayload): void {
+    const call$: Observable<RespostaSalvarBeneficiario> = this.isModoEdicao && this.alunoEmEdicao
        ? this.beneficiariosService.atualizar(this.alunoEmEdicao.id, dados)
        : this.beneficiariosService.criarBeneficiario(dados);
 
     call$.subscribe({
       next: (resp) => {
-        if (!this.isModoEdicao && '_reativacao' in resp && resp._reativacao) {
+        if (!this.isModoEdicao && this.isReativacaoAluno(resp)) {
           this.isSalvando = false;
-          this.dadosReativacao = resp as ReativacaoAluno;
+          this.dadosReativacao = resp;
           this._payloadPendente = dados;
           this.elementoFocoAnterior = document.activeElement as HTMLElement;
           this.modalReativacao = true;
@@ -684,6 +692,10 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         this.cdr.detectChanges();
       },
     });
+  }
+
+  private isReativacaoAluno(resp: RespostaSalvarBeneficiario): resp is ReativacaoAluno {
+    return '_reativacao' in resp && resp._reativacao;
   }
 
   confirmarReativacao() {

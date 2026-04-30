@@ -23,6 +23,7 @@ export interface Beneficiario {
     bairro?: string;
     cidade?: string;
     uf?: string;
+    pontoReferencia?: string;
     tipoDeficiencia?: string;
     causaDeficiencia?: string;
     idadeOcorrencia?: string;
@@ -52,6 +53,10 @@ export interface Beneficiario {
         turma: { id: string; nome: string; horario?: string; modeloCertificadoId?: string | null; status?: string };
     }[];
 }
+
+export type BeneficiarioPayload = Partial<
+    Omit<Beneficiario, 'id' | 'statusAtivo' | 'criadoEm' | 'matricula' | 'matriculasOficina'>
+>;
 
 export interface PaginatedResponse<T> {
     data: T[];
@@ -149,7 +154,7 @@ export class BeneficiariosService {
         return this.http.get<any>(`${this.url}/check-cpf-rg`, { params });
     }
 
-    atualizar(id: string, dados: Partial<Beneficiario>): Observable<Beneficiario> {
+    atualizar(id: string, dados: BeneficiarioPayload): Observable<Beneficiario> {
         this.limparCache();
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);
     }
@@ -169,7 +174,7 @@ export class BeneficiariosService {
         return this.http.delete(`${this.url}/${id}/hard`);
     }
 
-    criarBeneficiario(dados: Record<string, unknown>): Observable<Beneficiario | ReativacaoAluno> {
+    criarBeneficiario(dados: BeneficiarioPayload): Observable<Beneficiario | ReativacaoAluno> {
         this.limparCache();
         return this.http.post<Beneficiario | ReativacaoAluno>(this.url, dados);
     }

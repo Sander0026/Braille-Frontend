@@ -25,7 +25,7 @@ A lista busca alunos paginados e filtrados. O formulario cria/edita aluno, valid
 * Feature folder por dominio.
 * Reactive Forms para cadastro.
 * Service Layer para API.
-* DTO pattern com `Partial<Beneficiario>` e `Record<string, unknown>`.
+* DTO pattern com `BeneficiarioPayload` para criacao e edicao.
 * Cache TTL em listagem.
 * Guard canDeactivate para formularios sujos.
 * Facade de upload via `StorageService`.
@@ -186,7 +186,7 @@ Entidades inferidas pelo contrato: beneficiarios/alunos, matriculasOficina, turm
 ## Qualidade
 
 * Existe cobertura spec para lista, formulario e detalhes.
-* DTOs tipam campos principais.
+* `BeneficiarioPayload` deriva dos campos editaveis do aluno e evita payload generico no cadastro.
 * Importacao retorna erros por linha/documento/motivo.
 * Cache e limpo apos mutacoes.
 
@@ -215,7 +215,6 @@ Entidades inferidas pelo contrato: beneficiarios/alunos, matriculasOficina, turm
 * Alto numero de campos exige validacao consistente entre frontend e backend.
 * Dados sensiveis de saude/documentos exigem cuidado de exposicao visual e logs.
 * Cache pode mostrar lista defasada caso mutacao ocorra fora do servico.
-* `Record<string, unknown>` no cadastro reduz rigidez de DTO; tipar payload completo melhoraria manutencao.
 
 ---
 
@@ -231,5 +230,4 @@ Entidades inferidas pelo contrato: beneficiarios/alunos, matriculasOficina, turm
 
 # 10. Resumo Tecnico Final
 
-O modulo de beneficiarios e um dos mais criticos do sistema, pois concentra dados pessoais, documentos, consentimento LGPD e relacao com turmas/frequencias/certificados. A complexidade e alta. A arquitetura com servico dedicado, cache, guard de descarte e upload separado e apropriada, mas recomenda-se fortalecer tipagem do payload completo e revisar politicas de exposicao de dados sensiveis.
-
+O modulo de beneficiarios e um dos mais criticos do sistema, pois concentra dados pessoais, documentos, consentimento LGPD e relacao com turmas/frequencias/certificados. A complexidade e alta. A arquitetura com servico dedicado, cache, guard de descarte, payload tipado e upload separado e apropriada, mantendo como principal cuidado a revisao continua das politicas de exposicao de dados sensiveis.
