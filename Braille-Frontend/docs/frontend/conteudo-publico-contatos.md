@@ -164,7 +164,7 @@ Entidades refletidas: site_config, secoes_conteudo, comunicados/noticias e conta
 ## Seguranca
 
 * Admin de conteudo exige roles `ADMIN` ou `COMUNICACAO`.
-* Contatos admin exigem roles conforme rota.
+* Contatos admin exigem roles `ADMIN`, `SECRETARIA` ou `COMUNICACAO`, alinhadas ao backend e ao menu lateral.
 * Sanitizacao/strip de HTML reduz risco em previews.
 * Conteudo rico deve ser sanitizado antes de renderizar.
 * Formulario publico nao recebe token por regra de interceptor.

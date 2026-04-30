@@ -143,7 +143,7 @@ Nao ha integracao externa direta.
 
 # 8. Pontos de Atencao
 
-* Garantir que acoes rapidas sejam ocultadas ou tratadas conforme role para evitar clique em rota bloqueada.
+* Acoes rapidas estao alinhadas com as permissoes conhecidas das rotas; o desalinhamento encontrado em contatos foi corrigido na propria rota.
 * O cache pode exibir dados antigos ate 5 minutos se nenhuma mutacao limpar.
 * O dashboard depende do backend para agregacoes corretas.
 
@@ -161,4 +161,3 @@ Nao ha integracao externa direta.
 # 10. Resumo Tecnico Final
 
 O dashboard tem criticidade media-alta por orientar a operacao administrativa. A complexidade e media, com foco em leitura agregada e navegacao. A arquitetura com servico cacheado e componentes apresentacionais e adequada. Riscos principais: cache defasado e acoes rapidas desalinhadas com roles.
-

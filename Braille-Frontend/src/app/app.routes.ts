@@ -137,7 +137,7 @@ export const routes: Routes = [
         path: 'contatos',
         loadComponent: () => import('./pages/admin/contatos/contatos-lista/contatos-lista').then(m => m.ContatosLista),
         title: 'Fale Conosco — ILBES',
-        data: { roles: ['ADMIN', 'SECRETARIA'] }
+        data: { roles: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] }
       },
 
       // Usuários
