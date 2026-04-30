@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
@@ -13,6 +14,7 @@ export type SecoesMap = Record<string, Record<string, string>>;
 })
 export class SiteConfigService {
   private http = inject(HttpClient);
+  private document = inject(DOCUMENT);
   private apiUrl = '/api';
 
   // ── Estado reativo: configs gerais (cor, logo…) ───────────
@@ -101,24 +103,37 @@ export class SiteConfigService {
   /**
    * Aplica a cor primária diretamente nas variáveis CSS do Root.
    */
-  public aplicarCorPrimaria(corHex?: string) {
+  public aplicarCorPrimaria(corHex?: string): void {
     if (!corHex) return;
+    const rootElement = this.document?.documentElement;
+    if (!rootElement) return;
 
-    document.documentElement.style.setProperty('--color-primary', corHex);
+    rootElement.style.setProperty('--color-primary', corHex);
+    rootElement.style.setProperty('--color-primary-dark', this.escurecerCorHex(corHex, 20));
+  }
 
-    const darkenHex = (hex: string, amount: number) => {
-      let color = hex.replace('#', '');
-      if (color.length === 3) color = color.split('').map(c => c + c).join('');
-      let num = parseInt(color, 16);
-      let r = (num >> 16) - amount;
-      let b = ((num >> 8) & 0x00FF) - amount;
-      let g = (num & 0x0000FF) - amount;
-      r = Math.max(Math.min(255, r), 0);
-      b = Math.max(Math.min(255, b), 0);
-      g = Math.max(Math.min(255, g), 0);
-      return `#${(g | (b << 8) | (r << 16)).toString(16).padStart(6, '0')}`;
-    };
+  private escurecerCorHex(hex: string, amount: number): string {
+    const color = this.normalizarHex(hex);
+    if (!color) return hex;
 
-    document.documentElement.style.setProperty('--color-primary-dark', darkenHex(corHex, 20));
+    const num = parseInt(color, 16);
+    const r = this.limitarCanal(((num >> 16) & 0xff) - amount);
+    const g = this.limitarCanal(((num >> 8) & 0xff) - amount);
+    const b = this.limitarCanal((num & 0xff) - amount);
+
+    return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
+  }
+
+  private normalizarHex(hex: string): string | null {
+    let color = hex.trim().replace('#', '');
+    if (color.length === 3) {
+      color = color.split('').map(c => c + c).join('');
+    }
+
+    return /^[0-9a-fA-F]{6}$/.test(color) ? color : null;
+  }
+
+  private limitarCanal(valor: number): number {
+    return Math.max(Math.min(255, valor), 0);
   }
 }

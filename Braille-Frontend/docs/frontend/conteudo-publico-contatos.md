@@ -197,7 +197,7 @@ Entidades refletidas: site_config, secoes_conteudo, comunicados/noticias e conta
 
 * `ComunicadosService.listar` usa `HttpParams` para pagina, limite, categoria e titulo.
 * Renderizacao de HTML rico exige sanitizacao consistente.
-* `aplicarCorPrimaria` contem calculo de canais com nomes `r`, `b`, `g`; revisar para garantir escurecimento correto.
+* `aplicarCorPrimaria` normaliza hexadecimal, aplica guarda de documento e calcula canais RGB em ordem correta para escurecimento.
 * Conteudo publico depende da disponibilidade da API; ideal ter fallback local.
 
 ---

@@ -1,5 +1,5 @@
 import { Injectable, signal, computed, inject, NgZone } from '@angular/core';
-import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { AriaLivePoliteness, LiveAnnouncer } from '@angular/cdk/a11y';
 
 export type ToastTipo = 'sucesso' | 'erro' | 'aviso' | 'info';
 
@@ -11,8 +11,8 @@ export interface Toast {
 
 @Injectable({ providedIn: 'root' })
 export class ToastService {
-    private ngZone = inject(NgZone);
-    private liveAnnouncer = inject(LiveAnnouncer);
+    private readonly ngZone = inject(NgZone);
+    private readonly liveAnnouncer = inject(LiveAnnouncer);
     private _toasts = signal<Toast[]>([]);
     readonly toasts = computed(() => this._toasts());
 
@@ -20,6 +20,7 @@ export class ToastService {
 
     mostrar(mensagem: string, tipo: ToastTipo = 'sucesso', duracaoMs = 6000): void {
         const id = ++this.nextId;
+        this.anunciarMensagem(mensagem, tipo);
 
         // Isola completamente do Change Detection do Angular (Zone.js)
         this.ngZone.runOutsideAngular(() => {
@@ -40,5 +41,20 @@ export class ToastService {
         this.ngZone.runOutsideAngular(() => {
             this._toasts.update(lista => lista.filter(t => t.id !== id));
         });
+    }
+
+    private anunciarMensagem(mensagem: string, tipo: ToastTipo): void {
+        const politeness: AriaLivePoliteness = tipo === 'erro' ? 'assertive' : 'polite';
+        const prefixo = this.labelTipo(tipo);
+        this.liveAnnouncer.announce(`${prefixo}: ${mensagem}`, politeness);
+    }
+
+    private labelTipo(tipo: ToastTipo): string {
+        switch (tipo) {
+            case 'sucesso': return 'Sucesso';
+            case 'erro': return 'Erro';
+            case 'aviso': return 'Aviso';
+            case 'info': return 'Informacao';
+        }
     }
 }

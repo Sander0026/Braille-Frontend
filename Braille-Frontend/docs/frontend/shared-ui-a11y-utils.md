@@ -192,11 +192,11 @@ Nao acessa banco. Utilitarios formatam dados vindos da API.
 
 # 8. Pontos de Atencao
 
-* `ToastService` injeta `LiveAnnouncer`, mas a implementacao atual nao anuncia diretamente as mensagens; verificar template do toast.
+* `ToastService` anuncia mensagens via `LiveAnnouncer`, usando `assertive` para erros e `polite` para demais avisos.
 * `UiModal` usa SVG inline para icone de fechar; poderia padronizar com biblioteca de icones se houver.
 * `SafeUrlPipe` confia URLs relativas/http/https; validar origem quando PDFs vierem de terceiros.
 * `PhoneMaskDirective` depende de `NgControl`; uso fora de form control pode falhar.
-* Manipulacao direta de `document`/`window` exige guardas em qualquer SSR futuro.
+* Manipulacao direta de `document`/`window` deve continuar recebendo guardas em qualquer ponto novo com possibilidade de SSR.
 
 ---
 
@@ -213,4 +213,3 @@ Nao acessa banco. Utilitarios formatam dados vindos da API.
 # 10. Resumo Tecnico Final
 
 O modulo compartilhado e transversal e de criticidade alta para consistencia, acessibilidade e seguranca visual. A complexidade e media porque reune muitos pequenos blocos reutilizaveis. A base e boa: standalone components, signals, OnPush, CDK A11y, pipes puros e utilitarios testaveis. Os principais cuidados sao origem de URLs confiaveis, suporte futuro a SSR e alinhamento do feedback audivel.
-

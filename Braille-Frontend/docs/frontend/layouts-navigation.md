@@ -192,7 +192,7 @@ Nao possui integracao externa direta; usa recursos globais de Sentry, PWA e API 
 
 * O filtro visual de `navItems` nao substitui `roleGuard`; ambos devem permanecer alinhados. A rota de contatos foi ajustada para acompanhar o menu e o backend.
 * `window.innerWidth` torna layout dependente de browser; SSR exigiria guarda.
-* Divergencia entre roles da rota de apoiadores e roles do menu pode gerar experiencia inconsistente.
+* Divergencia entre roles da rota de apoiadores e roles do menu foi corrigida; manter revisao conjunta ao criar novas rotas.
 * `setTimeout` em `fecharModal` e aceitavel para aguardar DOM, mas poderia evoluir para `afterNextRender`.
 
 ---

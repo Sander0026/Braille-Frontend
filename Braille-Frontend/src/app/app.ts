@@ -33,7 +33,9 @@ export class App {
         filter(evt => evt.type === 'VERSION_READY'),
         takeUntilDestroyed()
       ).subscribe(() => {
-        window.location.reload();
+        if (typeof window !== 'undefined') {
+          window.location.reload();
+        }
       });
     }
 
@@ -46,6 +48,7 @@ export class App {
       // afterNextRender aguarda o ciclo de renderização antes de mover o foco.
       // Substitui setTimeout(fn, 100) frágil — padrão Angular 17+ oficial.
       afterNextRender(() => {
+        if (typeof document === 'undefined') return;
         const h1 = document.querySelector<HTMLHeadingElement>('h1');
         if (h1) {
           h1.setAttribute('tabindex', '-1');

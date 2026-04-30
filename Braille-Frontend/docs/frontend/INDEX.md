@@ -112,5 +112,5 @@ Toda chamada `HttpClient` passa por `apiInterceptor`, `authInterceptor` e `error
 * `AuthService` persiste tokens em `localStorage`, o que simplifica sessao SPA, mas aumenta exposicao em caso de XSS.
 * Servicos internos criticos foram padronizados para `/api`, deixando o `apiInterceptor` resolver a URL base.
 * `ComunicadosService.listar` usa `HttpParams`, mantendo encoding consistente dos filtros.
-* `SiteConfigService.aplicarCorPrimaria` manipula `document` diretamente; o uso atual e browser-only na pratica, mas exigiria guarda se SSR fosse habilitado.
+* `SiteConfigService.aplicarCorPrimaria` usa guarda de documento e calcula corretamente a variavel escurecida da cor primaria.
 * Existem comentarios com caracteres mojibake em alguns arquivos, indicando divergencia de encoding anterior.

@@ -4,6 +4,8 @@ import { Observable, shareReplay } from 'rxjs';
 import { PaginatedResponse } from './beneficiarios.service';
 import { StorageService } from './storage.service';
 
+export type UsuarioRole = 'ADMIN' | 'SECRETARIA' | 'PROFESSOR' | 'COMUNICACAO';
+
 export interface Usuario {
     id: string;
     nome: string;
@@ -11,7 +13,7 @@ export interface Usuario {
     email?: string;
     cpf?: string;
     matricula?: string;
-    role: 'ADMIN' | 'SECRETARIA' | 'PROFESSOR' | 'COMUNICACAO';
+    role: UsuarioRole;
     fotoPerfil?: string | null;
     precisaTrocarSenha?: boolean;
     statusAtivo?: boolean;
@@ -53,7 +55,7 @@ export interface CreateUsuarioResponse extends Usuario {
 export interface CreateUsuarioDto {
     nome: string;
     cpf: string;
-    role?: string;
+    role?: UsuarioRole;
     email?: string;
     telefone?: string;
     cep?: string;
@@ -80,7 +82,7 @@ export class UsuariosService {
 
     limparCache(): void { this.cache.clear(); }
 
-    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean, role?: string): string {
+    private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean, role?: UsuarioRole): string {
         return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${role ?? ''}`;
     }
 
@@ -90,7 +92,7 @@ export class UsuariosService {
         return this.http.get<any>(`${this.url}/check-cpf`, { params });
     }
 
-    listar(page = 1, limit = 10, nome?: string, inativos = false, role?: string): Observable<PaginatedResponse<Usuario>> {
+    listar(page = 1, limit = 10, nome?: string, inativos = false, role?: UsuarioRole): Observable<PaginatedResponse<Usuario>> {
         const key = this.buildCacheKey(page, limit, nome, inativos, role);
         const now = Date.now();
 

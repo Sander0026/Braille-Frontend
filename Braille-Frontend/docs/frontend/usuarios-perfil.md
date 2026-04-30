@@ -200,7 +200,7 @@ Entidade refletida: usuarios administrativos com papeis, status, credenciais, pe
 * Credenciais geradas devem ser exibidas com cuidado para nao vazar em logs ou screenshots.
 * Role `COMUNICACAO` deve estar sincronizada com rotas.
 * Hard delete de usuarios pode afetar auditoria/historico se backend nao preservar referencias.
-* `role?: string` em `CreateUsuarioDto` poderia ser tipado com union de roles.
+* `CreateUsuarioDto.role` usa union compartilhada `UsuarioRole`, reduzindo envio de papeis invalidos pelo frontend.
 
 ---
 
@@ -217,4 +217,3 @@ Entidade refletida: usuarios administrativos com papeis, status, credenciais, pe
 # 10. Resumo Tecnico Final
 
 Usuarios e perfil formam modulo de criticidade alta por controlar acesso e identidade. A complexidade e media-alta, com cache, wizard, credenciais, roles e perfil logado. A arquitetura e adequada, mas recomenda-se reforcar tipagem de roles e cuidado operacional com exibicao de credenciais.
-
