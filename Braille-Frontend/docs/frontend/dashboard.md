@@ -136,7 +136,7 @@ Nao ha integracao externa direta.
 
 * Dashboard deve ser tela inicial do admin.
 * Indicadores refletem somente contagens agregadas.
-* Atualizacoes de beneficiarios limpam cache do dashboard para refletir dados relevantes.
+* Atualizacoes de beneficiarios, turmas, usuarios e comunicados limpam cache do dashboard para refletir dados relevantes.
 * Acoes rapidas devem respeitar permissao real da rota, mesmo que aparecam visualmente.
 
 ---
@@ -144,7 +144,7 @@ Nao ha integracao externa direta.
 # 8. Pontos de Atencao
 
 * Acoes rapidas estao alinhadas com as permissoes conhecidas das rotas; o desalinhamento encontrado em contatos foi corrigido na propria rota.
-* O cache pode exibir dados antigos ate 5 minutos se nenhuma mutacao limpar.
+* O cache pode exibir dados antigos ate 5 minutos apenas quando a alteracao relevante ocorre fora dos servicos frontend que invalidam o dashboard.
 * O dashboard depende do backend para agregacoes corretas.
 
 ---
@@ -153,7 +153,7 @@ Nao ha integracao externa direta.
 
 * Consome `DashboardService`.
 * E alvo de redirecionamento do `roleGuard` quando acesso e negado.
-* Recebe invalidacao indireta de `BeneficiariosService`.
+* Recebe invalidacao indireta de `BeneficiariosService`, `TurmasService`, `UsuariosService` e `ComunicadosService`.
 * Navega para dominios de alunos, turmas, frequencias, conteudo e usuarios.
 
 ---

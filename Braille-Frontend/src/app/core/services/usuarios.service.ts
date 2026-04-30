@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { PaginatedResponse } from './beneficiarios.service';
+import { DashboardService } from './dashboard.service';
 import { StorageService } from './storage.service';
 
 export type UsuarioRole = 'ADMIN' | 'SECRETARIA' | 'PROFESSOR' | 'COMUNICACAO';
@@ -77,10 +78,14 @@ export class UsuariosService {
 
     constructor(
         private readonly http: HttpClient,
+        private readonly dashboardService: DashboardService,
         private readonly storage: StorageService
     ) { }
 
-    limparCache(): void { this.cache.clear(); }
+    limparCache(): void {
+        this.cache.clear();
+        this.dashboardService.limparCache();
+    }
 
     private buildCacheKey(page: number, limit: number, nome?: string, inativos?: boolean, role?: UsuarioRole): string {
         return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${role ?? ''}`;

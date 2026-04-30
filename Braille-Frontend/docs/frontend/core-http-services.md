@@ -305,7 +305,7 @@ Sem acesso direto. As entidades refletidas indicam tabelas/recursos provaveis no
 
 * `ComunicadosService.listar` foi migrado para `HttpParams`, evitando concatenacao manual de filtros.
 * `LaudosService`, `ModelosCertificadosService`, `SiteConfigService` e `ApoiadoresService` foram padronizados para rotas relativas `/api`, mantendo interceptacao uniforme.
-* Caches em memoria nao sao compartilhados entre abas e podem mostrar dados defasados ate TTL.
+* Caches em memoria nao sao compartilhados entre abas; dashboard e invalidado por mutacoes de alunos, turmas, usuarios e comunicados dentro dos servicos frontend.
 * Alguns retornos ainda usam `any` em pontos legados; autenticacao, usuarios, certificados e relatorio individual de frequencia ja possuem contratos compartilhados.
 * Upload/delete dependem de comportamento do backend para autorizacao e sanitizacao de arquivo.
 

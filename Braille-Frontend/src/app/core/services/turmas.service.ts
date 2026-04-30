@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { PaginatedResponse } from './beneficiarios.service';
+import { DashboardService } from './dashboard.service';
 
 export interface GradeHorariaDto {
     dia: 'SEG' | 'TER' | 'QUA' | 'QUI' | 'SEX' | 'SAB' | 'DOM';
@@ -59,7 +60,10 @@ export interface CreateTurmaDto {
 export class TurmasService {
     private readonly url = '/api/turmas';
 
-    constructor(private readonly http: HttpClient) { }
+    constructor(
+        private readonly http: HttpClient,
+        private readonly dashboardService: DashboardService
+    ) { }
 
     listar(page = 1, limit = 10, nome?: string, statusAtivo?: boolean | 'all', professorId?: string, status?: string, excluido?: boolean | 'all'): Observable<PaginatedResponse<Turma>> {
         let params = new HttpParams()
@@ -101,14 +105,17 @@ export class TurmasService {
     }
 
     criar(dados: CreateTurmaDto): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.post<Turma>(this.url, dados);
     }
 
     atualizar(id: string, dados: Partial<CreateTurmaDto>): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.patch<Turma>(`${this.url}/${id}`, dados);
     }
 
     arquivar(id: string): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.delete<Turma>(`${this.url}/${id}`);
     }
 
@@ -117,30 +124,37 @@ export class TurmasService {
     }
 
     restaurar(id: string): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.patch<Turma>(`${this.url}/${id}/restaurar`, {});
     }
 
     ocultarDaAba(id: string): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.patch<Turma>(`${this.url}/${id}/ocultar`, {});
     }
 
     matricularAluno(turmaId: string, alunoId: string): Observable<any> {
+        this.dashboardService.limparCache();
         return this.http.post(`${this.url}/${turmaId}/alunos/${alunoId}`, {});
     }
 
     desmatricularAluno(turmaId: string, alunoId: string): Observable<any> {
+        this.dashboardService.limparCache();
         return this.http.delete(`${this.url}/${turmaId}/alunos/${alunoId}`);
     }
 
     mudarStatus(id: string, status: TurmaStatus): Observable<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }> {
+        this.dashboardService.limparCache();
         return this.http.patch<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }>(`${this.url}/${id}/status`, { status });
     }
 
     cancelar(id: string): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.patch<Turma>(`${this.url}/${id}/cancelar`, {});
     }
 
     concluir(id: string): Observable<Turma> {
+        this.dashboardService.limparCache();
         return this.http.patch<Turma>(`${this.url}/${id}/concluir`, {});
     }
 }

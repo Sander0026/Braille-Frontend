@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { DashboardService } from './dashboard.service';
 
 export interface Comunicado {
     id: string;
@@ -35,7 +36,10 @@ export interface ComunicadoPayload {
 export class ComunicadosService {
     private readonly url = '/api/comunicados';
 
-    constructor(private http: HttpClient) { }
+    constructor(
+        private readonly http: HttpClient,
+        private readonly dashboardService: DashboardService
+    ) { }
 
     listar(page = 1, limit = 50, categoria?: string, titulo?: string): Observable<ComunicadoResponse | Comunicado[]> {
         let params = new HttpParams()
@@ -49,6 +53,7 @@ export class ComunicadosService {
     }
 
     criar(dados: ComunicadoPayload): Observable<Comunicado> {
+        this.dashboardService.limparCache();
         return this.http.post<Comunicado>(this.url, dados);
     }
 
@@ -57,10 +62,12 @@ export class ComunicadosService {
     }
 
     atualizar(id: string, dados: Partial<ComunicadoPayload>): Observable<Comunicado> {
+        this.dashboardService.limparCache();
         return this.http.patch<Comunicado>(`${this.url}/${id}`, dados);
     }
 
     excluir(id: string): Observable<void> {
+        this.dashboardService.limparCache();
         return this.http.delete<void>(`${this.url}/${id}`);
     }
 }
