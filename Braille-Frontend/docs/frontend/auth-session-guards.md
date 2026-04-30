@@ -185,9 +185,9 @@ Nao acessa diretamente. O impacto no banco ocorre via backend de autenticacao, u
 
 * Tokens em `localStorage` sao vulneraveis a exfiltracao se XSS ocorrer.
 * `AuthService.decodeToken` retorna `{}` em falha; consumidores devem tratar ausencia de campos.
-* `publicPaths` contem `/auth/login`, mas o frontend chama `/api/auth/login`; a regra funciona pelo sufixo apos `apiInterceptor`, porem deve ser revisada se URLs mudarem.
-* Mistura de roles `EDITOR` e `COMUNICACAO` deve ser corrigida.
-* `StorageService.deleteCloudFile` envia URL via query; caracteres especiais dependem de encoding correto por `HttpParams`.
+* `publicPaths` foi revisado para reconhecer caminhos com e sem `/api`, reduzindo acoplamento com a ordem dos interceptadores.
+* Mistura de roles `EDITOR` e `COMUNICACAO` foi corrigida na rota de apoiadores.
+* `StorageService.deleteCloudFile` envia URL via query com `HttpParams`, preservando encoding de caracteres especiais.
 
 ---
 
@@ -204,4 +204,3 @@ Nao acessa diretamente. O impacto no banco ocorre via backend de autenticacao, u
 # 10. Resumo Tecnico Final
 
 O modulo de autenticacao e autorizacao e de criticidade alta. Ele controla acesso administrativo, sessao JWT, renovacao automatica, RBAC e feedback acessivel de erros. A complexidade e alta por concorrencia no refresh e pelo acoplamento com navegacao. Os riscos centrais sao persistencia em `localStorage`, divergencia de roles e necessidade de garantir sanitizacao forte em todo conteudo renderizado.
-

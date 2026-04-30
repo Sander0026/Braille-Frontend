@@ -303,10 +303,10 @@ Sem acesso direto. As entidades refletidas indicam tabelas/recursos provaveis no
 
 # 8. Pontos de Atencao
 
-* `ComunicadosService.listar` usa concatenacao manual para `categoria`; recomenda-se `HttpParams`.
-* `LaudosService`, `ModelosCertificadosService`, `SiteConfigService` e `ApoiadoresService` usam `environment.apiUrl` direto; padronizar com `/api` facilitaria interceptacao uniforme.
+* `ComunicadosService.listar` foi migrado para `HttpParams`, evitando concatenacao manual de filtros.
+* `LaudosService`, `ModelosCertificadosService`, `SiteConfigService` e `ApoiadoresService` foram padronizados para rotas relativas `/api`, mantendo interceptacao uniforme.
 * Caches em memoria nao sao compartilhados entre abas e podem mostrar dados defasados ate TTL.
-* Alguns retornos usam `any`, especialmente certificados e relatorios; reforcar tipos reduziria bugs.
+* Alguns retornos ainda usam `any`, especialmente relatorios e pontos legados; certificados ja possuem contratos compartilhados.
 * Upload/delete dependem de comportamento do backend para autorizacao e sanitizacao de arquivo.
 
 ---
@@ -324,4 +324,3 @@ Sem acesso direto. As entidades refletidas indicam tabelas/recursos provaveis no
 # 10. Resumo Tecnico Final
 
 Este modulo e de criticidade alta porque concentra toda comunicacao com backend. A complexidade e alta pela quantidade de recursos, cache, uploads e variacoes de resposta. A arquitetura e adequada para Angular, com servicos tipados e cache local, mas deve evoluir para padronizacao de URLs, eliminacao de `any` e consistencia de `HttpParams` em todos os endpoints.
-

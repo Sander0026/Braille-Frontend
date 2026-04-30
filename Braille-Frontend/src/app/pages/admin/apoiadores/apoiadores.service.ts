@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, tap } from 'rxjs';
-import { environment } from '../../../../environments/environment';
 import {
   CertificadoEmitido,
   EmitirCertificadoApoiadorPayload,
@@ -56,7 +55,7 @@ export interface PaginatedResult<T> {
   providedIn: 'root'
 })
 export class ApoiadoresService {
-  private readonly apiUrl = `${environment.apiUrl}/apoiadores`;
+  private readonly apiUrl = '/api/apoiadores';
 
   private cacheLista: { [key: string]: PaginatedResult<Apoiador> } = {};
   private cachePublicos: Apoiador[] | null = null;

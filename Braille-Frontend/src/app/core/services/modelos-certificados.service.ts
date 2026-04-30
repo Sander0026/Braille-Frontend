@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import {
   CertificadoLayoutConfig,
   TesteGeracaoCertificadoPayload,
@@ -30,8 +29,8 @@ export interface ModeloCertificado {
 })
 export class ModelosCertificadosService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/modelos-certificados`;
-  private certificadosUrl = `${environment.apiUrl}/certificados`;
+  private apiUrl = '/api/modelos-certificados';
+  private certificadosUrl = '/api/certificados';
 
   listar(): Observable<ModeloCertificado[]> {
     return this.http.get<ModeloCertificado[]>(this.apiUrl);

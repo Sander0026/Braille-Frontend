@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 
 export interface LaudoMedico {
   id: string;
@@ -25,7 +24,7 @@ export interface CriarLaudoDto {
   providedIn: 'root'
 })
 export class LaudosService {
-  private readonly apiUrl = `${environment.apiUrl}`;
+  private readonly apiUrl = '/api';
 
   constructor(private readonly http: HttpClient) {}
 

@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PaginatedResponse } from './beneficiarios.service';
 
 export interface Comunicado {
     id: string;
@@ -24,6 +23,14 @@ export interface ComunicadoResponse {
     }
 }
 
+export interface ComunicadoPayload {
+    titulo: string;
+    conteudo: string;
+    categoria: string;
+    fixado: boolean;
+    imagemCapa?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ComunicadosService {
     private readonly url = '/api/comunicados';
@@ -31,13 +38,17 @@ export class ComunicadosService {
     constructor(private http: HttpClient) { }
 
     listar(page = 1, limit = 50, categoria?: string, titulo?: string): Observable<ComunicadoResponse | Comunicado[]> {
-        let qs = `?page=${page}&limit=${limit}`;
-        if (categoria) qs += `&categoria=${categoria}`;
-        if (titulo) qs += `&titulo=${encodeURIComponent(titulo)}`;
-        return this.http.get<ComunicadoResponse | Comunicado[]>(`${this.url}${qs}`);
+        let params = new HttpParams()
+            .set('page', page)
+            .set('limit', limit);
+
+        if (categoria) params = params.set('categoria', categoria);
+        if (titulo) params = params.set('titulo', titulo);
+
+        return this.http.get<ComunicadoResponse | Comunicado[]>(this.url, { params });
     }
 
-    criar(dados: Record<string, any>): Observable<Comunicado> {
+    criar(dados: ComunicadoPayload): Observable<Comunicado> {
         return this.http.post<Comunicado>(this.url, dados);
     }
 
@@ -45,11 +56,11 @@ export class ComunicadosService {
         return this.http.get<Comunicado>(`${this.url}/${id}`);
     }
 
-    atualizar(id: string, dados: Record<string, any>): Observable<Comunicado> {
+    atualizar(id: string, dados: Partial<ComunicadoPayload>): Observable<Comunicado> {
         return this.http.patch<Comunicado>(`${this.url}/${id}`, dados);
     }
 
-    excluir(id: string): Observable<any> {
-        return this.http.delete(`${this.url}/${id}`);
+    excluir(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.url}/${id}`);
     }
 }

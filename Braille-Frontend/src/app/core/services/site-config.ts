@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
 
 export interface SiteConfigMap {
   [chave: string]: string;
@@ -14,7 +13,7 @@ export type SecoesMap = Record<string, Record<string, string>>;
 })
 export class SiteConfigService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  private apiUrl = '/api';
 
   // ── Estado reativo: configs gerais (cor, logo…) ───────────
   private configsSubject = new BehaviorSubject<SiteConfigMap>({});

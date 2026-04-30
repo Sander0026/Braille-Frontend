@@ -108,10 +108,9 @@ Toda chamada `HttpClient` passa por `apiInterceptor`, `authInterceptor` e `error
 
 # 5. Pontos Globais de Atencao
 
-* `app.routes.ts` usa `EDITOR` na rota de apoiadores, enquanto os modelos e layout usam `COMUNICACAO`; isso pode bloquear acesso esperado a usuarios de comunicacao.
+* `app.routes.ts` foi alinhado para usar `COMUNICACAO` na rota de apoiadores, junto de `ADMIN` e `SECRETARIA`.
 * `AuthService` persiste tokens em `localStorage`, o que simplifica sessao SPA, mas aumenta exposicao em caso de XSS.
-* `LaudosService` e `ModelosCertificadosService` usam `environment.apiUrl` diretamente, enquanto outros servicos usam `/api` e dependem do `apiInterceptor`; a mistura funciona, mas reduz uniformidade.
-* `ComunicadosService.listar` monta query string manualmente; `HttpParams` seria mais consistente e seguro para todos os parametros.
+* Servicos internos criticos foram padronizados para `/api`, deixando o `apiInterceptor` resolver a URL base.
+* `ComunicadosService.listar` usa `HttpParams`, mantendo encoding consistente dos filtros.
 * `SiteConfigService.aplicarCorPrimaria` manipula `document` diretamente; o uso atual e browser-only na pratica, mas exigiria guarda se SSR fosse habilitado.
 * Existem comentarios com caracteres mojibake em alguns arquivos, indicando divergencia de encoding anterior.
-

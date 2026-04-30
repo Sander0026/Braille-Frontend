@@ -195,7 +195,7 @@ Entidades refletidas: site_config, secoes_conteudo, comunicados/noticias e conta
 
 # 8. Pontos de Atencao
 
-* `ComunicadosService.listar` deve migrar para `HttpParams` para categoria/titulo.
+* `ComunicadosService.listar` usa `HttpParams` para pagina, limite, categoria e titulo.
 * Renderizacao de HTML rico exige sanitizacao consistente.
 * `aplicarCorPrimaria` contem calculo de canais com nomes `r`, `b`, `g`; revisar para garantir escurecimento correto.
 * Conteudo publico depende da disponibilidade da API; ideal ter fallback local.
@@ -215,4 +215,3 @@ Entidades refletidas: site_config, secoes_conteudo, comunicados/noticias e conta
 # 10. Resumo Tecnico Final
 
 O modulo de conteudo publico e contatos tem criticidade media-alta por afetar imagem institucional, comunicacao externa e entrada de mensagens. A complexidade e media, com estado reativo e CMS leve. O principal risco e seguranca de HTML rico; manter sanitizacao, validacao backend e controle de roles e essencial.
-

@@ -24,8 +24,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const token = authService.getToken();
 
   // Rotas públicas mapeadas rigorosamente que não admitem Tokens na Criação/Registro
-  const publicPaths = ['/auth/login', '/inscricoes', '/contatos'];
-  const isPublicUrl = publicPaths.some(path => req.url.endsWith(path) || req.url.includes(path));
+  const publicPaths = ['/auth/login', '/api/auth/login', '/inscricoes', '/api/inscricoes', '/contatos', '/api/contatos'];
+  const requestPath = getRequestPath(req.url);
+  const isPublicUrl = publicPaths.some(path => requestPath === path || requestPath.endsWith(path));
   const isPublicPost = isPublicUrl && req.method === 'POST';
 
   let novoReq = req;
@@ -98,3 +99,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     })
   );
 };
+
+function getRequestPath(url: string): string {
+  try {
+    return new URL(url, window.location.origin).pathname;
+  } catch {
+    return url.split('?')[0];
+  }
+}

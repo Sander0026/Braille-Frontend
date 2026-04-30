@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ComunicadosService, Comunicado } from '../../../../../core/services/comunicados.service';
+import { ComunicadosService, Comunicado, ComunicadoPayload } from '../../../../../core/services/comunicados.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { QuillModule } from 'ngx-quill';
 import { BaseFormDescarte } from '../../../../../shared/classes/base-form-descarte';
@@ -176,7 +176,7 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
         imagemCapaUrl = ed.imagemCapa;
       }
 
-      const payload: Record<string, any> = {
+      const payload: ComunicadoPayload = {
         titulo: this.form.value.titulo,
         conteudo: this.form.value.conteudo,
         categoria: this.form.value.categoria,
@@ -184,7 +184,7 @@ export class ComunicadosLista extends BaseFormDescarte implements OnInit {
       };
       
       if (imagemCapaUrl !== undefined) {
-        payload['imagemCapa'] = imagemCapaUrl;
+        payload.imagemCapa = imagemCapaUrl;
       }
 
       if (ed) {
