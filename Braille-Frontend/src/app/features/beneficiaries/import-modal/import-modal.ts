@@ -55,9 +55,9 @@ export class ImportModalComponent {
     }
 
     selecionarArquivo(file: File): void {
-        const extensoesPermitidas = /\.(xlsx|xls|csv)$/i;
-        if (!extensoesPermitidas.test(file.name)) {
-            this.erro = 'Tipo de arquivo não permitido. Envie um arquivo .xlsx ou .csv.';
+        const extensaoPermitida = /\.xlsx$/i;
+        if (!extensaoPermitida.test(file.name)) {
+            this.erro = 'Tipo de arquivo não permitido. Envie a planilha modelo no formato .xlsx.';
             this.arquivoSelecionado = null;
             this.cdr.markForCheck();
             return;
