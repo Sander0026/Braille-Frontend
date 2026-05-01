@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray, AbstractControl, ValidationErrors } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { MasksUtil } from '../../../../../shared/utils/masks.util';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
@@ -81,8 +81,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
       }),
       visualVisibilidade: this.fb.group({
         exibirNoSite: [false],
-        consentimentoPublicacao: [false]
-      }, { validators: this.validarConsentimentoPublicacao }),
+      }),
       gerenciamento: this.fb.group({
         observacoes: ['']
       }),
@@ -100,7 +99,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     this.salvando = false;
     this.apoiadorForm.reset({
       informacoesPrincipais: { tipo: 'EMPRESA' },
-      visualVisibilidade: { exibirNoSite: false, consentimentoPublicacao: false },
+      visualVisibilidade: { exibirNoSite: false },
       ativo: true
     });
     this.acoesFormArray.clear();
@@ -129,7 +128,6 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
       },
       visualVisibilidade: {
         exibirNoSite: res.exibirNoSite,
-        consentimentoPublicacao: res.exibirNoSite
       },
       gerenciamento: { observacoes: res.observacoes },
       ativo: res.ativo
@@ -239,24 +237,6 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     return !!(control && control.invalid && control.touched);
   }
 
-  isConsentimentoPublicacaoInvalido(): boolean {
-    const grupo = this.apoiadorForm.get('visualVisibilidade');
-    const control = this.apoiadorForm.get('visualVisibilidade.consentimentoPublicacao');
-    return !!(grupo?.hasError('consentimentoPublicacaoObrigatorio') && (control?.touched || grupo.touched));
-  }
-
-  onExibirNoSiteChanged(): void {
-    const exibirNoSite = this.apoiadorForm.get('visualVisibilidade.exibirNoSite')?.value === true;
-    const consentimento = this.apoiadorForm.get('visualVisibilidade.consentimentoPublicacao');
-
-    if (!exibirNoSite) {
-      consentimento?.setValue(false);
-      consentimento?.markAsUntouched();
-    }
-
-    this.apoiadorForm.get('visualVisibilidade')?.updateValueAndValidity();
-  }
-
   onLogoSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
@@ -324,8 +304,6 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
       atividadeEspecialidade: formData.contatoEndereco.atividadeEspecialidade || undefined,
       observacoes: formData.gerenciamento.observacoes || undefined,
       exibirNoSite: formData.visualVisibilidade.exibirNoSite,
-      // Persiste o consentimento de publicacao para rastreabilidade no backend
-      consentimentoPublicacao: formData.visualVisibilidade.consentimentoPublicacao ?? false,
       ativo: formData.ativo,
       acoes: (!this.modoEdicao && formData.acoes?.length) ? formData.acoes : undefined
     };
@@ -377,12 +355,4 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     this.formClosed.emit();
   }
 
-  private validarConsentimentoPublicacao(group: AbstractControl): ValidationErrors | null {
-    const exibirNoSite = group.get('exibirNoSite')?.value === true;
-    const consentimento = group.get('consentimentoPublicacao')?.value === true;
-
-    if (!exibirNoSite || consentimento) return null;
-
-    return { consentimentoPublicacaoObrigatorio: true };
-  }
 }
