@@ -36,7 +36,7 @@
     <article class="comunicado-card card">
         @if (c.imagemCapa) {
         <div class="card-img-wrapper">
-            <img [src]="c.imagemCapa" alt="Capa do comunicado" class="card-img" loading="lazy" />
+            <img [src]="c.imagemCapa" [attr.alt]="'Imagem de capa do comunicado: ' + c.titulo" class="card-img" loading="lazy" />
         </div>
         }
         <div class="card-body">

@@ -43,6 +43,7 @@ export class NoticiasLista implements OnInit {
   // ── Estado reativo ───────────────────────────────────────────────────────────
   comunicados          = signal<Comunicado[]>([]);
   carregando           = signal<boolean>(true);
+  erroCarregamento     = signal<boolean>(false);
   categoriaSelecionada = signal<string | null>(null);
   busca                = signal<string>('');
   paginaAtual          = signal<number>(1);
@@ -70,6 +71,7 @@ export class NoticiasLista implements OnInit {
       this.paginaAtual.set(1);
       this.comunicados.set([]);
       this.carregando.set(true);
+      this.erroCarregamento.set(false);
     }
 
     const cat  = this.categoriaSelecionada() ?? undefined;
@@ -105,9 +107,13 @@ export class NoticiasLista implements OnInit {
           }
         },
         error: () => {
-          // Silencia o erro de rede para não travar o UI público (DevSecOps: sem stack-trace exposto)
+          // Silencia stack-trace no console (DevSecOps) — exibe fallback visual ao usuário
           this.carregando.set(false);
-          this.liveAnnouncer.announce('Erro ao carregar os comunicados.', 'assertive');
+          this.erroCarregamento.set(true);
+          this.liveAnnouncer.announce(
+            'Não foi possível carregar os comunicados. Por favor, tente novamente.',
+            'assertive'
+          );
         },
       });
   }

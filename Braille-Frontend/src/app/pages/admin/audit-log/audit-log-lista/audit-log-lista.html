@@ -42,14 +42,14 @@
 
 <!-- ══ ESTADOS ══ -->
 @if (isLoading) {
-<div class="loading-state">
-    <div class="spinner"></div>
+<div class="loading-state" role="status" aria-live="polite" aria-busy="true" aria-label="Carregando registros de auditoria">
+    <div class="spinner" aria-hidden="true"></div>
     <p>Carregando logs...</p>
 </div>
 } @else if (erro) {
-<div class="error-banner">{{ erro }}</div>
+<div class="error-banner" role="alert" aria-live="assertive">{{ erro }}</div>
 } @else if (logs.length === 0) {
-<div class="empty-state">
+<div class="empty-state" role="status" aria-live="polite">
     <p>Nenhum log encontrado para os filtros aplicados.</p>
 </div>
 } @else {

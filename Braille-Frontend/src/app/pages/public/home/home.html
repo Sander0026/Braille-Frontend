@@ -169,7 +169,7 @@
     </div>
 </section>
 
-@if (carregandoNoticias() || ultimasNoticias().length > 0) {
+@if (carregandoNoticias() || ultimasNoticias().length > 0 || erroNoticias()) {
 <!-- ══════════ ÚLTIMAS NOTÍCIAS ══════════ -->
 <section class="section-noticias" aria-labelledby="noticias-titulo">
     <div class="section-inner">
@@ -195,6 +195,17 @@
             </div>
             }
         </div>
+        } @else if (erroNoticias()) {
+        <!-- FALLBACK: API de notícias indisponível -->
+        <div role="alert" aria-live="assertive" style="text-align: center; padding: 2rem 1rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 2.5rem; color: var(--text-muted, #9ca3af);">wifi_off</span>
+            <p style="margin-top: 0.75rem; color: var(--text-muted, #6b7280);">As últimas notícias não puderam ser carregadas.</p>
+            <a routerLink="/noticias" style="display: inline-block; margin-top: 0.75rem;"
+               aria-label="Ir para a página de notícias para tentar carregar o conteúdo">
+                Ver todas as notícias
+                <span class="material-symbols-rounded" aria-hidden="true" style="vertical-align: middle;">arrow_forward</span>
+            </a>
+        </div>
         } @else if (ultimasNoticias().length > 0) {
         <div class="grid-noticias" role="list">
             @for (item of ultimasNoticias(); track item.id) {
@@ -202,7 +213,7 @@
                 [class.delay-200]="$index === 2" role="listitem">
                 <figure class="card-noticia-img">
                     @if (item.imagemCapa) {
-                    <img [src]="item.imagemCapa | cloudinary" alt="{{ item.titulo }}" loading="lazy" />
+                    <img [src]="item.imagemCapa | cloudinary" [attr.alt]="'Imagem ilustrativa da notícia: ' + item.titulo" loading="lazy" />
                     } @else {
                     <div class="placeholder"><span class="material-symbols-rounded">article</span></div>
                     }
@@ -234,7 +245,7 @@
 </section>
 }
 
-@if (carregandoParceiros() || parceiros().length > 0) {
+@if (carregandoParceiros() || parceiros().length > 0 || erroParceiros()) {
 <!-- ══════════ APOIADORES E PARCEIROS ══════════ -->
 <section class="parceiros" aria-labelledby="parceiros-titulo">
     <div class="section-inner">
@@ -250,6 +261,14 @@
                 <div class="skeleton" style="width: 100px; height: 100px; border-radius: 50%;"></div>
             </div>
             }
+        </div>
+        } @else if (erroParceiros()) {
+        <!-- FALLBACK: API de parceiros indisponível — seção visível mas com aviso discreto -->
+        <div role="status" aria-live="polite" style="text-align: center; padding: 1.5rem;
+             color: var(--text-muted, #9ca3af); font-size: 0.875rem;">
+            <span class="material-symbols-rounded" aria-hidden="true"
+                  style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">business</span>
+            Informações de parceiros temporariamente indisponíveis.
         </div>
         } @else {
         <div class="parceiros-grid" role="list">

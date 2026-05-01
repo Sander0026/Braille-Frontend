@@ -67,11 +67,11 @@ export class SiteConfigService {
   /**
    * Atualiza configs gerais no banco e recarrega o estado.
    */
-  salvarConfigs(configs: { chave: string, valor: string }[]): Observable<any> {
+  salvarConfigs(configs: { chave: string, valor: string }[]): Observable<SiteConfigMap> {
     const body: Record<string, string> = {};
     configs.forEach(c => body[c.chave] = c.valor);
     // Sem tap de refresh — o componente faz o refresh após a UI atualizar
-    return this.http.patch(`${this.apiUrl}/site-config`, body);
+    return this.http.patch<SiteConfigMap>(`${this.apiUrl}/site-config`, body);
   }
 
   // ──────────────────────────────────────────────────────────
@@ -102,11 +102,11 @@ export class SiteConfigService {
   /**
    * Atualiza o conteúdo de uma seção no banco e recarrega o estado.
    */
-  salvarSecao(secao: string, conteudo: { chave: string, valor: string }[]): Observable<any> {
+  salvarSecao(secao: string, conteudo: { chave: string, valor: string }[]): Observable<Record<string, string>> {
     const body: Record<string, string> = {};
     conteudo.forEach(c => body[c.chave] = c.valor);
     // Sem tap de refresh — o componente faz o refresh após a UI atualizar
-    return this.http.patch(`${this.apiUrl}/site-config/secoes/${secao}`, body);
+    return this.http.patch<Record<string, string>>(`${this.apiUrl}/site-config/secoes/${secao}`, body);
   }
 
   // ──────────────────────────────────────────────────────────

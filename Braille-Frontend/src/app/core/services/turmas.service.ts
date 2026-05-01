@@ -25,6 +25,20 @@ export interface MatriculaOficinaResumo {
     aluno: AlunoMatriculadoResumo;
 }
 
+/**
+ * Representa uma turma/oficina do Instituto Luiz Braille.
+ *
+ * ## Diferenca entre `status` e `statusAtivo`
+ *
+ * | Campo        | Tipo          | Semantica                                                                 |
+ * |--------------|---------------|---------------------------------------------------------------------------|
+ * | `status`     | `TurmaStatus` | Progresso pedagogico: PREVISTA -> ANDAMENTO -> CONCLUIDA -> CANCELADA.   |
+ * | `statusAtivo`| `boolean`     | Visibilidade administrativa: true = aba Ativas; false = Arquivadas.      |
+ * | `excluido`   | `boolean`     | Soft-delete: true = oculto de todas as abas. Historico preservado.       |
+ *
+ * Uma turma pode ter status='CONCLUIDA' e statusAtivo=true simultaneamente.
+ * Os dois campos sao INDEPENDENTES entre si.
+ */
 export interface Turma {
     id: string;
     nome: string;

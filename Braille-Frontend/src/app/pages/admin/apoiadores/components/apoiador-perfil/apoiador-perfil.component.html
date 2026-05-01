@@ -18,7 +18,7 @@
                 <div class="avatar-wrapper profile-avatar">
                     @if (apoiador.logoUrl) {
                     <img [src]="apoiador.logoUrl"
-                        alt="Logo de {{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}"
+                        [attr.alt]="'Logo de ' + (apoiador.nomeFantasia || apoiador.nomeRazaoSocial)"
                         loading="lazy" class="profile-logo" [class.opacity-50]="carregandoLogoInline" />
                     } @else {
                     <span class="material-symbols-rounded" style="font-size: 3.5rem; color: #9ca3af;"

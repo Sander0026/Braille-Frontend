@@ -16,7 +16,7 @@ export class SafeUrlPipe implements PipeTransform {
       return this.sanitizer.bypassSecurityTrustResourceUrl(urlLimpa);
     }
 
-    console.warn(`[SafeUrlPipe] URL de recurso nao permitida bloqueada: ${url}`);
+    console.warn('[SafeUrlPipe] URL de recurso nao permitida bloqueada. Verifique o valor passado ao pipe safeUrl.');
     return this.sanitizer.bypassSecurityTrustResourceUrl('');
   }
 }

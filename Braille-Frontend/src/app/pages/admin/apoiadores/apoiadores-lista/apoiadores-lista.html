@@ -148,20 +148,24 @@
                         <td data-label="Gerenciar" class="text-center">
                             <div class="action-buttons">
                                 <button class="btn btn-icon btn-sm btn-light" (click)="abrirDados(ap)"
-                                    title="Visualizar Ficha" aria-label="Visualizar Ficha">
+                                    [title]="'Visualizar ficha de ' + (ap.nomeFantasia || ap.nomeRazaoSocial)"
+                                    [attr.aria-label]="'Visualizar ficha de ' + (ap.nomeFantasia || ap.nomeRazaoSocial)">
                                     <span class="material-symbols-rounded" aria-hidden="true">visibility</span>
                                 </button>
                                 <button class="btn btn-icon btn-sm btn-light" (click)="editarApoiador(ap.id!)"
-                                    title="Editar" aria-label="Editar">
+                                    [title]="'Editar apoiador ' + (ap.nomeFantasia || ap.nomeRazaoSocial)"
+                                    [attr.aria-label]="'Editar apoiador ' + (ap.nomeFantasia || ap.nomeRazaoSocial)">
                                     <span class="material-symbols-rounded text-primary" aria-hidden="true">edit</span>
                                 </button>
                                 <div class="action-divider"></div>
                                 <button class="btn btn-icon btn-sm btn-light" (click)="abrirAcoes(ap.id!)"
-                                    title="CRM/Histórico" aria-label="Consultar Histórico de CRM">
+                                    [title]="'Histórico de CRM de ' + (ap.nomeFantasia || ap.nomeRazaoSocial)"
+                                    [attr.aria-label]="'Consultar histórico de CRM de ' + (ap.nomeFantasia || ap.nomeRazaoSocial)">
                                     <span class="material-symbols-rounded text-info" aria-hidden="true">history</span>
                                 </button>
                                 <button class="btn btn-icon btn-sm btn-light" (click)="abrirCertificados(ap.id!)"
-                                    title="Certificados e Honrarias" aria-label="Certificados e Honrarias">
+                                    [title]="'Certificados e honrarias de ' + (ap.nomeFantasia || ap.nomeRazaoSocial)"
+                                    [attr.aria-label]="'Certificados e honrarias de ' + (ap.nomeFantasia || ap.nomeRazaoSocial)">
                                     <span class="material-symbols-rounded text-success"
                                         aria-hidden="true">workspace_premium</span>
                                 </button>

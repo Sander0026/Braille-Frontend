@@ -98,26 +98,26 @@ export class FrequenciasService {
         return this.http.patch<Frequencia>(`${this.url}/${id}`, dados);
     }
 
-    salvarLote(turmaId: string, dataAula: string, alunos: { alunoId: string; presente: boolean, frequenciaId?: string }[]): Observable<any> {
+    salvarLote(turmaId: string, dataAula: string, alunos: { alunoId: string; presente: boolean, frequenciaId?: string }[]): Observable<{ results: Frequencia[] }> {
         this.limparCache();
-        return this.http.post<any>(`${this.url}/lote`, { turmaId, dataAula, alunos });
+        return this.http.post<{ results: Frequencia[] }>(`${this.url}/lote`, { turmaId, dataAula, alunos });
     }
 
-    excluir(id: string): Observable<any> {
+    excluir(id: string): Observable<{ message: string }> {
         this.limparCache();
-        return this.http.delete(`${this.url}/${id}`);
+        return this.http.delete<{ message: string }>(`${this.url}/${id}`);
     }
 
     // ── Diário ──────────────────────────────────────────────────────────────
 
-    fecharDiario(turmaId: string, dataAula: string): Observable<any> {
+    fecharDiario(turmaId: string, dataAula: string): Observable<{ message: string; diarioFechado: boolean }> {
         this.limparCache();
-        return this.http.post(`${this.url}/diario/fechar/${turmaId}/${dataAula}`, {});
+        return this.http.post<{ message: string; diarioFechado: boolean }>(`${this.url}/diario/fechar/${turmaId}/${dataAula}`, {});
     }
 
-    reabrirDiario(turmaId: string, dataAula: string): Observable<any> {
+    reabrirDiario(turmaId: string, dataAula: string): Observable<{ message: string; diarioFechado: boolean }> {
         this.limparCache();
-        return this.http.post(`${this.url}/diario/reabrir/${turmaId}/${dataAula}`, {});
+        return this.http.post<{ message: string; diarioFechado: boolean }>(`${this.url}/diario/reabrir/${turmaId}/${dataAula}`, {});
     }
 
     getRelatorioAluno(turmaId: string, alunoId: string): Observable<FrequenciaRelatorioAluno> {

@@ -93,8 +93,8 @@ export class AuthService {
     return this.isUserInfo(payload) ? payload : null;
   }
 
-  trocarSenha(senhaAtual: string, novaSenha: string): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/trocar-senha`, { senhaAtual, novaSenha });
+  trocarSenha(senhaAtual: string, novaSenha: string): Observable<{ message: string }> {
+    return this.http.patch<{ message: string }>(`${this.apiUrl}/trocar-senha`, { senhaAtual, novaSenha });
   }
 
   getMe(): Observable<PerfilUsuario> {
@@ -105,8 +105,8 @@ export class AuthService {
     );
   }
 
-  atualizarFoto(fotoPerfil: string | null): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/foto-perfil`, { fotoPerfil });
+  atualizarFoto(fotoPerfil: string | null): Observable<{ message: string }> {
+    return this.http.patch<{ message: string }>(`${this.apiUrl}/foto-perfil`, { fotoPerfil });
   }
 
   atualizarPerfil(dados: { nome?: string; email?: string }): Observable<PerfilUsuario> {

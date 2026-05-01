@@ -324,6 +324,8 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
       atividadeEspecialidade: formData.contatoEndereco.atividadeEspecialidade || undefined,
       observacoes: formData.gerenciamento.observacoes || undefined,
       exibirNoSite: formData.visualVisibilidade.exibirNoSite,
+      // Persiste o consentimento de publicacao para rastreabilidade no backend
+      consentimentoPublicacao: formData.visualVisibilidade.consentimentoPublicacao ?? false,
       ativo: formData.ativo,
       acoes: (!this.modoEdicao && formData.acoes?.length) ? formData.acoes : undefined
     };

@@ -40,6 +40,8 @@ export interface Apoiador {
   observacoes?: string;
   logoUrl?: string;
   exibirNoSite: boolean;
+  /** Registro de consentimento de publicacao no site — enviado pelo wizard para rastreabilidade. */
+  consentimentoPublicacao?: boolean;
   ativo: boolean;
   criadoEm: string;
   atualizadoEm: string;

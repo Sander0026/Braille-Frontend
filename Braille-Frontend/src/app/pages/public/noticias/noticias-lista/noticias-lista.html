@@ -63,6 +63,21 @@
             </div>
             }
         </div>
+        } @else if (erroCarregamento()) {
+        <!-- FALLBACK: API indisponível — exibe banner acessível com botão de retentativa -->
+        <div class="empty-state" role="alert" aria-live="assertive" style="grid-column: 1 / -1; padding: 3rem 1rem;">
+            <span class="material-symbols-rounded erro-icon" aria-hidden="true">wifi_off</span>
+            <p>Não foi possível carregar os comunicados no momento.</p>
+            <p style="font-size: 0.875rem; color: var(--text-muted, #6b7280); margin-top: 0.25rem;">
+                Verifique sua conexão ou tente novamente em instantes.
+            </p>
+            <button type="button" class="btn-outline" style="margin-top: 1rem;"
+                    (click)="carregarComunicados(true)"
+                    aria-label="Tentar carregar os comunicados novamente">
+                <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+                Tentar novamente
+            </button>
+        </div>
         } @else {
         
         <div class="grid-cards">

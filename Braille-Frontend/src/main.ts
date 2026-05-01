@@ -17,13 +17,39 @@ if (environment.sentryDsn) {
     environment: environment.sentryEnv,
     integrations: [
       Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration(),
+      // maskAllText: mascara TODOS os textos nos replays (evita captura de senha/credenciais geradas)
+      // blockAllMedia: bloqueia imagens nos replays (evita capturar dados visuais sensíveis)
+      Sentry.replayIntegration({
+        maskAllText: true,
+        blockAllMedia: true,
+      }),
     ],
-    tracesSampleRate: 1,
-    tracePropagationTargets: ['localhost', /^https:\/\/braille-api-oieq\.onrender\.com\/api/],
+    // 20% das traces — suficiente para métricas sem expor 100% dos requests autenticados
+    tracesSampleRate: 0.2,
+    tracePropagationTargets: ['localhost', /^\/https:\/\/braille-api-oieq\.onrender\.com\/api/],
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1,
+    // Remove headers sensíveis antes de enviar eventos ao Sentry
+    beforeSend(event) {
+      const SENSITIVE_HEADERS = ['authorization', 'cookie', 'x-api-key', 'set-cookie'];
+      if (event.request?.headers) {
+        SENSITIVE_HEADERS.forEach((header) => {
+          if (event.request!.headers![header]) {
+            event.request!.headers![header] = '[Filtered]';
+          }
+        });
+      }
+      return event;
+    },
   });
+} else if (!isDevMode()) {
+  // ⚠️  ATENÇÃO: Sentry não configurado em produção!
+  // Configure a variável SENTRY_DSN no painel do Render/Vercel e injete em environment.prod.ts
+  // Sem isso, erros críticos em produção não serão monitorados.
+  console.warn(
+    '[Sentry] DSN não configurado em produção. Monitoramento de erros DESATIVADO.\n' +
+    'Ação necessária: defina sentryDsn em environment.prod.ts antes do próximo deploy.'
+  );
 }
 
 bootstrapApplication(App, appConfig)

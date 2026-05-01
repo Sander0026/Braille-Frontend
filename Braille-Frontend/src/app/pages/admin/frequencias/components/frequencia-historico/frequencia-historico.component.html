@@ -17,7 +17,7 @@
 </section>
 
 @if (carregandoHistorico()) {
-<div class="loading-state" aria-busy="true" aria-label="Carregando histórico">
+<div class="loading-state" role="status" aria-live="polite" aria-busy="true" aria-label="Carregando histórico de frequências">
     <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 3rem;">sync</span>
     <p>Carregando histórico...</p>
 </div>
@@ -96,7 +96,7 @@
         </div>
         <div class="modal-body">
             @if (carregandoDetalhes()) {
-            <div class="loading-state empty-state--sm" aria-busy="true">
+            <div class="loading-state empty-state--sm" role="status" aria-live="polite" aria-busy="true" aria-label="Carregando lista de alunos da chamada">
                 <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
                 <p>Buscando lista de alunos...</p>
             </div>
