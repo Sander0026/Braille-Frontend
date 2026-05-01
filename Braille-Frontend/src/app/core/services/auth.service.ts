@@ -4,12 +4,18 @@ import { Observable, tap, map } from 'rxjs';
 import { StorageService } from './storage.service';
 import type { UsuarioRole } from './usuarios.service';
 
+/**
+ * Payload decodificado do JWT de acesso.
+ * ATENÇÃO: o backend (NestJS) envia `nome` como campo de exibição, NÃO `username`.
+ * Campos reais no JWT: sub, nome, role, precisaTrocarSenha, sid, iat, exp.
+ * Ref: braille-api → JwtStrategy → validate()
+ */
 export interface UserInfo {
   sub: string;
-  username: string;
-  nome?: string;
+  nome: string;
   role: UsuarioRole;
   precisaTrocarSenha?: boolean;
+  sid?: string;
 }
 
 interface AuthTokenPayload extends UserInfo {
@@ -146,9 +152,12 @@ export class AuthService {
   }
 
   private isUserInfo(payload: AuthTokenPayload | null): payload is AuthTokenPayload {
+    // Valida apenas os campos que o backend realmente envia no JWT.
+    // REMOVIDO: typeof payload.username === 'string' — JWT envia 'nome', não 'username'.
+    // Isso causava getUser() === null em todo login, bloqueando o roleGuard silenciosamente.
     return !!payload
       && typeof payload.sub === 'string'
-      && typeof payload.username === 'string'
+      && typeof payload.nome === 'string'
       && this.isUsuarioRole(payload.role);
   }
 

@@ -273,7 +273,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   }
 
   private atualizarDisplayUser(): void {
-    this.nomeDisplay = this.perfil?.nome ?? this.usuario?.nome ?? this.usuario?.username ?? 'Usuário';
+    this.nomeDisplay = this.perfil?.nome ?? this.usuario?.nome ?? 'Usuário';
     this.iniciaisDisplay = this.nomeDisplay.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase();
   }
 
