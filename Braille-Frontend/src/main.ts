@@ -5,6 +5,11 @@ import { appConfig } from './app/app.config';
 import { App } from './app/app';
 import { environment } from './environments/environment';
 
+type AxeNodeResult = {
+  target: Array<string | string[]>;
+  failureSummary?: string;
+};
+
 // Inicializa o Sentry apenas se o DSN estiver configurado (evita erros em ambientes sem chave)
 if (environment.sentryDsn) {
   Sentry.init({
@@ -28,18 +33,19 @@ bootstrapApplication(App, appConfig)
       import('axe-core').then((axe) => {
 
         /** Exibe os detalhes de um nó de violação no console — extraído p/ reduzir nesting (SonarQube) */
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const logViolationNode = (node: any): void => {
+        const logViolationNode = (node: AxeNodeResult): void => {
           const targetPath = node.target[0];
           const selectorString = Array.isArray(targetPath)
             ? targetPath.join(' ')
             : String(targetPath);
 
           let domElement: Element | null = null;
-          try {
-            domElement = document.querySelector(selectorString);
-          } catch (selectorErr) {
-            console.warn(`[A11Y Axe] Seletor inválido ignorado: "${selectorString}"`, selectorErr);
+          if (typeof document !== 'undefined') {
+            try {
+              domElement = document.querySelector(selectorString);
+            } catch (selectorErr) {
+              console.warn(`[A11Y Axe] Seletor inválido ignorado: "${selectorString}"`, selectorErr);
+            }
           }
 
           let angularComponent = 'N/A';

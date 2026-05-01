@@ -195,6 +195,7 @@ Entidade refletida: `audit_log`, contendo snapshots antigos/novos, autor e metad
 
 * DiferenÃ§as de auditoria mascaram campos sensiveis como CPF, RG, telefone, e-mail, documentos, senhas e tokens.
 * `oldValue`/`newValue` como `unknown` passam por guards antes de gerar diferencas visiveis.
+* Auditoria Axe em desenvolvimento usa helper tipado e protege consulta ao `document` antes de localizar o elemento violado.
 * Cobertura Cypress parece focada em alguns fluxos; ampliar para certificados, contatos, turmas e frequencias.
 * Sentry esta desativado enquanto DSN estiver vazio.
 * O output de axe em desenvolvimento nao substitui gating de CI.
