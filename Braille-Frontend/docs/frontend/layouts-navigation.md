@@ -191,9 +191,9 @@ Nao possui integracao externa direta; usa recursos globais de Sentry, PWA e API 
 # 8. Pontos de Atencao
 
 * O filtro visual de `navItems` nao substitui `roleGuard`; ambos devem permanecer alinhados. A rota de contatos foi ajustada para acompanhar o menu e o backend.
-* `window.innerWidth` torna layout dependente de browser; SSR exigiria guarda.
+* Leitura de viewport e foco no `AdminLayout` possui guarda de browser para reduzir risco em SSR/prerender.
 * Divergencia entre roles da rota de apoiadores e roles do menu foi corrigida; manter revisao conjunta ao criar novas rotas.
-* `setTimeout` em `fecharModal` e aceitavel para aguardar DOM, mas poderia evoluir para `afterNextRender`.
+* Fechamento de modal usa `afterNextRender` para devolver foco ao elemento acionador apos o DOM estabilizar.
 
 ---
 

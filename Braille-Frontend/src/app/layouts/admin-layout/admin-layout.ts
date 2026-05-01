@@ -1,6 +1,17 @@
-import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  HostListener,
+  ChangeDetectorRef,
+  ChangeDetectionStrategy,
+  Injector,
+  PLATFORM_ID,
+  afterNextRender,
+  inject
+} from '@angular/core';
 import { RouterOutlet, Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { A11yModule } from '@angular/cdk/a11y';
 import { AuthService, UserInfo, PerfilUsuario } from '../../core/services/auth.service';
 import { Subject, takeUntil } from 'rxjs';
@@ -59,6 +70,8 @@ export class AdminLayout implements OnInit, OnDestroy {
   lastFocusBeforeModal: HTMLElement | null = null;
 
   private readonly destroy$ = new Subject<void>();
+  private readonly injector = inject(Injector);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
 
   readonly navItems: NavItem[] = [
     { rota: '/admin/dashboard', label: 'Dashboard', icon: 'dashboard', aria: 'Ir para Dashboard' },
@@ -132,7 +145,7 @@ export class AdminLayout implements OnInit, OnDestroy {
   // ── Sidebar ─────────────────────────────────────────
   private updateMobileState(): void {
     const wasMobile = this.isMobile;
-    this.isMobile = window.innerWidth <= 768;
+    this.isMobile = this.getViewportWidth() <= 768;
 
     if (!wasMobile && this.isMobile) {
       if (this.sidebarState === 'full') this.sidebarState = 'icons';
@@ -176,7 +189,7 @@ export class AdminLayout implements OnInit, OnDestroy {
     // Se pularmos direto do Modal Perfil para o Modal Foto, NÃO sobreescrevemos a âncora original (Botão do Header).
     // Caso contrário, ao fechar a Foto, o foco tentaria ir para um botão do Perfil que já não existe mais no DOM.
     if (this.modalAtivo === 'none') {
-      this.lastFocusBeforeModal = document.activeElement as HTMLElement;
+      this.lastFocusBeforeModal = this.getActiveElement();
     }
     this.modalAtivo = modal;
     this.cdr.markForCheck();
@@ -186,7 +199,32 @@ export class AdminLayout implements OnInit, OnDestroy {
     this.modalAtivo = 'none';
     this.cdr.markForCheck();
     // Devolve o foco à âncora raiz de forma segura após o DOM desmanchar os Modais
-    setTimeout(() => this.lastFocusBeforeModal?.focus(), 0);
+    this.restaurarFocoAposFecharModal();
+  }
+
+  private getViewportWidth(): number {
+    return this.isBrowser ? window.innerWidth : 1024;
+  }
+
+  private getActiveElement(): HTMLElement | null {
+    if (!this.isBrowser || !(document.activeElement instanceof HTMLElement)) {
+      return null;
+    }
+
+    return document.activeElement;
+  }
+
+  private restaurarFocoAposFecharModal(): void {
+    const target = this.lastFocusBeforeModal;
+    if (!this.isBrowser || !target) {
+      return;
+    }
+
+    afterNextRender(() => {
+      if (document.contains(target)) {
+        target.focus();
+      }
+    }, { injector: this.injector });
   }
 
   onFotoAtualizada(url: string | null): void {
