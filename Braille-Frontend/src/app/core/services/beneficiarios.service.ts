@@ -74,6 +74,11 @@ export interface ReativacaoAluno {
     message: string;
 }
 
+export type CheckCpfRgBeneficiarioResponse =
+    | { status: 'livre' }
+    | { status: 'ativo'; id: string; nomeCompleto: string; matricula: string | null }
+    | { status: 'inativo'; id: string; nomeCompleto: string; matricula: string | null; excluido: boolean };
+
 
 @Injectable({ providedIn: 'root' })
 export class BeneficiariosService {
@@ -93,12 +98,12 @@ export class BeneficiariosService {
         this.dashboardService.limparCache();
     }
 
-    private buildCacheKey(page: number, limit: number, busca?: string, inativos?: boolean, filtros?: Record<string, any>): string {
+    private buildCacheKey(page: number, limit: number, busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): string {
         const filtrosStr = filtros ? JSON.stringify(filtros) : '';
         return `${page}|${limit}|${busca ?? ''}|${inativos ?? false}|${filtrosStr}`;
     }
 
-    listar(page = 1, limit = 10, busca?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<PaginatedResponse<Beneficiario>> {
+    listar(page = 1, limit = 10, busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<PaginatedResponse<Beneficiario>> {
         const key = this.buildCacheKey(page, limit, busca, inativos, filtros);
         const now = Date.now();
 
@@ -125,7 +130,7 @@ export class BeneficiariosService {
         return req$;
     }
 
-    exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, any>): Observable<ArrayBuffer> {
+    exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {
         let params = new HttpParams();
         if (busca) params = params.set('busca', busca);
         if (inativos) params = params.set('inativos', 'true');
@@ -143,15 +148,11 @@ export class BeneficiariosService {
         return this.http.get<Beneficiario>(`${this.url}/${id}`);
     }
 
-    checkCpfRg(cpf?: string, rg?: string): Observable<
-        | { status: 'livre' }
-        | { status: 'ativo'; id: string; nomeCompleto: string; matricula: string | null }
-        | { status: 'inativo'; id: string; nomeCompleto: string; matricula: string | null; excluido: boolean }
-    > {
+    checkCpfRg(cpf?: string, rg?: string): Observable<CheckCpfRgBeneficiarioResponse> {
         let params = new HttpParams();
         if (cpf) params = params.set('cpf', cpf);
         if (rg) params = params.set('rg', rg);
-        return this.http.get<any>(`${this.url}/check-cpf-rg`, { params });
+        return this.http.get<CheckCpfRgBeneficiarioResponse>(`${this.url}/check-cpf-rg`, { params });
     }
 
     atualizar(id: string, dados: BeneficiarioPayload): Observable<Beneficiario> {
@@ -159,19 +160,19 @@ export class BeneficiariosService {
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);
     }
 
-    inativar(id: string): Observable<any> {
+    inativar(id: string): Observable<void> {
         this.limparCache();
-        return this.http.delete(`${this.url}/${id}`);
+        return this.http.delete<void>(`${this.url}/${id}`);
     }
 
-    restaurar(id: string): Observable<any> {
+    restaurar(id: string): Observable<void> {
         this.limparCache();
-        return this.http.patch(`${this.url}/${id}/restore`, {});
+        return this.http.patch<void>(`${this.url}/${id}/restore`, {});
     }
 
-    excluirDefinitivo(id: string): Observable<any> {
+    excluirDefinitivo(id: string): Observable<void> {
         this.limparCache();
-        return this.http.delete(`${this.url}/${id}/hard`);
+        return this.http.delete<void>(`${this.url}/${id}/hard`);
     }
 
     criarBeneficiario(dados: BeneficiarioPayload): Observable<Beneficiario | ReativacaoAluno> {
@@ -193,7 +194,7 @@ export class BeneficiariosService {
         return this.storage.uploadSecurePdf(file, tipo);
     }
 
-    excluirArquivo(urlArquivo: string): Observable<any> {
+    excluirArquivo(urlArquivo: string): Observable<void> {
         return this.storage.deleteCloudFile(urlArquivo);
     }
 

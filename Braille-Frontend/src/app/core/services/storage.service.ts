@@ -27,8 +27,8 @@ export class StorageService {
         return this.http.post<{ url: string }>(`${this.uploadApi}/pdf?tipo=${tipo}`, formData);
     }
 
-    deleteCloudFile(urlArquivo: string): Observable<any> {
+    deleteCloudFile(urlArquivo: string): Observable<void> {
         const params = new HttpParams().set('url', urlArquivo);
-        return this.http.delete(this.uploadApi, { params });
+        return this.http.delete<void>(this.uploadApi, { params });
     }
 }

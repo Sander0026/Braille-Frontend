@@ -69,6 +69,17 @@ export interface CreateUsuarioDto {
     fotoPerfil?: string | null;
 }
 
+export type VerificacaoCpfUsuarioResponse =
+    | { status: 'livre'; id?: undefined; nome?: undefined; username?: undefined; matricula?: undefined; excluido?: undefined }
+    | {
+        status: 'ativo' | 'inativo' | 'excluido';
+        id: string;
+        nome: string;
+        username?: string;
+        matricula: string | null;
+        excluido?: boolean;
+    };
+
 
 @Injectable({ providedIn: 'root' })
 export class UsuariosService {
@@ -91,10 +102,10 @@ export class UsuariosService {
         return `${page}|${limit}|${nome ?? ''}|${inativos ?? false}|${role ?? ''}`;
     }
 
-    verificarCpf(cpf: string): Observable<any> {
+    verificarCpf(cpf: string): Observable<VerificacaoCpfUsuarioResponse> {
         let params = new HttpParams();
         if (cpf) params = params.set('cpf', cpf);
-        return this.http.get<any>(`${this.url}/check-cpf`, { params });
+        return this.http.get<VerificacaoCpfUsuarioResponse>(`${this.url}/check-cpf`, { params });
     }
 
     listar(page = 1, limit = 10, nome?: string, inativos = false, role?: UsuarioRole): Observable<PaginatedResponse<Usuario>> {
@@ -133,9 +144,9 @@ export class UsuariosService {
         return this.http.patch<Usuario>(`${this.url}/${id}`, dados);
     }
 
-    excluir(id: string): Observable<any> {
+    excluir(id: string): Observable<void> {
         this.limparCache();
-        return this.http.delete(`${this.url}/${id}`);
+        return this.http.delete<void>(`${this.url}/${id}`);
     }
 
     resetarSenha(id: string): Observable<Usuario> {
@@ -148,9 +159,9 @@ export class UsuariosService {
         return this.http.patch<Usuario>(`${this.url}/${id}/restore`, {});
     }
 
-    excluirDefinitivo(id: string): Observable<any> {
+    excluirDefinitivo(id: string): Observable<void> {
         this.limparCache();
-        return this.http.delete(`${this.url}/${id}/hard`);
+        return this.http.delete<void>(`${this.url}/${id}/hard`);
     }
 
     uploadFoto(file: File): Observable<{ url: string }> {

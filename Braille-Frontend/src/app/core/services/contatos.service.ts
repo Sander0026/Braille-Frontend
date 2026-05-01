@@ -52,13 +52,13 @@ export class ContatosService {
         return this.http.get<Contato>(`${this.url}/${id}`);
     }
 
-    marcarComoLida(id: string): Observable<any> {
+    marcarComoLida(id: string): Observable<void> {
         this.limparCache();
-        return this.http.patch(`${this.url}/${id}/lida`, {});
+        return this.http.patch<void>(`${this.url}/${id}/lida`, {});
     }
 
-    excluir(id: string): Observable<any> {
+    excluir(id: string): Observable<void> {
         this.limparCache();
-        return this.http.delete(`${this.url}/${id}`);
+        return this.http.delete<void>(`${this.url}/${id}`);
     }
 }
