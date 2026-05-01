@@ -444,33 +444,6 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         }
       }, 100);
     } else {
-      const invalidFields: string[] = [];
-      const formG = formGrupo as FormGroup;
-      if (formG && formG.controls) {
-         Object.keys(formG.controls).forEach(key => {
-            const ctrl = formG.get(key);
-            if (ctrl?.invalid) {
-               // Translate common errors to user-friendly text
-               let errorDesc = Object.keys(ctrl.errors || {}).join(', ');
-               if (ctrl?.hasError('maxlength')) {
-                  const req = ctrl.errors?.['maxlength'].requiredLength;
-                  const act = ctrl.errors?.['maxlength'].actualLength;
-                  errorDesc = `Passou do número de caracteres permitidos (Máx: ${req}, Atual: ${act})`;
-               } else if (ctrl?.hasError('required')) {
-                  errorDesc = `Campo vazio`;
-               } else if (ctrl?.hasError('minlength')) {
-                  errorDesc = `Muito curto`;
-               }
-               invalidFields.push(`- ${key}: ${errorDesc}`);
-            }
-         });
-      }
-      
-      // We log the details but show a minimal alert so it's not a giant JSON block.
-      console.log('Wizard Bloqueado por validação:', invalidFields);
-      // Removemos o alert para não atrapalhar o fluxo final do usuário se houver erros na formatação, 
-      // mas se quiser ligar de volta pode usar o console.
-      
       formGrupo?.markAllAsTouched();
       this.anunciarParaLeitorDeTela('Existem campos obrigatórios não preenchidos nesta etapa.');
       this.focarPrimeiroCampoInvalido();
@@ -686,7 +659,6 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         }
       },
       error: (err: { status: number; error?: { message?: string | string[] } }) => {
-        console.error('Erro ao salvar beneficiário:', err);
         const mensagemErro = err?.error?.message ?? 'Erro ao salvar. Verifique os dados e tente novamente.';
         this.exibirFeedback(Array.isArray(mensagemErro) ? mensagemErro.join(', ') : mensagemErro, 'erro');
         this.cdr.detectChanges();

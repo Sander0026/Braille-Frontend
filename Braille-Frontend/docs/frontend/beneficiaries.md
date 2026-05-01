@@ -213,7 +213,7 @@ Entidades inferidas pelo contrato: beneficiarios/alunos, matriculasOficina, turm
 # 8. Pontos de Atencao
 
 * Alto numero de campos exige validacao consistente entre frontend e backend.
-* Dados sensiveis de saude/documentos exigem cuidado de exposicao visual e logs.
+* Fluxo de cadastro evita registrar detalhes de validacao e erro no console para reduzir exposicao de dados sensiveis.
 * Cache pode mostrar lista defasada caso mutacao ocorra fora do servico.
 
 ---
