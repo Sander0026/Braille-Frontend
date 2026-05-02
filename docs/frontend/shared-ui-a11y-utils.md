@@ -190,26 +190,10 @@ Nao acessa banco. Utilitarios formatam dados vindos da API.
 
 ---
 
-# 8. Pontos de Atencao
-
-* `ToastService` anuncia mensagens via `LiveAnnouncer`, usando `assertive` para erros e `polite` para demais avisos.
-* `UiModal` usa SVG inline para icone de fechar; poderia padronizar com biblioteca de icones se houver.
-* `SafeUrlPipe` valida recursos locais, mesma origem, `blob:` e Cloudinary antes de usar `bypassSecurityTrustResourceUrl`.
-* `PhoneMaskDirective` aceita uso com ou sem `NgControl`, mantendo mascara no elemento e sincronizando o form control quando existir.
-* `AccessibilityService` aplica guardas para `document` e `localStorage`; novos usos diretos de browser APIs devem seguir o mesmo padrao.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Layouts usam `AccessibilityService`, `ToastComponent`, `ConfirmDialog` e `HotkeysService`.
 * Formularios usam `UiInput`, validadores, mascaras e `injectFormDescarte`.
 * Auditoria usa `AuditFriendlyPipe` e `gerarDiferencas`.
 * Ajuda e manuais usam visualizadores de PDF.
 * Conteudo publico usa pipes de categoria, strip HTML e preview.
-
----
-
-# 10. Resumo Tecnico Final
-
-O modulo compartilhado e transversal e de criticidade alta para consistencia, acessibilidade e seguranca visual. A complexidade e media porque reune muitos pequenos blocos reutilizaveis. A base e boa: standalone components, signals, OnPush, CDK A11y, pipes puros e utilitarios testaveis. Os principais cuidados sao origem de URLs confiaveis, suporte futuro a SSR e alinhamento do feedback audivel.

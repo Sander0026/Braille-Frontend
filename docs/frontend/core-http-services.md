@@ -301,26 +301,10 @@ Sem acesso direto. As entidades refletidas indicam tabelas/recursos provaveis no
 
 ---
 
-# 8. Pontos de Atencao
-
-* `ComunicadosService.listar` foi migrado para `HttpParams`, evitando concatenacao manual de filtros.
-* `LaudosService`, `ModelosCertificadosService`, `SiteConfigService` e `ApoiadoresService` foram padronizados para rotas relativas `/api`, mantendo interceptacao uniforme.
-* Caches em memoria nao sao compartilhados entre abas; dashboard e invalidado por mutacoes de alunos, turmas, usuarios e comunicados dentro dos servicos frontend.
-* Alguns retornos ainda usam `any` em pontos legados; autenticacao, usuarios, certificados, mutacoes simples de beneficiarios/contatos/storage e relatorio individual de frequencia ja possuem contratos mais restritos.
-* Upload/delete dependem de comportamento do backend para autorizacao e sanitizacao de arquivo.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Paginas administrativas consomem estes servicos para CRUD.
 * `DashboardService` e invalidado por `BeneficiariosService.limparCache`.
 * `StorageService` e usado por beneficiarios, usuarios e auth.
 * Interceptadores globais afetam todos os servicos.
 * Pipes e utilitarios formatam dados vindos desses contratos.
-
----
-
-# 10. Resumo Tecnico Final
-
-Este modulo e de criticidade alta porque concentra toda comunicacao com backend. A complexidade e alta pela quantidade de recursos, cache, uploads e variacoes de resposta. A arquitetura e adequada para Angular, com servicos tipados e cache local, mas deve evoluir para padronizacao de URLs, eliminacao de `any` e consistencia de `HttpParams` em todos os endpoints.

@@ -191,26 +191,9 @@ Entidade refletida: `audit_log`, contendo snapshots antigos/novos, autor e metad
 
 ---
 
-# 8. Pontos de Atencao
-
-* DiferenÃ§as de auditoria mascaram campos sensiveis como CPF, RG, telefone, e-mail, documentos, senhas e tokens.
-* `oldValue`/`newValue` como `unknown` passam por guards antes de gerar diferencas visiveis.
-* Auditoria Axe em desenvolvimento usa helper tipado e protege consulta ao `document` antes de localizar o elemento violado.
-* Cobertura Cypress parece focada em alguns fluxos; ampliar para certificados, contatos, turmas e frequencias.
-* Sentry esta desativado enquanto DSN estiver vazio.
-* O output de axe em desenvolvimento nao substitui gating de CI.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Auditoria registra eventos de usuarios, beneficiarios, turmas, frequencias, contatos, comunicados, apoiadores e certificados.
 * Ajuda apoia operacao de modulos administrativos.
 * Qualidade automatizada valida login, alunos e acessibilidade.
 * Sentry recebe erros globais do app.
-
----
-
-# 10. Resumo Tecnico Final
-
-Auditoria e qualidade possuem criticidade alta para governanca, seguranca e confiabilidade. Ajuda possui criticidade media por reduzir erro operacional. A complexidade e media-alta pela combinacao de logs, diffs, acessibilidade e testes. A implementacao e robusta em normalizacao e foco WCAG, mas deve evoluir em mascaramento de dados sensiveis, cobertura E2E e ativacao de observabilidade em producao.

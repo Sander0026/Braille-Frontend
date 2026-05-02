@@ -199,25 +199,10 @@ Nao ha integracao externa direta.
 
 ---
 
-# 8. Pontos de Atencao
-
-* Conflitos de concorrencia podem ocorrer se duas pessoas editarem a mesma chamada; backend deve arbitrar.
-* Status e `statusAtivo` coexistem; documentar diferenca operacional para usuarios.
-* `excluido='all'` e `statusAtivo='all'` exigem suporte backend consistente.
-* Relatorio individual de frequencia possui contrato tipado para estatisticas e historico, reduzindo dependencia de `any[]`.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Beneficiarios fornece alunos.
 * Usuarios fornece professores.
 * Certificados academicos dependem de turma/aluno.
 * Auditoria registra matricula, desmatricula, fechar/reabrir diario e mudar status.
 * Dashboard agrega turmas ativas.
-
----
-
-# 10. Resumo Tecnico Final
-
-Turmas e frequencias possuem criticidade alta para operacao pedagogica. A complexidade e alta por status, matriculas, chamada em lote, relatorios e fechamento de diario. A divisao por servicos e componentes esta adequada. Os riscos principais sao concorrencia operacional, regras de permissao por professor e tipagem incompleta de historicos.

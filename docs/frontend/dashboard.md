@@ -141,23 +141,9 @@ Nao ha integracao externa direta.
 
 ---
 
-# 8. Pontos de Atencao
-
-* Acoes rapidas estao alinhadas com as permissoes conhecidas das rotas; o desalinhamento encontrado em contatos foi corrigido na propria rota.
-* O cache pode exibir dados antigos ate 5 minutos apenas quando a alteracao relevante ocorre fora dos servicos frontend que invalidam o dashboard.
-* O dashboard depende do backend para agregacoes corretas.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Consome `DashboardService`.
 * E alvo de redirecionamento do `roleGuard` quando acesso e negado.
 * Recebe invalidacao indireta de `BeneficiariosService`, `TurmasService`, `UsuariosService` e `ComunicadosService`.
 * Navega para dominios de alunos, turmas, frequencias, conteudo e usuarios.
-
----
-
-# 10. Resumo Tecnico Final
-
-O dashboard tem criticidade media-alta por orientar a operacao administrativa. A complexidade e media, com foco em leitura agregada e navegacao. A arquitetura com servico cacheado e componentes apresentacionais e adequada. Riscos principais: cache defasado e acoes rapidas desalinhadas com roles.

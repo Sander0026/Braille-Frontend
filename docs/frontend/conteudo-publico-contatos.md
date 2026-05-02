@@ -193,25 +193,10 @@ Entidades refletidas: site_config, secoes_conteudo, comunicados/noticias e conta
 
 ---
 
-# 8. Pontos de Atencao
-
-* `ComunicadosService.listar` usa `HttpParams` para pagina, limite, categoria e titulo.
-* Renderizacao de HTML rico em paginas publicas usa `SafeHtmlPipe` para sanitizacao consistente.
-* `aplicarCorPrimaria` normaliza hexadecimal, aplica guarda de documento e calcula canais RGB em ordem correta para escurecimento.
-* Conteudo publico depende da disponibilidade da API; ideal ter fallback local.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * `App` carrega config/secoes globais.
 * Public layout hospeda paginas publicas.
 * Apoiadores publicos podem aparecer no site.
 * Certificados possuem pagina publica de validacao.
 * Auditoria pode registrar edicoes de conteudo se backend implementar.
-
----
-
-# 10. Resumo Tecnico Final
-
-O modulo de conteudo publico e contatos tem criticidade media-alta por afetar imagem institucional, comunicacao externa e entrada de mensagens. A complexidade e media, com estado reativo e CMS leve. O principal risco e seguranca de HTML rico; manter sanitizacao, validacao backend e controle de roles e essencial.

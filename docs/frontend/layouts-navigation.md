@@ -188,24 +188,9 @@ Nao possui integracao externa direta; usa recursos globais de Sentry, PWA e API 
 
 ---
 
-# 8. Pontos de Atencao
-
-* O filtro visual de `navItems` nao substitui `roleGuard`; ambos devem permanecer alinhados. A rota de contatos foi ajustada para acompanhar o menu e o backend.
-* Leitura de viewport e foco no `AdminLayout` possui guarda de browser para reduzir risco em SSR/prerender.
-* Divergencia entre roles da rota de apoiadores e roles do menu foi corrigida; manter revisao conjunta ao criar novas rotas.
-* Fechamento de modal usa `afterNextRender` para devolver foco ao elemento acionador apos o DOM estabilizar.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Consome `AuthService`, `HotkeysService`, `AccessibilityService` e `ConfirmDialogService`.
 * Fornece shell para todos os dominios admin.
 * Header e sidebar sao usados por layouts.
 * Modais de perfil atualizam estado que impacta header.
-
----
-
-# 10. Resumo Tecnico Final
-
-O modulo de layout e navegacao tem criticidade alta para UX, acessibilidade e seguranca percebida. A complexidade e media-alta pelo suporte a responsividade, roles, modais e atalhos. A implementacao segue bons padroes Angular com OnPush, componentes apresentacionais e eventos explicitos. O principal risco e manter roles sincronizadas entre menu, rotas e backend.

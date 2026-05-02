@@ -171,25 +171,10 @@ Nao ha acesso direto. O frontend consome dados por API REST.
 
 ---
 
-# 8. Pontos de Atencao
-
-* Rota `/admin/apoiadores` foi alinhada para `ADMIN`, `SECRETARIA` e `COMUNICACAO`, acompanhando menu e backend.
-* `provideAnimations()` esta marcado como legado/depreciado em comentario por dependencia do `ngx-quill`.
-* `environment.prod.ts` mantem `sentryDsn` vazio; observabilidade de producao nao coleta eventos ate configuracao real.
-* Manipulacoes de `document`/`window` em `App` e `SiteConfigService` possuem guarda para reduzir risco caso SSR seja ativado.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * `App` depende de `SiteConfigService`.
 * `app.routes.ts` depende de layouts, paginas e guards.
 * `app.config.ts` injeta todos os interceptadores usados pelos servicos HTTP.
 * `index.html` influencia acessibilidade global e SEO inicial.
 * `ngsw-config.json` afeta deploy, cache, atualizacao e confiabilidade offline.
-
----
-
-# 10. Resumo Tecnico Final
-
-O modulo de bootstrap e roteamento e critico e de alta centralidade. Ele estabelece a arquitetura Angular standalone, separa areas publica/admin, aplica seguranca por guards, melhora performance com lazy loading e PWA, e adiciona acessibilidade por foco pos-rota, VLibras e axe-core em dev. A complexidade e media-alta pela concentracao de responsabilidades globais, com riscos principais em divergencia de roles, Sentry desativado em producao e futura compatibilidade SSR.

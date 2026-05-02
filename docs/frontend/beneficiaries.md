@@ -210,24 +210,10 @@ Entidades inferidas pelo contrato: beneficiarios/alunos, matriculasOficina, turm
 
 ---
 
-# 8. Pontos de Atencao
-
-* Alto numero de campos exige validacao consistente entre frontend e backend.
-* Fluxo de cadastro evita registrar detalhes de validacao e erro no console para reduzir exposicao de dados sensiveis.
-* Cache pode mostrar lista defasada caso mutacao ocorra fora do servico.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * Turmas consomem alunos disponiveis e matriculas.
 * Frequencias dependem de alunos matriculados.
 * Certificados academicos dependem de aluno e turma.
 * Dashboard agrega alunos ativos.
 * Auditoria registra criacao, atualizacao, arquivamento e restauracao.
-
----
-
-# 10. Resumo Tecnico Final
-
-O modulo de beneficiarios e um dos mais criticos do sistema, pois concentra dados pessoais, documentos, consentimento LGPD e relacao com turmas/frequencias/certificados. A complexidade e alta. A arquitetura com servico dedicado, cache, guard de descarte, payload tipado e upload separado e apropriada, mantendo como principal cuidado a revisao continua das politicas de exposicao de dados sensiveis.

@@ -195,25 +195,10 @@ Entidade refletida: usuarios administrativos com papeis, status, credenciais, pe
 
 ---
 
-# 8. Pontos de Atencao
-
-* Credenciais geradas devem ser exibidas com cuidado para nao vazar em logs ou screenshots.
-* Role `COMUNICACAO` deve estar sincronizada com rotas.
-* Hard delete de usuarios pode afetar auditoria/historico se backend nao preservar referencias.
-* `CreateUsuarioDto.role` usa union compartilhada `UsuarioRole`, reduzindo envio de papeis invalidos pelo frontend.
-
----
-
-# 9. Relacao com Outros Modulos
+# 8. Relacao com Outros Modulos
 
 * `AdminLayout` exibe perfil do usuario.
 * `roleGuard` usa role do JWT.
 * Turmas usam professores.
 * Auditoria referencia `autorId`, `autorNome` e `autorRole`.
 * Dashboard agrega membros da equipe.
-
----
-
-# 10. Resumo Tecnico Final
-
-Usuarios e perfil formam modulo de criticidade alta por controlar acesso e identidade. A complexidade e media-alta, com cache, wizard, credenciais, roles e perfil logado. A arquitetura e adequada, mas recomenda-se reforcar tipagem de roles e cuidado operacional com exibicao de credenciais.
