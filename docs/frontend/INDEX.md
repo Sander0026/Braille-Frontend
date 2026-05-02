@@ -13,15 +13,15 @@
 1. [README.md](../../README.md) — visão geral e setup em 5 passos
 2. [00-setup.md](./00-setup.md) — ambiente local detalhado
 3. [CONTRIBUTING.md](../../CONTRIBUTING.md) — como contribuir
-4. [app-bootstrap-rotas.md](./app-bootstrap-rotas.md) — como a aplicação funciona
+4. [01-app-bootstrap-rotas.md](./01-app-bootstrap-rotas.md) — como a aplicação funciona
 
-**Preciso entender autenticação →** [auth-session-guards.md](./auth-session-guards.md)
+**Preciso entender autenticação →** [02-auth-session-guards.md](./02-auth-session-guards.md)
 
-**Preciso chamar a API →** [core-http-services.md](./core-http-services.md)
+**Preciso chamar a API →** [03-core-http-services.md](./03-core-http-services.md)
 
-**Preciso criar um componente acessível →** [11-acessibilidade.md](./11-acessibilidade.md) + [shared-ui-a11y-utils.md](./shared-ui-a11y-utils.md)
+**Preciso criar um componente acessível →** [15-acessibilidade.md](./15-acessibilidade.md) + [05-shared-ui-a11y-utils.md](./05-shared-ui-a11y-utils.md)
 
-**Quero entender por que X foi feito assim →** [12-decisoes-tecnicas.md](./12-decisoes-tecnicas.md)
+**Quero entender por que X foi feito assim →** [16-decisoes-tecnicas.md](./16-decisoes-tecnicas.md)
 
 ---
 
@@ -30,22 +30,22 @@
 | # | Documento | Cobertura |
 |---|---|---|
 | 00 | [Setup e Onboarding](./00-setup.md) | Pré-requisitos, instalação, ambiente, scripts, troubleshooting |
-| 01 | [Bootstrap, Config e Rotas](./app-bootstrap-rotas.md) | `main.ts`, `app.config.ts`, `app.routes.ts`, tabela completa de rotas |
-| 02 | [Autenticação, Sessão e Guards](./auth-session-guards.md) | JWT, refresh token concorrente, RBAC, `authGuard`, `roleGuard`, `descarteGuard` |
-| 03 | [Serviços HTTP e APIs](./core-http-services.md) | 19 serviços, todos os endpoints, cache TTL, interfaces TypeScript |
-| 04 | [Layouts e Navegação](./layouts-navigation.md) | `PublicLayout`, `AdminLayout`, sidebar, header, toast, menu por role |
-| 05 | [Componentes Shared, Pipes e Utilitários](./shared-ui-a11y-utils.md) | UI atoms, `SafeHtmlPipe`, `CloudinaryPipe`, masks, validators, directives |
-| 06 | [Dashboard](./dashboard.md) | KPIs, cache, acessibilidade |
-| 07 | [Beneficiários e Alunos](./beneficiaries.md) | CRUD completo, wizard, reativação, LGPD, importação, exportação |
-| 08 | [Turmas e Frequências](./turmas-frequencias.md) | Máquina de estados de turma, diário de chamada, atestados |
-| 09 | [Usuários e Perfil](./usuarios-perfil.md) | Gestão de funcionários, wizard de cadastro, perfil próprio |
-| 10 | [Conteúdo Público e Fale Conosco](./conteudo-publico-contatos.md) | CMS (Quill), comunicados, formulário de contato |
-| 11 | [Apoiadores e Certificados](./apoiadores-certificados.md) | Parceiros, modelos PDF, emissão, validação pública |
-| 12 | [Auditoria, Ajuda e Qualidade](./audit-ajuda-quality.md) | Log de auditoria, diff com mascaramento, central de ajuda, hotkeys |
-| 13 | [Testes](./09-testes.md) | Vitest (unitários), Cypress E2E, cypress-axe, CI/CD |
-| 14 | [PWA e Deploy](./10-pwa-deploy.md) | Build, service worker, Vercel, análise linha a linha do CSP |
-| 15 | [Acessibilidade (WCAG)](./11-acessibilidade.md) | axe-core, LiveAnnouncer, WCAG 2.1 AA, VLibras, checklist |
-| 16 | [Decisões Técnicas (ADRs)](./12-decisoes-tecnicas.md) | 11 ADRs: Angular standalone, JWT, interceptors, Sentry, branches |
+| 01 | [Bootstrap, Config e Rotas](./01-app-bootstrap-rotas.md) | `main.ts`, `app.config.ts`, `app.routes.ts`, tabela completa de rotas |
+| 02 | [Autenticação, Sessão e Guards](./02-auth-session-guards.md) | JWT, refresh token concorrente, RBAC, `authGuard`, `roleGuard`, `descarteGuard` |
+| 03 | [Serviços HTTP e APIs](./03-core-http-services.md) | 19 serviços, todos os endpoints, cache TTL, interfaces TypeScript |
+| 04 | [Layouts e Navegação](./04-layouts-navigation.md) | `PublicLayout`, `AdminLayout`, sidebar, header, toast, menu por role |
+| 05 | [Componentes Shared, Pipes e Utilitários](./05-shared-ui-a11y-utils.md) | UI atoms, `SafeHtmlPipe`, `CloudinaryPipe`, masks, validators, directives |
+| 06 | [Dashboard](./06-dashboard.md) | KPIs, cache, acessibilidade |
+| 07 | [Beneficiários e Alunos](./07-beneficiaries.md) | CRUD completo, wizard, reativação, LGPD, importação, exportação |
+| 08 | [Turmas e Frequências](./08-turmas-frequencias.md) | Máquina de estados de turma, diário de chamada, atestados |
+| 09 | [Usuários e Perfil](./09-usuarios-perfil.md) | Gestão de funcionários, wizard de cadastro, perfil próprio |
+| 10 | [Conteúdo Público e Fale Conosco](./10-conteudo-publico-contatos.md) | CMS (Quill), comunicados, formulário de contato |
+| 11 | [Apoiadores e Certificados](./11-apoiadores-certificados.md) | Parceiros, modelos PDF, emissão, validação pública |
+| 12 | [Auditoria, Ajuda e Qualidade](./12-audit-ajuda-quality.md) | Log de auditoria, diff com mascaramento, central de ajuda, hotkeys |
+| 13 | [Testes](./13-testes.md) | Vitest (unitários), Cypress E2E, cypress-axe, CI/CD |
+| 14 | [PWA e Deploy](./14-pwa-deploy.md) | Build, service worker, Vercel, análise linha a linha do CSP |
+| 15 | [Acessibilidade (WCAG)](./15-acessibilidade.md) | axe-core, LiveAnnouncer, WCAG 2.1 AA, VLibras, checklist |
+| 16 | [Decisões Técnicas (ADRs)](./16-decisoes-tecnicas.md) | 11 ADRs: Angular standalone, JWT, interceptors, Sentry, branches |
 
 ---
 
