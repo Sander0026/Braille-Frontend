@@ -1,180 +1,240 @@
-# Modulo: Aplicacao, Bootstrap e Roteamento
+# Módulo: Aplicação, Bootstrap e Roteamento
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar a inicializacao da SPA Angular, os providers globais, a estrategia de roteamento, a configuracao de ambiente, o PWA, a pagina HTML raiz e a politica de carregamento das telas.
+Documentar o ciclo de inicialização da SPA Angular — desde o ponto de entrada `main.ts`
+até o registro de providers globais em `app.config.ts` e a definição das rotas lazy-loaded em `app.routes.ts`.
 
 ## Responsabilidade
 
-Este modulo define a espinha dorsal do frontend: entrada em `src/main.ts`, raiz visual em `src/app/app.ts`, configuracao de providers em `src/app/app.config.ts`, rotas em `src/app/app.routes.ts`, ambientes em `src/environments`, PWA em `ngsw-config.json` e metadados globais em `src/index.html`.
+Estes três arquivos formam o **núcleo de composição** da aplicação. Toda feature,
+serviço e componente existe dentro do contexto que eles constroem.
 
 ## Fluxo de Funcionamento
 
-O navegador carrega `index.html`, instancia `<app-root>`, executa `main.ts`, configura Sentry quando existe DSN, habilita auditoria axe-core em desenvolvimento e chama `bootstrapApplication(App, appConfig)`. O `App` carrega configuracoes do site, secoes dinamicas, monitora novas versoes do service worker e move foco para o primeiro `h1` apos mudancas de rota.
+```
+index.html → main.ts → bootstrapApplication(App, appConfig)
+                              ↓
+                        app.config.ts  (providers globais)
+                              ↓
+                        app.routes.ts  (mapa de rotas lazy)
+                              ↓
+               PublicLayout  ou  AdminLayout  (shell escolhido pela URL)
+                              ↓
+                     Página carregada via loadComponent()
+```
 
 ---
 
 # 2. Arquitetura e Metodologias
 
-## Padroes Arquiteturais Identificados
+## Padrões Arquiteturais Identificados
 
-* SPA Angular standalone.
-* Lazy loading por rota com `loadComponent`.
-* Shell layout pattern para area publica e area administrativa.
-* Provider composition em `ApplicationConfig`.
-* Interceptor chain para cross-cutting concerns HTTP.
-* PWA com service worker e cache groups.
-* Observability pattern com Sentry.
-* Progressive enhancement de acessibilidade com axe-core em desenvolvimento e VLibras em `index.html`.
+- **Standalone Components** — sem NgModules; cada componente é auto-suficiente
+- **Lazy Loading** — `loadComponent()` em todas as rotas; bundle inicial mínimo
+- **Functional Guards** — guards como funções puras (`CanActivateFn`) em vez de classes
+- **Provider Pattern** — `app.config.ts` centraliza toda a DI da aplicação
+- **Shell Pattern** — dois layouts (shells) encapsulam áreas pública e administrativa
 
-## Justificativa Tecnica
+## Justificativa Técnica
 
-A escolha por Angular standalone reduz acoplamento com NgModules e melhora tree-shaking. O lazy loading evita carregar telas administrativas e publicas antes do uso, reduzindo bundle inicial. A separacao entre layouts publico e administrativo isola responsabilidades de navegacao, sessao e menus. O `app.config.ts` concentra providers globais para manter bootstrap previsivel e testavel.
+A arquitetura standalone (introduzida no Angular 14, estabilizada no 17) elimina
+a necessidade de `AppModule` e `NgModule` — reduzindo boilerplate e tornando
+tree-shaking mais eficiente. Cada componente declara suas dependências diretamente
+no `imports[]`, facilitando a leitura isolada do código.
 
----
-
-# 3. Fluxo Interno do Codigo
-
-## Fluxo de Execucao
-
-1. `src/index.html` define `lang="pt-BR"`, viewport, tema, manifest, fontes e widget VLibras.
-2. `src/main.ts` inicializa Sentry somente se `environment.sentryDsn` estiver preenchido.
-3. Em desenvolvimento, `main.ts` importa `axe-core` dinamicamente, roda auditoria apos renderizacao e expoe `globalThis.auditarAcessibilidade`.
-4. `bootstrapApplication` monta `App` com `appConfig`.
-5. `app.config.ts` registra roteador, HTTP com `withFetch`, interceptadores, locale `pt-BR`, Quill, service worker, listener global de Tab em textarea/contenteditable e Sentry `ErrorHandler`.
-6. `App` chama `SiteConfigService.carregarConfigs()` e `carregarSecoes()` para hidratar tema/conteudo global.
-7. `App` observa `SwUpdate.versionUpdates`; quando `VERSION_READY`, recarrega a pagina para evitar deadlock entre assets antigos e novo `index.html`.
-8. `App` observa `NavigationEnd`; apos render, procura `h1`, aplica `tabindex="-1"` e move foco para acessibilidade.
-9. `app.routes.ts` decide entre `PublicLayout`, `AdminLayout`, `Login` e `NotFound`.
-
-## Dependencias Internas
-
-* `App`
-* `routes`
-* `apiInterceptor`
-* `authInterceptor`
-* `errorInterceptor`
-* `SiteConfigService`
-* `provideTabEscapeForTextareas`
-* `environment`
-* layouts publico e administrativo
-* guards `authGuard`, `roleGuard`, `descarteGuard`
-
-## Dependencias Externas
-
-* `@angular/core`
-* `@angular/router`
-* `@angular/common`
-* `@angular/common/http`
-* `@angular/service-worker`
-* `@angular/animations`
-* `@angular/cdk/a11y`
-* `@sentry/angular`
-* `ngx-quill`
-* `rxjs`
-* `axe-core` em desenvolvimento
-* VLibras via script externo em `https://vlibras.gov.br/app/vlibras-plugin.js`
+O lazy loading via `loadComponent()` garante que o bundle inicial carregue apenas
+o necessário para renderizar a primeira tela, melhorando o LCP (Largest Contentful Paint).
 
 ---
 
-# 4. Dicionario Tecnico
+# 3. Fluxo Interno do Código
 
-## Variaveis
+## 3.1 `src/main.ts` — Ponto de Entrada
 
-* `environment.production`: booleano que diferencia desenvolvimento e producao; controla otimizacoes, service worker e endpoint real.
-* `environment.apiUrl`: base de API; em dev e `/api` para proxy, em prod e `https://braille-api-oieq.onrender.com/api`.
-* `environment.sentryDsn`: DSN opcional; vazio desativa Sentry.
-* `environment.sentryEnv`: nome logico do ambiente Sentry.
-* `title`: signal em `App` com valor `Instituto Luiz Braille`.
-* `swUpdate`: injecao opcional de `SwUpdate`; permite app funcionar mesmo sem service worker habilitado.
-* `routes`: array de rotas principal; define lazy loading, guards, roles e titulos.
+```typescript
+bootstrapApplication(App, appConfig)
+  .then(() => {
+    if (isDevMode()) {
+      // Carrega axe-core dinamicamente (import lazy) — zero impacto em produção
+      import('axe-core').then((axe) => {
+        // Auditoria automática 2s após boot
+        setTimeout(rodarAuditoria, 2000);
+        // Expõe auditarAcessibilidade() no console do DevTools
+        Object.defineProperty(globalThis, 'auditarAcessibilidade', { ... });
+      });
+    }
+  });
+```
 
-## Funcoes e Metodos
+**Responsabilidades do `main.ts`:**
+1. Bootstraps a aplicação com `App` (componente raiz) e `appConfig` (providers)
+2. Em modo dev, carrega o `axe-core` de forma **lazy** para não impactar produção
+3. Executa auditoria de acessibilidade automática 2s após o boot
+4. Expõe `auditarAcessibilidade()` globalmente para uso manual no DevTools
 
-* `bootstrapApplication(App, appConfig)`: inicializa aplicacao standalone.
-* `Sentry.init`: registra tracing e replay quando existe DSN.
-* `rodarAuditoria`: executa `axe.run(document, { runOnly: ['wcag2a','wcag2aa'] })` em desenvolvimento.
-* `carregarConfigs`: busca configuracoes globais e aplica cor primaria.
-* `carregarSecoes`: busca conteudo dinamico por secao.
-* `provideServiceWorker`: registra `ngsw-worker.js` quando `!isDevMode()`.
+## 3.2 `src/app/app.config.ts` — Providers Globais
 
-## Classes
+| Provider | O que faz |
+|---|---|
+| `provideBrowserGlobalErrorListeners()` | Captura erros globais não tratados |
+| `provideAnimations()` | API legada de animações — mantida pelo `ngx-quill` |
+| `provideRouter(routes)` | Registra o roteador com as rotas definidas |
+| `provideHttpClient(withFetch(), withInterceptors([...]))` | HTTP com Fetch API + 3 interceptors em cadeia |
+| `{ provide: LOCALE_ID, useValue: 'pt-BR' }` | Pipes de data/moeda/número em PT-BR |
+| `importProvidersFrom(QuillModule.forRoot())` | Editor rich text global |
+| `...provideTabEscapeForTextareas()` | Diretiva de acessibilidade em textareas |
+| `provideServiceWorker(...)` | PWA — ativo apenas em produção |
 
-* `App`: componente raiz standalone; coordena bootstrap funcional, PWA update e foco pos-navegacao.
+**Ordem dos interceptors importa:**
+```typescript
+withInterceptors([apiInterceptor, authInterceptor, errorInterceptor])
+// 1. apiInterceptor  → resolve URL relativa /api/* para URL absoluta
+// 2. authInterceptor → injeta Bearer token + trata 401/refresh
+// 3. errorInterceptor → exibe toast para erros 0, 403, 5xx
+```
 
-## Interfaces e Tipagens
+## 3.3 `src/app/app.routes.ts` — Mapa de Rotas
 
-* `Environment`: contrato de ambiente com `production`, `apiUrl`, `sentryDsn` e `sentryEnv`.
-* `Routes`: contrato Angular para arvore de navegacao.
+### Área Pública (`PublicLayout`)
+
+| Rota | Componente | Título |
+|---|---|---|
+| `/` | `Home` | Início — Instituto Luiz Braille |
+| `/sobre` | `Sobre` | Sobre Nós — Instituto Luiz Braille |
+| `/contato` | `Contato` | Fale Conosco — Instituto Luiz Braille |
+| `/noticias` | `NoticiasLista` | Notícias e Comunicados — ILBES |
+| `/noticias/:id` | `NoticiaDetalhe` | Notícia — Instituto Luiz Braille |
+| `/validar-certificado` | `ValidarCertificado` | Validação de Certificado — ILBES |
+| `/login` | `Login` | Entrar — ILBES |
+| `/**` | `NotFound` | Página Não Encontrada — ILBES |
+
+### Área Administrativa (`AdminLayout`) — protegida por `[authGuard, roleGuard]`
+
+| Rota | Componente | Roles permitidos | Guard extra |
+|---|---|---|---|
+| `/admin/dashboard` | `Dashboard` | Todos autenticados | — |
+| `/admin/alunos` | `BeneficiaryList` | ADMIN, SECRETARIA | `descarteGuard` |
+| `/admin/alunos/cadastro` | `BeneficiaryFormComponent` | ADMIN, SECRETARIA | `descarteGuard` |
+| `/admin/turmas` | `TurmasLista` | Todos autenticados | `descarteGuard` |
+| `/admin/frequencias` | `FrequenciasLista` | Todos autenticados | — |
+| `/admin/apoiadores` | `ApoiadoresLista` | ADMIN, SECRETARIA, COMUNICACAO | `descarteGuard` |
+| `/admin/modelos-certificados` | `ModelosLista` | ADMIN, SECRETARIA | — |
+| `/admin/modelos-certificados/novo` | `ModelosForm` | ADMIN, SECRETARIA | `descarteGuard` |
+| `/admin/modelos-certificados/editar/:id` | `ModelosForm` | ADMIN, SECRETARIA | `descarteGuard` |
+| `/admin/conteudo` | `ConteudoSite` | ADMIN, COMUNICACAO | — |
+| `/admin/contatos` | `ContatosLista` | ADMIN, SECRETARIA, COMUNICACAO | — |
+| `/admin/usuarios` | `UsuariosLista` | ADMIN | — |
+| `/admin/usuarios/cadastro` | `CadastroUsuarioWizard` | ADMIN | `descarteGuard` |
+| `/admin/ajuda` | `Ajuda` | Todos autenticados | — |
+| `/admin/auditoria` | `AuditLogLista` | ADMIN | — |
 
 ---
 
-# 5. Servicos e Integracoes
+# 4. Dicionário Técnico
 
-## APIs
+## Variáveis e Constantes
 
-O modulo nao chama endpoints diretamente exceto via `SiteConfigService`:
+| Nome | Tipo | Onde | Descrição |
+|---|---|---|---|
+| `routes` | `Routes` | `app.routes.ts` | Array de definições de rota exportado para o router |
+| `appConfig` | `ApplicationConfig` | `app.config.ts` | Objeto de configuração com todos os providers |
 
-* `GET /site-config`: configuracoes gerais.
-* `GET /site-config/secoes`: conteudo publico dinamico.
+## Funções
 
-## Banco de Dados
+| Função | Arquivo | Descrição |
+|---|---|---|
+| `bootstrapApplication()` | `main.ts` | Inicializa a SPA com o componente raiz e os providers |
+| `rodarAuditoria()` | `main.ts` | Executa axe-core e imprime violações de acessibilidade no console |
+| `logViolationNode()` | `main.ts` | Formata e exibe cada nó de violação de acessibilidade |
+| `provideTabEscapeForTextareas()` | `tab-escape.provider.ts` | Retorna providers que aplicam `TabEscapeDirective` globalmente |
 
-Nao ha acesso direto. O frontend consome dados por API REST.
+## Interfaces
 
-## Servicos Externos
-
-* Sentry: captura de erros e tracing quando configurado.
-* VLibras: widget de traducao/acessibilidade em Libras.
-* Google Fonts: fontes `Inter`, `Pinyon Script` e `Cormorant Garamond`.
-* Angular Service Worker: cache de app shell e assets.
+| Interface | Arquivo | Campos |
+|---|---|---|
+| `Environment` | `environment.interface.ts` | `production: boolean`, `apiUrl: string` |
+| `AxeNodeResult` | `main.ts` (local) | `target: Array<string \| string[]>`, `failureSummary?: string` |
 
 ---
 
-# 6. Seguranca e Qualidade
+# 5. Serviços e Integrações
 
-## Seguranca
+## Dependências do Bootstrap
 
-* Rotas administrativas exigem `authGuard` e `roleGuard`.
-* Interceptadores centralizam base URL, JWT e erros.
-* O service worker e registrado apenas em build nao dev.
-* A auditoria axe-core e carregada dinamicamente apenas em desenvolvimento.
-* O script VLibras e inicializado em bloco `try/catch` para nao quebrar bootstrap.
+- `@angular/platform-browser` → `bootstrapApplication`
+- `@angular/core` → `isDevMode`
+- `axe-core` → auditoria de acessibilidade (carregado via dynamic import, apenas dev)
+- `./app/app.config` → providers da aplicação
+- `./app/app` → componente raiz
 
-## Qualidade
+---
 
-* `angular.json` define budgets de bundle: initial warning 1MB, error 2MB; estilos por componente warning 50kB, error 100kB.
-* Test runner configurado como Vitest.
-* ESLint configurado para TS/HTML.
-* Cypress cobre fluxos E2E e acessibilidade.
+# 6. Segurança e Qualidade
+
+## Segurança
+
+- **axe-core isolado em dev:** o import dinâmico garante que a biblioteca nunca vai para o bundle de produção
+- **`globalThis.auditarAcessibilidade` com `configurable: true`:** permite sobrescrever em testes sem lançar erros
+- **Títulos de rota:** todas as rotas têm `title` definido — beneficia SEO e leitores de tela
 
 ## Performance
 
-* Lazy loading por componente reduz carregamento inicial.
-* `provideHttpClient(withFetch())` usa backend fetch moderno.
-* Service worker usa `installMode: prefetch` para app shell e `lazy` para assets.
-* `afterNextRender` substitui `setTimeout` fragil em foco pos-render.
+- **Lazy loading em todas as rotas:** bundle inicial mínimo; o Angular só carrega o chunk da página acessada
+- **`withFetch()`:** usa a Fetch API nativa em vez de `XMLHttpRequest`, melhorando performance no servidor
+- **`provideServiceWorker` só em produção:** evita o overhead do SW em desenvolvimento
+
+## Débito Técnico
+
+- **`provideAnimations()` está deprecated** desde Angular 19. Mantido como dependência bloqueante do `ngx-quill`.
+  Remoção prevista quando `ngx-quill` migrar para a nova API de animações CSS (estimativa: Angular 23).
 
 ---
 
-# 7. Regras de Negocio
+# 7. Regras de Negócio
 
-* Area publica e acessivel sem autenticacao.
-* Area administrativa exige usuario autenticado e papel autorizado por rota.
-* `Login` fica fora do `PublicLayout` e do `AdminLayout`, evitando herdar navegacao indevida.
-* `NotFound` recebe wildcard `**`.
-* Quando uma nova versao PWA esta pronta, a pagina recarrega automaticamente para garantir consistencia entre index, CSP e assets.
+- **Toda rota administrativa exige `authGuard` + `roleGuard`** — aplicados no nível do `AdminLayout`
+- **`descarteGuard`** protege formulários com dados não salvos — deve ser aplicado em toda rota de formulário
+- **`roleGuard` usa `route.data.roles`** — se a propriedade não for definida, todos os autenticados têm acesso
+- **`/admin` redireciona para `/admin/dashboard`** via `{ path: '', redirectTo: 'dashboard', pathMatch: 'full' }`
+- **`/**` (wildcard)** sempre redireciona para `NotFound` — nunca deve quebrar com tela em branco
 
 ---
 
-# 8. Relacao com Outros Modulos
+# 8. Pontos de Atenção
 
-* `App` depende de `SiteConfigService`.
-* `app.routes.ts` depende de layouts, paginas e guards.
-* `app.config.ts` injeta todos os interceptadores usados pelos servicos HTTP.
-* `index.html` influencia acessibilidade global e SEO inicial.
-* `ngsw-config.json` afeta deploy, cache, atualizacao e confiabilidade offline.
+- Ao adicionar nova rota admin, sempre definir `data: { roles: [...] }` — sem isso, todos os autenticados acessam
+- Ao adicionar formulário com estado, sempre aplicar `canDeactivate: [descarteGuard]`
+- O `title` de cada rota é obrigatório para SEO e acessibilidade — nunca omitir
+- `app.routes.ts` centraliza tudo — evitar criar roteadores filho espalhados pelo projeto
+
+---
+
+# 9. Relação com Outros Módulos
+
+| Módulo | Relação |
+|---|---|
+| `auth.guard.ts` | Protege todas as rotas admin verificando token JWT |
+| `role.guard.ts` | Verifica `route.data.roles` contra o role do usuário |
+| `descarte.guard.ts` | Chama `podeDescartar()` nos componentes de formulário |
+| `api.interceptor.ts` | Resolve URLs relativas `/api/*` |
+| `auth.interceptor.ts` | Injeta JWT e trata 401 |
+| `error.interceptor.ts` | Feedback visual para erros HTTP |
+| `AdminLayout` | Shell que hospeda todas as páginas admin |
+| `PublicLayout` | Shell que hospeda o site público |
+
+---
+
+# 10. Resumo Técnico Final
+
+| Item | Detalhe |
+|---|---|
+| **Função** | Inicialização, composição de providers e roteamento da SPA |
+| **Criticidade** | 🔴 Crítica — qualquer erro aqui impede o boot da aplicação |
+| **Complexidade** | Média — alto impacto, código enxuto |
+| **Principais integrações** | axe-core (dev), Angular Router, HttpClient, Service Worker |
+| **Risco principal** | Alterar a ordem dos interceptors ou remover um provider pode quebrar toda a aplicação silenciosamente |

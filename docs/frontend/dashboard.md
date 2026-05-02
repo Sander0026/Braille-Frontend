@@ -1,149 +1,106 @@
-# Modulo: Dashboard Administrativo
+# Módulo: Dashboard Administrativo
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar o dashboard administrativo, seus cards estatisticos, acoes rapidas, servico de configuracao visual e integracao com estatisticas da API.
+Exibir uma visão consolidada e em tempo real do estado operacional do Instituto:
+total de alunos ativos, turmas em andamento, frequência da semana e ações rápidas.
 
 ## Responsabilidade
 
-O dashboard e a primeira tela interna apos login. Ele apresenta indicadores principais e atalhos para operacoes recorrentes, consumindo `DashboardService` e componentes em `src/app/features/dashboard`.
+O Dashboard é a **primeira tela** que o usuário vê após login. Deve carregar rapidamente,
+fornecer indicadores-chave (KPIs) e oferecer atalhos para as ações mais comuns.
 
 ## Fluxo de Funcionamento
 
-Ao acessar `/admin/dashboard`, o roteador carrega `Dashboard`. O componente consulta estatisticas, combina com configuracao visual de cards/acoes e renderiza `StatCardComponent` e `QuickActionComponent`.
+```
+AdminLayout inicializa → Router carrega Dashboard (lazy)
+    ↓
+DashboardComponent.ngOnInit()
+    ↓
+DashboardService.getStats() → verifica cache (TTL 5 min)
+    ↓
+Exibe cards de KPIs + atalhos rápidos + gráfico de frequência
+```
 
 ---
 
 # 2. Arquitetura e Metodologias
 
-## Padroes Arquiteturais Identificados
+## Padrões Identificados
 
-* Feature module folder por dominio.
-* Presentational components para cards e acoes.
-* Service Layer para dados de estatisticas.
-* Configuration service para metadados visuais.
-* Lazy loading via rota standalone.
-
-## Justificativa Tecnica
-
-Separar componentes de cards/acoes da pagina principal deixa o dashboard extensivel. O servico de estatisticas possui cache de 5 minutos, adequado para indicadores agregados que nao precisam atualizar a cada navegacao.
+- **Signals** — estado de loading e dados dos KPIs reativos
+- **Cache Aside** — `DashboardService` com TTL de 5 minutos
+- **Smart Component** — Dashboard orquestra a carga dos dados
+- **Lazy Loading** — carregado apenas quando o usuário acessa `/admin/dashboard`
 
 ---
 
-# 3. Fluxo Interno do Codigo
+# 3. Serviço e Endpoint
 
-## Fluxo de Execucao
+**`DashboardService`** — `src/app/core/services/dashboard.service.ts`
 
-1. Usuario autenticado acessa `/admin/dashboard`.
-2. `Dashboard` injeta servicos necessarios.
-3. `DashboardService.getEstatisticas()` consulta `/api/dashboard/estatisticas`.
-4. `DashboardConfigService` fornece configuracao visual dos indicadores e atalhos.
-5. Cards exibem numeros de alunos ativos, turmas ativas, membros da equipe e comunicados gerais.
-6. Acoes rapidas navegam para rotas administrativas como alunos, turmas, frequencias e conteudo.
-7. Em erro, a tela deve manter feedback visual por toast/interceptor ou estado local.
+```typescript
+getStats(): Observable<DashboardStats>
+  GET /api/dashboard/stats
+```
 
-## Dependencias Internas
+**Interface `DashboardStats`:**
+```typescript
+interface DashboardStats {
+  totalAlunos: number;
+  alunosAtivos: number;
+  turmasEmAndamento: number;
+  frequenciaMedia: number;   // percentual da semana
+  comunicadosRecentes: number;
+}
+```
 
-* `DashboardService`
-* `DashboardConfigService`
-* `StatCardComponent`
-* `QuickActionComponent`
-* `DashboardStats`
-* rotas admin
-
-## Dependencias Externas
-
-* Angular core/common/router.
-* RxJS.
+**Cache:** TTL de 5 minutos. Invalidado por `BeneficiariosService.limparCache()`.
 
 ---
 
-# 4. Dicionario Tecnico
+# 4. Componente
 
-## Variaveis
+**Arquivo:** `src/app/features/dashboard/dashboard.ts`
 
-* `alunosAtivos`: quantidade de beneficiarios ativos.
-* `turmasAtivas`: quantidade de turmas ativas.
-* `membrosEquipe`: quantidade de usuarios/equipe.
-* `comunicadosGerais`: quantidade de comunicados.
-* `cache`: objeto local em `DashboardService` com Observable e expiracao.
-* `cacheTimeMs`: 5 minutos.
+### Elementos visuais
+- Cards de KPIs (Alunos Ativos, Turmas, Frequência, Comunicados)
+- Atalhos rápidos: "Novo Aluno", "Nova Chamada", "Ver Relatórios"
+- Gráfico de presença da semana (renderizado com dados da API)
+- Mensagem de boas-vindas com nome do usuário autenticado
 
-## Funcoes e Metodos
-
-* `getEstatisticas()`: retorna estatisticas cacheadas ou busca da API.
-* `limparCache()`: limpa indicadores; chamado por servicos que alteram dados relevantes.
-* Metodos do componente `Dashboard`: carregam dados e expõem configuracao de render.
-
-## Classes
-
-* `DashboardService`: acesso HTTP e cache de estatisticas.
-* `Dashboard`: container da tela.
-* `StatCardComponent`: card de metrica.
-* `QuickActionComponent`: acao de navegacao.
-* `DashboardConfigService`: metadados de UI.
-
-## Interfaces e Tipagens
-
-* `DashboardStats`: `{ alunosAtivos, turmasAtivas, membrosEquipe, comunicadosGerais }`.
-* Modelos em `dashboard.models.ts`: contratos visuais de card e acao.
+### Acessibilidade
+- `aria-live="polite"` na região de KPIs (atualiza quando dados carregam)
+- Ícones decorativos com `aria-hidden="true"`
+- Atalhos de teclado globais (`Alt+Shift+D` retorna ao dashboard)
 
 ---
 
-# 5. Servicos e Integracoes
+# 5. Segurança e Performance
 
-## APIs
-
-* `GET /api/dashboard/estatisticas`: retorna indicadores agregados.
-
-## Banco de Dados
-
-Nao acessa diretamente. Indicadores refletem agregacoes do backend sobre alunos, turmas, usuarios e comunicados.
-
-## Servicos Externos
-
-Nao ha integracao externa direta.
+- **Sem role específico** — todos os autenticados veem o dashboard
+- **Cache de 5 min** — evita re-fetch a cada navegação interna
+- **Invalidação coordenada** com `BeneficiariosService` — dados ficam consistentes após criar/inativar alunos
 
 ---
 
-# 6. Seguranca e Qualidade
+# 6. Pontos de Atenção
 
-## Seguranca
-
-* Rota protegida por `authGuard` e `roleGuard` no pai `/admin`.
-* JWT aplicado por interceptor.
-* Dados exibidos sao agregados, reduzindo exposicao de dados pessoais.
-
-## Qualidade
-
-* Existe spec para dashboard.
-* Componentizacao reduz duplicacao visual.
-* Cache com `shareReplay(1)` evita chamadas repetidas.
-
-## Performance
-
-* Cache de 5 minutos para estatisticas.
-* Lazy loading de rota.
-* Componentes pequenos favorecem OnPush/isolamento.
+- `DashboardService` não é invalidado por mutações em `TurmasService` ou `UsuariosService` —
+  os contadores podem estar defasados por até 5 minutos após essas operações.
+- Se o backend estiver lento (Render cold start), o dashboard pode exibir skeleton por vários segundos.
 
 ---
 
-# 7. Regras de Negocio
+# 7. Relação com Outros Módulos
 
-* Dashboard deve ser tela inicial do admin.
-* Indicadores refletem somente contagens agregadas.
-* Atualizacoes de beneficiarios, turmas, usuarios e comunicados limpam cache do dashboard para refletir dados relevantes.
-* Acoes rapidas devem respeitar permissao real da rota, mesmo que aparecam visualmente.
-
----
-
-# 8. Relacao com Outros Modulos
-
-* Consome `DashboardService`.
-* E alvo de redirecionamento do `roleGuard` quando acesso e negado.
-* Recebe invalidacao indireta de `BeneficiariosService`, `TurmasService`, `UsuariosService` e `ComunicadosService`.
-* Navega para dominios de alunos, turmas, frequencias, conteudo e usuarios.
+| Módulo | Relação |
+|---|---|
+| `DashboardService` | Fonte de dados dos KPIs |
+| `AuthService.getUser()` | Nome de boas-vindas |
+| `BeneficiariosService` | Invalida cache do dashboard após mutações |
+| `HotkeysService` | `Alt+Shift+D` retorna ao dashboard |

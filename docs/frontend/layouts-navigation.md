@@ -1,196 +1,202 @@
-# Modulo: Layout, Navegacao e Shell Visual
+# Módulo: Layouts e Navegação
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar os shells visuais publico e administrativo, header, sidebar, footer, modais de perfil, foto, senha, atalhos e o fluxo de navegacao responsivo.
+Documentar os dois shells visuais da aplicação — `PublicLayout` e `AdminLayout` —
+e todos os componentes estruturais de navegação: header, sidebar, footer e toast.
 
 ## Responsabilidade
 
-`PublicLayout` organiza a experiencia publica com menu, footer e CTA flutuante. `AdminLayout` organiza a experiencia autenticada com sidebar RBAC, header de usuario, acessibilidade, modais, atalhos e `RouterOutlet` para telas internas.
+Os layouts funcionam como **orquestradores visuais**: definem o esqueleto da página,
+instanciam componentes estruturais e expõem um `<router-outlet>` onde as páginas
+são injetadas pelo Angular Router.
 
 ## Fluxo de Funcionamento
 
-As rotas carregam `PublicLayout` ou `AdminLayout`. Cada layout renderiza elementos comuns e delega a tela ativa ao `RouterOutlet`. O admin carrega usuario/perfil, filtra menu por papel, alterna sidebar conforme viewport, captura atalhos e abre modais de conta.
+```
+URL acessada pelo usuário
+    ↓
+Router seleciona PublicLayout ou AdminLayout (baseado no path)
+    ↓
+Layout renderiza componentes estruturais (header, sidebar, footer)
+    ↓
+<router-outlet> injeta o componente da página específica
+    ↓
+Componentes da página consomem serviços via inject()
+```
 
 ---
 
 # 2. Arquitetura e Metodologias
 
-## Padroes Arquiteturais Identificados
+## Padrões Identificados
 
-* Shell layout pattern.
-* Smart/container component em `AdminLayout`.
-* Presentational components em `HeaderComponent` e `Sidebar`.
-* EventEmitter pattern para comunicacao filho-pai.
-* OnPush change detection no admin/public layouts.
-* Signals para estado simples no `PublicLayout`.
-* RBAC visual por filtro de navegacao.
-* Accessibility-first navigation com foco, labels e contraste.
-
-## Justificativa Tecnica
-
-A separacao entre layout e paginas reduz repeticao de header/sidebar. `AdminLayout` centraliza comportamento de sessao para evitar que cada pagina trate perfil e logout. `HeaderComponent` recebe dados por `@Input` e emite acoes, mantendo baixo acoplamento. `Sidebar` recebe `rotasPermitidas`, portanto nao conhece regras de autenticacao.
+- **Shell Pattern** — dois layouts encapsulam o contexto visual de cada área
+- **Smart/Dumb Component** — layouts são "smart" (lógica de auth/menu); páginas são "dumb"
+- **Signals** — estado de sidebar (aberta/fechada), perfil do usuário, loading
+- **Lazy Loading** — próprios layouts são lazy: `loadComponent()` em `app.routes.ts`
 
 ---
 
-# 3. Fluxo Interno do Codigo
+# 3. `PublicLayout` — Shell do Site Institucional
 
-## Fluxo de Execucao
+**Arquivo:** `src/app/layouts/public-layout/public-layout.ts`
 
-1. Rota publica carrega `PublicLayout`; rota admin carrega `AdminLayout`.
-2. `PublicLayout` injeta `AccessibilityService`, guarda estado `isMobileMenuOpen` em signal e oferece `toggleMobileMenu`/`closeMobileMenu`.
-3. `AdminLayout.ngOnInit` le usuario do JWT, atualiza estado mobile, busca perfil completo e carrega atalhos registrados.
-4. `AdminLayout.rotasPermitidas` filtra `navItems` pelo papel do usuario.
-5. `HeaderComponent` renderiza modo publico ou admin conforme `theme`.
-6. Acoes de header (`perfil`, `foto`, `senha`, `sair`) sobem via `userAction`.
-7. `AdminLayout` abre modais e preserva o elemento focado antes do modal.
-8. Ao fechar modal, foco retorna ao elemento anterior.
-9. `Sidebar` emite `sair` quando solicitado.
-10. Resize da janela recalcula estado da sidebar.
+Hospeda o site público acessível sem autenticação.
 
-## Dependencias Internas
+### Estrutura visual
+```
+┌─────────────────────────────────┐
+│  HeaderComponent (público)      │
+├─────────────────────────────────┤
+│  <router-outlet>                │  ← Home, Sobre, Contato, Notícias...
+│  (página carregada pelo router) │
+├─────────────────────────────────┤
+│  FooterComponent                │
+└─────────────────────────────────┘
+```
 
-* `AuthService`
-* `AccessibilityService`
-* `HotkeysService`
-* `ConfirmDialogService`
-* `HeaderComponent`
-* `Sidebar`
-* `FooterComponent`
-* `ToastComponent`
-* `ConfirmDialog`
-* `ModalFotoComponent`
-* `ModalSenhaComponent`
-* `ModalPerfilComponent`
-* `ModalHotkeysComponent`
-* `FloatingCtaComponent`
-
-## Dependencias Externas
-
-* `@angular/core`
-* `@angular/common`
-* `@angular/router`
-* `@angular/cdk/a11y`
-* `rxjs`
+### Componentes instanciados
+- `HeaderComponent` — logo, menu de navegação pública, link para Login
+- `FooterComponent` — rodapé institucional com links e contato
+- Botão de acessibilidade (VLibras) — integração com widget gov.br
 
 ---
 
-# 4. Dicionario Tecnico
+# 4. `AdminLayout` — Shell do Painel Administrativo
 
-## Variaveis
+**Arquivo:** `src/app/layouts/admin-layout/admin-layout.ts`
 
-* `sidebarState`: `'full' | 'icons' | 'hidden'`; controla densidade da sidebar.
-* `isMobile`: booleano derivado de `window.innerWidth <= 768`.
-* `usuario`: payload decodificado do JWT.
-* `perfil`: perfil completo carregado via API.
-* `fotoPerfil`: URL da foto atual.
-* `nomeDisplay`: nome exibido no header.
-* `iniciaisDisplay`: fallback visual quando nao ha foto.
-* `modalAtivo`: `'none' | 'foto' | 'senha' | 'perfil' | 'hotkeys'`.
-* `hotkeysDisponiveis`: lista de atalhos registrados.
-* `lastFocusBeforeModal`: ancora de foco para acessibilidade.
-* `navItems`: matriz de rotas, labels, icones, aria-labels e roles.
-* `isMobileMenuOpen`: signal publico para menu mobile.
-* `menuAberto`: estado local do dropdown de usuario no header.
+Shell protegido por `authGuard` + `roleGuard`. Carrega o perfil do usuário autenticado
+e filtra o menu lateral de acordo com o role.
 
-## Funcoes e Metodos
+### Estrutura visual
+```
+┌──────────┬──────────────────────────────────┐
+│          │  HeaderComponent (admin)          │
+│ Sidebar  ├──────────────────────────────────┤
+│          │  <router-outlet>                  │
+│ (menu    │  (Dashboard, Alunos, Turmas...)   │
+│ lateral) │                                   │
+│          │                                   │
+└──────────┴──────────────────────────────────┘
+         ToastComponent (flutuante, global)
+         ConfirmDialogComponent (modal global)
+```
 
-* `ngOnInit`: inicializa usuario, perfil, responsividade e atalhos.
-* `ngOnDestroy`: finaliza `destroy$`.
-* `carregarPerfil`: busca `/auth/me`.
-* `updateMobileState`: adapta sidebar a mobile/desktop.
-* `onResize`: HostListener de resize.
-* `toggleSidebar`: alterna estados da sidebar.
-* `onHeaderAction`: roteia acoes emitidas pelo header.
-* `abrirModal`: abre modal preservando foco original.
-* `fecharModal`: fecha modal e devolve foco.
-* `onFotoAtualizada`: sincroniza foto no layout.
-* `onPerfilAtualizado`: sincroniza perfil e display.
-* `confirmarERemoverFoto`: usa dialogo global antes de limpar foto.
-* `sair`: logout e navegacao para `/login`.
-* `atualizarDisplayUser`: calcula nome e iniciais.
-* `toggleMobileMenu` e `closeMobileMenu`: controlam menu publico mobile.
-* `HeaderComponent.toggleUserMenu`: abre/fecha dropdown admin.
-* `HeaderComponent.onEscapeKey`: fecha dropdown com Escape.
+### Responsabilidades do AdminLayout
+1. Chama `AuthService.getMe()` ao inicializar para carregar foto e nome de exibição
+2. Filtra itens do menu baseado em `user.role` (RBAC visual)
+3. Gerencia estado de collapse da sidebar (signal local)
+4. Instancia `HotkeysService` via `inject()` para registrar atalhos globais
+5. Escuta `HotkeysService.onHelpRequested$` para abrir modal de ajuda de atalhos
 
-## Classes
+### Itens do menu lateral por role
 
-* `AdminLayout`: container admin com estado de usuario, navegacao, modal e acessibilidade.
-* `PublicLayout`: container publico com menu mobile e servico de acessibilidade.
-* `HeaderComponent`: componente reutilizavel para header publico/admin.
-* `Sidebar`: menu lateral admin filtrado por permissao.
-
-## Interfaces e Tipagens
-
-* `NavItem`: `{ rota, label, icon, aria, role? }`.
-* `SidebarState`: `'full' | 'icons' | 'hidden'`.
-* `ModalType`: `'none' | 'foto' | 'senha' | 'perfil' | 'hotkeys'`.
-* `RotaSidebar`: contrato visual da sidebar.
+| Item de Menu | Rota | Roles |
+|---|---|---|
+| Dashboard | `/admin/dashboard` | Todos |
+| Alunos | `/admin/alunos` | ADMIN, SECRETARIA |
+| Turmas | `/admin/turmas` | Todos |
+| Frequências | `/admin/frequencias` | Todos |
+| Apoiadores | `/admin/apoiadores` | ADMIN, SECRETARIA, COMUNICACAO |
+| Certificados | `/admin/modelos-certificados` | ADMIN, SECRETARIA |
+| Conteúdo do Site | `/admin/conteudo` | ADMIN, COMUNICACAO |
+| Fale Conosco | `/admin/contatos` | ADMIN, SECRETARIA, COMUNICACAO |
+| Usuários | `/admin/usuarios` | ADMIN |
+| Auditoria | `/admin/auditoria` | ADMIN |
+| Ajuda | `/admin/ajuda` | Todos |
 
 ---
 
-# 5. Servicos e Integracoes
+# 5. Componentes Estruturais Globais
 
-## APIs
+## 5.1 `HeaderComponent` (admin)
 
-* `GET /api/auth/me`: perfil do usuario no layout admin.
-* `PATCH /api/auth/me/foto`: remocao/atualizacao de foto via fluxo de modal.
-* `PATCH /api/auth/me`: atualizacao de perfil.
-* `PATCH /api/auth/me/senha`: troca de senha.
+**Arquivo:** `src/app/core/components/header/`
 
-## Banco de Dados
+- Exibe nome e foto de perfil do usuário autenticado
+- Botão de logout → `AuthService.logout()` + redirect `/login`
+- Botão de editar perfil → abre `PerfilModal`
+- Botão de trocar foto → abre `FotoModal`
+- Botão de trocar senha → abre `SenhaModal`
+- Toggle de sidebar no mobile (emite evento para `AdminLayout`)
 
-Nao acessa diretamente. O layout reflete usuarios, perfis e roles persistidos no backend.
+## 5.2 `SidebarComponent`
 
-## Servicos Externos
+**Arquivo:** `src/app/core/components/sidebar/`
 
-Nao possui integracao externa direta; usa recursos globais de Sentry, PWA e API por meio de providers.
+- Renderiza menu lateral filtrando por `user.role`
+- Suporte a collapse em desktop (signal de estado)
+- Totalmente navegável por teclado (Tab + Enter)
+- `aria-current="page"` no item ativo
+- `aria-label` descritivo em cada link
 
----
+## 5.3 `ToastComponent`
 
-# 6. Seguranca e Qualidade
+**Arquivo:** `src/app/core/components/toast/`
 
-## Seguranca
+- Consome `ToastService.toasts` (signal computed)
+- Renderiza pilha de toasts no canto inferior direito
+- Cada toast tem `role="alert"` para leitores de tela
+- Auto-remove após duração configurada no serviço
+- Cores semânticas: verde (sucesso), vermelho (erro), amarelo (aviso), azul (info)
 
-* Menu admin e filtrado por papel, reduzindo descoberta de funcionalidades.
-* Logout limpa tokens.
-* Modais preservam foco e reduzem erro operacional.
-* Remocao de foto exige confirmacao.
-* Acoes sensiveis sao delegadas a API protegida por JWT.
+## 5.4 `ConfirmDialogComponent`
 
-## Qualidade
+**Arquivo:** `src/app/core/components/confirm-dialog/`
 
-* `ChangeDetectionStrategy.OnPush` reduz renderizacoes desnecessarias.
-* `takeUntil(this.destroy$)` evita vazamento de subscriptions.
-* Dropdown fecha com clique externo e Escape.
-* Labels ARIA estao presentes nos itens de navegacao.
+- Modal global de confirmação com `cdkTrapFocus` (não vaza foco)
+- Consome `ConfirmDialogService` (signal-based)
+- Botões "Confirmar" e "Cancelar" com callbacks tipados
+- Fecha com Esc e clique no backdrop
 
-## Performance
+## 5.5 `FooterComponent`
 
-* Sidebar calcula rotas permitidas por getter simples.
-* Layout publico usa signal para estado local.
-* Admin usa `markForCheck` apenas apos eventos assíncronos.
+**Arquivo:** `src/app/core/components/footer/`
 
----
-
-# 7. Regras de Negocio
-
-* ADMIN ve todas as rotas administrativas.
-* SECRETARIA ve alunos, turmas, frequencias, certificados, apoiadores e contatos.
-* PROFESSOR ve turmas e frequencias.
-* COMUNICACAO ve apoiadores, conteudo e contatos no layout.
-* Ajuda nao exige role especifica no menu, mas ainda exige area admin autenticada.
-* Em mobile, sidebar nunca fica em estado `full` permanente; alterna entre icones e oculto.
+- Rodapé do site público
+- Links para Home, Sobre, Contato
+- Dados de contato e endereço do ILBES
 
 ---
 
-# 8. Relacao com Outros Modulos
+# 6. Segurança e Acessibilidade
 
-* Consome `AuthService`, `HotkeysService`, `AccessibilityService` e `ConfirmDialogService`.
-* Fornece shell para todos os dominios admin.
-* Header e sidebar sao usados por layouts.
-* Modais de perfil atualizam estado que impacta header.
+## Segurança
+
+- `AdminLayout` só é renderizado após `authGuard` liberar a rota — sem flash de conteúdo admin
+- Itens de menu não renderizados para roles sem permissão → RBAC visual + guard de rota
+
+## Acessibilidade
+
+- Sidebar com `aria-label="Menu de navegação"` e `nav` semântico
+- `aria-current="page"` no link ativo
+- Header com `role="banner"` e main com `role="main"`
+- Toast com `role="alert"` + `LiveAnnouncer` integrado via `ToastService`
+- ConfirmDialog com `cdkTrapFocus` — foco não escapa do modal
+
+---
+
+# 7. Pontos de Atenção
+
+- `getMe()` é chamado toda vez que `AdminLayout` inicializa — ao navegar entre páginas admin,
+  o layout não é destruído (Angular mantém o shell vivo), então `getMe()` só é chamado uma vez por sessão.
+- A sidebar filtra visualmente por role, mas a proteção real está nos guards de rota —
+  nunca depender apenas do menu para segurança.
+
+---
+
+# 8. Relação com Outros Módulos
+
+| Módulo | Relação |
+|---|---|
+| `AuthService` | AdminLayout consome `getUser()` e `getMe()` |
+| `HotkeysService` | Instanciado e escutado pelo AdminLayout |
+| `ToastService` | ToastComponent renderiza os signals do serviço |
+| `ConfirmDialogService` | ConfirmDialogComponent renderiza o diálogo global |
+| `app.routes.ts` | Define qual layout é usado por cada grupo de rotas |

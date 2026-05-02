@@ -13,7 +13,6 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { QuillModule } from 'ngx-quill';
-import * as Sentry from '@sentry/angular';
 
 import { routes } from './app.routes';
 import { apiInterceptor } from './core/interceptors/api.interceptor';
@@ -56,11 +55,5 @@ export const appConfig: ApplicationConfig = {
       enabled: !isDevMode(),
       registrationStrategy: 'registerWhenStable:30000',
     }),
-
-    // ── Monitoring / Observabilidade (Sentry) ────────────────────────
-    {
-      provide: ErrorHandler,
-      useValue: Sentry.createErrorHandler({ showDialog: false }),
-    },
   ],
 };

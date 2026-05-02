@@ -1,208 +1,149 @@
-# Modulo: Turmas e Frequencias
+# Módulo: Turmas e Frequências
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar a gestao de turmas/oficinas, matriculas, chamada de frequencia, fechamento/reabertura de diario, relatorios e componentes administrativos relacionados.
+Gerenciar o ciclo completo das oficinas/turmas do Instituto (criação, matrícula, status)
+e registrar a presença dos alunos por chamada diária com suporte a diário fechado/reaberto.
 
 ## Responsabilidade
 
-Este modulo abrange `TurmasService`, `FrequenciasService`, `TurmasLista`, cards/modais de turma, filtros, alunos da turma, `FrequenciasLista`, chamada, historico, relatorio e diretiva de linha focavel.
-
-## Fluxo de Funcionamento
-
-Administradores, secretaria e professores acessam turmas/frequencias. Turmas sao criadas com grade, professor e status. Alunos sao matriculados/desmatriculados. Frequencias registram presenca por data, podem ser salvas em lote e o diario pode ser fechado ou reaberto.
+Dois domínios intimamente relacionados: **Turmas** define quem estuda o quê e quando;
+**Frequências** registra dia a dia se cada aluno esteve presente.
 
 ---
 
-# 2. Arquitetura e Metodologias
+# 2. Turmas
 
-## Padroes Arquiteturais Identificados
+## 2.1 `TurmasLista` — Listagem e Gerenciamento
 
-* Feature/domain separation por turma e frequencia.
-* Service Layer REST.
-* Modal composition para formulario, alunos e filtros.
-* DTO pattern para `CreateTurmaDto`.
-* Cache TTL para resumo de frequencias.
-* State-driven UI para chamada/historico/relatorio.
-* Accessibility pattern com diretiva focavel em tabela.
+**Arquivo:** `src/app/pages/admin/turmas/turmas-lista/`
+**Rota:** `/admin/turmas`
 
-## Justificativa Tecnica
+### Funcionalidades
+- Lista de turmas com filtros: nome, status, professor
+- Criação e edição via `TurmaFormModal` (modal inline — sem navegar para nova rota)
+- Arquivar, restaurar, ocultar turmas
+- Gerenciar matrículas: adicionar/remover alunos
+- Mudança de status: `PREVISTA → ANDAMENTO → CONCLUIDA | CANCELADA`
+- `descarteGuard` ativo na rota
 
-Turmas e frequencias possuem fluxo operacional frequente. Dividir lista, card, filtro, formulario e alunos melhora manutencao. A chamada em lote reduz roundtrips, enquanto o fechamento de diario cria marco de consistencia pedagogica.
+### Máquina de Estados das Turmas
 
----
+```
+PREVISTA ──────────► ANDAMENTO ──────────► CONCLUIDA
+    │                    │
+    └────────────────────┴────────────────► CANCELADA
+```
 
-# 3. Fluxo Interno do Codigo
+### Grade Horária
 
-## Fluxo de Execucao
+Cada turma tem uma `GradeHorariaDto` com os dias e horários das aulas.
+O backend valida **colisão de horários** por professor — o frontend exibe o erro retornado pela API.
 
-1. `/admin/turmas` carrega listagem.
-2. `TurmasService.listar` aplica paginacao e filtros, incluindo `excluido`, `statusAtivo`, `professorId` e `status`.
-3. Criacao/edicao usa `CreateTurmaDto`.
-4. Matricula chama `POST /turmas/:turmaId/alunos/:alunoId`.
-5. Status muda via endpoints especificos.
-6. `/admin/frequencias` carrega resumo e/ou registros.
-7. Chamada seleciona turma/data e salva lote.
-8. Diario fechado impede alteracoes conforme regra backend.
-9. Relatorio individual consulta presencas/faltas/taxa.
+```typescript
+interface GradeHorariaDto {
+  diaSemana: number;     // 0=Dom, 1=Seg, ..., 6=Sáb
+  horaInicio: number;    // minutos desde meia-noite (ex: 480 = 08:00)
+  horaFim: number;
+}
+```
 
-## Dependencias Internas
-
-* `TurmasService`
-* `FrequenciasService`
-* `BeneficiariosService`
-* `UsuariosService` para professores ativos via backend de turmas.
-* `ConfirmDialogService`
-* `ToastService`
-* pipes de data e formatacao
-
-## Dependencias Externas
-
-* Angular Forms.
-* Angular Router.
-* Angular HttpClient.
-* RxJS.
+> **Nota:** horários são armazenados em **minutos** (não string HH:MM) — decisão documentada
+> em `docs/backend/11-decisoes-tecnicas.md` (ADR-006).
 
 ---
 
-# 4. Dicionario Tecnico
+# 3. Frequências
 
-## Variaveis
+## 3.1 `FrequenciasLista` — Chamada Diária
 
-* `GradeHorariaDto.dia`: `SEG|TER|QUA|QUI|SEX|SAB|DOM`.
-* `horaInicio`, `horaFim`: minutos desde meia-noite.
-* `TurmaStatus`: `PREVISTA|ANDAMENTO|CONCLUIDA|CANCELADA`.
-* `Turma.capacidadeMaxima`: limite de alunos.
-* `cargaHoraria`: carga total.
-* `professor`: usuario responsavel.
-* `matriculasOficina`: alunos vinculados.
-* `Frequencia.presente`: booleano da chamada.
-* `dataAula`: data da aula.
-* `fechado`, `fechadoEm`: estado de diario.
-* `ResumoFrequencia.totalAlunos`, `presentes`, `faltas`, `diarioFechado`.
-* `resumoCache`: cache de resumo padrao por 1 minuto.
+**Arquivo:** `src/app/pages/admin/frequencias/frequencias-lista/`
+**Rota:** `/admin/frequencias`
 
-## Funcoes e Metodos
+### Fluxo de Chamada
 
-* `TurmasService.listar`: lista turmas com filtros.
-* `listarProfessoresAtivos`: carrega professores para selecao.
-* `alunosDisponiveis`: busca alunos nao matriculados.
-* `criar`, `atualizar`, `arquivar`, `restaurar`, `ocultarDaAba`.
-* `matricularAluno`, `desmatricularAluno`.
-* `mudarStatus`, `cancelar`, `concluir`.
-* `FrequenciasService.listar`: registros detalhados.
-* `listarResumo`: resumo cacheado para tela principal.
-* `salvarLote`: persiste chamada.
-* `fecharDiario`, `reabrirDiario`.
-* `getRelatorioAluno`: estatisticas individuais.
+```
+Professor seleciona turma + data
+    ↓
+FrequenciasService.getResumo(turmaId, data)
+    ↓
+Exibe lista de alunos com toggle Presente/Ausente
+    ↓
+Usuário marca presença → salva em lote
+    ↓
+POST /api/frequencias/lote
+    ↓
+Opcional: fechar diário → imutável até reabrir (ADMIN)
+```
 
-## Classes
+### Diário de Classe
 
-* `TurmasLista`: container de listagem e acoes.
-* `TurmaCardComponent`: apresentacao de turma.
-* `TurmaFormModalComponent`: cadastro/edicao.
-* `TurmaAlunosModalComponent`: matriculas.
-* `TurmaFiltroDrawerComponent`: filtros.
-* `FrequenciasLista`: container.
-* `FrequenciaChamadaComponent`: chamada.
-* `FrequenciaHistoricoComponent`: historico.
-* `FrequenciaRelatorioComponent`: relatorio.
-* `TabelaTrFocavelDirective`: acessibilidade de linhas/tabela.
+O diário pode ser **fechado** após a chamada do dia, tornando os registros imutáveis.
+Apenas `ADMIN` pode reabrir um diário fechado.
 
-## Interfaces e Tipagens
+```typescript
+fecharDiario(turmaId: string, data: string): Observable<void>
+  POST /api/frequencias/diario/fechar/:turmaId/:data
 
-* `GradeHorariaDto`
-* `TurmaStatus`
-* `Turma`
-* `CreateTurmaDto`
-* `Frequencia`
-* `ResumoFrequencia`
-* `FrequenciaRelatorioAluno`
-* `FrequenciaRelatorioEstatisticas`
-* `FrequenciaRelatorioHistoricoItem`
-* `PaginatedResponse<T>`
+reabrirDiario(turmaId: string, data: string): Observable<void>
+  POST /api/frequencias/diario/reabrir/:turmaId/:data
+```
+
+### Relatório Individual
+
+Gera relatório de presença/ausência de um aluno em uma turma específica.
+Usado para impressão e envio aos responsáveis.
+
+```typescript
+getRelatorioAluno(turmaId, alunoId): Observable<ResumoFrequencia>
+  GET /api/frequencias/relatorio/turma/:turmaId/aluno/:alunoId
+```
+
+### Integração com Atestados
+
+Quando um atestado médico é registrado para um aluno, o sistema
+**justifica automaticamente** as faltas dentro do período do atestado.
+O frontend exibe `preview` de faltas justificáveis antes de salvar o atestado.
 
 ---
 
-# 5. Servicos e Integracoes
+# 4. Segurança e Acessibilidade
 
-## APIs
+## Segurança
 
-* `GET /api/turmas`
-* `GET /api/turmas/professores-ativos`
-* `GET /api/turmas/:id`
-* `GET /api/turmas/:turmaId/alunos-disponiveis`
-* `POST /api/turmas`
-* `PATCH /api/turmas/:id`
-* `DELETE /api/turmas/:id`
-* `PATCH /api/turmas/:id/restaurar`
-* `PATCH /api/turmas/:id/ocultar`
-* `POST /api/turmas/:turmaId/alunos/:alunoId`
-* `DELETE /api/turmas/:turmaId/alunos/:alunoId`
-* `PATCH /api/turmas/:id/status`
-* `PATCH /api/turmas/:id/cancelar`
-* `PATCH /api/turmas/:id/concluir`
-* `GET /api/frequencias`
-* `GET /api/frequencias/resumo`
-* `POST /api/frequencias`
-* `PATCH /api/frequencias/:id`
-* `POST /api/frequencias/lote`
-* `DELETE /api/frequencias/:id`
-* `POST /api/frequencias/diario/fechar/:turmaId/:dataAula`
-* `POST /api/frequencias/diario/reabrir/:turmaId/:dataAula`
-* `GET /api/frequencias/relatorio/turma/:turmaId/aluno/:alunoId`
+- **Turmas:** `descarteGuard` protege o `TurmaFormModal` contra fechamento acidental
+- **Frequências:** diário fechado é imutável para não-ADMINs — proteção por regra de negócio no backend
 
-## Banco de Dados
+## Acessibilidade
 
-Entidades refletidas: turmas, usuarios professores, matriculasOficina, beneficiarios/alunos e frequencias.
-
-## Servicos Externos
-
-Nao ha integracao externa direta.
+- Toggle de presença tem `aria-checked` e `aria-label="Marcar presença de [nome]"`
+- Feedback de chamada salva anunciado via `LiveAnnouncer`
+- `Alt+Shift+O` navega para turmas; `Alt+Shift+F` navega para frequências
 
 ---
 
-# 6. Seguranca e Qualidade
+# 5. Pontos de Atenção
 
-## Seguranca
-
-* Rotas exigem usuario admin autenticado; roles de turma/frequencia incluem `ADMIN`, `SECRETARIA` e `PROFESSOR`.
-* Professores devem ver/operar dados conforme backend restringir por token.
-* Fechamento de diario protege integridade da chamada.
-
-## Qualidade
-
-* Existem specs para servico de turmas e componentes de turma/frequencia.
-* `HttpHeaders` anti-cache em turmas evita dados obsoletos em listagem operacional.
-* Resumo de frequencia possui cache curto e invalidacao por mutacoes.
-
-## Performance
-
-* Chamada em lote reduz multiplas requisicoes.
-* Resumo padrao usa `shareReplay(1)` por 1 minuto.
-* Lazy loading das paginas evita custo antes do acesso.
+- **Colisão de horários** é validada no backend — o frontend mostra a mensagem de erro da API.
+  O UX poderia ser melhorado com validação prévia no formulário (débito técnico).
+- **Chamada em lote** (`salvarLote`) é uma transação atômica no backend — se um registro falhar,
+  nenhum é salvo. O frontend deve informar isso ao usuário.
+- **Cache de resumo** (5 min) pode exibir dados desatualizados se outro professor
+  lançar chamada simultaneamente.
 
 ---
 
-# 7. Regras de Negocio
+# 6. Relação com Outros Módulos
 
-* Turma pode ser prevista, em andamento, concluida ou cancelada.
-* Arquivamento e restauracao preservam historico.
-* Aluno so deve ser matriculado se disponivel.
-* Diario fechado sinaliza chamada validada.
-* Diario pode ser reaberto quando permitido.
-* Relatorio individual calcula total de aulas, presentes, faltas e taxa de presenca.
-
----
-
-# 8. Relacao com Outros Modulos
-
-* Beneficiarios fornece alunos.
-* Usuarios fornece professores.
-* Certificados academicos dependem de turma/aluno.
-* Auditoria registra matricula, desmatricula, fechar/reabrir diario e mudar status.
-* Dashboard agrega turmas ativas.
+| Módulo | Relação |
+|---|---|
+| `TurmasService` | Toda a comunicação com `/api/turmas` |
+| `FrequenciasService` | Chamadas, resumo, diário e relatório |
+| `AtestadosService` | Justificativa automática de faltas por atestado |
+| `BeneficiariosService` | Lista alunos disponíveis para matrícula |
+| `descarteGuard` | Proteção de formulários de turma |
+| `HotkeysService` | `Alt+Shift+O` e `Alt+Shift+F` |

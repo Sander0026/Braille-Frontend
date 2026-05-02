@@ -1,204 +1,129 @@
-# Modulo: Usuarios e Perfil Administrativo
+# Módulo: Usuários e Perfil Administrativo
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar a gestao de usuarios administrativos, cadastro assistido, papeis, CPF, reativacao, reset de senha, perfil logado, foto e troca de senha.
+Gerenciar os usuários do painel administrativo (funcionários e professores do Instituto)
+e o perfil do usuário autenticado (foto, nome, senha).
 
 ## Responsabilidade
 
-Este modulo inclui `UsuariosService`, `UsuariosLista`, `CadastroUsuarioWizard`, modais de usuario, modais de perfil/foto/senha do `AdminLayout` e integracao com `AuthService`.
-
-## Fluxo de Funcionamento
-
-Administradores acessam `/admin/usuarios`, listam usuarios, filtram por nome/role/inativos, criam usuarios com CPF e cargo, recebem credenciais geradas pelo backend, reativam usuarios inativos, resetam senha, editam dados e gerenciam perfil/foto/senha do usuario logado.
+Dois sub-domínios: **Usuários** (gestão de contas pela ADMIN) e **Perfil** (auto-gerenciamento
+pelo próprio usuário autenticado via header do AdminLayout).
 
 ---
 
-# 2. Arquitetura e Metodologias
+# 2. Gestão de Usuários (`/admin/usuarios`)
 
-## Padroes Arquiteturais Identificados
+**Acesso:** apenas `ADMIN`
 
-* Service Layer para usuarios.
-* Wizard pattern para cadastro.
-* Modal pattern para formularios e perfil.
-* RBAC por rota.
-* Cache TTL em listagem.
-* DTO pattern para criacao.
-* Soft delete, restore e hard delete.
-* Facade de upload via `StorageService`.
+## 2.1 `UsuariosLista` — Listagem
 
-## Justificativa Tecnica
+**Arquivo:** `src/app/pages/admin/usuarios/usuarios-lista/`
 
-Usuarios impactam seguranca e autorizacao; separar servico e telas facilita auditoria. O backend gera credenciais, reduzindo regra sensivel no frontend. O wizard reduz erro de preenchimento em cadastro. Cache melhora listagem, mas e invalidado em mutacoes.
+### Funcionalidades
+- Lista paginada de funcionários com filtro por nome, role, status
+- Ações: editar, inativar, restaurar, excluir definitivamente, resetar senha
+- Visualização de role com badge colorido por tipo
+- Alerta de reativação: quando CPF já existe como inativo
 
----
+### Roles disponíveis
 
-# 3. Fluxo Interno do Codigo
+| Role | Descrição |
+|---|---|
+| `ADMIN` | Acesso total ao sistema |
+| `SECRETARIA` | Alunos, turmas, frequências, documentos |
+| `PROFESSOR` | Apenas lançamento de chamada |
+| `COMUNICACAO` | Comunicados, apoiadores, conteúdo do site |
 
-## Fluxo de Execucao
+## 2.2 `CadastroUsuarioWizard` — Wizard de Cadastro
 
-1. Usuario ADMIN acessa `/admin/usuarios`.
-2. `UsuariosService.listar` consulta `/api/users` com filtros e cache.
-3. Cadastro chama `verificarCpf` para detectar duplicidade.
-4. `criar` envia `CreateUsuarioDto`.
-5. Backend retorna usuario com `_credenciais` ou `_reativacao`.
-6. Se reativacao for solicitada, `reativar(id)` gera nova senha padrao.
-7. Edicao chama `atualizar`.
-8. Inativacao/restauracao/exclusao definitiva limpam cache.
-9. Reset de senha chama `resetarSenha`.
-10. Perfil logado e manipulado por `AuthService.getMe`, `atualizarPerfil`, `atualizarFoto`, `trocarSenha`.
+**Arquivo:** `src/app/pages/admin/usuarios/cadastro-usuario-wizard/`
+**Rota:** `/admin/usuarios/cadastro`
 
-## Dependencias Internas
+### Passos do wizard
 
-* `UsuariosService`
-* `AuthService`
-* `StorageService`
-* `ConfirmDialogService`
-* `ToastService`
-* `senhaForteValidator`
-* pipes/mascaras de CPF, telefone e CEP
-* `descarteGuard`
+| Passo | Campos |
+|---|---|
+| 1. Dados | Nome, username, CPF, role, email |
+| 2. Senha | Senha temporária (gerada ou manual) |
+| 3. Confirmação | Revisão antes de salvar |
 
-## Dependencias Externas
+### Fluxo de Reativação
 
-* Angular Forms.
-* Angular Router.
-* Angular HttpClient.
-* RxJS.
+Idêntico ao de beneficiários: se CPF já existe como inativo, sistema oferece reativação.
+`POST /api/users/:id/reativar` → gera nova senha temporária e define `precisaTrocarSenha: true`.
+
+### Reset de Senha
+
+`PATCH /api/users/:id/reset-password` → redefine para senha padrão do ambiente
+e ativa `precisaTrocarSenha: true`. No próximo login, o usuário é forçado a trocar.
 
 ---
 
-# 4. Dicionario Tecnico
+# 3. Perfil do Usuário Autenticado
 
-## Variaveis
+Gerenciado diretamente pelo `AdminLayout` via modais no header — sem rota separada.
 
-* `Usuario.id`: identificador.
-* `nome`: nome exibido e oficial.
-* `username`: login.
-* `email`, `telefone`: contato.
-* `cpf`: documento de deduplicacao.
-* `matricula`: codigo interno.
-* `role`: `ADMIN|SECRETARIA|PROFESSOR|COMUNICACAO`.
-* `fotoPerfil`: imagem do usuario.
-* `precisaTrocarSenha`: obriga troca no fluxo de autenticacao.
-* `statusAtivo`: ativo/inativo.
-* `CreateUsuarioDto`: payload de criacao.
-* `_credenciais`: username, senha e instrucao gerados pelo backend.
-* `_reativacao`: marcador de usuario inativo existente.
-* `cache`: cache de listagem por chave.
-* `cacheTimeMs`: 2 minutos.
+## 3.1 Modal de Perfil
 
-## Funcoes e Metodos
+- Campos: `nome`, `email`
+- Chama `AuthService.atualizarPerfil({ nome, email })`
+- `PATCH /api/auth/perfil`
 
-* `verificarCpf(cpf)`: consulta duplicidade.
-* `listar(page,limit,nome,inativos,role)`: lista usuarios.
-* `criar(dados)`: cria ou retorna reativacao.
-* `reativar(id)`: reativa e gera credenciais.
-* `atualizar(id,dados)`: edita usuario.
-* `excluir(id)`: inativa.
-* `resetarSenha(id)`: redefine senha.
-* `restaurar(id)`: restaura.
-* `excluirDefinitivo(id)`: hard delete.
-* `uploadFoto(file)`: envia foto.
-* `AuthService.trocarSenha`: troca senha do usuario logado.
-* `AuthService.getMe`: carrega perfil.
+## 3.2 Modal de Foto
 
-## Classes
+- Upload de imagem via `AuthService.uploadFoto(file)` → `StorageService.uploadGlobalImage()`
+- `POST /api/upload` → URL Cloudinary retornada
+- `PATCH /api/auth/foto-perfil` → salva a nova URL no perfil
+- Preview antes de confirmar
 
-* `UsuariosService`: API/cache de usuarios.
-* `UsuariosLista`: listagem e acoes.
-* `CadastroUsuarioWizard`: cadastro guiado.
-* `UsuarioFormModalComponent`: formulario modal.
-* `UsuarioPerfilModalComponent`: detalhe/perfil.
-* `ModalPerfilComponent`: perfil do usuario logado.
-* `ModalFotoComponent`: foto do usuario logado.
-* `ModalSenhaComponent`: troca de senha.
+## 3.3 Modal de Troca de Senha
 
-## Interfaces e Tipagens
-
-* `Usuario`
-* `ReativacaoResponse`
-* `CredenciaisGeradas`
-* `CreateUsuarioResponse`
-* `CreateUsuarioDto`
-* `PerfilUsuario`
-* `UserInfo`
+- Campos: `senhaAtual`, `novaSenha`, `confirmarNovaSenha`
+- `senhaForteValidator` aplicado em `novaSenha`
+- `PATCH /api/auth/trocar-senha`
+- Obrigatório no primeiro login (`precisaTrocarSenha: true`)
 
 ---
 
-# 5. Servicos e Integracoes
+# 4. Segurança e Qualidade
 
-## APIs
+## Segurança
 
-* `GET /api/users/check-cpf`
-* `GET /api/users`
-* `POST /api/users`
-* `POST /api/users/:id/reativar`
-* `PATCH /api/users/:id`
-* `DELETE /api/users/:id`
-* `PATCH /api/users/:id/reset-password`
-* `PATCH /api/users/:id/restore`
-* `DELETE /api/users/:id/hard`
-* `POST /api/upload`
-* `GET /api/auth/me`
-* `PATCH /api/auth/me`
-* `PATCH /api/auth/me/foto`
-* `PATCH /api/auth/me/senha`
-
-## Banco de Dados
-
-Entidade refletida: usuarios administrativos com papeis, status, credenciais, perfil, foto e endereco.
-
-## Servicos Externos
-
-* Storage remoto para foto de perfil via `/api/upload`.
-
----
-
-# 6. Seguranca e Qualidade
-
-## Seguranca
-
-* Rota `/admin/usuarios` restrita a ADMIN.
-* Backend gera credenciais e senha padrao.
-* Reset de senha e reativacao sao acoes administrativas.
-* `senhaForteValidator` protege troca de senha.
-* `precisaTrocarSenha` e respeitado pelo `authGuard`.
+- **Apenas ADMIN** acessa `/admin/usuarios`
+- **Qualquer usuário autenticado** pode editar seu próprio perfil/foto/senha
+- **Reset de senha** sempre ativa `precisaTrocarSenha: true` — nunca expõe senha em texto claro
+- **Senha padrão** vem do ambiente do backend (`SENHA_PADRAO`) — nunca hardcoded no frontend
+- **CPF mascarado** no log de auditoria via `audit-diff.util`
 
 ## Qualidade
 
-* Existe spec para listagem e formulario modal.
-* Cache e invalidado em mutacoes.
-* DTO reduz campos aceitos na criacao.
-* Interfaces explicitam roles validas.
-
-## Performance
-
-* Listagem usa cache com `shareReplay(1)`.
-* Upload de foto e delegado.
-* Lazy loading evita custo antes do uso admin.
+- `descarteGuard` no wizard de cadastro
+- Validação de CPF antes de submeter → chama `/api/users/check-cpf`
+- Feedback específico por erro do formulário (`senhaForteValidator`)
 
 ---
 
-# 7. Regras de Negocio
+# 5. Pontos de Atenção
 
-* Somente ADMIN gerencia usuarios.
-* CPF duplicado ativo impede novo cadastro.
-* CPF duplicado inativo aciona fluxo de reativacao.
-* Criacao gera credenciais automaticas.
-* Reset de senha deve produzir novo estado de troca obrigatoria conforme backend.
-* Usuarios possuem papeis que controlam menu e rotas.
+- **Usuário não pode se auto-excluir** — validação no backend, mas o botão deve ser desabilitado
+  visualmente para o próprio usuário logado (UX).
+- **`precisaTrocarSenha`** é lido do JWT — após resetar a senha de outro usuário,
+  a sessão atual daquele usuário é encerrada no próximo request protegido.
 
 ---
 
-# 8. Relacao com Outros Modulos
+# 6. Relação com Outros Módulos
 
-* `AdminLayout` exibe perfil do usuario.
-* `roleGuard` usa role do JWT.
-* Turmas usam professores.
-* Auditoria referencia `autorId`, `autorNome` e `autorRole`.
-* Dashboard agrega membros da equipe.
+| Módulo | Relação |
+|---|---|
+| `UsuariosService` | Toda comunicação com `/api/users` |
+| `AuthService` | Perfil, foto e senha do usuário autenticado |
+| `StorageService` | Upload de foto de perfil |
+| `authGuard` | Detecta `precisaTrocarSenha` e força logout |
+| `senhaForteValidator` | Validação de senha nos modais |
+| `descarteGuard` | Proteção do wizard de cadastro |

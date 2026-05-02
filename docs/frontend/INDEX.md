@@ -1,116 +1,179 @@
-# Documentacao Tecnica Frontend
+# Documentação Técnica Frontend — Braille-Frontend
+
+**Sistema Administrativo Integrado — Instituto Luiz Braille do Espírito Santo (ILBES)**
+
+> Gerada por engenharia reversa completa do código-fonte — Angular 21 Standalone.
+> Última atualização: 2026-05-02 | Versão: 2.0
 
 ---
 
-# 1. Visao Geral
+## Como Navegar por Esta Documentação
 
-## Objetivo
+**Sou novo no projeto → Comece por:**
+1. [README.md](../../README.md) — visão geral e setup em 5 passos
+2. [00-setup.md](./00-setup.md) — ambiente local detalhado
+3. [CONTRIBUTING.md](../../CONTRIBUTING.md) — como contribuir
+4. [app-bootstrap-rotas.md](./app-bootstrap-rotas.md) — como a aplicação funciona
 
-Este indice centraliza a documentacao tecnica gerada por engenharia reversa do frontend Angular do sistema Instituto Luiz Braille.
+**Preciso entender autenticação →** [auth-session-guards.md](./auth-session-guards.md)
 
-## Escopo
+**Preciso chamar a API →** [core-http-services.md](./core-http-services.md)
 
-A varredura cobre arquitetura SPA, bootstrap, roteamento, layouts, guards, interceptadores, servicos HTTP, estado reativo, componentes compartilhados, dominios administrativos, paginas publicas, PWA, acessibilidade e testes.
+**Preciso criar um componente acessível →** [11-acessibilidade.md](./11-acessibilidade.md) + [shared-ui-a11y-utils.md](./shared-ui-a11y-utils.md)
 
-## Modulos Documentados
-
-* [Aplicacao, Bootstrap e Roteamento](./app-bootstrap-rotas.md)
-* [Autenticacao, Sessao e Autorizacao](./auth-session-guards.md)
-* [Servicos HTTP e Integracoes de API](./core-http-services.md)
-* [Layout, Navegacao e Shell Visual](./layouts-navigation.md)
-* [Acessibilidade, UI Compartilhada e Utilitarios](./shared-ui-a11y-utils.md)
-* [Dashboard Administrativo](./dashboard.md)
-* [Beneficiarios e Cadastro de Alunos](./beneficiaries.md)
-* [Turmas e Frequencias](./turmas-frequencias.md)
-* [Usuarios e Perfil Administrativo](./usuarios-perfil.md)
-* [Conteudo Publico, Comunicados e Contatos](./conteudo-publico-contatos.md)
-* [Apoiadores e Certificados](./apoiadores-certificados.md)
-* [Auditoria, Ajuda e Qualidade](./audit-ajuda-quality.md)
+**Quero entender por que X foi feito assim →** [12-decisoes-tecnicas.md](./12-decisoes-tecnicas.md)
 
 ---
 
-# 2. Mapa Arquitetural
+## Índice de Documentos
 
-## Camadas Identificadas
-
-* `src/main.ts`: inicializacao Angular, Sentry, axe-core em desenvolvimento e bootstrap da SPA.
-* `src/app/app.config.ts`: providers globais, `HttpClient` com interceptadores, router, locale, Quill, PWA e Sentry `ErrorHandler`.
-* `src/app/app.routes.ts`: composicao de rotas publicas e administrativas com lazy loading via `loadComponent`.
-* `src/app/core`: servicos de dominio, guards, interceptadores, pipes seguros e componentes estruturais globais.
-* `src/app/layouts`: shells publico e administrativo.
-* `src/app/features`: dominios funcionais reutilizados por rotas administrativas, como dashboard e beneficiarios.
-* `src/app/pages`: paginas publicas e administrativas.
-* `src/app/shared`: componentes atomicos, diretivas, pipes, validadores, providers e utilitarios puros.
-* `cypress`: testes E2E, acessibilidade e fluxos criticos.
-
-## Dependencias Externas Principais
-
-* Angular 21 para SPA standalone, router, forms, service worker e HTTP.
-* Angular CDK para acessibilidade, `LiveAnnouncer` e focus trap.
-* RxJS para Observables, cache com `shareReplay`, `BehaviorSubject`, `Subject` e composicao assíncrona.
-* Angular Signals para estado local de UI e servicos de dialog/toast.
-* `@sentry/angular` para observabilidade de erros quando `sentryDsn` estiver configurado.
-* `ngx-quill` e `quill` para conteudo rico no CMS.
-* `dompurify` e pipes de sanitizacao para reducao de risco XSS.
-* `pdfjs-dist` e visualizadores de PDF para documentos e manuais.
-* Cypress, axe-core, Vitest e ESLint para qualidade.
+| # | Documento | Cobertura |
+|---|---|---|
+| 00 | [Setup e Onboarding](./00-setup.md) | Pré-requisitos, instalação, ambiente, scripts, troubleshooting |
+| 01 | [Bootstrap, Config e Rotas](./app-bootstrap-rotas.md) | `main.ts`, `app.config.ts`, `app.routes.ts`, tabela completa de rotas |
+| 02 | [Autenticação, Sessão e Guards](./auth-session-guards.md) | JWT, refresh token concorrente, RBAC, `authGuard`, `roleGuard`, `descarteGuard` |
+| 03 | [Serviços HTTP e APIs](./core-http-services.md) | 19 serviços, todos os endpoints, cache TTL, interfaces TypeScript |
+| 04 | [Layouts e Navegação](./layouts-navigation.md) | `PublicLayout`, `AdminLayout`, sidebar, header, toast, menu por role |
+| 05 | [Componentes Shared, Pipes e Utilitários](./shared-ui-a11y-utils.md) | UI atoms, `SafeHtmlPipe`, `CloudinaryPipe`, masks, validators, directives |
+| 06 | [Dashboard](./dashboard.md) | KPIs, cache, acessibilidade |
+| 07 | [Beneficiários e Alunos](./beneficiaries.md) | CRUD completo, wizard, reativação, LGPD, importação, exportação |
+| 08 | [Turmas e Frequências](./turmas-frequencias.md) | Máquina de estados de turma, diário de chamada, atestados |
+| 09 | [Usuários e Perfil](./usuarios-perfil.md) | Gestão de funcionários, wizard de cadastro, perfil próprio |
+| 10 | [Conteúdo Público e Fale Conosco](./conteudo-publico-contatos.md) | CMS (Quill), comunicados, formulário de contato |
+| 11 | [Apoiadores e Certificados](./apoiadores-certificados.md) | Parceiros, modelos PDF, emissão, validação pública |
+| 12 | [Auditoria, Ajuda e Qualidade](./audit-ajuda-quality.md) | Log de auditoria, diff com mascaramento, central de ajuda, hotkeys |
+| 13 | [Testes](./09-testes.md) | Vitest (unitários), Cypress E2E, cypress-axe, CI/CD |
+| 14 | [PWA e Deploy](./10-pwa-deploy.md) | Build, service worker, Vercel, análise linha a linha do CSP |
+| 15 | [Acessibilidade (WCAG)](./11-acessibilidade.md) | axe-core, LiveAnnouncer, WCAG 2.1 AA, VLibras, checklist |
+| 16 | [Decisões Técnicas (ADRs)](./12-decisoes-tecnicas.md) | 11 ADRs: Angular standalone, JWT, interceptors, Sentry, branches |
 
 ---
 
-# 3. Historico de Varredura
+## Mapa Arquitetural
 
-## Entrada Atual
-
-* Tipo de analise: frontend.
-* Data local da execucao: 2026-04-29.
-* Workspace analisado: `E:\PI-5\Braille-Frontend\Braille-Frontend`.
-* Codigo gerado: documentacao Markdown em `docs/frontend`.
-
-## Arquivos-Fonte Base Lidos
-
-* `package.json`
-* `angular.json`
-* `ngsw-config.json`
-* `proxy.conf.json`
-* `src/index.html`
-* `src/main.ts`
-* `src/styles.scss`
-* `src/environments/environment.ts`
-* `src/environments/environment.prod.ts`
-* `src/environments/environment.interface.ts`
-* `src/app/app.ts`
-* `src/app/app.config.ts`
-* `src/app/app.routes.ts`
-* `src/app/core/**/*.ts`
-* `src/app/layouts/**/*.ts`
-* `src/app/features/**/*.ts`
-* `src/app/pages/**/*.ts`
-* `src/app/shared/**/*.ts`
-* `cypress/**/*.ts`
-
----
-
-# 4. Rastreabilidade Entre Modulos
-
-## Fluxo Publico
-
-`PublicLayout` hospeda `HeaderComponent`, `FooterComponent`, `FloatingCtaComponent` e `RouterOutlet`. As paginas `Home`, `Sobre`, `Contato`, `Noticias`, `ValidarCertificado` e `NotFound` consomem `SiteConfigService`, `ComunicadosService`, `ContatoService`, `ModelosCertificadosService` e recursos visuais de `assets`.
-
-## Fluxo Administrativo
-
-`AdminLayout` e protegido por `authGuard` e `roleGuard`, carrega perfil via `AuthService`, filtra menu por papel, orquestra sidebar, header, modais, dialogo global, toast e atalhos. As paginas administrativas consomem os servicos de dominio em `core/services` e servicos locais, como `ApoiadoresService`.
-
-## Fluxo HTTP
-
-Toda chamada `HttpClient` passa por `apiInterceptor`, `authInterceptor` e `errorInterceptor`. O primeiro resolve base URL, o segundo injeta JWT e renova token em 401, e o terceiro centraliza feedback visual/audivel para falhas 0, 403 e 5xx.
+```
+src/
+├── main.ts                   ← Bootstrap + axe-core (dev only, dynamic import)
+├── environments/
+│   ├── environment.ts        ← DEV: apiUrl = '/api' (proxy local)
+│   └── environment.prod.ts   ← PROD: apiUrl = 'https://braille-api-oieq.onrender.com/api'
+├── app/
+│   ├── app.config.ts         ← Providers globais: HTTP + interceptors + PWA + Quill + locale
+│   ├── app.routes.ts         ← Rotas lazy-loaded (público + admin protegido)
+│   ├── core/
+│   │   ├── services/         ← 19 serviços HTTP (AuthService, BeneficiariosService, ...)
+│   │   ├── interceptors/     ← apiInterceptor → authInterceptor → errorInterceptor
+│   │   ├── guards/           ← authGuard + roleGuard + descarteGuard
+│   │   ├── pipes/            ← SafeHtmlPipe, SafeUrlPipe, CloudinaryPipe
+│   │   └── components/       ← Header, Sidebar, Footer, Toast, ConfirmDialog
+│   ├── layouts/
+│   │   ├── public-layout/    ← Site público (sem auth)
+│   │   └── admin-layout/     ← Painel protegido (authGuard + roleGuard)
+│   ├── features/
+│   │   ├── dashboard/        ← Dashboard administrativo
+│   │   └── beneficiaries/    ← Listagem e formulário de alunos
+│   ├── pages/
+│   │   ├── admin/            ← Todas as páginas do painel
+│   │   └── public/           ← Home, Sobre, Contato, Notícias, Login...
+│   └── shared/
+│       ├── components/       ← UiButton, UiCard, UiInput, UiModal, PdfViewer
+│       ├── directives/       ← TabEscape, PhoneMask, AnimateOnScroll
+│       ├── validators/       ← senhaForteValidator (OWASP)
+│       ├── utils/            ← masks, audit-diff, html-sanitizer
+│       └── providers/        ← provideTabEscapeForTextareas()
+├── styles/                   ← TailwindCSS + SCSS globais
+└── environments/             ← Configuração por ambiente
+```
 
 ---
 
-# 5. Pontos Globais de Atencao
+## Fluxo HTTP Completo
 
-* `app.routes.ts` foi alinhado para usar `COMUNICACAO` na rota de apoiadores, junto de `ADMIN` e `SECRETARIA`.
-* `AuthService` persiste tokens em `localStorage`, o que simplifica sessao SPA, mas aumenta exposicao em caso de XSS.
-* Servicos internos criticos foram padronizados para `/api`, deixando o `apiInterceptor` resolver a URL base.
-* `ComunicadosService.listar` usa `HttpParams`, mantendo encoding consistente dos filtros.
-* `SiteConfigService.aplicarCorPrimaria` usa guarda de documento e calcula corretamente a variavel escurecida da cor primaria.
-* Existem comentarios com caracteres mojibake em alguns arquivos, indicando divergencia de encoding anterior.
+```
+Componente → Serviço.listar()
+    ↓
+HttpClient.get('/api/beneficiaries')
+    ↓
+[1] apiInterceptor     → resolve /api/* para URL absoluta do Render
+[2] authInterceptor    → injeta Bearer token | intercepta 401 → refresh
+[3] errorInterceptor   → toast para status 0, 403, 5xx
+    ↓
+API NestJS (Render)
+    ↓
+Resposta tipada → Observable<T> → componente atualiza view
+```
+
+---
+
+## Fluxo de Autenticação
+
+```
+Login → JWT salvo em localStorage
+    ↓
+authGuard verifica exp + precisaTrocarSenha
+    ↓
+roleGuard verifica route.data.roles vs user.role
+    ↓
+authInterceptor injeta token em cada request
+    ↓
+401 recebido → refresh automático (1 chamada para N requests)
+    ↓
+Token renovado → requests em fila são reexecutadas
+```
+
+---
+
+## Stack Completa
+
+| Camada | Tecnologia | Versão |
+|---|---|---|
+| Framework | Angular Standalone | 21 |
+| Estilos | TailwindCSS + SCSS | 3 |
+| Estado | Angular Signals + RxJS | — |
+| Editor Rich Text | ngx-quill | — |
+| PDF | pdfjs-dist | — |
+| Sanitização | DOMPurify | — |
+| A11y (dev) | axe-core | — |
+| A11y (E2E) | cypress-axe | — |
+| A11y (runtime) | Angular CDK LiveAnnouncer | — |
+| PWA | @angular/service-worker | — |
+| Deploy | Vercel | — |
+| Testes E2E | Cypress | 15 |
+| Testes Unitários | Vitest | 4 |
+| Linting | ESLint 9 + angular-eslint | — |
+
+---
+
+## URLs de Produção
+
+| Serviço | URL |
+|---|---|
+| Site público | `instituto-luizbraille.vercel.app` |
+| Painel admin | `instituto-luizbraille.vercel.app/login` |
+| API (backend) | `https://braille-api-oieq.onrender.com/api` |
+| Swagger (API docs) | `https://braille-api-oieq.onrender.com/api/docs` |
+
+---
+
+## Perfis de Acesso
+
+| Role | O que acessa |
+|---|---|
+| `ADMIN` | Tudo — único com acesso a Usuários e Auditoria |
+| `SECRETARIA` | Alunos, Turmas, Frequências, Certificados, Contatos |
+| `PROFESSOR` | Dashboard + lançamento de chamada (apenas suas turmas) |
+| `COMUNICACAO` | Dashboard, Comunicados, Apoiadores, Conteúdo do Site |
+
+---
+
+## Pontos de Atenção Globais
+
+| Ponto | Detalhe |
+|---|---|
+| **`provideAnimations()` deprecated** | Mantido por dependência do `ngx-quill` — remover no Angular 23 |
+| **JWT em localStorage** | Risco residual de XSS — mitigado por CSP + DOMPurify |
+| **Render cold start** | Backend pode demorar 30-60s para responder no primeiro acesso diário |
+| **Service Worker** | Desabilitado em desenvolvimento; ativar apenas via build de produção |
+| **ngx-quill** | Requer `provideAnimations()` legado — bloqueia migração para animações modernas |
+| **ViaCEP** | Serviço externo para preenchimento de endereço — sem SLA garantido |
+| **Formulário de Contato** | Sem CAPTCHA — vulnerável a spam (melhoria recomendada) |

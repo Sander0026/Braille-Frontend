@@ -1,199 +1,334 @@
-# Modulo: Acessibilidade, UI Compartilhada e Utilitarios
+# Módulo: Componentes Shared, UI, Acessibilidade e Utilitários
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar componentes atomicos, pipes, diretivas, validadores, providers e servicos de acessibilidade/feedback usados transversalmente no frontend.
+Documentar todos os elementos reutilizáveis da aplicação: componentes atômicos de UI,
+diretivas, pipes, validators, utilitários puros e providers globais.
 
 ## Responsabilidade
 
-Este modulo cobre `AccessibilityService`, `ToastService`, `ConfirmDialogService`, `HotkeysService`, `UiButtonComponent`, `UiInput`, `UiModal`, `PdfViewerComponent`, diretivas de scroll/mascara/Tab, pipes de formatacao/sanitizacao, utilitarios puros e validador de senha forte.
-
-## Fluxo de Funcionamento
-
-Paginas e layouts reutilizam componentes e utilitarios compartilhados para manter consistencia visual, feedback acessivel, formatacao de dados brasileiros, protecao de URLs, mascaras, modais com foco preso, escape de textarea/contenteditable e validacao de formularios.
+A camada `shared/` fornece os **blocos de construção** usados por todas as features.
+Cada elemento é standalone, testável de forma isolada e sem dependência de feature específica.
 
 ---
 
-# 2. Arquitetura e Metodologias
+# 2. Componentes Atômicos (`shared/components/`)
 
-## Padroes Arquiteturais Identificados
+## 2.1 `UiButtonComponent` — Botão Padronizado
 
-* Design system leve por componentes standalone.
-* ControlValueAccessor para input reutilizavel.
-* Signals e computed para UI reativa.
-* Focus trap com Angular CDK.
-* Provider singleton para comportamento global de teclado.
-* Pure pipes para formatacao performatica.
-* Functional utilities para mascaras e diffs.
-* Composition over inheritance com `injectFormDescarte`.
+**Arquivo:** `src/app/shared/components/ui-button/`
 
-## Justificativa Tecnica
+Componente de botão com variantes visuais e estado de loading.
 
-Componentes standalone reduzem dependencias e facilitam importacao pontual. Signals simplificam estado local sem subscriptions. Pipes puros evitam recalculos desnecessarios. Diretivas e providers encapsulam problemas de acessibilidade que seriam repetidos em telas diversas.
+```html
+<!-- Uso típico -->
+<ui-button variant="primary" [loading]="salvando" (clicked)="salvar()">
+  Salvar
+</ui-button>
+```
 
----
+**Variantes:** `primary`, `secondary`, `danger`, `ghost`
+**Acessibilidade:** `aria-busy` quando loading, `disabled` nativo ao carregar
 
-# 3. Fluxo Interno do Codigo
+## 2.2 `UiCardComponent` — Container Visual
 
-## Fluxo de Execucao
+**Arquivo:** `src/app/shared/components/ui-card/`
 
-1. `AccessibilityService` restaura preferencias do `localStorage`.
-2. Ao alternar contraste ou fonte, aplica classes/estilos no `document.documentElement`.
-3. `ToastService` adiciona toast em signal e remove por timeout.
-4. `ConfirmDialogService.confirmar` grava dados em signal e retorna Promise resolvida por confirmar/cancelar.
-5. `HotkeysService` registra atalhos `Alt+Shift+N/O/F/H/D` e escuta `keydown`.
-6. `UiInput` implementa `ControlValueAccessor` e sincroniza valor com Angular Forms.
-7. `UiModal` renderiza `<dialog>`, backdrop, focus trap e emite `closed`.
-8. `PdfViewerComponent` normaliza URL, gera Blob para assets locais e revoga ObjectURL no destroy.
-9. Diretivas de mascara e Tab interceptam eventos de input/keydown.
-10. Pipes formatam valores e sanitizam URLs/HTML conforme contexto.
+Container com sombra, bordas arredondadas e padding padrão. Base visual de todas
+as seções de formulário e listagem.
 
-## Dependencias Internas
+## 2.3 `UiInputComponent` — Campo de Formulário
 
-* `ConfirmDialogService`
-* `AccessibilityService`
-* `ToastService`
-* `SafeUrlPipe`
-* `formatarCep`, `formatarTelefone`, `formatarCpfCnpj`, `formatarRg`
-* `AuditLog`
+**Arquivo:** `src/app/shared/components/ui-input/`
 
-## Dependencias Externas
+Input com label flutuante, mensagens de erro integradas e suporte a máscaras.
 
-* `@angular/core`
-* `@angular/forms`
-* `@angular/common`
-* `@angular/platform-browser`
-* `@angular/cdk/a11y`
-* `rxjs`
+```html
+<ui-input
+  label="CPF"
+  [control]="form.get('cpf')"
+  mask="cpf"
+  [errorMessages]="{ required: 'CPF obrigatório', pattern: 'CPF inválido' }"
+/>
+```
 
----
+## 2.4 `UiModalComponent` — Modal Padronizado
 
-# 4. Dicionario Tecnico
+**Arquivo:** `src/app/shared/components/ui-modal/`
 
-## Variaveis
+Modal com `cdkTrapFocus`, fechamento por Esc, backdrop clicável e animação de entrada/saída.
 
-* `LS_CONTRASTE`: chave `a11y_alto_contraste`.
-* `LS_FONTE`: chave `a11y_tamanho_fonte`.
-* `_altoContraste`: `BehaviorSubject<boolean>`.
-* `_fonteSize`: `BehaviorSubject<FonteSize>`.
-* `_toasts`: signal de lista de toasts.
-* `nextId`: contador incremental de toasts.
-* `dialogData`: signal com dados do dialogo atual.
-* `hotkeys`: `Map<string, HotkeyAction>`.
-* `onHelpRequested$`: `Subject<void>` para abrir ajuda de atalhos.
-* `onNovoAlunoRequested$`: `Subject<void>` reservado para fluxo de novo aluno.
-* `BLOCKED_PROTOCOLS`: lista `javascript:`, `data:`, `vbscript:`.
-* `PASSWORD_MIN_LENGTH`: minimo 8.
-* `AUDIT_FIELD_LABELS`: mapa de campos amigaveis de auditoria.
-* `AUDIT_IGNORED_FIELDS`: campos tecnicos omitidos do diff.
+```html
+<ui-modal [aberto]="modalAberto" titulo="Editar Aluno" (fechou)="fecharModal()">
+  <!-- conteúdo -->
+</ui-modal>
+```
 
-## Funcoes e Metodos
+**Acessibilidade:**
+- `role="dialog"` + `aria-modal="true"`
+- `aria-labelledby` aponta para o título
+- `cdkTrapFocus` — foco não escapa enquanto aberto
+- Fecha com `Esc`
 
-* `toggleAltoContraste`: alterna contraste e persiste preferencia.
-* `setFonte`: aplica fonte `padrao`, `grande` ou `extragrande`.
-* `mostrar`, `sucesso`, `erro`, `aviso`, `info`, `remover`: ciclo de vida de toast.
-* `confirmar`, `_confirmar`, `_cancelar`: ciclo de confirm dialog.
-* `addHotkey`, `getRegisteredHotkeys`: registro/consulta de atalhos.
-* `listenToKeyboard`: subscription global de teclado.
-* `isInsideInputForm`: evita atalhos em inputs/editaveis.
-* `writeValue`, `registerOnChange`, `registerOnTouched`, `setDisabledState`: CVA de `UiInput`.
-* `closeOnBackdrop`, `onEscape`: fechamento de modal.
-* `prepararPdf`, `normalizarUrl`, `deveRenderizarComoBlob`, `revogarObjectUrl`: fluxo PDF.
-* `generatePreview`: remove HTML e trunca preview.
-* `gerarDiferencas`: compara valores antigos/novos de auditoria.
-* `senhaForteValidator`: valida comprimento, maiuscula, minuscula, numero e especial.
+## 2.5 `PdfViewerComponent` — Visualizador de PDF
 
-## Classes
+**Arquivo:** `src/app/shared/components/pdf-viewer/`
 
-* `AccessibilityService`: preferencias visuais globais.
-* `ToastService`: feedback visual e audivel.
-* `ConfirmDialogService`: promessas de confirmacao.
-* `HotkeysService`: atalhos de teclado admin.
-* `UiButtonComponent`: botao tipado com variantes.
-* `UiInput`: input reutilizavel com CVA e ARIA.
-* `UiModal`: modal com dialog e focus trap.
-* `PdfViewerComponent`: visualizador seguro de PDF.
-* `AnimateOnScrollDirective`: animacao por IntersectionObserver.
-* `PhoneMaskDirective`: mascara de telefone.
-* `TabEscapeDirective`: remove armadilha de Tab.
-* Pipes: `AuditFriendlyPipe`, `CategoryLabelPipe`, `CepPipe`, `CpfRgPipe`, `DataBraillePipe`, `SafeUrlPipe`, `StripHtmlPipe`, `TelefonePipe`.
+Renderiza PDFs (atestados, laudos, certificados) usando `pdfjs-dist`.
 
-## Interfaces e Tipagens
+```html
+<pdf-viewer [url]="urlDoArquivo" />
+```
 
-* `FonteSize`: `padrao | grande | extragrande`.
-* `ToastTipo`: `sucesso | erro | aviso | info`.
-* `Toast`: `{ id, mensagem, tipo }`.
-* `ConfirmDialogData`: titulo, mensagem, textos e tipo.
-* `HotkeyAction`: combo, descricao e action.
-* `AuditDiff`: campo, de, para e alterado.
-* `PasswordStrengthErrors`: flags de regras de senha.
+**Funcionalidades:**
+- Renderização canvas a partir de URL remota
+- Navegação por páginas
+- Fallback de loading e erro
+- Não baixa o arquivo automaticamente — exibe inline
 
 ---
 
-# 5. Servicos e Integracoes
+# 3. Diretivas (`shared/directives/`)
 
-## APIs
+## 3.1 `TabEscapeDirective` — Acessibilidade em Textareas
 
-Nao ha endpoints diretos, exceto o `PdfViewerComponent`, que usa `fetch` para assets locais `/assets/...` com `credentials: 'same-origin'`.
+**Arquivo:** `src/app/shared/directives/tab-escape.directive.ts`
+**Seletor:** `textarea[tabEscape]`
 
-## Banco de Dados
+Resolve a "armadilha de teclado" (WCAG 2.1 SC 2.1.1 e 2.1.2): por padrão, pressionar
+`Tab` dentro de um `<textarea>` insere um caractere `\t` em vez de mover o foco.
+Esta diretiva intercepta `Tab` e `Shift+Tab` e navega para o próximo/anterior elemento focável.
 
-Nao acessa banco. Utilitarios formatam dados vindos da API.
+```html
+<!-- Aplicar em qualquer textarea que possa prender o foco -->
+<textarea tabEscape rows="5" formControlName="descricao"></textarea>
+```
 
-## Servicos Externos
+**Comportamento técnico:**
+- Limita a busca de elementos focáveis ao `dialog`, `[cdkTrapFocus]` ou `form` mais próximo
+- Filtra elementos com `aria-hidden="true"` e `offsetParent === null` (invisíveis)
+- Navegação circular: do último elemento volta ao primeiro
+- SSR-safe: verifica `isPlatformBrowser()` antes de acessar o DOM
 
-* Angular CDK A11y para `LiveAnnouncer` e `cdkTrapFocus`.
-* Browser APIs: `localStorage`, `document`, `IntersectionObserver`, `URL.createObjectURL`, `AbortController`, `fetch`.
+## 3.2 `PhoneMaskDirective` — Máscara de Telefone
 
----
+**Arquivo:** `src/app/shared/directives/phone-mask.directive.ts`
+**Seletor:** `input[phoneMask]`
 
-# 6. Seguranca e Qualidade
+Aplica máscara de telefone brasileiro em tempo real durante a digitação.
 
-## Seguranca
+```html
+<input phoneMask type="tel" formControlName="telefone" />
+<!-- Resultado: (27) 99999-9999 -->
+```
 
-* `SafeUrlPipe` bloqueia protocolos comuns de XSS antes de `bypassSecurityTrustResourceUrl`.
-* `StripHtmlPipe` remove tags sem usar `innerHTML` ou `DOMParser`.
-* `senhaForteValidator` aplica regras fortes e regex sem backtracking catastrofico.
-* `TabEscapeDirective` e provider evitam armadilha de teclado.
-* `PdfViewerComponent` revoga ObjectURLs para evitar vazamentos.
+Utiliza `formatarTelefone()` de `masks.util.ts` internamente.
 
-## Qualidade
+## 3.3 `AnimateOnScrollDirective` — Animação de Entrada
 
-* Componentes usam OnPush.
-* Pipes sao puros.
-* Utilitarios sao funcoes puras e testaveis.
-* Existem specs para UI components, pipes e diretiva focavel.
-* Comments indicam preocupacao com OWASP, WCAG e SSR guards.
+**Arquivo:** `src/app/shared/directives/animate-on-scroll.directive.ts`
+**Seletor:** `[animateOnScroll]`
 
-## Performance
+Adiciona classe CSS de animação quando o elemento entra no viewport via `IntersectionObserver`.
+Usado nas seções do site público (Home, Sobre, Apoiadores).
 
-* `UiButton` usa `computed` em vez de `NgClass`.
-* Toast roda fora da zona Angular para reduzir change detection.
-* IntersectionObserver observa ate primeira visibilidade e desregistra.
-* Provider global usa flag singleton para evitar listeners duplicados.
-
----
-
-# 7. Regras de Negocio
-
-* Preferencias de contraste/fonte persistem entre sessoes.
-* Toast de erro dura 8s; demais usam 6s padrao.
-* Atalhos so funcionam com `Alt+Shift` e fora de campos de formulario.
-* Tab em textarea/contenteditable move foco, nao insere tabulacao.
-* Senha forte exige ao menos 8 caracteres, maiuscula, minuscula, numero e especial.
-* Datas ISO sao exibidas como `DD/MM/AAAA`.
-* CPF, RG, telefone e CEP sao exibidos com mascara brasileira.
+```html
+<section animateOnScroll animationClass="fade-in-up">
+  <!-- conteúdo animado ao entrar na tela -->
+</section>
+```
 
 ---
 
-# 8. Relacao com Outros Modulos
+# 4. Pipes (`core/pipes/`)
 
-* Layouts usam `AccessibilityService`, `ToastComponent`, `ConfirmDialog` e `HotkeysService`.
-* Formularios usam `UiInput`, validadores, mascaras e `injectFormDescarte`.
-* Auditoria usa `AuditFriendlyPipe` e `gerarDiferencas`.
-* Ajuda e manuais usam visualizadores de PDF.
-* Conteudo publico usa pipes de categoria, strip HTML e preview.
+## 4.1 `SafeHtmlPipe` — Sanitização HTML Anti-XSS
+
+**Arquivo:** `src/app/core/pipes/safe-html.pipe.ts`
+**Nome:** `safeHtml` | **Pure:** `true`
+
+Pipeline de sanitização de HTML em dois estágios: DOMPurify → Angular DomSanitizer.
+
+```html
+<!-- Conteúdo do CMS (Quill editor) renderizado com segurança -->
+<div [innerHTML]="comunicado.conteudo | safeHtml"></div>
+```
+
+**Pipeline interno:**
+1. Verifica cache em memória (evita reprocessar o mesmo HTML)
+2. DOMPurify sanitiza: permite lista branca de tags e atributos
+3. DOMParser injeta `alt=""` em `<img>` sem alt (WCAG)
+4. DOMParser injeta `aria-label` em `<a target="_blank">` (WCAG 3.2.5)
+5. `DomSanitizer.bypassSecurityTrustHtml()` marca como confiável para o Angular
+6. Armazena no cache (máx. 50 entradas — prevenção de memory leak)
+
+**Tags permitidas:** `b, i, em, strong, a, p, h1-h6, ul, ol, li, br, span, div, img, s, u, blockquote, pre`
+
+## 4.2 `SafeUrlPipe` — Validação de URLs
+
+**Arquivo:** `src/app/core/pipes/safe-url.pipe.ts`
+**Nome:** `safeUrl` | **Pure:** `true`
+
+Bloqueia URLs com protocolos perigosos antes de confiar ao Angular.
+
+```html
+<a [href]="item.link | safeUrl">Ver mais</a>
+```
+
+**Protocolos bloqueados:** `javascript:`, `data:`, `vbscript:`
+
+## 4.3 `CloudinaryPipe` — Otimização de Imagens
+
+**Arquivo:** `src/app/core/pipes/cloudinary.pipe.ts`
+**Nome:** `cloudinary` | **Pure:** `true`
+
+Injeta parâmetros de transformação na URL do Cloudinary para otimização automática
+de formato (WebP) e qualidade — sem precisar gerar múltiplas versões no upload.
+
+```html
+<!-- Imagem original → otimizada para 400px de largura em WebP -->
+<img [src]="apoiador.logo | cloudinary: { w: 400, c: 'fill' }" [alt]="apoiador.nome" />
+```
+
+**Transformações aplicadas:**
+- `f_auto` — formato automático (WebP em browsers modernos)
+- `q_auto` — qualidade automática (Cloudinary otimiza)
+- `w_N` — largura em pixels (opcional)
+- `h_N` — altura em pixels (opcional)
+- `c_fill|scale|crop` — modo de corte (opcional)
+
+**Proteções:**
+- Ignora URLs que não sejam do `res.cloudinary.com`
+- Não duplica transformações já aplicadas
+
+---
+
+# 5. Validators (`shared/validators/`)
+
+## 5.1 `senhaForteValidator` — Validador de Força de Senha
+
+**Arquivo:** `src/app/shared/validators/password.validator.ts`
+
+Validador Angular Reativo compatível com as diretrizes OWASP para senhas seguras.
+
+```typescript
+// Uso no FormBuilder
+this.fb.group({
+  senha: ['', [Validators.required, senhaForteValidator]]
+});
+
+// Template — feedback específico por regra
+@if (form.get('senha')?.errors?.['senhaFraca']?.tooShort) {
+  <span>Mínimo 8 caracteres</span>
+}
+@if (form.get('senha')?.errors?.['senhaFraca']?.missingUppercase) {
+  <span>Precisa de uma letra maiúscula</span>
+}
+```
+
+**Regras validadas:**
+| Regra | Constante | Critério |
+|---|---|---|
+| Comprimento | `tooShort` | Mínimo `PASSWORD_MIN_LENGTH` (8) caracteres |
+| Maiúsculas | `missingUppercase` | Ao menos 1 `[A-Z]` |
+| Minúsculas | `missingLowercase` | Ao menos 1 `[a-z]` |
+| Número | `missingNumber` | Ao menos 1 `[0-9]` |
+| Especial | `missingSpecial` | Ao menos 1 `!@#$%^&*...` (ReDoS-safe) |
+
+Retorna `null` se a senha estiver vazia (compatível com `Validators.required` sem conflito).
+
+---
+
+# 6. Utilitários (`shared/utils/`)
+
+## 6.1 `masks.util.ts` — Funções de Formatação
+
+Funções puras exportadas individualmente (tree-shakeable).
+
+| Função | Entrada | Saída | Exemplo |
+|---|---|---|---|
+| `formatarCpfCnpj(valor)` | `'12345678900'` | `'123.456.789-00'` | CPF e CNPJ |
+| `formatarTelefone(valor)` | `'27999999999'` | `'(27) 99999-9999'` | Celular/Fixo |
+| `formatarCep(valor)` | `'29000000'` | `'29000-000'` | CEP |
+| `formatarRg(valor)` | `'1234567'` | `'1.234.567'` | RG |
+| `limparEmail(valor)` | `' User@EMAIL.com '` | `'user@email.com'` | Normalização |
+
+> `MasksUtil` (objeto agrupador) está marcado como `@deprecated`. Usar as funções diretamente.
+
+## 6.2 `audit-diff.util.ts` — Diff de Auditoria
+
+Utilitário que compara dois objetos JSON (antes/depois de uma edição) e gera
+uma lista legível de diferenças para exibição no log de auditoria.
+
+```typescript
+const diffs = gerarDiferencas(registroAntigo, registroNovo);
+// Retorna: [{ campo: 'Nome', de: 'João', para: 'João Silva', alterado: true, sensivel: false }]
+```
+
+**Funcionalidades:**
+- Ignora campos técnicos (`id`, `criadoEm`, `atualizadoEm`, `senhaHash`)
+- Mascara campos sensíveis (CPF mostra `Final 1234`, email mostra `j***@gmail.com`)
+- Formata datas ISO para PT-BR
+- Traduz `boolean` para `Sim`/`Não`
+- Usa `AUDIT_FIELD_LABELS` para nomes amigáveis dos campos
+
+**Constantes:**
+- `AUDIT_FIELD_LABELS` — mapa de chave técnica → label PT-BR
+- `AUDIT_IGNORED_FIELDS` — campos ignorados no diff (Set imutável)
+
+## 6.3 `html-sanitizer.util.ts` — Sanitizador de Texto Livre
+
+Função pura para sanitizar texto antes de inserir em contextos HTML.
+Complementa o `SafeHtmlPipe` para casos de sanitização sem pipe.
+
+## 6.4 `safe-resource-url.util.ts` — URL Segura para Recursos
+
+Helper para validar e retornar URLs seguras para uso em `src` de iframes e embeds,
+bloqueando protocolos inseguros.
+
+---
+
+# 7. Providers (`shared/providers/`)
+
+## 7.1 `provideTabEscapeForTextareas()`
+
+**Arquivo:** `src/app/shared/providers/tab-escape.provider.ts`
+
+Registra `TabEscapeDirective` globalmente para todos os `<textarea>` da aplicação,
+sem precisar importar a diretiva em cada componente individualmente.
+
+```typescript
+// app.config.ts
+...provideTabEscapeForTextareas()
+```
+
+---
+
+# 8. Segurança
+
+| Elemento | Proteção |
+|---|---|
+| `SafeHtmlPipe` | XSS via DOMPurify + lista branca de tags |
+| `SafeUrlPipe` | Bloqueia `javascript:`, `data:`, `vbscript:` |
+| `CloudinaryPipe` | Só transforma URLs do `res.cloudinary.com` |
+| `senhaForteValidator` | ReDoS-safe, sem regex com back-tracking |
+| `audit-diff.util` | Mascara CPF, RG, email, telefone, senha no log de auditoria |
+
+---
+
+# 9. Relação com Outros Módulos
+
+| Módulo | Consome |
+|---|---|
+| Todas as páginas admin | `UiButton`, `UiCard`, `UiInput`, `UiModal` |
+| CMS / Comunicados | `SafeHtmlPipe` |
+| Fotos de perfil, logos | `CloudinaryPipe` |
+| Links externos | `SafeUrlPipe` |
+| Formulários de documentos | `PdfViewerComponent` |
+| Formulários de usuário/aluno | `senhaForteValidator`, `PhoneMaskDirective` |
+| Log de auditoria | `audit-diff.util` |
+| Todo o app | `TabEscapeDirective` (via provider global) |

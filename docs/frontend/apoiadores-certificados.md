@@ -1,216 +1,164 @@
-# Modulo: Apoiadores e Certificados
+# Módulo: Apoiadores e Certificados
 
 ---
 
-# 1. Visao Geral
+# 1. Visão Geral
 
 ## Objetivo
 
-Documentar gestao de apoiadores, acoes de relacionamento, logos, exibicao publica, certificados de honraria, modelos de certificados, emissao academica e validacao publica.
+Gerenciar os apoiadores/patrocinadores do Instituto exibidos no site público
+e os modelos/emissão de certificados acadêmicos para alunos concluintes.
 
 ## Responsabilidade
 
-O modulo abrange `ApoiadoresService`, telas/admin de apoiadores, componentes de perfil, wizard, acoes e certificados, alem de `ModelosCertificadosService`, lista/formulario/preview de modelos e pagina publica de validacao.
-
-## Fluxo de Funcionamento
-
-Apoiadores sao cadastrados com tipo, dados de contato, logo e flag de exibicao publica. Acoes registram relacionamento/eventos. Certificados de honraria podem ser emitidos para apoiadores. Modelos de certificado sao cadastrados com artes/assinaturas e usados para emissao academica ou honraria. Validacao publica consulta codigo.
+**Apoiadores:** vitrine de parceiros e patrocinadores.
+**Certificados:** fluxo de geração de certificados com modelo personalizado (imagem de fundo),
+dados do aluno e validação pública por código único.
 
 ---
 
-# 2. Arquitetura e Metodologias
+# 2. Apoiadores (`/admin/apoiadores`)
 
-## Padroes Arquiteturais Identificados
+**Acesso:** `ADMIN`, `SECRETARIA`, `COMUNICACAO`
 
-* Service Layer.
-* Wizard form para apoiador.
-* Component composition para perfil, acoes e certificados.
-* FormData upload para logo/arte/assinaturas.
-* Cache local em apoiadores.
-* DTO pattern parcial para entidades.
-* Public validation endpoint.
+## 2.1 `ApoiadoresLista` — Gestão
 
-## Justificativa Tecnica
+**Arquivo:** `src/app/pages/admin/apoiadores/`
 
-Apoiadores misturam CRM institucional e exibicao publica; separar componentes por perfil/acoes/certificados mantem cada fluxo pequeno. Certificados exigem arquivos e layout configuravel, por isso `FormData` e `layoutConfig` permitem flexibilidade sem recompilar frontend.
+### Funcionalidades
+- Lista de apoiadores com preview de logo
+- Cadastro e edição com upload de logo (Cloudinary, máx. 10MB)
+- Reordenação de exibição no site
+- Desativar/ativar exibição no site público
 
----
+### Interface de Apoiador
 
-# 3. Fluxo Interno do Codigo
+```typescript
+interface Apoiador {
+  id: string;
+  nome: string;
+  logo: string | null;       // URL Cloudinary
+  website: string | null;
+  descricao: string | null;
+  ativo: boolean;
+  ordem: number;
+}
+```
 
-## Fluxo de Execucao
+### Exibição no Site Público
 
-1. `/admin/apoiadores` carrega listagem.
-2. `ApoiadoresService.listar` aplica `skip`, `take`, `tipo`, `search` e `ativo`.
-3. Cadastro/edicao usa wizard/form e chama `criar` ou `atualizar`.
-4. Logo e enviado por `uploadLogo`.
-5. Acoes sao listadas/adicionadas/editadas/removidas por endpoints aninhados.
-6. Certificados de apoiador sao listados e emitidos.
-7. `/admin/modelos-certificados` lista modelos.
-8. Formulario de modelo envia `FormData` com arte base, assinatura(s), texto e layout.
-9. Preview/teste chama endpoint que retorna Blob.
-10. Emissao academica usa turma/aluno.
-11. Validacao publica chama `/api/certificados/validar/:codigo`.
+Apoiadores ativos são exibidos na seção "Nossos Parceiros" da home pública,
+com logo otimizada via `CloudinaryPipe`:
 
-## Dependencias Internas
-
-* `ApoiadoresService`
-* `ModelosCertificadosService`
-* `TurmasService`
-* `BeneficiariosService`
-* `ToastService`
-* `ConfirmDialogService`
-* `StorageService` indiretamente para uploads gerais, quando aplicavel
-* `SafeUrlPipe`
-
-## Dependencias Externas
-
-* Angular Forms.
-* Angular Router.
-* Angular HttpClient.
-* RxJS.
-* Browser Blob/PDF.
+```html
+<img [src]="apoiador.logo | cloudinary: { w: 200, c: 'fill' }" [alt]="apoiador.nome" />
+```
 
 ---
 
-# 4. Dicionario Tecnico
+# 3. Modelos de Certificados (`/admin/modelos-certificados`)
 
-## Variaveis
+**Acesso:** `ADMIN`, `SECRETARIA`
 
-* `Apoiador.tipo`: `VOLUNTARIO|EMPRESA|IMPRENSA|PROFISSIONAL_LIBERAL|ONG|OUTRO`.
-* `nomeRazaoSocial`, `nomeFantasia`: identidade do apoiador.
-* `cpfCnpj`: documento.
-* `contatoPessoa`, `telefone`, `email`: contato.
-* `atividadeEspecialidade`: area de atuacao.
-* `observacoes`: notas internas.
-* `logoUrl`: imagem.
-* `exibirNoSite`: controla publicacao.
-* `ativo`: ciclo de vida.
-* `AcaoApoiador.dataEvento`, `descricaoAcao`: historico CRM.
-* `modeloCertificadoId`, `motivoPersonalizado`: dados para honraria.
-* `ModeloCertificado.arteBaseUrl`: fundo do certificado.
-* `assinaturaUrl`, `assinaturaUrl2`: assinaturas.
-* `textoTemplate`: texto parametrizavel.
-* `layoutConfig`: geometria/posicionamento.
-* `tipo`: `ACADEMICO|HONRARIA`.
-* `codigoValidacao`: codigo publico de autenticidade.
+## 3.1 `ModelosLista` — Listagem de Modelos
 
-## Funcoes e Metodos
+**Arquivo:** `src/app/pages/admin/modelos-certificados/modelos-lista/`
 
-* `ApoiadoresService.listar`: lista com cache.
-* `buscarPublicos`: apoiadores exibiveis no site.
-* `obterPorId`, `criar`, `atualizar`, `excluir`, `inativar`, `reativar`.
-* `uploadLogo`: envia logo via `FormData`.
-* `buscarAcoes`, `adicionarAcao`, `editarAcao`, `removerAcao`.
-* `listarCertificados`, `emitirCertificado`, `gerarPdfCertificado`.
-* `ModelosCertificadosService.listar`, `buscarPorId`, `criar`, `atualizar`, `excluir`.
-* `validarAutenticidade`: consulta codigo publico.
-* `testarGeracaoGeometrica`: retorna Blob de teste.
-* `emitirAcademico`: emite certificado para turma/aluno.
+Exibe modelos de certificado disponíveis com preview de imagem de fundo.
 
-## Classes
+## 3.2 `ModelosForm` — Criação e Edição
 
-* `ApoiadoresLista`
-* `ApoiadorWizardFormComponent`
-* `ApoiadorPerfilComponent`
-* `ApoiadorAcoesComponent`
-* `ApoiadorCertificadosComponent`
-* `ApoiadoresService`
-* `ModelosLista`
-* `ModelosForm`
-* `CertificadoPreviewComponent`
-* `ModelosCertificadosService`
-* `ValidarCertificado`
+**Arquivo:** `src/app/pages/admin/modelos-certificados/modelos-form/`
+**Rotas:** `/admin/modelos-certificados/novo` e `/admin/modelos-certificados/editar/:id`
 
-## Interfaces e Tipagens
+### Funcionalidades
 
-* `Apoiador`
-* `AcaoApoiador`
-* `PaginatedResult<T>`
-* `ModeloCertificado`
-* payloads de emissao de certificado
-* resposta de validacao `{ valido, nome, curso, data, tipo }`
+- Upload de imagem de fundo (o layout do certificado)
+- Editor de texto para configurar posição e formato do nome, data e código
+- Geração de PDF de teste (para validar o layout antes de emitir)
+- `descarteGuard` ativo
+
+### Fluxo de Criação de Modelo
+
+```
+Upload imagem de fundo → POST /api/modelos-certificados (FormData)
+    ↓
+Configurar campos: fonte, tamanho, posição de texto
+    ↓
+Gerar teste → POST /api/modelos-certificados/teste (retorna Blob PDF)
+    ↓
+Abrir PDF no PdfViewerComponent para revisão
+    ↓
+Salvar modelo
+```
+
+## 3.3 Emissão de Certificado Acadêmico
+
+```typescript
+emitirAcademico(dto: EmitirCertificadoDto): Observable<{ url: string }>
+  POST /api/modelos-certificados/emitir-academico
+```
+
+```typescript
+interface EmitirCertificadoDto {
+  modeloId: string;
+  alunoId: string;
+  turmaId: string;
+  dataEmissao: string;
+}
+```
+
+O backend gera o PDF com dados do aluno e turma sobre a imagem de fundo,
+sobe para o Cloudinary e retorna a URL. O frontend abre o PDF no `PdfViewerComponent`.
 
 ---
 
-# 5. Servicos e Integracoes
+# 4. Validação Pública de Certificado
 
-## APIs
+**Rota pública:** `/validar-certificado` (sem autenticação)
 
-* `GET /api/apoiadores`
-* `GET /api/apoiadores/publicos`
-* `GET /api/apoiadores/:id`
-* `POST /api/apoiadores`
-* `PATCH /api/apoiadores/:id`
-* `DELETE /api/apoiadores/:id`
-* `PATCH /api/apoiadores/:id/inativar`
-* `PATCH /api/apoiadores/:id/reativar`
-* `PATCH /api/apoiadores/:id/logo`
-* `GET /api/apoiadores/:id/acoes`
-* `POST /api/apoiadores/:id/acoes`
-* `PATCH /api/apoiadores/:apoiadorId/acoes/:acaoId`
-* `DELETE /api/apoiadores/:apoiadorId/acoes/:acaoId`
-* `GET /api/apoiadores/:apoiadorId/certificados`
-* `POST /api/apoiadores/:apoiadorId/certificados`
-* `GET /api/apoiadores/:apoiadorId/certificados/:certId/pdf`
-* `GET /api/modelos-certificados`
-* `GET /api/modelos-certificados/:id`
-* `POST /api/modelos-certificados`
-* `PATCH /api/modelos-certificados/:id`
-* `DELETE /api/modelos-certificados/:id`
-* `POST /api/modelos-certificados/teste`
-* `POST /api/modelos-certificados/emitir-academico`
-* `GET /api/certificados/validar/:codigo`
+```typescript
+validarAutenticidade(codigo: string): Observable<CertificadoInfo | null>
+  GET /api/certificados/validar/:codigo
+```
 
-## Banco de Dados
-
-Entidades refletidas: apoiadores, acoes_apoiador, certificados, modelos_certificados, turmas, beneficiarios e arquivos de arte/assinatura.
-
-## Servicos Externos
-
-* Storage remoto para logos, artes e assinaturas.
-* Gerador PDF no backend.
+Qualquer pessoa pode verificar a autenticidade de um certificado informando o código
+impresso no documento. A API retorna nome do aluno, turma, data e status.
 
 ---
 
-# 6. Seguranca e Qualidade
+# 5. Segurança e Qualidade
 
-## Seguranca
+## Segurança
 
-* Rotas admin protegidas por RBAC.
-* Validacao publica usa codigo e nao exige login.
-* Uploads de arte/logo devem validar tipo/tamanho no backend.
-* `SafeUrlPipe` deve proteger embeds/downloads.
+- **Upload de logo e imagem de fundo:** via `FormData` com limite de 10MB no frontend
+  e validação de tipo MIME no backend
+- **Código de validação:** UUID único gerado no backend — não sequencial (não previsível)
+- **Rota de validação pública:** sem JWT — exposição mínima controlada
 
-## Qualidade
+## Acessibilidade
 
-* Specs existem para apoiadores, componentes de certificados e modelos.
-* Cache de apoiadores e limpo em mutacoes.
-* Separacao por componentes reduz complexidade visual.
-
-## Performance
-
-* Cache local evita recarregamento repetido de apoiadores.
-* `buscarPublicos` cacheia resultado publico.
-* Preview por Blob evita salvar teste necessariamente.
+- Logos de apoiadores sempre com `alt` descritivo (`[alt]="apoiador.nome"`)
+- PDF gerado é texto selecionável (não imagem escaneada) para compatibilidade com leitores de tela
+- `PdfViewerComponent` com controles de navegação de página acessíveis por teclado
 
 ---
 
-# 7. Regras de Negocio
+# 6. Pontos de Atenção
 
-* Apoiador pode estar ativo/inativo.
-* Somente apoiadores com `exibirNoSite` devem aparecer publicamente.
-* Acoes registram historico de relacionamento.
-* Certificado de honraria pode usar acao ou motivo personalizado.
-* Modelo define tipo academico ou honraria.
-* Certificado academico exige turma e aluno.
-* Codigo de validacao confirma autenticidade publicamente.
+- **Modelos de certificado** dependem de imagem de fundo no Cloudinary — se a imagem for excluída
+  do Cloudinary externamente, a emissão falhará sem mensagem clara para o usuário.
+- **PDF de teste** usa `Blob` — o browser pode bloquear o download dependendo de configuração de CSP.
+  O `PdfViewerComponent` inline contorna isso usando `pdfjs-dist` em vez de download direto.
 
 ---
 
-# 8. Relacao com Outros Modulos
+# 7. Relação com Outros Módulos
 
-* Conteudo publico pode exibir apoiadores publicos.
-* Certificados academicos dependem de turmas e beneficiarios.
-* Usuarios/roles controlam acesso admin.
-* Auditoria deve registrar acoes de CRUD/emissao se backend suportar.
+| Módulo | Relação |
+|---|---|
+| `ModelosCertificadosService` | CRUD de modelos e emissão |
+| `StorageService` | Upload de imagens de fundo |
+| `PdfViewerComponent` | Preview do certificado gerado |
+| `CloudinaryPipe` | Otimiza logo de apoiadores no site público |
+| `descarteGuard` | Proteção do formulário de modelo |

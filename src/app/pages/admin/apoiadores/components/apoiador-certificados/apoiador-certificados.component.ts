@@ -22,13 +22,11 @@ export class ApoiadorCertificadosComponent implements OnInit {
   @Output() modalClosed = new EventEmitter<void>();
   @Output() certificatesUpdated = new EventEmitter<void>();
 
-  // Track button states
   processandoId: string | null = null;
 
-  // View PDF
   pdfAberto = false;
   pdfAtual: { url: string; title: string } | null = null;
-  
+
   private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
@@ -36,9 +34,7 @@ export class ApoiadorCertificadosComponent implements OnInit {
     private readonly cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    // Empty initialization
-  }
+  ngOnInit(): void {}
 
   fecharModal(): void {
     this.modalClosed.emit();
@@ -74,15 +70,37 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  /**
+   * Snyk Fix (CWE-601 — Open Redirect):
+   * Valida que a URL retornada pela API pertence ao Cloudinary antes de abrir no browser.
+   * Impede que uma URL maliciosa redirecione o usuário para domínios não autorizados.
+   */
+  private isSafeCloudinaryUrl(url: string): boolean {
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'https:' &&
+        (parsed.hostname === 'res.cloudinary.com' || parsed.hostname.endsWith('.cloudinary.com'));
+    } catch {
+      return false;
+    }
+  }
+
   baixarPdf(cert: CertificadoEmitido): void {
     this.processandoId = cert.id;
     this.cdr.detectChanges();
 
     this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
       next: (res) => {
-        // Redireciona para Cloudinary com target _blank para iniciar o download ou visualização nativa
-        window.open(res.pdfUrl, '_blank');
-        
+        // Snyk Fix CWE-601: valida domínio antes de abrir (aceita apenas Cloudinary)
+        if (!this.isSafeCloudinaryUrl(res.pdfUrl)) {
+          console.error('[Segurança] URL de PDF rejeitada — domínio não autorizado:', res.pdfUrl);
+          this.announcer.announce('Erro de segurança: URL do PDF é inválida.', 'assertive');
+          this.processandoId = null;
+          this.cdr.detectChanges();
+          return;
+        }
+        // noopener,noreferrer — previne que a nova aba acesse window.opener
+        window.open(res.pdfUrl, '_blank', 'noopener,noreferrer');
         this.processandoId = null;
         this.announcer.announce('Download da honraria iniciado com sucesso.', 'polite');
         this.cdr.detectChanges();
