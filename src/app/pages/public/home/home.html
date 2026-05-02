@@ -1,0 +1,341 @@
+@if (heroConfig$ | async; as heroConfig) {
+<!-- ══════════ HERO ══════════ -->
+<section class="hero" aria-label="Seção principal de boas-vindas ao Instituto">
+    <!-- Fundo dinâmico vindo do CMS (fachadaUrl) com otimização WebP CDN e Proteção de Leak Signal -->
+    <div class="hero-bg" [style.backgroundImage]="fachadaUrl() ? 'url(' + (fachadaUrl() | cloudinary) + ')' : null"></div>
+    <div class="hero-inner">
+        <div class="hero-content animate-on-scroll" appAnimateOnScroll>
+            <p class="hero-eyebrow">{{ heroConfig['eyebrow'] || 'Instituto de Educação Inclusiva' }}</p>
+            <h1 class="hero-title">
+                {{ heroConfig['tituloLinha1'] || 'Mais do que inclusão' }}<br>
+                <span class="hero-highlight">{{ heroConfig['tituloDestaque'] || 'transformação' }}</span>
+            </h1>
+            <div class="hero-desc">
+                @if (heroConfig['descricao']) {
+                <div [innerHTML]="heroConfig['descricao'] | safeHtml"></div>
+                } @else {
+                <p>
+                    Há mais de 30 anos o <strong>Instituto Luiz Braille</strong> oferece educação, autonomia e oportunidades
+                    para pessoas com deficiência visual em nossa comunidade.
+                </p>
+                }
+            </div>
+            <div class="hero-actions">
+                <a routerLink="/contato" class="btn-hero-primary" aria-label="Navegar para a página Fale Conosco">
+                    {{ heroConfig['btnPrimario'] || 'Fale Conosco' }}
+                    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5" stroke-linecap="round">
+                        <path d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                </a>
+                <a routerLink="/sobre" class="btn-hero-secondary" aria-label="Navegar para saber mais sobre o Instituto">
+                    {{ heroConfig['btnSecundario'] || 'Conheça o Instituto' }}
+                </a>
+            </div>
+
+            <div class="hero-stats" role="list" aria-label="Estatísticas principais do instituto">
+                <div class="stat-item" role="listitem">
+                    <span class="stat-num">{{ heroConfig['stat1Num'] || '300+' }}</span>
+                    <span class="stat-label">{{ heroConfig['stat1Desc'] || 'Alunos atendidos por ano' }}</span>
+                </div>
+                <div class="stat-divider" aria-hidden="true"></div>
+                <div class="stat-item" role="listitem">
+                    <span class="stat-num">{{ heroConfig['stat2Num'] || '30+' }}</span>
+                    <span class="stat-label">{{ heroConfig['stat2Desc'] || 'Anos de história' }}</span>
+                </div>
+                <div class="stat-divider" aria-hidden="true"></div>
+                <div class="stat-item" role="listitem">
+                    <span class="stat-num">{{ heroConfig['stat3Num'] || '6' }}</span>
+                    <span class="stat-label">{{ heroConfig['stat3Desc'] || 'Oficinas disponíveis' }}</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+}
+
+@if (missaoConfig$ | async; as missaoConfig) {
+<!-- ══════════ MISSÃO, VISÃO E VALORES ══════════ -->
+<section class="sobre" aria-label="Diretrizes Estratégicas: Nossa Missão, Visão e Valores">
+    <div class="section-inner mvv-grid" role="list">
+
+        <!-- MISSÃO -->
+        <article class="mvv-card animate-on-scroll" appAnimateOnScroll role="listitem">
+            <div class="mvv-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">flag</span>
+            </div>
+            <h2 class="mvv-titulo">Missão</h2>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha1'] || 'O Instituto Luiz Braille é uma entidade sem fins lucrativos dedicada à reabilitação, educação e inclusão social de pessoas com deficiência visual. Oferecemos serviços gratuitos de qualidade e compromisso com a dignidade.') | safeHtml"></div>
+        </article>
+
+        <!-- VISÃO -->
+        <article class="mvv-card animate-on-scroll delay-100" appAnimateOnScroll role="listitem">
+            <div class="mvv-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">wb_sunny</span>
+            </div>
+            <h2 class="mvv-titulo">Visão</h2>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha2'] || 'Acreditamos que toda pessoa, independentemente de sua condição visual, tem o direito a uma vida plena, produtiva e com autonomia. Nosso trabalho é tornar esse direito real e presente no dia-a-dia de todos.') | safeHtml"></div>
+        </article>
+
+        <!-- VALORES -->
+        <article class="mvv-card animate-on-scroll delay-200" appAnimateOnScroll role="listitem">
+            <div class="mvv-icon" aria-hidden="true">
+                <span class="material-symbols-rounded">public</span>
+            </div>
+            <h2 class="mvv-titulo">Valores</h2>
+            <div class="mvv-desc" [innerHTML]="(missaoConfig['descricaoLinha2'] || 'Valorizamos a dignidade, o respeito e a inclusão, atuando com ética, empatia e compromisso para promover autonomia e acessibilidade.') | safeHtml"></div>
+        </article>
+
+    </div>
+</section>
+}
+
+<!-- ══════════ OFICINAS ══════════ -->
+<section class="oficinas" aria-labelledby="oficinas-titulo">
+    <div class="wave-transition">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0,0 C240,120 480,120 720,60 C960,0 1200,0 1440,60 L1440,0 L0,0 Z" fill="#ffffff" />
+        </svg>
+    </div>
+    <div class="section-inner">
+        <div class="section-header animate-on-scroll" appAnimateOnScroll>
+            <h2 id="oficinas-titulo" class="section-title">Nossas Oficinas</h2>
+            <p class="section-subtitle">Atividades gratuitas para pessoas com deficiência visual de todas as idades.</p>
+        </div>
+
+        <div class="oficinas-grid" role="region" aria-label="Lista de oficinas ativas">
+            @for (of of oficinas(); track of.titulo) {
+            <article class="oficina-card animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index % 3 === 1"
+                [class.delay-200]="$index % 3 === 2">
+                <div class="oficina-icon" aria-hidden="true">
+                    <span class="material-symbols-rounded">{{ of.icon || 'school' }}</span>
+                </div>
+                <h3 class="oficina-titulo">{{ of.titulo }}</h3>
+                <div class="oficina-desc" [innerHTML]="of.descricao | safeHtml"></div>
+            </article>
+            } @empty {
+            <div class="feed-vazio" style="grid-column: 1 / -1; min-height: 100px;" role="status">
+                <p>Nenhuma oficina cadastrada no momento.</p>
+            </div>
+            }
+        </div>
+
+        <div class="oficinas-cta">
+            <a routerLink="/contato" class="btn-primary-lg"
+                aria-label="Entre em contato para saber sobre as inscrições de nossas oficinas">
+                Quero Saber Mais
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ DEPOIMENTOS ══════════ -->
+<section class="depoimentos" aria-labelledby="dep-titulo">
+    <div class="wave-transition-double">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0,20 C320,100 420,100 720,50 C1020,0 1120,0 1440,60 L1440,0 L0,0 Z" fill="#b0b0b0"
+                opacity="0.4" />
+            <path d="M0,60 C320,0 420,0 720,50 C1020,100 1120,100 1440,20 L1440,0 L0,0 Z" fill="#e8e8e8" />
+        </svg>
+    </div>
+    <div class="section-inner">
+        <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll" appAnimateOnScroll>O que nossos alunos dizem</h2>
+
+        <div class="dep-grid" role="region" aria-label="Grade de Depoimentos de estudantes">
+            @for (dep of depoimentos(); track dep.nome) {
+            <blockquote class="dep-card animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index % 3 === 1"
+                [class.delay-200]="$index % 3 === 2">
+                <div class="dep-texto" [innerHTML]="dep.texto | safeHtml"></div>
+                <footer class="dep-autor">
+                    <div class="dep-avatar" aria-hidden="true">{{ dep.nome.charAt(0) }}</div>
+                    <div>
+                        <cite class="dep-nome">{{ dep.nome }}</cite>
+                        <span class="dep-idade">{{ dep.idade > 0 ? dep.idade + ' anos' : '' }}</span>
+                    </div>
+                </footer>
+            </blockquote>
+            } @empty {
+            <div class="feed-vazio" style="grid-column: 1 / -1; color: white; min-height: 100px; text-align: center;" role="status">
+                <p>Nenhum depoimento cadastrado no momento.</p>
+            </div>
+            }
+        </div>
+    </div>
+    <div class="wave-transition-concave">
+        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M0,0 C480,120 960,120 1440,0 L1440,0 L0,0 Z" fill="#111111" />
+        </svg>
+    </div>
+</section>
+
+@if (carregandoNoticias() || ultimasNoticias().length > 0 || erroNoticias()) {
+<!-- ══════════ ÚLTIMAS NOTÍCIAS ══════════ -->
+<section class="section-noticias" aria-labelledby="noticias-titulo">
+    <div class="section-inner">
+        <header class="section-header animate-on-scroll" appAnimateOnScroll>
+            <h2 id="noticias-titulo" class="section-title">Últimas Novidades</h2>
+            <p class="section-desc">Acompanhe as notícias, vagas para PCD e comunicados mais recentes do Instituto.</p>
+        </header>
+
+        @if (carregandoNoticias()) {
+        <div class="skeleton-grid-home" aria-busy="true" aria-label="Carregando bloco de notícias">
+            @for (i of [1, 2, 3]; track i) {
+            <div class="card-noticia skeleton-wrapper" style="border: none; box-shadow: none">
+                <div class="skeleton skeleton-img" style="height: 200px; border-radius: 1rem 1rem 0 0;"></div>
+                <div class="card-noticia-body">
+                    <div class="skeleton skeleton-title" style="width: 80%"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%"></div>
+                    <div class="skeleton skeleton-text" style="width: 100%"></div>
+                    <div class="skeleton skeleton-text" style="width: 60%"></div>
+                    <footer style="margin-top: auto">
+                        <div class="skeleton skeleton-text" style="width: 30%; margin-top: 1rem;"></div>
+                    </footer>
+                </div>
+            </div>
+            }
+        </div>
+        } @else if (erroNoticias()) {
+        <!-- FALLBACK: API de notícias indisponível -->
+        <div role="alert" aria-live="assertive" style="text-align: center; padding: 2rem 1rem;">
+            <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 2.5rem; color: var(--text-muted, #9ca3af);">wifi_off</span>
+            <p style="margin-top: 0.75rem; color: var(--text-muted, #6b7280);">As últimas notícias não puderam ser carregadas.</p>
+            <a routerLink="/noticias" style="display: inline-block; margin-top: 0.75rem;"
+               aria-label="Ir para a página de notícias para tentar carregar o conteúdo">
+                Ver todas as notícias
+                <span class="material-symbols-rounded" aria-hidden="true" style="vertical-align: middle;">arrow_forward</span>
+            </a>
+        </div>
+        } @else if (ultimasNoticias().length > 0) {
+        <div class="grid-noticias" role="list">
+            @for (item of ultimasNoticias(); track item.id) {
+            <article class="card-noticia animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index === 1"
+                [class.delay-200]="$index === 2" role="listitem">
+                <figure class="card-noticia-img">
+                    @if (item.imagemCapa) {
+                    <img [src]="item.imagemCapa | cloudinary" [attr.alt]="'Imagem ilustrativa da notícia: ' + item.titulo" loading="lazy" />
+                    } @else {
+                    <div class="placeholder"><span class="material-symbols-rounded">article</span></div>
+                    }
+                    <span class="badge" [attr.data-categoria]="item.categoria">{{ item.categoria | categoryLabel }}</span>
+                </figure>
+                <div class="card-noticia-body">
+                    <h3>{{ item.titulo }}</h3>
+                    <!-- Parsing Limpo (XSS seguro e modularizado) via StripHtmlPipe puro -->
+                    <p class="card-excerpt">{{ item.conteudo | stripHtml }}</p>
+                    <footer>
+                        <time [attr.datetime]="item.criadoEm">{{ item.criadoEm | date:'dd/MM/yyyy' }}</time>
+                    </footer>
+                </div>
+                <!-- Link sobreposto mantendo o card clicável acessível no WCAG -->
+                <a routerLink="/noticias" class="full-link" [attr.aria-label]="'Acessar detalhes completos da notícia: ' + item.titulo"></a>
+            </article>
+            }
+        </div>
+
+        }
+
+        <div class="noticias-footer" style="margin-top: 2rem; text-align: center;">
+            <a routerLink="/noticias" class="btn-outline-primary" aria-label="Ver histórico e todas as postagens de notícias">
+                Acessar Todas as Notícias 
+                <span class="material-symbols-rounded" aria-hidden="true" style="vertical-align: middle;">arrow_forward</span>
+            </a>
+        </div>
+    </div>
+</section>
+}
+
+@if (carregandoParceiros() || parceiros().length > 0 || erroParceiros()) {
+<!-- ══════════ APOIADORES E PARCEIROS ══════════ -->
+<section class="parceiros" aria-labelledby="parceiros-titulo">
+    <div class="section-inner">
+        <header class="section-header animate-on-scroll text-center" appAnimateOnScroll>
+            <h2 id="parceiros-titulo" class="section-title">Apoiadores e Parceiros</h2>
+            <p class="section-desc">Empresas e pessoas físicas que acreditam e apoiam nossa missão diariamente.</p>
+        </header>
+
+        @if (carregandoParceiros()) {
+        <div class="parceiros-grid" aria-busy="true">
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+            <div class="parceiro-card skeleton-wrapper">
+                <div class="skeleton" style="width: 100px; height: 100px; border-radius: 50%;"></div>
+            </div>
+            }
+        </div>
+        } @else if (erroParceiros()) {
+        <!-- FALLBACK: API de parceiros indisponível — seção visível mas com aviso discreto -->
+        <div role="status" aria-live="polite" style="text-align: center; padding: 1.5rem;
+             color: var(--text-muted, #9ca3af); font-size: 0.875rem;">
+            <span class="material-symbols-rounded" aria-hidden="true"
+                  style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">business</span>
+            Informações de parceiros temporariamente indisponíveis.
+        </div>
+        } @else {
+        <div class="parceiros-grid" role="list">
+            @for (parceiro of parceiros(); track parceiro.id) {
+            <div class="parceiro-card animate-on-scroll" appAnimateOnScroll role="listitem">
+                @if (parceiro.logoUrl) {
+                <figure class="parceiro-logo" [attr.aria-label]="parceiro.nomeFantasia || parceiro.nomeRazaoSocial">
+                    <img [src]="parceiro.logoUrl | cloudinary" 
+                         [alt]="'Logo corporativo de ' + (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)" loading="lazy">
+                </figure>
+                } @else {
+                <div class="parceiro-placeholder">
+                    <span aria-hidden="true">{{ (parceiro.nomeFantasia || parceiro.nomeRazaoSocial)?.charAt(0) | uppercase }}</span>
+                    <p class="parceiro-nome-fallback">
+                        <span class="sr-only">Parceiro: </span>{{ parceiro.nomeFantasia || parceiro.nomeRazaoSocial }}
+                    </p>
+                </div>
+                }
+            </div>
+            }
+        </div>
+        }
+    </div>
+</section>
+}
+
+<!-- ══════════ FAQ (PERGUNTAS FREQUENTES) ══════════ -->
+<section class="faq" aria-labelledby="faq-titulo">
+    <div class="section-inner">
+        <header class="section-header animate-on-scroll" appAnimateOnScroll>
+            <h2 id="faq-titulo" class="section-title">Perguntas Frequentes</h2>
+            <p class="section-desc">Tire suas dúvidas sobre matrículas, horários e funcionamento do Instituto.</p>
+        </header>
+
+        <div class="faq-list">
+            @for (item of faq(); track item.pergunta) {
+            <details class="faq-item animate-on-scroll" appAnimateOnScroll [class.delay-100]="$index === 1" [class.delay-200]="$index === 2">
+                <summary class="faq-pergunta">
+                    <span>{{ item.pergunta }}</span>
+                    <span class="material-symbols-rounded faq-icon" aria-hidden="true">expand_more</span>
+                </summary>
+                <div class="faq-resposta ql-content" [innerHTML]="item.resposta | safeHtml"></div>
+            </details>
+            } @empty {
+            <div class="feed-vazio" role="status">
+                <p>Nenhuma pergunta cadastrada no momento.</p>
+            </div>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- ══════════ CTA FINAL ══════════ -->
+<section class="cta-final" aria-labelledby="cta-titulo">
+    <div class="section-inner cta-inner animate-on-scroll" appAnimateOnScroll>
+        <div class="cta-text">
+            <h2 id="cta-titulo">Pronto para começar?</h2>
+            <p>A inscrição é gratuita e pode ser feita online. Nossa equipe entrará em contato para agendar uma visita.
+            </p>
+        </div>
+        <div class="cta-actions">
+            <a routerLink="/contato" class="btn-hero-primary" aria-label="Navegar para contatar a secretaria">
+                Fale com a Secretaria
+            </a>
+            <a routerLink="/sobre" class="btn-hero-secondary" aria-label="Ler mais detalhes e informações do instituto">
+                Saiba Mais
+            </a>
+        </div>
+    </div>
+</section>

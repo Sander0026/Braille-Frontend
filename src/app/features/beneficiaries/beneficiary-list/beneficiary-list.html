@@ -1,0 +1,1322 @@
+<!-- Cabeçalho da página -->
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Alunos</h1>
+        <p class="page-subtitle">
+            @if (total > 0) { {{ total }} aluno(s) cadastrado(s) }
+        </p>
+    </div>
+    <div class="header-actions">
+        @if (isAdmin) {
+        <button type="button" class="btn btn-outline-primary" (click)="modalImportAberto = true"
+            aria-label="Importar alunos via planilha">
+            <span class="material-symbols-rounded">table_view</span>
+            Importar Planilha
+        </button>
+        }
+        <a routerLink="/admin/alunos/cadastro" class="btn btn-primary" aria-label="Cadastrar novo aluno">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <line x1="12" x2="12" y1="5" y2="19" />
+                <line x1="5" x2="19" y1="12" y2="12" />
+            </svg>
+            Novo Aluno
+        </a>
+    </div>
+</div>
+
+<!-- Barra de busca + Filtros -->
+<div class="filter-bar" role="search">
+    <div class="filter-search">
+        <label for="busca-aluno" class="sr-only">Buscar aluno por nome ou matrícula</label>
+        <input id="busca-aluno" type="search" class="form-input" placeholder="Buscar por nome ou matrícula..."
+            [formControl]="buscaCtrl" aria-label="Buscar aluno por nome ou matrícula" autocomplete="off" />
+
+    </div>
+
+    <!-- Botão de Filtros Avançados -->
+    <button type="button" class="btn btn-outline-primary filter-btn" (click)="drawerAberto = true"
+        [class.filter-btn--active]="quantidadeFiltrosAtivos > 0" aria-label="Filtros avançados"
+        [attr.aria-expanded]="drawerAberto ? 'true' : 'false'" aria-controls="filter-drawer-panel">
+        <span class="material-symbols-rounded">tune</span>
+        Filtros
+        @if (quantidadeFiltrosAtivos > 0) {
+        <span class="filter-badge">{{ quantidadeFiltrosAtivos }}</span>
+        }
+    </button>
+
+    <!-- Botão Exportar Lista -->
+    @if (isAdmin) {
+    <button type="button" class="btn btn-outline-primary filter-btn" (click)="exportarListaParaXlsx()"
+        [disabled]="exportando"
+        [attr.aria-disabled]="exportando ? 'true' : null"
+        [attr.aria-busy]="exportando"
+        [class.opacity-50]="exportando"
+        [style.cursor]="exportando ? 'not-allowed' : 'pointer'"
+        aria-label="Exportar lista de alunos para planilha Excel"
+        [title]="exportando ? 'Gerando planilha...' : 'Exportar a lista atual (com filtros) para Excel'">
+        @if (exportando) {
+        <span class="loading-spinner" style="width:14px;height:14px;border-width:2px;" aria-hidden="true"></span>
+        <span class="sr-only">Aguarde, gerando planilha excel</span>
+        <span aria-hidden="true">Exportando...</span>
+        } @else {
+        <span class="material-symbols-rounded">download</span>
+        Exportar Lista
+        }
+    </button>
+    }
+</div>
+
+<!-- Aviso de filtros ativos -->
+@if (quantidadeFiltrosAtivos > 0) {
+<div class="filter-active-bar" role="status">
+    <span class="material-symbols-rounded" style="font-size:16px;">filter_alt</span>
+    <span>{{ quantidadeFiltrosAtivos }} filtro(s) ativo(s) — {{ total }} resultado(s)</span>
+    <button type="button" class="btn-link" (click)="limparFiltros()">Limpar todos</button>
+</div>
+}
+
+<!-- ═══ DRAWER: Filtros Avançados ═══ -->
+@if (drawerAberto) {
+<div class="filter-overlay" (click)="drawerAberto = false" aria-hidden="true"></div>
+}
+<div id="filter-drawer-panel" class="filter-drawer" [class.filter-drawer--open]="drawerAberto" role="dialog"
+    aria-modal="true" aria-label="Filtros avançados" [formGroup]="filterForm" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
+
+    <div class="filter-drawer__header">
+        <h2 class="filter-drawer__title">
+            <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+            Filtros Avançados
+        </h2>
+        <button type="button" class="btn btn-icon btn-ghost" (click)="drawerAberto = false"
+            aria-label="Fechar filtros" cdkFocusInitial>✕</button>
+    </div>
+
+    <div class="filter-drawer__body" tabindex="0">
+
+        <!-- DEFICIÊNCIA -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Perfil da Deficiência</h3>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-tipo">Tipo de Deficiência</label>
+                <select id="f-tipo" class="form-input" formControlName="tipoDeficiencia">
+                    <option value="">Todas</option>
+                    <option value="CEGUEIRA_TOTAL">Cegueira Total</option>
+                    <option value="BAIXA_VISAO">Baixa Visão</option>
+                    <option value="VISAO_MONOCULAR">Visão Monocular</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-causa">Causa da Deficiência</label>
+                <select id="f-causa" class="form-input" formControlName="causaDeficiencia">
+                    <option value="">Todas</option>
+                    <option value="CONGENITA">Congênita (de nascença)</option>
+                    <option value="ADQUIRIDA">Adquirida</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-pref">Preferência de Acessibilidade</label>
+                <select id="f-pref" class="form-input" formControlName="prefAcessibilidade">
+                    <option value="">Todas</option>
+                    <option value="BRAILLE">Braille</option>
+                    <option value="FONTE_AMPLIADA">Fonte Ampliada</option>
+                    <option value="ARQUIVO_DIGITAL">Arquivo Digital</option>
+                    <option value="AUDIO">Áudio</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-acomp">Precisa de Acompanhante</label>
+                <select id="f-acomp" class="form-input" formControlName="precisaAcompanhante">
+                    <option value="">Todos</option>
+                    <option value="true">Sim</option>
+                    <option value="false">Não</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- DADOS PESSOAIS -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Dados Pessoais</h3>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-genero">Gênero</label>
+                <select id="f-genero" class="form-input" formControlName="genero">
+                    <option value="">Todos</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Feminino">Feminino</option>
+                    <option value="Outro">Outro</option>
+                    <option value="Prefiro não informar">Prefiro não informar</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-corraca">Cor/Raça</label>
+                <select id="f-corraca" class="form-input" formControlName="corRaca">
+                    <option value="">Todas</option>
+                    <option value="BRANCA">Branca</option>
+                    <option value="PRETA">Preta</option>
+                    <option value="PARDA">Parda</option>
+                    <option value="AMARELA">Amarela</option>
+                    <option value="INDIGENA">Indígena</option>
+                    <option value="NAO_DECLARADO">Prefiro não responder / Não declarado</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-estadocivil">Estado Civil</label>
+                <select id="f-estadocivil" class="form-input" formControlName="estadoCivil">
+                    <option value="">Todos</option>
+                    <option value="Solteiro(a)">Solteiro(a)</option>
+                    <option value="Casado(a)">Casado(a)</option>
+                    <option value="Divorciado(a)">Divorciado(a)</option>
+                    <option value="Viúvo(a)">Viúvo(a)</option>
+                    <option value="União estável">União estável</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- LOCALIZAÇÃO -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Localização</h3>
+            <div class="filter-field">
+                <label class="form-label" for="f-cidade">Cidade</label>
+                <input id="f-cidade" type="text" class="form-input" placeholder="Ex: São Paulo"
+                    formControlName="cidade" />
+            </div>
+            <div class="filter-field">
+                <label class="form-label" for="f-uf">Estado (UF)</label>
+                <input id="f-uf" type="text" class="form-input" placeholder="Ex: SP" maxlength="2"
+                    style="text-transform:uppercase" formControlName="uf" />
+            </div>
+        </section>
+
+        <!-- SOCIOECONÔMICO -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Socioeconômico</h3>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-escolaridade">Escolaridade</label>
+                <select id="f-escolaridade" class="form-input" formControlName="escolaridade">
+                    <option value="">Todas</option>
+                    <option value="Sem escolaridade">Sem escolaridade</option>
+                    <option value="Fundamental incompleto">Fundamental incompleto</option>
+                    <option value="Fundamental completo">Fundamental completo</option>
+                    <option value="Médio incompleto">Médio incompleto</option>
+                    <option value="Médio completo">Médio completo</option>
+                    <option value="Superior incompleto">Superior incompleto</option>
+                    <option value="Superior completo">Superior completo</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label class="form-label" for="f-renda">Renda Familiar</label>
+                <select id="f-renda" class="form-input" formControlName="rendaFamiliar">
+                    <option value="">Todas</option>
+                    <option value="Sem renda">Sem renda</option>
+                    <option value="Até 1 salário mínimo">Até 1 salário mínimo</option>
+                    <option value="1 a 3 salários mínimos">1 a 3 salários mínimos</option>
+                    <option value="3 a 5 salários mínimos">3 a 5 salários mínimos</option>
+                    <option value="Acima de 5 salários mínimos">Acima de 5 salários mínimos</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- DATA DE CADASTRO -->
+        <section class="filter-section">
+            <h3 class="filter-section__title">Data de Cadastro</h3>
+            <div class="filter-field-row">
+                <div class="filter-field">
+                    <label class="form-label" for="f-data-inicio">De</label>
+                    <input id="f-data-inicio" type="date" class="form-input" formControlName="dataCadastroInicio" />
+                </div>
+                <div class="filter-field">
+                    <label class="form-label" for="f-data-fim">Até</label>
+                    <input id="f-data-fim" type="date" class="form-input" formControlName="dataCadastroFim" />
+                </div>
+            </div>
+        </section>
+
+    </div><!-- /filter-drawer__body -->
+
+    <div class="filter-drawer__footer">
+        <button type="button" class="btn btn-secondary" (click)="limparFiltros()">
+            Limpar
+        </button>
+        <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">
+            <span class="material-symbols-rounded">check</span>
+            Aplicar Filtros
+            @if (quantidadeFiltrosAtivos > 0) { ({{ quantidadeFiltrosAtivos }}) }
+        </button>
+    </div>
+</div>
+
+<!-- Tabela de Alunos -->
+@if (isLoading) {
+<div class="data-table-wrapper" aria-busy="true" aria-live="polite" aria-label="Carregando lista de alunos..."
+    tabindex="0">
+    <div class="loading-container" role="status">
+        <div class="loading-spinner" aria-hidden="true"></div>
+        <p>Carregando alunos...</p>
+    </div>
+</div>
+} @else if (erro) {
+<div role="alert" aria-live="assertive" class="card card-body">
+    <p class="form-error">{{ erro }}</p>
+    <button class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
+</div>
+} @else {
+<div class="tabs-container">
+    <div class="tabs" role="tablist" aria-label="Filtro de status de beneficiário">
+        <button class="tab-btn" [class.active]="abaAtiva === 'ativos'" (click)="setAba('ativos')"
+            [attr.aria-selected]="abaAtiva === 'ativos' ? 'true' : 'false'" 
+            [attr.tabindex]="abaAtiva === 'ativos' ? 0 : -1" 
+            aria-controls="painel-alunos" id="tab-al-ativos" role="tab">
+            Ativos
+        </button>
+        <button class="tab-btn" [class.active]="abaAtiva === 'inativos'" (click)="setAba('inativos')"
+            [attr.aria-selected]="abaAtiva === 'inativos' ? 'true' : 'false'" 
+            [attr.tabindex]="abaAtiva === 'inativos' ? 0 : -1" 
+            aria-controls="painel-alunos" id="tab-al-inativos" role="tab">
+            Inativos
+        </button>
+    </div>
+</div>
+
+<div id="painel-alunos" role="tabpanel" [attr.aria-labelledby]="abaAtiva === 'ativos' ? 'tab-al-ativos' : 'tab-al-inativos'">
+
+@if (alunos.length === 0) {
+<div class="empty-state" role="status">
+    <h3>Nenhum aluno {{ abaAtiva === 'ativos' ? 'ativo' : 'inativo' }} encontrado</h3>
+    <p>
+        @if (buscaCtrl.value) { Nenhum resultado para "{{ buscaCtrl.value }}". }
+        @else if (abaAtiva === 'ativos') { Comece cadastrando o primeiro aluno. }
+    </p>
+</div>
+} @else {
+<div class="data-table-wrapper" tabindex="0">
+    <table class="data-table" role="table" aria-label="Lista de alunos ativos">
+        <caption class="sr-only">{{ total }} alunos cadastrados, página {{ paginaAtual }} de {{ totalPaginas }}
+        </caption>
+        <thead>
+            <tr>
+                <th scope="col">Nome Completo</th>
+                <th scope="col" class="hide-on-mobile">CPF / RG</th>
+                <th scope="col" class="hide-on-tablet">Nascimento</th>
+                <th scope="col" class="hide-on-mobile">Tipo de Deficiência</th>
+                <th scope="col">Telefone</th>
+                <th scope="col"><span class="sr-only">Ações</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (aluno of alunos; track aluno.id) {
+            <tr tabindex="0" appTabelaTrFocavel class="focavel-tr"
+                [attr.aria-label]="'Linha: ' + aluno.nomeCompleto + '. Pressione Enter para editar.'">
+                <td>
+                    <span class="aluno-nome">{{ aluno.nomeCompleto }}</span>
+                </td>
+                <td class="hide-on-mobile">{{ (aluno.cpf | cpfRg) || (aluno.rg | cpfRg) || '—' }}</td>
+                <td class="hide-on-tablet">{{ aluno.dataNascimento | dataBraille }}</td>
+                <td class="hide-on-mobile">
+                    @if (aluno.tipoDeficiencia) {
+                    <span class="badge badge-primary">{{ aluno.tipoDeficiencia }}</span>
+                    } @else { <span>—</span> }
+                </td>
+                <td>{{ (aluno.telefoneContato | telefone) || '—' }}</td>
+                <td class="acoes-cell">
+                    @if (abaAtiva === 'ativos') {
+                    <button class="btn btn-sm btn-ghost" (click)="abrirModalEdicao(aluno)"
+                        [attr.aria-label]="'Editar aluno ' + aluno.nomeCompleto">
+                        Editar
+                    </button>
+                    <button class="btn btn-sm btn-ghost" (click)="abrirModal(aluno)"
+                        [attr.aria-label]="'Ver detalhes de ' + aluno.nomeCompleto">
+                        Ver
+                    </button>
+                    <button class="btn btn-sm btn-danger" (click)="inativar(aluno)"
+                        [attr.aria-label]="'Inativar aluno ' + aluno.nomeCompleto">
+                        Inativar
+                    </button>
+                    } @else {
+                    <button class="btn btn-sm"
+                        style="background-color: #047857; color: white; border: none; margin-right: 0.5rem;"
+                        (click)="restaurarConta(aluno)"
+                        [attr.aria-label]="'Restaurar aluno ' + aluno.nomeCompleto">Restaurar</button>
+                    <button class="btn btn-sm btn-danger" (click)="excluirDefinitivamente(aluno)"
+                        [attr.aria-label]="'Excluir definitivamente o aluno ' + aluno.nomeCompleto">Excluir</button>
+                    }
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Paginação -->
+@if (totalPaginas > 1) {
+<nav class="pagination" role="navigation" aria-label="Paginação dos alunos">
+
+    <!-- Primeira página -->
+    <button (click)="irParaPagina(1)" [disabled]="paginaAtual === 1" aria-label="Primeira página"
+        title="Primeira página">«</button>
+
+    <!-- Anterior -->
+    <button (click)="irParaPagina(paginaAtual - 1)" [disabled]="paginaAtual === 1"
+        aria-label="Página anterior">‹</button>
+
+    <!-- Janela de páginas com reticências -->
+    @for (p of paginasVisiveis; track p + '_' + $index) {
+    @if (p === -1) {
+    <span class="pagination-ellipsis" aria-hidden="true">…</span>
+    } @else {
+    <button (click)="irParaPagina(p)" [class.active]="p === paginaAtual" [attr.aria-label]="'Ir para página ' + p"
+        [attr.aria-current]="p === paginaAtual ? 'page' : null">
+        {{ p }}
+    </button>
+    }
+    }
+
+    <!-- Próxima -->
+    <button (click)="irParaPagina(paginaAtual + 1)" [disabled]="paginaAtual === totalPaginas"
+        aria-label="Próxima página">›</button>
+
+    <!-- Última página -->
+    <button (click)="irParaPagina(totalPaginas)" [disabled]="paginaAtual === totalPaginas" aria-label="Última página"
+        title="Última página">»</button>
+
+    <!-- Info + ir para página -->
+    <span class="pagination-info" aria-live="polite">
+        {{ paginaAtual }} / {{ totalPaginas }}
+    </span>
+
+    <label class="pagination-goto" aria-label="Ir para a página:">
+        <span class="sr-only">Ir para a página:</span>
+        <input type="number" min="1" [max]="totalPaginas" [placeholder]="'Ir...'"
+            aria-label="Número da página para navegar">
+    </label>
+</nav>
+}
+}
+</div>
+}
+
+<!-- Modal Visualizar Aluno -->
+@if (modalAberto) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalAlunoTitulo" cdkTrapFocus
+    [cdkTrapFocusAutoCapture]="true">
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h2 id="modalAlunoTitulo">Perfil do Aluno</h2>
+            <button class="btn-close" (click)="fecharModal()" aria-label="Fechar janela de perfil">×</button>
+        </div>
+
+        <div class="modal-body profile-body" tabindex="0">
+            @if (carregandoDetalhes) {
+            <div class="loading-container p-4 text-center">
+                <div class="loading-spinner"></div>
+                <p>Buscando ficha completa...</p>
+            </div>
+            } @else if (alunoSelecionado) {
+
+            <div class="profile-header">
+                <div class="avatar-wrapper" style="position: relative; display: inline-block;">
+                    <div class="profile-avatar">
+                        <img [src]="getAvatarUrl(alunoSelecionado)" alt="Foto de {{ alunoSelecionado.nomeCompleto }}"
+                            loading="lazy" />
+
+                        @if (uploadingImage || deletandoImage) {
+                        <div
+                            style="position: absolute; inset:0; background: rgba(255,255,255,0.7); display:flex; align-items:center; justify-content:center; border-radius: 50%;">
+                            <div class="loading-spinner" style="width: 20px; height: 20px; border-width: 2px;"></div>
+                        </div>
+                        }
+                    </div>
+
+                    @if (abaAtiva === 'ativos') {
+                    <div class="avatar-actions"
+                        style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px;">
+                        <label class="btn btn-sm btn-primary"
+                            style="padding: 4px 8px; font-size: 11px; cursor: pointer;" title="Alterar Foto"
+                            [class.opacity-50]="uploadingImage || deletandoImage">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">photo_camera</span>
+                            <input type="file" (change)="processarUploadArquivo($event, 'fotoPerfil')"
+                                accept=".jpg,.jpeg,.png,.webp" style="display: none;"
+                                [disabled]="uploadingImage || deletandoImage">
+                        </label>
+
+                        @if (alunoSelecionado.fotoPerfil) {
+                        <button class="btn btn-sm btn-danger" style="padding: 4px 8px; font-size: 11px;"
+                            title="Remover Foto" (click)="excluirDocumento('fotoPerfil')"
+                            [disabled]="uploadingImage || deletandoImage">
+                            <span class="material-symbols-rounded" style="font-size: 14px;">delete</span>
+                        </button>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <div class="profile-title">
+                    <h3>{{ alunoSelecionado.nomeCompleto }}</h3>
+                    @if (alunoSelecionado.matricula) {
+                    <div class="matricula-tag" title="Número de Matrícula Institucional">
+                        <span class="material-symbols-rounded"
+                            style="font-size:14px;vertical-align:middle;">badge</span>
+                        Mat. {{ alunoSelecionado.matricula }}
+                    </div>
+                    }
+                    <div class="profile-badges">
+                        @if (alunoSelecionado.statusAtivo) {
+                        <span class="badge badge-success">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                                aria-hidden="true">check_circle</span>
+                            Ativo
+                        </span>
+                        } @else {
+                        <span class="badge badge-danger">
+                            <span class="material-symbols-rounded" style="font-size: 14px; margin-right: 4px;"
+                                aria-hidden="true">cancel</span>
+                            Inativo
+                        </span>
+                        }
+                        @if (alunoSelecionado.tipoDeficiencia) {
+                        <span class="badge badge-primary">{{ alunoSelecionado.tipoDeficiencia }}</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                <!-- Informações Pessoais -->
+                <div class="profile-section">
+                    <h4>Informações Pessoais</h4>
+                    <p><strong>CPF:</strong> {{ (alunoSelecionado.cpf | cpfRg) || 'N/I' }} &nbsp;|&nbsp; <strong>RG:</strong> {{ (alunoSelecionado.rg | cpfRg) || 'N/I' }}</p>
+                    <p><strong>Nascimento:</strong> {{ alunoSelecionado.dataNascimento | dataBraille }}</p>
+                    <p><strong>Gênero:</strong> {{ alunoSelecionado.genero || 'Não informado' }}</p>
+                    <p><strong>Cor/Raça:</strong> {{ 
+                        alunoSelecionado.corRaca === 'NAO_DECLARADO' ? 'Não Declarado' : 
+                        (alunoSelecionado.corRaca | titlecase) || 'Não informado' 
+                    }}</p>
+                    <p><strong>Contato:</strong> {{ (alunoSelecionado.telefoneContato | telefone) || 'N/I' }}</p>
+                    <p><strong>Email:</strong> {{ alunoSelecionado.email || 'N/I' }}</p>
+                    <p><strong>Contato Emergência:</strong> {{ alunoSelecionado.contatoEmergencia || 'N/I' }}</p>
+                </div>
+
+                <!-- Perfil da Deficiência -->
+                <div class="profile-section">
+                    <h4>Perfil Inclusivo</h4>
+                    <p><strong>Causa:</strong> {{ alunoSelecionado.causaDeficiencia || 'N/I' }}</p>
+                    <p><strong>Idade da Ocorrência:</strong> {{ alunoSelecionado.idadeOcorrencia || 'N/I' }}</p>
+                    <p><strong>Acessibilidade Preferida:</strong> {{ alunoSelecionado.prefAcessibilidade || 'N/I' }}</p>
+                    <p><strong>Tec. Assistivas:</strong> {{ alunoSelecionado.tecAssistivas || 'Nenhuma informada' }}</p>
+                    <p><strong>Precisa de acompanhante?</strong> {{ alunoSelecionado.precisaAcompanhante ? 'Sim' : 'Não'
+                        }}</p>
+
+
+                </div>
+
+
+                <!-- Visualizador PDF movido para overlay de nível raiz (veja abaixo do modal de perfil) -->
+
+
+                <!-- Endereço -->
+                <div class="profile-section full-width">
+                    <h4>Endereço</h4>
+                    <p>
+                        {{ alunoSelecionado.rua || 'Rua não informada' }}, {{ alunoSelecionado.numero || 'SN' }}
+                        @if (alunoSelecionado.complemento) { - {{ alunoSelecionado.complemento }} }
+                        <br>
+                        {{ alunoSelecionado.bairro || 'Bairro' }} - {{ alunoSelecionado.cidade || 'Cidade' }}/{{
+                        alunoSelecionado.uf || 'UF' }}
+                        <br>
+                        <strong>CEP:</strong> {{ (alunoSelecionado.cep | cep) || 'N/I' }}
+                    </p>
+                </div>
+
+                <!-- Histórico de Oficinas -->
+                <div class="profile-section full-width historico-section">
+                    <h4>
+                        <span class="material-symbols-rounded"
+                            style="font-size:16px;vertical-align:middle;margin-right:4px;">school</span>
+                        Histórico de Oficinas
+                    </h4>
+                    @if (alunoSelecionado.matriculasOficina && alunoSelecionado.matriculasOficina.length > 0) {
+                    <div class="table-responsive">
+                        <table class="historico-table">
+                            <thead>
+                                <tr>
+                                    <th>Oficina / Turma</th>
+                                    <th>Entrada</th>
+                                    <th>Saída</th>
+                                    <th>Presenças</th>
+                                    <th>Faltas</th>
+                                    <th>Freq.%</th>
+                                    <th>Status</th>
+                                    <th style="text-align:center;">Certificado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (m of alunoSelecionado.matriculasOficina; track m.id) {
+                                <tr>
+                                    <td>{{ m.turma.nome }}</td>
+                                    <td>{{ m.dataEntrada | dataBraille }}</td>
+                                    <td>{{ m.dataEncerramento ? (m.dataEncerramento | dataBraille) : '—' }}</td>
+                                    <!-- Frequência -->
+                                    @if (frequenciasMap.has(m.turma.id)) {
+                                    <td style="text-align: center;">{{ frequenciasMap.get(m.turma.id)?.presentes }}</td>
+                                    <td style="text-align: center;">{{ frequenciasMap.get(m.turma.id)?.faltas }}</td>
+                                    <td style="text-align: center; font-weight: 500;">
+                                        @let freq = frequenciasMap.get(m.turma.id)?.taxaPresenca || 0;
+                                        <span style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+                                            [style.color]="freq >= 75 ? '#047857' : (freq >= 50 ? '#b45309' : '#b91c1c')">
+                                            <span class="material-symbols-rounded" style="font-size: 16px;"
+                                                aria-hidden="true"
+                                                [style.color]="freq >= 75 ? '#047857' : (freq >= 50 ? '#b45309' : '#b91c1c')">
+                                                {{ freq >= 75 ? 'check_circle' : (freq >= 50 ? 'warning' : 'cancel') }}
+                                            </span>
+                                            {{ freq }}%
+                                        </span>
+                                    </td>
+                                    } @else {
+                                    <td style="text-align: center; color: #9ca3af;">—</td>
+                                    <td style="text-align: center; color: #9ca3af;">—</td>
+                                    <td style="text-align: center; color: #9ca3af;">—</td>
+                                    }
+                                    <td>
+                                        @let statusEfetivo = (m.status === 'ATIVA' && m.turma.status === 'CONCLUIDA') ? 'CONCLUIDA' : m.status;
+                                        <span class="badge-status badge-status--{{ statusEfetivo.toLowerCase() }}">
+                                            {{ statusEfetivo === 'ATIVA' ? 'Em Curso' :
+                                            statusEfetivo === 'CONCLUIDA' ? 'Concluída' :
+                                            statusEfetivo === 'EVADIDA' ? 'Evadido(a)' : 'Cancelada' }}
+                                        </span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                          @let freqCert = frequenciasMap.get(m.turma.id)?.taxaPresenca ?? 0;
+                                          @let turmaFinalizada = m.status === 'CONCLUIDA' || m.turma.status === 'CONCLUIDA';
+                                          @let podeEmitir = turmaFinalizada && freqCert >= 75 && !!m.turma.modeloCertificadoId;
+                                          @if (turmaFinalizada) {
+                                            <button 
+                                              class="btn btn-sm"
+                                              [class.btn-outline-primary]="podeEmitir"
+                                              [class.btn-outline-secondary]="!podeEmitir"
+                                              style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;"
+                                              [disabled]="!podeEmitir || emitindoCertificadoId === m.id"
+                                              (click)="emitirCertificadoAcademico(m)"
+                                              [title]="!m.turma.modeloCertificadoId
+                                                ? 'Nenhum modelo de certificado configurado para esta turma'
+                                                : freqCert < 75
+                                                  ? 'Frequência de ' + freqCert + '% — abaixo do mínimo de 75%'
+                                                  : 'Emitir Certificado Acadêmico'">
+                                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 14px;">
+                                                    {{ emitindoCertificadoId === m.id ? 'sync' : (podeEmitir ? 'workspace_premium' : 'block') }}
+                                                </span>
+                                                {{ emitindoCertificadoId === m.id ? 'Gerando...' : 'Emitir' }}
+                                            </button>
+                                          } @else {
+                                            <span style="font-size: 11px; color: #9ca3af; font-style: italic;">—</span>
+                                          }
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    } @else {
+                    <p style="color: #4b5563; font-size: 0.875rem; margin-top: 4px;">
+                        Nenhuma oficina registrada.
+                    </p>
+                    }
+                </div>
+            </div>
+
+            <!-- ═══ Documentação de Saúde & Presença (Botões de Ação) ═══ -->
+            <div class="profile-section full-width historico-section">
+                <h4 style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 1rem;">
+                    <span class="material-symbols-rounded" style="font-size:16px;" aria-hidden="true">folder_special</span>
+                    Documentação de Saúde e Frequência
+                </h4>
+                <div style="display:flex; gap:1rem; flex-wrap:wrap;">
+                    <button class="btn btn-outline-primary" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; width:180px; height:120px; border-radius:12px;" (click)="abrirModalGerenciamentoAtestados()">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px;">assignment_late</span>
+                        <span style="font-weight:600; font-size:14px; text-align:center;">Gerenciar<br>Atestados</span>
+                    </button>
+                    
+                    <button class="btn btn-outline-primary" style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; width:180px; height:120px; border-radius:12px;" (click)="abrirModalGerenciamentoLaudos()">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px;">health_metrics</span>
+                        <span style="font-weight:600; font-size:14px; text-align:center;">Gerenciar<br>Laudos Médicos</span>
+                    </button>
+
+                    <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.5rem; width:180px; height:120px; border-radius:12px; border: 1px solid #e5e7eb;">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:32px; margin-bottom: 8px; color: #10b981;">verified_user</span>
+                        <span style="font-weight:600; font-size:14px; text-align:center;">Termo LGPD</span>
+                        @if (alunoSelecionado.termoLgpdUrl) {
+                            <div style="display: flex; gap: 0.5rem; margin-top: 8px;">
+                                <button class="btn btn-outline-primary btn-sm" (click)="abrirVisualizadorPdf(alunoSelecionado.termoLgpdUrl)" title="Visualizar">Ver</button>
+                                <button class="btn btn-outline-secondary btn-sm" (click)="abrirModalLgpd()" title="Editar / Substituir Arquivo">Editar</button>
+                            </div>
+                        } @else {
+                            <button class="btn btn-primary btn-sm" style="margin-top: 8px;" (click)="abrirModalLgpd()">Anexar Novo</button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModal()">Fechar</button>
+            @if (alunoSelecionado && !carregandoDetalhes) {
+            <button class="btn btn-outline-primary" (click)="imprimirFicha()"
+                aria-label="Imprimir ou salvar a ficha como PDF"
+                title="Abre a tela de impressão — selecione 'Salvar como PDF' para exportar">
+                <span class="material-symbols-rounded"
+                    style="font-size:16px; vertical-align:middle; margin-right:4px;">print</span>
+                Imprimir Ficha
+            </button>
+            }
+        </div>
+    </div>
+</div>
+}
+
+<!-- ── Overlay do Visualizador de PDF (nível raiz, fora de qualquer modal) ── -->
+@if (mostrarVisualizadorPdf && urlPdfParaVisualizar) {
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-label="Visualizador de documento PDF"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
+  style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 1rem;
+  ">
+  <div style="
+    width: 90%;
+    max-width: 960px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+  ">
+    <app-pdf-viewer
+      [url]="urlPdfParaVisualizar"
+      (fecharModal)="fecharVisualizadorPdf()">
+    </app-pdf-viewer>
+  </div>
+</div>
+}
+
+<!-- ── Overlay do Visualizador de Imagem (laudo fotográfico) ── -->
+@if (mostrarModalImagem && urlImagemParaVisualizar) {
+<div
+  role="dialog"
+  aria-modal="true"
+  aria-label="Visualizador de imagem do laudo"
+  (click)="fecharModalImagem()"
+  (keydown.escape)="fecharModalImagem()"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="true"
+  tabindex="-1"
+  style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.80);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10001;
+    padding: 1rem;
+  ">
+  <div
+    (click)="$event.stopPropagation()"
+    style="position: relative; max-width: 90vw; max-height: 90vh;">
+    <!-- Botão fechar -->
+    <button
+      (click)="fecharModalImagem()"
+      aria-label="Fechar visualizador de imagem"
+      style="
+        position: absolute; top: -14px; right: -14px;
+        background: #fff; border: none; border-radius: 50%;
+        width: 32px; height: 32px; cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        font-size: 16px; line-height: 1;
+        display: flex; align-items: center; justify-content: center;
+        z-index: 1;
+      ">✕</button>
+    <!-- Imagem -->
+    <img
+      [src]="urlImagemParaVisualizar"
+      [attr.alt]="'Laudo médico de ' + (alunoSelecionado?.nomeCompleto || 'aluno')"
+      style="
+        max-width: 100%;
+        max-height: 85vh;
+        object-fit: contain;
+        border-radius: 8px;
+        box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+        display: block;
+      ">
+  </div>
+</div>
+}
+
+<!-- MODAL DE GERENCIAMENTO DE ATESTADOS -->
+@if (gerenciandoAtestados) {
+<div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-atestado-title"
+    aria-describedby="modal-atestado-instrucoes modal-atestado-status"
+    (click)="fecharModalGerenciamentoAtestados($event)" (keydown.escape)="onKeydown($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modal-atestado-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
+                <span class="material-symbols-rounded" style="color:var(--primary-color);">assignment_late</span>
+                Gerenciar Atestados de {{ alunoSelecionado?.nomeCompleto }}
+            </h3>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModalGerenciamentoAtestados()" aria-label="Fechar">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+        </div>
+        <div class="modal-body" [attr.aria-busy]="carregandoAtestados || salvandoAtestado || uploadingAtestado ? 'true' : 'false'">
+            <p id="modal-atestado-instrucoes" class="sr-only">Janela de gerenciamento de atestados. Pressione Tab para percorrer os controles e Escape para voltar à tela anterior.</p>
+            <p id="modal-atestado-status" class="sr-only" aria-live="polite">{{ statusAtestados }}</p>
+            @if (!modalAtestadoAberto) {
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
+                <button class="btn btn-primary" (click)="abrirModalAtestadoForm()" aria-haspopup="dialog" aria-label="Abrir formulário para registrar novo atestado">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;">add</span> Registrar Novo Atestado
+                </button>
+            </div>
+            } @else {
+            <div class="atestado-form-card" style="margin-bottom:1.5rem; border:2px solid var(--primary-color);">
+                <div class="atestado-form-header">
+                    <strong>{{ atestadoEmEdicao ? 'Editar Atestado' : 'Novo Atestado' }}</strong>
+                    <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalAtestadoForm()" aria-label="Cancelar">
+                        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+                    </button>
+                </div>
+                <div class="atestado-form-body">
+                    <div class="atestado-form-row">
+                        <div class="form-group">
+                            <label for="at-inicio">Data Início <span class="required" aria-hidden="true">*</span></label>
+                            <input id="at-inicio" type="date" class="form-input" [(ngModel)]="novoAtestado.dataInicio" [max]="hojeISO()" (change)="buscarPreviewAtestado()" [disabled]="!!atestadoEmEdicao" />
+                        </div>
+                        <div class="form-group">
+                            <label for="at-fim">Data Fim <span class="required" aria-hidden="true">*</span></label>
+                            <input id="at-fim" type="date" class="form-input" [(ngModel)]="novoAtestado.dataFim" [max]="hojeISO()" (change)="buscarPreviewAtestado()" [disabled]="!!atestadoEmEdicao" />
+                        </div>
+                    </div>
+                    @if (atestadoEmEdicao) {
+                    <div style="background:#fffbeb; border:1px solid #fde68a; color:#b45309; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; margin-bottom: 1rem;">
+                        <strong>Nota:</strong> Não é possível editar as datas de um atestado já salvo, pois as faltas já foram justificadas no diário de classe. Se o período estiver errado, é recomendado excluir este atestado e registrar um novo.
+                    </div>
+                    }
+                    <div class="form-group">
+                        <label for="at-motivo">Motivo <span class="required" aria-hidden="true">*</span></label>
+                        <input id="at-motivo" type="text" class="form-input" [(ngModel)]="novoAtestado.motivo" placeholder="Ex: Consulta Médica, Internação..." maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label>Arquivo (PDF / Imagem)</label>
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;" [attr.aria-busy]="uploadingAtestado ? 'true' : 'false'">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
+                            {{ uploadingAtestado ? 'Enviando...' : (novoAtestado.arquivoUrl ? 'Arquivo anexado' : 'Selecionar Arquivo') }}
+                            <input type="file" accept=".jpg,.jpeg,.png,.pdf" style="display:none;" (change)="uploadArquivoAtestado($event)" [disabled]="uploadingAtestado" aria-label="Selecionar arquivo do atestado" />
+                        </label>
+                        @if (novoAtestado.arquivoUrl) {
+                        <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoAtestado.arquivoUrl!)" aria-label="Ver arquivo enviado">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">open_in_new</span> Ver arquivo
+                        </button>
+                        }
+                    </div>
+                    @if (atestadoPreview) {
+                    <div style="background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; display:flex; gap:0.5rem; align-items:flex-start;" role="status">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">info</span>
+                        @if (atestadoPreview.totalFaltasNoPeriodo === 0) {
+                        <span>Nenhuma falta encontrada no período para justificar.</span>
+                        } @else {
+                        <span>Serão justificadas <strong>{{ atestadoPreview.totalFaltasNoPeriodo }}</strong> falta(s) no período selecionado.</span>
+                        }
+                    </div>
+                    }
+                    @if (erroAtestado) {
+                    <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem;" role="alert">{{ erroAtestado }}</div>
+                    }
+                </div>
+                <div class="atestado-form-footer">
+                    <button class="btn btn-secondary btn-sm" (click)="fecharModalAtestadoForm()">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" (click)="salvarAtestado()" [disabled]="salvandoAtestado || (!atestadoEmEdicao && (!novoAtestado.dataInicio || !novoAtestado.dataFim)) || !novoAtestado.motivo" [attr.aria-busy]="salvandoAtestado ? 'true' : 'false'">
+                        @if (salvandoAtestado) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
+                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> {{ atestadoEmEdicao ? 'Salvar Edição' : 'Salvar Atestado' }} }
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (carregandoAtestados) {
+            <div style="padding:2rem; text-align:center;" aria-busy="true">
+                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
+                <p style="color:#6b7280;">Buscando atestados...</p>
+            </div>
+            } @else if (atestadosDoAluno.length === 0) {
+            <div style="text-align: center; padding: 2rem; border: 1px dashed #ccc; border-radius: 8px;">
+                <p style="color:#6b7280; font-size:0.95rem;">Nenhum atestado registrado para este aluno.</p>
+            </div>
+            } @else {
+            <table class="historico-table">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Motivo</th>
+                        <th style="text-align:center;">Faltas Justific.</th>
+                        <th>Documento</th>
+                        @if (isAdmin) { <th>Ação</th> }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (at of atestadosDoAluno; track at.id) {
+                    <tr>
+                        <td style="white-space:nowrap; font-weight: 500;">{{ formatarData(at.dataInicio) }} &nbsp;até&nbsp; {{ formatarData(at.dataFim) }}</td>
+                        <td>{{ at.motivo }}</td>
+                        <td style="text-align:center;">
+                            <span class="badge badge-fj">{{ at.frequencias?.length ?? 0 }}</span>
+                        </td>
+                        <td>
+                            @if (at.arquivoUrl) {
+                            <button class="btn btn-outline-primary btn-sm" (click)="abrirVisualizadorPdf(at.arquivoUrl)" aria-label="Ver documento">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">description</span> PDF/IMG
+                            </button>
+                            } @else { <span style="color:#9ca3af;">—</span> }
+                        </td>
+                        @if (isAdmin) {
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary btn-sm" (click)="abrirModalAtestadoForm(at)" aria-label="Editar atestado" title="Editar atestado">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">edit</span>
+                                </button>
+                                <button class="btn btn-danger btn-sm" (click)="removerAtestado(at.id)" aria-label="Remover atestado" title="Excluir e reverter faltas justificadas">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalGerenciamentoAtestados()">Voltar ao Perfil</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- MODAL DE GERENCIAMENTO DE LAUDOS -->
+@if (gerenciandoLaudos) {
+<div class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="modal-laudo-title"
+    aria-describedby="modal-laudo-instrucoes modal-laudo-status"
+    (click)="fecharModalGerenciamentoLaudos($event)" (keydown.escape)="onKeydown($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal-content" style="max-width: 850px;" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h3 id="modal-laudo-title" style="display:flex; align-items:center; gap:0.5rem; margin:0; font-size:1.25rem;">
+                <span class="material-symbols-rounded" style="color:var(--primary-color);">health_metrics</span>
+                Histórico de Laudos Médicos de {{ alunoSelecionado?.nomeCompleto }}
+            </h3>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModalGerenciamentoLaudos()" aria-label="Fechar">
+                <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+        </div>
+        <div class="modal-body" [attr.aria-busy]="carregandoLaudos || salvandoLaudo || uploadingLaudo ? 'true' : 'false'">
+            <p id="modal-laudo-instrucoes" class="sr-only">Janela de histórico de laudos médicos. Pressione Tab para percorrer os controles e Escape para voltar à tela anterior.</p>
+            <p id="modal-laudo-status" class="sr-only" aria-live="polite">{{ statusLaudos }}</p>
+            @if (!modalLaudoAberto) {
+            <div style="display:flex; justify-content:flex-end; margin-bottom: 1rem;">
+                <button class="btn btn-primary" (click)="abrirModalLaudoForm()" aria-haspopup="dialog" aria-label="Abrir formulário para anexar novo laudo">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:18px;">add</span> Anexar Novo Laudo
+                </button>
+            </div>
+            } @else {
+            <div class="atestado-form-card" style="margin-bottom:1.5rem; border:2px solid var(--primary-color);">
+                <div class="atestado-form-header">
+                    <strong>{{ laudoEmEdicao ? 'Editar Laudo Médico' : 'Novo Laudo Médico' }}</strong>
+                    <button class="btn btn-icon btn-ghost btn-sm" (click)="fecharModalLaudoForm()" aria-label="Cancelar">
+                        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+                    </button>
+                </div>
+                <div class="atestado-form-body">
+                    <div class="atestado-form-row">
+                        <div class="form-group">
+                            <label for="ld-emissao">Data de Emissão <span class="required" aria-hidden="true">*</span></label>
+                            <input id="ld-emissao" type="date" class="form-input" [(ngModel)]="novoLaudo.dataEmissao" [max]="hojeISO()" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ld-medico">Médico Resp. (Opcional)</label>
+                            <input id="ld-medico" type="text" class="form-input" [(ngModel)]="novoLaudo.medicoResponsavel" placeholder="Ex: Dr. José Silva - CRM 123" maxlength="100" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="ld-descricao">Descrição / Detalhes (Opcional)</label>
+                        <input id="ld-descricao" type="text" class="form-input" [(ngModel)]="novoLaudo.descricao" placeholder="CID 10, grau de acometimento, etc..." maxlength="200" />
+                    </div>
+                    <div class="form-group">
+                        <label>Documento (PDF / Imagem) <span class="required" aria-hidden="true">*</span></label>
+                        <label class="btn btn-secondary btn-sm" style="cursor:pointer; width:fit-content; gap:6px;" [attr.aria-busy]="uploadingLaudo ? 'true' : 'false'">
+                            <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">upload_file</span>
+                            {{ uploadingLaudo ? 'Enviando...' : (novoLaudo.arquivoUrl ? 'Arquivo anexado ✓' : 'Selecionar Arquivo') }}
+                            <input type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" style="display:none;" (change)="uploadArquivoLaudo($event)" [disabled]="uploadingLaudo" aria-label="Selecionar arquivo do laudo" />
+                        </label>
+                        @if (novoLaudo.arquivoUrl && !uploadingLaudo) {
+                        <div style="display:flex; gap:0.5rem; align-items:center; margin-top:0.5rem;">
+                            @if (tipoDocumento(novoLaudo.arquivoUrl) === 'pdf') {
+                            <button class="btn btn-ghost btn-sm" (click)="abrirVisualizadorPdf(novoLaudo.arquivoUrl!)" aria-label="Visualizar PDF do laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">picture_as_pdf</span> Ver PDF
+                            </button>
+                            } @else {
+                            <button class="btn btn-ghost btn-sm" (click)="abrirModalImagem(novoLaudo.arquivoUrl!)" aria-label="Visualizar imagem do laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">image</span> Ver Imagem
+                            </button>
+                            }
+                        </div>
+                        }
+                    </div>
+                    @if (erroLaudo) {
+                    <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem;" role="alert">{{ erroLaudo }}</div>
+                    }
+                </div>
+                <div class="atestado-form-footer">
+                    <button class="btn btn-secondary btn-sm" (click)="fecharModalLaudoForm()">Cancelar</button>
+                    <button class="btn btn-primary btn-sm" (click)="salvarLaudo()" [disabled]="salvandoLaudo || !novoLaudo.dataEmissao || !novoLaudo.arquivoUrl" [attr.aria-busy]="salvandoLaudo ? 'true' : 'false'">
+                        @if (salvandoLaudo) { <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size:14px;">sync</span> Salvando... } 
+                        @else { <span class="material-symbols-rounded" aria-hidden="true" style="font-size:14px;">save</span> {{ laudoEmEdicao ? 'Salvar Edição' : 'Salvar Laudo' }} }
+                    </button>
+                </div>
+            </div>
+            }
+
+            @if (carregandoLaudos) {
+            <div style="padding:2rem; text-align:center;" aria-busy="true">
+                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
+                <p style="color:#6b7280;">Buscando laudos médicos...</p>
+            </div>
+            } @else if (laudosDoAluno.length === 0) {
+            <div style="text-align: center; padding: 2rem; border: 1px dashed #ccc; border-radius: 8px;">
+                <p style="color:#6b7280; font-size:0.95rem;">Nenhum laudo médico documentado.</p>
+            </div>
+            } @else {
+            <table class="historico-table">
+                <thead>
+                    <tr>
+                        <th>Emissão</th>
+                        <th>Médico Resp.</th>
+                        <th>Descrição</th>
+                        <th>Documento</th>
+                        @if (isAdmin) { <th>Ação</th> }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (ld of laudosDoAluno; track ld.id) {
+                    <tr>
+                        <td style="white-space:nowrap; font-weight: 500;">{{ formatarData(ld.dataEmissao) }}</td>
+                        <td>{{ ld.medicoResponsavel || '—' }}</td>
+                        <td>{{ ld.descricao || '—' }}</td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm"
+                                (click)="tipoDocumento(ld.arquivoUrl) === 'pdf' ? abrirVisualizadorPdf(ld.arquivoUrl) : abrirModalImagem(ld.arquivoUrl!)"
+                                aria-label="Ver Laudo">
+                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">
+                                    {{ tipoDocumento(ld.arquivoUrl) === 'pdf' ? 'picture_as_pdf' : 'image' }}
+                                </span>
+                                {{ tipoDocumento(ld.arquivoUrl) === 'pdf' ? 'PDF' : 'Imagem' }}
+                            </button>
+                        </td>
+                        @if (isAdmin) {
+                        <td>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary btn-sm" (click)="abrirModalLaudoForm(ld)" aria-label="Editar laudo" title="Editar laudo">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">edit</span>
+                                </button>
+                                <button class="btn btn-danger btn-sm" (click)="removerLaudo(ld.id)" aria-label="Deletar Laudo">
+                                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:16px;">delete</span>
+                                </button>
+                            </div>
+                        </td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalGerenciamentoLaudos()">Voltar ao Perfil</button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Inativação -->
+@if (alunoParaInativar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="(alunoParaInativar.statusAtivo !== false ? 'Inativar' : 'Reativar') + ' Aluno ' + alunoParaInativar.nomeCompleto"
+    (click)="cancelarInativacao()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
+        <div class="modal-header">
+            <h2 id="modal-titulo-inativacao"
+                [style.color]="alunoParaInativar.statusAtivo !== false ? '#b45309' : '#2563eb'">
+                {{ alunoParaInativar.statusAtivo !== false ? 'Inativar Aluno' : 'Reativar Aluno' }}
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarInativacao()" aria-label="Cancelar ação">✕</button>
+        </div>
+
+        <div class="modal-body">
+            @if (alunoParaInativar.statusAtivo !== false) {
+            <p>Deseja inativar <strong>{{ alunoParaInativar.nomeCompleto }}</strong>?</p>
+            <p>O registro será mantido, mas o aluno ficará inativo e não aparecerá em operações de nova matrícula.</p>
+            } @else {
+            <p>Deseja reativar <strong>{{ alunoParaInativar.nomeCompleto }}</strong>?</p>
+            <p>Ele passará a ficar disponível para novas matrículas.</p>
+            }
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarInativacao()"
+                [disabled]="salvando">Cancelar</button>
+            <button [class]="alunoParaInativar.statusAtivo !== false ? 'btn btn-warning' : 'btn btn-primary'"
+                type="button" (click)="confirmarInativacao()" [disabled]="salvando"
+                [style]="alunoParaInativar.statusAtivo !== false ? 'background-color: #fbbf24; color: #111827; border: none;' : ''">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"
+                    style="width:14px; height:14px; border-width:2px;"></span> Verificando... }
+                @else { {{ alunoParaInativar.statusAtivo !== false ? 'Sim, inativar' : 'Sim, reativar' }} }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Excluir Documento -->
+@if (documentoParaExcluir) {
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Excluir Documento"
+    (click)="cancelarExclusaoDocumento()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
+        <div class="modal-header">
+            <h2 id="modal-titulo-documento" style="color: #b91c1c;">Apagar Arquivo</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDocumento()"
+                aria-label="Cancelar exclusão de documento">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>
+                {{ documentoParaExcluir.tipo === 'fotoPerfil'
+                ? 'Deseja apagar a foto de perfil deste aluno definitivamente?'
+                : 'Deseja apagar o laudo/documento deste aluno definitivamente?'
+                }}
+            </p>
+            <p>Esta ação não pode ser desfeita.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDocumento()"
+                [disabled]="deletandoImage">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDocumento()"
+                [disabled]="deletandoImage" style="background-color: #b91c1c; color: white; border: none;">
+                @if (deletandoImage) { <span class="loading-spinner" aria-hidden="true"
+                    style="width:14px; height:14px; border-width:2px;"></span> Apagando... }
+                @else { Sim, apagar }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Exclusão DEFINITIVA (Soft Delete Nvl 2) -->
+@if (alunoParaExcluirDefinitivo) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Excluir definitivamente o aluno ' + alunoParaExcluirDefinitivo.nomeCompleto"
+    (click)="cancelarExclusaoDefinitiva()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
+        <div class="modal-header">
+            <h2 id="modal-titulo-exclusao-def" style="color: #991b1b;">Apagar Registro do Aluno</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarExclusaoDefinitiva()"
+                aria-label="Cancelar exclusão">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>Você está prestes a apagar <strong>permanentemente</strong> o acesso do aluno <strong>{{
+                    alunoParaExcluirDefinitivo.nomeCompleto }}</strong> de todo o painel.</p>
+            <p>Por motivos da LGPD o cadastro e dados sensíveis serão fisicamente preservados mas ocultos.</p>
+            <p style="color: #b91c1c; font-weight: bold; margin-top: 1rem;">Tem CERTEZA absoluta disso?</p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarExclusaoDefinitiva()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-danger" type="button" (click)="confirmarExclusaoDefinitiva()" [disabled]="salvando"
+                style="background-color: #991b1b; color: white; border: none;">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Apagando... }
+                @else { Excluir Permanente }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- Modal de Confirmação de Restauração -->
+@if (alunoParaRestaurar) {
+<div class="modal-backdrop" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Restaurar o aluno ' + alunoParaRestaurar.nomeCompleto" (click)="cancelarRestauracao()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal" (click)="$event.stopPropagation()" tabindex="0">
+        <div class="modal-header">
+            <h2 id="modal-titulo-restaurar" style="color: #047857;">Restaurar Inscrição</h2>
+            <button class="btn btn-icon btn-ghost" (click)="cancelarRestauracao()"
+                aria-label="Cancelar restauração">✕</button>
+        </div>
+
+        <div class="modal-body">
+            <p>O aluno <strong>{{ alunoParaRestaurar.nomeCompleto }}</strong> será reativado.</p>
+            <p>Ele passará a aparecer novamente nos relatórios financeiros e para novas matrículas em turmas e cursos.
+            </p>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" (click)="cancelarRestauracao()"
+                [disabled]="salvando">Cancelar</button>
+            <button class="btn btn-primary" type="button" (click)="confirmarRestauracao()" [disabled]="salvando"
+                style="background-color: #047857; color: white; border: none;">
+                @if (salvando) { <span class="loading-spinner" aria-hidden="true"></span> Restaurando... }
+                @else { Restaurar Aluno }
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+<!-- ══════════ MODAL DE EDIÇÃO ══════════ -->
+@if (modalEdicaoAberto && alunoEmEdicao) {
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true"
+    [attr.aria-label]="'Editar aluno ' + alunoEmEdicao.nomeCompleto" (click)="tentarFecharModalEdicao()"
+    cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="display: flex; align-items: center; justify-content: center; z-index: 1050;">
+    <div style="max-width: 820px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;" (click)="$event.stopPropagation()">
+        <app-beneficiary-form 
+           [alunoEmEdicao]="alunoEmEdicao" 
+           (salvou)="aoSalvarEdicao()" 
+           (cancelou)="tentarFecharModalEdicao()">
+        </app-beneficiary-form>
+    </div>
+</div>
+}
+
+<!-- Modal de Importação via Planilha -->
+@if (modalImportAberto) {
+<app-import-modal (fechou)="onImportFechou($event)" />
+}
+
+<!-- ── Modal: Ficha Técnica do Aluno ──────────────────────────── -->
+@if (mostrarModalFicha) {
+<div class="ficha-modal-overlay"
+     role="dialog"
+     aria-modal="true"
+     [attr.aria-label]="'Ficha técnica de ' + fichaAlunoNome"
+     cdkTrapFocus
+     (keydown.escape)="fecharModalFicha()">
+
+  <!-- Card centralizado (proporcional ao padrão do projeto) -->
+  <div class="ficha-modal-card">
+
+    <!-- Cabeçalho com título e botões (oculto na impressão) -->
+    <div class="ficha-modal-toolbar no-print">
+      <span class="ficha-modal-title">
+        <strong>Ficha Técnica</strong> — {{ fichaAlunoNome }}
+      </span>
+      <div class="ficha-modal-actions">
+        <button class="btn btn-primary btn-sm"
+                (click)="imprimirFichaModal()"
+                aria-label="Imprimir ou salvar como PDF">
+                    Imprimir / PDF
+        </button>
+        <button class="btn btn-secondary btn-sm"
+                (click)="fecharModalFicha()"
+                aria-label="Fechar ficha técnica">
+          ✕ Fechar
+        </button>
+      </div>
+    </div>
+
+    <!-- Conteúdo da ficha com scroll -->
+    <div class="ficha-modal-body ficha-print-content"
+         tabindex="0"
+         [innerHTML]="fichaHtml">
+    </div>
+
+  </div><!-- /.ficha-modal-card -->
+</div>
+}
+
+<!-- ── Modal para Anexar/Editar Termo LGPD ── -->
+@if (modalLgpdAberto) {
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-label="Termo LGPD"
+    aria-describedby="modal-lgpd-instrucoes modal-lgpd-status"
+    (click)="fecharModalLgpd()" (keydown.escape)="onKeydown($event)" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" style="z-index: 100000;">
+    <div class="modal modal--large" (click)="$event.stopPropagation()" style="max-width: 500px; width: 95%;" tabindex="-1">
+        <div class="modal-header">
+            <h2 style="color: #10b981; display:flex; align-items:center; gap:0.5rem;">
+                <span class="material-symbols-rounded" aria-hidden="true">verified_user</span>
+                Termo LGPD
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="fecharModalLgpd()" aria-label="Fechar">✕</button>
+        </div>
+        <div class="modal-body" style="padding: 1.5rem;" [attr.aria-busy]="uploadingLgpd || salvandoLgpd ? 'true' : 'false'">
+            <p id="modal-lgpd-instrucoes" class="sr-only">Janela de termo LGPD. Pressione Tab para percorrer os controles e Escape para voltar à tela anterior.</p>
+            <p id="modal-lgpd-status" class="sr-only" aria-live="polite">{{ statusLgpd }}</p>
+            <p style="font-size: 0.95rem; margin-bottom: 1.5rem; color:#4b5563;">Faça o upload do documento assinado (PDF ou Imagem).</p>
+            
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label>Selecionar Arquivo <span class="required" aria-hidden="true">*</span></label>
+                <div style="margin-top:0.5rem;">
+                    <label class="btn btn-outline-primary" style="cursor:pointer; display:inline-flex; width:100%; justify-content:center; align-items:center; gap:8px;" [attr.aria-busy]="uploadingLgpd ? 'true' : 'false'">
+                        <span class="material-symbols-rounded" aria-hidden="true">upload_file</span>
+                        {{ uploadingLgpd ? 'Enviando...' : (novoLgpdUrl ? 'Substituir Arquivo' : 'Escolher Arquivo...') }}
+                        <input type="file" accept="image/jpeg,image/png,application/pdf" style="display:none;" (change)="uploadArquivoLgpd($event)" [disabled]="uploadingLgpd" aria-label="Selecionar arquivo do termo LGPD">
+                    </label>
+                </div>
+                
+                @if (novoLgpdUrl && !uploadingLgpd) {
+                <div style="background:#ecfdf5; border:1px solid #10b981; color:#065f46; padding:0.75rem; border-radius:0.5rem; font-size:0.875rem; display:flex; gap:0.5rem; align-items:flex-start; margin-top:1rem;">
+                    <span class="material-symbols-rounded" aria-hidden="true" style="font-size:1rem; flex-shrink:0;">check_circle</span>
+                    <span>Arquivo recebido e pronto para ser salvo!</span>
+                </div>
+                }
+            </div>
+
+            @if (erroLgpd) {
+                <div style="background:#fef2f2; border:1px solid #fca5a5; color:#b91c1c; padding:0.75rem 1rem; border-radius:0.5rem; font-size:0.85rem; margin-bottom:1rem;" role="alert">
+                    {{ erroLgpd }}
+                </div>
+            }
+        </div>
+        <div class="modal-footer" style="padding-top: 1rem; border-top: 1px solid #e5e7eb;">
+            <button class="btn btn-secondary" (click)="fecharModalLgpd()">Cancelar</button>
+            <button class="btn btn-primary" (click)="salvarLgpd()" [disabled]="salvandoLgpd || !novoLgpdUrl || uploadingLgpd" [attr.aria-busy]="salvandoLgpd ? 'true' : 'false'" style="background-color: #10b981; border: none; color: white;">
+                @if (salvandoLgpd) {
+                    <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 14px;">sync</span>
+                    Salvando...
+                } @else {
+                    Salvar Termo LGPD
+                }
+            </button>
+        </div>
+    </div>
+</div>
+}
+

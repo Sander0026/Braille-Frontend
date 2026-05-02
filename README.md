@@ -1,75 +1,154 @@
-# 📅 Cronograma de Desenvolvimento - Projeto ILBES (Sistema Administrativo)
+# Braille-Frontend
 
-**Projeto:** Sistema de Gestão para o Instituto Luiz Braille, voltado ao atendimento de pessoas com deficiência visual.
+**Sistema Administrativo Integrado — Instituto Luiz Braille do Espírito Santo (ILBES)**
 
-**Adaptação de Escopo (Março/2026):** Inclusão de novos requisitos solicitados pelo cliente (Certificados Dinâmicos, Apoiadores, QR Code e Módulo de Ajuda), mantendo a data de entrega e Go-Live em 26/05/2026.
-
-**Legenda de Status:**
-- [X] ✅ Concluído
-- [~] 🚧 Em Andamento / Parcialmente Feito
-- [ ] ⏳ Pendente
+SPA Angular 21 que serve dois ambientes: o **site público institucional** e o **painel administrativo** para gestão de alunos, turmas, frequências, certificados e comunicados.
 
 ---
 
-## 🏗️ FASE 1 — Fundação e Estrutura (Semanas 1 e 2)
-> 17/02/2026 a 03/03/2026
+## Stack Tecnológica
 
-| Sprint | Data | Tarefa / Entregável | Status |
-| :--: | :--- | :--- | :---: |
-| 1.1 | **17/02/2026** | **Configuração do Ambiente e Repositórios**<br>- Criar repositório Git (Front e API)<br>- Inicializar projeto NestJS e Angular<br>- Configurar banco PostgreSQL no Neon.tech<br>- Configurar proxy e variáveis de ambiente | [X] |
-| 1.2 | **24/02/2026** | **Modelagem de Dados e Autenticação**<br>- Definir schema Prisma completo<br>- Implementar Login com JWT no NestJS<br>- Definir Roles (ADMIN, SECRETARIA, PROFESSOR, COMUNICACAO)<br>- Tela de Login no Angular | [X] |
-| 1.3 | **03/03/2026** | **CRUD de Beneficiários (Alunos)**<br>- Ficha completa: dados, contato, perfil da deficiência, socioeconômica<br>- Upload de foto de perfil e laudo médico (Cloudinary)<br>- Wizard de cadastro no Angular | [X] | 
-
----
-
-## ⚙️ FASE 2 — Backend Core e Módulos de Negócio (Semanas 3, 4 e 5)
-> 10/03/2026 a 31/03/2026
-
-| Sprint | Data | Tarefa / Entregável | Status |
-| :--: | :--- | :--- | :---: |
-| 2.1 | **10/03/2026** | **Módulo de Oficinas/Turmas**<br>- API de Turmas (oficinas): criar, editar, listar<br>- Vinculação de aluno a uma ou mais turmas<br>- Suporte a múltiplas oficinas dinâmicas | [X] |
-| 2.2 | **17/03/2026** | **Módulo de Frequência (Chamada)**<br>- API de Frequência: registrar presença/ausência<br>- Tela de frequências no Angular com filtros | [X] |
-| 2.3 | **24/03/2026** | **Gestão de Usuários do Sistema**<br>- API para CRUD de usuários do painel<br>- Fluxo de redefinição de senha e upload de foto<br>- Controle de roles e permissões | [X] |
-| 2.4 | **31/03/2026** | **Módulo de Comunicados e Notícias**<br>- API de Comunicados: criar, editar, publicar, fixar, categorizar<br>- Categorias: Notícia, Serviço, Vaga, Evento, etc.<br>- Upload de imagem de capa e tela de listagem | [~] |
+| Camada | Tecnologia |
+|---|---|
+| Framework | Angular 21 (Standalone Components) |
+| Estilos | TailwindCSS 3 + SCSS |
+| Estado | Angular Signals + RxJS |
+| HTTP | HttpClient + 3 Interceptors |
+| Editor Rich Text | ngx-quill |
+| Visualizador PDF | pdfjs-dist |
+| Sanitização HTML | DOMPurify |
+| Acessibilidade (dev) | axe-core + Angular CDK LiveAnnouncer |
+| Testes E2E | Cypress 15 (4 roles) |
+| Testes Unitários | Vitest 4 |
+| Linting | ESLint 9 + angular-eslint |
+| PWA | @angular/service-worker |
+| Deploy | Vercel |
 
 ---
 
-## 👁️ FASE 3 — Site Público e Painel CMS (Semanas 6 e 7)
-> 07/04/2026 a 14/04/2026
+## Setup Local em 5 Passos
 
-| Sprint | Data | Tarefa / Entregável | Status |
-| :--: | :--- | :--- | :---: |
-| 3.1 | **07/04/2026** | **Site Público (Vitrine Institucional)**<br>- Página Home com seções: hero, missão, oficinas, depoimentos<br>- Página Sobre e Página de Notícias<br>- Página de Contato com formulário "Fale Conosco" | [ ] |
-| 3.2 | **14/04/2026** | **Painel CMS & Dashboard Administrativo**<br>- API de SiteConfig e ConteudoSecao para edição do site<br>- API de métricas e Tela de Dashboard com cards de resumo<br>- Navegação e menu lateral para o painel admin | [ ] |
+**Pré-requisitos:** Node.js 22+, npm 11+, Angular CLI 21
 
----
+```bash
+# 1. Clone o repositório
+git clone <url-do-repositorio>
+cd Braille-Frontend
 
-## 🎓 FASE 4 — Expansão de Escopo: Certificados e Apoiadores (Semanas 8 e 9)
-> 21/04/2026 a 28/04/2026
+# 2. Instale as dependências
+npm install
 
-| Sprint | Data | Tarefa / Entregável | Status |
-| :--: | :--- | :--- | :---: |
-| 4.1 | **21/04/2026** | **Motor de Certificados e Editor Visual**<br>- Tela de criação de Modelos (Editor Drag & Drop, upload de arte, escala de fontes)<br>- Motor de geração de PDFs vetorizados no backend (`pdf-lib`) | [ ] |
-| 4.2 | **28/04/2026** | **Apoiadores e Validação QR Code**<br>- Módulo de Apoiadores (Amigos do Braille)<br>- Botão "Emitir Certificado" no perfil do aluno/apoiador<br>- Motor de injeção de QR Code e Portal de Validação de Autenticidade | [ ] |
+# 3. Configure o ambiente
+# (o proxy.conf.json já redireciona /api → localhost:3000 automaticamente)
+# Nenhuma variável de ambiente é necessária para desenvolvimento local
 
----
+# 4. Suba o servidor de desenvolvimento
+npm start
+# Acesse: http://localhost:4200
 
-## 🎨 FASE 5 — Refinamento Visual e Acessibilidade (Semanas 10 e 11)
-> 05/05/2026 a 12/05/2026
+# 5. (Opcional) Aponte para a API em produção
+# Edite src/environments/environment.ts se quiser usar a API do Render em vez do local
+```
 
-| Sprint | Data | Tarefa / Entregável | Status |
-| :--: | :--- | :--- | :---: |
-| 5.1 | **05/05/2026** | **Design System e Acessibilidade Avançada**<br>- Padronizar formulários, botões e modais de exclusão<br>- Revisão de tags `aria-label`, contraste WCAG AA<br>- Testes práticos com leitor de tela (NVDA) e navegação por teclado | [ ] |
-| 5.2 | **12/05/2026** | **Relatórios e Exportação**<br>- Relatório de frequência por turma/período<br>- Relatório de beneficiários por tipo de deficiência<br>- Opção de exportação (PDF ou CSV) e filtros avançados | [ ] |
+> **Pré-requisito:** o backend ([Braille-Api](../Braille-Api)) deve estar rodando em `localhost:3000` para o proxy funcionar.
 
 ---
 
-## 🚀 FASE 6 — Deploy, Manuais e Entrega Final (Semanas 12 e 13)
-> 19/05/2026 a 26/05/2026
+## Scripts Disponíveis
 
-| Sprint | Data | Tarefa / Entregável | Status |
-| :--: | :--- | :--- | :---: |
-| 6.1 | **19/05/2026** | **Hospedagem, Deploy e Auditoria**<br>- Backend no Render.com e Frontend na Vercel (com HTTPS e domínio)<br>- Rodar Axe-core / Lighthouse e resolver bugs críticos (Regressão) | [ ] |
-| 6.2 | **26/05/2026** | **Módulo de Ajuda e Documentação Final**<br>- Criação do módulo interno com manuais de uso para a secretaria<br>- Operação assistida (projeto rodando na instituição e feedbacks)<br>- **🏁 Code Freeze e Apresentação Final para a Banca Acadêmica** | [ ] |
+| Script | Comando | Descrição |
+|---|---|---|
+| Desenvolvimento | `npm start` | Serve em `localhost:4200` com proxy para API |
+| Build produção | `npm run build` | Gera bundle otimizado em `dist/` |
+| Testes unitários | `npm test` | Roda Vitest em modo watch |
+| Lint | `npm run lint` | ESLint + angular-eslint |
+| Cypress (interface) | `npm run teste_automatizado:gui` | Abre o Cypress visualmente |
+| Cypress (admin) | `npm run teste_automatizado:adm` | E2E headless com role ADMIN |
+| Cypress (secretaria) | `npm run teste_automatizado:secretaria` | E2E com role SECRETARIA |
+| Cypress (professor) | `npm run teste_automatizado:professor` | E2E com role PROFESSOR |
+| Cypress (comunicação) | `npm run teste_automatizado:comunicacao` | E2E com role COMUNICACAO |
 
 ---
+
+## Arquitetura de Pastas
+
+```
+src/
+├── main.ts                  # Bootstrap, axe-core (dev)
+├── environments/            # environment.ts (dev) + environment.prod.ts
+├── app/
+│   ├── app.config.ts        # Providers globais: HTTP, Router, PWA, Locale, Quill
+│   ├── app.routes.ts        # Rotas lazy-loaded (público + admin)
+│   ├── core/
+│   │   ├── services/        # 19 serviços HTTP de domínio
+│   │   ├── interceptors/    # api + auth + error (3 interceptors)
+│   │   ├── guards/          # authGuard + roleGuard + descarteGuard
+│   │   ├── pipes/           # safe-html, safe-url, cloudinary
+│   │   ├── interfaces/      # Interfaces de domínio (certificados, descarte)
+│   │   └── components/      # Header, Footer, Sidebar, Toast, ConfirmDialog
+│   ├── layouts/
+│   │   ├── admin-layout/    # Shell protegido (JWT + RBAC)
+│   │   └── public-layout/   # Shell público (sem autenticação)
+│   ├── features/
+│   │   ├── beneficiaries/   # Listagem e formulário de alunos
+│   │   └── dashboard/       # Dashboard administrativo
+│   ├── pages/
+│   │   ├── admin/           # Páginas do painel: turmas, frequências, usuários...
+│   │   ├── public/          # Home, Sobre, Contato, Notícias, Login...
+│   │   └── modelos-certificados/
+│   └── shared/
+│       ├── components/      # ui-button, ui-card, ui-input, ui-modal, pdf-viewer
+│       ├── directives/      # phone-mask, tab-escape, animate-on-scroll
+│       ├── pipes/           # (pipes compartilhados)
+│       ├── utils/           # audit-diff, html-sanitizer, masks, safe-resource-url
+│       ├── validators/      # password validator
+│       └── providers/       # tab-escape provider
+└── styles/                  # Estilos globais SCSS + TailwindCSS
+```
+
+---
+
+## Perfis de Acesso (Roles)
+
+| Role | Área de acesso |
+|---|---|
+| `ADMIN` | Acesso total — único que vê auditoria e usuários |
+| `SECRETARIA` | Alunos, turmas, frequências, atestados |
+| `PROFESSOR` | Apenas lançamento de chamada nas suas turmas |
+| `COMUNICACAO` | Comunicados, apoiadores, conteúdo do site |
+
+---
+
+## URLs de Produção
+
+| Ambiente | URL |
+|---|---|
+| Site público | `instituto-luizbraille.vercel.app` |
+| Painel administrativo | `instituto-luizbraille.vercel.app/login` |
+| API (backend) | `https://braille-api-oieq.onrender.com/api` |
+
+---
+
+## Documentação Técnica
+
+A documentação completa está em [`docs/frontend/`](docs/frontend/INDEX.md).
+
+| Documento | Descrição |
+|---|---|
+| [Índice](docs/frontend/INDEX.md) | Visão geral e mapa de navegação |
+| [Setup](docs/frontend/00-setup.md) | Ambiente local detalhado |
+| [Bootstrap e Rotas](docs/frontend/app-bootstrap-rotas.md) | Inicialização e roteamento |
+| [Auth e Guards](docs/frontend/auth-session-guards.md) | JWT, refresh token, RBAC |
+| [Serviços HTTP](docs/frontend/core-http-services.md) | Todos os serviços e endpoints |
+| [Layouts](docs/frontend/layouts-navigation.md) | Shells público e admin |
+| [Componentes Shared](docs/frontend/shared-ui-a11y-utils.md) | UI, directives, pipes, utils |
+| [Testes](docs/frontend/09-testes.md) | Cypress e Vitest |
+| [PWA e Deploy](docs/frontend/10-pwa-deploy.md) | Build, Vercel e CSP |
+| [Acessibilidade](docs/frontend/11-acessibilidade.md) | WCAG, axe-core, LiveAnnouncer |
+| [Decisões Técnicas](docs/frontend/12-decisoes-tecnicas.md) | ADRs |
+
+---
+
+## Contribuição
+
+Ver [CONTRIBUTING.md](CONTRIBUTING.md) para padrões de código, fluxo de branches e checklist de PR.

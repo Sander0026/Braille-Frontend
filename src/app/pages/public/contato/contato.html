@@ -1,0 +1,221 @@
+<ng-container *ngIf="contatoConfig$ | async as config">
+  <!-- ══════════ CONTATO — HERO ══════════ -->
+  <section class="page-hero" aria-labelledby="contato-titulo">
+      <div class="page-hero-inner">
+          <p class="page-eyebrow">Fale Conosco</p>
+          <h1 id="contato-titulo" class="page-hero-title">Entre em contato</h1>
+          @if (config?.heroDescricaoContato) {
+          <div class="page-hero-desc" [innerHTML]="config.heroDescricaoContato | safeHtml"></div>
+          } @else {
+          <p class="page-hero-desc">
+              Preencha o formulário e nossa secretaria entrará em contato com você
+              para oferecer orientações e agendamentos.
+          </p>
+          }
+      </div>
+  </section>
+
+  <!-- ══════════ FORMULÁRIO ══════════ -->
+  <section class="contato-section">
+      <div class="contato-inner">
+
+          <!-- Infos de contato direto -->
+          <aside class="contato-info" aria-label="Informações úteis de contato direto">
+              <h2 class="info-titulo">Outras formas de contato</h2>
+
+              <div class="info-item">
+                  <span class="info-icon material-symbols-rounded" aria-hidden="true">location_on</span>
+                  <div>
+                      <strong>Endereço</strong>
+                      <p>{{ config?.enderecoCompleto || 'Rua Exemplo, 123 — Centro, Cidade — Estado' }}</p>
+                  </div>
+              </div>
+
+              <div class="info-item">
+                  <span class="info-icon material-symbols-rounded" aria-hidden="true">call</span>
+                  <div>
+                      <strong>Telefone</strong>
+                      <p>{{ config?.telefoneCentral || '(XX) XXXX-XXXX' }}</p>
+                      <p class="info-hint">Atendimento em horário comercial</p>
+                  </div>
+              </div>
+
+              <div class="info-item">
+                  <span class="info-icon material-symbols-rounded" aria-hidden="true">mail</span>
+                  <div>
+                      <strong>E-mail</strong>
+                      <p>{{ config?.emailOficial || 'contato@institutobraille.org.br' }}</p>
+                  </div>
+              </div>
+
+              <!-- Redes Sociais -->
+              @if (config?.instagram || config?.facebook || config?.youtube || config?.linkedin) {
+              <div class="info-item info-sociais">
+                  <span class="info-icon material-symbols-rounded" aria-hidden="true">language</span>
+                  <div>
+                      <strong>Redes Sociais</strong>
+                      <div class="social-links-grid" role="list">
+                          @if (config?.instagram) {
+                          <div role="listitem">
+                            <a [href]="config.instagram" target="_blank" rel="noopener noreferrer" aria-label="Acessar Instagram (abre em nova aba)" class="social-badge">
+                                <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span> Instagram
+                            </a>
+                          </div>
+                          }
+                          @if (config?.facebook) {
+                          <div role="listitem">
+                            <a [href]="config.facebook" target="_blank" rel="noopener noreferrer" aria-label="Acessar Facebook (abre em nova aba)" class="social-badge">
+                                <span class="material-symbols-rounded" aria-hidden="true">groups</span> Facebook
+                            </a>
+                          </div>
+                          }
+                          @if (config?.youtube) {
+                          <div role="listitem">
+                            <a [href]="config.youtube" target="_blank" rel="noopener noreferrer" aria-label="Acessar YouTube (abre em nova aba)" class="social-badge">
+                                <span class="material-symbols-rounded" aria-hidden="true">smart_display</span> YouTube
+                            </a>
+                          </div>
+                          }
+                          @if (config?.linkedin) {
+                          <div role="listitem">
+                            <a [href]="config.linkedin" target="_blank" rel="noopener noreferrer" aria-label="Acessar LinkedIn (abre em nova aba)" class="social-badge">
+                                <span class="material-symbols-rounded" aria-hidden="true">business_center</span> LinkedIn
+                            </a>
+                          </div>
+                          }
+                      </div>
+                  </div>
+              </div>
+              }
+
+              <div class="info-aviso" role="note">
+                  <p>
+                      <strong><span class="material-symbols-rounded" aria-hidden="true">info</span> Como funciona?</strong><br>
+                      Ao enviar este formulário, nossa secretaria recebe a mensagem e entrará em contato
+                      pelo telefone ou e-mail que você informar.
+                  </p>
+              </div>
+          </aside>
+
+          <!-- Formulário -->
+          <div class="contato-form-wrap">
+
+              <!-- Estado: sucesso -->
+              @if (enviado()) {
+              <section class="success-state" aria-label="Status de mensagem enviada com sucesso" aria-live="polite" aria-atomic="true">
+                  <div class="success-icon" aria-hidden="true"><span class="material-symbols-rounded">check_circle</span></div>
+                  <h2>Mensagem enviada com sucesso!</h2>
+                  <p>
+                      Recebemos sua mensagem. Nossa secretaria entrará em contato em breve.
+                  </p>
+                  <button class="btn-primary" (click)="novoContato()" aria-label="Enviar outra mensagem de contato">
+                      Enviar outra mensagem
+                  </button>
+              </section>
+
+              } @else {
+
+              <!-- Formulário de contato principal -->
+              <form [formGroup]="contatoForm" (ngSubmit)="enviar()" novalidate aria-label="Formulário principal de contato" class="form-card">
+                  <h2 class="form-title">Envie sua mensagem</h2>
+                  <p class="form-subtitle">
+                      Campos marcados com <span aria-hidden="true" class="req-mark">*</span>
+                      <span class="sr-only">asterisco</span> são obrigatórios.
+                  </p>
+
+                  @if (erroEnvio()) {
+                                    <div class="form-error-banner" role="alert" aria-live="assertive">
+                                        <span class="material-symbols-rounded" aria-hidden="true">warning</span> {{ erroEnvio() }}
+                  </div>
+                  }
+
+                  <!-- Nome -->
+                  <div class="form-group">
+                      <label for="cNome">
+                          Nome completo <span class="req-mark" aria-hidden="true">*</span>
+                      </label>
+                      <input type="text" id="cNome" #nomeInput formControlName="nome"
+                          class="form-input" [class.invalid]="isCampoInvalido('nome')" placeholder="Seu nome completo"
+                          autocomplete="name" aria-required="true" 
+                          [attr.aria-invalid]="isCampoInvalido('nome') ? 'true' : null" 
+                          [attr.aria-describedby]="isCampoInvalido('nome') ? 'err-nome' : null" />
+                      @if (isCampoInvalido('nome')) {
+                        <span id="err-nome" class="field-error" role="alert" aria-live="polite">Informe seu nome (mínimo 2 caracteres).</span>
+                      }
+                  </div>
+
+                  <!-- Email e Telefone -->
+                  <div class="form-row-2">
+                      <div class="form-group">
+                          <label for="cEmail">E-mail</label>
+                          <input type="email" id="cEmail" formControlName="email"
+                              class="form-input" [class.invalid]="isCampoInvalido('email')"
+                              placeholder="seu@email.com" autocomplete="email"
+                              [attr.aria-describedby]="isCampoInvalido('email') || isContatoObrigatorioInvalido() ? 'contato-hint err-email' : 'contato-hint'"
+                              [attr.aria-invalid]="isCampoInvalido('email') || isContatoObrigatorioInvalido() ? 'true' : null" />
+                      </div>
+
+                      <div class="form-group">
+                          <label for="cTelefone">Telefone</label>
+                          <input type="tel" id="cTelefone" formControlName="telefone"
+                              appPhoneMask
+                              class="form-input" [class.invalid]="isCampoInvalido('telefone')" placeholder="(XX) XXXXX-XXXX" autocomplete="tel" inputmode="numeric"
+                              [attr.aria-describedby]="isCampoInvalido('telefone') || isContatoObrigatorioInvalido() ? 'contato-hint err-telefone' : 'contato-hint'"
+                              [attr.aria-invalid]="isCampoInvalido('telefone') || isContatoObrigatorioInvalido() ? 'true' : null"
+                              maxlength="15" />
+                      </div>
+                  </div>
+                  <p id="contato-hint" class="field-hint">
+                      * Informe ao menos e-mail <em>ou</em> telefone para podermos responder.
+                  </p>
+                  
+                  @if (isContatoObrigatorioInvalido()) {
+                    <span id="err-email" class="field-error" role="alert" aria-live="polite">É necessário informar ao menos um e-mail ou telefone.</span>
+                    <span id="err-telefone" class="sr-only">É necessário informar ao menos um e-mail ou telefone.</span>
+                  } @else if (isCampoInvalido('email')) {
+                    <span id="err-email" class="field-error" role="alert" aria-live="polite">E-mail inválido. Verifique o formato (ex: usuario&#64;email.com).</span>
+                  }
+
+                  <!-- Assunto -->
+                  <div class="form-group">
+                      <label for="cAssunto">
+                          Assunto <span class="req-mark" aria-hidden="true">*</span>
+                      </label>
+                      <input type="text" id="cAssunto" formControlName="assunto"
+                          class="form-input" [class.invalid]="isCampoInvalido('assunto')"
+                          placeholder="Ex: Informações sobre as oficinas" aria-required="true"
+                          [attr.aria-invalid]="isCampoInvalido('assunto') ? 'true' : null"
+                          [attr.aria-describedby]="isCampoInvalido('assunto') ? 'err-assunto' : null" />
+                      @if (isCampoInvalido('assunto')) {
+                        <span id="err-assunto" class="field-error" role="alert" aria-live="polite">Informe o assunto (mínimo 3 caracteres).</span>
+                      }
+                  </div>
+
+                  <!-- Mensagem -->
+                  <div class="form-group">
+                      <label for="cMensagem">
+                          Mensagem <span class="req-mark" aria-hidden="true">*</span>
+                      </label>
+                      <textarea id="cMensagem" formControlName="mensagem"
+                          class="form-input"
+                          [class.invalid]="isCampoInvalido('mensagem')" rows="5"
+                          placeholder="Descreva sua dúvida, solicitação ou comentário..." aria-required="true"
+                          [attr.aria-invalid]="isCampoInvalido('mensagem') ? 'true' : null"
+                          [attr.aria-describedby]="isCampoInvalido('mensagem') ? 'err-mensagem' : null" tabEscape></textarea>
+                      @if (isCampoInvalido('mensagem')) {
+                        <span id="err-mensagem" class="field-error" role="alert" aria-live="polite">Sua mensagem deve conter no mínimo 10 caracteres.</span>
+                      }
+                  </div>
+
+                  <!-- Submit -->
+                  <button type="submit" class="btn-primary btn-full" [disabled]="enviando()" [attr.aria-busy]="enviando()">
+                      @if (enviando()) { <span aria-live="polite" aria-atomic="true"><span class="material-symbols-rounded" aria-hidden="true">hourglass_top</span> Enviando, aguarde...</span> }
+                      @else { <span class="material-symbols-rounded" aria-hidden="true">send</span> Enviar Mensagem }
+                  </button>
+              </form>
+
+              }
+          </div>
+      </div>
+  </section>
+</ng-container>
