@@ -60,7 +60,17 @@ API cria aluno → limparCache() → lista atualizada
 - Paginação com `aria-label="Navegação de páginas"`
 - `LiveAnnouncer` anuncia resultado de busca e ações (ex: "Aluno inativado com sucesso")
 
-## 3.2 `BeneficiaryFormComponent` — Cadastro/Edição
+## 3.2 `ImportModalComponent` — Importação em Lote via Planilha
+
+**Arquivo:** `src/app/features/beneficiaries/import-modal/`
+
+### Funcionalidades (Chunking Frontend)
+- **Parse no Navegador:** Faz a extração do arquivo `.xlsx` instantaneamente no cliente usando a biblioteca `xlsx`, protegendo o servidor de pico de CPU/Memória.
+- **Processamento em Lotes (Chunking):** Fila sequencial de envio que fatia milhares de alunos em pacotes limitados (ex: `TAMANHO_LOTE = 200`). Isso imuniza a aplicação de timeouts HTTP e limites no servidor (Render/Neon).
+- **Progress Bar Inclusiva:** O modal mostra `aria-valuenow` de forma iterativa sem congelar a UI.
+- **Acessibilidade Aprimorada:** O pacote `@angular/cdk/a11y` (`LiveAnnouncer`) reporta auditivamente aos leitores de tela a cada 20% importado, promovendo autonomia aos gestores cegos.
+
+## 3.3 `BeneficiaryFormComponent` — Cadastro/Edição
 
 **Arquivo:** `src/app/features/beneficiaries/beneficiary-form/`
 
@@ -140,8 +150,7 @@ interface Beneficiario {
 
 - **ViaCEP** é um serviço externo — se ficar fora do ar, o preenchimento de endereço falha silenciosamente.
   O campo de endereço deve aceitar preenchimento manual como fallback.
-- **Importação de planilha** não tem preview antes de confirmar — erros só aparecem após o upload.
-  A API retorna `ImportResult` com lista de linhas com erro.
+- **Importação em Massa via Planilha:** Com a arquitetura de *Chunking*, a UI atualiza um Progress Bar dinâmico; os erros de processamento consolidados aparecem apenas ao fim de todos os lotes como um Relatório de Falhas.
 - **`descarteGuard`** ativo: ao recarregar a página acidentalmente, o browser exibe o dialog nativo
   "Sair da página? Dados não salvos serão perdidos."
 
