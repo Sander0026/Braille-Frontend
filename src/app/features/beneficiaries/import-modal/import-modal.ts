@@ -28,7 +28,7 @@ export class ImportModalComponent {
     totalLinhas = 0;
     linhasProcessadas = 0;
     progressoPercentual = 0;
-    TAMANHO_LOTE = 200; 
+    TAMANHO_LOTE = 300; 
 
     constructor(
         private beneficiariosService: BeneficiariosService,
@@ -107,8 +107,9 @@ export class ImportModalComponent {
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
 
+                // range: 1 ignora a linha 0 (instruções visuais) e usa a linha 1 como chaves (cabeçalhos)
                 // blankrows: false e defval: '' garante um formato previsível
-                const rawData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { blankrows: false, defval: '' });
+                const rawData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { range: 1, blankrows: false, defval: '' });
                 
                 this.totalLinhas = rawData.length;
                 if (this.totalLinhas === 0) {
