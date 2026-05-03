@@ -131,6 +131,15 @@ export const environment: Environment = {
 
 > Se a URL da API mudar, é necessário atualizar `environment.prod.ts` e fazer novo deploy.
 
+## 4.4 Vercel Staged Deployments e Build Cache
+
+> [!WARNING]
+> **Atenção Crítica para Deploys na Vercel:**
+> Dois comportamentos podem fazer com que **código antigo seja servido em produção** mesmo após um push bem-sucedido na branch `main`:
+> 
+> 1. **Staged Deployments:** O projeto pode estar configurado com *Deployment Protection*. Nesse estado, a build finaliza, mas fica marcada como `Production: Staged`. Ela **não** é publicada automaticamente no domínio oficial. É necessário promovê-la manualmente clicando em **Promote to Production** nos detalhes do deploy no painel da Vercel, ou desativar o recurso em *Settings > Git*.
+> 2. **Build Cache Preso:** Para compilar mais rápido, a Vercel reutiliza artefatos antigos. Ocasionalmente, alterações estruturais no HTML podem não ser detectadas corretamente. Para forçar uma compilação do zero, acione o **Redeploy** desmarcando explicitamente a opção **"Use existing Build Cache"**.
+
 ---
 
 # 5. Headers de Segurança (vercel.json)
