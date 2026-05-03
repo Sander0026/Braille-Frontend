@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { BeneficiariosService, ImportResult } from '../../../core/services/beneficiarios.service';
 import { ToastService } from '../../../core/services/toast.service';
+import * as XLSX from 'xlsx';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-import-modal',
@@ -20,6 +22,13 @@ export class ImportModalComponent {
     processando = false;
     resultado: ImportResult | null = null;
     erro = '';
+
+    // Estado da Importação em Lote
+    faseProcessamento: 'aguardando' | 'lendo' | 'enviando' | 'concluido' = 'aguardando';
+    totalLinhas = 0;
+    linhasProcessadas = 0;
+    progressoPercentual = 0;
+    TAMANHO_LOTE = 300; 
 
     constructor(
         private beneficiariosService: BeneficiariosService,
@@ -86,31 +95,111 @@ export class ImportModalComponent {
         this.processando = true;
         this.erro = '';
         this.resultado = null;
-        this.liveAnnouncer.announce('Iniciando processamento da planilha. Por favor, aguarde.', 'assertive');
+        this.faseProcessamento = 'lendo';
+        this.liveAnnouncer.announce('Iniciando leitura da planilha no seu navegador. Isso pode levar alguns segundos.', 'assertive');
         this.cdr.markForCheck();
 
-        this.beneficiariosService.importar(this.arquivoSelecionado).subscribe({
-            next: (res) => {
-                this.resultado = res;
-                this.processando = false;
-                if (res.importados > 0) {
-                    this.liveAnnouncer.announce(`Importação concluída. ${res.importados} aluno(s) importado(s) com sucesso.`, 'assertive');
-                    this.toast.sucesso(`${res.importados} aluno(s) importado(s) com sucesso!`);
-                    this.beneficiariosService.limparCache();
-                } else {
-                    this.liveAnnouncer.announce('Importação concluída, mas nenhum aluno novo foi importado.', 'assertive');
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                const data = new Uint8Array(e.target?.result as ArrayBuffer);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+
+                // range: 1 ignora a linha 0 (instruções visuais) e usa a linha 1 como chaves (cabeçalhos)
+                // blankrows: false e defval: '' garante um formato previsível
+                const rawData = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet, { range: 1, blankrows: false, defval: '' });
+                
+                this.totalLinhas = rawData.length;
+                if (this.totalLinhas === 0) {
+                    throw new Error('A planilha está vazia ou sem dados válidos.');
                 }
+
+                this.faseProcessamento = 'enviando';
+                this.liveAnnouncer.announce(`Planilha lida com sucesso. Encontradas ${this.totalLinhas} linhas. Iniciando o envio para o servidor em lotes.`, 'assertive');
                 this.cdr.markForCheck();
-            },
-            error: (err) => {
-                this.erro = err?.error?.message || 'Erro ao processar a planilha. Tente novamente.';
+
+                await this.processarEmLotes(rawData);
+            } catch (err: any) {
+                this.erro = err?.message || 'Falha ao ler o arquivo Excel. Verifique se o formato está correto.';
                 this.processando = false;
-                this.liveAnnouncer.announce('Erro na importação: ' + this.erro, 'assertive');
+                this.faseProcessamento = 'aguardando';
+                this.liveAnnouncer.announce('Erro: ' + this.erro, 'assertive');
                 this.cdr.markForCheck();
             }
-        });
+        };
+
+        reader.onerror = () => {
+            this.erro = 'Erro na leitura do arquivo pelo navegador.';
+            this.processando = false;
+            this.faseProcessamento = 'aguardando';
+            this.cdr.markForCheck();
+        };
+
+        reader.readAsArrayBuffer(this.arquivoSelecionado);
     }
 
+    private async processarEmLotes(dadosTotais: Record<string, unknown>[]): Promise<void> {
+        let consolidadosImportados = 0;
+        let consolidadosIgnorados = 0;
+        const consolidadosErros: { linha: number; documento: string; motivo: string }[] = [];
+
+        this.linhasProcessadas = 0;
+        this.progressoPercentual = 0;
+
+        for (let i = 0; i < this.totalLinhas; i += this.TAMANHO_LOTE) {
+            const lote = dadosTotais.slice(i, i + this.TAMANHO_LOTE);
+            
+            // Injeta a linha original para preservar a referência correta nos erros (índice 0 = linha 2 do excel, etc)
+            const loteMarcado = lote.map((row, index) => ({
+                ...row,
+                _linhaOriginal: i + index + 2 // Pula o cabeçalho
+            }));
+
+            try {
+                const res = await firstValueFrom(this.beneficiariosService.importarLote(loteMarcado));
+                consolidadosImportados += res.importados;
+                consolidadosIgnorados += res.ignorados;
+                consolidadosErros.push(...res.erros);
+                
+                this.linhasProcessadas += lote.length;
+                this.progressoPercentual = Math.round((this.linhasProcessadas / this.totalLinhas) * 100);
+                
+                // Anuncia o progresso a cada 20% ou no final para não poluir o leitor de tela
+                if (this.progressoPercentual % 20 === 0 || this.linhasProcessadas === this.totalLinhas) {
+                    this.liveAnnouncer.announce(`Progresso de importação: ${this.progressoPercentual} por cento concluído.`, 'polite');
+                }
+                
+                this.cdr.markForCheck();
+            } catch (error: any) {
+                this.erro = error?.error?.message || `Falha fatal ao processar o lote ${Math.floor(i / this.TAMANHO_LOTE) + 1}. A importação foi abortada.`;
+                this.processando = false;
+                this.faseProcessamento = 'aguardando';
+                this.liveAnnouncer.announce('Erro grave na importação: ' + this.erro, 'assertive');
+                this.cdr.markForCheck();
+                return; // Interrompe o loop
+            }
+        }
+
+        // Concluído com sucesso (mesmo que com erros de linha)
+        this.faseProcessamento = 'concluido';
+        this.processando = false;
+        this.resultado = {
+            importados: consolidadosImportados,
+            ignorados: consolidadosIgnorados,
+            erros: consolidadosErros
+        };
+
+        if (consolidadosImportados > 0) {
+            this.liveAnnouncer.announce(`Importação concluída. ${consolidadosImportados} aluno(s) importado(s) com sucesso.`, 'assertive');
+            this.toast.sucesso(`${consolidadosImportados} aluno(s) importado(s) com sucesso!`);
+            this.beneficiariosService.limparCache();
+        } else {
+            this.liveAnnouncer.announce('Importação concluída, mas nenhum aluno novo foi importado.', 'assertive');
+        }
+        this.cdr.markForCheck();
+    }
     // ── Fechar ──────────────────────────────────────────────────
     fechar(): void {
         const devRecarregar = (this.resultado?.importados ?? 0) > 0;
