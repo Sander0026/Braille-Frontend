@@ -240,30 +240,66 @@
     font-size: 0.875rem;
 }
 
-/* ── Processando ───────────────────────────────────────────────────── */
-.processando {
+/* ── Progresso ───────────────────────────────────────────────────── */
+.processando-container {
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.progress-wrapper {
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 0.75rem;
-    padding: 1.5rem;
-    color: #4b5563;
-    font-size: 0.9rem;
 }
 
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #e5e7eb;
-    border-top-color: var(--color-primary, #2563eb);
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.875rem;
+    color: #475569;
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+.progress-info strong {
+    color: #0f172a;
+}
+
+.progress-track {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--color-primary, #2563eb);
+    border-radius: 999px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.indeterminate {
+    width: 100%;
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 1rem 1rem;
+    animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+    from { background-position: 1rem 0; }
+    to { background-position: 0 0; }
 }
 
 /* ── Resultado ─────────────────────────────────────────────────────── */

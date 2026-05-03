@@ -98,11 +98,28 @@
             </div>
             }
 
-            <!-- Loading -->
+            <!-- Progresso e Loading -->
             @if (processando) {
-            <div class="processando">
-                <div class="spinner"></div>
-                <p>Processando planilha, aguarde...</p>
+            <div class="processando-container">
+                <div class="progress-wrapper" role="progressbar" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100" 
+                     [attr.aria-valuenow]="faseProcessamento === 'lendo' ? 0 : progressoPercentual"
+                     [attr.aria-valuetext]="faseProcessamento === 'lendo' ? 'Lendo arquivo...' : progressoPercentual + '% processado'">
+                    
+                    <div class="progress-info">
+                        <strong>{{ faseProcessamento === 'lendo' ? 'Lendo planilha...' : 'Importando alunos...' }}</strong>
+                        @if (faseProcessamento === 'enviando') {
+                            <span>{{ linhasProcessadas }} / {{ totalLinhas }} alunos</span>
+                        }
+                    </div>
+
+                    <div class="progress-track">
+                        <div class="progress-fill" 
+                             [style.width.%]="faseProcessamento === 'lendo' ? 100 : progressoPercentual" 
+                             [class.indeterminate]="faseProcessamento === 'lendo'"></div>
+                    </div>
+                </div>
             </div>
             }
         </div>

@@ -204,6 +204,11 @@ export class BeneficiariosService {
         this.limparCache();
         return this.http.post<ImportResult>(`${this.url}/import`, formData);
     }
+
+    importarLote(dados: Record<string, unknown>[]): Observable<ImportResult> {
+        this.limparCache();
+        return this.http.post<ImportResult>(`${this.url}/import-batch`, { data: dados });
+    }
 }
 
 export interface ImportResult {
