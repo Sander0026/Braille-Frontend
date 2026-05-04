@@ -93,7 +93,8 @@
                                     }
                                 </div>
                                 <div>
-                                    <div class="font-weight-600 item-title">{{ ap.nomeFantasia || ap.nomeRazaoSocial }}
+                                    <div class="font-weight-600 item-title" [title]="ap.nomeFantasia || ap.nomeRazaoSocial">
+                                        {{ (ap.nomeFantasia || ap.nomeRazaoSocial) | slice:0:17 }}{{ ((ap.nomeFantasia || ap.nomeRazaoSocial)?.length || 0) > 17 ? '...' : '' }}
                                     </div>
                                     <div class="item-subtitle">{{ ap.cpfCnpj | slice:0:18 }}</div>
                                 </div>
@@ -105,7 +106,7 @@
                             <div class="contact-info">
                                 <div class="text-truncate" style="max-width: 200px;" [title]="ap.email || 'N/A'">
                                     <span class="material-symbols-rounded icon-sm" aria-hidden="true">mail</span>
-                                    {{ ap.email || 'Não informado' }}
+                                    {{ ap.email ? (ap.email.length > 15 ? (ap.email | slice:0:15) + '...' : ap.email) : 'Não informado' }}
                                 </div>
                                 <div class="text-truncate">
                                     <span class="material-symbols-rounded icon-sm" aria-hidden="true">call</span>
