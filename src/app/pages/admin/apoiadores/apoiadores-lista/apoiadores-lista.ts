@@ -190,16 +190,44 @@ export class ApoiadoresLista implements OnInit, OnDestroy, ComponenteComDescarte
     this.fecharTodosModais(); // Garante sem memory leak de modais abertos no fundo
     this.modoEdicao = true;
     
-    // Set a context early for Form Wizard rendering
-    this.apoiadorAtual = this.apoiadoresOriginais.find(a => a.id === id) || null;
-    this.modalFormAberto.set(true);
+    // Buscar os dados completos (incluindo observações que são excluídas na listagem)
+    this.carregandoLista = true;
+    this.cdr.detectChanges();
+    this.apoiadoresService.obterPorId(id).subscribe({
+      next: (apoiadorCompleto) => {
+        this.apoiadorAtual = apoiadorCompleto;
+        this.carregandoLista = false;
+        this.modalFormAberto.set(true);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoLista = false;
+        this.announcer.announce('Erro ao carregar os dados completos do apoiador.', 'assertive');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   abrirDados(apoiador: Apoiador): void {
     this.modalVoltarParaPerfil.set(false);
     this.fecharTodosModais();
-    this.apoiadorAtual = { ...apoiador };
-    this.modalPerfilAberto.set(true);
+    if (!apoiador.id) return;
+    
+    this.carregandoLista = true;
+    this.cdr.detectChanges();
+    this.apoiadoresService.obterPorId(apoiador.id).subscribe({
+      next: (apoiadorCompleto) => {
+        this.apoiadorAtual = apoiadorCompleto;
+        this.carregandoLista = false;
+        this.modalPerfilAberto.set(true);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.carregandoLista = false;
+        this.announcer.announce('Erro ao carregar os detalhes do apoiador.', 'assertive');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   abrirAcoes(apoiadorId: string, fromPerfil = false): void {

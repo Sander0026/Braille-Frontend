@@ -52,7 +52,11 @@ export class ApoiadorAcoesComponent implements OnInit {
     }
 
     this.salvandoAcao = true;
-    const dto = this.acaoForm.value;
+    const formValue = this.acaoForm.value;
+    const dto = {
+      dataEvento: formValue.dataEvento,
+      descricaoAcao: formValue.descricaoAcao
+    };
 
     this.apoiadoresService.adicionarAcao(this.apoiador.id, dto).subscribe({
       next: () => {
