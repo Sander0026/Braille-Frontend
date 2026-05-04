@@ -34,6 +34,8 @@ export class Login {
   precisaTrocarSenha = signal<boolean>(false);
   senhaAntigaTemp    = signal<string>('');
   mostrarSenha       = signal<boolean>(false);
+  mostrarNovaSenha   = signal<boolean>(false);
+  mostrarConfirmarSenha = signal<boolean>(false);
   senhaAlteradaOk    = signal<boolean>(false); // substitui alert() nativo (inacessível/inacessível a11y)
 
   private novaSenhaValue = signal<string>('');
@@ -77,6 +79,14 @@ export class Login {
   // ── Actions ───────────────────────────────────────────────────────────────
   toggleSenha(): void {
     this.mostrarSenha.update(v => !v);
+  }
+
+  toggleNovaSenha(): void {
+    this.mostrarNovaSenha.update(v => !v);
+  }
+
+  toggleConfirmarSenha(): void {
+    this.mostrarConfirmarSenha.update(v => !v);
   }
 
   fazerLogin(): void {

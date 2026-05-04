@@ -5,6 +5,7 @@ import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { MasksUtil } from '../../../../../shared/utils/masks.util';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { ToastService } from '../../../../../core/services/toast.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-apoiador-wizard-form',
@@ -315,17 +316,37 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
     req$.subscribe({
       next: (res) => {
         const id = this.modoEdicao && this.apoiadorIdEditando ? this.apoiadorIdEditando : res.id;
+        
+        // Se estamos no modo edição, o backend ignora a lista de ações no Update. Precisamos enviá-las individualmente.
+        const acoesParaSalvar = (this.modoEdicao && formData.acoes?.length) ? formData.acoes : [];
+        const requestsAcoes = acoesParaSalvar.map((acao: any) => this.apoiadoresService.adicionarAcao(id!, acao));
+
+        const processarFinais = () => {
+          if (requestsAcoes.length > 0) {
+            forkJoin(requestsAcoes).subscribe({
+              next: () => this.sucessoForm(),
+              error: (err) => {
+                console.error('Erro ao salvar ações anexadas', err);
+                this.announcer.announce('Apoiador salvo, mas houve uma falha ao registrar o histórico de interações.', 'assertive');
+                this.sucessoForm();
+              }
+            });
+          } else {
+            this.sucessoForm();
+          }
+        };
+
         if (this.logoFile && id) {
           this.apoiadoresService.uploadLogo(id, this.logoFile).subscribe({
-            next: () => this.sucessoForm(),
+            next: () => processarFinais(),
             error: (err) => {
               console.error('Erro no upload logo', err);
               this.announcer.announce('Apoiador salvo, mas houve uma falha ao enviar o logotipo.', 'assertive');
-              this.sucessoForm(); // Finaliza do mesmo modo
+              processarFinais();
             }
           });
         } else {
-          this.sucessoForm();
+          processarFinais();
         }
       },
       error: (err) => {
