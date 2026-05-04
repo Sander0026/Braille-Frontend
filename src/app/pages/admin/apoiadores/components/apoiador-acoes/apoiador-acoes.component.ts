@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Apoiador, AcaoApoiador, ApoiadoresService } from '../../apoiadores.service';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
+import { injectFormDescarte } from '../../../../../shared/classes/base-form-descarte';
 
 @Component({
   selector: 'app-apoiador-acoes',
@@ -24,6 +25,12 @@ export class ApoiadorAcoesComponent implements OnInit {
   acaoForm!: FormGroup;
   salvandoAcao = false;
 
+  podeDescartar = injectFormDescarte(() => this.isFormDirty());
+
+  isFormDirty(): boolean {
+    return !!this.acaoForm?.dirty && !this.salvandoAcao;
+  }
+
   private readonly announcer = inject(LiveAnnouncer);
 
   constructor(
@@ -40,7 +47,10 @@ export class ApoiadorAcoesComponent implements OnInit {
     });
   }
 
-  fecharModal(): void {
+  async fecharModal(): Promise<void> {
+    const podeFechar = await this.podeDescartar();
+    if (!podeFechar) return;
+
     this.acaoForm.reset();
     this.modalClosed.emit();
   }
