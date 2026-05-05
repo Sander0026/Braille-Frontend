@@ -1,0 +1,50 @@
+@if (isOpen()) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes da chamada da turma"
+    (click)="onClose()" (keydown.escape)="onClose()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <dialog class="modal" open (click)="$event.stopPropagation()">
+        <div class="modal-header">
+            <h2 class="modal-title">
+                Chamada — {{ formatarData(detalhesResumo()?.dataAula) }}
+            </h2>
+            <button class="btn btn-icon btn-ghost" (click)="onClose()" aria-label="Fechar janela de detalhes"><span
+                    class="material-symbols-rounded" aria-hidden="true">close</span></button>
+        </div>
+        <div class="modal-body">
+            @if (carregandoDetalhes()) {
+            <div class="loading-state empty-state--sm" role="status" aria-live="polite" aria-busy="true" aria-label="Carregando lista de alunos da chamada">
+                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
+                <p>Buscando lista de alunos...</p>
+            </div>
+            } @else {
+            <div class="resumo-chamada">
+                <div class="resumo-item text-total"><strong>Total de Alunos:</strong> {{ detalhesAlunos().length }}</div>
+                <div class="resumo-item text-presentes"><strong>Presentes:</strong> {{ detalhesResumo()?.presentes }}</div>
+                <div class="resumo-item text-faltas"><strong>Faltas:</strong> {{ detalhesResumo()?.faltas }}</div>
+            </div>
+
+            <ul class="alunos-list">
+                @for (aluno of detalhesAlunos(); track aluno.id) {
+                <li class="aluno-item">
+                    <div class="aluno-nome">
+                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
+                            [class.avatar--falta]="!aluno.presente" aria-hidden="true">
+                            {{ aluno.aluno?.nomeCompleto?.charAt(0) || '?' }}
+                        </div>
+                        <span class="nome-texto">{{ aluno.aluno?.nomeCompleto }}</span>
+                    </div>
+                    <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente">
+                        <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 14px; margin-right: 4px;">{{ aluno.presente ? 'check_circle' : 'cancel' }}</span>
+                        {{ aluno.presente ? 'Presente' : 'Falta' }}
+                    </span>
+                </li>
+                }
+            </ul>
+            }
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="onClose()"
+                aria-label="Fechar janela de detalhes">Sair</button>
+        </div>
+    </dialog>
+</div>
+}

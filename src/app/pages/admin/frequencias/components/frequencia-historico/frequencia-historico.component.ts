@@ -7,11 +7,12 @@ import { FrequenciasService, Frequencia, ResumoFrequencia } from '../../../../..
 import { Turma } from '../../../../../core/services/turmas.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { TabelaTrFocavelDirective } from '../tabela-tr-focavel.directive';
+import { FrequenciaHistoricoModalComponent } from '../frequencia-historico-modal/frequencia-historico-modal';
 
 @Component({
   selector: 'app-frequencia-historico',
   standalone: true,
-  imports: [CommonModule, FormsModule, A11yModule, TabelaTrFocavelDirective],
+  imports: [CommonModule, FormsModule, A11yModule, TabelaTrFocavelDirective, FrequenciaHistoricoModalComponent],
   providers: [DatePipe],
   templateUrl: './frequencia-historico.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -134,7 +135,8 @@ export class FrequenciaHistoricoComponent implements OnInit, AfterViewInit {
     this.modalDetalhesAberto.set(true);
     this.detalhesAlunos.set([]);
 
-    this.frequenciasService.listar(1, 400, resumo.turmaId, resumo.dataAula)
+    const dataFormatada = resumo.dataAula ? resumo.dataAula.substring(0, 10) : '';
+    this.frequenciasService.listar(1, 100, resumo.turmaId, dataFormatada)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
