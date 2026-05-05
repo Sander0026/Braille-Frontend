@@ -82,60 +82,11 @@
 </nav>
 }
 
-<!-- ══════════ MODAL DE DETALHES DE FREQUENCIA C/ DIALOG NATIVO ══════════ -->
-@if (modalDetalhesAberto()) {
-<div class="modal-overlay" role="dialog" aria-modal="true" aria-label="Detalhes da chamada da turma"
-    (click)="fecharDetalhes()" (keydown.escape)="fecharDetalhes()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
-    <dialog class="modal" open (click)="$event.stopPropagation()">
-        <div class="modal-header">
-            <h2 class="modal-title">
-                Chamada — {{ formatarData(detalhesResumo()?.dataAula) }}
-            </h2>
-            <button class="btn btn-icon btn-ghost" (click)="fecharDetalhes()" aria-label="Fechar janela de detalhes"><span
-                    class="material-symbols-rounded" aria-hidden="true">close</span></button>
-        </div>
-        <div class="modal-body">
-            @if (carregandoDetalhes()) {
-            <div class="loading-state empty-state--sm" role="status" aria-live="polite" aria-busy="true" aria-label="Carregando lista de alunos da chamada">
-                <span class="material-symbols-rounded spinner" aria-hidden="true" style="font-size: 2rem;">sync</span>
-                <p>Buscando lista de alunos...</p>
-            </div>
-            } @else {
-
-            <div
-                style="display: flex; gap: 1rem; margin-bottom: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; justify-content: space-around;">
-                <div style="font-size: 0.9rem; color: #374151;"><strong>Total de Alunos:</strong> {{
-                    detalhesAlunos().length }}</div>
-                <div style="font-size: 0.9rem; color: #166534;"><strong>Presentes:</strong> {{ detalhesResumo()?.presentes
-                    }}</div>
-                <div style="font-size: 0.9rem; color: #991b1b;"><strong>Faltas:</strong> {{ detalhesResumo()?.faltas }}
-                </div>
-            </div>
-
-            <ul class="alunos-list" style="max-height: 400px; overflow-y: auto;">
-                @for (aluno of detalhesAlunos(); track aluno.id) {
-                <li class="aluno-item"
-                    style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
-                    <div class="aluno-nome">
-                        <div class="aluno-avatar" [class.avatar--presente]="aluno.presente"
-                            [class.avatar--falta]="!aluno.presente" aria-hidden="true"
-                            style="width: 2rem; height: 2rem; font-size: 0.8rem;">
-                            {{ aluno.aluno?.nomeCompleto?.charAt(0) || '?' }}
-                        </div>
-                        <span class="nome-texto">{{ aluno.aluno?.nomeCompleto }}</span>
-                    </div>
-                    <span class="badge" [class.badge-success]="aluno.presente" [class.badge-danger]="!aluno.presente">
-                        {{ aluno.presente ? 'Presente' : 'Falta' }}
-                    </span>
-                </li>
-                }
-            </ul>
-            }
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="fecharDetalhes()"
-                aria-label="Fechar janela de detalhes">Sair</button>
-        </div>
-    </dialog>
-</div>
-}
+<!-- ══════════ MODAL DE DETALHES DE FREQUENCIA ══════════ -->
+<app-frequencia-historico-modal
+    [isOpen]="modalDetalhesAberto()"
+    [carregandoDetalhes]="carregandoDetalhes()"
+    [detalhesResumo]="detalhesResumo()"
+    [detalhesAlunos]="detalhesAlunos()"
+    (fechar)="fecharDetalhes()">
+</app-frequencia-historico-modal>
