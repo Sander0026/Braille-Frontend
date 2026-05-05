@@ -93,6 +93,26 @@ reabrirDiario(turmaId: string, data: string): Observable<void>
   POST /api/frequencias/diario/reabrir/:turmaId/:data
 ```
 
+## 3.2 Histórico de Frequências
+
+**Arquivos:** `src/app/pages/admin/frequencias/components/frequencia-historico/` e `frequencia-historico-modal/`
+
+### Visualização Detalhada da Chamada
+
+Ao consultar o histórico de chamadas de uma oficina, o sistema permite a visualização detalhada daquele dia específico por meio de um modal interativo.
+
+- **Modal Centralizado:** A exibição ocorre em um modal padronizado, perfeitamente centralizado (vertical e horizontalmente) na tela, utilizando um fundo escurecido (overlay). Isso aprimora a usabilidade e mantém o foco visual nas informações da chamada.
+- **Listagem Nominal de Presença:** O modal exibe a **lista completa e detalhada** de todos os alunos da chamada, complementando os totalizadores (presentes e faltas).
+- **Status Individual:** Cada aluno é exibido com seu nome e um *badge* visual (com uso de cores semânticas e ícones) que indica claramente o status daquele dia (**Presente** ou **Falta**).
+
+**Objetivo da Funcionalidade:** Esse detalhamento nominal garante maior **rastreabilidade e eficiência na auditoria**, permitindo que a administração consulte e comprove o status de um aluno específico de forma imediata.
+
+### Impacto e Relação com Turmas
+
+A exibição detalhada extrai e processa os dados vinculados de matrícula (nomes e avatares dos alunos) pertencentes à **Turma** no dia da chamada. Isso garante total consistência informacional entre os módulos, refletindo a base centralizada de beneficiários do sistema.
+
+## 3.3 Outros Recursos
+
 ### Relatório Individual
 
 Gera relatório de presença/ausência de um aluno em uma turma específica.
