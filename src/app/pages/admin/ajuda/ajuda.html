@@ -19,7 +19,7 @@
     </h2>
 
     <div class="manuais-grid">
-      @for (manual of manuais; track manual.titulo) {
+      @for (manual of manuaisVisiveis; track manual.titulo) {
         <app-manual-card
           [manual]="manual"
           (openManualList)="abrirModalManuais($event)">
@@ -113,10 +113,11 @@
   aria-labelledby="modal-manuais-titulo"
   aria-describedby="modal-manuais-descricao"
   (click)="fecharModalManuais()"
+  (keydown.escape)="fecharModalManuais()"
   cdkTrapFocus
   [cdkTrapFocusAutoCapture]="true">
 
-  <div class="modal-card modal-card--manual-list" (click)="$event.stopPropagation()">
+  <div class="modal-card modal-card--manual-list" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <div class="modal-header">
       <div>
         <h2 id="modal-manuais-titulo">{{ cardAtivo()?.titulo }}</h2>

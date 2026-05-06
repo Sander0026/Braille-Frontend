@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, HostListener, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, HostListener, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
@@ -26,7 +26,6 @@ import { AuthService } from '../../../core/services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class Ajuda {
-  readonly manuais = MANUAIS_AJUDA;
   readonly tecnologias = TECNOLOGIAS_SISTEMA;
   readonly equipe = EQUIPE_SISTEMA;
 
@@ -41,11 +40,17 @@ export class Ajuda {
   private arquivoAbertoDaLista: ManualArquivo | null = null;
   private readonly roleAtual: ManualRole | null;
 
-  constructor(
-    private readonly liveAnnouncer: LiveAnnouncer,
-    private readonly authService: AuthService
-  ) {
+  private readonly liveAnnouncer = inject(LiveAnnouncer);
+  private readonly authService = inject(AuthService);
+
+  constructor() {
     this.roleAtual = this.normalizarRole(this.authService.getUser()?.role);
+  }
+
+  get manuaisVisiveis(): ManualCard[] {
+    if (!this.roleAtual) return [];
+    if (this.roleAtual === 'ADMIN') return MANUAIS_AJUDA;
+    return MANUAIS_AJUDA.filter((manual) => manual.roles.includes(this.roleAtual!));
   }
 
   arquivosPermitidos(manual: ManualCard): ManualArquivo[] {
