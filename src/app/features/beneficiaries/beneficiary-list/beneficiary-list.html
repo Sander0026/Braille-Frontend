@@ -684,6 +684,45 @@
 </div>
 }
 
+<!-- Modal Exportando Planilha -->
+@if (modalExportAberto) {
+<div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalExportTitulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+    <div class="modal-content" style="max-width: 450px; text-align: center;">
+        <div class="modal-header" style="border-bottom: none; justify-content: center; padding-bottom: 0;">
+            <h2 id="modalExportTitulo" style="margin-bottom: 0;">
+                <span class="material-symbols-rounded" style="font-size: 32px; color: var(--color-primary); vertical-align: middle;">download</span><br>
+                Exportando Planilha
+            </h2>
+        </div>
+        
+        <div class="modal-body" style="padding: 2rem 1.5rem;">
+            <p style="margin-bottom: 1.5rem; color: #4b5563;">
+                Aguarde enquanto os dados são processados e a planilha Excel é gerada. Isso pode levar alguns segundos.
+            </p>
+            
+            <div style="background-color: #f3f4f6; border-radius: 9999px; height: 1.5rem; width: 100%; overflow: hidden; position: relative;">
+                <div style="height: 100%; background-color: var(--color-primary); border-radius: 9999px; transition: width 0.5s ease-out;"
+                    [style.width]="progressoExportacao + '%'"
+                    role="progressbar"
+                    [attr.aria-valuenow]="progressoExportacao"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+                </div>
+            </div>
+            <div style="margin-top: 0.75rem; font-weight: 600; font-size: 1.125rem; color: var(--color-primary);" aria-live="polite">
+                {{ progressoExportacao }}% Concluído
+            </div>
+            
+            @if (progressoExportacao === 100) {
+            <p style="margin-top: 1rem; color: #059669; font-weight: 500;">
+                Download pronto! O arquivo será salvo no seu computador.
+            </p>
+            }
+        </div>
+    </div>
+</div>
+}
+
 <!-- ── Overlay do Visualizador de PDF (nível raiz, fora de qualquer modal) ── -->
 @if (mostrarVisualizadorPdf && urlPdfParaVisualizar) {
 <div

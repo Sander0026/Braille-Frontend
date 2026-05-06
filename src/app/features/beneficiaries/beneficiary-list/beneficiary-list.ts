@@ -670,11 +670,42 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   }
 
   // ── Exportar Lista para Excel ─────────────────────────────────────
+  modalExportAberto = false;
+  progressoExportacao = 0;
+  exportTimer: any;
+
   exportarListaParaXlsx(): void {
     if (this.exportando) return;
     this.exportando = true;
-    this.liveAnnouncer.announce('Aguarde, gerando a planilha Excel...', 'assertive');
+    this.modalExportAberto = true;
+    this.progressoExportacao = 0;
+    this.liveAnnouncer.announce('Iniciando exportação da planilha. Progresso em 0%', 'assertive');
     this.cdr.markForCheck();
+
+    // Inicia simulação de progresso mais realista (não-linear)
+    this.exportTimer = setInterval(() => {
+      let increment = 0;
+      if (this.progressoExportacao < 40) {
+        increment = Math.floor(Math.random() * 6) + 3; // 3% a 8%
+      } else if (this.progressoExportacao < 70) {
+        increment = Math.floor(Math.random() * 4) + 1; // 1% a 4%
+      } else if (this.progressoExportacao < 90) {
+        increment = Math.floor(Math.random() * 2) + 1; // 1% a 2%
+      } else if (this.progressoExportacao < 98) {
+        increment = Math.random() > 0.6 ? 1 : 0; // 1% ocasionalmente (muito lento)
+      }
+
+      if (increment > 0) {
+        this.progressoExportacao += increment;
+        if (this.progressoExportacao > 98) this.progressoExportacao = 98;
+        
+        // Anuncia a cada ~20%
+        if ([20, 40, 60, 80].includes(this.progressoExportacao) || this.progressoExportacao === 50) {
+          this.liveAnnouncer.announce(`Progresso da exportação em ${this.progressoExportacao}%`, 'polite');
+        }
+        this.cdr.markForCheck();
+      }
+    }, 1000);
 
     const busca = this.buscaCtrl.value?.trim() || undefined;
     const filtros = this.filtrosAtivos();
@@ -682,26 +713,37 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.beneficiariosService.exportarLista(busca, this.abaAtiva === 'inativos', filtros)
       .subscribe({
         next: (buffer: ArrayBuffer) => {
-          const blob = new Blob([buffer], {
-            type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          });
-          const url = URL.createObjectURL(blob);
-          const date = new Date().toISOString().slice(0, 10);
-          const status = this.abaAtiva === 'inativos' ? 'Inativos' : 'Ativos';
-          const nomeArquivo = `Alunos_${status}_${date}.xlsx`;
-
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', nomeArquivo);
-          link.click();
-          URL.revokeObjectURL(url);
-          this.exportando = false;
-          this.liveAnnouncer.announce('Planilha exportada com sucesso.', 'assertive');
+          clearInterval(this.exportTimer);
+          this.progressoExportacao = 100;
+          this.liveAnnouncer.announce('Exportação 100% concluída. O download vai começar.', 'assertive');
           this.cdr.markForCheck();
+
+          setTimeout(() => {
+            const blob = new Blob([buffer], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            const url = URL.createObjectURL(blob);
+            const date = new Date().toISOString().slice(0, 10);
+            const status = this.abaAtiva === 'inativos' ? 'Inativos' : 'Ativos';
+            const nomeArquivo = `Alunos_${status}_${date}.xlsx`;
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', nomeArquivo);
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            this.exportando = false;
+            this.modalExportAberto = false;
+            this.liveAnnouncer.announce('Planilha exportada com sucesso.', 'assertive');
+            this.cdr.markForCheck();
+          }, 1000);
         },
         error: () => {
-          this.toast.erro('Erro ao exportar a lista. Tente novamente.');
+          clearInterval(this.exportTimer);
           this.exportando = false;
+          this.modalExportAberto = false;
+          this.toast.erro('Erro ao exportar a lista. Tente novamente.');
           this.liveAnnouncer.announce('Ocorreu um erro ao exportar a planilha.', 'assertive');
           this.cdr.markForCheck();
         },
