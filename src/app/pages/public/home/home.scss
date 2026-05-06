@@ -70,6 +70,10 @@ $transition: 250ms ease;
     font-size: 1rem;
     color: $gray-600;
     margin: 0 0 2.5rem;
+
+    &--light {
+        color: rgba(255, 255, 255, 0.75);
+    }
 }
 
 .section-header {
@@ -685,7 +689,8 @@ $transition: 250ms ease;
     width: 100%;
     margin-bottom: -1px;
     line-height: 0;
-    background: $white;
+    // Sem background próprio: o preto da seção fica visível atrás do SVG,
+    // permitindo que o path branco forme a onda sobre o fundo escuro.
 
     svg {
         position: relative;
@@ -1200,12 +1205,15 @@ $transition: 250ms ease;
     .wave-transition,
     .wave-transition svg,
     .wave-transition-double,
-    .wave-transition-double svg {
+    .wave-transition-double svg,
+    .wave-transition-concave,
+    .wave-transition-concave svg {
         background: #000 !important;
     }
 
     .wave-transition svg path,
-    .wave-transition-double svg path {
+    .wave-transition-double svg path,
+    .wave-transition-concave svg path {
         fill: #000 !important;
     }
 }
