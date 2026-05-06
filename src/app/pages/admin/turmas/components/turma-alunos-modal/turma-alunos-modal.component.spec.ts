@@ -233,6 +233,51 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
     });
   });
 
+  describe('Modo professor', () => {
+    it('deve abrir em modo leitura sem buscar alunos disponiveis para matricula', () => {
+      vi.clearAllMocks();
+      turmaSvc.buscarPorId.mockReturnValue(of({ ...TURMA_DETALHE, matriculasOficina: [] }));
+      turmaSvc.alunosDisponiveis.mockReturnValue(of(ALUNOS_DISPONIVEIS));
+
+      component.aberto = false;
+      fixture.detectChanges();
+      component.isProfessor = true;
+      component.turmaOriginal = { id: 't1', nome: 'Oficina de Braille' } as any;
+      component.aberto = true;
+      component.ngOnChanges({
+        aberto: {
+          currentValue: true,
+          previousValue: false,
+          firstChange: false,
+          isFirstChange: () => false,
+        },
+      } as any);
+      fixture.detectChanges();
+
+      expect(component.abaAtual()).toBe('remover');
+      expect(turmaSvc.buscarPorId).toHaveBeenCalledWith('t1');
+      expect(turmaSvc.alunosDisponiveis).not.toHaveBeenCalled();
+      expect(toastSvc.erro).not.toHaveBeenCalled();
+    });
+
+    it('deve impedir acoes administrativas quando estiver em modo professor', async () => {
+      vi.clearAllMocks();
+      component.isProfessor = true;
+      component.turmaDetalhes.set(TURMA_DETALHE as any);
+      component.abaAtual.set('remover');
+
+      component.alterarAba('adicionar');
+      component.buscarAlunosParaMatricula('');
+      component.salvarMatriculasEmLote();
+      await component.removerAluno('a1', 'Ana Silva');
+
+      expect(component.abaAtual()).toBe('remover');
+      expect(turmaSvc.alunosDisponiveis).not.toHaveBeenCalled();
+      expect(turmaSvc.matricularAluno).not.toHaveBeenCalled();
+      expect(turmaSvc.desmatricularAluno).not.toHaveBeenCalled();
+    });
+  });
+
   // ── 9. WCAG 2.5.3 — Botão Remover com nome do aluno ──────────────
 
   describe('2.5.3 — Botão Remover contém nome do aluno no aria-label', () => {

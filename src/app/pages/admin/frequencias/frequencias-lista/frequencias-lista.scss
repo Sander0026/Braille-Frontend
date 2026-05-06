@@ -357,6 +357,16 @@ $transition: 200ms ease;
             color: #ef4444;
         }
     }
+
+    &.warning {
+        background: #fffbeb;
+        color: #92400e;
+        border: 1px solid #fde68a;
+
+        .material-symbols-rounded {
+            color: #f59e0b;
+        }
+    }
 }
 
 // ── Loading ────────────────────────────────────────────────

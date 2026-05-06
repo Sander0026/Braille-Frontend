@@ -7,7 +7,6 @@ import { A11yModule } from '@angular/cdk/a11y';
 import { Turma, TurmasService, CreateTurmaDto, TurmaStatus } from '../../../../core/services/turmas.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { UsuariosService, Usuario } from '../../../../core/services/usuarios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 import { TurmaFiltroDrawerComponent } from '../components/turma-filtro-drawer/turma-filtro-drawer.component';
@@ -16,6 +15,8 @@ import { TurmaAlunosModalComponent } from '../components/turma-alunos-modal/turm
 import { TurmaCardComponent } from './turma-card/turma-card.component';
 import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
 import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
+
+type ProfessorOption = { id: string; nome: string; role?: string };
 
 @Component({
   selector: 'app-turmas-lista',
@@ -37,14 +38,13 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
   private readonly turmasService = inject(TurmasService);
   private readonly confirmDialog = inject(ConfirmDialogService);
   private readonly toast = inject(ToastService);
-  private readonly usuariosService = inject(UsuariosService);
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
 
   // Estado da Lista
   readonly turmas = signal<Turma[]>([]);
   readonly carregando = signal<boolean>(true);
-  readonly professoresDisponiveis = signal<Usuario[]>([]);
+  readonly professoresDisponiveis = signal<ProfessorOption[]>([]);
   readonly isProfessor = signal<boolean>(false);
   
   // Controle de Tabs e Status
@@ -114,17 +114,18 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
     const user = this.authService.getUser();
     this.isProfessor.set(user?.role === 'PROFESSOR');
     
-    // Paralelismo inicial com Promise.all via RxJS forkJoin (ou carrega professores independente)
-    this.carregarProfessores();
+    if (!this.isProfessor()) {
+      this.carregarProfessores();
+    }
     this.carregarTurmas();
   }
 
   carregarProfessores() {
-    this.usuariosService.listar(1, 100, undefined, false, 'PROFESSOR')
+    this.turmasService.listarProfessoresAtivos()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => {
-          this.professoresDisponiveis.set(res.data.filter(u => u.statusAtivo !== false));
+        next: (professores) => {
+          this.professoresDisponiveis.set(professores);
         },
         error: () => {
           this.toast.erro('Não foi possível carregar a base de professores.');
@@ -134,9 +135,12 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
 
   carregarTurmas() {
     this.carregando.set(true);
+    const professorId = this.isProfessor()
+      ? this.authService.getUser()?.sub
+      : this.tempProfessorId() || undefined;
 
     // Bypassing exclusion & activity block to allow fetching both Active and Archived turmas simultaneously
-    this.turmasService.listar(1, 100, undefined, 'all', this.tempProfessorId() || undefined, this.tempStatus() || undefined, 'all')
+    this.turmasService.listar(1, 100, undefined, 'all', professorId, this.tempStatus() || undefined, 'all')
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {

@@ -216,42 +216,52 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   }
 
   onDragEndedOutput(event: DragEndEvent): void {
-    if (this.layoutConfig[event.field]) {
-      this.layoutConfig[event.field].x = event.x;
-      this.layoutConfig[event.field].y = event.y;
-      this.formModelo.markAsDirty();
-    }
+    this.atualizarCampoLayout(event.field, { x: event.x, y: event.y });
   }
 
   setTextAlign(align: CertificadoTextAlign) {
-    this.layoutConfig.textoPronto.textAlign = align;
-    this.formModelo.markAsDirty();
+    this.atualizarCampoLayout('textoPronto', { textAlign: align });
   }
 
   setFontSize(event: Event) {
     const val = Number((event.target as HTMLInputElement).value);
     if (val >= 8 && val <= 120) {
-      this.layoutConfig.textoPronto.fontSize = val;
-      this.formModelo.markAsDirty();
+      this.atualizarCampoLayout('textoPronto', { fontSize: val });
     }
   }
   
   setNomeAlunoFontSize(event: Event) {
     const val = Number((event.target as HTMLInputElement).value);
     if (val >= 8 && val <= 200) {
-      this.layoutConfig.nomeAluno.fontSize = val;
-      this.formModelo.markAsDirty();
+      this.atualizarCampoLayout('nomeAluno', { fontSize: val });
     }
   }
 
   setNomeAlunoColor(event: Event) {
-    this.layoutConfig.nomeAluno.color = (event.target as HTMLInputElement).value;
-    this.formModelo.markAsDirty();
+    this.atualizarCampoLayout('nomeAluno', { color: (event.target as HTMLInputElement).value });
   }
 
   setTextoColor(event: Event) {
-    this.layoutConfig.textoPronto.color = (event.target as HTMLInputElement).value;
+    this.atualizarCampoLayout('textoPronto', { color: (event.target as HTMLInputElement).value });
+  }
+
+  setCampoLayout(campo: keyof CertificadoLayoutConfig, prop: string, valor: string | number): void {
+    this.atualizarCampoLayout(campo, { [prop]: valor });
+  }
+
+  private atualizarCampoLayout(
+    campo: keyof CertificadoLayoutConfig,
+    patch: Partial<CertificadoLayoutConfig[keyof CertificadoLayoutConfig]>
+  ): void {
+    this.layoutConfig = {
+      ...this.layoutConfig,
+      [campo]: {
+        ...this.layoutConfig[campo],
+        ...patch,
+      },
+    };
     this.formModelo.markAsDirty();
+    this.cdr.markForCheck();
   }
 
   proximoPasso() {

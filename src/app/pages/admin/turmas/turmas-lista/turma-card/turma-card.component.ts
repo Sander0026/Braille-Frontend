@@ -24,6 +24,14 @@ export class TurmaCardComponent {
     this.atualizarStatusRapido.emit({ turma: this.turma, status: novoStatus as TurmaStatus });
   }
 
+  totalAlunosMatriculados(): number {
+    return this.turma._count?.matriculasOficina ?? this.turma.matriculasOficina?.length ?? 0;
+  }
+
+  capacidadeTotal(): number | null {
+    return this.turma.capacidadeMaxima ?? null;
+  }
+
   formatarGradeHoraria(grade: Turma['gradeHoraria']): string {
     if (!grade || grade.length === 0) return 'Horário a definir';
     return grade.map(g => {

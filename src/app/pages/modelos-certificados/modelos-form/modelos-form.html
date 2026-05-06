@@ -244,7 +244,7 @@
 
                 <div>
                   <label for="ctrl-fonte-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
-                  <select id="ctrl-fonte-texto" [(ngModel)]="layoutConfig.textoPronto.fontFamily" [ngModelOptions]="{standalone: true}" (change)="formModelo.markAsDirty()" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
+                  <select id="ctrl-fonte-texto" [ngModel]="layoutConfig.textoPronto.fontFamily" [ngModelOptions]="{standalone: true}" (ngModelChange)="setCampoLayout('textoPronto', 'fontFamily', $event)" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
                     <option value="Helvetica">Padrão (Helvetica)</option>
                     <option value="TimesRoman">Times Roman</option>
                     <option value="Roboto">Roboto</option>
@@ -274,7 +274,7 @@
                   <label for="ctrl-larg-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.textoPronto.maxWidth }}%</label>
                   <input id="ctrl-larg-texto" type="range" min="30" max="95"
                          [value]="layoutConfig.textoPronto.maxWidth"
-                         (input)="layoutConfig.textoPronto.maxWidth = +$any($event.target).value; formModelo.markAsDirty()"
+                         (input)="setCampoLayout('textoPronto', 'maxWidth', +$any($event.target).value)"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
               </div>
@@ -288,7 +288,7 @@
               <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
                 <div>
                   <label for="ctrl-fonte-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
-                  <select id="ctrl-fonte-nome" [(ngModel)]="layoutConfig.nomeAluno.fontFamily" [ngModelOptions]="{standalone: true}" (change)="formModelo.markAsDirty()" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
+                  <select id="ctrl-fonte-nome" [ngModel]="layoutConfig.nomeAluno.fontFamily" [ngModelOptions]="{standalone: true}" (ngModelChange)="setCampoLayout('nomeAluno', 'fontFamily', $event)" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
                     <option value="Helvetica">Padrão (Helvetica)</option>
                     <option value="Great Vibes">Great Vibes (Cursiva)</option>
                     <option value="Parisienne">Parisienne</option>
@@ -317,7 +317,7 @@
                   <label for="ctrl-larg-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.nomeAluno.maxWidth || 50 }}%</label>
                   <input id="ctrl-larg-nome" type="range" min="20" max="90"
                          [value]="layoutConfig.nomeAluno.maxWidth || 50"
-                         (input)="layoutConfig.nomeAluno.maxWidth = +$any($event.target).value; formModelo.markAsDirty()"
+                         (input)="setCampoLayout('nomeAluno', 'maxWidth', +$any($event.target).value)"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
               </div>
@@ -333,14 +333,14 @@
                   <label for="ctrl-larg-assin1" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 1: {{ layoutConfig.assinatura1.width }}%</label>
                   <input id="ctrl-larg-assin1" type="range" min="10" max="40"
                          [value]="layoutConfig.assinatura1.width"
-                         (input)="layoutConfig.assinatura1.width = +$any($event.target).value; formModelo.markAsDirty()"
+                         (input)="setCampoLayout('assinatura1', 'width', +$any($event.target).value)"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
                 <div>
                   <label for="ctrl-larg-assin2" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 2: {{ layoutConfig.assinatura2.width }}%</label>
                   <input id="ctrl-larg-assin2" type="range" min="10" max="40"
                          [value]="layoutConfig.assinatura2.width"
-                         (input)="layoutConfig.assinatura2.width = +$any($event.target).value; formModelo.markAsDirty()"
+                         (input)="setCampoLayout('assinatura2', 'width', +$any($event.target).value)"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
                 <p style="font-size:0.72rem; color:#64748b; margin:0;">Arraste cada assinatura na prévia para posicioná-la no lugar correto.</p>
@@ -357,7 +357,7 @@
                   <label for="ctrl-tam-qr" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO: {{ layoutConfig.qrCode.size }}%</label>
                   <input id="ctrl-tam-qr" type="range" min="4" max="20"
                          [value]="layoutConfig.qrCode.size"
-                         (input)="layoutConfig.qrCode.size = +$any($event.target).value; formModelo.markAsDirty()"
+                         (input)="setCampoLayout('qrCode', 'size', +$any($event.target).value)"
                          style="width:100%; margin-top:0.2rem;">
                 </div>
                 <p style="font-size:0.72rem; color:#64748b; margin:0;">O QR Code será gerado automaticamente no backend durante a emissão com o link de validação pública.</p>
