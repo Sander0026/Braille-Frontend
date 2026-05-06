@@ -107,7 +107,9 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
         next: (t) => {
           this.turmaDetalhes.set(t);
           this.carregandoDetalhes.set(false);
-          this.buscarAlunosParaMatricula('');
+          if (!this.isProfessor) {
+            this.buscarAlunosParaMatricula('');
+          }
         },
         error: () => {
           this.carregandoDetalhes.set(false);
@@ -117,6 +119,8 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   }
 
   alterarAba(aba: 'adicionar' | 'remover'): void {
+    if (this.isProfessor && aba === 'adicionar') return;
+
     this.abaAtual.set(aba);
     if (aba === 'adicionar') {
       this.buscaAlunoCtrl.setValue('', { emitEvent: false });
@@ -125,6 +129,13 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   }
 
   buscarAlunosParaMatricula(termo: string): void {
+    if (this.isProfessor) {
+      this.alunosBuscaRestado.set([]);
+      this.alunosSelecionadosParaMatricula.set([]);
+      this.buscandoAlunos.set(false);
+      return;
+    }
+
     const turma = this.turmaDetalhes();
     if (!turma) return;
 
@@ -176,6 +187,8 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   }
 
   salvarMatriculasEmLote(): void {
+    if (this.isProfessor) return;
+
     const turma = this.turmaDetalhes();
     const selecionados = this.alunosSelecionadosParaMatricula();
 
@@ -238,6 +251,8 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   }
 
   async removerAluno(alunoId: string, nome: string): Promise<void> {
+    if (this.isProfessor) return;
+
     const turma = this.turmaDetalhes();
     if (!turma || this.operacaoEmProgresso()) return;
 

@@ -8,7 +8,6 @@ import { TurmasLista } from './turmas-lista';
 import { TurmasService } from '../../../../core/services/turmas.service';
 import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { UsuariosService } from '../../../../core/services/usuarios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 describe('TurmasLista Component', () => {
@@ -18,13 +17,13 @@ describe('TurmasLista Component', () => {
   let mockTurmasService: any;
   let mockConfirmDialog: any;
   let mockToast: any;
-  let mockUsuariosService: any;
   let mockAuthService: any;
 
   beforeEach(async () => {
     // Inicialização dos mocks usando o padrão Vitest para alta cobertura
     mockTurmasService = {
       listar: vi.fn(),
+      listarProfessoresAtivos: vi.fn(),
       criar: vi.fn(),
       atualizar: vi.fn(),
       excluir: vi.fn(),
@@ -40,10 +39,6 @@ describe('TurmasLista Component', () => {
       erro: vi.fn()
     };
 
-    mockUsuariosService = {
-      listar: vi.fn()
-    };
-
     mockAuthService = {
       getUser: vi.fn()
     };
@@ -54,7 +49,6 @@ describe('TurmasLista Component', () => {
         { provide: TurmasService, useValue: mockTurmasService },
         { provide: ConfirmDialogService, useValue: mockConfirmDialog },
         { provide: ToastService, useValue: mockToast },
-        { provide: UsuariosService, useValue: mockUsuariosService },
         { provide: AuthService, useValue: mockAuthService }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -72,7 +66,7 @@ describe('TurmasLista Component', () => {
 
     // Configurando respostas padrão para as inicializações do RxJS
     mockAuthService.getUser.mockReturnValue({ role: 'ADMIN' });
-    mockUsuariosService.listar.mockReturnValue(of({ data: [{ id: '1', nome: 'Prof 1', statusAtivo: true }] }));
+    mockTurmasService.listarProfessoresAtivos.mockReturnValue(of([{ id: '1', nome: 'Prof 1', role: 'PROFESSOR' }]));
     mockTurmasService.listar.mockReturnValue(of({ 
       data: [
         { id: '100', nome: 'Oficina Ativa', excluido: false, statusAtivo: true, status: 'ANDAMENTO', professor: { id: '1', nome: 'Prof 1' } },
@@ -89,7 +83,7 @@ describe('TurmasLista Component', () => {
       expect(mockAuthService.getUser).toHaveBeenCalled();
       expect(component.isProfessor()).toBe(false);
 
-      expect(mockUsuariosService.listar).toHaveBeenCalledWith(1, 100, undefined, false, 'PROFESSOR');
+      expect(mockTurmasService.listarProfessoresAtivos).toHaveBeenCalled();
       expect(component.professoresDisponiveis().length).toBe(1);
 
       expect(mockTurmasService.listar).toHaveBeenCalled();
@@ -102,6 +96,18 @@ describe('TurmasLista Component', () => {
       const filtradas = component.turmasFiltradas();
       expect(filtradas.length).toBe(1);
       expect(filtradas[0].id).toBe('100');
+    });
+
+    it('nao deve carregar base de professores quando o usuario logado for PROFESSOR', () => {
+      mockAuthService.getUser.mockReturnValue({ sub: 'prof-1', role: 'PROFESSOR' });
+
+      fixture.detectChanges();
+
+      expect(component.isProfessor()).toBe(true);
+      expect(mockTurmasService.listarProfessoresAtivos).not.toHaveBeenCalled();
+      expect(component.professoresDisponiveis()).toEqual([]);
+      expect(mockTurmasService.listar).toHaveBeenCalledWith(1, 100, undefined, 'all', 'prof-1', undefined, 'all');
+      expect(mockToast.erro).not.toHaveBeenCalledWith('Não foi possível carregar a base de professores.');
     });
   });
 
