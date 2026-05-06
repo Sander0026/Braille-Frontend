@@ -102,8 +102,8 @@ export class TurmasService {
         return this.http.get<PaginatedResponse<Turma>>(this.url, { params, headers });
     }
 
-    listarProfessoresAtivos(): Observable<{ id: string; nome: string }[]> {
-        return this.http.get<{ id: string; nome: string }[]>(`${this.url}/professores-ativos`);
+    listarProfessoresAtivos(): Observable<{ id: string; nome: string; role?: string }[]> {
+        return this.http.get<{ id: string; nome: string; role?: string }[]>(`${this.url}/professores-ativos`);
     }
 
     buscarPorId(id: string): Observable<Turma> {

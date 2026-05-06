@@ -14,7 +14,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { Turma, CreateTurmaDto } from '../../../../../core/services/turmas.service';
-import { Usuario } from '../../../../../core/services/usuarios.service';
 import { ModelosCertificadosService, ModeloCertificado } from '../../../../../core/services/modelos-certificados.service';
 
 const DIAS: { valor: string; label: string }[] = [
@@ -47,7 +46,7 @@ function isoParaInputDate(valor?: string | null): string {
 })
 export class TurmaFormModalComponent implements OnInit, OnChanges {
   @Input() aberto = false;
-  @Input() professores: Usuario[] = [];
+  @Input() professores: { id: string; nome: string; role?: string }[] = [];
   @Input() turmaEdicao: Turma | null = null;
   @Input() salvando = false;
   @Input() erroAPI = '';

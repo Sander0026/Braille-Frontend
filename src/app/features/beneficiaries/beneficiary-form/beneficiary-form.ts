@@ -245,6 +245,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
         next: (dados: any) => {
           if (dados.erro) {
             this.anunciarParaLeitorDeTela('CEP não encontrado. Verifique a digitação.');
+            this.cadastroForm.get('enderecoLocalizacao.cep')?.setErrors({ cepInvalido: true });
             return;
           }
           this.cadastroForm.get('enderecoLocalizacao')?.patchValue({
