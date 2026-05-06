@@ -62,6 +62,13 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
   /** Mensagem de erro de validação de data/dia (exibida antes de carregar) */
   readonly erroValidacao = signal<string>('');
 
+  /**
+   * Grade horária da turma atualmente carregada.
+   * Persistida após carregarChamada() para permitir revalidação
+   * em tempo real sem nova requisição HTTP.
+   */
+  private readonly gradeHorariaTurmaAtual = signal<GradeHorariaDto[]>([]);
+
   // Computed Properties (Sem Recalculo Constante)
   readonly turmaSelecionadaNome = computed(() => 
     this.turmas?.find(t => t.id === this.turmaSelecionadaId())?.nome ?? ''
@@ -116,11 +123,30 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
 
   updateTurma(id: string) {
     this.turmaSelecionadaId.set(id);
+    // Ao trocar de turma, a chamada anterior deixa de ser válida
+    this.gradeHorariaTurmaAtual.set([]);
+    this.chamadaCarregada.set(false);
+    this.alunosNaChamada.set([]);
     this.erroValidacao.set('');
+    this.feedbackSalvo.set('');
   }
 
   updateData(dt: string) {
     this.dataAula.set(dt);
+
+    // ── Revalidação em tempo real ───────────────────────────────────────
+    // Sempre que a data muda, revalida imediatamente.
+    // A grade da turma carregada está disponível em gradeHorariaTurmaAtual.
+    const erroData = this.validarData(dt);
+    if (erroData) {
+      this.erroValidacao.set(erroData);
+      return;
+    }
+    const erroGrade = this.validarDiaSemana(dt, this.gradeHorariaTurmaAtual());
+    if (erroGrade) {
+      this.erroValidacao.set(erroGrade);
+      return;
+    }
     this.erroValidacao.set('');
   }
 
@@ -155,6 +181,9 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
             this.carregandoChamada.set(false);
             return;
           }
+
+          // Persiste a grade para revalidação em tempo real (updateData)
+          this.gradeHorariaTurmaAtual.set(turma.gradeHoraria ?? []);
 
           const alunos = (turma.matriculasOficina ?? []).map((m: any) => m.aluno).filter(Boolean);
           if (alunos.length === 0) {
@@ -253,6 +282,20 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
   salvarChamada(): void {
     const lista = this.alunosNaChamada();
     if (this.salvandoTudo() || lista.length === 0) return;
+
+    // ── Guard de revalidação antes de salvar ─────────────────────────
+    // Garante que nenhuma alteração posterior de data consiga burlar a regra.
+    const dataAtual = this.dataAula();
+    const erroData = this.validarData(dataAtual);
+    if (erroData) {
+      this.erroValidacao.set(erroData);
+      return;
+    }
+    const erroGrade = this.validarDiaSemana(dataAtual, this.gradeHorariaTurmaAtual());
+    if (erroGrade) {
+      this.erroValidacao.set(erroGrade);
+      return;
+    }
 
     this.salvandoTudo.set(true);
     this.feedbackSalvo.set('Salvando Lote de Frequências...');

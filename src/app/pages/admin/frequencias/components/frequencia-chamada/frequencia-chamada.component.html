@@ -212,8 +212,11 @@
 <!-- Botão salvar chamada — oculto em modo visualização -->
 @if (!modoVisualizacao()) {
 <div class="salvar-footer">
-    <button class="btn btn-primary btn-lg" (click)="salvarChamada()" [disabled]="salvandoTudo()"
-        aria-label="Salvar chamada de todos os alunos" [attr.aria-busy]="salvandoTudo()">
+    <button class="btn btn-primary btn-lg" (click)="salvarChamada()"
+        [disabled]="salvandoTudo() || !!erroValidacao()"
+        aria-label="Salvar chamada de todos os alunos"
+        [attr.aria-busy]="salvandoTudo()"
+        [title]="erroValidacao() ? 'Corrija o erro de data antes de salvar' : ''">
         @if (salvandoTudo()) { <span class="material-symbols-rounded spinner" aria-hidden="true">sync</span> Salvando
         chamada... }
         @else { <span class="material-symbols-rounded" aria-hidden="true">save</span> Salvar Chamada }
