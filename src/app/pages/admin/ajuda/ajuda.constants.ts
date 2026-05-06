@@ -18,7 +18,7 @@ export interface ManualCard {
   icon: string;
   cor: string;
   arquivo: string | null;
-  perfis: string[];
+  roles: ManualRole[];
 }
 
 export interface ManualConteudoAcessivel {
@@ -53,7 +53,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     icon: 'badge',
     cor: 'primary',
     arquivo: null,
-    perfis: ['Secretaria', 'Admin']
+    roles: ['SECRETARIA', 'ADMIN']
   },
   {
     id: 'professor',
@@ -62,7 +62,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     icon: 'school',
     cor: 'info',
     arquivo: null,
-    perfis: ['Professor', 'Admin', 'Secretaria']
+    roles: ['PROFESSOR', 'ADMIN', 'SECRETARIA']
   },
   {
     id: 'comunicacao',
@@ -71,7 +71,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     icon: 'campaign',
     cor: 'warning',
     arquivo: null,
-    perfis: ['Comunicação', 'Admin']
+    roles: ['COMUNICACAO', 'ADMIN']
   },
   {
     id: 'administrador',
@@ -80,7 +80,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     icon: 'admin_panel_settings',
     cor: 'success',
     arquivo: null,
-    perfis: ['Admin']
+    roles: ['ADMIN']
   }
 ];
 
