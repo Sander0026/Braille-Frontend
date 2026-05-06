@@ -40,22 +40,24 @@ $transition: 0.2s ease-in-out;
 // HEADER DA PÁGINA
 // ══════════════════════════════════════════════════════════════
 .page-header {
-    background: #1a1a00;
-    background-image: url('/fachada_ilbes.png');
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
+    // Gradiente institucional: preto → verde-oliva escuro → âmbar profundo
+    // Substitui a imagem de fachada fixa por cor pura da identidade do instituto
+    background: linear-gradient(135deg, #111111 0%, #1a1a00 50%, #2e2300 100%);
     color: white;
     padding: 4rem 0;
     text-align: center;
     position: relative;
     overflow: hidden;
 
+    // Acento decorativo sutil: brilho radial amarelo no canto direito
     &::before {
         content: '';
         position: absolute;
-        inset: 0;
-        background: linear-gradient(160deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.52) 100%);
+        top: -50%;
+        right: -5%;
+        width: 55%;
+        height: 220%;
+        background: radial-gradient(ellipse at center, rgba(245, 200, 0, 0.09) 0%, transparent 62%);
         z-index: 0;
         pointer-events: none;
     }
@@ -88,7 +90,6 @@ $transition: 0.2s ease-in-out;
         line-height: 1.7;
         margin: 0 auto;
         max-width: 600px;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
     }
 }
 
@@ -615,9 +616,9 @@ $transition: 0.2s ease-in-out;
 :host-context(html.alto-contraste) {
     .page-header {
         background: #000 !important;
-        background-image: none !important;
     }
 
+    // Oculta acento decorativo no modo alto contraste
     .page-header::before {
         display: none !important;
     }
