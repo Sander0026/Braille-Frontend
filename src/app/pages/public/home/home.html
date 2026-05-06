@@ -140,7 +140,10 @@
         </svg>
     </div>
     <div class="section-inner">
-        <h2 id="dep-titulo" class="section-title section-title--light animate-on-scroll" appAnimateOnScroll>O que nossos alunos dizem</h2>
+        <div class="section-header animate-on-scroll" appAnimateOnScroll>
+            <h2 id="dep-titulo" class="section-title section-title--light">O que nossos alunos dizem</h2>
+            <p class="section-subtitle section-subtitle--light">Depoimentos de alunos sobre suas experiências em nossas atividades</p>
+        </div>
 
         <div class="dep-grid" role="region" aria-label="Grade de Depoimentos de estudantes">
             @for (dep of depoimentos(); track dep.nome) {
@@ -164,7 +167,7 @@
     </div>
     <div class="wave-transition-concave">
         <svg viewBox="0 0 1440 120" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M0,0 C480,120 960,120 1440,0 L1440,0 L0,0 Z" fill="#111111" />
+            <path d="M0,60 C240,0 480,0 720,60 C960,120 1200,120 1440,60 L1440,120 L0,120 Z" fill="#fafafa" />
         </svg>
     </div>
 </section>
