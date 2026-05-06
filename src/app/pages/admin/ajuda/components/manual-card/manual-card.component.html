@@ -8,11 +8,6 @@
     <h3 class="manual-titulo">{{ manual.titulo }}</h3>
     <p class="manual-descricao">{{ manual.descricao }}</p>
 
-    <div class="manual-perfis" aria-label="Perfis indicados">
-      @for (perfil of manual.perfis; track perfil) {
-      <span class="perfil-badge">{{ perfil }}</span>
-      }
-    </div>
   </div>
 
   <div class="manual-card-footer">
