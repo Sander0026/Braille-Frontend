@@ -62,7 +62,7 @@ export const MANUAIS_AJUDA: ManualCard[] = [
     icon: 'school',
     cor: 'info',
     arquivo: null,
-    roles: ['PROFESSOR', 'ADMIN', 'SECRETARIA']
+    roles: ['PROFESSOR', 'ADMIN']
   },
   {
     id: 'comunicacao',
