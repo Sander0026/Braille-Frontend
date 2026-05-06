@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { catchError, filter, switchMap, take } from 'rxjs/operators';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { environment } from '../../../environments/environment';
 
 /**
  * Interceptor de Autenticação.
@@ -33,7 +34,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let novoReq = req;
 
   // 1. Viagem de Ida: Injetar o Token de Acesso
-  if (token && !isPublicPost) {
+  const isApiUrl = req.url.startsWith(environment.apiUrl) || req.url.startsWith('/api') || !req.url.startsWith('http');
+  if (token && !isPublicPost && isApiUrl) {
     novoReq = req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
   }
 
