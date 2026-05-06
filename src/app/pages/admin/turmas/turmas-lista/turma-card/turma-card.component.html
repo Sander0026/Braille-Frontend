@@ -39,9 +39,15 @@
       <span class="material-symbols-rounded text-icon" aria-hidden="true">group</span>
       <span class="truncated-text">
         <strong>Alunos:</strong> 
-        {{ turma.matriculasOficina?.length || 0 }}/{{ turma.capacidadeMaxima || 0 }} 
-        <span class="sr-only">({{ turma.matriculasOficina?.length || 0 }} matriculados de {{ turma.capacidadeMaxima || 0 }} vagas totais)</span>
-        <span aria-hidden="true">({{ turma.matriculasOficina?.length || 0 }} de {{ turma.capacidadeMaxima || 0 }} vagas)</span>
+        @if (capacidadeTotal() !== null) {
+          {{ totalAlunosMatriculados() }}/{{ capacidadeTotal() }}
+          <span class="sr-only">({{ totalAlunosMatriculados() }} matriculados de {{ capacidadeTotal() }} vagas totais)</span>
+          <span aria-hidden="true">({{ totalAlunosMatriculados() }} de {{ capacidadeTotal() }} vagas ocupadas)</span>
+        } @else {
+          {{ totalAlunosMatriculados() }}
+          <span class="sr-only">alunos matriculados, sem limite de vagas definido</span>
+          <span aria-hidden="true">(sem limite de vagas)</span>
+        }
       </span>
     </div>
   </div>
