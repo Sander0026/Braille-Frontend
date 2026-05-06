@@ -9,23 +9,25 @@ $gray-900: #1a1a1a;
 
 // ── Page hero (shared with Sobre/Contato) ─────────────────
 .page-hero {
-    background: $black;
-    background-image: url('/fachada_ilbes.png');
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
+    // Gradiente institucional: preto → verde-oliva escuro → âmbar profundo
+    // Substitui a imagem de fachada fixa por cor pura da identidade do instituto
+    background: linear-gradient(135deg, #111111 0%, #1a1a00 50%, #2e2300 100%);
     padding: 4rem 1.5rem 3.5rem;
     text-align: center;
     position: relative;
     overflow: hidden;
 
+    // Acento decorativo sutil: brilho radial amarelo no canto direito
     &::before {
         content: '';
         position: absolute;
-        inset: 0;
-        background: linear-gradient(160deg, rgba(0, 0, 0, 0.68) 0%, rgba(0, 0, 0, 0.52) 100%);
-        z-index: 0;
+        top: -50%;
+        right: -5%;
+        width: 55%;
+        height: 220%;
+        background: radial-gradient(ellipse at center, rgba(245, 200, 0, 0.09) 0%, transparent 62%);
         pointer-events: none;
+        z-index: 0;
     }
 }
 
@@ -355,9 +357,9 @@ $gray-900: #1a1a1a;
     .equipe-section,
     .wave-sep svg {
         background: #000 !important;
-        background-image: none !important;
     }
 
+    // Oculta acento decorativo no modo alto contraste
     .page-hero::before {
         display: none !important;
     }
