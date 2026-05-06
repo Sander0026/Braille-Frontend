@@ -19,7 +19,10 @@
         <div class="form-group">
             <label for="dataAulaInput">Data da Aula</label>
             <input type="date" id="dataAulaInput" [ngModel]="dataAula()" (ngModelChange)="updateData($event)"
-                class="form-input" aria-required="true" />
+                class="form-input" aria-required="true"
+                [max]="hojeISO()"
+                aria-describedby="dataAulaHint" />
+            <span id="dataAulaHint" class="sr-only">Apenas datas de hoje ou anteriores são permitidas.</span>
         </div>
 
         <button class="btn btn-primary" (click)="carregarChamada()"
@@ -31,6 +34,14 @@
         </button>
     </div>
 </section>
+
+<!-- Erro de validação (data futura ou dia sem aula) -->
+@if (erroValidacao()) {
+<div class="alert warning" role="alert" aria-live="assertive" aria-atomic="true">
+    <span class="material-symbols-rounded" aria-hidden="true">event_busy</span>
+    <span>{{ erroValidacao() }}</span>
+</div>
+}
 
 <!-- Erro de carregamento -->
 @if (erroCarregamento()) {

@@ -4,9 +4,20 @@ import { FormsModule } from '@angular/forms';
 import { A11yModule, FocusKeyManager } from '@angular/cdk/a11y';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FrequenciasService } from '../../../../../core/services/frequencias.service';
-import { TurmasService, Turma } from '../../../../../core/services/turmas.service';
+import { TurmasService, Turma, GradeHorariaDto } from '../../../../../core/services/turmas.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { TabelaTrFocavelDirective } from '../tabela-tr-focavel.directive';
+
+/** Mapa de código de dia (grade horária) → número do JS Date.getDay() */
+const DIA_SEMANA_MAP: Record<string, number> = {
+  'DOM': 0, 'SEG': 1, 'TER': 2, 'QUA': 3, 'QUI': 4, 'SEX': 5, 'SAB': 6,
+};
+
+/** Rótulo legível dos dias para mensagens de erro */
+const DIA_SEMANA_LABEL: Record<string, string> = {
+  'DOM': 'domingos', 'SEG': 'segundas-feiras', 'TER': 'terças-feiras',
+  'QUA': 'quartas-feiras', 'QUI': 'quintas-feiras', 'SEX': 'sextas-feiras', 'SAB': 'sábados',
+};
 
 // Otimiza e expõe os tipos pra cá
 export interface AlunoNaChamada {
@@ -48,6 +59,8 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
   readonly chamadaCarregada = signal<boolean>(false);
   readonly erroCarregamento = signal<string>('');
   readonly feedbackSalvo = signal<string>('');
+  /** Mensagem de erro de validação de data/dia (exibida antes de carregar) */
+  readonly erroValidacao = signal<string>('');
 
   // Computed Properties (Sem Recalculo Constante)
   readonly turmaSelecionadaNome = computed(() => 
@@ -103,10 +116,12 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
 
   updateTurma(id: string) {
     this.turmaSelecionadaId.set(id);
+    this.erroValidacao.set('');
   }
 
   updateData(dt: string) {
     this.dataAula.set(dt);
+    this.erroValidacao.set('');
   }
 
   carregarChamada(): void {
@@ -115,6 +130,14 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
 
     if (!turmaId || !data) return;
 
+    // ── Validação 1: Bloquear datas futuras ──────────────────────────────────
+    const erroData = this.validarData(data);
+    if (erroData) {
+      this.erroValidacao.set(erroData);
+      return;
+    }
+
+    this.erroValidacao.set('');
     this.carregandoChamada.set(true);
     this.chamadaCarregada.set(false);
     this.erroCarregamento.set('');
@@ -125,6 +148,14 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (turma) => {
+          // ── Validação 2: Dia da semana vs. grade horária ─────────────────
+          const erroGrade = this.validarDiaSemana(data, turma.gradeHoraria ?? []);
+          if (erroGrade) {
+            this.erroValidacao.set(erroGrade);
+            this.carregandoChamada.set(false);
+            return;
+          }
+
           const alunos = (turma.matriculasOficina ?? []).map((m: any) => m.aluno).filter(Boolean);
           if (alunos.length === 0) {
             this.carregandoChamada.set(false);
@@ -168,6 +199,41 @@ export class FrequenciaChamadaComponent implements OnInit, AfterViewInit {
           this.carregandoChamada.set(false);
         }
       });
+  }
+
+  /**
+   * Valida se a data não é futura.
+   * @returns Mensagem de erro ou `null` se a data for válida.
+   */
+  private validarData(data: string): string | null {
+    const hoje = this.hojeISO();
+    if (data > hoje) {
+      return 'Não é possível registrar chamada para datas futuras. Selecione a data de hoje ou uma data anterior.';
+    }
+    return null;
+  }
+
+  /**
+   * Valida se o dia da semana da data corresponde a algum dia da grade horária.
+   * Turmas sem grade configurada não são bloqueadas.
+   * @returns Mensagem de erro ou `null` se o dia for válido.
+   */
+  private validarDiaSemana(data: string, grade: GradeHorariaDto[]): string | null {
+    if (!grade || grade.length === 0) return null;
+
+    // Usa horário fixo ao meio-dia para evitar erros de fuso horário
+    const diaSemanaData = new Date(data + 'T12:00:00').getDay();
+    const diasAula = grade
+      .map(g => DIA_SEMANA_MAP[g.dia])
+      .filter(d => d !== undefined);
+
+    if (!diasAula.includes(diaSemanaData)) {
+      const diasLabel = grade
+        .map(g => DIA_SEMANA_LABEL[g.dia] ?? g.dia)
+        .join(', ');
+      return `Esta oficina ocorre apenas às: ${diasLabel}. A data selecionada não corresponde a um dia de aula.`;
+    }
+    return null;
   }
 
   togglePresente(aluno: AlunoNaChamada): void {
