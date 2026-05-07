@@ -10,7 +10,11 @@
   <ul id="sidebar-nav" class="sidebar-nav">
     @for (item of rotasPermitidas; track item.rota) {
     <li>
-      <a [routerLink]="item.rota" routerLinkActive="active" 
+      <a [href]="item.rota"
+        routerLinkActive="active"
+        (click)="navegar(item.rota, $event)"
+        (keydown.enter)="navegar(item.rota, $event)"
+        (keydown.space)="navegar(item.rota, $event)"
         [attr.aria-label]="!showLabels ? item.aria || item.label : null" class="nav-link"
         [attr.title]="!showLabels ? item.label : null"
         [attr.tabindex]="sidebarState === 'hidden' ? -1 : 0">
