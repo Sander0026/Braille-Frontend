@@ -90,6 +90,13 @@ export interface CertificadoEmitido {
   dataEmissao: string;
   codigoValidacao?: string;
   pdfUrl?: string | null;
+  modelo?: {
+    nome: string;
+  } | null;
+  acao?: {
+    descricaoAcao: string;
+    dataEvento: string;
+  } | null;
   emitidoPor?: {
     id?: string;
     nome?: string;
