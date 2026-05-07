@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
   CertificadoLayoutConfig,
-  TesteGeracaoCertificadoPayload,
   TipoModeloCertificado
 } from '../interfaces/certificados.interface';
 
@@ -12,16 +11,28 @@ export interface ModeloCertificado {
   nome: string;
   arteBaseUrl: string;
   assinaturaUrl: string;
-  assinaturaUrl2?: string;
+  assinaturaUrl2?: string | null;
   textoTemplate: string;
   nomeAssinante: string;
   cargoAssinante: string;
-  nomeAssinante2?: string;
-  cargoAssinante2?: string;
-  layoutConfig?: CertificadoLayoutConfig;
+  nomeAssinante2?: string | null;
+  cargoAssinante2?: string | null;
+  layoutConfig?: CertificadoLayoutConfig | null;
   tipo: TipoModeloCertificado;
-  dataCriacao: string;
-  dataAtualizacao: string;
+  criadoEm: string;
+  atualizadoEm: string;
+}
+
+export interface ValidacaoCertificadoResponse {
+  valido: boolean;
+  nome: string;
+  curso: string;
+  data: string;
+  dataEmissao?: string;
+  cargaHoraria?: string;
+  codigoValidacao?: string;
+  status?: string;
+  tipo: string;
 }
 
 @Injectable({
@@ -53,32 +64,8 @@ export class ModelosCertificadosService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  validarAutenticidade(codigo: string): Observable<{
-    valido: boolean;
-    nome: string;
-    curso: string;
-    data: string;
-    dataEmissao?: string;
-    cargaHoraria?: string;
-    codigoValidacao?: string;
-    status?: string;
-    tipo: string;
-  }> {
-    return this.http.get<{
-      valido: boolean;
-      nome: string;
-      curso: string;
-      data: string;
-      dataEmissao?: string;
-      cargaHoraria?: string;
-      codigoValidacao?: string;
-      status?: string;
-      tipo: string;
-    }>(`${this.certificadosUrl}/validar/${codigo}`);
-  }
-
-  testarGeracaoGeometrica(payload: TesteGeracaoCertificadoPayload): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/teste`, payload, { responseType: 'blob' });
+  validarAutenticidade(codigo: string): Observable<ValidacaoCertificadoResponse> {
+    return this.http.get<ValidacaoCertificadoResponse>(`${this.certificadosUrl}/validar/${codigo}`);
   }
 
   emitirAcademico(turmaId: string, alunoId: string): Observable<{ pdfUrl: string; codigoValidacao: string }> {
