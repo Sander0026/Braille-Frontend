@@ -53,8 +53,28 @@ export class ModelosCertificadosService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  validarAutenticidade(codigo: string): Observable<{ valido: boolean, nome: string, curso: string, data: string, tipo: string }> {
-    return this.http.get<{ valido: boolean, nome: string, curso: string, data: string, tipo: string }>(`${this.certificadosUrl}/validar/${codigo}`);
+  validarAutenticidade(codigo: string): Observable<{
+    valido: boolean;
+    nome: string;
+    curso: string;
+    data: string;
+    dataEmissao?: string;
+    cargaHoraria?: string;
+    codigoValidacao?: string;
+    status?: string;
+    tipo: string;
+  }> {
+    return this.http.get<{
+      valido: boolean;
+      nome: string;
+      curso: string;
+      data: string;
+      dataEmissao?: string;
+      cargaHoraria?: string;
+      codigoValidacao?: string;
+      status?: string;
+      tipo: string;
+    }>(`${this.certificadosUrl}/validar/${codigo}`);
   }
 
   testarGeracaoGeometrica(payload: TesteGeracaoCertificadoPayload): Observable<Blob> {

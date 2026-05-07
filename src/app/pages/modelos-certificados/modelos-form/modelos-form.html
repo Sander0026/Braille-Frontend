@@ -146,13 +146,20 @@
           @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Aluno no cursor" (click)="injetarTag('{{ALUNO}}')">+ Aluno</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Turma" (click)="injetarTag('{{TURMA}}')">+ Oficina</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome do curso" (click)="injetarTag('{{NOME_CURSO}}')">+ Curso</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga Horária" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Início" (click)="injetarTag('{{DATA_INICIO}}')">+ Início</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Fim" (click)="injetarTag('{{DATA_FIM}}')">+ Fim</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar data de emissão" (click)="injetarTag('{{DATA_EMISSAO}}')">+ Emissão</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar código do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Código</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituição" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituição</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar responsável" (click)="injetarTag('{{NOME_RESPONSAVEL}}')">+ Responsável</button>
           } @else {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Parceiro" (click)="injetarTag('{{PARCEIRO}}')">+ Nome do Amigo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Motivo" (click)="injetarTag('{{MOTIVO}}')">+ Motivo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Data Corrente" (click)="injetarTag('{{DATA}}')">+ Data Atual</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar código do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Código</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituição" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituição</button>
           }
         </div>
 
@@ -190,7 +197,7 @@
             [cargoAssinante2]="formModelo.get('cargoAssinante2')?.value"
             [textoTemplate]="formModelo.get('textoTemplate')?.value"
             [layoutConfig]="layoutConfig"
-            [applyMocks]="false"
+            [applyMocks]="true"
             [isDraggable]="true"
             (dragEnded)="onDragEndedOutput($event)">
           </app-certificado-preview>

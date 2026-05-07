@@ -48,6 +48,7 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
   
   /** Se true, os elementos podem ser arrastados. */
   @Input() isDraggable = false;
+  @Input() exibirNomeAlunoSeparado = true;
   /** Se true, substitui {{tags}} por dados fictícios para visualização. */
   @Input() applyMocks = false;
 
@@ -92,10 +93,17 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
            .replace(/\{\{NOME_ALUNO\}\}/gi, 'Maria da Silva Santos')
            .replace(/\{\{TURMA\}\}/gi, 'Braille Nível I')
            .replace(/\{\{CURSO\}\}/gi, 'Braille Nível I')
+           .replace(/\{\{NOME_CURSO\}\}/gi, 'Braille Nível I')
            .replace(/\{\{CARGA_HORARIA\}\}/gi, '40')
+           .replace(/\{\{CH\}\}/gi, '40')
            .replace(/\{\{DATA_INICIO\}\}/gi, '03/01/2025')
            .replace(/\{\{DATA_FIM\}\}/gi, '28/03/2025')
            .replace(/\{\{DATA_EMISSAO\}\}/gi, new Date().toLocaleDateString('pt-BR'))
+           .replace(/\{\{CODIGO_CERTIFICADO\}\}/gi, 'A1B2C3D4')
+           .replace(/\{\{CODIGO_VALIDACAO\}\}/gi, 'A1B2C3D4')
+           .replace(/\{\{NOME_INSTITUICAO\}\}/gi, 'Instituto Luiz Braille')
+           .replace(/\{\{NOME_RESPONSAVEL\}\}/gi, this.nomeAssinante || 'Signatário 1')
+           .replace(/\{\{CARGO_RESPONSAVEL\}\}/gi, this.cargoAssinante || 'Cargo')
            .replace(/\{\{PARCEIRO\}\}/gi, 'Empresa Solidária LTDA')
            .replace(/\{\{MOTIVO\}\}/gi, 'Apoio contínuo à inclusão')
            .replace(/\{\{DATA\}\}/gi, new Date().toLocaleDateString('pt-BR'))

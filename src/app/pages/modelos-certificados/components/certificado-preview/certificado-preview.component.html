@@ -16,7 +16,7 @@
     }
 
     <!-- Nome do Aluno -->
-    @if (layoutConfig.nomeAluno) {
+    @if (exibirNomeAlunoSeparado && layoutConfig.nomeAluno) {
     <div [ngStyle]="{
            'left':       layoutConfig.nomeAluno.x + '%',
            'top':        layoutConfig.nomeAluno.y + '%',
