@@ -54,6 +54,9 @@
           <span class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">visibility</span>
           Visualizar
         </button>
+        <button class="btn btn-sm btn-success" (click)="abrirEmissaoManual(modelo)" [attr.aria-label]="'Gerar certificado manual com ' + modelo.nome">
+          Gerar Manual
+        </button>
         <button class="btn btn-sm btn-secondary" (click)="editarModelo(modelo.id)" [attr.aria-label]="'Editar modelo ' + modelo.nome">
           Editar
         </button>
@@ -116,4 +119,145 @@
     </footer>
 
   </div>
+</dialog>
+
+<dialog #manualDialog
+        class="manual-dialog"
+        aria-modal="true"
+        aria-labelledby="manual-dialog-title"
+        aria-describedby="manual-dialog-description"
+        (close)="onManualDialogClosed()"
+        (click)="onManualBackdropClick($event)">
+  <form class="manual-dialog__content" (ngSubmit)="emitirManual()" (click)="$event.stopPropagation()" *ngIf="modeloManual()">
+    <header class="manual-dialog__header">
+      <h2 id="manual-dialog-title">{{ modeloManual()?.tipo === 'ACADEMICO' ? 'Gerar certificado manual' : 'Gerar honraria manual' }}</h2>
+      <p id="manual-dialog-description" class="sr-only">
+        Preencha os dados que serao impressos no certificado. Campos com asterisco sao obrigatorios.
+      </p>
+      <button type="button" class="btn-close" (click)="fecharEmissaoManual()" aria-label="Fechar janela de geracao manual">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <div class="manual-dialog__body">
+      @if (isCarregandoManual()) {
+        <div class="manual-loading" role="status" aria-live="polite">Carregando opcoes...</div>
+      }
+      @if (modeloManual()?.tipo === 'ACADEMICO') {
+        <div class="form-group">
+          <label for="manual-aluno">
+            Aluno cadastrado
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input #manualFirstInput
+                 id="manual-aluno"
+                 class="form-input"
+                 name="buscaAluno"
+                 type="search"
+                 autocomplete="off"
+                 placeholder="Buscar por nome ou matricula"
+                 [ngModel]="buscaAlunoManual()"
+                 (ngModelChange)="onBuscaAlunoManual($event)"
+                 [attr.aria-expanded]="alunosFiltradosManual().length > 0"
+                 aria-controls="manual-alunos-lista"
+                 required
+                 aria-required="true">
+          @if (!manualForm.alunoId) {
+            <div id="manual-alunos-lista" class="manual-option-list" role="listbox" aria-label="Alunos encontrados">
+              @for (aluno of alunosFiltradosManual(); track aluno.id) {
+                <button type="button"
+                        class="manual-option"
+                        role="option"
+                        [attr.aria-selected]="false"
+                        (click)="selecionarAlunoManual(aluno)">
+                  <span>{{ aluno.nomeCompleto }}</span>
+                  @if (aluno.matricula) {
+                    <small>{{ aluno.matricula }}</small>
+                  }
+                </button>
+              } @empty {
+                <div class="manual-option-empty" role="status">Nenhum aluno encontrado.</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="manual-turma">
+            Curso cadastrado
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <select id="manual-turma" class="form-input" name="turmaId" [(ngModel)]="manualForm.turmaId" required aria-required="true">
+            <option value="">Selecione um curso</option>
+            @for (turma of turmasManual(); track turma.id) {
+              <option [value]="turma.id">{{ turma.nome }}{{ turma.cargaHoraria ? ' - ' + turma.cargaHoraria : '' }}</option>
+            }
+          </select>
+        </div>
+      } @else {
+        <div class="form-group">
+          <label for="manual-apoiador">
+            Apoiador cadastrado
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input #manualFirstInput
+                 id="manual-apoiador"
+                 class="form-input"
+                 name="buscaApoiador"
+                 type="search"
+                 autocomplete="off"
+                 placeholder="Buscar por nome"
+                 [ngModel]="buscaApoiadorManual()"
+                 (ngModelChange)="onBuscaApoiadorManual($event)"
+                 [attr.aria-expanded]="apoiadoresFiltradosManual().length > 0"
+                 aria-controls="manual-apoiadores-lista"
+                 required
+                 aria-required="true">
+          @if (!manualForm.apoiadorId) {
+            <div id="manual-apoiadores-lista" class="manual-option-list" role="listbox" aria-label="Apoiadores encontrados">
+              @for (apoiador of apoiadoresFiltradosManual(); track apoiador.id) {
+                <button type="button"
+                        class="manual-option"
+                        role="option"
+                        [attr.aria-selected]="false"
+                        (click)="selecionarApoiadorManual(apoiador)">
+                  <span>{{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}</span>
+                  @if (apoiador.nomeFantasia && apoiador.nomeFantasia !== apoiador.nomeRazaoSocial) {
+                    <small>{{ apoiador.nomeRazaoSocial }}</small>
+                  }
+                </button>
+              } @empty {
+                <div class="manual-option-empty" role="status">Nenhum apoiador encontrado.</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="manual-titulo-acao">
+            Titulo da acao
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="manual-titulo-acao" class="form-input" name="tituloAcao" autocomplete="off" [(ngModel)]="manualForm.tituloAcao" required aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="manual-motivo">Motivo complementar</label>
+          <textarea id="manual-motivo" class="form-input" rows="4" name="motivo" [(ngModel)]="manualForm.motivo"></textarea>
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="manual-emissao">
+          Data de emissao
+          <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input id="manual-emissao" class="form-input" type="date" name="dataEmissao" [(ngModel)]="manualForm.dataEmissao" required aria-required="true">
+      </div>
+    </div>
+
+    <footer class="manual-dialog__footer">
+      <button type="button" class="btn btn-secondary" (click)="fecharEmissaoManual()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="isEmitindoManual()" [attr.aria-busy]="isEmitindoManual() ? 'true' : null">
+        {{ isEmitindoManual() ? 'Gerando...' : 'Gerar certificado' }}
+      </button>
+    </footer>
+  </form>
 </dialog>

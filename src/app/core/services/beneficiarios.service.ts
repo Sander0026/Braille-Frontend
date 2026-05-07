@@ -52,6 +52,18 @@ export interface Beneficiario {
         dataEncerramento?: string;
         turma: { id: string; nome: string; horario?: string; modeloCertificadoId?: string | null; status?: string };
     }[];
+    certificadosEmitidos?: {
+        id: string;
+        codigoValidacao: string;
+        dataEmissao: string;
+        pdfUrl?: string | null;
+        status?: string;
+        turmaId?: string | null;
+        cursoImpresso?: string | null;
+        cargaHorariaImpresso?: string | null;
+        modelo?: { id: string; nome: string; tipo: 'ACADEMICO' | 'HONRARIA' };
+        turma?: { id: string; nome: string; cargaHoraria?: string | null } | null;
+    }[];
 }
 
 export type BeneficiarioPayload = Partial<

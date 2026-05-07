@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, Elemen
 import { CommonModule } from '@angular/common';
 import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
 import {
+  CertificadoLayoutElement,
   CertificadoLayoutCampo,
   CertificadoLayoutConfig,
   normalizarCertificadoLayoutConfig
@@ -12,7 +13,8 @@ export const CERT_CANVAS_W = 1122;
 export const CERT_CANVAS_H = 794;
 
 export interface DragEndEvent {
-  field: CertificadoLayoutCampo;
+  field?: CertificadoLayoutCampo;
+  elementId?: string;
   x: number;
   y: number;
 }
@@ -44,6 +46,16 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
 
   get layoutConfig(): CertificadoLayoutConfig {
     return this.layoutConfigNormalizado;
+  }
+
+  get layoutElements(): CertificadoLayoutElement[] {
+    return [...(this.layoutConfig.elements || [])]
+      .filter(element => element.visible !== false)
+      .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+  }
+
+  get hasDynamicLayout(): boolean {
+    return Array.isArray(this.layoutConfig.elements);
   }
   
   /** Se true, os elementos podem ser arrastados. */
@@ -86,25 +98,53 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
   }
 
   get displayTextoTemplate(): string {
-    let t = this.textoTemplate || '';
+    return this.renderMockText(this.textoTemplate || '') || (this.isDraggable ? '(texto do certificado aparecerá aqui)' : '');
+  }
+
+  renderElementContent(element: CertificadoLayoutElement): string {
+    if (element.type === 'DYNAMIC_TEXT' && element.content === '{{TEXTO_CERTIFICADO}}') {
+      return this.displayTextoTemplate;
+    }
+
+    return this.renderMockText(element.content || '');
+  }
+
+  private renderMockText(value: string): string {
+    let t = value || '';
     if (this.applyMocks && t) {
       t = t.replace(/\{\{ALUNO\}\}/gi, 'Maria da Silva Santos')
            .replace(/\{\{NOME_ALUNO\}\}/gi, 'Maria da Silva Santos')
            .replace(/\{\{TURMA\}\}/gi, 'Braille Nível I')
            .replace(/\{\{CURSO\}\}/gi, 'Braille Nível I')
+           .replace(/\{\{NOME_CURSO\}\}/gi, 'Braille Nivel I')
            .replace(/\{\{CARGA_HORARIA\}\}/gi, '40')
+           .replace(/\{\{CH\}\}/gi, '40')
            .replace(/\{\{DATA_INICIO\}\}/gi, '03/01/2025')
            .replace(/\{\{DATA_FIM\}\}/gi, '28/03/2025')
            .replace(/\{\{DATA_EMISSAO\}\}/gi, new Date().toLocaleDateString('pt-BR'))
            .replace(/\{\{PARCEIRO\}\}/gi, 'Empresa Solidária LTDA')
            .replace(/\{\{MOTIVO\}\}/gi, 'Apoio contínuo à inclusão')
            .replace(/\{\{DATA\}\}/gi, new Date().toLocaleDateString('pt-BR'))
+           .replace(/\{\{CODIGO_CERTIFICADO\}\}/gi, 'A1B2C3D4')
+           .replace(/\{\{CODIGO_VALIDACAO\}\}/gi, 'A1B2C3D4')
+           .replace(/\{\{NOME_INSTITUICAO\}\}/gi, 'Instituto Luiz Braille')
+           .replace(/\{\{NOME_RESPONSAVEL\}\}/gi, this.nomeAssinante || 'Signatario 1')
+           .replace(/\{\{CARGO_RESPONSAVEL\}\}/gi, this.cargoAssinante || 'Cargo')
+           .replace(/\{\{TEXTO_CERTIFICADO\}\}/gi, this.textoTemplate || '')
            .replace(/\{\{[^}]+\}\}/g, '[...]');
     }
-    return t || (this.isDraggable ? '(texto do certificado aparecerá aqui)' : '');
+    return t;
   }
 
   onDragEnded(event: CdkDragEnd, field: CertificadoLayoutCampo) {
+    this.emitDragPosition(event, { field });
+  }
+
+  onDynamicDragEnded(event: CdkDragEnd, element: CertificadoLayoutElement) {
+    this.emitDragPosition(event, { elementId: element.id, field: element.legacyField });
+  }
+
+  private emitDragPosition(event: CdkDragEnd, target: Pick<DragEndEvent, 'field' | 'elementId'>) {
     if (!this.isDraggable) return;
 
     const element = event.source.element.nativeElement;
@@ -122,7 +162,7 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
     const yPct = Math.max(0, Math.min((rawYPx / this.CANVAS_H) * 100, 90));
 
     this.dragEnded.emit({
-      field,
+      ...target,
       x: Math.round(xPct * 10) / 10,
       y: Math.round(yPct * 10) / 10
     });

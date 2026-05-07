@@ -146,13 +146,20 @@
           @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Aluno no cursor" (click)="injetarTag('{{ALUNO}}')">+ Aluno</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Turma" (click)="injetarTag('{{TURMA}}')">+ Oficina</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome do curso" (click)="injetarTag('{{NOME_CURSO}}')">+ Curso</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga Horária" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Início" (click)="injetarTag('{{DATA_INICIO}}')">+ Início</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Fim" (click)="injetarTag('{{DATA_FIM}}')">+ Fim</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar data de emissao" (click)="injetarTag('{{DATA_EMISSAO}}')">+ Emissao</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar codigo do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Codigo</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituicao" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituicao</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar responsavel" (click)="injetarTag('{{NOME_RESPONSAVEL}}')">+ Responsavel</button>
           } @else {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Parceiro" (click)="injetarTag('{{PARCEIRO}}')">+ Nome do Amigo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Motivo" (click)="injetarTag('{{MOTIVO}}')">+ Motivo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Data Corrente" (click)="injetarTag('{{DATA}}')">+ Data Atual</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar codigo do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Codigo</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituicao" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituicao</button>
           }
         </div>
 
@@ -190,11 +197,135 @@
             [cargoAssinante2]="formModelo.get('cargoAssinante2')?.value"
             [textoTemplate]="formModelo.get('textoTemplate')?.value"
             [layoutConfig]="layoutConfig"
-            [applyMocks]="false"
+            [applyMocks]="true"
             [isDraggable]="true"
             (dragEnded)="onDragEndedOutput($event)">
           </app-certificado-preview>
           <!-- =================================================== -->
+
+          <div class="dynamic-editor-panel" aria-label="Editor de elementos do certificado">
+            <section class="dynamic-editor-card">
+              <div class="dynamic-editor-card__header">
+                <h2>Elementos</h2>
+              </div>
+              <div class="element-actions">
+                <button type="button" class="btn-element" (click)="addTextElement()">+ Texto</button>
+                <button type="button" class="btn-element" (click)="addDynamicTextElement()">+ Variavel</button>
+                <button type="button" class="btn-element" (click)="addSignatureBlockElement()">+ Assinatura</button>
+                <button type="button" class="btn-element" (click)="addQrElement()">+ QR</button>
+                <button type="button" class="btn-element" (click)="addValidationCodeElement()">+ Codigo</button>
+              </div>
+
+              <div class="element-list" role="listbox" aria-label="Elementos posicionados">
+                @for (element of layoutElements; track element.id) {
+                  <button type="button"
+                          class="element-list-item"
+                          [class.is-selected]="selectedElement?.id === element.id"
+                          (click)="selectElement(element.id)">
+                    <span>{{ element.label }}</span>
+                    <small>{{ elementTypeLabels[element.type] || element.type }}</small>
+                  </button>
+                }
+              </div>
+            </section>
+
+            @if (selectedElement; as element) {
+              <section class="dynamic-editor-card">
+                <div class="dynamic-editor-card__header">
+                  <h2>Propriedades</h2>
+                  <button type="button" class="btn-remove-element" [disabled]="!!element.legacyField" (click)="removeSelectedElement()">Remover</button>
+                </div>
+
+                <div class="properties-grid">
+                  <label>
+                    Nome
+                    <input type="text"
+                           [ngModel]="element.label"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ label: $event })">
+                  </label>
+
+                  @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE' || element.type === 'SIGNATURE_BLOCK') {
+                    <label class="property-full">
+                      Conteudo
+                      <textarea rows="2"
+                                [ngModel]="element.content"
+                                [ngModelOptions]="{standalone: true}"
+                                (ngModelChange)="updateSelectedElement({ content: $event })"></textarea>
+                    </label>
+                  }
+
+                  <label>
+                    X (%)
+                    <input type="number" min="0" max="100"
+                           [ngModel]="element.x"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ x: +$event })">
+                  </label>
+                  <label>
+                    Y (%)
+                    <input type="number" min="0" max="100"
+                           [ngModel]="element.y"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ y: +$event })">
+                  </label>
+                  <label>
+                    Largura (%)
+                    <input type="number" min="1" max="100"
+                           [ngModel]="element.width"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ width: +$event })">
+                  </label>
+                  <label>
+                    Altura (%)
+                    <input type="number" min="1" max="100"
+                           [ngModel]="element.height"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ height: +$event })">
+                  </label>
+
+                  @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE') {
+                    <label>
+                      Fonte
+                      <select [ngModel]="element.fontFamily"
+                              [ngModelOptions]="{standalone: true}"
+                              (ngModelChange)="updateSelectedElement({ fontFamily: $event })">
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="TimesRoman">Times Roman</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Great Vibes">Great Vibes</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                      </select>
+                    </label>
+                    <label>
+                      Tamanho
+                      <input type="number" min="8" max="160"
+                             [ngModel]="element.fontSize"
+                             [ngModelOptions]="{standalone: true}"
+                             (ngModelChange)="updateSelectedElement({ fontSize: +$event })">
+                    </label>
+                    <label>
+                      Cor
+                      <input type="color"
+                             [ngModel]="element.color"
+                             [ngModelOptions]="{standalone: true}"
+                             (ngModelChange)="updateSelectedElement({ color: $event })">
+                    </label>
+                    <div>
+                      <span class="property-label">Alinhamento</span>
+                      <div class="align-actions">
+                        <button type="button" [class.is-active]="element.textAlign === 'left'" (click)="setSelectedTextAlign('left')">E</button>
+                        <button type="button" [class.is-active]="element.textAlign === 'center'" (click)="setSelectedTextAlign('center')">C</button>
+                        <button type="button" [class.is-active]="element.textAlign === 'right'" (click)="setSelectedTextAlign('right')">D</button>
+                        <button type="button" [class.is-active]="element.textAlign === 'justify'" (click)="setSelectedTextAlign('justify')">J</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </section>
+            }
+          </div>
 
           <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin:1.25rem 0; font-size:0.75rem; color:#64748b;">
             <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(59,130,246,.8);border-radius:2px;"></span>Texto principal</span>

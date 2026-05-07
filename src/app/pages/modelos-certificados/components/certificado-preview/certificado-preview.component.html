@@ -15,8 +15,93 @@
       <img [src]="arteBaseUrl" alt="Arte base do certificado" class="arte-base">
     }
 
+    @for (element of layoutElements; track element.id) {
+      <div [ngStyle]="{
+             'left': element.x + '%',
+             'top': element.y + '%',
+             'width': element.width + '%',
+             'min-height': (element.height || 4) + '%',
+             'z-index': element.zIndex || 1
+           }"
+           class="cert-element dynamic-cert-element"
+           [class.is-draggable]="isDraggable"
+           [class.dynamic-text-outline]="isDraggable && (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT')"
+           [class.dynamic-signature-outline]="isDraggable && (element.type === 'SIGNATURE_BLOCK' || element.type === 'SIGNATURE_IMAGE')"
+           [class.qr-outline]="isDraggable && element.type === 'QR_CODE'"
+           [class.validation-code-outline]="isDraggable && element.type === 'VALIDATION_CODE'"
+           [cdkDragDisabled]="!isDraggable"
+           [attr.tabindex]="isDraggable ? 0 : null"
+           role="button"
+           [attr.aria-label]="'Posicionar ' + element.label + ' no certificado.'"
+           cdkDrag
+           (cdkDragEnded)="onDynamicDragEnded($event, element)">
+
+        @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE') {
+          <div [ngStyle]="{
+                 'font-family': element.fontFamily || 'Helvetica',
+                 'font-size': (element.fontSize || 16) + 'px',
+                 'font-weight': element.fontWeight || 'normal',
+                 'color': element.color || '#000',
+                 'text-align': element.textAlign || 'center',
+                 'line-height': element.lineHeight || 1.4
+               }"
+               class="dynamic-text">
+            {{ renderElementContent(element) }}
+          </div>
+        }
+
+        @if (element.type === 'SIGNATURE_BLOCK' && element.legacyField === 'assinatura1' && assinaturaUrl) {
+          <div class="cert-assinatura">
+            <img [src]="assinaturaUrl" alt="Assinatura" class="assinatura-img">
+            <div class="assinatura-texto">
+              <strong>{{ nomeAssinante || (applyMocks ? 'Signatário 1' : '') }}</strong>
+              <span>{{ cargoAssinante || (applyMocks ? 'Cargo' : '') }}</span>
+            </div>
+          </div>
+        }
+
+        @if (element.type === 'SIGNATURE_BLOCK' && element.legacyField === 'assinatura2' && assinaturaUrl2 && nomeAssinante2) {
+          <div class="cert-assinatura">
+            <img [src]="assinaturaUrl2" alt="Assinatura 2" class="assinatura-img">
+            <div class="assinatura-texto">
+              <strong>{{ nomeAssinante2 || (applyMocks ? 'Signatário 2' : '') }}</strong>
+              <span>{{ cargoAssinante2 || (applyMocks ? 'Cargo' : '') }}</span>
+            </div>
+          </div>
+        }
+
+        @if (element.type === 'SIGNATURE_BLOCK' && !element.legacyField) {
+          <div class="signature-placeholder">
+            <span>{{ renderElementContent(element) || 'Responsável' }}</span>
+          </div>
+        }
+
+        @if (element.type === 'QR_CODE') {
+          <div class="cert-qr">
+            <svg *ngIf="applyMocks" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;opacity:.85;">
+              <rect x="5"  y="5"  width="35" height="35" rx="4" fill="none" stroke="#1a1a00" stroke-width="5"/>
+              <rect x="14" y="14" width="18" height="18" rx="2" fill="#1a1a00"/>
+              <rect x="60" y="5"  width="35" height="35" rx="4" fill="none" stroke="#1a1a00" stroke-width="5"/>
+              <rect x="69" y="14" width="18" height="18" rx="2" fill="#1a1a00"/>
+              <rect x="5"  y="60" width="35" height="35" rx="4" fill="none" stroke="#1a1a00" stroke-width="5"/>
+              <rect x="14" y="69" width="18" height="18" rx="2" fill="#1a1a00"/>
+              <rect x="47" y="5"  width="8" height="8" fill="#1a1a00"/>
+              <rect x="60" y="47" width="8" height="8" fill="#1a1a00"/>
+              <rect x="73" y="60" width="8" height="8" fill="#1a1a00"/>
+              <rect x="86" y="86" width="8" height="8" fill="#1a1a00"/>
+            </svg>
+            <img *ngIf="!applyMocks" src="assets/images/qr-placeholder.svg" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg'" alt="QR Code" style="width: 100%; display: block;">
+          </div>
+        }
+
+        @if (element.type === 'LINE') {
+          <div class="dynamic-line" [style.border-color]="element.color || '#1a1a00'"></div>
+        }
+      </div>
+    }
+
     <!-- Nome do Aluno -->
-    @if (layoutConfig.nomeAluno) {
+    @if (!hasDynamicLayout && layoutConfig.nomeAluno) {
     <div [ngStyle]="{
            'left':       layoutConfig.nomeAluno.x + '%',
            'top':        layoutConfig.nomeAluno.y + '%',
@@ -38,7 +123,7 @@
     }
 
     <!-- Texto Principal -->
-    @if (layoutConfig.textoPronto) {
+    @if (!hasDynamicLayout && layoutConfig.textoPronto) {
     <div [ngStyle]="{
            'left':       layoutConfig.textoPronto.x + '%',
            'top':        layoutConfig.textoPronto.y + '%',
@@ -61,7 +146,7 @@
     }
 
     <!-- Assinatura 1 -->
-    @if (layoutConfig.assinatura1 && assinaturaUrl) {
+    @if (!hasDynamicLayout && layoutConfig.assinatura1 && assinaturaUrl) {
     <div [ngStyle]="{
            'left':  layoutConfig.assinatura1.x + '%',
            'top':   layoutConfig.assinatura1.y + '%',
@@ -84,7 +169,7 @@
     }
 
     <!-- Assinatura 2 -->
-    @if (layoutConfig.assinatura2 && assinaturaUrl2 && nomeAssinante2) {
+    @if (!hasDynamicLayout && layoutConfig.assinatura2 && assinaturaUrl2 && nomeAssinante2) {
     <div [ngStyle]="{
            'left':  layoutConfig.assinatura2.x + '%',
            'top':   layoutConfig.assinatura2.y + '%',
@@ -107,7 +192,7 @@
     }
 
     <!-- QR Code -->
-    @if (layoutConfig.qrCode) {
+    @if (!hasDynamicLayout && layoutConfig.qrCode) {
     <div [ngStyle]="{
            'left':  layoutConfig.qrCode.x + '%',
            'top':   layoutConfig.qrCode.y + '%',

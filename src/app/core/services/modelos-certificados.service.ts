@@ -1,9 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import {
   CertificadoLayoutConfig,
-  TesteGeracaoCertificadoPayload,
   TipoModeloCertificado
 } from '../interfaces/certificados.interface';
 
@@ -24,6 +23,27 @@ export interface ModeloCertificado {
   atualizadoEm?: string;
   dataCriacao: string;
   dataAtualizacao: string;
+}
+
+export interface CertificadoCicloVidaResponse {
+  id?: string;
+  certificadoId?: string;
+  pdfUrl?: string;
+  codigoValidacao?: string;
+  status?: string;
+}
+
+export interface EmitirManualAcademicoPayload {
+  modeloId: string;
+  alunoId: string;
+  turmaId: string;
+  matricula?: string;
+  nomeAluno?: string;
+  nomeCurso?: string;
+  cargaHoraria?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  dataEmissao?: string;
 }
 
 type ModeloCertificadoApi = Omit<ModeloCertificado, 'dataCriacao' | 'dataAtualizacao'> & {
@@ -68,18 +88,70 @@ export class ModelosCertificadosService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  validarAutenticidade(codigo: string): Observable<{ valido: boolean, nome: string, curso: string, data: string, tipo: string }> {
-    return this.http.get<{ valido: boolean, nome: string, curso: string, data: string, tipo: string }>(`${this.certificadosUrl}/validar/${codigo}`);
-  }
-
-  testarGeracaoGeometrica(payload: TesteGeracaoCertificadoPayload): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/teste`, payload, { responseType: 'blob' });
+  validarAutenticidade(codigo: string): Observable<{
+    valido: boolean;
+    nome: string;
+    curso: string;
+    data: string;
+    dataEmissao?: string;
+    cargaHoraria?: string;
+    codigoValidacao?: string;
+    status?: string;
+    mensagem?: string;
+    tipo: string;
+  }> {
+    return this.http.get<{
+      valido: boolean;
+      nome: string;
+      curso: string;
+      data: string;
+      dataEmissao?: string;
+      cargaHoraria?: string;
+      codigoValidacao?: string;
+      status?: string;
+      mensagem?: string;
+      tipo: string;
+    }>(`${this.certificadosUrl}/validar/${codigo}`);
   }
 
   emitirAcademico(turmaId: string, alunoId: string): Observable<{ pdfUrl: string; codigoValidacao: string }> {
     return this.http.post<{ pdfUrl: string; codigoValidacao: string }>(
       `${this.apiUrl}/emitir-academico`,
       { turmaId, alunoId },
+    );
+  }
+
+  emitirManualAcademico(payload: EmitirManualAcademicoPayload): Observable<CertificadoCicloVidaResponse> {
+    return this.http.post<CertificadoCicloVidaResponse>(
+      `${this.apiUrl}/emitir-manual-academico`,
+      payload,
+    );
+  }
+
+  emitirHonrariaManual(payload: {
+    modeloId: string;
+    apoiadorId: string;
+    tituloAcao: string;
+    motivo?: string;
+    dataEmissao: string;
+  }): Observable<HttpResponse<Blob>> {
+    return this.http.post(`${this.apiUrl}/emitir-honraria`, payload, {
+      observe: 'response',
+      responseType: 'blob',
+    });
+  }
+
+  cancelarCertificado(certificadoId: string, motivo: string): Observable<CertificadoCicloVidaResponse> {
+    return this.http.patch<CertificadoCicloVidaResponse>(
+      `${this.apiUrl}/certificados/${certificadoId}/cancelar`,
+      { motivo },
+    );
+  }
+
+  reemitirCertificado(certificadoId: string): Observable<CertificadoCicloVidaResponse> {
+    return this.http.post<CertificadoCicloVidaResponse>(
+      `${this.apiUrl}/certificados/${certificadoId}/reemitir`,
+      {},
     );
   }
 
