@@ -19,7 +19,7 @@ import { CertificadoPreviewComponent } from '../components/certificado-preview/c
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule, RouterModule, FormsModule, CertificadoPreviewComponent, DatePipe],
   templateUrl: './modelos-lista.html',
-  styleUrl: './modelos-lista.scss',
+  styleUrls: ['./modelos-lista.scss'],
 })
 export class ModelosLista implements OnInit {
   // Estado Reativo local via Signals

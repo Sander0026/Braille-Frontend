@@ -10,19 +10,19 @@
   <ul id="sidebar-nav" class="sidebar-nav">
     @for (item of rotasPermitidas; track item.rota) {
     <li>
-      <a [href]="item.rota"
-        routerLinkActive="active"
-        (click)="navegar(item.rota, $event)"
-        (keydown.enter)="navegar(item.rota, $event)"
-        (keydown.space)="navegar(item.rota, $event)"
-        [attr.aria-label]="!showLabels ? item.aria || item.label : null" class="nav-link"
+      <button type="button"
+        (click)="navegar(item.rota)"
+        [class.active]="isActive(item.rota)"
+        [attr.aria-current]="isActive(item.rota) ? 'page' : null"
+        [attr.aria-label]="!showLabels ? item.aria || item.label : null"
+        class="nav-link"
         [attr.title]="!showLabels ? item.label : null"
         [attr.tabindex]="sidebarState === 'hidden' ? -1 : 0">
         <span class="material-symbols-rounded nav-icon" aria-hidden="true">{{ item.icon }}</span>
         @if (showLabels) {
         <span class="nav-label">{{ item.label }}</span>
         }
-      </a>
+      </button>
     </li>
     }
   </ul>

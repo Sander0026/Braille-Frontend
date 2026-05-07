@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLinkActive } from '@angular/router';
+import { Router } from '@angular/router';
 
 export interface RotaSidebar {
   rota: string;
@@ -13,7 +13,7 @@ export interface RotaSidebar {
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLinkActive],
+  imports: [CommonModule],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
 })
@@ -26,10 +26,13 @@ export class Sidebar {
 
   constructor(private readonly router: Router) {}
 
-  navegar(rota: string, event?: Event): void {
-    event?.preventDefault();
+  navegar(rota: string): void {
     if (this.sidebarState === 'hidden') return;
     this.router.navigateByUrl(rota);
+  }
+
+  isActive(rota: string): boolean {
+    return this.router.url === rota || this.router.url.startsWith(`${rota}/`);
   }
 
   emitAction(actionName: 'sair') {

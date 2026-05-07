@@ -6,12 +6,18 @@ import { Sidebar } from './sidebar';
 describe('Sidebar', () => {
   let component: Sidebar;
   let fixture: ComponentFixture<Sidebar>;
+  let routerMock: { navigateByUrl: jasmine.Spy; url: string };
 
   beforeEach(async () => {
+    routerMock = {
+      navigateByUrl: jasmine.createSpy('navigateByUrl'),
+      url: '/admin/dashboard',
+    };
+
     await TestBed.configureTestingModule({
       imports: [Sidebar],
       providers: [
-        { provide: Router, useValue: { navigateByUrl: jasmine.createSpy('navigateByUrl') } },
+        { provide: Router, useValue: routerMock },
       ],
     })
     .compileComponents();
@@ -26,10 +32,14 @@ describe('Sidebar', () => {
   });
 
   it('navega para a rota do item selecionado', () => {
-    const router = TestBed.inject(Router);
-
     component.navegar('/admin/modelos-certificados');
 
-    expect(router.navigateByUrl).toHaveBeenCalledWith('/admin/modelos-certificados');
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/admin/modelos-certificados');
+  });
+
+  it('marca a rota atual como ativa', () => {
+    routerMock.url = '/admin/modelos-certificados';
+
+    expect(component.isActive('/admin/modelos-certificados')).toBeTrue();
   });
 });
