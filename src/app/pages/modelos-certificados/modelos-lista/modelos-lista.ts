@@ -295,7 +295,7 @@ export class ModelosLista implements OnInit {
       apoiadorId: this.manualForm.apoiadorId,
       tituloAcao: this.manualForm.tituloAcao,
       motivo: this.manualForm.motivo || this.manualForm.tituloAcao,
-      dataEmissao: this.manualForm.dataEmissao,
+      dataEvento: this.manualForm.dataEmissao,
     }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.isEmitindoManual.set(false);

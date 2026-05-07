@@ -246,7 +246,7 @@
 
       <div class="form-group">
         <label for="manual-emissao">
-          Data de emissao
+          {{ modeloManual()?.tipo === 'HONRARIA' ? 'Data do evento' : 'Data de emissao' }}
           <span class="required" aria-hidden="true">*</span>
         </label>
         <input id="manual-emissao" class="form-input" type="date" name="dataEmissao" [(ngModel)]="manualForm.dataEmissao" required aria-required="true">

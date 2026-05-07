@@ -133,7 +133,7 @@ export class ModelosCertificadosService {
     apoiadorId: string;
     tituloAcao: string;
     motivo?: string;
-    dataEmissao: string;
+    dataEvento: string;
   }): Observable<HttpResponse<Blob>> {
     return this.http.post(`${this.apiUrl}/emitir-honraria`, payload, {
       observe: 'response',

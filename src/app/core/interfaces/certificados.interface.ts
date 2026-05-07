@@ -101,7 +101,7 @@ export interface EmitirCertificadoApoiadorPayload {
   modeloId: string;
   acaoId?: string;
   motivoPersonalizado?: string;
-  dataEmissao?: string;
+  dataEvento?: string;
 }
 
 export interface EmitirCertificadoApoiadorResponse {
