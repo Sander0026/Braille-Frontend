@@ -317,6 +317,19 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     });
   }
 
+  addLineElement(): void {
+    this.addElement({
+      type: 'LINE',
+      label: 'Linha decorativa',
+      x: 35,
+      y: 70,
+      width: 30,
+      height: 1,
+      color: '#1a1a00',
+      zIndex: this.proximoZIndex(),
+    });
+  }
+
   removeSelectedElement(): void {
     const selected = this.selectedElement;
     if (!selected) return;

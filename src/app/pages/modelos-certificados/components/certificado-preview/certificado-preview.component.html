@@ -49,7 +49,15 @@
         }
 
         @if (element.type === 'SIGNATURE_BLOCK') {
-          <div class="cert-assinatura">
+          <div class="cert-assinatura"
+               [ngStyle]="{
+                 'font-family': element.fontFamily || 'Helvetica',
+                 'font-size': (element.fontSize || 12) + 'px',
+                 'font-weight': element.fontWeight || 'normal',
+                 'color': element.color || '#1a1a00',
+                 'text-align': element.textAlign || 'center',
+                 'line-height': element.lineHeight || 1.4
+               }">
             @if (signatureImageFor(element)) {
               <img [src]="signatureImageFor(element)" alt="Assinatura" class="assinatura-img">
             }

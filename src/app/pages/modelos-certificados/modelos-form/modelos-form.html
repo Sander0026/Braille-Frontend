@@ -214,6 +214,7 @@
                 <button type="button" class="btn-element" (click)="addSignatureBlockElement()">+ Assinatura</button>
                 <button type="button" class="btn-element" (click)="addQrElement()">+ QR</button>
                 <button type="button" class="btn-element" (click)="addValidationCodeElement()">+ Codigo</button>
+                <button type="button" class="btn-element" (click)="addLineElement()">+ Linha</button>
               </div>
 
               <div class="element-list" role="listbox" aria-label="Elementos posicionados">
@@ -284,7 +285,7 @@
                            (ngModelChange)="updateSelectedElement({ height: +$event })">
                   </label>
 
-                  @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE') {
+                  @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE' || element.type === 'SIGNATURE_BLOCK') {
                     <label>
                       Fonte
                       <select [ngModel]="element.fontFamily"
