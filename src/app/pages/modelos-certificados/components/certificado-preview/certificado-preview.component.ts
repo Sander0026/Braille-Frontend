@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { CdkDragEnd, DragDropModule } from '@angular/cdk/drag-drop';
 import {
   CertificadoLayoutElement,
-  CertificadoLayoutCampo,
   CertificadoLayoutConfig,
   normalizarCertificadoLayoutConfig
 } from '../../../../core/interfaces/certificados.interface';
@@ -13,8 +12,7 @@ export const CERT_CANVAS_W = 1122;
 export const CERT_CANVAS_H = 794;
 
 export interface DragEndEvent {
-  field?: CertificadoLayoutCampo;
-  elementId?: string;
+  elementId: string;
   x: number;
   y: number;
 }
@@ -54,10 +52,6 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
       .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
   }
 
-  get hasDynamicLayout(): boolean {
-    return Array.isArray(this.layoutConfig.elements);
-  }
-  
   /** Se true, os elementos podem ser arrastados. */
   @Input() isDraggable = false;
   /** Se true, substitui {{tags}} por dados fictícios para visualização. */
@@ -136,15 +130,35 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
     return t;
   }
 
-  onDragEnded(event: CdkDragEnd, field: CertificadoLayoutCampo) {
-    this.emitDragPosition(event, { field });
+  signatureImageFor(element: CertificadoLayoutElement): string | ArrayBuffer | null {
+    if (this.isSecondSignatureElement(element) && this.assinaturaUrl2) {
+      return this.assinaturaUrl2;
+    }
+
+    return this.assinaturaUrl || this.assinaturaUrl2 || null;
+  }
+
+  signatureTextFor(element: CertificadoLayoutElement): string {
+    const renderedContent = this.renderElementContent(element).trim();
+    if (renderedContent) return renderedContent;
+
+    if (this.isSecondSignatureElement(element)) {
+      return [this.nomeAssinante2, this.cargoAssinante2].filter(Boolean).join('\n');
+    }
+
+    return [this.nomeAssinante, this.cargoAssinante].filter(Boolean).join('\n');
+  }
+
+  private isSecondSignatureElement(element: CertificadoLayoutElement): boolean {
+    const marker = `${element.id} ${element.label}`.toLowerCase();
+    return marker.includes('assinatura-2') || marker.includes('assinatura 2') || marker.includes('segunda');
   }
 
   onDynamicDragEnded(event: CdkDragEnd, element: CertificadoLayoutElement) {
-    this.emitDragPosition(event, { elementId: element.id, field: element.legacyField });
+    this.emitDragPosition(event, { elementId: element.id });
   }
 
-  private emitDragPosition(event: CdkDragEnd, target: Pick<DragEndEvent, 'field' | 'elementId'>) {
+  private emitDragPosition(event: CdkDragEnd, target: Pick<DragEndEvent, 'elementId'>) {
     if (!this.isDraggable) return;
 
     const element = event.source.element.nativeElement;

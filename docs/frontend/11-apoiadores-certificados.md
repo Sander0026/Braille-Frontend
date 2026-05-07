@@ -10,10 +10,10 @@ Gerenciar apoiadores/parceiros e operar o modulo administrativo de certificados:
 
 ## Estado atual
 
-O frontend tambem esta em estado hibrido:
+O frontend esta em transicao controlada:
 
-- O editor visual novo trabalha com `layoutConfig.elements`.
-- A compatibilidade com modelos antigos ainda usa `textoPronto`, `nomeAluno`, `assinatura1`, `assinatura2`, `qrCode` e `legacyField`.
+- O editor visual trabalha somente com `layoutConfig.elements`.
+- O contrato de layout nao usa mais `textoPronto`, `nomeAluno`, `assinatura1`, `assinatura2`, `qrCode` nem `legacyField`.
 - A listagem e emissao continuam usando o endpoint legado `/api/modelos-certificados`.
 - O contrato visual de certificados de apoiadores ja aceita `modelo` e `acao`, que sao retornados pelo backend atual.
 
@@ -89,8 +89,6 @@ As fontes de certificado sao carregadas em `src/index.html` via Google Fonts par
 Os selects de fonte do editor usam o mesmo catalogo:
 
 - Elemento selecionado em `layoutConfig.elements`.
-- Campo legado de texto principal.
-- Campo legado de nome do participante.
 
 ---
 
@@ -122,29 +120,27 @@ Cada elemento pode conter:
 - `color`, `textAlign`, `lineHeight`
 - `zIndex`
 - `visible`
-- `legacyField`
 
 As coordenadas sao percentuais.
 
-## 6.2 Compatibilidade legada
+## 6.2 Layout padrao
 
-`normalizarCertificadoLayoutConfig()` cria elementos dinamicos a partir do layout antigo:
+`normalizarCertificadoLayoutConfig()` garante que o layout sempre tenha uma lista de elementos.
 
-- `legacy-nome-aluno`
-- `legacy-texto-principal`
-- `legacy-assinatura-1`
-- `legacy-assinatura-2`
-- `legacy-qrcode`
+Quando o modelo nao possui `elements`, o frontend usa o layout padrao:
 
-Esses elementos mantem `legacyField` para sincronizar com:
+- `nome-aluno`
+- `texto-principal`
+- `assinatura-1`
+- `qrcode`
 
-- `layoutConfig.nomeAluno`
-- `layoutConfig.textoPronto`
-- `layoutConfig.assinatura1`
-- `layoutConfig.assinatura2`
-- `layoutConfig.qrCode`
+Novos modelos salvos enviam apenas:
 
-Nao remover esses campos enquanto houver modelos antigos.
+```ts
+{
+  elements: CertificadoLayoutElement[]
+}
+```
 
 ---
 
@@ -156,7 +152,7 @@ Nao remover esses campos enquanto houver modelos antigos.
 - Ordena `elements` por `zIndex`.
 - Ignora elementos `visible === false`.
 - Aplica escala responsiva.
-- Renderiza texto, QR Code, assinatura, linha e campos legados.
+- Renderiza texto, QR Code, assinatura e linha somente a partir de `elements`.
 - Substitui variaveis simuladas quando `applyMocks` esta ativo.
 
 Variaveis simuladas no preview incluem:
@@ -270,18 +266,17 @@ Melhorias aplicadas:
 
 # 12. Pontos de atencao
 
-Nao remover ainda:
+Mantido por enquanto:
 
-- `legacyField`
-- Campos fixos do `layoutConfig`
-- Normalizacao de layout legado
-- Controles legados de texto/nome
+- Rotas `/api/modelos-certificados`.
+- Fluxos atuais de emissao academica, honraria e validacao.
+- Tabelas funcionais `ModeloCertificado` e `CertificadoEmitido` no backend.
 
 Riscos conhecidos:
 
 - `fontWeight` no PDF preserva a familia, mas ainda nao usa variante bold real da fonte customizada.
 - A equivalencia preview/PDF depende das fontes carregadas no `index.html` e do catalogo do backend.
-- O fluxo V2 existe no banco, mas ainda nao substitui o CRUD/emissao legado.
+- O fluxo V2 existe no banco, mas ainda nao substitui o CRUD/emissao atual.
 
 ---
 

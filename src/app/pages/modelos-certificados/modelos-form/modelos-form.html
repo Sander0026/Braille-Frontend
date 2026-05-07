@@ -1,14 +1,14 @@
-<div class="wizard-container">
+﻿<div class="wizard-container">
   
-  <!-- Cabeçalho Dinâmico -->
+  <!-- CabeÃ§alho DinÃ¢mico -->
   <div class="wizard-header" style="text-align: center; margin-bottom: 2rem;">
     <h1 style="font-size: 1.75rem; color: #1e293b; margin-bottom: 0.5rem;" id="wizard-title">
       {{ modoEdicao() ? 'Editar Modelo' : 'Novo Modelo de Certificado' }}
     </h1>
     <p style="color: #64748b;" aria-live="polite">Passo {{ passoAtual() }} de 4: 
-      <span *ngIf="passoAtual() === 1"><strong>Identificação Básica</strong></span>
+      <span *ngIf="passoAtual() === 1"><strong>IdentificaÃ§Ã£o BÃ¡sica</strong></span>
       <span *ngIf="passoAtual() === 2"><strong>Artes e Assinaturas</strong></span>
-      <span *ngIf="passoAtual() === 3"><strong>Conteúdo e Variáveis</strong></span>
+      <span *ngIf="passoAtual() === 3"><strong>ConteÃºdo e VariÃ¡veis</strong></span>
       <span *ngIf="passoAtual() === 4"><strong>Ajuste Visual Final</strong></span>
     </p>
   </div>
@@ -27,34 +27,34 @@
 
   <form [formGroup]="formModelo" (ngSubmit)="salvar()" novalidate aria-labelledby="wizard-title">
     
-    <!-- PASSO 1: IDENTIFICAÇÃO -->
+    <!-- PASSO 1: IDENTIFICAÃ‡ÃƒO -->
     <div *ngIf="passoAtual() === 1" class="wizard-step-content animate-fade-in">
       <fieldset style="border: none; padding: 0;">
-        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;">Informações Iniciais</legend>
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;">InformaÃ§Ãµes Iniciais</legend>
         <div class="row">
           <div class="col-lg-8">
             <div class="form-group">
               <label for="input-nome">Nome do Template <span aria-hidden="true" style="color: #ef4444;">*</span></label>
               <input type="text" id="input-nome" formControlName="nome" class="form-input"
-                placeholder="Ex: Certificado Braille Padrão 2024"
+                placeholder="Ex: Certificado Braille PadrÃ£o 2024"
                 [class.is-invalid]="isFieldInvalid('nome')"
                 [attr.aria-invalid]="isFieldInvalid('nome') ? 'true' : null"
                 [attr.aria-describedby]="isFieldInvalid('nome') ? 'err-nome' : null">
-              @if (isFieldInvalid('nome')) { <span id="err-nome" class="error-text" role="alert">Obrigatório. Mínimo 3 caracteres.</span> }
+              @if (isFieldInvalid('nome')) { <span id="err-nome" class="error-text" role="alert">ObrigatÃ³rio. MÃ­nimo 3 caracteres.</span> }
             </div>
           </div>
           <div class="col-lg-4">
             <div class="form-group">
               <label for="input-tipo">Categoria <span aria-hidden="true" style="color: #ef4444;">*</span></label>
               <select id="input-tipo" formControlName="tipo" class="form-input" [class.is-invalid]="isFieldInvalid('tipo')" aria-required="true">
-                <option value="ACADEMICO">Oficinas / Acadêmico</option>
+                <option value="ACADEMICO">Oficinas / AcadÃªmico</option>
                 <option value="HONRARIA">Amigos do Braille (Honrarias Gerais)</option>
               </select>
             </div>
           </div>
         </div>
         <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0 8px 8px 0; margin-top: 1.5rem;" role="note">
-          <p style="font-size: 0.9rem; color: #1e40af; margin: 0;"><strong>Dica:</strong> Modelos acadêmicos permitem injetar carga horária e datas da turma. Modelos de honraria são focados em agradecimentos a parceiros.</p>
+          <p style="font-size: 0.9rem; color: #1e40af; margin: 0;"><strong>Dica:</strong> Modelos acadÃªmicos permitem injetar carga horÃ¡ria e datas da turma. Modelos de honraria sÃ£o focados em agradecimentos a parceiros.</p>
         </div>
       </fieldset>
     </div>
@@ -93,8 +93,8 @@
           </div>
           <div class="col-lg-4">
             <div class="form-group">
-              <label for="input-nome-assinante">Nome do Signatário 1</label>
-              <input type="text" id="input-nome-assinante" formControlName="nomeAssinante" class="form-input" placeholder="Ex: Dr. João Silva">
+              <label for="input-nome-assinante">Nome do SignatÃ¡rio 1</label>
+              <input type="text" id="input-nome-assinante" formControlName="nomeAssinante" class="form-input" placeholder="Ex: Dr. JoÃ£o Silva">
             </div>
           </div>
           <div class="col-lg-4">
@@ -120,7 +120,7 @@
           </div>
           <div class="col-lg-4">
             <div class="form-group">
-              <label for="input-nome-assinante2">Nome do Signatário 2</label>
+              <label for="input-nome-assinante2">Nome do SignatÃ¡rio 2</label>
               <input type="text" id="input-nome-assinante2" formControlName="nomeAssinante2" class="form-input" placeholder="Ex: Dra. Maria Santos">
             </div>
           </div>
@@ -136,19 +136,19 @@
     </div>
 
 
-    <!-- PASSO 3: CONTEÚDO (apenas texto e tags) -->
+    <!-- PASSO 3: CONTEÃšDO (apenas texto e tags) -->
     <div *ngIf="passoAtual() === 3" class="wizard-step-content animate-fade-in">
       <fieldset style="border: none; padding: 0;">
-        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Criação do Texto</legend>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">Escreva o texto do certificado. Use as tags abaixo para inserir dados automáticos na hora da emissão.</p>
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">CriaÃ§Ã£o do Texto</legend>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">Escreva o texto do certificado. Use as tags abaixo para inserir dados automÃ¡ticos na hora da emissÃ£o.</p>
 
         <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
           @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Aluno no cursor" (click)="injetarTag('{{ALUNO}}')">+ Aluno</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Turma" (click)="injetarTag('{{TURMA}}')">+ Oficina</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome do curso" (click)="injetarTag('{{NOME_CURSO}}')">+ Curso</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga Horária" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Início" (click)="injetarTag('{{DATA_INICIO}}')">+ Início</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga HorÃ¡ria" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar InÃ­cio" (click)="injetarTag('{{DATA_INICIO}}')">+ InÃ­cio</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Fim" (click)="injetarTag('{{DATA_FIM}}')">+ Fim</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar data de emissao" (click)="injetarTag('{{DATA_EMISSAO}}')">+ Emissao</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar codigo do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Codigo</button>
@@ -166,14 +166,14 @@
         <div class="form-group">
           <textarea #textoTemplateInput id="textoTemplate" formControlName="textoTemplate" class="form-textarea fixed-font" rows="12"
                   style="font-size: 1.05rem; line-height: 1.8; border-radius: 8px; width: 100%;"
-                  [placeholder]="'Ex:\nO Instituto Luiz Braille certifica que ' + '{' + '{ALUNO}' + '}' + ' concluiu com êxito...'"
+                  [placeholder]="'Ex:\nO Instituto Luiz Braille certifica que ' + '{' + '{ALUNO}' + '}' + ' concluiu com Ãªxito...'"
                   [class.is-invalid]="isFieldInvalid('textoTemplate')"
                   [attr.aria-invalid]="isFieldInvalid('textoTemplate') ? 'true' : null"
                   [attr.aria-describedby]="isFieldInvalid('textoTemplate') ? 'err-texto' : null"></textarea>
           @if (isFieldInvalid('textoTemplate')) { <span id="err-texto" class="error-text" role="alert">O texto deve ter pelo menos 20 caracteres.</span> }
         </div>
         <p style="font-size:0.8rem; color:#64748b; margin-top: 0.5rem;" aria-live="polite">
-          Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
+          Dica: No prÃ³ximo passo vocÃª irÃ¡ definir fonte, cor, tamanho e posiÃ§Ã£o deste texto sobre a arte do certificado.
         </p>
       </fieldset>
     </div>
@@ -182,7 +182,7 @@
     <div *ngIf="passoAtual() === 4" class="wizard-step-content animate-fade-in">
       <fieldset style="border: none; padding: 0;">
         <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Ajuste Visual Final</legend>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicioná-los. Use os painéis abaixo para ajustar estilos.</p>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicionÃ¡-los. Use os painÃ©is abaixo para ajustar estilos.</p>
 
         <div *ngIf="previewBaseUrl()">
 
@@ -233,7 +233,7 @@
               <section class="dynamic-editor-card">
                 <div class="dynamic-editor-card__header">
                   <h2>Propriedades</h2>
-                  <button type="button" class="btn-remove-element" [disabled]="!!element.legacyField" (click)="removeSelectedElement()">Remover</button>
+                  <button type="button" class="btn-remove-element" (click)="removeSelectedElement()">Remover</button>
                 </div>
 
                 <div class="properties-grid">
@@ -324,190 +324,28 @@
             }
           </div>
 
-          <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin:1.25rem 0; font-size:0.75rem; color:#64748b;">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(59,130,246,.8);border-radius:2px;"></span>Texto principal</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(168,85,247,.8);border-radius:2px;"></span>Nome do Aluno</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(34,197,94,.8);border-radius:2px;"></span>Assinatura 1</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(239,68,68,.8);border-radius:2px;"></span>Assinatura 2</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(234,88,12,.8);border-radius:2px;"></span>QR Code</span>
-          </div>
-
-          <!-- ===== PAINEL DE CONTROLES EM GRID RESPONSIVO ===== -->
-          <div class="controls-grid">
-            
-            <!-- Card 1: Texto Principal -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#eff6ff; padding:0.5rem 0.75rem; border-bottom:1px solid #bfdbfe;">
-                <h2 style="margin:0; font-weight:700; color:#1d4ed8; font-size:0.8rem;">Texto Principal</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <fieldset style="border:0; padding:0; margin:0;" aria-label="Alinhamento do Texto">
-                    <legend class="sr-only">Alinhamento do Texto Primário</legend>
-                    <label style="font-size:0.7rem; font-weight:600; color:#64748b;">ALINHAMENTO</label>
-                    <div style="display:flex; gap:0.3rem; margin-top:0.25rem;">
-                      <button type="button" aria-label="Alinhar à esquerda" (click)="setTextAlign('left')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'left'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'left' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'left' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Esquerda">←</button>
-                      <button type="button" aria-label="Alinhar ao centro" (click)="setTextAlign('center')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'center'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'center' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'center' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Centro">≡</button>
-                      <button type="button" aria-label="Alinhar à direita" (click)="setTextAlign('right')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'right'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'right' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'right' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Direita">→</button>
-                      <button type="button" aria-label="Texto justificado" (click)="setTextAlign('justify')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'justify'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'justify' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'justify' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Justificado">⊟</button>
-                    </div>
-                  </fieldset>
-                </div>
-
-                <div>
-                  <label for="ctrl-fonte-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
-                  <select id="ctrl-fonte-texto" [ngModel]="layoutConfig.textoPronto.fontFamily" [ngModelOptions]="{standalone: true}" (ngModelChange)="setCampoLayout('textoPronto', 'fontFamily', $event)" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
-                    @for (font of certificadoFontes; track font.value) {
-                      <option [value]="font.value">{{ font.label }}</option>
-                    }
-                  </select>
-                </div>
-
-                <div style="display:flex; gap:0.4rem; align-items:flex-end;">
-                  <div style="flex:1;">
-                    <label for="ctrl-tam-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO (pt)</label>
-                    <input id="ctrl-tam-texto" type="number" min="8" max="120"
-                           [value]="layoutConfig.textoPronto.fontSize || 32"
-                           (change)="setFontSize($event)"
-                           style="width:100%; height:30px; padding:0 0.4rem; border:1px solid #e2e8f0; border-radius:5px; font-size:0.82rem; margin-top:0.2rem;">
-                  </div>
-                  <div>
-                    <label for="ctrl-cor-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">COR</label>
-                    <input id="ctrl-cor-texto" type="color" [value]="layoutConfig.textoPronto.color || '#1a1a00'"
-                           (input)="setTextoColor($event)"
-                           style="display:block; width:34px; height:30px; border:1px solid #e2e8f0; border-radius:5px; padding:2px; cursor:pointer; margin-top:0.2rem;" aria-label="Selecionador de cores do texto">
-                  </div>
-                </div>
-
-                <div>
-                  <label for="ctrl-larg-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.textoPronto.maxWidth }}%</label>
-                  <input id="ctrl-larg-texto" type="range" min="30" max="95"
-                         [value]="layoutConfig.textoPronto.maxWidth"
-                         (input)="setCampoLayout('textoPronto', 'maxWidth', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2: Nome do Aluno -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#faf5ff; padding:0.5rem 0.75rem; border-bottom:1px solid #e9d5ff;">
-                <h2 style="margin:0; font-weight:700; color:#7c3aed; font-size:0.8rem;">Nome do Participante</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <label for="ctrl-fonte-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
-                  <select id="ctrl-fonte-nome" [ngModel]="layoutConfig.nomeAluno.fontFamily" [ngModelOptions]="{standalone: true}" (ngModelChange)="setCampoLayout('nomeAluno', 'fontFamily', $event)" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
-                    @for (font of certificadoFontes; track font.value) {
-                      <option [value]="font.value">{{ font.label }}</option>
-                    }
-                  </select>
-                </div>
-                <div style="display:flex; gap:0.4rem; align-items:flex-end;">
-                  <div style="flex:1;">
-                    <label for="ctrl-tam-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO (pt)</label>
-                    <input id="ctrl-tam-nome" type="number" min="12" max="160"
-                           [value]="layoutConfig.nomeAluno.fontSize || 56"
-                           (change)="setNomeAlunoFontSize($event)"
-                           style="width:100%; height:30px; padding:0 0.4rem; border:1px solid #e2e8f0; border-radius:5px; font-size:0.82rem; margin-top:0.2rem;">
-                  </div>
-                  <div>
-                    <label for="ctrl-cor-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">COR</label>
-                    <input id="ctrl-cor-nome" type="color" [value]="layoutConfig.nomeAluno.color || '#000000'"
-                           (input)="setNomeAlunoColor($event)"
-                           style="display:block; width:34px; height:30px; border:1px solid #e2e8f0; border-radius:5px; padding:2px; cursor:pointer; margin-top:0.2rem;" aria-label="Cores do nome do Participante">
-                  </div>
-                </div>
-                <div>
-                  <label for="ctrl-larg-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.nomeAluno.maxWidth || 50 }}%</label>
-                  <input id="ctrl-larg-nome" type="range" min="20" max="90"
-                         [value]="layoutConfig.nomeAluno.maxWidth || 50"
-                         (input)="setCampoLayout('nomeAluno', 'maxWidth', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: Assinaturas -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#f0fdf4; padding:0.5rem 0.75rem; border-bottom:1px solid #bbf7d0;">
-                <h2 style="margin:0; font-weight:700; color:#15803d; font-size:0.8rem;">Assinaturas</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <label for="ctrl-larg-assin1" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 1: {{ layoutConfig.assinatura1.width }}%</label>
-                  <input id="ctrl-larg-assin1" type="range" min="10" max="40"
-                         [value]="layoutConfig.assinatura1.width"
-                         (input)="setCampoLayout('assinatura1', 'width', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-                <div>
-                  <label for="ctrl-larg-assin2" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 2: {{ layoutConfig.assinatura2.width }}%</label>
-                  <input id="ctrl-larg-assin2" type="range" min="10" max="40"
-                         [value]="layoutConfig.assinatura2.width"
-                         (input)="setCampoLayout('assinatura2', 'width', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-                <p style="font-size:0.72rem; color:#64748b; margin:0;">Arraste cada assinatura na prévia para posicioná-la no lugar correto.</p>
-              </div>
-            </div>
-
-            <!-- Card 4: QR Code -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#fff7ed; padding:0.5rem 0.75rem; border-bottom:1px solid #fed7aa;">
-                <h2 style="margin:0; font-weight:700; color:#c2410c; font-size:0.8rem;">Autenticidade (QR Code)</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <label for="ctrl-tam-qr" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO: {{ layoutConfig.qrCode.size }}%</label>
-                  <input id="ctrl-tam-qr" type="range" min="4" max="20"
-                         [value]="layoutConfig.qrCode.size"
-                         (input)="setCampoLayout('qrCode', 'size', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-                <p style="font-size:0.72rem; color:#64748b; margin:0;">O QR Code será gerado automaticamente no backend durante a emissão com o link de validação pública.</p>
-              </div>
-            </div>
-
-          </div><!-- /grid 4 cols -->
         </div><!-- /if previewBaseUrl -->
 
         <div *ngIf="!previewBaseUrl()" style="padding: 3rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b;" role="alert">
-          Atenção: Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
+          AtenÃ§Ã£o: Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
         </div>
       </fieldset>
     </div>
 
-    <!-- Barra de Navegação Inferior -->
+    <!-- Barra de NavegaÃ§Ã£o Inferior -->
     <div class="wizard-footer">
       <button type="button" (click)="passoAnterior()" *ngIf="passoAtual() > 1"
               class="btn btn-secondary btn-voltar">
-        ← Voltar
+        â† Voltar
       </button>
       <div *ngIf="passoAtual() === 1" class="spacer"></div>
 
       <div class="wizard-footer-actions">
-        <a routerLink="/admin/modelos-certificados" class="btn-cancelar">Cancelar Edição</a>
+        <a routerLink="/admin/modelos-certificados" class="btn-cancelar">Cancelar EdiÃ§Ã£o</a>
 
         <button type="button" (click)="proximoPasso()" *ngIf="passoAtual() < 4"
                 class="btn btn-primary btn-avancar">
-          Avançar →
+          AvanÃ§ar â†’
         </button>
 
         <button type="submit" *ngIf="passoAtual() === 4"

@@ -41,7 +41,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   assinatura2PreviewUrl = signal<string | ArrayBuffer | null>(null);
 
   layoutConfig: CertificadoLayoutConfig = normalizarCertificadoLayoutConfig();
-  selectedElementId = signal('legacy-texto-principal');
+  selectedElementId = signal('texto-principal');
   readonly certificadoFontes = CERTIFICADO_FONTES;
 
   readonly elementTypeLabels: Record<string, string> = {
@@ -231,15 +231,8 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   }
 
   onDragEndedOutput(event: DragEndEvent): void {
-    if (event.elementId) {
-      this.atualizarElementoLayout(event.elementId, { x: event.x, y: event.y });
-      this.selectedElementId.set(event.elementId);
-      return;
-    }
-
-    if (event.field) {
-      this.atualizarCampoLayout(event.field, { x: event.x, y: event.y });
-    }
+    this.atualizarElementoLayout(event.elementId, { x: event.x, y: event.y });
+    this.selectedElementId.set(event.elementId);
   }
 
   get layoutElements(): CertificadoLayoutElement[] {
@@ -327,11 +320,6 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   removeSelectedElement(): void {
     const selected = this.selectedElement;
     if (!selected) return;
-    if (selected.legacyField) {
-      this.toast.aviso('Este elemento faz parte do modelo atual e não pode ser removido nesta fase.');
-      return;
-    }
-
     this.layoutConfig = {
       ...this.layoutConfig,
       elements: this.layoutElements.filter(element => element.id !== selected.id),
@@ -351,52 +339,6 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     this.updateSelectedElement({ textAlign: align });
   }
 
-  setTextAlign(align: CertificadoTextAlign) {
-    this.atualizarCampoLayout('textoPronto', { textAlign: align });
-  }
-
-  setFontSize(event: Event) {
-    const val = Number((event.target as HTMLInputElement).value);
-    if (val >= 8 && val <= 120) {
-      this.atualizarCampoLayout('textoPronto', { fontSize: val });
-    }
-  }
-  
-  setNomeAlunoFontSize(event: Event) {
-    const val = Number((event.target as HTMLInputElement).value);
-    if (val >= 8 && val <= 200) {
-      this.atualizarCampoLayout('nomeAluno', { fontSize: val });
-    }
-  }
-
-  setNomeAlunoColor(event: Event) {
-    this.atualizarCampoLayout('nomeAluno', { color: (event.target as HTMLInputElement).value });
-  }
-
-  setTextoColor(event: Event) {
-    this.atualizarCampoLayout('textoPronto', { color: (event.target as HTMLInputElement).value });
-  }
-
-  setCampoLayout(campo: keyof CertificadoLayoutConfig, prop: string, valor: string | number): void {
-    this.atualizarCampoLayout(campo, { [prop]: valor });
-  }
-
-  private atualizarCampoLayout(
-    campo: keyof CertificadoLayoutConfig,
-    patch: Partial<CertificadoLayoutConfig[keyof CertificadoLayoutConfig]>
-  ): void {
-    this.layoutConfig = {
-      ...this.layoutConfig,
-      [campo]: {
-        ...this.layoutConfig[campo],
-        ...patch,
-      },
-    };
-    this.sincronizarElementoLegado(campo, patch);
-    this.formModelo.markAsDirty();
-    this.cdr.markForCheck();
-  }
-
   private addElement(element: Partial<CertificadoLayoutElement>): void {
     const novo = normalizarCertificadoLayoutElement({
       ...element,
@@ -414,112 +356,16 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   }
 
   private atualizarElementoLayout(elementId: string, patch: Partial<CertificadoLayoutElement>): void {
-    let elementoAtualizado: CertificadoLayoutElement | undefined;
     this.layoutConfig = {
       ...this.layoutConfig,
       elements: this.layoutElements.map(element => {
         if (element.id !== elementId) return element;
-        elementoAtualizado = { ...element, ...patch };
-        return elementoAtualizado;
+        return { ...element, ...patch };
       }),
     };
-
-    if (elementoAtualizado?.legacyField) {
-      this.sincronizarCampoLegado(elementoAtualizado);
-    }
 
     this.formModelo.markAsDirty();
     this.cdr.markForCheck();
-  }
-
-  private sincronizarElementoLegado(
-    campo: keyof CertificadoLayoutConfig,
-    patch: Partial<CertificadoLayoutConfig[keyof CertificadoLayoutConfig]>
-  ): void {
-    if (campo === 'elements') return;
-    this.layoutConfig = {
-      ...this.layoutConfig,
-      elements: this.layoutElements.map(element => {
-        if (element.legacyField !== campo) return element;
-        return this.aplicarPatchLegadoNoElemento(element, campo, patch);
-      }),
-    };
-  }
-
-  private aplicarPatchLegadoNoElemento(
-    element: CertificadoLayoutElement,
-    campo: Exclude<keyof CertificadoLayoutConfig, 'elements'>,
-    patch: Partial<CertificadoLayoutConfig[keyof CertificadoLayoutConfig]>
-  ): CertificadoLayoutElement {
-    const mapped: Partial<CertificadoLayoutElement> = {};
-    const patchRecord = patch as Record<string, string | number>;
-
-    if (typeof patchRecord['x'] === 'number') mapped.x = patchRecord['x'];
-    if (typeof patchRecord['y'] === 'number') mapped.y = patchRecord['y'];
-    if (typeof patchRecord['fontSize'] === 'number') mapped.fontSize = patchRecord['fontSize'];
-    if (typeof patchRecord['color'] === 'string') mapped.color = patchRecord['color'];
-    if (typeof patchRecord['fontFamily'] === 'string') mapped.fontFamily = patchRecord['fontFamily'];
-    if (typeof patchRecord['textAlign'] === 'string') mapped.textAlign = patchRecord['textAlign'] as CertificadoTextAlign;
-
-    if ((campo === 'textoPronto' || campo === 'nomeAluno') && typeof patchRecord['maxWidth'] === 'number') {
-      mapped.width = patchRecord['maxWidth'];
-    }
-    if ((campo === 'assinatura1' || campo === 'assinatura2') && typeof patchRecord['width'] === 'number') {
-      mapped.width = patchRecord['width'];
-    }
-    if (campo === 'qrCode' && typeof patchRecord['size'] === 'number') {
-      mapped.width = patchRecord['size'];
-      mapped.height = patchRecord['size'];
-    }
-
-    return { ...element, ...mapped };
-  }
-
-  private sincronizarCampoLegado(element: CertificadoLayoutElement): void {
-    const campo = element.legacyField;
-    if (!campo) return;
-
-    if (campo === 'textoPronto' || campo === 'nomeAluno') {
-      this.layoutConfig = {
-        ...this.layoutConfig,
-        [campo]: {
-          ...this.layoutConfig[campo],
-          x: element.x,
-          y: element.y,
-          maxWidth: element.width,
-          fontSize: element.fontSize,
-          color: element.color,
-          fontFamily: element.fontFamily,
-          textAlign: element.textAlign,
-        },
-      };
-      return;
-    }
-
-    if (campo === 'assinatura1' || campo === 'assinatura2') {
-      this.layoutConfig = {
-        ...this.layoutConfig,
-        [campo]: {
-          ...this.layoutConfig[campo],
-          x: element.x,
-          y: element.y,
-          width: element.width,
-        },
-      };
-      return;
-    }
-
-    if (campo === 'qrCode') {
-      this.layoutConfig = {
-        ...this.layoutConfig,
-        qrCode: {
-          ...this.layoutConfig.qrCode,
-          x: element.x,
-          y: element.y,
-          size: element.width,
-        },
-      };
-    }
   }
 
   private proximoZIndex(): number {
