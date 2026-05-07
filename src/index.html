@@ -51,7 +51,11 @@
        Guard defensivo: evita TypeError caso o script seja bloqueado por CSP ou falha de rede. */
     try {
       if (globalThis.VLibras && globalThis.VLibras.Widget) {
-        new globalThis.VLibras.Widget('https://vlibras.gov.br/app');
+        new globalThis.VLibras.Widget({
+          rootPath: 'https://vlibras.gov.br/app/',
+          position: 'R',
+          opacity: 1
+        });
       }
     } catch (e) {
       console.warn('[VLibras] Widget não pôde ser inicializado:', e);
