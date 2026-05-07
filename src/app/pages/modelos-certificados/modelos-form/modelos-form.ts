@@ -10,6 +10,7 @@ import { ToastService } from '../../../core/services/toast.service';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 import { CertificadoPreviewComponent, DragEndEvent } from '../components/certificado-preview/certificado-preview.component';
 import {
+  CERTIFICADO_FONTES,
   CertificadoLayoutElement,
   CertificadoLayoutConfig,
   CertificadoTextAlign,
@@ -41,6 +42,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
 
   layoutConfig: CertificadoLayoutConfig = normalizarCertificadoLayoutConfig();
   selectedElementId = signal('legacy-texto-principal');
+  readonly certificadoFontes = CERTIFICADO_FONTES;
 
   readonly elementTypeLabels: Record<string, string> = {
     TEXT: 'Texto',

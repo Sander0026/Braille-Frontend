@@ -9,6 +9,28 @@ export type CertificadoLayoutElementType =
   | 'VALIDATION_CODE'
   | 'LINE';
 
+export interface CertificadoFonte {
+  label: string;
+  value: string;
+  category: 'Padrao' | 'Sem serifa' | 'Serifada' | 'Cursiva';
+}
+
+export const CERTIFICADO_FONTES: CertificadoFonte[] = [
+  { label: 'Helvetica', value: 'Helvetica', category: 'Padrao' },
+  { label: 'Times Roman', value: 'TimesRoman', category: 'Padrao' },
+  { label: 'Courier', value: 'Courier', category: 'Padrao' },
+  { label: 'Roboto', value: 'Roboto', category: 'Sem serifa' },
+  { label: 'Open Sans', value: 'Open Sans', category: 'Sem serifa' },
+  { label: 'Montserrat', value: 'Montserrat', category: 'Sem serifa' },
+  { label: 'Merriweather', value: 'Merriweather', category: 'Serifada' },
+  { label: 'Cinzel', value: 'Cinzel', category: 'Serifada' },
+  { label: 'Playfair Display', value: 'Playfair Display', category: 'Serifada' },
+  { label: 'Great Vibes', value: 'Great Vibes', category: 'Cursiva' },
+  { label: 'Parisienne', value: 'Parisienne', category: 'Cursiva' },
+  { label: 'Dancing Script', value: 'Dancing Script', category: 'Cursiva' },
+  { label: 'Pacifico', value: 'Pacifico', category: 'Cursiva' },
+];
+
 export interface CertificadoElementoTexto {
   x: number;
   y: number;
