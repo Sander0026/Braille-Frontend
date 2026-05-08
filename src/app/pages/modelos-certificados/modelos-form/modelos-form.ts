@@ -220,6 +220,12 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
       .subscribe({
         next: (modelo) => {
           this.isSalvando.set(false);
+          this.arteBaseFile = null;
+          this.assinaturaFile = null;
+          this.assinatura2File = null;
+          this.previewBaseUrl.set(modelo.arteBaseUrl);
+          this.assinaturaPreviewUrl.set(modelo.assinaturaUrl);
+          this.assinatura2PreviewUrl.set(modelo.assinaturaUrl2 || null);
           this.formModelo.markAsPristine();
           this.toast.sucesso(`Modelo de certificado ${this.modoEdicao() ? 'atualizado' : 'criado'} com sucesso!`);
           if (visualizarPdfReal) {
