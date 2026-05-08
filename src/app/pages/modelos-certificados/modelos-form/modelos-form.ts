@@ -30,6 +30,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   modoEdicao = signal(false);
   modeloId = signal('');
   isSalvando = signal(false);
+  isGerandoPreviewPdf = signal(false);
   passoAtual = signal(1);
 
   arteBaseFile: File | null = null;
@@ -179,7 +180,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  salvar(): void {
+  salvar(visualizarPdfReal = false): void {
     if (this.formModelo.invalid || this.isSalvando()) {
       this.formModelo.markAllAsTouched();
       return;
@@ -217,10 +218,19 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     requisicao$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (modelo) => {
           this.isSalvando.set(false);
           this.formModelo.markAsPristine();
           this.toast.sucesso(`Modelo de certificado ${this.modoEdicao() ? 'atualizado' : 'criado'} com sucesso!`);
+          if (visualizarPdfReal) {
+            this.modoEdicao.set(true);
+            this.modeloId.set(modelo.id);
+            this.abrirPreviewPdfReal(modelo.id);
+            if (!this.route.snapshot.paramMap.get('id')) {
+              window.history.replaceState(null, '', `/admin/modelos-certificados/editar/${modelo.id}`);
+            }
+            return;
+          }
           this.router.navigate(['/admin/modelos-certificados']);
         },
         error: (err: { error?: { message?: string | string[] } }) => {
@@ -228,6 +238,31 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
           const msg = err.error?.message || 'Erro ao comunicar com o servidor.';
           this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
         }
+      });
+  }
+
+  salvarEVisualizarPdfReal(): void {
+    this.salvar(true);
+  }
+
+  private abrirPreviewPdfReal(modeloId: string): void {
+    if (this.isGerandoPreviewPdf()) return;
+
+    this.isGerandoPreviewPdf.set(true);
+    this.modelosService.previewPdfReal(modeloId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.isGerandoPreviewPdf.set(false);
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener');
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: (err: { error?: { message?: string | string[] } }) => {
+          this.isGerandoPreviewPdf.set(false);
+          const msg = err.error?.message || 'Não foi possível gerar a prévia PDF real.';
+          this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
+        },
       });
   }
 

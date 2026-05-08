@@ -317,7 +317,6 @@
                         <button type="button" [class.is-active]="element.textAlign === 'left'" (click)="setSelectedTextAlign('left')">E</button>
                         <button type="button" [class.is-active]="element.textAlign === 'center'" (click)="setSelectedTextAlign('center')">C</button>
                         <button type="button" [class.is-active]="element.textAlign === 'right'" (click)="setSelectedTextAlign('right')">D</button>
-                        <button type="button" [class.is-active]="element.textAlign === 'justify'" (click)="setSelectedTextAlign('justify')">J</button>
                       </div>
                     </div>
                   }
@@ -348,7 +347,7 @@
     <div class="wizard-footer">
       <button type="button" (click)="passoAnterior()" *ngIf="passoAtual() > 1"
               class="btn btn-secondary btn-voltar">
-        Voltar
+        &larr; Voltar
       </button>
       <div *ngIf="passoAtual() === 1" class="spacer"></div>
 
@@ -357,12 +356,20 @@
 
         <button type="button" (click)="proximoPasso()" *ngIf="passoAtual() < 4"
                 class="btn btn-primary btn-avancar">
-          Avançar
+          Avançar &rarr;
+        </button>
+
+        <button type="button" *ngIf="passoAtual() === 4"
+                class="btn btn-primary btn-preview-real"
+                (click)="salvarEVisualizarPdfReal()"
+                [disabled]="isSalvando() || isGerandoPreviewPdf()"
+                [attr.aria-busy]="isGerandoPreviewPdf() ? 'true' : null">
+          {{ isGerandoPreviewPdf() ? 'Gerando PDF...' : 'Salvar e visualizar PDF real' }}
         </button>
 
         <button type="submit" *ngIf="passoAtual() === 4"
                 class="btn btn-success btn-salvar"
-                [disabled]="isSalvando()">
+                [disabled]="isSalvando() || isGerandoPreviewPdf()">
           {{ isSalvando() ? 'Salvando...' : 'Salvar Modelo' }}
         </button>
       </div>

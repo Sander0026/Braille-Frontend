@@ -1,5 +1,5 @@
 export type TipoModeloCertificado = 'ACADEMICO' | 'HONRARIA';
-export type CertificadoTextAlign = 'left' | 'center' | 'right' | 'justify';
+export type CertificadoTextAlign = 'left' | 'center' | 'right';
 export type CertificadoLayoutElementType =
   | 'TEXT'
   | 'DYNAMIC_TEXT'
@@ -122,10 +122,10 @@ export const CERTIFICADO_LAYOUT_PADRAO: CertificadoLayoutConfig = {
       y: 20,
       width: 80,
       height: 22,
-      fontFamily: 'Helvetica',
+      fontFamily: 'Open Sans',
       fontSize: 32,
       fontWeight: 'normal',
-      textAlign: 'justify',
+      textAlign: 'center',
       color: '#1a1a00',
       lineHeight: 1.75,
       zIndex: 2,
@@ -184,7 +184,7 @@ export function normalizarCertificadoLayoutElement(
     fontSize: element.fontSize || 16,
     fontWeight: element.fontWeight || 'normal',
     color: element.color || '#000000',
-    textAlign: element.textAlign || 'center',
+    textAlign: element.textAlign === 'left' || element.textAlign === 'right' ? element.textAlign : 'center',
     lineHeight: element.lineHeight || 1.4,
     zIndex: Number.isFinite(element.zIndex) ? Number(element.zIndex) : index + 1,
     visible: element.visible !== false,
