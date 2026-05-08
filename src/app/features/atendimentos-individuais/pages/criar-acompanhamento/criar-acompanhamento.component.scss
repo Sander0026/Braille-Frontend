@@ -1,0 +1,15 @@
+.page { display:grid; gap:1.25rem; padding:2rem; max-width:58rem; }
+h1 { margin:0; font-size:1.7rem; }
+p { margin:.35rem 0 0; color:#64748b; }
+.panel { display:grid; gap:1rem; padding:1rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; }
+h2 { margin:0; font-size:1.15rem; }
+label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
+input, select, textarea { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; }
+textarea { resize:vertical; }
+.check { display:flex; align-items:center; gap:.55rem; }
+.check input { width:1.2rem; min-height:1.2rem; }
+.actions { display:flex; justify-content:flex-end; gap:.75rem; }
+.primary, .secondary { min-height:2.5rem; border-radius:8px; padding:.6rem 1rem; font-weight:900; cursor:pointer; }
+.primary { border:0; background:#f2c300; color:#111827; }
+.secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }
+@media (max-width:760px) { .page { padding:1rem; } .actions { flex-direction:column; } }

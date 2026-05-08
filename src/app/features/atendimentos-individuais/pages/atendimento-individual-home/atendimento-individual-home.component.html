@@ -1,0 +1,38 @@
+<main class="page">
+  <header class="hero">
+    <div>
+      <h1>Atendimento Individual</h1>
+      <p>Acompanhe atendimentos, faltas, evolucao pedagogica e historico individual dos alunos.</p>
+    </div>
+    <a class="primary" routerLink="/admin/atendimentos-individuais/criar">Criar acompanhamento</a>
+  </header>
+
+  <section class="indicators" aria-label="Indicadores de atendimento individual">
+    <article><span>Em andamento</span><strong>{{ emAndamento() }}</strong></article>
+    <article><span>Alunos acompanhados</span><strong>{{ alunosAcompanhados() }}</strong></article>
+    <article><span>Finalizados</span><strong>{{ finalizados() }}</strong></article>
+  </section>
+
+  <nav class="cards" aria-label="Navegacao do modulo de atendimento individual">
+    <a routerLink="/admin/atendimentos-individuais/criar">
+      <span class="material-symbols-rounded" aria-hidden="true">add_circle</span>
+      <strong>Criar acompanhamento</strong>
+      <small>Inicie um acompanhamento e registre o primeiro atendimento.</small>
+    </a>
+    <a routerLink="/admin/atendimentos-individuais/em-andamento">
+      <span class="material-symbols-rounded" aria-hidden="true">pending_actions</span>
+      <strong>Em andamento</strong>
+      <small>Veja acompanhamentos ativos e registre novos atendimentos.</small>
+    </a>
+    <a routerLink="/admin/atendimentos-individuais/finalizados">
+      <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>
+      <strong>Finalizados</strong>
+      <small>Consulte historicos encerrados.</small>
+    </a>
+    <a routerLink="/admin/atendimentos-individuais/relatorio">
+      <span class="material-symbols-rounded" aria-hidden="true">summarize</span>
+      <strong>Gerar relatorio</strong>
+      <small>Filtre por aluno, periodo, professor e status.</small>
+    </a>
+  </nav>
+</main>

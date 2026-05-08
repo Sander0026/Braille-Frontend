@@ -56,18 +56,16 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.processandoId = cert.id;
     this.cdr.detectChanges();
 
+    const janelaPdf = this.abrirJanelaPdfPendente();
     this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
       next: (res) => {
-        this.pdfAtual = {
-          url: res.pdfUrl,
-          title: `${this.tituloCertificado(cert)} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
-        };
-        this.pdfAberto = true;
+        this.enviarPdfParaJanela(res.pdfUrl, janelaPdf);
         this.processandoId = null;
-        this.announcer.announce('Certificado aberto no visualizador.', 'polite');
+        this.announcer.announce('Certificado aberto em nova aba.', 'polite');
         this.cdr.detectChanges();
       },
       error: (err) => {
+        janelaPdf?.close();
         console.error('Erro ao abrir PDF', err);
         this.announcer.announce('Erro ao carregar o PDF do servidor. Verifique sua conexão.', 'assertive');
         this.processandoId = null;
@@ -101,28 +99,65 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.processandoId = cert.id;
     this.cdr.detectChanges();
 
+    const janelaPdf = this.abrirJanelaPdfPendente();
     this.apoiadoresService.gerarPdfCertificado(this.apoiador.id, cert.id).subscribe({
       next: (res) => {
         // Snyk Fix CWE-601: valida domínio antes de abrir (aceita apenas Cloudinary)
         if (!this.isSafeCloudinaryUrl(res.pdfUrl)) {
           console.error('[Segurança] URL de PDF rejeitada — domínio não autorizado:', res.pdfUrl);
           this.announcer.announce('Erro de segurança: URL do PDF é inválida.', 'assertive');
+          janelaPdf?.close();
           this.processandoId = null;
           this.cdr.detectChanges();
           return;
         }
         // noopener,noreferrer — previne que a nova aba acesse window.opener
-        window.open(res.pdfUrl, '_blank', 'noopener,noreferrer');
+        this.enviarPdfParaJanela(res.pdfUrl, janelaPdf);
         this.processandoId = null;
         this.announcer.announce('Download da honraria iniciado com sucesso.', 'polite');
         this.cdr.detectChanges();
       },
       error: (err) => {
+        janelaPdf?.close();
         console.error('Erro ao baixar PDF', err);
         this.announcer.announce('Erro ao realizar o download do PDF.', 'assertive');
         this.processandoId = null;
         this.cdr.detectChanges();
       }
     });
+  }
+
+  private abrirJanelaPdfPendente(): Window | null {
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      this.announcer.announce('O navegador bloqueou a abertura do PDF. Permita pop-ups para este sistema e tente novamente.', 'assertive');
+      return null;
+    }
+
+    janela.opener = null;
+    janela.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head><title>Carregando PDF</title></head>
+        <body style="font-family: Arial, sans-serif; display: grid; min-height: 100vh; place-items: center; margin: 0;">
+          <p>Gerando PDF, aguarde...</p>
+        </body>
+      </html>
+    `);
+    janela.document.close();
+    return janela;
+  }
+
+  private enviarPdfParaJanela(url: string, janela: Window | null): void {
+    if (janela && !janela.closed) {
+      janela.location.href = url;
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.click();
   }
 }

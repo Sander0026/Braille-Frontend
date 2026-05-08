@@ -1,0 +1,56 @@
+<main class="page">
+  <header>
+    <h1>Relatorio de atendimento individual</h1>
+    <p>Filtre registros por periodo, status e tipo de atendimento.</p>
+  </header>
+
+  <section class="panel no-print">
+    <div class="filters">
+      <label><span>Data inicial</span><input type="date" [(ngModel)]="filtros.dataInicio" /></label>
+      <label><span>Data final</span><input type="date" [(ngModel)]="filtros.dataFim" /></label>
+      <label>
+        <span>Status</span>
+        <select [(ngModel)]="filtros.status">
+          <option value="">Todos</option>
+          <option value="EM_ANDAMENTO">Em andamento</option>
+          <option value="FINALIZADO">Finalizado</option>
+          <option value="ARQUIVADO">Arquivado</option>
+        </select>
+      </label>
+      <label>
+        <span>Tipo</span>
+        <select [(ngModel)]="filtros.tipoRegistro">
+          <option value="">Todos</option>
+          <option value="ATENDIMENTO_REALIZADO">Atendimento realizado</option>
+          <option value="FALTA_JUSTIFICADA">Falta justificada</option>
+          <option value="FALTA_NAO_JUSTIFICADA">Falta nao justificada</option>
+          <option value="CANCELADO">Cancelado</option>
+        </select>
+      </label>
+    </div>
+    <div class="actions">
+      <button type="button" class="primary" (click)="gerar()">{{ carregando ? 'Gerando...' : 'Gerar relatorio' }}</button>
+      <button type="button" class="secondary" (click)="imprimir()" [disabled]="!relatorio()">Imprimir</button>
+    </div>
+  </section>
+
+  @if (relatorio(); as r) {
+    <section class="panel">
+      <h2>Resumo quantitativo</h2>
+      <app-resumo-atendimentos [resumo]="r.totais" />
+      <p>Total de acompanhamentos: <strong>{{ r.totalAcompanhamentos }}</strong></p>
+      <p>Total de registros: <strong>{{ r.totalRegistros }}</strong></p>
+    </section>
+
+    <section class="panel">
+      <h2>Historico por acompanhamento</h2>
+      @for (acomp of r.acompanhamentos; track acomp.id) {
+        <article class="report-item">
+          <h3>{{ acomp.aluno?.nomeCompleto }} · {{ acomp.assuntoAtual }}</h3>
+          <p>Professor: {{ acomp.professor?.nome }} · Status: {{ acomp.status }}</p>
+          <p>Registros encontrados: {{ acomp.atendimentos?.length || 0 }}</p>
+        </article>
+      }
+    </section>
+  }
+</main>

@@ -1,0 +1,17 @@
+@if (acompanhamento(); as item) {
+<main class="page">
+  <header>
+    <a [routerLink]="['/admin/atendimentos-individuais', item.id]" class="back">Voltar ao historico</a>
+    <h1>Novo atendimento</h1>
+    <p>{{ item.aluno?.nomeCompleto }} · {{ item.professor?.nome }} · {{ item.assuntoAtual }}</p>
+  </header>
+
+  <section class="panel">
+    <app-atendimento-form
+      [saving]="salvando()"
+      submitLabel="Salvar atendimento"
+      (save)="salvar($event)"
+      (cancel)="cancelar()" />
+  </section>
+</main>
+}

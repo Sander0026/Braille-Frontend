@@ -46,6 +46,7 @@
 | 14 | [PWA e Deploy](./14-pwa-deploy.md) | Build, service worker, Vercel, análise linha a linha do CSP |
 | 15 | [Acessibilidade (WCAG)](./15-acessibilidade.md) | axe-core, LiveAnnouncer, WCAG 2.1 AA, VLibras, checklist |
 | 16 | [Decisões Técnicas (ADRs)](./16-decisoes-tecnicas.md) | 11 ADRs: Angular standalone, JWT, interceptors, Sentry, branches |
+| 17 | [Atendimentos Individuais](./17-atendimentos-individuais.md) | Acompanhamentos independentes de turmas, tela admin e perfil do aluno |
 
 ---
 

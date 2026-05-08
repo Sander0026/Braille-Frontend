@@ -23,6 +23,8 @@ import { AtestadosService, Atestado, PreviewAtestado } from '../../../core/servi
 import { LaudosService, LaudoMedico } from '../../../core/services/laudos.service';
 import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
 import { ComponenteComDescarte } from '../../../core/interfaces/componente-com-descarte.interface';
+import { AcompanhamentoIndividual } from '../../atendimentos-individuais/models/acompanhamento-individual.model';
+import { AtendimentosIndividuaisApiService } from '../../atendimentos-individuais/services/atendimentos-individuais-api.service';
 
 
 @Directive({
@@ -80,6 +82,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
 
   documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'; url: string } | null = null;
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
+  acompanhamentosIndividuaisAluno: AcompanhamentoIndividual[] = [];
+  carregandoAtendimentosIndividuais = false;
 
   // KeyManager
   @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
@@ -254,7 +258,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     private readonly atestadosService: AtestadosService,
     private readonly laudosService: LaudosService,
     private readonly http: HttpClient,
-    private readonly modelosCertificadosService: ModelosCertificadosService
+    private readonly modelosCertificadosService: ModelosCertificadosService,
+    private readonly atendimentosIndividuaisService: AtendimentosIndividuaisApiService
   ) {
 
     this.filterForm = this.fb.group({
@@ -868,10 +873,12 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.carregandoDetalhes = true;
     this.alunoSelecionado = null;
     this.frequenciasMap.clear();
+    this.acompanhamentosIndividuaisAluno = [];
 
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
+        this.carregarAcompanhamentosIndividuaisDoAluno(dadosCompletos.id);
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
@@ -907,6 +914,24 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         this.cdr.markForCheck();
       }
     });
+  }
+
+  private carregarAcompanhamentosIndividuaisDoAluno(alunoId: string): void {
+    this.carregandoAtendimentosIndividuais = true;
+    this.atendimentosIndividuaisService.listar({ alunoId, limit: 20 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.acompanhamentosIndividuaisAluno = res.data;
+          this.carregandoAtendimentosIndividuais = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.acompanhamentosIndividuaisAluno = [];
+          this.carregandoAtendimentosIndividuais = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   fecharModal(): void {
@@ -1102,7 +1127,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   visualizarCertificadoAcademico(turmaId: string): void {
     const certificado = this.certificadoAcademicoPorTurma(turmaId);
     if (certificado?.pdfUrl) {
-      this.abrirVisualizadorPdf(certificado.pdfUrl);
+      this.abrirPdfEmNovaAba(certificado.pdfUrl);
     }
   }
 
@@ -1111,16 +1136,17 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.emitindoCertificadoId = matricula.id;
     this.cdr.detectChanges();
 
+    const janelaPdf = this.abrirJanelaPdfPendente();
     const alunoId = this.alunoSelecionado!.id;
     this.modelosCertificadosService.emitirAcademico(matricula.turma.id, alunoId).subscribe({
       next: (res: { pdfUrl: string; codigoValidacao: string }) => {
         // Usa URL do Cloudinary diretamente — sem criar blob local, sem download duplo
-        this.urlPdfParaVisualizar = res.pdfUrl;
-        this.mostrarVisualizadorPdf = true;
+        this.enviarPdfParaJanela(res.pdfUrl, janelaPdf);
         this.emitindoCertificadoId = null;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
+        janelaPdf?.close();
         this.toast.erro(err?.error?.message ?? 'Erro ao emitir certificado acadêmico.');
         this.emitindoCertificadoId = null;
         this.cdr.detectChanges();
@@ -1129,6 +1155,45 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   }
 
   // ── Modal de Imagem (laudo fotográfico) ──────────────────────────────
+  private abrirPdfEmNovaAba(url: string): void {
+    const janelaPdf = this.abrirJanelaPdfPendente();
+    this.enviarPdfParaJanela(url, janelaPdf);
+  }
+
+  private abrirJanelaPdfPendente(): Window | null {
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      this.toast.aviso('O navegador bloqueou a abertura do PDF. Permita pop-ups para este sistema e tente novamente.');
+      return null;
+    }
+
+    janela.opener = null;
+    janela.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head><title>Carregando PDF</title></head>
+        <body style="font-family: Arial, sans-serif; display: grid; min-height: 100vh; place-items: center; margin: 0;">
+          <p>Gerando PDF, aguarde...</p>
+        </body>
+      </html>
+    `);
+    janela.document.close();
+    return janela;
+  }
+
+  private enviarPdfParaJanela(url: string, janela: Window | null): void {
+    if (janela && !janela.closed) {
+      janela.location.href = url;
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.click();
+  }
+
   abrirModalImagem(url: string): void {
     this.pushFocus();
     this.urlImagemParaVisualizar = url;
