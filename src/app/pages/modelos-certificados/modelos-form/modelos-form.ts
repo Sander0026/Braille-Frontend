@@ -10,8 +10,11 @@ import { ToastService } from '../../../core/services/toast.service';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 import { CertificadoPreviewComponent, DragEndEvent } from '../components/certificado-preview/certificado-preview.component';
 import {
+  CERTIFICADO_FONTES,
+  CertificadoLayoutElement,
   CertificadoLayoutConfig,
   CertificadoTextAlign,
+  normalizarCertificadoLayoutElement,
   normalizarCertificadoLayoutConfig
 } from '../../../core/interfaces/certificados.interface';
 
@@ -27,6 +30,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   modoEdicao = signal(false);
   modeloId = signal('');
   isSalvando = signal(false);
+  isGerandoPreviewPdf = signal(false);
   passoAtual = signal(1);
 
   arteBaseFile: File | null = null;
@@ -38,6 +42,26 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   assinatura2PreviewUrl = signal<string | ArrayBuffer | null>(null);
 
   layoutConfig: CertificadoLayoutConfig = normalizarCertificadoLayoutConfig();
+  selectedElementId = signal('texto-principal');
+  previewPdfForm = {
+    nomeAluno: 'Maria Aparecida dos Santos Oliveira Almeida',
+    nomeCurso: 'Curso Avançado de Braille e Tecnologias Assistivas',
+    cargaHoraria: '120 horas',
+    nomeApoiador: 'Empresa Solidária LTDA',
+    tituloAcao: 'Apoio contínuo à inclusão',
+  };
+  readonly certificadoFontes = CERTIFICADO_FONTES;
+
+  readonly elementTypeLabels: Record<string, string> = {
+    TEXT: 'Texto',
+    DYNAMIC_TEXT: 'Texto dinâmico',
+    SIGNATURE_IMAGE: 'Imagem de assinatura',
+    SIGNATURE_BLOCK: 'Bloco de assinatura',
+    QR_CODE: 'QR Code',
+    VALIDATION_CODE: 'Código de validação',
+    LINE: 'Linha',
+    RECTANGLE: 'Retângulo',
+  };
 
   @ViewChild('textoTemplateInput') textoTemplateInput!: ElementRef<HTMLTextAreaElement>;
 
@@ -163,7 +187,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     return !!(control && control.invalid && (control.dirty || control.touched));
   }
 
-  salvar(): void {
+  salvar(visualizarPdfReal = false): void {
     if (this.formModelo.invalid || this.isSalvando()) {
       this.formModelo.markAllAsTouched();
       return;
@@ -194,17 +218,32 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
 
     formData.append('layoutConfig', JSON.stringify(this.layoutConfig));
 
-    const requisicao$ = this.modoEdicao() 
+    const requisicao$ = this.modoEdicao()
       ? this.modelosService.atualizar(this.modeloId(), formData)
       : this.modelosService.criar(formData);
 
     requisicao$
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (modelo) => {
           this.isSalvando.set(false);
+          this.arteBaseFile = null;
+          this.assinaturaFile = null;
+          this.assinatura2File = null;
+          this.previewBaseUrl.set(modelo.arteBaseUrl);
+          this.assinaturaPreviewUrl.set(modelo.assinaturaUrl);
+          this.assinatura2PreviewUrl.set(modelo.assinaturaUrl2 || null);
           this.formModelo.markAsPristine();
           this.toast.sucesso(`Modelo de certificado ${this.modoEdicao() ? 'atualizado' : 'criado'} com sucesso!`);
+          if (visualizarPdfReal) {
+            this.modoEdicao.set(true);
+            this.modeloId.set(modelo.id);
+            this.abrirPreviewPdfReal(modelo.id);
+            if (!this.route.snapshot.paramMap.get('id')) {
+              window.history.replaceState(null, '', `/admin/modelos-certificados/editar/${modelo.id}`);
+            }
+            return;
+          }
           this.router.navigate(['/admin/modelos-certificados']);
         },
         error: (err: { error?: { message?: string | string[] } }) => {
@@ -215,53 +254,226 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
       });
   }
 
+  salvarEVisualizarPdfReal(): void {
+    this.salvar(true);
+  }
+
+  private abrirPreviewPdfReal(modeloId: string): void {
+    if (this.isGerandoPreviewPdf()) return;
+
+    const isHonraria = this.formModelo.get('tipo')?.value === 'HONRARIA';
+    const payload = isHonraria
+      ? {
+          nomeApoiador: this.previewPdfForm.nomeApoiador,
+          tituloAcao: this.previewPdfForm.tituloAcao,
+          motivo: this.previewPdfForm.tituloAcao,
+        }
+      : {
+          nomeAluno: this.previewPdfForm.nomeAluno,
+          nomeCurso: this.previewPdfForm.nomeCurso,
+          cargaHoraria: this.previewPdfForm.cargaHoraria,
+        };
+
+    this.isGerandoPreviewPdf.set(true);
+    this.modelosService.previewPdfReal(modeloId, payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.isGerandoPreviewPdf.set(false);
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener');
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: (err: { error?: { message?: string | string[] } }) => {
+          this.isGerandoPreviewPdf.set(false);
+          const msg = err.error?.message || 'Não foi possível gerar a prévia PDF real.';
+          this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
+        },
+      });
+  }
+
   onDragEndedOutput(event: DragEndEvent): void {
-    this.atualizarCampoLayout(event.field, { x: event.x, y: event.y });
+    this.atualizarElementoLayout(event.elementId, { x: event.x, y: event.y });
+    this.selectedElementId.set(event.elementId);
   }
 
-  setTextAlign(align: CertificadoTextAlign) {
-    this.atualizarCampoLayout('textoPronto', { textAlign: align });
+  get layoutElements(): CertificadoLayoutElement[] {
+    return this.layoutConfig.elements || [];
   }
 
-  setFontSize(event: Event) {
-    const val = Number((event.target as HTMLInputElement).value);
-    if (val >= 8 && val <= 120) {
-      this.atualizarCampoLayout('textoPronto', { fontSize: val });
+  get selectedElement(): CertificadoLayoutElement | null {
+    return this.layoutElements.find(element => element.id === this.selectedElementId()) || this.layoutElements[0] || null;
+  }
+
+  selectElement(elementId: string): void {
+    this.selectedElementId.set(elementId);
+  }
+
+  addTextElement(): void {
+    this.addElement({
+      type: 'TEXT',
+      label: 'Texto livre',
+      content: 'Novo texto',
+      x: 35,
+      y: 30,
+      width: 30,
+      height: 6,
+      fontSize: 18,
+      textAlign: 'center',
+      zIndex: this.proximoZIndex(),
+    });
+  }
+
+  addDynamicTextElement(): void {
+    this.addElement({
+      type: 'DYNAMIC_TEXT',
+      label: 'Texto com variável',
+      content: '{{NOME_CURSO}}',
+      x: 25,
+      y: 40,
+      width: 50,
+      height: 8,
+      fontSize: 18,
+      textAlign: 'center',
+      zIndex: this.proximoZIndex(),
+    });
+  }
+
+  addValidationCodeElement(): void {
+    this.addElement({
+      type: 'VALIDATION_CODE',
+      label: 'Código de validação',
+      content: '{{CODIGO_CERTIFICADO}}',
+      x: 70,
+      y: 92,
+      width: 25,
+      height: 4,
+      fontSize: 10,
+      textAlign: 'center',
+      zIndex: this.proximoZIndex(),
+    });
+  }
+
+  addQrElement(): void {
+    this.addElement({
+      type: 'QR_CODE',
+      label: 'QR Code',
+      x: 84,
+      y: 80,
+      width: 9,
+      height: 9,
+      zIndex: this.proximoZIndex(),
+    });
+  }
+
+  addSignatureBlockElement(): void {
+    const totalAssinaturas = this.layoutElements.filter(element => element.type === 'SIGNATURE_BLOCK').length;
+    if (totalAssinaturas >= 2) {
+      this.toast.erro('O modelo permite ate duas assinaturas.');
+      return;
     }
-  }
-  
-  setNomeAlunoFontSize(event: Event) {
-    const val = Number((event.target as HTMLInputElement).value);
-    if (val >= 8 && val <= 200) {
-      this.atualizarCampoLayout('nomeAluno', { fontSize: val });
-    }
+
+    const numero = totalAssinaturas + 1;
+    const isSegundaAssinatura = numero === 2;
+
+    this.addElement({
+      type: 'SIGNATURE_BLOCK',
+      label: `Assinatura ${numero}`,
+      signatureSlot: numero as 1 | 2,
+      content: isSegundaAssinatura
+        ? '{{NOME_RESPONSAVEL_2}}\n{{CARGO_RESPONSAVEL_2}}'
+        : '{{NOME_RESPONSAVEL}}\n{{CARGO_RESPONSAVEL}}',
+      x: isSegundaAssinatura ? 60 : 35,
+      y: 74,
+      width: 30,
+      height: 10,
+      zIndex: this.proximoZIndex(),
+    });
   }
 
-  setNomeAlunoColor(event: Event) {
-    this.atualizarCampoLayout('nomeAluno', { color: (event.target as HTMLInputElement).value });
+  addLineElement(): void {
+    this.addElement({
+      type: 'LINE',
+      label: 'Linha decorativa',
+      x: 35,
+      y: 70,
+      width: 30,
+      height: 1,
+      color: '#1a1a00',
+      zIndex: this.proximoZIndex(),
+    });
   }
 
-  setTextoColor(event: Event) {
-    this.atualizarCampoLayout('textoPronto', { color: (event.target as HTMLInputElement).value });
+  addRectangleElement(): void {
+    this.addElement({
+      type: 'RECTANGLE',
+      label: 'Retângulo',
+      x: 35,
+      y: 62,
+      width: 30,
+      height: 10,
+      color: '#1a1a00',
+      zIndex: this.proximoZIndex(),
+    });
   }
 
-  setCampoLayout(campo: keyof CertificadoLayoutConfig, prop: string, valor: string | number): void {
-    this.atualizarCampoLayout(campo, { [prop]: valor });
-  }
-
-  private atualizarCampoLayout(
-    campo: keyof CertificadoLayoutConfig,
-    patch: Partial<CertificadoLayoutConfig[keyof CertificadoLayoutConfig]>
-  ): void {
+  removeSelectedElement(): void {
+    const selected = this.selectedElement;
+    if (!selected) return;
     this.layoutConfig = {
       ...this.layoutConfig,
-      [campo]: {
-        ...this.layoutConfig[campo],
-        ...patch,
-      },
+      elements: this.layoutElements.filter(element => element.id !== selected.id),
     };
+    this.selectedElementId.set(this.layoutElements[0]?.id || '');
     this.formModelo.markAsDirty();
     this.cdr.markForCheck();
+  }
+
+  updateSelectedElement(patch: Partial<CertificadoLayoutElement>): void {
+    const selected = this.selectedElement;
+    if (!selected) return;
+    this.atualizarElementoLayout(selected.id, patch);
+  }
+
+  setSelectedTextAlign(align: CertificadoTextAlign): void {
+    this.updateSelectedElement({ textAlign: align });
+  }
+
+  private addElement(element: Partial<CertificadoLayoutElement>): void {
+    const novo = normalizarCertificadoLayoutElement({
+      ...element,
+      id: this.gerarElementId(element.type || 'TEXT'),
+      visible: true,
+    }, this.layoutElements.length);
+
+    this.layoutConfig = {
+      ...this.layoutConfig,
+      elements: [...this.layoutElements, novo],
+    };
+    this.selectedElementId.set(novo.id);
+    this.formModelo.markAsDirty();
+    this.cdr.markForCheck();
+  }
+
+  private atualizarElementoLayout(elementId: string, patch: Partial<CertificadoLayoutElement>): void {
+    this.layoutConfig = {
+      ...this.layoutConfig,
+      elements: this.layoutElements.map(element => {
+        if (element.id !== elementId) return element;
+        return { ...element, ...patch };
+      }),
+    };
+
+    this.formModelo.markAsDirty();
+    this.cdr.markForCheck();
+  }
+
+  private proximoZIndex(): number {
+    return Math.max(0, ...this.layoutElements.map(element => element.zIndex || 0)) + 1;
+  }
+
+  private gerarElementId(type: string): string {
+    return `${type.toLowerCase()}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
   }
 
   proximoPasso() {
