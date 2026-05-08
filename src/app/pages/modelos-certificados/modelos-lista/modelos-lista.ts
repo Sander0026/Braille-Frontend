@@ -114,6 +114,7 @@ export class ModelosLista implements OnInit {
   abrirPreviewPdfReal(modelo: ModeloCertificado): void {
     if (this.isGerandoPreviewPdf()) return;
 
+    const janelaPdf = this.abrirJanelaPdfPendente();
     this.isGerandoPreviewPdf.set(modelo.id);
     this.modelosService.previewPdfReal(modelo.id)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -121,11 +122,12 @@ export class ModelosLista implements OnInit {
         next: (blob) => {
           this.isGerandoPreviewPdf.set('');
           const url = URL.createObjectURL(blob);
-          window.open(url, '_blank', 'noopener');
+          this.enviarPdfParaJanela(url, janelaPdf);
           setTimeout(() => URL.revokeObjectURL(url), 60_000);
         },
         error: (err: { error?: { message?: string | string[] } }) => {
           this.isGerandoPreviewPdf.set('');
+          janelaPdf?.close();
           const msg = err.error?.message || 'Não foi possível gerar a prévia PDF real.';
           this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
         },
@@ -295,7 +297,7 @@ export class ModelosLista implements OnInit {
           this.isEmitindoManual.set(false);
           this.fecharEmissaoManual();
           this.toast.sucesso('Certificado manual gerado com sucesso.');
-          if (res.pdfUrl) window.open(res.pdfUrl, '_blank', 'noopener');
+          if (res.pdfUrl) this.abrirPdfEmNovaAba(res.pdfUrl);
         },
         error: (err: { error?: { message?: string | string[] } }) => {
           this.isEmitindoManual.set(false);
@@ -312,6 +314,7 @@ export class ModelosLista implements OnInit {
       return;
     }
 
+    const janelaPdf = this.abrirJanelaPdfPendente();
     this.modelosService.emitirHonrariaManual({
       modeloId: modelo.id,
       apoiadorId: this.manualForm.apoiadorId,
@@ -323,14 +326,60 @@ export class ModelosLista implements OnInit {
         this.isEmitindoManual.set(false);
         this.fecharEmissaoManual();
         const blob = res.body;
-        if (blob) window.open(URL.createObjectURL(blob), '_blank', 'noopener');
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          this.enviarPdfParaJanela(url, janelaPdf);
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        } else {
+          janelaPdf?.close();
+        }
         this.toast.sucesso('Certificado de honraria gerado com sucesso.');
       },
       error: () => {
         this.isEmitindoManual.set(false);
+        janelaPdf?.close();
         this.toast.erro('Erro ao gerar certificado de honraria.');
       },
     });
+  }
+
+  private abrirPdfEmNovaAba(url: string): void {
+    const janelaPdf = this.abrirJanelaPdfPendente();
+    this.enviarPdfParaJanela(url, janelaPdf);
+  }
+
+  private abrirJanelaPdfPendente(): Window | null {
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      this.toast.aviso('O navegador bloqueou a abertura do PDF. Permita pop-ups para este sistema e tente novamente.');
+      return null;
+    }
+
+    janela.opener = null;
+    janela.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head><title>Carregando PDF</title></head>
+        <body style="font-family: Arial, sans-serif; display: grid; min-height: 100vh; place-items: center; margin: 0;">
+          <p>Gerando PDF, aguarde...</p>
+        </body>
+      </html>
+    `);
+    janela.document.close();
+    return janela;
+  }
+
+  private enviarPdfParaJanela(url: string, janela: Window | null): void {
+    if (janela && !janela.closed) {
+      janela.location.href = url;
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.click();
   }
 
   onDialogClosed(): void {

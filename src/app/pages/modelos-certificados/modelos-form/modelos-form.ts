@@ -198,6 +198,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
       return;
     }
 
+    const janelaPdf = visualizarPdfReal ? this.abrirJanelaPdfPendente() : null;
     this.isSalvando.set(true);
     const formData = new FormData();
     const v = this.formModelo.value;
@@ -238,7 +239,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
           if (visualizarPdfReal) {
             this.modoEdicao.set(true);
             this.modeloId.set(modelo.id);
-            this.abrirPreviewPdfReal(modelo.id);
+            this.abrirPreviewPdfReal(modelo.id, janelaPdf);
             if (!this.route.snapshot.paramMap.get('id')) {
               window.history.replaceState(null, '', `/admin/modelos-certificados/editar/${modelo.id}`);
             }
@@ -248,6 +249,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
         },
         error: (err: { error?: { message?: string | string[] } }) => {
           this.isSalvando.set(false);
+          janelaPdf?.close();
           const msg = err.error?.message || 'Erro ao comunicar com o servidor.';
           this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
         }
@@ -258,7 +260,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     this.salvar(true);
   }
 
-  private abrirPreviewPdfReal(modeloId: string): void {
+  private abrirPreviewPdfReal(modeloId: string, janelaPdf: Window | null = null): void {
     if (this.isGerandoPreviewPdf()) return;
 
     const isHonraria = this.formModelo.get('tipo')?.value === 'HONRARIA';
@@ -281,15 +283,50 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
         next: (blob) => {
           this.isGerandoPreviewPdf.set(false);
           const url = URL.createObjectURL(blob);
-          window.open(url, '_blank', 'noopener');
+          this.enviarPdfParaJanela(url, janelaPdf);
           setTimeout(() => URL.revokeObjectURL(url), 60_000);
         },
         error: (err: { error?: { message?: string | string[] } }) => {
           this.isGerandoPreviewPdf.set(false);
+          janelaPdf?.close();
           const msg = err.error?.message || 'Não foi possível gerar a prévia PDF real.';
           this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
         },
       });
+  }
+
+  private abrirJanelaPdfPendente(): Window | null {
+    const janela = window.open('', '_blank');
+    if (!janela) {
+      this.toast.aviso('O navegador bloqueou a abertura do PDF. Permita pop-ups para este sistema e tente novamente.');
+      return null;
+    }
+
+    janela.opener = null;
+    janela.document.write(`
+      <!doctype html>
+      <html lang="pt-BR">
+        <head><title>Carregando PDF</title></head>
+        <body style="font-family: Arial, sans-serif; display: grid; min-height: 100vh; place-items: center; margin: 0;">
+          <p>Gerando PDF, aguarde...</p>
+        </body>
+      </html>
+    `);
+    janela.document.close();
+    return janela;
+  }
+
+  private enviarPdfParaJanela(url: string, janela: Window | null): void {
+    if (janela && !janela.closed) {
+      janela.location.href = url;
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.click();
   }
 
   onDragEndedOutput(event: DragEndEvent): void {
