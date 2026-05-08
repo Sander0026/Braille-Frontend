@@ -322,7 +322,7 @@ export class ModelosLista implements OnInit {
   async excluirModelo(modelo: ModeloCertificado): Promise<void> {
     const ok = await this.confirmDialog.confirmar({
       titulo: 'Excluir Modelo',
-      mensagem: `Tem certeza que deseja excluir o modelo "${modelo.nome}"? Esta ação não pode ser desfeita.`,
+      mensagem: `Tem certeza que deseja excluir o modelo "${modelo.nome}" Esta ação não pode ser desfeita.`,
       textoBotaoConfirmar: 'Sim, excluir',
       tipo: 'warning',
     });

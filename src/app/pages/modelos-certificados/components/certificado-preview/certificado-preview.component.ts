@@ -66,8 +66,9 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
   readonly CANVAS_H = CERT_CANVAS_H;
 
   // Estado via Signals
+  canvasHeight = signal<number>(CERT_CANVAS_H);
   scaleFactor = signal<number>(1);
-  wrapperHeightPx = computed(() => `${Math.round(this.CANVAS_H * this.scaleFactor())}px`);
+  wrapperHeightPx = computed(() => `${Math.round(this.canvasHeight() * this.scaleFactor())}px`);
 
   private _resizeObserver?: ResizeObserver;
 
@@ -124,6 +125,8 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
            .replace(/\{\{NOME_INSTITUICAO\}\}/gi, 'Instituto Luiz Braille')
            .replace(/\{\{NOME_RESPONSAVEL\}\}/gi, this.nomeAssinante || 'Signatario 1')
            .replace(/\{\{CARGO_RESPONSAVEL\}\}/gi, this.cargoAssinante || 'Cargo')
+           .replace(/\{\{NOME_RESPONSAVEL_2\}\}/gi, this.nomeAssinante2 || 'Signatario 2')
+           .replace(/\{\{CARGO_RESPONSAVEL_2\}\}/gi, this.cargoAssinante2 || 'Cargo')
            .replace(/\{\{TEXTO_CERTIFICADO\}\}/gi, this.textoTemplate || '')
            .replace(/\{\{[^}]+\}\}/g, '[...]');
     }
@@ -150,8 +153,19 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private isSecondSignatureElement(element: CertificadoLayoutElement): boolean {
-    const marker = `${element.id} ${element.label}`.toLowerCase();
+    const marker = `${element.id} ${element.label} ${element.content || ''}`.toLowerCase();
     return marker.includes('assinatura-2') || marker.includes('assinatura 2') || marker.includes('segunda');
+  }
+
+  onArteBaseLoad(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    if (!image?.naturalWidth || !image?.naturalHeight) return;
+
+    const aspectHeight = Math.round((this.CANVAS_W * image.naturalHeight) / image.naturalWidth);
+    if (aspectHeight > 0 && Number.isFinite(aspectHeight)) {
+      this.canvasHeight.set(aspectHeight);
+      this._recalcularScale();
+    }
   }
 
   onDynamicDragEnded(event: CdkDragEnd, element: CertificadoLayoutElement) {
@@ -173,7 +187,7 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
     const rawYPx = (elRect.top  - contRect.top)  / scale;
 
     const xPct = Math.max(0, Math.min((rawXPx / this.CANVAS_W) * 100, 90));
-    const yPct = Math.max(0, Math.min((rawYPx / this.CANVAS_H) * 100, 90));
+    const yPct = Math.max(0, Math.min((rawYPx / this.canvasHeight()) * 100, 90));
 
     this.dragEnded.emit({
       ...target,

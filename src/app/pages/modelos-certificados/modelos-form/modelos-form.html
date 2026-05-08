@@ -1,14 +1,14 @@
 ﻿<div class="wizard-container">
   
-  <!-- CabeÃ§alho DinÃ¢mico -->
+  <!-- Cabeçalho Dinâmico -->
   <div class="wizard-header" style="text-align: center; margin-bottom: 2rem;">
     <h1 style="font-size: 1.75rem; color: #1e293b; margin-bottom: 0.5rem;" id="wizard-title">
       {{ modoEdicao() ? 'Editar Modelo' : 'Novo Modelo de Certificado' }}
     </h1>
     <p style="color: #64748b;" aria-live="polite">Passo {{ passoAtual() }} de 4: 
-      <span *ngIf="passoAtual() === 1"><strong>IdentificaÃ§Ã£o BÃ¡sica</strong></span>
+      <span *ngIf="passoAtual() === 1"><strong>Identificação Básica</strong></span>
       <span *ngIf="passoAtual() === 2"><strong>Artes e Assinaturas</strong></span>
-      <span *ngIf="passoAtual() === 3"><strong>ConteÃºdo e VariÃ¡veis</strong></span>
+      <span *ngIf="passoAtual() === 3"><strong>Conteúdo e Variáveis</strong></span>
       <span *ngIf="passoAtual() === 4"><strong>Ajuste Visual Final</strong></span>
     </p>
   </div>
@@ -27,34 +27,34 @@
 
   <form [formGroup]="formModelo" (ngSubmit)="salvar()" novalidate aria-labelledby="wizard-title">
     
-    <!-- PASSO 1: IDENTIFICAÃ‡ÃƒO -->
+    <!-- PASSO 1: IDENTIFICAÇÃO -->
     <div *ngIf="passoAtual() === 1" class="wizard-step-content animate-fade-in">
       <fieldset style="border: none; padding: 0;">
-        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;">InformaÃ§Ãµes Iniciais</legend>
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 1.5rem;">Informações Iniciais</legend>
         <div class="row">
           <div class="col-lg-8">
             <div class="form-group">
               <label for="input-nome">Nome do Template <span aria-hidden="true" style="color: #ef4444;">*</span></label>
               <input type="text" id="input-nome" formControlName="nome" class="form-input"
-                placeholder="Ex: Certificado Braille PadrÃ£o 2024"
+                placeholder="Ex: Certificado Braille Padrão 2024"
                 [class.is-invalid]="isFieldInvalid('nome')"
                 [attr.aria-invalid]="isFieldInvalid('nome') ? 'true' : null"
                 [attr.aria-describedby]="isFieldInvalid('nome') ? 'err-nome' : null">
-              @if (isFieldInvalid('nome')) { <span id="err-nome" class="error-text" role="alert">ObrigatÃ³rio. MÃ­nimo 3 caracteres.</span> }
+              @if (isFieldInvalid('nome')) { <span id="err-nome" class="error-text" role="alert">Obrigatório. Mínimo 3 caracteres.</span> }
             </div>
           </div>
           <div class="col-lg-4">
             <div class="form-group">
               <label for="input-tipo">Categoria <span aria-hidden="true" style="color: #ef4444;">*</span></label>
               <select id="input-tipo" formControlName="tipo" class="form-input" [class.is-invalid]="isFieldInvalid('tipo')" aria-required="true">
-                <option value="ACADEMICO">Oficinas / AcadÃªmico</option>
+                <option value="ACADEMICO">Oficinas / Acadêmico</option>
                 <option value="HONRARIA">Amigos do Braille (Honrarias Gerais)</option>
               </select>
             </div>
           </div>
         </div>
         <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0 8px 8px 0; margin-top: 1.5rem;" role="note">
-          <p style="font-size: 0.9rem; color: #1e40af; margin: 0;"><strong>Dica:</strong> Modelos acadÃªmicos permitem injetar carga horÃ¡ria e datas da turma. Modelos de honraria sÃ£o focados em agradecimentos a parceiros.</p>
+          <p style="font-size: 0.9rem; color: #1e40af; margin: 0;"><strong>Dica:</strong> Modelos acadêmicos permitem injetar carga horária e datas da turma. Modelos de honraria são focados em agradecimentos a parceiros.</p>
         </div>
       </fieldset>
     </div>
@@ -93,8 +93,8 @@
           </div>
           <div class="col-lg-4">
             <div class="form-group">
-              <label for="input-nome-assinante">Nome do SignatÃ¡rio 1</label>
-              <input type="text" id="input-nome-assinante" formControlName="nomeAssinante" class="form-input" placeholder="Ex: Dr. JoÃ£o Silva">
+              <label for="input-nome-assinante">Nome do Signatário 1</label>
+              <input type="text" id="input-nome-assinante" formControlName="nomeAssinante" class="form-input" placeholder="Ex: Dr. João Silva">
             </div>
           </div>
           <div class="col-lg-4">
@@ -120,7 +120,7 @@
           </div>
           <div class="col-lg-4">
             <div class="form-group">
-              <label for="input-nome-assinante2">Nome do SignatÃ¡rio 2</label>
+              <label for="input-nome-assinante2">Nome do Signatário 2</label>
               <input type="text" id="input-nome-assinante2" formControlName="nomeAssinante2" class="form-input" placeholder="Ex: Dra. Maria Santos">
             </div>
           </div>
@@ -136,44 +136,44 @@
     </div>
 
 
-    <!-- PASSO 3: CONTEÃšDO (apenas texto e tags) -->
+    <!-- PASSO 3: CONTEÚDO (apenas texto e tags) -->
     <div *ngIf="passoAtual() === 3" class="wizard-step-content animate-fade-in">
       <fieldset style="border: none; padding: 0;">
-        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">CriaÃ§Ã£o do Texto</legend>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">Escreva o texto do certificado. Use as tags abaixo para inserir dados automÃ¡ticos na hora da emissÃ£o.</p>
+        <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.5rem;">Criação do Texto</legend>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1.5rem;">Escreva o texto do certificado. Use as tags abaixo para inserir dados automáticos na hora da emissão.</p>
 
         <div style="background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
           @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Aluno no cursor" (click)="injetarTag('{{ALUNO}}')">+ Aluno</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Turma" (click)="injetarTag('{{TURMA}}')">+ Oficina</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome do curso" (click)="injetarTag('{{NOME_CURSO}}')">+ Curso</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga HorÃ¡ria" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar InÃ­cio" (click)="injetarTag('{{DATA_INICIO}}')">+ InÃ­cio</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga Horária" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Início" (click)="injetarTag('{{DATA_INICIO}}')">+ Início</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Fim" (click)="injetarTag('{{DATA_FIM}}')">+ Fim</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar data de emissao" (click)="injetarTag('{{DATA_EMISSAO}}')">+ Emissao</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar codigo do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Codigo</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituicao" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituicao</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar responsavel" (click)="injetarTag('{{NOME_RESPONSAVEL}}')">+ Responsavel</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar data de emissão" (click)="injetarTag('{{DATA_EMISSAO}}')">+ Emissão</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar código do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Código</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituição" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituição</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar responsável" (click)="injetarTag('{{NOME_RESPONSAVEL}}')">+ Responsável</button>
           } @else {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Parceiro" (click)="injetarTag('{{PARCEIRO}}')">+ Nome do Amigo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Motivo" (click)="injetarTag('{{MOTIVO}}')">+ Motivo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Data Corrente" (click)="injetarTag('{{DATA}}')">+ Data Atual</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar codigo do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Codigo</button>
-            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituicao" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituicao</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar código do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Código</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituição" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituição</button>
           }
         </div>
 
         <div class="form-group">
           <textarea #textoTemplateInput id="textoTemplate" formControlName="textoTemplate" class="form-textarea fixed-font" rows="12"
                   style="font-size: 1.05rem; line-height: 1.8; border-radius: 8px; width: 100%;"
-                  [placeholder]="'Ex:\nO Instituto Luiz Braille certifica que ' + '{' + '{ALUNO}' + '}' + ' concluiu com Ãªxito...'"
+                  [placeholder]="'Ex:\nO Instituto Luiz Braille certifica que ' + '{' + '{ALUNO}' + '}' + ' concluiu com êxito...'"
                   [class.is-invalid]="isFieldInvalid('textoTemplate')"
                   [attr.aria-invalid]="isFieldInvalid('textoTemplate') ? 'true' : null"
                   [attr.aria-describedby]="isFieldInvalid('textoTemplate') ? 'err-texto' : null"></textarea>
           @if (isFieldInvalid('textoTemplate')) { <span id="err-texto" class="error-text" role="alert">O texto deve ter pelo menos 20 caracteres.</span> }
         </div>
         <p style="font-size:0.8rem; color:#64748b; margin-top: 0.5rem;" aria-live="polite">
-          Dica: No prÃ³ximo passo vocÃª irÃ¡ definir fonte, cor, tamanho e posiÃ§Ã£o deste texto sobre a arte do certificado.
+          Dica: No próximo passo você irá definir fonte, cor, tamanho e posição deste texto sobre a arte do certificado.
         </p>
       </fieldset>
     </div>
@@ -182,7 +182,7 @@
     <div *ngIf="passoAtual() === 4" class="wizard-step-content animate-fade-in">
       <fieldset style="border: none; padding: 0;">
         <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Ajuste Visual Final</legend>
-        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicionÃ¡-los. Use os painÃ©is abaixo para ajustar estilos.</p>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicioná-los. Use os painéis abaixo para ajustar estilos.</p>
 
         <div *ngIf="previewBaseUrl()">
 
@@ -210,11 +210,12 @@
               </div>
               <div class="element-actions">
                 <button type="button" class="btn-element" (click)="addTextElement()">+ Texto</button>
-                <button type="button" class="btn-element" (click)="addDynamicTextElement()">+ Variavel</button>
+                <button type="button" class="btn-element" (click)="addDynamicTextElement()">+ Variável</button>
                 <button type="button" class="btn-element" (click)="addSignatureBlockElement()">+ Assinatura</button>
                 <button type="button" class="btn-element" (click)="addQrElement()">+ QR</button>
-                <button type="button" class="btn-element" (click)="addValidationCodeElement()">+ Codigo</button>
+                <button type="button" class="btn-element" (click)="addValidationCodeElement()">+ Código</button>
                 <button type="button" class="btn-element" (click)="addLineElement()">+ Linha</button>
+                <button type="button" class="btn-element" (click)="addRectangleElement()">+ Retângulo</button>
               </div>
 
               <div class="element-list" role="listbox" aria-label="Elementos posicionados">
@@ -320,6 +321,16 @@
                       </div>
                     </div>
                   }
+
+                  @if (element.type === 'LINE' || element.type === 'RECTANGLE') {
+                    <label>
+                      Cor
+                      <input type="color"
+                             [ngModel]="element.color"
+                             [ngModelOptions]="{standalone: true}"
+                             (ngModelChange)="updateSelectedElement({ color: $event })">
+                    </label>
+                  }
                 </div>
               </section>
             }
@@ -328,12 +339,12 @@
         </div><!-- /if previewBaseUrl -->
 
         <div *ngIf="!previewBaseUrl()" style="padding: 3rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b;" role="alert">
-          AtenÃ§Ã£o: Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
+          Atenção: Volte ao Passo 2 e envie a imagem de fundo para editar visualmente o certificado.
         </div>
       </fieldset>
     </div>
 
-    <!-- Barra de NavegaÃ§Ã£o Inferior -->
+    <!-- Barra de Navegação Inferior -->
     <div class="wizard-footer">
       <button type="button" (click)="passoAnterior()" *ngIf="passoAtual() > 1"
               class="btn btn-secondary btn-voltar">
@@ -342,11 +353,11 @@
       <div *ngIf="passoAtual() === 1" class="spacer"></div>
 
       <div class="wizard-footer-actions">
-        <a routerLink="/admin/modelos-certificados" class="btn-cancelar">Cancelar EdiÃ§Ã£o</a>
+        <a routerLink="/admin/modelos-certificados" class="btn-cancelar">Cancelar Edição</a>
 
         <button type="button" (click)="proximoPasso()" *ngIf="passoAtual() < 4"
                 class="btn btn-primary btn-avancar">
-          AvanÃ§ar â†’
+          Avançar â†’
         </button>
 
         <button type="submit" *ngIf="passoAtual() === 4"

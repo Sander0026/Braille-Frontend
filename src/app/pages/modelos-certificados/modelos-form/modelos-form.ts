@@ -52,6 +52,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     QR_CODE: 'QR Code',
     VALIDATION_CODE: 'Código de validação',
     LINE: 'Linha',
+    RECTANGLE: 'Retângulo',
   };
 
   @ViewChild('textoTemplateInput') textoTemplateInput!: ElementRef<HTMLTextAreaElement>;
@@ -209,7 +210,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
 
     formData.append('layoutConfig', JSON.stringify(this.layoutConfig));
 
-    const requisicao$ = this.modoEdicao() 
+    const requisicao$ = this.modoEdicao()
       ? this.modelosService.atualizar(this.modeloId(), formData)
       : this.modelosService.criar(formData);
 
@@ -305,11 +306,22 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   }
 
   addSignatureBlockElement(): void {
+    const totalAssinaturas = this.layoutElements.filter(element => element.type === 'SIGNATURE_BLOCK').length;
+    if (totalAssinaturas >= 2) {
+      this.toast.erro('O modelo permite ate duas assinaturas.');
+      return;
+    }
+
+    const numero = totalAssinaturas + 1;
+    const isSegundaAssinatura = numero === 2;
+
     this.addElement({
       type: 'SIGNATURE_BLOCK',
-      label: 'Bloco de assinatura',
-      content: '{{NOME_RESPONSAVEL}}\n{{CARGO_RESPONSAVEL}}',
-      x: 35,
+      label: `Assinatura ${numero}`,
+      content: isSegundaAssinatura
+        ? '{{NOME_RESPONSAVEL_2}}\n{{CARGO_RESPONSAVEL_2}}'
+        : '{{NOME_RESPONSAVEL}}\n{{CARGO_RESPONSAVEL}}',
+      x: isSegundaAssinatura ? 60 : 35,
       y: 74,
       width: 30,
       height: 10,
@@ -325,6 +337,19 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
       y: 70,
       width: 30,
       height: 1,
+      color: '#1a1a00',
+      zIndex: this.proximoZIndex(),
+    });
+  }
+
+  addRectangleElement(): void {
+    this.addElement({
+      type: 'RECTANGLE',
+      label: 'Retângulo',
+      x: 35,
+      y: 62,
+      width: 30,
+      height: 10,
       color: '#1a1a00',
       zIndex: this.proximoZIndex(),
     });

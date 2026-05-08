@@ -5,12 +5,12 @@
 
   <div #previewContainer
        [style.width.px]="CANVAS_W"
-       [style.height.px]="CANVAS_H"
+       [style.height.px]="canvasHeight()"
        [style.transform]="'scale(' + scaleFactor() + ')'"
        class="preview-container preview-drag-container">
 
     @if (arteBaseUrl) {
-      <img [src]="arteBaseUrl" alt="Arte base do certificado" class="arte-base">
+      <img [src]="arteBaseUrl" alt="Arte base do certificado" class="arte-base" (load)="onArteBaseLoad($event)">
     }
 
     @for (element of layoutElements; track element.id) {
@@ -18,7 +18,7 @@
              'left': element.x + '%',
              'top': element.y + '%',
              'width': element.width + '%',
-             'min-height': (element.height || 4) + '%',
+             'height': (element.height || 4) + '%',
              'z-index': element.zIndex || 1
            }"
            class="cert-element dynamic-cert-element"
@@ -27,6 +27,7 @@
            [class.dynamic-signature-outline]="isDraggable && (element.type === 'SIGNATURE_BLOCK' || element.type === 'SIGNATURE_IMAGE')"
            [class.qr-outline]="isDraggable && element.type === 'QR_CODE'"
            [class.validation-code-outline]="isDraggable && element.type === 'VALIDATION_CODE'"
+           [class.dynamic-shape-outline]="isDraggable && (element.type === 'LINE' || element.type === 'RECTANGLE')"
            [cdkDragDisabled]="!isDraggable"
            [attr.tabindex]="isDraggable ? 0 : null"
            role="button"
@@ -87,6 +88,10 @@
 
         @if (element.type === 'LINE') {
           <div class="dynamic-line" [style.border-color]="element.color || '#1a1a00'"></div>
+        }
+
+        @if (element.type === 'RECTANGLE') {
+          <div class="dynamic-rectangle" [style.border-color]="element.color || '#1a1a00'"></div>
         }
       </div>
     }

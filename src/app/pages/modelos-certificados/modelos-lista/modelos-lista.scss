@@ -96,7 +96,7 @@ $transition: 200ms ease;
     justify-content: space-between;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
-    flex-wrap: wrap; // Garante que o tÃ­tulo e as badges nÃ£o se esmaguem
+    flex-wrap: wrap; // Garante que o título e as badges não se esmaguem
 }
 
 .turma-nome {
@@ -151,7 +151,7 @@ $transition: 200ms ease;
     padding: 0.875rem 1.25rem;
     border-top: 1px solid $gray-100;
     background: $gray-100;
-    flex-wrap: wrap; // ðŸ‘‰ Essencial para os novos botÃµes caberem no mobile
+    flex-wrap: wrap; // ðŸ‘‰ Essencial para os novos botões caberem no mobile
 }
 
 // â”€â”€ Badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -226,7 +226,7 @@ $transition: 200ms ease;
     font-size: 0.875rem;
 }
 
-// â”€â”€ PaginaÃ§Ã£o â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Paginação â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .pagination {
     display: flex;
     align-items: center;
@@ -495,7 +495,7 @@ $transition: 200ms ease;
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-//  FILTROS AVANÃ‡ADOS â€” Drawer
+//  FILTROS AVANÇADOS - Drawer
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 
 .filter-btn {
@@ -667,7 +667,7 @@ $transition: 200ms ease;
     }
 }
 
-// â”€â”€ Grade HorÃ¡ria â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€ Grade Horária â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .grade-horaria-fieldset {
     border: 1px solid $gray-200;
     border-radius: $border-r;

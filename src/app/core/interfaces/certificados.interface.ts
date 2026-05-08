@@ -7,7 +7,8 @@ export type CertificadoLayoutElementType =
   | 'SIGNATURE_BLOCK'
   | 'QR_CODE'
   | 'VALIDATION_CODE'
-  | 'LINE';
+  | 'LINE'
+  | 'RECTANGLE';
 
 export interface CertificadoFonte {
   label: string;

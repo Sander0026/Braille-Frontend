@@ -35,6 +35,7 @@
 .cert-element {
   position: absolute;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .cert-text-element {
@@ -48,8 +49,12 @@
 
 .dynamic-text {
   width: 100%;
+  height: 100%;
   white-space: pre-wrap;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  overflow: hidden;
 }
 
 .is-draggable {
@@ -61,10 +66,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 
   .assinatura-img {
     width: 100%;
-    max-height: 80px;
+    flex: 1 1 auto;
+    min-height: 0;
     object-fit: contain;
     mix-blend-mode: darken; // importante para tornar fundo branco transparente visualmente
   }
@@ -109,6 +116,13 @@
   border-top: 2px solid;
 }
 
+.dynamic-rectangle {
+  width: 100%;
+  height: 100%;
+  border: 2px solid;
+  background: transparent;
+}
+
 // Estilos de Destaque apenas em Modo Edição
 .draggable-mode {
   .nome-aluno-outline {
@@ -134,5 +148,8 @@
   }
   .validation-code-outline {
     outline: 2px dashed rgba(14, 165, 233, 0.75);
+  }
+  .dynamic-shape-outline {
+    outline: 2px dashed rgba(99, 102, 241, 0.75);
   }
 }

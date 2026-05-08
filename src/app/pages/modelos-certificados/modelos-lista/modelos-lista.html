@@ -132,16 +132,16 @@
     <header class="manual-dialog__header">
       <h2 id="manual-dialog-title">{{ modeloManual()?.tipo === 'ACADEMICO' ? 'Gerar certificado manual' : 'Gerar honraria manual' }}</h2>
       <p id="manual-dialog-description" class="sr-only">
-        Preencha os dados que serao impressos no certificado. Campos com asterisco sao obrigatorios.
+        Preencha os dados que serão impressos no certificado. Campos com asterisco são obrigatórios.
       </p>
-      <button type="button" class="btn-close" (click)="fecharEmissaoManual()" aria-label="Fechar janela de geracao manual">
+      <button type="button" class="btn-close" (click)="fecharEmissaoManual()" aria-label="Fechar janela de geração manual">
         <span class="material-symbols-rounded" aria-hidden="true">close</span>
       </button>
     </header>
 
     <div class="manual-dialog__body">
       @if (isCarregandoManual()) {
-        <div class="manual-loading" role="status" aria-live="polite">Carregando opcoes...</div>
+        <div class="manual-loading" role="status" aria-live="polite">Carregando opções...</div>
       }
       @if (modeloManual()?.tipo === 'ACADEMICO') {
         <div class="form-group">
@@ -155,7 +155,7 @@
                  name="buscaAluno"
                  type="search"
                  autocomplete="off"
-                 placeholder="Buscar por nome ou matricula"
+                 placeholder="Buscar por nome ou matrícula"
                  [ngModel]="buscaAlunoManual()"
                  (ngModelChange)="onBuscaAlunoManual($event)"
                  [attr.aria-expanded]="alunosFiltradosManual().length > 0"
@@ -233,7 +233,7 @@
         </div>
         <div class="form-group">
           <label for="manual-titulo-acao">
-            Titulo da acao
+            Título da ação
             <span class="required" aria-hidden="true">*</span>
           </label>
           <input id="manual-titulo-acao" class="form-input" name="tituloAcao" autocomplete="off" [(ngModel)]="manualForm.tituloAcao" required aria-required="true">
@@ -246,7 +246,7 @@
 
       <div class="form-group">
         <label for="manual-emissao">
-          {{ modeloManual()?.tipo === 'HONRARIA' ? 'Data do evento' : 'Data de emissao' }}
+          {{ modeloManual()?.tipo === 'HONRARIA' ? 'Data do evento' : 'Data de emissão' }}
           <span class="required" aria-hidden="true">*</span>
         </label>
         <input id="manual-emissao" class="form-input" type="date" name="dataEmissao" [(ngModel)]="manualForm.dataEmissao" required aria-required="true">
