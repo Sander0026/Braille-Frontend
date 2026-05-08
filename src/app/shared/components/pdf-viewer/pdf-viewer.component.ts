@@ -46,7 +46,7 @@ export class PdfViewerComponent {
 
     if (!urlLimpa) return;
 
-    if (!this.deveRenderizarComoBlob(urlLimpa)) {
+    if (urlLimpa.startsWith('blob:')) {
       this.urlVisualizadorPdf.set(urlLimpa);
       return;
     }
@@ -54,9 +54,14 @@ export class PdfViewerComponent {
     this.carregando.set(true);
 
     try {
-      const response = await fetch(urlLimpa, {
+      const fetchOptions: RequestInit = {
         signal,
-        credentials: 'same-origin'
+        credentials: this.isSameOriginUrl(urlLimpa) ? 'same-origin' : 'omit',
+        mode: this.isSameOriginUrl(urlLimpa) ? 'same-origin' : 'cors',
+      };
+
+      const response = await fetch(urlLimpa, {
+        ...fetchOptions,
       });
 
       if (!response.ok) {
@@ -88,8 +93,13 @@ export class PdfViewerComponent {
     return urlLimpa.startsWith('assets/') ? `/${urlLimpa}` : urlLimpa;
   }
 
-  private deveRenderizarComoBlob(url: string): boolean {
-    return url.startsWith('/assets/');
+  private isSameOriginUrl(url: string): boolean {
+    try {
+      const parsedUrl = new URL(url, window.location.origin);
+      return parsedUrl.origin === window.location.origin;
+    } catch {
+      return true;
+    }
   }
 
   private revogarObjectUrl(): void {
