@@ -597,8 +597,18 @@
                                     <td style="text-align: center;">
                                           @let freqCert = frequenciasMap.get(m.turma.id)?.taxaPresenca ?? 0;
                                           @let turmaFinalizada = m.status === 'CONCLUIDA' || m.turma.status === 'CONCLUIDA';
+                                          @let certificadoExistente = certificadoAcademicoPorTurma(m.turma.id);
                                           @let podeEmitir = turmaFinalizada && freqCert >= 75 && !!m.turma.modeloCertificadoId;
-                                          @if (turmaFinalizada) {
+                                          @if (certificadoExistente?.pdfUrl) {
+                                            <button
+                                              class="btn btn-sm btn-outline-primary"
+                                              style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;"
+                                              (click)="visualizarCertificadoAcademico(m.turma.id)"
+                                              title="Visualizar certificado emitido">
+                                                <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 14px;">workspace_premium</span>
+                                                Ver PDF
+                                            </button>
+                                          } @else if (turmaFinalizada) {
                                             <button 
                                               class="btn btn-sm"
                                               [class.btn-outline-primary]="podeEmitir"

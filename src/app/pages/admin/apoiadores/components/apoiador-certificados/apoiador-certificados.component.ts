@@ -40,6 +40,18 @@ export class ApoiadorCertificadosComponent implements OnInit {
     this.modalClosed.emit();
   }
 
+  tituloCertificado(cert: CertificadoEmitido): string {
+    return cert.modelo?.nome || cert.acao?.descricaoAcao || cert.tituloCertificado || 'Certificado';
+  }
+
+  detalheCertificado(cert: CertificadoEmitido): string {
+    if (cert.acao?.descricaoAcao) return `Acao: ${cert.acao.descricaoAcao}`;
+    if (cert.emitidoPor?.nomeCompleto || cert.emitidoPor?.nome) {
+      return `Emitido por: ${cert.emitidoPor.nomeCompleto || cert.emitidoPor.nome}`;
+    }
+    return 'Emissao manual';
+  }
+
   abrirPdf(cert: CertificadoEmitido): void {
     this.processandoId = cert.id;
     this.cdr.detectChanges();
@@ -48,7 +60,7 @@ export class ApoiadorCertificadosComponent implements OnInit {
       next: (res) => {
         this.pdfAtual = {
           url: res.pdfUrl,
-          title: `${cert.tituloCertificado || 'Certificado'} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
+          title: `${this.tituloCertificado(cert)} - ${this.apoiador.nomeFantasia || this.apoiador.nomeRazaoSocial}`
         };
         this.pdfAberto = true;
         this.processandoId = null;

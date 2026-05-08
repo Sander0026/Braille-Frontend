@@ -35,11 +35,26 @@
 .cert-element {
   position: absolute;
   white-space: nowrap;
+  overflow: hidden;
 }
 
 .cert-text-element {
   white-space: pre-wrap;
   line-height: 1.75;
+}
+
+.dynamic-cert-element {
+  white-space: normal;
+}
+
+.dynamic-text {
+  width: 100%;
+  height: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
+  overflow: hidden;
 }
 
 .is-draggable {
@@ -51,10 +66,12 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  height: 100%;
 
   .assinatura-img {
     width: 100%;
-    max-height: 80px;
+    flex: 1 1 auto;
+    min-height: 0;
     object-fit: contain;
     mix-blend-mode: darken; // importante para tornar fundo branco transparente visualmente
   }
@@ -85,6 +102,27 @@
   border-radius: 4px;
 }
 
+.signature-placeholder {
+  width: 100%;
+  border-top: 1px solid #5a4a00;
+  padding-top: 4px;
+  text-align: center;
+  font-size: 12px;
+  color: #1a1a00;
+}
+
+.dynamic-line {
+  width: 100%;
+  border-top: 2px solid;
+}
+
+.dynamic-rectangle {
+  width: 100%;
+  height: 100%;
+  border: 2px solid;
+  background: transparent;
+}
+
 // Estilos de Destaque apenas em Modo Edição
 .draggable-mode {
   .nome-aluno-outline {
@@ -101,5 +139,17 @@
   }
   .qr-outline {
     outline: 2px dashed rgba(234, 88, 12, 0.7);
+  }
+  .dynamic-text-outline {
+    outline: 2px dashed rgba(59, 130, 246, 0.6);
+  }
+  .dynamic-signature-outline {
+    outline: 2px dashed rgba(34, 197, 94, 0.7);
+  }
+  .validation-code-outline {
+    outline: 2px dashed rgba(14, 165, 233, 0.75);
+  }
+  .dynamic-shape-outline {
+    outline: 2px dashed rgba(99, 102, 241, 0.75);
   }
 }

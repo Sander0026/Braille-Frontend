@@ -1091,6 +1091,21 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
 
   // ── Emissão de Certificados ─────────────────────────────────────────
 
+  certificadoAcademicoPorTurma(turmaId: string): NonNullable<Beneficiario['certificadosEmitidos']>[number] | null {
+    return this.alunoSelecionado?.certificadosEmitidos?.find((cert) =>
+      cert.status === 'VALID' &&
+      !!cert.pdfUrl &&
+      (cert.turmaId === turmaId || cert.turma?.id === turmaId)
+    ) ?? null;
+  }
+
+  visualizarCertificadoAcademico(turmaId: string): void {
+    const certificado = this.certificadoAcademicoPorTurma(turmaId);
+    if (certificado?.pdfUrl) {
+      this.abrirVisualizadorPdf(certificado.pdfUrl);
+    }
+  }
+
   emitirCertificadoAcademico(matricula: { id: string; turma: { id: string } }): void {
     if (this.emitindoCertificadoId === matricula.id) return;
     this.emitindoCertificadoId = matricula.id;
