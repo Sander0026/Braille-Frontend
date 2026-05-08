@@ -1,0 +1,29 @@
+<main class="page">
+  <header>
+    <div>
+      <h1>Acompanhamentos em andamento</h1>
+      <p>Registre novos atendimentos e acompanhe a evolucao dos alunos.</p>
+    </div>
+    <a class="primary" routerLink="/admin/atendimentos-individuais/criar">Criar acompanhamento</a>
+  </header>
+
+  <section class="toolbar">
+    <label>
+      <span>Buscar</span>
+      <input type="search" [(ngModel)]="busca" placeholder="Nome, matricula ou assunto" (keyup.enter)="carregar()" />
+    </label>
+    <button type="button" (click)="carregar()">Filtrar</button>
+  </section>
+
+  @if (carregando()) {
+    <app-empty-state-atendimentos title="Carregando acompanhamentos" description="Aguarde enquanto buscamos os registros." />
+  } @else if (acompanhamentos().length === 0) {
+    <app-empty-state-atendimentos title="Nenhum acompanhamento em andamento" description="Crie um novo acompanhamento para iniciar o historico individual." />
+  } @else {
+    <section class="grid">
+      @for (acompanhamento of acompanhamentos(); track acompanhamento.id) {
+        <app-acompanhamento-card [acompanhamento]="acompanhamento" (finish)="finalizar($event)" />
+      }
+    </section>
+  }
+</main>

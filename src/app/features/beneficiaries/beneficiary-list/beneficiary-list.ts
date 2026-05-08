@@ -23,6 +23,8 @@ import { AtestadosService, Atestado, PreviewAtestado } from '../../../core/servi
 import { LaudosService, LaudoMedico } from '../../../core/services/laudos.service';
 import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
 import { ComponenteComDescarte } from '../../../core/interfaces/componente-com-descarte.interface';
+import { AcompanhamentoIndividual } from '../../atendimentos-individuais/models/acompanhamento-individual.model';
+import { AtendimentosIndividuaisApiService } from '../../atendimentos-individuais/services/atendimentos-individuais-api.service';
 
 
 @Directive({
@@ -80,6 +82,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
 
   documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'; url: string } | null = null;
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
+  acompanhamentosIndividuaisAluno: AcompanhamentoIndividual[] = [];
+  carregandoAtendimentosIndividuais = false;
 
   // KeyManager
   @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
@@ -254,7 +258,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     private readonly atestadosService: AtestadosService,
     private readonly laudosService: LaudosService,
     private readonly http: HttpClient,
-    private readonly modelosCertificadosService: ModelosCertificadosService
+    private readonly modelosCertificadosService: ModelosCertificadosService,
+    private readonly atendimentosIndividuaisService: AtendimentosIndividuaisApiService
   ) {
 
     this.filterForm = this.fb.group({
@@ -868,10 +873,12 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.carregandoDetalhes = true;
     this.alunoSelecionado = null;
     this.frequenciasMap.clear();
+    this.acompanhamentosIndividuaisAluno = [];
 
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
+        this.carregarAcompanhamentosIndividuaisDoAluno(dadosCompletos.id);
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
@@ -907,6 +914,24 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
         this.cdr.markForCheck();
       }
     });
+  }
+
+  private carregarAcompanhamentosIndividuaisDoAluno(alunoId: string): void {
+    this.carregandoAtendimentosIndividuais = true;
+    this.atendimentosIndividuaisService.listar({ alunoId, limit: 20 })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.acompanhamentosIndividuaisAluno = res.data;
+          this.carregandoAtendimentosIndividuais = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.acompanhamentosIndividuaisAluno = [];
+          this.carregandoAtendimentosIndividuais = false;
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   fecharModal(): void {

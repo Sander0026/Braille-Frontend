@@ -1,0 +1,55 @@
+<main class="page">
+  <header>
+    <h1>Criar acompanhamento individual</h1>
+    <p>Selecione o aluno, defina o assunto principal e registre o primeiro atendimento se desejar.</p>
+  </header>
+
+  <section class="panel">
+    <app-aluno-autocomplete [alunos]="alunos()" (selected)="selecionarAluno($event)" />
+
+    @if (!isProfessor()) {
+      <label>
+        <span>Professor responsavel *</span>
+        <select [(ngModel)]="professorId">
+          <option value="">Selecione um professor</option>
+          @for (professor of professores(); track professor.id) {
+            <option [value]="professor.id">{{ professor.nome }} - {{ professor.matricula || 'sem matricula' }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    <label>
+      <span>Assunto principal *</span>
+      <input type="text" [(ngModel)]="assuntoAtual" maxlength="200" />
+    </label>
+
+    <label>
+      <span>Descricao</span>
+      <textarea rows="4" [(ngModel)]="descricao" maxlength="2000"></textarea>
+    </label>
+
+    <label class="check">
+      <input type="checkbox" [ngModel]="incluirPrimeiroAtendimento()" (ngModelChange)="incluirPrimeiroAtendimento.set($event)" />
+      <span>Registrar primeiro atendimento agora</span>
+    </label>
+  </section>
+
+  @if (incluirPrimeiroAtendimento()) {
+    <section class="panel">
+      <h2>Primeiro atendimento</h2>
+      <app-atendimento-form
+        [saving]="salvando()"
+        submitLabel="Criar acompanhamento"
+        (save)="capturarPrimeiroAtendimento($event)"
+        (cancel)="incluirPrimeiroAtendimento.set(false)" />
+    </section>
+  } @else {
+    <div class="actions">
+      <button type="button" class="secondary" routerLink="/admin/atendimentos-individuais">Cancelar</button>
+      <button type="button" class="primary" (click)="salvarSemPrimeiroAtendimento()" [disabled]="salvando()">
+        Criar acompanhamento
+      </button>
+    </div>
+  }
+</main>

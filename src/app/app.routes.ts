@@ -88,6 +88,14 @@ export const routes: Routes = [
         title: 'Frequências — ILBES'
       },
 
+      {
+        path: 'atendimentos-individuais',
+        loadChildren: () => import('./features/atendimentos-individuais/atendimentos-individuais.routes').then(m => m.ATENDIMENTOS_INDIVIDUAIS_ROUTES),
+        title: 'Atendimentos Individuais — ILBES',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] }
+      },
+
       // Apoiadores (Módulo novo)
       {
         path: 'apoiadores',

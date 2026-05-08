@@ -643,6 +643,52 @@
                 </div>
             </div>
 
+            <div class="profile-section full-width historico-section">
+                <h4>
+                    <span class="material-symbols-rounded"
+                        style="font-size:16px;vertical-align:middle;margin-right:4px;">clinical_notes</span>
+                    Atendimentos Individuais
+                </h4>
+                @if (carregandoAtendimentosIndividuais) {
+                <p style="color: #4b5563; font-size: 0.875rem; margin-top: 4px;">Carregando atendimentos individuais...</p>
+                } @else if (acompanhamentosIndividuaisAluno.length > 0) {
+                <div class="table-responsive">
+                    <table class="historico-table">
+                        <thead>
+                            <tr>
+                                <th>Assunto</th>
+                                <th>Professor</th>
+                                <th>Inicio</th>
+                                <th>Registros</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (acomp of acompanhamentosIndividuaisAluno; track acomp.id) {
+                            <tr>
+                                <td>{{ acomp.assuntoAtual }}</td>
+                                <td>{{ acomp.professor?.nome || 'Professor nao informado' }}</td>
+                                <td>{{ acomp.dataInicio | dataBraille }}</td>
+                                <td style="text-align: center;">{{ acomp._count?.atendimentos || 0 }}</td>
+                                <td>
+                                    <span class="badge-status"
+                                        [class.badge-status--concluida]="acomp.status === 'FINALIZADO'"
+                                        [class.badge-status--ativa]="acomp.status === 'EM_ANDAMENTO'">
+                                        {{ acomp.status === 'EM_ANDAMENTO' ? 'Em andamento' : (acomp.status === 'FINALIZADO' ? 'Finalizado' : 'Arquivado') }}
+                                    </span>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                } @else {
+                <p style="color: #4b5563; font-size: 0.875rem; margin-top: 4px;">
+                    Nenhum acompanhamento individual registrado.
+                </p>
+                }
+            </div>
+
             <!-- ═══ Documentação de Saúde & Presença (Botões de Ação) ═══ -->
             <div class="profile-section full-width historico-section">
                 <h4 style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 1rem;">
