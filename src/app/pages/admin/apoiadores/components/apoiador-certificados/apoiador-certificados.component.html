@@ -41,8 +41,11 @@
                                 @for (cert of certificados; track cert.id) {
                                     <tr>
                                         <td data-label="Título/Honraria" style="padding: 1rem; border-bottom: 1px solid #e2e8f0;">
-                                            <div style="font-weight: 600; color: #0f172a;">{{ cert.tituloCertificado }}</div>
-                                            <div style="font-size: 0.8rem; color: #64748b;">Emitido por: {{ cert.emitidoPor?.nomeCompleto || 'Sistema' }}</div>
+                                            <div style="font-weight: 600; color: #0f172a;">{{ tituloCertificado(cert) }}</div>
+                                            <div style="font-size: 0.8rem; color: #64748b;">{{ detalheCertificado(cert) }}</div>
+                                            @if (cert.codigoValidacao) {
+                                                <div style="font-size: 0.78rem; color: #64748b;">Codigo: {{ cert.codigoValidacao }}</div>
+                                            }
                                         </td>
                                         <td data-label="Data de Emissão" style="padding: 1rem; border-bottom: 1px solid #e2e8f0; vertical-align: middle;">
                                             {{ cert.dataEmissao | date:'dd/MM/yyyy' }}

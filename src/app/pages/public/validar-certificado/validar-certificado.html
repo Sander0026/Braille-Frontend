@@ -58,7 +58,10 @@
                 <ul class="dados-lista">
                   <li><strong>Emitido para:</strong> {{ resultadoValidacao().nome }}</li>
                   <li><strong>Certificação:</strong> {{ resultadoValidacao().curso }}</li>
+                  <li><strong>Carga horária:</strong> {{ resultadoValidacao().cargaHoraria || 'Não informada' }}</li>
                   <li><strong>Data de Emissão:</strong> {{ resultadoValidacao().data }}</li>
+                  <li><strong>Status:</strong> {{ resultadoValidacao().status || 'VALIDO' }}</li>
+                  <li><strong>Código:</strong> {{ resultadoValidacao().codigoValidacao || form.value.codigo }}</li>
                   <li><strong>Natureza:</strong> {{ resultadoValidacao().tipo === 'ACADEMICO' ? 'Certificação Acadêmica' : 'Honraria / Parceiro' }}</li>
                 </ul>
               </div>

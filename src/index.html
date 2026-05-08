@@ -44,6 +44,37 @@
       <div class="vw-plugin-top-wrapper"></div>
     </div>
   </div>
+  <script>
+    /* O script do VLibras ainda referencia assets do branch @dev no jsdelivr em algumas versoes.
+       Esse CDN entra em loop de redirect; redirecionamos antes da imagem ser requisitada. */
+    (function patchVlibrasAssets() {
+      const cdnBase = 'https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/vlibras-portal@dev/app/';
+      const officialBase = 'https://vlibras.gov.br/app/';
+      const normalizeVlibrasUrl = function (value) {
+        return typeof value === 'string' ? value.replace(cdnBase, officialBase) : value;
+      };
+
+      const srcDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+      if (srcDescriptor && srcDescriptor.get && srcDescriptor.set) {
+        Object.defineProperty(HTMLImageElement.prototype, 'src', {
+          configurable: true,
+          enumerable: srcDescriptor.enumerable,
+          get: function () {
+            return srcDescriptor.get.call(this);
+          },
+          set: function (value) {
+            srcDescriptor.set.call(this, normalizeVlibrasUrl(value));
+          }
+        });
+      }
+
+      const originalSetAttribute = Element.prototype.setAttribute;
+      Element.prototype.setAttribute = function (name, value) {
+        const shouldPatch = this instanceof HTMLImageElement && String(name).toLowerCase() === 'src';
+        return originalSetAttribute.call(this, name, shouldPatch ? normalizeVlibrasUrl(value) : value);
+      };
+    })();
+  </script>
   <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
   <script>
     /* eslint-disable no-new */

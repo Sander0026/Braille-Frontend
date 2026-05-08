@@ -222,12 +222,16 @@ getStats(): Observable<DashboardStats>   GET /api/dashboard/stats
 | Método | Endpoint | Descrição |
 |---|---|---|
 | `listar()` | `GET /api/modelos-certificados` | Lista modelos |
+| `buscarPorId(id)` | `GET /api/modelos-certificados/:id` | Carrega modelo para edicao |
 | `criar(formData)` | `POST /api/modelos-certificados` | Cria com `FormData` (imagem de fundo) |
-| `atualizar(id, dto)` | `PATCH /api/modelos-certificados/:id` | Atualiza modelo |
+| `atualizar(id, formData)` | `PATCH /api/modelos-certificados/:id` | Atualiza modelo, imagens e layout |
 | `excluir(id)` | `DELETE /api/modelos-certificados/:id` | Remove |
 | `validarAutenticidade(codigo)` | `GET /api/certificados/validar/:codigo` | Valida certificado público |
-| `gerarTeste(id)` | `POST /api/modelos-certificados/teste` | Gera PDF de teste (Blob) |
 | `emitirAcademico(dto)` | `POST /api/modelos-certificados/emitir-academico` | Emite certificado acadêmico |
+| `emitirManualAcademico(payload)` | `POST /api/modelos-certificados/emitir-manual-academico` | Emite certificado manual para aluno/turma cadastrados |
+| `emitirHonrariaManual(payload)` | `POST /api/modelos-certificados/emitir-honraria` | Emite honraria manual para apoiador cadastrado |
+| `cancelarCertificado(id, motivo)` | `PATCH /api/modelos-certificados/certificados/:id/cancelar` | Cancela certificado emitido |
+| `reemitirCertificado(id)` | `POST /api/modelos-certificados/certificados/:id/reemitir` | Reemite certificado academico |
 
 ## 3.14 `SiteConfigService` — CMS e Configurações
 

@@ -1,4 +1,4 @@
-<div class="wizard-container">
+﻿<div class="wizard-container">
   
   <!-- Cabeçalho Dinâmico -->
   <div class="wizard-header" style="text-align: center; margin-bottom: 2rem;">
@@ -146,13 +146,20 @@
           @if(formModelo.get('tipo')?.value === 'ACADEMICO') {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Aluno no cursor" (click)="injetarTag('{{ALUNO}}')">+ Aluno</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar tag Turma" (click)="injetarTag('{{TURMA}}')">+ Oficina</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome do curso" (click)="injetarTag('{{NOME_CURSO}}')">+ Curso</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Carga Horária" (click)="injetarTag('{{CARGA_HORARIA}}')">+ Horas</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Início" (click)="injetarTag('{{DATA_INICIO}}')">+ Início</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Fim" (click)="injetarTag('{{DATA_FIM}}')">+ Fim</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar data de emissão" (click)="injetarTag('{{DATA_EMISSAO}}')">+ Emissão</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar código do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Código</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituição" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituição</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar responsável" (click)="injetarTag('{{NOME_RESPONSAVEL}}')">+ Responsável</button>
           } @else {
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Parceiro" (click)="injetarTag('{{PARCEIRO}}')">+ Nome do Amigo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Motivo" (click)="injetarTag('{{MOTIVO}}')">+ Motivo</button>
             <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar Data Corrente" (click)="injetarTag('{{DATA}}')">+ Data Atual</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar código do certificado" (click)="injetarTag('{{CODIGO_CERTIFICADO}}')">+ Código</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" aria-label="Adicionar nome da instituição" (click)="injetarTag('{{NOME_INSTITUICAO}}')">+ Instituição</button>
           }
         </div>
 
@@ -177,6 +184,43 @@
         <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Ajuste Visual Final</legend>
         <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicioná-los. Use os painéis abaixo para ajustar estilos.</p>
 
+        <div class="preview-data-panel" aria-label="Dados usados na prévia PDF real">
+          <h2>Dados da prévia PDF real</h2>
+          @if (formModelo.get('tipo')?.value === 'HONRARIA') {
+            <label>
+              Nome do apoiador
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.nomeApoiador"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+            <label>
+              Título da ação
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.tituloAcao"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+          } @else {
+            <label>
+              Nome do aluno
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.nomeAluno"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+            <label>
+              Curso
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.nomeCurso"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+            <label>
+              Carga horária
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.cargaHoraria"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+          }
+        </div>
+
         <div *ngIf="previewBaseUrl()">
 
           <!-- ======= COMPONENTE COMPARTILHADO DE PREVIEW ======= -->
@@ -190,181 +234,144 @@
             [cargoAssinante2]="formModelo.get('cargoAssinante2')?.value"
             [textoTemplate]="formModelo.get('textoTemplate')?.value"
             [layoutConfig]="layoutConfig"
-            [applyMocks]="false"
+            [applyMocks]="true"
             [isDraggable]="true"
             (dragEnded)="onDragEndedOutput($event)">
           </app-certificado-preview>
           <!-- =================================================== -->
 
-          <div style="display:flex; flex-wrap:wrap; gap:0.75rem; margin:1.25rem 0; font-size:0.75rem; color:#64748b;">
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(59,130,246,.8);border-radius:2px;"></span>Texto principal</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(168,85,247,.8);border-radius:2px;"></span>Nome do Aluno</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(34,197,94,.8);border-radius:2px;"></span>Assinatura 1</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(239,68,68,.8);border-radius:2px;"></span>Assinatura 2</span>
-            <span style="display:flex;align-items:center;gap:4px;"><span style="display:inline-block;width:12px;height:12px;border:2px dashed rgba(234,88,12,.8);border-radius:2px;"></span>QR Code</span>
+          <div class="dynamic-editor-panel" aria-label="Editor de elementos do certificado">
+            <section class="dynamic-editor-card">
+              <div class="dynamic-editor-card__header">
+                <h2>Elementos</h2>
+              </div>
+              <div class="element-actions">
+                <button type="button" class="btn-element" (click)="addTextElement()">+ Texto</button>
+                <button type="button" class="btn-element" (click)="addDynamicTextElement()">+ Variável</button>
+                <button type="button" class="btn-element" (click)="addSignatureBlockElement()">+ Assinatura</button>
+                <button type="button" class="btn-element" (click)="addQrElement()">+ QR</button>
+                <button type="button" class="btn-element" (click)="addValidationCodeElement()">+ Código</button>
+                <button type="button" class="btn-element" (click)="addLineElement()">+ Linha</button>
+                <button type="button" class="btn-element" (click)="addRectangleElement()">+ Retângulo</button>
+              </div>
+
+              <div class="element-list" role="listbox" aria-label="Elementos posicionados">
+                @for (element of layoutElements; track element.id) {
+                  <button type="button"
+                          class="element-list-item"
+                          [class.is-selected]="selectedElement?.id === element.id"
+                          (click)="selectElement(element.id)">
+                    <span>{{ element.label }}</span>
+                    <small>{{ elementTypeLabels[element.type] || element.type }}</small>
+                  </button>
+                }
+              </div>
+            </section>
+
+            @if (selectedElement; as element) {
+              <section class="dynamic-editor-card">
+                <div class="dynamic-editor-card__header">
+                  <h2>Propriedades</h2>
+                  <button type="button" class="btn-remove-element" (click)="removeSelectedElement()">Remover</button>
+                </div>
+
+                <div class="properties-grid">
+                  <label>
+                    Nome
+                    <input type="text"
+                           [ngModel]="element.label"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ label: $event })">
+                  </label>
+
+                  @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE' || element.type === 'SIGNATURE_BLOCK') {
+                    <label class="property-full">
+                      Conteudo
+                      <textarea rows="2"
+                                [ngModel]="element.content"
+                                [ngModelOptions]="{standalone: true}"
+                                (ngModelChange)="updateSelectedElement({ content: $event })"></textarea>
+                    </label>
+                  }
+
+                  <label>
+                    X (%)
+                    <input type="number" min="0" max="100"
+                           [ngModel]="element.x"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ x: +$event })">
+                  </label>
+                  <label>
+                    Y (%)
+                    <input type="number" min="0" max="100"
+                           [ngModel]="element.y"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ y: +$event })">
+                  </label>
+                  <label>
+                    Largura (%)
+                    <input type="number" min="1" max="100"
+                           [ngModel]="element.width"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ width: +$event })">
+                  </label>
+                  <label>
+                    Altura (%)
+                    <input type="number" min="1" max="100"
+                           [ngModel]="element.height"
+                           [ngModelOptions]="{standalone: true}"
+                           (ngModelChange)="updateSelectedElement({ height: +$event })">
+                  </label>
+
+                  @if (element.type === 'TEXT' || element.type === 'DYNAMIC_TEXT' || element.type === 'VALIDATION_CODE' || element.type === 'SIGNATURE_BLOCK') {
+                    <label>
+                      Fonte
+                      <select [ngModel]="element.fontFamily"
+                              [ngModelOptions]="{standalone: true}"
+                              (ngModelChange)="updateSelectedElement({ fontFamily: $event })">
+                        @for (font of certificadoFontes; track font.value) {
+                          <option [value]="font.value">{{ font.label }}</option>
+                        }
+                      </select>
+                    </label>
+                    <label>
+                      Tamanho
+                      <input type="number" min="8" max="160"
+                             [ngModel]="element.fontSize"
+                             [ngModelOptions]="{standalone: true}"
+                             (ngModelChange)="updateSelectedElement({ fontSize: +$event })">
+                    </label>
+                    <label>
+                      Cor
+                      <input type="color"
+                             [ngModel]="element.color"
+                             [ngModelOptions]="{standalone: true}"
+                             (ngModelChange)="updateSelectedElement({ color: $event })">
+                    </label>
+                    <div>
+                      <span class="property-label">Alinhamento</span>
+                      <div class="align-actions">
+                        <button type="button" [class.is-active]="element.textAlign === 'left'" (click)="setSelectedTextAlign('left')">E</button>
+                        <button type="button" [class.is-active]="element.textAlign === 'center'" (click)="setSelectedTextAlign('center')">C</button>
+                        <button type="button" [class.is-active]="element.textAlign === 'right'" (click)="setSelectedTextAlign('right')">D</button>
+                      </div>
+                    </div>
+                  }
+
+                  @if (element.type === 'LINE' || element.type === 'RECTANGLE') {
+                    <label>
+                      Cor
+                      <input type="color"
+                             [ngModel]="element.color"
+                             [ngModelOptions]="{standalone: true}"
+                             (ngModelChange)="updateSelectedElement({ color: $event })">
+                    </label>
+                  }
+                </div>
+              </section>
+            }
           </div>
 
-          <!-- ===== PAINEL DE CONTROLES EM GRID RESPONSIVO ===== -->
-          <div class="controls-grid">
-            
-            <!-- Card 1: Texto Principal -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#eff6ff; padding:0.5rem 0.75rem; border-bottom:1px solid #bfdbfe;">
-                <h2 style="margin:0; font-weight:700; color:#1d4ed8; font-size:0.8rem;">Texto Principal</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <fieldset style="border:0; padding:0; margin:0;" aria-label="Alinhamento do Texto">
-                    <legend class="sr-only">Alinhamento do Texto Primário</legend>
-                    <label style="font-size:0.7rem; font-weight:600; color:#64748b;">ALINHAMENTO</label>
-                    <div style="display:flex; gap:0.3rem; margin-top:0.25rem;">
-                      <button type="button" aria-label="Alinhar à esquerda" (click)="setTextAlign('left')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'left'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'left' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'left' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Esquerda">←</button>
-                      <button type="button" aria-label="Alinhar ao centro" (click)="setTextAlign('center')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'center'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'center' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'center' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Centro">≡</button>
-                      <button type="button" aria-label="Alinhar à direita" (click)="setTextAlign('right')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'right'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'right' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'right' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Direita">→</button>
-                      <button type="button" aria-label="Texto justificado" (click)="setTextAlign('justify')"
-                              [attr.aria-pressed]="layoutConfig.textoPronto.textAlign === 'justify'"
-                              [style.background]="layoutConfig.textoPronto.textAlign === 'justify' ? '#3b82f6' : '#f1f5f9'"
-                              [style.color]="layoutConfig.textoPronto.textAlign === 'justify' ? '#fff' : '#374151'"
-                              style="flex:1; border:1px solid #e2e8f0; padding:0.3rem 0; border-radius:5px; cursor:pointer; font-size:0.9rem;" title="Justificado">⊟</button>
-                    </div>
-                  </fieldset>
-                </div>
-
-                <div>
-                  <label for="ctrl-fonte-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
-                  <select id="ctrl-fonte-texto" [ngModel]="layoutConfig.textoPronto.fontFamily" [ngModelOptions]="{standalone: true}" (ngModelChange)="setCampoLayout('textoPronto', 'fontFamily', $event)" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
-                    <option value="Helvetica">Padrão (Helvetica)</option>
-                    <option value="TimesRoman">Times Roman</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Merriweather">Merriweather</option>
-                    <option value="Open Sans">Open Sans</option>
-                  </select>
-                </div>
-
-                <div style="display:flex; gap:0.4rem; align-items:flex-end;">
-                  <div style="flex:1;">
-                    <label for="ctrl-tam-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO (pt)</label>
-                    <input id="ctrl-tam-texto" type="number" min="8" max="120"
-                           [value]="layoutConfig.textoPronto.fontSize || 32"
-                           (change)="setFontSize($event)"
-                           style="width:100%; height:30px; padding:0 0.4rem; border:1px solid #e2e8f0; border-radius:5px; font-size:0.82rem; margin-top:0.2rem;">
-                  </div>
-                  <div>
-                    <label for="ctrl-cor-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">COR</label>
-                    <input id="ctrl-cor-texto" type="color" [value]="layoutConfig.textoPronto.color || '#1a1a00'"
-                           (input)="setTextoColor($event)"
-                           style="display:block; width:34px; height:30px; border:1px solid #e2e8f0; border-radius:5px; padding:2px; cursor:pointer; margin-top:0.2rem;" aria-label="Selecionador de cores do texto">
-                  </div>
-                </div>
-
-                <div>
-                  <label for="ctrl-larg-texto" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.textoPronto.maxWidth }}%</label>
-                  <input id="ctrl-larg-texto" type="range" min="30" max="95"
-                         [value]="layoutConfig.textoPronto.maxWidth"
-                         (input)="setCampoLayout('textoPronto', 'maxWidth', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 2: Nome do Aluno -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#faf5ff; padding:0.5rem 0.75rem; border-bottom:1px solid #e9d5ff;">
-                <h2 style="margin:0; font-weight:700; color:#7c3aed; font-size:0.8rem;">Nome do Participante</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <label for="ctrl-fonte-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">FONTE</label>
-                  <select id="ctrl-fonte-nome" [ngModel]="layoutConfig.nomeAluno.fontFamily" [ngModelOptions]="{standalone: true}" (ngModelChange)="setCampoLayout('nomeAluno', 'fontFamily', $event)" class="form-input" style="height:30px; padding:0 0.4rem; font-size:0.78rem; margin-top:0.2rem;">
-                    <option value="Helvetica">Padrão (Helvetica)</option>
-                    <option value="Great Vibes">Great Vibes (Cursiva)</option>
-                    <option value="Parisienne">Parisienne</option>
-                    <option value="Playfair Display">Playfair Display</option>
-                    <option value="Dancing Script">Dancing Script</option>
-                    <option value="Pacifico">Pacifico</option>
-                    <option value="Cinzel">Cinzel (Romana)</option>
-                  </select>
-                </div>
-                <div style="display:flex; gap:0.4rem; align-items:flex-end;">
-                  <div style="flex:1;">
-                    <label for="ctrl-tam-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO (pt)</label>
-                    <input id="ctrl-tam-nome" type="number" min="12" max="160"
-                           [value]="layoutConfig.nomeAluno.fontSize || 56"
-                           (change)="setNomeAlunoFontSize($event)"
-                           style="width:100%; height:30px; padding:0 0.4rem; border:1px solid #e2e8f0; border-radius:5px; font-size:0.82rem; margin-top:0.2rem;">
-                  </div>
-                  <div>
-                    <label for="ctrl-cor-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">COR</label>
-                    <input id="ctrl-cor-nome" type="color" [value]="layoutConfig.nomeAluno.color || '#000000'"
-                           (input)="setNomeAlunoColor($event)"
-                           style="display:block; width:34px; height:30px; border:1px solid #e2e8f0; border-radius:5px; padding:2px; cursor:pointer; margin-top:0.2rem;" aria-label="Cores do nome do Participante">
-                  </div>
-                </div>
-                <div>
-                  <label for="ctrl-larg-nome" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA: {{ layoutConfig.nomeAluno.maxWidth || 50 }}%</label>
-                  <input id="ctrl-larg-nome" type="range" min="20" max="90"
-                         [value]="layoutConfig.nomeAluno.maxWidth || 50"
-                         (input)="setCampoLayout('nomeAluno', 'maxWidth', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-              </div>
-            </div>
-
-            <!-- Card 3: Assinaturas -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#f0fdf4; padding:0.5rem 0.75rem; border-bottom:1px solid #bbf7d0;">
-                <h2 style="margin:0; font-weight:700; color:#15803d; font-size:0.8rem;">Assinaturas</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <label for="ctrl-larg-assin1" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 1: {{ layoutConfig.assinatura1.width }}%</label>
-                  <input id="ctrl-larg-assin1" type="range" min="10" max="40"
-                         [value]="layoutConfig.assinatura1.width"
-                         (input)="setCampoLayout('assinatura1', 'width', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-                <div>
-                  <label for="ctrl-larg-assin2" style="font-size:0.7rem; font-weight:600; color:#64748b;">LARGURA ASSIN. 2: {{ layoutConfig.assinatura2.width }}%</label>
-                  <input id="ctrl-larg-assin2" type="range" min="10" max="40"
-                         [value]="layoutConfig.assinatura2.width"
-                         (input)="setCampoLayout('assinatura2', 'width', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-                <p style="font-size:0.72rem; color:#64748b; margin:0;">Arraste cada assinatura na prévia para posicioná-la no lugar correto.</p>
-              </div>
-            </div>
-
-            <!-- Card 4: QR Code -->
-            <div style="background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden;">
-              <div style="background:#fff7ed; padding:0.5rem 0.75rem; border-bottom:1px solid #fed7aa;">
-                <h2 style="margin:0; font-weight:700; color:#c2410c; font-size:0.8rem;">Autenticidade (QR Code)</h2>
-              </div>
-              <div style="padding:0.75rem; display:flex; flex-direction:column; gap:0.6rem;">
-                <div>
-                  <label for="ctrl-tam-qr" style="font-size:0.7rem; font-weight:600; color:#64748b;">TAMANHO: {{ layoutConfig.qrCode.size }}%</label>
-                  <input id="ctrl-tam-qr" type="range" min="4" max="20"
-                         [value]="layoutConfig.qrCode.size"
-                         (input)="setCampoLayout('qrCode', 'size', +$any($event.target).value)"
-                         style="width:100%; margin-top:0.2rem;">
-                </div>
-                <p style="font-size:0.72rem; color:#64748b; margin:0;">O QR Code será gerado automaticamente no backend durante a emissão com o link de validação pública.</p>
-              </div>
-            </div>
-
-          </div><!-- /grid 4 cols -->
         </div><!-- /if previewBaseUrl -->
 
         <div *ngIf="!previewBaseUrl()" style="padding: 3rem; text-align: center; border: 2px dashed #cbd5e1; border-radius: 12px; background: #f8fafc; color: #64748b;" role="alert">
@@ -377,7 +384,7 @@
     <div class="wizard-footer">
       <button type="button" (click)="passoAnterior()" *ngIf="passoAtual() > 1"
               class="btn btn-secondary btn-voltar">
-        ← Voltar
+        &larr; Voltar
       </button>
       <div *ngIf="passoAtual() === 1" class="spacer"></div>
 
@@ -386,12 +393,20 @@
 
         <button type="button" (click)="proximoPasso()" *ngIf="passoAtual() < 4"
                 class="btn btn-primary btn-avancar">
-          Avançar →
+          Avançar &rarr;
+        </button>
+
+        <button type="button" *ngIf="passoAtual() === 4"
+                class="btn btn-primary btn-preview-real"
+                (click)="salvarEVisualizarPdfReal()"
+                [disabled]="isSalvando() || isGerandoPreviewPdf()"
+                [attr.aria-busy]="isGerandoPreviewPdf() ? 'true' : null">
+          {{ isGerandoPreviewPdf() ? 'Gerando PDF...' : 'Salvar e visualizar PDF real' }}
         </button>
 
         <button type="submit" *ngIf="passoAtual() === 4"
                 class="btn btn-success btn-salvar"
-                [disabled]="isSalvando()">
+                [disabled]="isSalvando() || isGerandoPreviewPdf()">
           {{ isSalvando() ? 'Salvando...' : 'Salvar Modelo' }}
         </button>
       </div>

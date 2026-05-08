@@ -44,15 +44,26 @@
           </span>
           <span class="meta-item" title="Última atualização">
             <span class="material-symbols-rounded" aria-hidden="true">calendar_month</span>
-            Atualizado em: {{ modelo.dataAtualizacao | date:'dd/MM/yyyy HH:mm' }}
+            Atualizado em: {{ modelo.atualizadoEm | date:'dd/MM/yyyy HH:mm' }}
           </span>
         </div>
       </div>
 
       <div class="card-footer" style="flex-wrap: wrap; gap: 0.5rem;">
-        <button class="btn btn-sm btn-info" (click)="abrirPreview(modelo)" [attr.aria-label]="'Visualizar impressão de ' + modelo.nome">
+        <button class="btn btn-sm btn-info" (click)="abrirPreview(modelo)" [attr.aria-label]="'Abrir prévia visual de ' + modelo.nome">
           <span class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">visibility</span>
-          Visualizar
+          Prévia visual
+        </button>
+        <button class="btn btn-sm btn-primary"
+                type="button"
+                (click)="abrirPreviewPdfReal(modelo)"
+                [disabled]="isGerandoPreviewPdf() === modelo.id"
+                [attr.aria-busy]="isGerandoPreviewPdf() === modelo.id ? 'true' : null"
+                [attr.aria-label]="'Abrir PDF real de prévia de ' + modelo.nome">
+          {{ isGerandoPreviewPdf() === modelo.id ? 'Gerando...' : 'PDF real' }}
+        </button>
+        <button class="btn btn-sm btn-success" (click)="abrirEmissaoManual(modelo)" [attr.aria-label]="'Gerar certificado manual com ' + modelo.nome">
+          Gerar Manual
         </button>
         <button class="btn btn-sm btn-secondary" (click)="editarModelo(modelo.id)" [attr.aria-label]="'Editar modelo ' + modelo.nome">
           Editar
@@ -116,4 +127,145 @@
     </footer>
 
   </div>
+</dialog>
+
+<dialog #manualDialog
+        class="manual-dialog"
+        aria-modal="true"
+        aria-labelledby="manual-dialog-title"
+        aria-describedby="manual-dialog-description"
+        (close)="onManualDialogClosed()"
+        (click)="onManualBackdropClick($event)">
+  <form class="manual-dialog__content" (ngSubmit)="emitirManual()" (click)="$event.stopPropagation()" *ngIf="modeloManual()">
+    <header class="manual-dialog__header">
+      <h2 id="manual-dialog-title">{{ modeloManual()?.tipo === 'ACADEMICO' ? 'Gerar certificado manual' : 'Gerar honraria manual' }}</h2>
+      <p id="manual-dialog-description" class="sr-only">
+        Preencha os dados que serão impressos no certificado. Campos com asterisco são obrigatórios.
+      </p>
+      <button type="button" class="btn-close" (click)="fecharEmissaoManual()" aria-label="Fechar janela de geração manual">
+        <span class="material-symbols-rounded" aria-hidden="true">close</span>
+      </button>
+    </header>
+
+    <div class="manual-dialog__body">
+      @if (isCarregandoManual()) {
+        <div class="manual-loading" role="status" aria-live="polite">Carregando opções...</div>
+      }
+      @if (modeloManual()?.tipo === 'ACADEMICO') {
+        <div class="form-group">
+          <label for="manual-aluno">
+            Aluno cadastrado
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input #manualFirstInput
+                 id="manual-aluno"
+                 class="form-input"
+                 name="buscaAluno"
+                 type="search"
+                 autocomplete="off"
+                 placeholder="Buscar por nome ou matrícula"
+                 [ngModel]="buscaAlunoManual()"
+                 (ngModelChange)="onBuscaAlunoManual($event)"
+                 [attr.aria-expanded]="alunosFiltradosManual().length > 0"
+                 aria-controls="manual-alunos-lista"
+                 required
+                 aria-required="true">
+          @if (!manualForm.alunoId) {
+            <div id="manual-alunos-lista" class="manual-option-list" role="listbox" aria-label="Alunos encontrados">
+              @for (aluno of alunosFiltradosManual(); track aluno.id) {
+                <button type="button"
+                        class="manual-option"
+                        role="option"
+                        [attr.aria-selected]="false"
+                        (click)="selecionarAlunoManual(aluno)">
+                  <span>{{ aluno.nomeCompleto }}</span>
+                  @if (aluno.matricula) {
+                    <small>{{ aluno.matricula }}</small>
+                  }
+                </button>
+              } @empty {
+                <div class="manual-option-empty" role="status">Nenhum aluno encontrado.</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="manual-turma">
+            Curso cadastrado
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <select id="manual-turma" class="form-input" name="turmaId" [(ngModel)]="manualForm.turmaId" required aria-required="true">
+            <option value="">Selecione um curso</option>
+            @for (turma of turmasManual(); track turma.id) {
+              <option [value]="turma.id">{{ turma.nome }}{{ turma.cargaHoraria ? ' - ' + turma.cargaHoraria : '' }}</option>
+            }
+          </select>
+        </div>
+      } @else {
+        <div class="form-group">
+          <label for="manual-apoiador">
+            Apoiador cadastrado
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input #manualFirstInput
+                 id="manual-apoiador"
+                 class="form-input"
+                 name="buscaApoiador"
+                 type="search"
+                 autocomplete="off"
+                 placeholder="Buscar por nome"
+                 [ngModel]="buscaApoiadorManual()"
+                 (ngModelChange)="onBuscaApoiadorManual($event)"
+                 [attr.aria-expanded]="apoiadoresFiltradosManual().length > 0"
+                 aria-controls="manual-apoiadores-lista"
+                 required
+                 aria-required="true">
+          @if (!manualForm.apoiadorId) {
+            <div id="manual-apoiadores-lista" class="manual-option-list" role="listbox" aria-label="Apoiadores encontrados">
+              @for (apoiador of apoiadoresFiltradosManual(); track apoiador.id) {
+                <button type="button"
+                        class="manual-option"
+                        role="option"
+                        [attr.aria-selected]="false"
+                        (click)="selecionarApoiadorManual(apoiador)">
+                  <span>{{ apoiador.nomeFantasia || apoiador.nomeRazaoSocial }}</span>
+                  @if (apoiador.nomeFantasia && apoiador.nomeFantasia !== apoiador.nomeRazaoSocial) {
+                    <small>{{ apoiador.nomeRazaoSocial }}</small>
+                  }
+                </button>
+              } @empty {
+                <div class="manual-option-empty" role="status">Nenhum apoiador encontrado.</div>
+              }
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label for="manual-titulo-acao">
+            Título da ação
+            <span class="required" aria-hidden="true">*</span>
+          </label>
+          <input id="manual-titulo-acao" class="form-input" name="tituloAcao" autocomplete="off" [(ngModel)]="manualForm.tituloAcao" required aria-required="true">
+        </div>
+        <div class="form-group">
+          <label for="manual-motivo">Motivo complementar</label>
+          <textarea id="manual-motivo" class="form-input" rows="4" name="motivo" [(ngModel)]="manualForm.motivo"></textarea>
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="manual-emissao">
+          {{ modeloManual()?.tipo === 'HONRARIA' ? 'Data do evento' : 'Data de emissão' }}
+          <span class="required" aria-hidden="true">*</span>
+        </label>
+        <input id="manual-emissao" class="form-input" type="date" name="dataEmissao" [(ngModel)]="manualForm.dataEmissao" required aria-required="true">
+      </div>
+    </div>
+
+    <footer class="manual-dialog__footer">
+      <button type="button" class="btn btn-secondary" (click)="fecharEmissaoManual()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="isEmitindoManual()" [attr.aria-busy]="isEmitindoManual() ? 'true' : null">
+        {{ isEmitindoManual() ? 'Gerando...' : 'Gerar certificado' }}
+      </button>
+    </footer>
+  </form>
 </dialog>
