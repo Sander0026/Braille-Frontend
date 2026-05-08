@@ -46,6 +46,18 @@ export interface EmitirManualAcademicoPayload {
   dataEmissao?: string;
 }
 
+export interface PreviewCertificadoPdfPayload {
+  nomeAluno?: string;
+  nomeCurso?: string;
+  cargaHoraria?: string;
+  nomeApoiador?: string;
+  tituloAcao?: string;
+  dataInicio?: string;
+  dataFim?: string;
+  dataEmissao?: string;
+  motivo?: string;
+}
+
 type ModeloCertificadoApi = Omit<ModeloCertificado, 'dataCriacao' | 'dataAtualizacao'> & {
   dataCriacao?: string;
   dataAtualizacao?: string;
@@ -128,8 +140,8 @@ export class ModelosCertificadosService {
     );
   }
 
-  previewPdfReal(id: string): Observable<Blob> {
-    return this.http.post(`${this.apiUrl}/${id}/preview-pdf`, {}, {
+  previewPdfReal(id: string, payload: PreviewCertificadoPdfPayload = {}): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/${id}/preview-pdf`, payload, {
       responseType: 'blob',
     });
   }

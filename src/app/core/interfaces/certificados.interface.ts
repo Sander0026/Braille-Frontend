@@ -47,6 +47,7 @@ export interface CertificadoLayoutElement {
   color?: string;
   textAlign?: CertificadoTextAlign;
   lineHeight?: number;
+  signatureSlot?: 1 | 2;
   zIndex?: number;
   visible?: boolean;
 }
@@ -136,6 +137,7 @@ export const CERTIFICADO_LAYOUT_PADRAO: CertificadoLayoutConfig = {
       type: 'SIGNATURE_BLOCK',
       label: 'Assinatura 1',
       content: '{{NOME_RESPONSAVEL}}\n{{CARGO_RESPONSAVEL}}',
+      signatureSlot: 1,
       x: 20,
       y: 70,
       width: 20,
@@ -152,6 +154,23 @@ export const CERTIFICADO_LAYOUT_PADRAO: CertificadoLayoutConfig = {
       width: 10,
       height: 10,
       zIndex: 4,
+      visible: true,
+    },
+    {
+      id: 'codigo-validacao',
+      type: 'VALIDATION_CODE',
+      label: 'Código de validação',
+      content: '{{CODIGO_CERTIFICADO}}',
+      x: 70,
+      y: 92,
+      width: 25,
+      height: 4,
+      fontFamily: 'Open Sans',
+      fontSize: 10,
+      fontWeight: 'normal',
+      textAlign: 'center',
+      color: '#000000',
+      zIndex: 5,
       visible: true,
     },
   ],
@@ -186,6 +205,7 @@ export function normalizarCertificadoLayoutElement(
     color: element.color || '#000000',
     textAlign: element.textAlign === 'left' || element.textAlign === 'right' ? element.textAlign : 'center',
     lineHeight: element.lineHeight || 1.4,
+    signatureSlot: element.signatureSlot === 2 ? 2 : element.signatureSlot === 1 ? 1 : undefined,
     zIndex: Number.isFinite(element.zIndex) ? Number(element.zIndex) : index + 1,
     visible: element.visible !== false,
   };

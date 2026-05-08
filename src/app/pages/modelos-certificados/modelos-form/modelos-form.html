@@ -184,6 +184,43 @@
         <legend style="font-size: 1.25rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem;">Ajuste Visual Final</legend>
         <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">Arraste os elementos sobre o certificado para posicioná-los. Use os painéis abaixo para ajustar estilos.</p>
 
+        <div class="preview-data-panel" aria-label="Dados usados na prévia PDF real">
+          <h2>Dados da prévia PDF real</h2>
+          @if (formModelo.get('tipo')?.value === 'HONRARIA') {
+            <label>
+              Nome do apoiador
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.nomeApoiador"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+            <label>
+              Título da ação
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.tituloAcao"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+          } @else {
+            <label>
+              Nome do aluno
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.nomeAluno"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+            <label>
+              Curso
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.nomeCurso"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+            <label>
+              Carga horária
+              <input type="text"
+                     [(ngModel)]="previewPdfForm.cargaHoraria"
+                     [ngModelOptions]="{standalone: true}">
+            </label>
+          }
+        </div>
+
         <div *ngIf="previewBaseUrl()">
 
           <!-- ======= COMPONENTE COMPARTILHADO DE PREVIEW ======= -->

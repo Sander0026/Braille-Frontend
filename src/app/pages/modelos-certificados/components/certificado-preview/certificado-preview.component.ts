@@ -153,6 +153,9 @@ export class CertificadoPreviewComponent implements AfterViewInit, OnDestroy {
   }
 
   private isSecondSignatureElement(element: CertificadoLayoutElement): boolean {
+    if (element.signatureSlot === 2) return true;
+    if (element.signatureSlot === 1) return false;
+
     const marker = `${element.id} ${element.label} ${element.content || ''}`.toLowerCase();
     return marker.includes('assinatura-2') || marker.includes('assinatura 2') || marker.includes('segunda');
   }

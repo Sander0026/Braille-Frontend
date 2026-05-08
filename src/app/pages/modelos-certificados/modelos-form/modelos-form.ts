@@ -43,6 +43,13 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
 
   layoutConfig: CertificadoLayoutConfig = normalizarCertificadoLayoutConfig();
   selectedElementId = signal('texto-principal');
+  previewPdfForm = {
+    nomeAluno: 'Maria Aparecida dos Santos Oliveira Almeida',
+    nomeCurso: 'Curso Avançado de Braille e Tecnologias Assistivas',
+    cargaHoraria: '120 horas',
+    nomeApoiador: 'Empresa Solidária LTDA',
+    tituloAcao: 'Apoio contínuo à inclusão',
+  };
   readonly certificadoFontes = CERTIFICADO_FONTES;
 
   readonly elementTypeLabels: Record<string, string> = {
@@ -254,8 +261,21 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
   private abrirPreviewPdfReal(modeloId: string): void {
     if (this.isGerandoPreviewPdf()) return;
 
+    const isHonraria = this.formModelo.get('tipo')?.value === 'HONRARIA';
+    const payload = isHonraria
+      ? {
+          nomeApoiador: this.previewPdfForm.nomeApoiador,
+          tituloAcao: this.previewPdfForm.tituloAcao,
+          motivo: this.previewPdfForm.tituloAcao,
+        }
+      : {
+          nomeAluno: this.previewPdfForm.nomeAluno,
+          nomeCurso: this.previewPdfForm.nomeCurso,
+          cargaHoraria: this.previewPdfForm.cargaHoraria,
+        };
+
     this.isGerandoPreviewPdf.set(true);
-    this.modelosService.previewPdfReal(modeloId)
+    this.modelosService.previewPdfReal(modeloId, payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
@@ -359,6 +379,7 @@ export class ModelosForm extends BaseFormDescarte implements OnInit {
     this.addElement({
       type: 'SIGNATURE_BLOCK',
       label: `Assinatura ${numero}`,
+      signatureSlot: numero as 1 | 2,
       content: isSegundaAssinatura
         ? '{{NOME_RESPONSAVEL_2}}\n{{CARGO_RESPONSAVEL_2}}'
         : '{{NOME_RESPONSAVEL}}\n{{CARGO_RESPONSAVEL}}',
