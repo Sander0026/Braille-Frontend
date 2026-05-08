@@ -50,9 +50,17 @@
       </div>
 
       <div class="card-footer" style="flex-wrap: wrap; gap: 0.5rem;">
-        <button class="btn btn-sm btn-info" (click)="abrirPreview(modelo)" [attr.aria-label]="'Visualizar impressão de ' + modelo.nome">
+        <button class="btn btn-sm btn-info" (click)="abrirPreview(modelo)" [attr.aria-label]="'Abrir prévia visual de ' + modelo.nome">
           <span class="material-symbols-rounded" style="font-size: 1rem; vertical-align: middle;">visibility</span>
-          Visualizar
+          Prévia visual
+        </button>
+        <button class="btn btn-sm btn-primary"
+                type="button"
+                (click)="abrirPreviewPdfReal(modelo)"
+                [disabled]="isGerandoPreviewPdf() === modelo.id"
+                [attr.aria-busy]="isGerandoPreviewPdf() === modelo.id ? 'true' : null"
+                [attr.aria-label]="'Abrir PDF real de prévia de ' + modelo.nome">
+          {{ isGerandoPreviewPdf() === modelo.id ? 'Gerando...' : 'PDF real' }}
         </button>
         <button class="btn btn-sm btn-success" (click)="abrirEmissaoManual(modelo)" [attr.aria-label]="'Gerar certificado manual com ' + modelo.nome">
           Gerar Manual

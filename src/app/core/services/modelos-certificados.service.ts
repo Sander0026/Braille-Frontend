@@ -128,6 +128,12 @@ export class ModelosCertificadosService {
     );
   }
 
+  previewPdfReal(id: string): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/${id}/preview-pdf`, {}, {
+      responseType: 'blob',
+    });
+  }
+
   emitirHonrariaManual(payload: {
     modeloId: string;
     apoiadorId: string;

@@ -28,6 +28,7 @@ export class ModelosLista implements OnInit {
   erro = signal<string>('');
   
   modeloPreview = signal<ModeloCertificado | null>(null);
+  isGerandoPreviewPdf = signal<string>('');
   modeloManual = signal<ModeloCertificado | null>(null);
   isEmitindoManual = signal(false);
   isCarregandoManual = signal(false);
@@ -108,6 +109,27 @@ export class ModelosLista implements OnInit {
     if (dialog && dialog.open) {
       dialog.close();
     }
+  }
+
+  abrirPreviewPdfReal(modelo: ModeloCertificado): void {
+    if (this.isGerandoPreviewPdf()) return;
+
+    this.isGerandoPreviewPdf.set(modelo.id);
+    this.modelosService.previewPdfReal(modelo.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.isGerandoPreviewPdf.set('');
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank', 'noopener');
+          setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        },
+        error: (err: { error?: { message?: string | string[] } }) => {
+          this.isGerandoPreviewPdf.set('');
+          const msg = err.error?.message || 'Não foi possível gerar a prévia PDF real.';
+          this.toast.erro(typeof msg === 'string' ? msg : msg[0]);
+        },
+      });
   }
 
   abrirEmissaoManual(modelo: ModeloCertificado): void {
@@ -211,7 +233,7 @@ export class ModelosLista implements OnInit {
         },
         error: () => {
           this.isCarregandoManual.set(false);
-          this.toast.erro('Nao foi possivel carregar alunos e cursos.');
+          this.toast.erro('Não foi possível carregar alunos e cursos.');
         },
       });
       return;
@@ -226,7 +248,7 @@ export class ModelosLista implements OnInit {
         },
         error: () => {
           this.isCarregandoManual.set(false);
-          this.toast.erro('Nao foi possivel carregar apoiadores.');
+          this.toast.erro('Não foi possível carregar apoiadores.');
         },
       });
   }
@@ -285,7 +307,7 @@ export class ModelosLista implements OnInit {
     }
 
     if (!this.manualForm.apoiadorId || !this.manualForm.tituloAcao.trim()) {
-      this.toast.aviso('Selecione um apoiador cadastrado e informe o titulo da acao.');
+      this.toast.aviso('Selecione um apoiador cadastrado e informe o título da ação.');
       this.isEmitindoManual.set(false);
       return;
     }
