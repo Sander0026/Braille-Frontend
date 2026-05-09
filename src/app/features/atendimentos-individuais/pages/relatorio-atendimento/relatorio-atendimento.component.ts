@@ -25,8 +25,10 @@ export class RelatorioAtendimentoComponent {
   private readonly toast = inject(ToastService);
   readonly relatorio = signal<RelatorioAtendimentoIndividual | null>(null);
   readonly alunos = signal<BeneficiarioResumo[]>([]);
+  readonly alunoSelecionado = signal<BeneficiarioResumo | null>(null);
   readonly professores = signal<Usuario[]>([]);
   carregando = false;
+  exportandoPdf = false;
   readonly isProfessor = this.authService.getUser()?.role === 'PROFESSOR';
   filtros = {
     alunoId: '',
@@ -46,6 +48,7 @@ export class RelatorioAtendimentoComponent {
   }
 
   selecionarAluno(aluno: BeneficiarioResumo | null): void {
+    this.alunoSelecionado.set(aluno);
     this.filtros.alunoId = aluno?.id ?? '';
   }
 
@@ -57,10 +60,7 @@ export class RelatorioAtendimentoComponent {
   }
 
   gerar(): void {
-    if (this.filtros.dataInicio && this.filtros.dataFim && this.filtros.dataInicio > this.filtros.dataFim) {
-      this.toast.erro('A data inicial deve ser menor ou igual a data final.');
-      return;
-    }
+    if (!this.validarPeriodo()) return;
 
     this.carregando = true;
     this.api.gerar({
@@ -84,6 +84,9 @@ export class RelatorioAtendimentoComponent {
   }
 
   exportarPdf(): void {
+    if (!this.validarPeriodo() || this.exportandoPdf) return;
+
+    this.exportandoPdf = true;
     this.api.exportarPdf({
       alunoId: this.filtros.alunoId || undefined,
       professorId: this.filtros.professorId || undefined,
@@ -99,8 +102,35 @@ export class RelatorioAtendimentoComponent {
         link.download = `relatorio-atendimento-individual-${new Date().toISOString().slice(0, 10)}.pdf`;
         link.click();
         URL.revokeObjectURL(url);
+        this.exportandoPdf = false;
       },
-      error: () => this.toast.erro('Nao foi possivel exportar o PDF.'),
+      error: () => {
+        this.exportandoPdf = false;
+        this.toast.erro('Nao foi possivel exportar o PDF.');
+      },
     });
+  }
+
+  professorSelecionadoLabel(): string {
+    if (this.isProfessor) return 'Usuario logado';
+    if (!this.filtros.professorId) return 'Todos os professores';
+    return this.professores().find(professor => professor.id === this.filtros.professorId)?.nome ?? 'Professor selecionado';
+  }
+
+  alunoSelecionadoLabel(): string {
+    return this.alunoSelecionado()?.nomeCompleto ?? 'Todos os alunos';
+  }
+
+  periodoLabel(): string {
+    if (!this.filtros.dataInicio && !this.filtros.dataFim) return 'Todo o periodo';
+    return `${this.filtros.dataInicio || 'inicio'} ate ${this.filtros.dataFim || 'hoje'}`;
+  }
+
+  private validarPeriodo(): boolean {
+    if (this.filtros.dataInicio && this.filtros.dataFim && this.filtros.dataInicio > this.filtros.dataFim) {
+      this.toast.erro('A data inicial deve ser menor ou igual a data final.');
+      return false;
+    }
+    return true;
   }
 }

@@ -6,6 +6,8 @@ import { AtendimentosIndividuaisApiService } from '../../services/atendimentos-i
 import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
 import { AcompanhamentoCardComponent } from '../../components/acompanhamento-card/acompanhamento-card.component';
 import { EmptyStateAtendimentosComponent } from '../../components/empty-state-atendimentos/empty-state-atendimentos.component';
+import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-acompanhamentos-em-andamento',
@@ -16,8 +18,11 @@ import { EmptyStateAtendimentosComponent } from '../../components/empty-state-at
 })
 export class AcompanhamentosEmAndamentoComponent implements OnInit {
   private readonly api = inject(AtendimentosIndividuaisApiService);
+  private readonly authService = inject(AuthService);
+  private readonly toast = inject(ToastService);
   readonly acompanhamentos = signal<AcompanhamentoIndividual[]>([]);
   readonly carregando = signal(true);
+  readonly erro = signal('');
   busca = '';
 
   ngOnInit(): void {
@@ -26,14 +31,20 @@ export class AcompanhamentosEmAndamentoComponent implements OnInit {
 
   carregar(): void {
     this.carregando.set(true);
+    this.erro.set('');
     this.api.listar({ status: 'EM_ANDAMENTO', busca: this.busca || undefined, limit: 100 }).subscribe({
       next: res => { this.acompanhamentos.set(res.data); this.carregando.set(false); },
-      error: () => this.carregando.set(false),
+      error: () => {
+        this.carregando.set(false);
+        this.erro.set('Nao foi possivel carregar os acompanhamentos em andamento.');
+        this.toast.erro('Nao foi possivel carregar os acompanhamentos.');
+      },
     });
   }
 
-  finalizar(acompanhamento: AcompanhamentoIndividual): void {
-    if (!confirm(`Finalizar acompanhamento de ${acompanhamento.aluno?.nomeCompleto || 'aluno'}?`)) return;
-    this.api.finalizar(acompanhamento.id, {}).subscribe({ next: () => this.carregar() });
+  canCreateAtendimento(acompanhamento: AcompanhamentoIndividual): boolean {
+    const user = this.authService.getUser();
+    if (user?.role === 'ADMIN') return true;
+    return user?.role === 'PROFESSOR' && acompanhamento.professorId === user.sub;
   }
 }

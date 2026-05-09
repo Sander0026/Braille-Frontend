@@ -16,6 +16,8 @@
 
   @if (carregando()) {
     <app-empty-state-atendimentos title="Carregando acompanhamentos" description="Aguarde enquanto buscamos os registros." />
+  } @else if (erro()) {
+    <app-empty-state-atendimentos title="Falha ao carregar acompanhamentos" [description]="erro()" />
   } @else if (acompanhamentos().length === 0) {
     <app-empty-state-atendimentos title="Nenhum acompanhamento finalizado" description="Quando houver encerramentos, eles aparecerao aqui." />
   } @else {

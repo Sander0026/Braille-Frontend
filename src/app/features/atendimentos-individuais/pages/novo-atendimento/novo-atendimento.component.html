@@ -1,4 +1,23 @@
-@if (acompanhamento(); as item) {
+@if (carregando()) {
+<main class="page">
+  <section class="panel" aria-live="polite">
+    <h1>Carregando acompanhamento</h1>
+    <p>Aguarde enquanto buscamos os dados do atendimento.</p>
+  </section>
+</main>
+} @else if (erro()) {
+<main class="page">
+  <section class="panel" role="alert">
+    <h1>Nao foi possivel registrar atendimento</h1>
+    <p>{{ erro() }}</p>
+    @if (acompanhamento(); as item) {
+      <a class="back" [routerLink]="['/admin/atendimentos-individuais', item.id]">Voltar ao historico</a>
+    } @else {
+      <a class="back" routerLink="/admin/atendimentos-individuais/em-andamento">Voltar aos acompanhamentos</a>
+    }
+  </section>
+</main>
+} @else if (acompanhamento(); as item) {
 <main class="page">
   <header>
     <a [routerLink]="['/admin/atendimentos-individuais', item.id]" class="back">Voltar ao historico</a>

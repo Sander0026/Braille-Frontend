@@ -9,6 +9,7 @@ import { TimelineAtendimentosComponent } from '../../components/timeline-atendim
 import { ResumoAtendimentosComponent } from '../../components/resumo-atendimentos/resumo-atendimentos.component';
 import { calcularResumoAtendimentos } from '../../utils/calcular-resumo-atendimentos.util';
 import { AuthService } from '../../../../core/services/auth.service';
+import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-detalhe-acompanhamento',
@@ -21,8 +22,13 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(AtendimentosIndividuaisApiService);
   private readonly authService = inject(AuthService);
+  private readonly toast = inject(ToastService);
   readonly acompanhamento = signal<AcompanhamentoIndividual | null>(null);
   readonly resumo = computed(() => calcularResumoAtendimentos(this.acompanhamento()?.atendimentos ?? []));
+  readonly carregando = signal(true);
+  readonly erro = signal('');
+  readonly salvandoAssunto = signal(false);
+  readonly finalizandoAcompanhamento = signal(false);
 
   alterandoAssunto = false;
   finalizando = false;
@@ -38,12 +44,24 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   carregar(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) return;
-    this.api.buscar(id).subscribe({ next: item => this.acompanhamento.set(item) });
+    this.carregando.set(true);
+    this.erro.set('');
+    this.api.buscar(id).subscribe({
+      next: item => {
+        this.acompanhamento.set(item);
+        this.carregando.set(false);
+      },
+      error: () => {
+        this.carregando.set(false);
+        this.erro.set('Nao foi possivel carregar este acompanhamento.');
+      },
+    });
   }
 
   salvarAssunto(): void {
     const item = this.acompanhamento();
     if (!item || !this.novoAssunto.trim() || !this.motivoAlteracao.trim()) return;
+    this.salvandoAssunto.set(true);
     this.api.atualizarAssunto(item.id, {
       assuntoAtual: this.novoAssunto,
       motivoAlteracao: this.motivoAlteracao,
@@ -51,6 +69,12 @@ export class DetalheAcompanhamentoComponent implements OnInit {
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoAssunto = false;
+        this.salvandoAssunto.set(false);
+        this.toast.sucesso('Assunto atualizado com sucesso.');
+      },
+      error: () => {
+        this.salvandoAssunto.set(false);
+        this.toast.erro('Nao foi possivel atualizar o assunto.');
       },
     });
   }
@@ -58,6 +82,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   finalizar(): void {
     const item = this.acompanhamento();
     if (!item) return;
+    this.finalizandoAcompanhamento.set(true);
     this.api.finalizar(item.id, {
       resultadoFinal: this.resultadoFinal || undefined,
       resumoFinal: this.resumoFinal || undefined,
@@ -65,6 +90,12 @@ export class DetalheAcompanhamentoComponent implements OnInit {
       next: atual => {
         this.acompanhamento.set(atual);
         this.finalizando = false;
+        this.finalizandoAcompanhamento.set(false);
+        this.toast.sucesso('Acompanhamento finalizado com sucesso.');
+      },
+      error: () => {
+        this.finalizandoAcompanhamento.set(false);
+        this.toast.erro('Nao foi possivel finalizar o acompanhamento.');
       },
     });
   }

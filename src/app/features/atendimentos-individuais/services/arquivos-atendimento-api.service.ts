@@ -5,7 +5,7 @@ import { ArquivoAtendimentoIndividual, CategoriaArquivoAtendimentoIndividual } f
 
 @Injectable({ providedIn: 'root' })
 export class ArquivosAtendimentoApiService {
-  private readonly url = '/api/atendimentos-individuais/atendimentos';
+  private readonly baseUrl = '/api/atendimentos-individuais';
 
   constructor(private readonly http: HttpClient) {}
 
@@ -17,6 +17,12 @@ export class ArquivosAtendimentoApiService {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('categoria', categoria);
-    return this.http.post<ArquivoAtendimentoIndividual>(`${this.url}/${atendimentoId}/arquivos`, formData);
+    return this.http.post<ArquivoAtendimentoIndividual>(`${this.baseUrl}/atendimentos/${atendimentoId}/arquivos`, formData);
+  }
+
+  download(arquivoId: string): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/arquivos/${arquivoId}/download`, {
+      responseType: 'blob',
+    });
   }
 }

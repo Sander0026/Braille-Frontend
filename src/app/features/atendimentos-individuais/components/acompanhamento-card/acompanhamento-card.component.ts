@@ -34,8 +34,10 @@ import { StatusAcompanhamentoBadgeComponent } from '../status-acompanhamento-bad
 
       <div class="actions">
         <a class="btn-secondary" [routerLink]="['/admin/atendimentos-individuais', acompanhamento.id]">Ver historico</a>
-        @if (acompanhamento.status === 'EM_ANDAMENTO') {
+        @if (acompanhamento.status === 'EM_ANDAMENTO' && canCreateAtendimento) {
           <a class="btn-primary" [routerLink]="['/admin/atendimentos-individuais', acompanhamento.id, 'novo-atendimento']">Novo atendimento</a>
+        }
+        @if (acompanhamento.status === 'EM_ANDAMENTO' && canFinish) {
           <button type="button" class="btn-ghost" (click)="finish.emit(acompanhamento)">Finalizar</button>
         }
       </div>
@@ -60,5 +62,7 @@ import { StatusAcompanhamentoBadgeComponent } from '../status-acompanhamento-bad
 })
 export class AcompanhamentoCardComponent {
   @Input({ required: true }) acompanhamento!: AcompanhamentoIndividual;
+  @Input() canCreateAtendimento = false;
+  @Input() canFinish = false;
   @Output() finish = new EventEmitter<AcompanhamentoIndividual>();
 }

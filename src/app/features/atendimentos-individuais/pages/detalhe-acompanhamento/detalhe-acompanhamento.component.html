@@ -1,4 +1,19 @@
-@if (acompanhamento(); as item) {
+@if (carregando()) {
+<main class="page">
+  <section class="panel" aria-live="polite">
+    <h1>Carregando acompanhamento</h1>
+    <p>Aguarde enquanto buscamos o historico individual.</p>
+  </section>
+</main>
+} @else if (erro()) {
+<main class="page">
+  <section class="panel" role="alert">
+    <h1>Falha ao carregar acompanhamento</h1>
+    <p>{{ erro() }}</p>
+    <button class="secondary" type="button" (click)="carregar()">Tentar novamente</button>
+  </section>
+</main>
+} @else if (acompanhamento(); as item) {
 <main class="page">
   <header class="hero">
     <div>
@@ -41,7 +56,9 @@
       <label><span>Motivo da alteracao *</span><textarea rows="3" [(ngModel)]="motivoAlteracao"></textarea></label>
       <div class="actions">
         <button class="secondary" type="button" (click)="alterandoAssunto = false">Cancelar</button>
-        <button class="primary" type="button" (click)="salvarAssunto()">Salvar assunto</button>
+        <button class="primary" type="button" (click)="salvarAssunto()" [disabled]="salvandoAssunto()">
+          {{ salvandoAssunto() ? 'Salvando...' : 'Salvar assunto' }}
+        </button>
       </div>
     </section>
   }
@@ -53,7 +70,9 @@
       <label><span>Resumo geral</span><textarea rows="4" [(ngModel)]="resumoFinal"></textarea></label>
       <div class="actions">
         <button class="secondary" type="button" (click)="finalizando = false">Cancelar</button>
-        <button class="primary" type="button" (click)="finalizar()">Finalizar</button>
+        <button class="primary" type="button" (click)="finalizar()" [disabled]="finalizandoAcompanhamento()">
+          {{ finalizandoAcompanhamento() ? 'Finalizando...' : 'Finalizar' }}
+        </button>
       </div>
     </section>
   }

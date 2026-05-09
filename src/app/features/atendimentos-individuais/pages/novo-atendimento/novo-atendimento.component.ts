@@ -8,6 +8,7 @@ import { AtendimentoIndividual, CriarAtendimentoIndividualPayload } from '../../
 import { UploadArquivosAtendimentoComponent } from '../../components/upload-arquivos-atendimento/upload-arquivos-atendimento.component';
 import { ToastService } from '../../../../core/services/toast.service';
 import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-novo-atendimento',
@@ -21,18 +22,35 @@ export class NovoAtendimentoComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly api = inject(AtendimentosIndividuaisApiService);
   private readonly toast = inject(ToastService);
+  private readonly authService = inject(AuthService);
   readonly acompanhamento = signal<AcompanhamentoIndividual | null>(null);
   readonly atendimentoCriado = signal<AtendimentoIndividual | null>(null);
   readonly salvando = signal(false);
+  readonly carregando = signal(true);
+  readonly erro = signal('');
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) this.api.buscar(id).subscribe({ next: item => this.acompanhamento.set(item) });
+    if (!id) return;
+
+    this.api.buscar(id).subscribe({
+      next: item => {
+        this.acompanhamento.set(item);
+        this.carregando.set(false);
+        if (!this.canCreateAtendimento(item)) {
+          this.erro.set('Voce nao tem permissao para registrar atendimento neste acompanhamento.');
+        }
+      },
+      error: () => {
+        this.carregando.set(false);
+        this.erro.set('Nao foi possivel carregar o acompanhamento.');
+      },
+    });
   }
 
   salvar(payload: CriarAtendimentoIndividualPayload): void {
     const item = this.acompanhamento();
-    if (!item) return;
+    if (!item || !this.canCreateAtendimento(item)) return;
     this.salvando.set(true);
     this.api.criarAtendimento(item.id, payload).subscribe({
       next: atendimento => {
@@ -61,5 +79,12 @@ export class NovoAtendimentoComponent implements OnInit {
   cancelar(): void {
     const item = this.acompanhamento();
     if (item) this.router.navigate(['/admin/atendimentos-individuais', item.id]);
+  }
+
+  canCreateAtendimento(item: AcompanhamentoIndividual): boolean {
+    if (item.status !== 'EM_ANDAMENTO') return false;
+    const user = this.authService.getUser();
+    if (user?.role === 'ADMIN') return true;
+    return user?.role === 'PROFESSOR' && item.professorId === user.sub;
   }
 }

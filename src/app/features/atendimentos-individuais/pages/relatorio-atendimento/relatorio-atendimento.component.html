@@ -50,13 +50,22 @@
     </div>
 
     <div class="actions">
-      <button type="button" class="primary" (click)="gerar()">{{ carregando ? 'Gerando...' : 'Gerar relatorio' }}</button>
-      <button type="button" class="secondary" (click)="exportarPdf()">Exportar PDF</button>
+      <button type="button" class="primary" (click)="gerar()" [disabled]="carregando">{{ carregando ? 'Gerando...' : 'Gerar relatorio' }}</button>
+      <button type="button" class="secondary" (click)="exportarPdf()" [disabled]="exportandoPdf">{{ exportandoPdf ? 'Exportando...' : 'Exportar PDF' }}</button>
       <button type="button" class="secondary" (click)="imprimir()" [disabled]="!relatorio()">Imprimir</button>
     </div>
   </section>
 
   @if (relatorio(); as r) {
+    <section class="panel">
+      <h2>Filtros aplicados</h2>
+      <p>Aluno: <strong>{{ alunoSelecionadoLabel() }}</strong></p>
+      <p>Professor: <strong>{{ professorSelecionadoLabel() }}</strong></p>
+      <p>Periodo: <strong>{{ periodoLabel() }}</strong></p>
+      <p>Status: <strong>{{ filtros.status || 'Todos' }}</strong></p>
+      <p>Tipo: <strong>{{ filtros.tipoRegistro || 'Todos' }}</strong></p>
+    </section>
+
     <section class="panel">
       <h2>Resumo quantitativo</h2>
       <app-resumo-atendimentos [resumo]="r.totais" />
