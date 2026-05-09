@@ -9,6 +9,12 @@ export interface AcompanhamentoIndividual {
   assuntoAtual: string;
   descricao?: string | null;
   status: StatusAcompanhamentoIndividual;
+  /** Flag booleana independente do status pedagogico. Quando true, o backend projeta status='ARQUIVADO'. */
+  arquivado?: boolean;
+  arquivadoEm?: string | null;
+  arquivadoPorId?: string | null;
+  desarquivadoEm?: string | null;
+  desarquivadoPorId?: string | null;
   dataInicio: string;
   dataFinalizacao?: string | null;
   resultadoFinal?: string | null;

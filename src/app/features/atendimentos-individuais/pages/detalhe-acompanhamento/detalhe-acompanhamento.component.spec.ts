@@ -65,7 +65,7 @@ describe('DetalheAcompanhamentoComponent', () => {
 
   // ─── 1. ADMIN vê Arquivar e Desarquivar ────────────────────────────
 
-  it('ADMIN deve ver botao Arquivar quando status nao e ARQUIVADO', () => {
+  it('ADMIN deve ver botao Arquivar quando acompanhamento nao esta arquivado', () => {
     setup('ADMIN', makeAcompanhamento({ status: 'EM_ANDAMENTO' }));
 
     const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
@@ -73,8 +73,8 @@ describe('DetalheAcompanhamentoComponent', () => {
     expect(arquivarBtn).toBeTruthy();
   });
 
-  it('ADMIN deve ver botao Desarquivar quando status e ARQUIVADO', () => {
-    setup('ADMIN', makeAcompanhamento({ status: 'ARQUIVADO' }));
+  it('ADMIN deve ver botao Desarquivar quando acompanhamento esta arquivado', () => {
+    setup('ADMIN', makeAcompanhamento({ status: 'ARQUIVADO', arquivado: true }));
 
     const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
     const desarquivarBtn = buttons.find((b) => b.textContent?.trim() === 'Desarquivar');
@@ -123,7 +123,7 @@ describe('DetalheAcompanhamentoComponent', () => {
   // ─── 5. Confirmação de desarquivamento aparece ─────────────────────
 
   it('deve exibir dialogo de confirmacao ao clicar em Desarquivar', () => {
-    setup('ADMIN', makeAcompanhamento({ status: 'ARQUIVADO' }));
+    setup('ADMIN', makeAcompanhamento({ status: 'ARQUIVADO', arquivado: true }));
 
     const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
     const desarquivarBtn = buttons.find((b) => b.textContent?.trim() === 'Desarquivar');

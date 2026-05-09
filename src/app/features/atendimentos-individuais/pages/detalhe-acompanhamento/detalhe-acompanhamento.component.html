@@ -32,7 +32,7 @@
     @if (item.descricao) { <p>{{ item.descricao }}</p> }
 
     <div class="actions">
-      @if (item.status === 'EM_ANDAMENTO') {
+      @if (item.status === 'EM_ANDAMENTO' && !item.arquivado) {
         @if (canCreateAtendimento(item)) {
           <a class="primary" [routerLink]="['/admin/atendimentos-individuais', item.id, 'novo-atendimento']">Novo atendimento</a>
         }
@@ -43,10 +43,10 @@
           <button type="button" class="secondary" (click)="finalizando = true">Finalizar acompanhamento</button>
         }
       }
-      @if (canArchive() && item.status !== 'ARQUIVADO') {
+      @if (canArchive() && !item.arquivado) {
         <button type="button" class="secondary" (click)="solicitarConfirmacaoArquivo('arquivar', $event)" [disabled]="alterandoArquivo()">Arquivar</button>
       }
-      @if (canArchive() && item.status === 'ARQUIVADO') {
+      @if (canArchive() && item.arquivado) {
         <button type="button" class="secondary" (click)="solicitarConfirmacaoArquivo('desarquivar', $event)" [disabled]="alterandoArquivo()">Desarquivar</button>
       }
       <a class="secondary" routerLink="/admin/atendimentos-individuais/relatorio">Gerar relatorio</a>

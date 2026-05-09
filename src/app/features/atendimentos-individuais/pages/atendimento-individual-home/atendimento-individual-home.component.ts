@@ -19,7 +19,7 @@ export class AtendimentoIndividualHomeComponent implements OnInit {
 
   readonly emAndamento = computed(() => this.acompanhamentos().filter(a => a.status === 'EM_ANDAMENTO').length);
   readonly finalizados = computed(() => this.acompanhamentos().filter(a => a.status === 'FINALIZADO').length);
-  readonly arquivados = computed(() => this.acompanhamentos().filter(a => a.status === 'ARQUIVADO').length);
+  readonly arquivados = computed(() => this.acompanhamentos().filter(a => a.arquivado || a.status === 'ARQUIVADO').length);
   readonly alunosAcompanhados = computed(() => new Set(this.acompanhamentos().map(a => a.alunoId)).size);
   readonly canViewArquivados = computed(() => {
     const role = this.authService.getUser()?.role;
