@@ -33,6 +33,7 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
   {
     path: 'arquivados',
     canActivate: [atendimentoIndividualPermissionGuard],
+    data: { roles: ['ADMIN', 'SECRETARIA'] },
     loadComponent: () =>
       import('./pages/acompanhamentos-arquivados/acompanhamentos-arquivados.component')
         .then(m => m.AcompanhamentosArquivadosComponent),

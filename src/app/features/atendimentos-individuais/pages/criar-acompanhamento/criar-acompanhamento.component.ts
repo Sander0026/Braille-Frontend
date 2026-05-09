@@ -8,6 +8,7 @@ import { Usuario, UsuariosService } from '../../../../core/services/usuarios.ser
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 import { AtendimentosIndividuaisApiService } from '../../services/atendimentos-individuais-api.service';
+import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
 import { AlunoAutocompleteComponent } from '../../components/aluno-autocomplete/aluno-autocomplete.component';
 import { AtendimentoFormComponent } from '../../components/atendimento-form/atendimento-form.component';
 import { CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
@@ -34,6 +35,8 @@ export class CriarAcompanhamentoComponent implements OnInit {
   readonly isProfessor = signal(false);
   readonly isSecretaria = signal(false);
   readonly buscandoAlunos = signal(false);
+  readonly duplicado = signal<AcompanhamentoIndividual | null>(null);
+  readonly verificandoDuplicidade = signal(false);
 
   alunoId = '';
   professorId = '';
@@ -59,6 +62,7 @@ export class CriarAcompanhamentoComponent implements OnInit {
 
   selecionarAluno(aluno: BeneficiarioResumo | null): void {
     this.alunoId = aluno?.id ?? '';
+    this.duplicado.set(null);
   }
 
   buscarAlunos(termo: string): void {
@@ -85,13 +89,31 @@ export class CriarAcompanhamentoComponent implements OnInit {
     this.salvar();
   }
 
-  private salvar(): void {
+  continuarMesmoComDuplicidade(): void {
+    this.salvar(true);
+  }
+
+  abrirAcompanhamentoDuplicado(): void {
+    const existente = this.duplicado();
+    if (existente) this.router.navigate(['/admin/atendimentos-individuais', existente.id]);
+  }
+
+  limparDuplicidade(): void {
+    this.duplicado.set(null);
+  }
+
+  private salvar(ignorarDuplicidade = false): void {
     if (!this.alunoId || !this.assuntoAtual.trim()) {
       this.toast.erro('Informe o aluno e o assunto principal.');
       return;
     }
     if (!this.isProfessor() && !this.professorId) {
       this.toast.erro('Selecione o professor responsavel.');
+      return;
+    }
+
+    if (!ignorarDuplicidade) {
+      this.verificarDuplicidadeAntesDeSalvar();
       return;
     }
 
@@ -111,6 +133,29 @@ export class CriarAcompanhamentoComponent implements OnInit {
       error: () => {
         this.salvando.set(false);
         this.toast.erro('Nao foi possivel criar o acompanhamento.');
+      },
+    });
+  }
+
+  private verificarDuplicidadeAntesDeSalvar(): void {
+    this.verificandoDuplicidade.set(true);
+    this.api.verificarDuplicidade({
+      alunoId: this.alunoId,
+      professorId: this.isProfessor() ? undefined : this.professorId,
+      assuntoAtual: this.assuntoAtual,
+    }).subscribe({
+      next: resultado => {
+        this.verificandoDuplicidade.set(false);
+        if (resultado.duplicado && resultado.acompanhamento) {
+          this.duplicado.set(resultado.acompanhamento);
+          this.toast.erro('Ja existe um acompanhamento semelhante em andamento.');
+          return;
+        }
+        this.salvar(true);
+      },
+      error: () => {
+        this.verificandoDuplicidade.set(false);
+        this.toast.erro('Nao foi possivel verificar acompanhamentos semelhantes.');
       },
     });
   }

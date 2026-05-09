@@ -8,6 +8,8 @@ export interface RelatorioAtendimentoIndividual {
   totais: {
     atendimentosRealizados: number;
     faltasJustificadas: number;
+    faltasJustificadasComComprovante?: number;
+    faltasJustificadasSemComprovante?: number;
     faltasNaoJustificadas: number;
     cancelados: number;
   };

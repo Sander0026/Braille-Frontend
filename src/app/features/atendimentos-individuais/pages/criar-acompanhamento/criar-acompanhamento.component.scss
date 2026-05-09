@@ -9,6 +9,9 @@ textarea { resize:vertical; }
 .check { display:flex; align-items:center; gap:.55rem; }
 .check input { width:1.2rem; min-height:1.2rem; }
 .actions { display:flex; justify-content:flex-end; gap:.75rem; }
+.duplicate-alert { display:grid; gap:.7rem; padding:1rem; border:1px solid #f59e0b; border-radius:8px; background:#fffbeb; color:#78350f; }
+.duplicate-alert h2 { font-size:1rem; }
+.duplicate-actions { display:flex; justify-content:flex-end; gap:.75rem; flex-wrap:wrap; }
 .primary, .secondary { min-height:2.5rem; border-radius:8px; padding:.6rem 1rem; font-weight:900; cursor:pointer; }
 .primary { border:0; background:#f2c300; color:#111827; }
 .secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }

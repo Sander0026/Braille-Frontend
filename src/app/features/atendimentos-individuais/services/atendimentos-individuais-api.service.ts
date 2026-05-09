@@ -40,6 +40,25 @@ export class AtendimentosIndividuaisApiService {
     return this.http.post<AcompanhamentoIndividual>(`${this.url}/acompanhamentos`, payload);
   }
 
+  verificarDuplicidade(params: {
+    alunoId: string;
+    professorId?: string;
+    assuntoAtual: string;
+  }): Observable<{ duplicado: boolean; acompanhamento?: AcompanhamentoIndividual | null; mensagem?: string | null }> {
+    let httpParams = new HttpParams()
+      .set('alunoId', params.alunoId)
+      .set('assuntoAtual', params.assuntoAtual);
+
+    if (params.professorId) {
+      httpParams = httpParams.set('professorId', params.professorId);
+    }
+
+    return this.http.get<{ duplicado: boolean; acompanhamento?: AcompanhamentoIndividual | null; mensagem?: string | null }>(
+      `${this.url}/acompanhamentos/duplicidade`,
+      { params: httpParams },
+    );
+  }
+
   atualizarAssunto(id: string, payload: { assuntoAtual: string; motivoAlteracao?: string }): Observable<AcompanhamentoIndividual> {
     return this.http.patch<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}/assunto`, payload);
   }

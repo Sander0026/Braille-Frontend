@@ -20,7 +20,7 @@
     @if (!isProfessor()) {
       <label>
         <span>Professor responsavel *</span>
-        <select [(ngModel)]="professorId">
+        <select [(ngModel)]="professorId" (ngModelChange)="limparDuplicidade()">
           <option value="">Selecione um professor</option>
           @for (professor of professores(); track professor.id) {
             <option [value]="professor.id">{{ professor.nome }} - {{ professor.matricula || 'sem matricula' }}</option>
@@ -31,7 +31,7 @@
 
     <label>
       <span>Assunto principal *</span>
-      <input type="text" [(ngModel)]="assuntoAtual" maxlength="200" />
+      <input type="text" [(ngModel)]="assuntoAtual" (ngModelChange)="limparDuplicidade()" maxlength="200" />
     </label>
 
     <label>
@@ -44,6 +44,22 @@
         <input type="checkbox" [ngModel]="incluirPrimeiroAtendimento()" (ngModelChange)="incluirPrimeiroAtendimento.set($event)" />
         <span>Registrar primeiro atendimento agora</span>
       </label>
+    }
+
+    @if (duplicado(); as existente) {
+      <section class="duplicate-alert" role="alert" aria-live="assertive">
+        <h2>Acompanhamento semelhante encontrado</h2>
+        <p>
+          Ja existe um acompanhamento em andamento para este aluno, professor e assunto:
+          <strong>{{ existente.assuntoAtual }}</strong>.
+        </p>
+        <div class="duplicate-actions">
+          <button type="button" class="secondary" (click)="abrirAcompanhamentoDuplicado()">Abrir acompanhamento existente</button>
+          <button type="button" class="primary" (click)="continuarMesmoComDuplicidade()" [disabled]="salvando()">
+            Criar mesmo assim
+          </button>
+        </div>
+      </section>
     }
   </section>
 
@@ -59,8 +75,8 @@
   } @else {
     <div class="actions">
       <button type="button" class="secondary" routerLink="/admin/atendimentos-individuais">Cancelar</button>
-      <button type="button" class="primary" (click)="salvarSemPrimeiroAtendimento()" [disabled]="salvando()">
-        Criar acompanhamento
+      <button type="button" class="primary" (click)="salvarSemPrimeiroAtendimento()" [disabled]="salvando() || verificandoDuplicidade()">
+        {{ verificandoDuplicidade() ? 'Verificando...' : 'Criar acompanhamento' }}
       </button>
     </div>
   }

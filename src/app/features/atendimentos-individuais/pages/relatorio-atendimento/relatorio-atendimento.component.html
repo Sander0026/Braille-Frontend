@@ -70,6 +70,8 @@
     <section class="panel">
       <h2>Resumo quantitativo</h2>
       <app-resumo-atendimentos [resumo]="r.totais" />
+      <p>Faltas justificadas com comprovante: <strong>{{ r.totais.faltasJustificadasComComprovante || 0 }}</strong></p>
+      <p>Faltas justificadas sem comprovante: <strong>{{ r.totais.faltasJustificadasSemComprovante || 0 }}</strong></p>
       <p>Total de acompanhamentos: <strong>{{ r.totalAcompanhamentos }}</strong></p>
       <p>Total de registros: <strong>{{ r.totalRegistros }}</strong></p>
     </section>
@@ -98,6 +100,9 @@
                     </p>
                   }
                   @if (atendimento.assuntoDoDia) { <p>Assunto: {{ atendimento.assuntoDoDia }}</p> }
+                  @if (atendimento.tipoRegistro === 'FALTA_JUSTIFICADA') {
+                    <p>{{ atendimento.temComprovante ? 'Falta justificada com comprovante.' : 'Falta justificada sem comprovante.' }}</p>
+                  }
                   @if (atendimento.observacao) { <p>Observacao: {{ atendimento.observacao }}</p> }
                   @if (atendimento.evolucao) { <p>Evolucao: {{ atendimento.evolucao }}</p> }
                   @if (atendimento.dificuldades) { <p>Dificuldades: {{ atendimento.dificuldades }}</p> }

@@ -11,7 +11,9 @@
     <article><span>Em andamento</span><strong>{{ emAndamento() }}</strong></article>
     <article><span>Alunos acompanhados</span><strong>{{ alunosAcompanhados() }}</strong></article>
     <article><span>Finalizados</span><strong>{{ finalizados() }}</strong></article>
-    <article><span>Arquivados</span><strong>{{ arquivados() }}</strong></article>
+    @if (canViewArquivados()) {
+      <article><span>Arquivados</span><strong>{{ arquivados() }}</strong></article>
+    }
   </section>
 
   <nav class="cards" aria-label="Navegacao do modulo de atendimento individual">
@@ -30,11 +32,13 @@
       <strong>Finalizados</strong>
       <small>Consulte historicos encerrados.</small>
     </a>
-    <a routerLink="/admin/atendimentos-individuais/arquivados">
-      <span class="material-symbols-rounded" aria-hidden="true">inventory_2</span>
-      <strong>Arquivados</strong>
-      <small>Consulte acompanhamentos ocultados da visualizacao principal.</small>
-    </a>
+    @if (canViewArquivados()) {
+      <a routerLink="/admin/atendimentos-individuais/arquivados">
+        <span class="material-symbols-rounded" aria-hidden="true">inventory_2</span>
+        <strong>Arquivados</strong>
+        <small>Consulte acompanhamentos ocultados da visualizacao principal.</small>
+      </a>
+    }
     <a routerLink="/admin/atendimentos-individuais/relatorio">
       <span class="material-symbols-rounded" aria-hidden="true">summarize</span>
       <strong>Gerar relatorio</strong>
