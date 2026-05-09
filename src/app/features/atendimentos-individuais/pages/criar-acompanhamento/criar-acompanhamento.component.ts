@@ -33,6 +33,7 @@ export class CriarAcompanhamentoComponent implements OnInit {
   readonly incluirPrimeiroAtendimento = signal(true);
   readonly isProfessor = signal(false);
   readonly isSecretaria = signal(false);
+  readonly buscandoAlunos = signal(false);
 
   alunoId = '';
   professorId = '';
@@ -61,9 +62,16 @@ export class CriarAcompanhamentoComponent implements OnInit {
   }
 
   buscarAlunos(termo: string): void {
+    this.buscandoAlunos.set(true);
     this.beneficiariosService.buscarResumo(termo).subscribe({
-      next: alunos => this.alunos.set(alunos),
-      error: () => this.toast.erro('Nao foi possivel buscar alunos.'),
+      next: alunos => {
+        this.alunos.set(alunos);
+        this.buscandoAlunos.set(false);
+      },
+      error: () => {
+        this.buscandoAlunos.set(false);
+        this.toast.erro('Nao foi possivel buscar alunos.');
+      },
     });
   }
 

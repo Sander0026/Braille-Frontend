@@ -20,6 +20,7 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
         [attr.aria-expanded]="isOpen()"
         [attr.aria-controls]="listboxId"
         [attr.aria-activedescendant]="activeOptionId()"
+        aria-autocomplete="list"
         aria-describedby="aluno-autocomplete-status"
         autocomplete="off" />
     </label>
@@ -35,22 +36,27 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
         <button type="button" (click)="limpar()">Trocar aluno</button>
       </div>
     } @else if (isListVisible()) {
-      <ul class="results" [id]="listboxId" role="listbox" aria-label="Resultados de alunos">
-        @for (aluno of resultados(); track aluno.id; let i = $index) {
-          <li role="option" [id]="optionId(i)" [attr.aria-selected]="activeIndex() === i">
-            <button type="button" (mouseenter)="activeIndex.set(i)" (click)="selecionar(aluno)">
-              <strong>{{ aluno.nomeCompleto }}</strong>
-              <span>{{ descricaoAluno(aluno) }}</span>
-            </button>
-          </li>
-        }
-      </ul>
+      @if (loading) {
+        <div class="results status" role="status">Buscando alunos...</div>
+      } @else {
+        <ul class="results" [id]="listboxId" role="listbox" aria-label="Resultados de alunos">
+          @for (aluno of resultados(); track aluno.id; let i = $index) {
+            <li role="option" [id]="optionId(i)" [attr.aria-selected]="activeIndex() === i">
+              <button type="button" (mouseenter)="activeIndex.set(i)" (click)="selecionar(aluno)">
+                <strong>{{ aluno.nomeCompleto }}</strong>
+                <span>{{ descricaoAluno(aluno) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
     }
   `,
   styles: [`
     .field { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
     input { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; }
     .results { margin:.5rem 0 0; padding:0; list-style:none; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#fff; }
+    .status { padding:.8rem; color:#475569; font-weight:800; }
     .results button { width:100%; display:flex; justify-content:space-between; gap:1rem; border:0; background:#fff; padding:.8rem; text-align:left; cursor:pointer; }
     .results [aria-selected="true"] button { background:#f8fafc; outline:2px solid #f2c300; outline-offset:-2px; }
     .results button:hover, .results button:focus { background:#f8fafc; outline:2px solid #f2c300; outline-offset:-2px; }
@@ -64,6 +70,7 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
 export class AlunoAutocompleteComponent {
   @Input() alunos: BeneficiarioResumo[] = [];
   @Input() label = 'Aluno cadastrado';
+  @Input() loading = false;
   @Output() selected = new EventEmitter<BeneficiarioResumo | null>();
   @Output() search = new EventEmitter<string>();
 
@@ -98,6 +105,7 @@ export class AlunoAutocompleteComponent {
   statusMessage(): string {
     if (this.selecionado()) return `Aluno selecionado: ${this.selecionado()?.nomeCompleto}.`;
     if (this.termo.trim().length < 3) return 'Digite ao menos 3 caracteres para buscar aluno.';
+    if (this.loading) return 'Buscando alunos...';
     const total = this.resultados().length;
     return total ? `${total} alunos encontrados. Use as setas para navegar, Enter para selecionar e Escape para fechar.` : 'Nenhum aluno encontrado.';
   }

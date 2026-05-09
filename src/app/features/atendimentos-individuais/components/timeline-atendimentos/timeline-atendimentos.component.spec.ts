@@ -98,4 +98,35 @@ describe('TimelineAtendimentosComponent', () => {
     expect(detalhes).toContain('Presencial');
     expect(detalhes).toContain('Local Sala 3');
   });
+
+  it('deve indicar falta justificada com e sem comprovante', () => {
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ArquivosAtendimentoApiService, useValue: { download: vi.fn() } },
+        { provide: ToastService, useValue: { erro: vi.fn() } },
+      ],
+    });
+
+    const component = TestBed.runInInjectionContext(() => new TimelineAtendimentosComponent());
+
+    expect(component.comprovanteLabel({
+      id: 'atend-2',
+      acompanhamentoId: 'acomp-1',
+      alunoId: 'aluno-1',
+      professorId: 'prof-1',
+      dataAtendimento: '2026-05-08',
+      tipoRegistro: 'FALTA_JUSTIFICADA',
+      temComprovante: true,
+    })).toContain('com comprovante');
+
+    expect(component.comprovanteLabel({
+      id: 'atend-3',
+      acompanhamentoId: 'acomp-1',
+      alunoId: 'aluno-1',
+      professorId: 'prof-1',
+      dataAtendimento: '2026-05-08',
+      tipoRegistro: 'FALTA_JUSTIFICADA',
+      temComprovante: false,
+    })).toContain('sem comprovante');
+  });
 });

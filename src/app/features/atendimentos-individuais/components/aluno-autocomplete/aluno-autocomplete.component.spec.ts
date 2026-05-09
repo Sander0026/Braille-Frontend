@@ -72,4 +72,11 @@ describe('AlunoAutocompleteComponent', () => {
     expect(component.activeIndex()).toBe(-1);
     expect(component.isManuallyClosed()).toBe(true);
   });
+
+  it('deve informar carregamento enquanto busca alunos', () => {
+    component.loading = true;
+    component.termo = 'Ana';
+
+    expect(component.statusMessage()).toBe('Buscando alunos...');
+  });
 });

@@ -29,6 +29,7 @@ export class RelatorioAtendimentoComponent {
   readonly professores = signal<Usuario[]>([]);
   carregando = false;
   exportandoPdf = false;
+  buscandoAlunos = false;
   readonly isProfessor = this.authService.getUser()?.role === 'PROFESSOR';
   filtros = {
     alunoId: '',
@@ -53,9 +54,16 @@ export class RelatorioAtendimentoComponent {
   }
 
   buscarAlunos(termo: string): void {
+    this.buscandoAlunos = true;
     this.beneficiariosService.buscarResumo(termo).subscribe({
-      next: alunos => this.alunos.set(alunos),
-      error: () => this.toast.erro('Nao foi possivel buscar alunos.'),
+      next: alunos => {
+        this.alunos.set(alunos);
+        this.buscandoAlunos = false;
+      },
+      error: () => {
+        this.buscandoAlunos = false;
+        this.toast.erro('Nao foi possivel buscar alunos.');
+      },
     });
   }
 

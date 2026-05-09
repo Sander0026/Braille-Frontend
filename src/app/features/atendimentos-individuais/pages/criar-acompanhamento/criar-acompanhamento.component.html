@@ -13,6 +13,7 @@
   <section class="panel">
     <app-aluno-autocomplete
       [alunos]="alunos()"
+      [loading]="buscandoAlunos()"
       (search)="buscarAlunos($event)"
       (selected)="selecionarAluno($event)" />
 

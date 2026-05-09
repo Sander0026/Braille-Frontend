@@ -27,6 +27,7 @@ export interface AtendimentoIndividual {
   pendencias?: string | null;
   recomendacoes?: string | null;
   arquivos?: ArquivoAtendimentoIndividual[];
+  temComprovante?: boolean | null;
 }
 
 export interface CriarAtendimentoIndividualPayload {

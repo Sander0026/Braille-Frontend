@@ -8,6 +8,7 @@
     <div class="filters">
       <app-aluno-autocomplete
         [alunos]="alunos()"
+        [loading]="buscandoAlunos"
         label="Aluno"
         (search)="buscarAlunos($event)"
         (selected)="selecionarAluno($event)" />

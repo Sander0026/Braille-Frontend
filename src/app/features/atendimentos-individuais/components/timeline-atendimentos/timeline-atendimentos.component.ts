@@ -19,6 +19,7 @@ import { ToastService } from '../../../../core/services/toast.service';
             <app-tipo-registro-badge [tipo]="item.tipoRegistro" />
             @if (item.assuntoDoDia) { <h3>{{ item.assuntoDoDia }}</h3> }
             @if (detalhesAtendimento(item)) { <p class="details">{{ detalhesAtendimento(item) }}</p> }
+            @if (comprovanteLabel(item)) { <p class="proof">{{ comprovanteLabel(item) }}</p> }
             @if (item.observacao) { <p>{{ item.observacao }}</p> }
             @if (item.evolucao) { <p><strong>Evolucao:</strong> {{ item.evolucao }}</p> }
             @if (item.dificuldades) { <p><strong>Dificuldades:</strong> {{ item.dificuldades }}</p> }
@@ -48,6 +49,7 @@ import { ToastService } from '../../../../core/services/toast.service';
     h3 { margin:.55rem 0 .35rem; font-size:1rem; }
     p { margin:.35rem 0; line-height:1.5; }
     .details { color:#475569; font-weight:700; }
+    .proof { color:#7c2d12; font-weight:800; }
     .files { margin:.75rem 0 0; padding-left:1rem; }
     .files button { border:0; background:transparent; color:#0f5f95; font-weight:800; padding:.25rem 0; cursor:pointer; text-align:left; }
     .files button:focus-visible { outline:2px solid #f2c300; outline-offset:3px; }
@@ -91,6 +93,11 @@ export class TimelineAtendimentosComponent {
       item.localAtendimento ? `Local ${item.localAtendimento}` : null,
     ].filter(Boolean);
     return partes.join(' - ');
+  }
+
+  comprovanteLabel(item: AtendimentoIndividual): string {
+    if (item.tipoRegistro !== 'FALTA_JUSTIFICADA') return '';
+    return item.temComprovante ? 'Falta justificada com comprovante anexado.' : 'Falta justificada sem comprovante anexado.';
   }
 
   private formatarModalidade(modalidade: string): string {

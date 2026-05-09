@@ -44,10 +44,10 @@
         }
       }
       @if (canArchive() && item.status !== 'ARQUIVADO') {
-        <button type="button" class="secondary" (click)="confirmacaoArquivo.set('arquivar')" [disabled]="alterandoArquivo()">Arquivar</button>
+        <button type="button" class="secondary" (click)="solicitarConfirmacaoArquivo('arquivar', $event)" [disabled]="alterandoArquivo()">Arquivar</button>
       }
       @if (canArchive() && item.status === 'ARQUIVADO') {
-        <button type="button" class="secondary" (click)="confirmacaoArquivo.set('desarquivar')" [disabled]="alterandoArquivo()">Desarquivar</button>
+        <button type="button" class="secondary" (click)="solicitarConfirmacaoArquivo('desarquivar', $event)" [disabled]="alterandoArquivo()">Desarquivar</button>
       }
       <a class="secondary" routerLink="/admin/atendimentos-individuais/relatorio">Gerar relatorio</a>
     </div>
@@ -56,9 +56,9 @@
   <app-resumo-atendimentos [resumo]="resumo()" />
 
   @if (confirmacaoArquivo(); as acao) {
-    <section class="panel" role="dialog" aria-labelledby="confirmacao-arquivo-title">
+    <section class="panel" role="dialog" aria-modal="true" aria-labelledby="confirmacao-arquivo-title" aria-describedby="confirmacao-arquivo-description" (keydown)="onConfirmacaoKeydown($event)">
       <h2 id="confirmacao-arquivo-title">{{ acao === 'arquivar' ? 'Arquivar acompanhamento' : 'Desarquivar acompanhamento' }}</h2>
-      <p>
+      <p id="confirmacao-arquivo-description">
         @if (acao === 'arquivar') {
           Este acompanhamento sera ocultado das listagens principais e ficara disponivel na tela de arquivados.
         } @else {
@@ -66,7 +66,7 @@
         }
       </p>
       <div class="actions">
-        <button class="secondary" type="button" (click)="confirmacaoArquivo.set(null)" [disabled]="alterandoArquivo()">Cancelar</button>
+        <button #confirmacaoCancelar class="secondary" type="button" (click)="fecharConfirmacaoArquivo()" [disabled]="alterandoArquivo()">Cancelar</button>
         <button class="primary" type="button" (click)="acao === 'arquivar' ? arquivar() : desarquivar()" [disabled]="alterandoArquivo()">
           {{ alterandoArquivo() ? 'Processando...' : 'Confirmar' }}
         </button>

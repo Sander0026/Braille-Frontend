@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -31,6 +31,8 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   readonly finalizandoAcompanhamento = signal(false);
   readonly alterandoArquivo = signal(false);
   readonly confirmacaoArquivo = signal<'arquivar' | 'desarquivar' | null>(null);
+  @ViewChild('confirmacaoCancelar') private confirmacaoCancelar?: ElementRef<HTMLButtonElement>;
+  private ultimoBotaoConfirmacao: HTMLElement | null = null;
 
   alterandoAssunto = false;
   finalizando = false;
@@ -111,7 +113,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoArquivo.set(false);
-        this.confirmacaoArquivo.set(null);
+        this.fecharConfirmacaoArquivo();
         this.toast.sucesso('Acompanhamento arquivado com sucesso.');
       },
       error: () => {
@@ -130,7 +132,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoArquivo.set(false);
-        this.confirmacaoArquivo.set(null);
+        this.fecharConfirmacaoArquivo();
         this.toast.sucesso('Acompanhamento desarquivado com sucesso.');
       },
       error: () => {
@@ -154,6 +156,42 @@ export class DetalheAcompanhamentoComponent implements OnInit {
 
   canArchive(): boolean {
     return this.authService.getUser()?.role === 'ADMIN';
+  }
+
+  solicitarConfirmacaoArquivo(acao: 'arquivar' | 'desarquivar', event: Event): void {
+    this.ultimoBotaoConfirmacao = event.currentTarget as HTMLElement;
+    this.confirmacaoArquivo.set(acao);
+    window.setTimeout(() => this.confirmacaoCancelar?.nativeElement.focus());
+  }
+
+  fecharConfirmacaoArquivo(): void {
+    this.confirmacaoArquivo.set(null);
+    window.setTimeout(() => this.ultimoBotaoConfirmacao?.focus());
+  }
+
+  onConfirmacaoKeydown(event: KeyboardEvent): void {
+    if (event.key !== 'Tab') return;
+
+    const root = event.currentTarget as HTMLElement;
+    const focusable = Array.from(root.querySelectorAll<HTMLElement>('button:not([disabled])'));
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+      return;
+    }
+    if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.confirmacaoArquivo() && !this.alterandoArquivo()) this.fecharConfirmacaoArquivo();
   }
 
   private canMutate(item: AcompanhamentoIndividual): boolean {
