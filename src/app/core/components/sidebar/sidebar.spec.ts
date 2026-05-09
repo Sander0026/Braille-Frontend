@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 
@@ -6,11 +7,11 @@ import { Sidebar } from './sidebar';
 describe('Sidebar', () => {
   let component: Sidebar;
   let fixture: ComponentFixture<Sidebar>;
-  let routerMock: { navigateByUrl: jasmine.Spy; url: string };
+  let routerMock: { navigateByUrl: ReturnType<typeof vi.fn>; url: string };
 
   beforeEach(async () => {
     routerMock = {
-      navigateByUrl: jasmine.createSpy('navigateByUrl'),
+      navigateByUrl: vi.fn(),
       url: '/admin/dashboard',
     };
 
@@ -40,6 +41,6 @@ describe('Sidebar', () => {
   it('marca a rota atual como ativa', () => {
     routerMock.url = '/admin/modelos-certificados';
 
-    expect(component.isActive('/admin/modelos-certificados')).toBeTrue();
+    expect(component.isActive('/admin/modelos-certificados')).toBe(true);
   });
 });
