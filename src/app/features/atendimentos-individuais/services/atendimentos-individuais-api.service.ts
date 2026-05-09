@@ -11,6 +11,7 @@ import {
   CriarAtendimentoIndividualPayload,
 } from '../models/atendimento-individual.model';
 import { FiltroAcompanhamentoIndividual } from '../models/filtros-atendimento.model';
+import { DashboardAtendimentoIndividual } from '../models/dashboard-atendimento.model';
 
 @Injectable({ providedIn: 'root' })
 export class AtendimentosIndividuaisApiService {
@@ -34,6 +35,10 @@ export class AtendimentosIndividuaisApiService {
 
   buscar(id: string): Observable<AcompanhamentoIndividual> {
     return this.http.get<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}`);
+  }
+
+  dashboard(): Observable<DashboardAtendimentoIndividual> {
+    return this.http.get<DashboardAtendimentoIndividual>(`${this.url}/acompanhamentos/dashboard`);
   }
 
   criar(payload: CriarAcompanhamentoIndividualPayload): Observable<AcompanhamentoIndividual> {

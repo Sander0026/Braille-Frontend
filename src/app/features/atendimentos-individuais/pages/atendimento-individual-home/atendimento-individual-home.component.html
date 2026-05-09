@@ -33,6 +33,11 @@
       <small>Consulte historicos encerrados.</small>
     </a>
     @if (canViewArquivados()) {
+      <a routerLink="/admin/atendimentos-individuais/dashboard">
+        <span class="material-symbols-rounded" aria-hidden="true">monitoring</span>
+        <strong>Dashboard administrativo</strong>
+        <small>Acompanhe indicadores do mes, faltas e ranking de atendimentos.</small>
+      </a>
       <a routerLink="/admin/atendimentos-individuais/arquivados">
         <span class="material-symbols-rounded" aria-hidden="true">inventory_2</span>
         <strong>Arquivados</strong>

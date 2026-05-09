@@ -17,6 +17,14 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
         .then(m => m.CriarAcompanhamentoComponent),
   },
   {
+    path: 'dashboard',
+    canActivate: [atendimentoIndividualPermissionGuard],
+    data: { roles: ['ADMIN', 'SECRETARIA'] },
+    loadComponent: () =>
+      import('./pages/dashboard-atendimento/dashboard-atendimento.component')
+        .then(m => m.DashboardAtendimentoComponent),
+  },
+  {
     path: 'em-andamento',
     canActivate: [atendimentoIndividualPermissionGuard],
     loadComponent: () =>
