@@ -23,8 +23,10 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
 
     @if (selecionado()) {
       <div class="selected">
-        <strong>{{ selecionado()?.nomeCompleto }}</strong>
-        <span>{{ selecionado()?.matricula || 'Sem matricula' }}</span>
+        <div>
+          <strong>{{ selecionado()?.nomeCompleto }}</strong>
+          <span>{{ descricaoAluno(selecionado()) }}</span>
+        </div>
         <button type="button" (click)="limpar()">Trocar aluno</button>
       </div>
     } @else if (termo.trim().length >= 3) {
@@ -33,7 +35,7 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
           <li>
             <button type="button" (click)="selecionar(aluno)">
               <strong>{{ aluno.nomeCompleto }}</strong>
-              <span>{{ aluno.matricula || aluno.cpfMascarado || 'sem matricula' }}</span>
+              <span>{{ descricaoAluno(aluno) }}</span>
             </button>
           </li>
         }
@@ -47,6 +49,8 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
     .results button { width:100%; display:flex; justify-content:space-between; gap:1rem; border:0; background:#fff; padding:.8rem; text-align:left; cursor:pointer; }
     .results button:hover, .results button:focus { background:#f8fafc; outline:2px solid #f2c300; outline-offset:-2px; }
     .selected { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:.5rem; padding:.75rem; border-radius:8px; background:#f8fafc; }
+    .selected div { display:grid; gap:.2rem; }
+    .selected span, .results span { color:#64748b; font-size:.9rem; }
     .selected button { border:1px solid #cbd5e1; border-radius:8px; background:#fff; padding:.45rem .7rem; font-weight:800; cursor:pointer; }
     .sr-only { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
   `],
@@ -62,12 +66,8 @@ export class AlunoAutocompleteComponent {
   readonly selecionado = signal<BeneficiarioResumo | null>(null);
 
   readonly resultados = computed(() => {
-    const q = this.termo.trim().toLowerCase();
-    if (q.length < 3) return [];
-    return this.alunos.filter((aluno) => {
-      const texto = `${aluno.nomeCompleto} ${aluno.matricula ?? ''} ${aluno.cpfMascarado ?? ''}`.toLowerCase();
-      return texto.includes(q);
-    }).slice(0, 10);
+    if (this.termo.trim().length < 3) return [];
+    return this.alunos.slice(0, 10);
   });
 
   statusMessage(): string {
@@ -96,5 +96,15 @@ export class AlunoAutocompleteComponent {
     this.selecionado.set(null);
     this.termo = '';
     this.selected.emit(null);
+  }
+
+  descricaoAluno(aluno: BeneficiarioResumo | null): string {
+    if (!aluno) return 'Sem matricula';
+    const partes = [
+      aluno.matricula ? `Matricula: ${aluno.matricula}` : null,
+      aluno.cpfMascarado ? `CPF: ${aluno.cpfMascarado}` : null,
+    ].filter(Boolean);
+
+    return partes.length ? partes.join(' - ') : 'Sem matricula';
   }
 }
