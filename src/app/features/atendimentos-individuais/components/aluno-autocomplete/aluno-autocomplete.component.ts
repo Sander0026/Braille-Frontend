@@ -34,7 +34,7 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
         </div>
         <button type="button" (click)="limpar()">Trocar aluno</button>
       </div>
-    } @else if (termo.trim().length >= 3) {
+    } @else if (isListVisible()) {
       <ul class="results" [id]="listboxId" role="listbox" aria-label="Resultados de alunos">
         @for (aluno of resultados(); track aluno.id; let i = $index) {
           <li role="option" [id]="optionId(i)" [attr.aria-selected]="activeIndex() === i">
@@ -72,6 +72,7 @@ export class AlunoAutocompleteComponent {
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
   readonly selecionado = signal<BeneficiarioResumo | null>(null);
   readonly activeIndex = signal(-1);
+  readonly isManuallyClosed = signal(false);
 
   readonly resultados = computed(() => {
     if (this.termo.trim().length < 3) return [];
@@ -79,7 +80,11 @@ export class AlunoAutocompleteComponent {
   });
 
   isOpen(): boolean {
-    return !this.selecionado() && this.termo.trim().length >= 3 && this.resultados().length > 0;
+    return this.isListVisible() && this.resultados().length > 0;
+  }
+
+  isListVisible(): boolean {
+    return !this.selecionado() && !this.isManuallyClosed() && this.termo.trim().length >= 3;
   }
 
   activeOptionId(): string | null {
@@ -94,13 +99,14 @@ export class AlunoAutocompleteComponent {
     if (this.selecionado()) return `Aluno selecionado: ${this.selecionado()?.nomeCompleto}.`;
     if (this.termo.trim().length < 3) return 'Digite ao menos 3 caracteres para buscar aluno.';
     const total = this.resultados().length;
-    return total ? `${total} alunos encontrados. Use Tab para navegar e Enter para selecionar.` : 'Nenhum aluno encontrado.';
+    return total ? `${total} alunos encontrados. Use as setas para navegar, Enter para selecionar e Escape para fechar.` : 'Nenhum aluno encontrado.';
   }
 
   onSearchChange(value: string): void {
     this.termo = value;
     if (this.searchTimer) clearTimeout(this.searchTimer);
     this.activeIndex.set(-1);
+    this.isManuallyClosed.set(false);
     const q = value.trim();
     if (q.length < 3 || this.selecionado()) return;
 
@@ -132,12 +138,14 @@ export class AlunoAutocompleteComponent {
     if (event.key === 'Escape') {
       event.preventDefault();
       this.activeIndex.set(-1);
+      this.isManuallyClosed.set(true);
     }
   }
 
   selecionar(aluno: BeneficiarioResumo): void {
     this.selecionado.set(aluno);
     this.activeIndex.set(-1);
+    this.isManuallyClosed.set(true);
     this.termo = aluno.nomeCompleto;
     this.selected.emit(aluno);
   }
@@ -145,6 +153,7 @@ export class AlunoAutocompleteComponent {
   limpar(): void {
     this.selecionado.set(null);
     this.activeIndex.set(-1);
+    this.isManuallyClosed.set(false);
     this.termo = '';
     this.selected.emit(null);
   }

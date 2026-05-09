@@ -30,6 +30,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   readonly salvandoAssunto = signal(false);
   readonly finalizandoAcompanhamento = signal(false);
   readonly alterandoArquivo = signal(false);
+  readonly confirmacaoArquivo = signal<'arquivar' | 'desarquivar' | null>(null);
 
   alterandoAssunto = false;
   finalizando = false;
@@ -110,6 +111,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoArquivo.set(false);
+        this.confirmacaoArquivo.set(null);
         this.toast.sucesso('Acompanhamento arquivado com sucesso.');
       },
       error: () => {
@@ -128,6 +130,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoArquivo.set(false);
+        this.confirmacaoArquivo.set(null);
         this.toast.sucesso('Acompanhamento desarquivado com sucesso.');
       },
       error: () => {
