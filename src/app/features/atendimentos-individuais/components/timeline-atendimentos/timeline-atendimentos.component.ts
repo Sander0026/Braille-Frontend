@@ -18,6 +18,7 @@ import { ToastService } from '../../../../core/services/toast.service';
           <div class="content">
             <app-tipo-registro-badge [tipo]="item.tipoRegistro" />
             @if (item.assuntoDoDia) { <h3>{{ item.assuntoDoDia }}</h3> }
+            @if (detalhesAtendimento(item)) { <p class="details">{{ detalhesAtendimento(item) }}</p> }
             @if (item.observacao) { <p>{{ item.observacao }}</p> }
             @if (item.evolucao) { <p><strong>Evolucao:</strong> {{ item.evolucao }}</p> }
             @if (item.dificuldades) { <p><strong>Dificuldades:</strong> {{ item.dificuldades }}</p> }
@@ -46,6 +47,7 @@ import { ToastService } from '../../../../core/services/toast.service';
     .content { border-left:3px solid #f2c300; padding:0 0 0 1rem; }
     h3 { margin:.55rem 0 .35rem; font-size:1rem; }
     p { margin:.35rem 0; line-height:1.5; }
+    .details { color:#475569; font-weight:700; }
     .files { margin:.75rem 0 0; padding-left:1rem; }
     .files button { border:0; background:transparent; color:#0f5f95; font-weight:800; padding:.25rem 0; cursor:pointer; text-align:left; }
     .files button:focus-visible { outline:2px solid #f2c300; outline-offset:3px; }
@@ -78,5 +80,26 @@ export class TimelineAtendimentosComponent {
         this.toast.erro('Nao foi possivel abrir o arquivo anexado.');
       },
     });
+  }
+
+  detalhesAtendimento(item: AtendimentoIndividual): string {
+    const partes = [
+      item.horaInicio ? `Inicio ${item.horaInicio}` : null,
+      item.horaFim ? `Fim ${item.horaFim}` : null,
+      item.duracaoMinutos ? `${item.duracaoMinutos} min` : null,
+      item.modalidade ? this.formatarModalidade(item.modalidade) : null,
+      item.localAtendimento ? `Local ${item.localAtendimento}` : null,
+    ].filter(Boolean);
+    return partes.join(' - ');
+  }
+
+  private formatarModalidade(modalidade: string): string {
+    const labels: Record<string, string> = {
+      PRESENCIAL: 'Presencial',
+      REMOTO: 'Remoto',
+      TELEFONE: 'Telefone',
+      OUTRO: 'Outro',
+    };
+    return labels[modalidade] ?? modalidade;
   }
 }

@@ -29,6 +29,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   readonly erro = signal('');
   readonly salvandoAssunto = signal(false);
   readonly finalizandoAcompanhamento = signal(false);
+  readonly alterandoArquivo = signal(false);
 
   alterandoAssunto = false;
   finalizando = false;
@@ -100,6 +101,42 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     });
   }
 
+  arquivar(): void {
+    const item = this.acompanhamento();
+    if (!item || !this.canArchive()) return;
+
+    this.alterandoArquivo.set(true);
+    this.api.arquivar(item.id).subscribe({
+      next: atual => {
+        this.acompanhamento.set(atual);
+        this.alterandoArquivo.set(false);
+        this.toast.sucesso('Acompanhamento arquivado com sucesso.');
+      },
+      error: () => {
+        this.alterandoArquivo.set(false);
+        this.toast.erro('Nao foi possivel arquivar o acompanhamento.');
+      },
+    });
+  }
+
+  desarquivar(): void {
+    const item = this.acompanhamento();
+    if (!item || !this.canArchive()) return;
+
+    this.alterandoArquivo.set(true);
+    this.api.desarquivar(item.id).subscribe({
+      next: atual => {
+        this.acompanhamento.set(atual);
+        this.alterandoArquivo.set(false);
+        this.toast.sucesso('Acompanhamento desarquivado com sucesso.');
+      },
+      error: () => {
+        this.alterandoArquivo.set(false);
+        this.toast.erro('Nao foi possivel desarquivar o acompanhamento.');
+      },
+    });
+  }
+
   canCreateAtendimento(item: AcompanhamentoIndividual): boolean {
     return item.status === 'EM_ANDAMENTO' && this.canMutate(item);
   }
@@ -110,6 +147,10 @@ export class DetalheAcompanhamentoComponent implements OnInit {
 
   canFinish(item: AcompanhamentoIndividual): boolean {
     return item.status === 'EM_ANDAMENTO' && this.canMutate(item);
+  }
+
+  canArchive(): boolean {
+    return this.authService.getUser()?.role === 'ADMIN';
   }
 
   private canMutate(item: AcompanhamentoIndividual): boolean {

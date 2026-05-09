@@ -31,6 +31,13 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
         .then(m => m.AcompanhamentosFinalizadosComponent),
   },
   {
+    path: 'arquivados',
+    canActivate: [atendimentoIndividualPermissionGuard],
+    loadComponent: () =>
+      import('./pages/acompanhamentos-arquivados/acompanhamentos-arquivados.component')
+        .then(m => m.AcompanhamentosArquivadosComponent),
+  },
+  {
     path: 'relatorio',
     canActivate: [atendimentoIndividualPermissionGuard],
     loadComponent: () =>

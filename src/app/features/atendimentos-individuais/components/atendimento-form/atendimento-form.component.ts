@@ -27,6 +27,38 @@ import {
         <input type="date" [(ngModel)]="value.dataAtendimento" name="dataAtendimento" required />
       </label>
 
+      <div class="three-cols">
+        <label>
+          <span>Inicio</span>
+          <input type="time" [(ngModel)]="value.horaInicio" name="horaInicio" />
+        </label>
+        <label>
+          <span>Fim</span>
+          <input type="time" [(ngModel)]="value.horaFim" name="horaFim" />
+        </label>
+        <label>
+          <span>Duracao (min)</span>
+          <input type="number" min="1" max="1440" [(ngModel)]="value.duracaoMinutos" name="duracaoMinutos" />
+        </label>
+      </div>
+
+      <div class="two-cols">
+        <label>
+          <span>Modalidade</span>
+          <select [(ngModel)]="value.modalidade" name="modalidade">
+            <option [ngValue]="undefined">Nao informar</option>
+            <option value="PRESENCIAL">Presencial</option>
+            <option value="REMOTO">Remoto</option>
+            <option value="TELEFONE">Telefone</option>
+            <option value="OUTRO">Outro</option>
+          </select>
+        </label>
+        <label>
+          <span>Local</span>
+          <input type="text" [(ngModel)]="value.localAtendimento" name="localAtendimento" maxlength="120" placeholder="Sala, endereco ou plataforma" />
+        </label>
+      </div>
+
       @if (value.tipoRegistro === 'ATENDIMENTO_REALIZADO') {
         <label>
           <span>Assunto do dia *</span>
@@ -70,12 +102,13 @@ import {
     input, select, textarea { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; background:#fff; }
     textarea { resize:vertical; }
     .two-cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+    .three-cols { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
     .actions { display:flex; justify-content:flex-end; gap:.75rem; }
     .btn-primary, .btn-secondary { min-height:2.5rem; border-radius:8px; padding:.55rem .9rem; font-weight:800; cursor:pointer; }
     .btn-primary { border:0; background:#f2c300; color:#111827; }
     .btn-secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }
     .error { min-height:1.25rem; color:#b91c1c; margin:0; font-weight:700; }
-    @media (max-width:760px) { .two-cols { grid-template-columns:1fr; } .actions { flex-direction:column; } }
+    @media (max-width:760px) { .two-cols, .three-cols { grid-template-columns:1fr; } .actions { flex-direction:column; } }
   `],
 })
 export class AtendimentoFormComponent {
@@ -93,11 +126,17 @@ export class AtendimentoFormComponent {
   submit(): void {
     this.error = this.validate();
     if (this.error) return;
-    this.save.emit({ ...this.value });
+    this.save.emit(this.normalizarPayload());
   }
 
   private validate(): string {
     if (!this.value.dataAtendimento) return 'Informe a data do atendimento.';
+    if (this.value.horaInicio && this.value.horaFim && this.value.horaFim <= this.value.horaInicio) {
+      return 'O horario de fim deve ser posterior ao horario de inicio.';
+    }
+    if (this.value.duracaoMinutos && (this.value.duracaoMinutos < 1 || this.value.duracaoMinutos > 1440)) {
+      return 'Informe uma duracao entre 1 e 1440 minutos.';
+    }
     if (this.value.tipoRegistro === 'ATENDIMENTO_REALIZADO') {
       if (!this.value.assuntoDoDia?.trim()) return 'Informe o assunto do dia.';
       if (!this.value.observacao?.trim()) return 'Informe a observacao do atendimento.';
@@ -106,5 +145,14 @@ export class AtendimentoFormComponent {
       return 'Informe o motivo da falta justificada.';
     }
     return '';
+  }
+
+  private normalizarPayload(): CriarAtendimentoIndividualPayload {
+    const payload: CriarAtendimentoIndividualPayload = { ...this.value };
+    Object.keys(payload).forEach((key) => {
+      const value = payload[key as keyof CriarAtendimentoIndividualPayload];
+      if (value === '') delete payload[key as keyof CriarAtendimentoIndividualPayload];
+    });
+    return payload;
   }
 }

@@ -86,6 +86,16 @@
               @for (atendimento of acomp.atendimentos; track atendimento.id) {
                 <li>
                   <strong>{{ atendimento.dataAtendimento | date:'dd/MM/yyyy' }} - {{ atendimento.tipoRegistro }}</strong>
+                  @if (atendimento.horaInicio || atendimento.horaFim || atendimento.duracaoMinutos || atendimento.modalidade || atendimento.localAtendimento) {
+                    <p>
+                      Detalhes:
+                      @if (atendimento.horaInicio) { Inicio {{ atendimento.horaInicio }} }
+                      @if (atendimento.horaFim) { Fim {{ atendimento.horaFim }} }
+                      @if (atendimento.duracaoMinutos) { {{ atendimento.duracaoMinutos }} min }
+                      @if (atendimento.modalidade) { {{ atendimento.modalidade }} }
+                      @if (atendimento.localAtendimento) { Local {{ atendimento.localAtendimento }} }
+                    </p>
+                  }
                   @if (atendimento.assuntoDoDia) { <p>Assunto: {{ atendimento.assuntoDoDia }}</p> }
                   @if (atendimento.observacao) { <p>Observacao: {{ atendimento.observacao }}</p> }
                   @if (atendimento.evolucao) { <p>Evolucao: {{ atendimento.evolucao }}</p> }

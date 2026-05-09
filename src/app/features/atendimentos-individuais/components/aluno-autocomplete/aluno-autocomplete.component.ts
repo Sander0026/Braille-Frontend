@@ -14,7 +14,12 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
         type="search"
         [(ngModel)]="termo"
         (ngModelChange)="onSearchChange($event)"
+        (keydown)="onKeydown($event)"
         placeholder="Busque por nome, CPF ou matricula"
+        role="combobox"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="listboxId"
+        [attr.aria-activedescendant]="activeOptionId()"
         aria-describedby="aluno-autocomplete-status"
         autocomplete="off" />
     </label>
@@ -30,10 +35,10 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
         <button type="button" (click)="limpar()">Trocar aluno</button>
       </div>
     } @else if (termo.trim().length >= 3) {
-      <ul class="results">
-        @for (aluno of resultados(); track aluno.id) {
-          <li>
-            <button type="button" (click)="selecionar(aluno)">
+      <ul class="results" [id]="listboxId" role="listbox" aria-label="Resultados de alunos">
+        @for (aluno of resultados(); track aluno.id; let i = $index) {
+          <li role="option" [id]="optionId(i)" [attr.aria-selected]="activeIndex() === i">
+            <button type="button" (mouseenter)="activeIndex.set(i)" (click)="selecionar(aluno)">
               <strong>{{ aluno.nomeCompleto }}</strong>
               <span>{{ descricaoAluno(aluno) }}</span>
             </button>
@@ -47,6 +52,7 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
     input { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; }
     .results { margin:.5rem 0 0; padding:0; list-style:none; border:1px solid #cbd5e1; border-radius:8px; overflow:hidden; background:#fff; }
     .results button { width:100%; display:flex; justify-content:space-between; gap:1rem; border:0; background:#fff; padding:.8rem; text-align:left; cursor:pointer; }
+    .results [aria-selected="true"] button { background:#f8fafc; outline:2px solid #f2c300; outline-offset:-2px; }
     .results button:hover, .results button:focus { background:#f8fafc; outline:2px solid #f2c300; outline-offset:-2px; }
     .selected { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-top:.5rem; padding:.75rem; border-radius:8px; background:#f8fafc; }
     .selected div { display:grid; gap:.2rem; }
@@ -62,13 +68,27 @@ export class AlunoAutocompleteComponent {
   @Output() search = new EventEmitter<string>();
 
   termo = '';
+  readonly listboxId = `aluno-autocomplete-${Math.random().toString(36).slice(2)}-listbox`;
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
   readonly selecionado = signal<BeneficiarioResumo | null>(null);
+  readonly activeIndex = signal(-1);
 
   readonly resultados = computed(() => {
     if (this.termo.trim().length < 3) return [];
     return this.alunos.slice(0, 10);
   });
+
+  isOpen(): boolean {
+    return !this.selecionado() && this.termo.trim().length >= 3 && this.resultados().length > 0;
+  }
+
+  activeOptionId(): string | null {
+    return this.activeIndex() >= 0 ? this.optionId(this.activeIndex()) : null;
+  }
+
+  optionId(index: number): string {
+    return `${this.listboxId}-option-${index}`;
+  }
 
   statusMessage(): string {
     if (this.selecionado()) return `Aluno selecionado: ${this.selecionado()?.nomeCompleto}.`;
@@ -80,20 +100,51 @@ export class AlunoAutocompleteComponent {
   onSearchChange(value: string): void {
     this.termo = value;
     if (this.searchTimer) clearTimeout(this.searchTimer);
+    this.activeIndex.set(-1);
     const q = value.trim();
     if (q.length < 3 || this.selecionado()) return;
 
     this.searchTimer = setTimeout(() => this.search.emit(q), 300);
   }
 
+  onKeydown(event: KeyboardEvent): void {
+    const resultados = this.resultados();
+    if (!resultados.length) return;
+
+    if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.activeIndex.set((this.activeIndex() + 1) % resultados.length);
+      return;
+    }
+
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.activeIndex.set(this.activeIndex() <= 0 ? resultados.length - 1 : this.activeIndex() - 1);
+      return;
+    }
+
+    if (event.key === 'Enter' && this.activeIndex() >= 0) {
+      event.preventDefault();
+      this.selecionar(resultados[this.activeIndex()]);
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.activeIndex.set(-1);
+    }
+  }
+
   selecionar(aluno: BeneficiarioResumo): void {
     this.selecionado.set(aluno);
+    this.activeIndex.set(-1);
     this.termo = aluno.nomeCompleto;
     this.selected.emit(aluno);
   }
 
   limpar(): void {
     this.selecionado.set(null);
+    this.activeIndex.set(-1);
     this.termo = '';
     this.selected.emit(null);
   }

@@ -43,6 +43,12 @@
           <button type="button" class="secondary" (click)="finalizando = true">Finalizar acompanhamento</button>
         }
       }
+      @if (canArchive() && item.status !== 'ARQUIVADO') {
+        <button type="button" class="secondary" (click)="arquivar()" [disabled]="alterandoArquivo()">Arquivar</button>
+      }
+      @if (canArchive() && item.status === 'ARQUIVADO') {
+        <button type="button" class="secondary" (click)="desarquivar()" [disabled]="alterandoArquivo()">Desarquivar</button>
+      }
       <a class="secondary" routerLink="/admin/atendimentos-individuais/relatorio">Gerar relatorio</a>
     </div>
   </section>
