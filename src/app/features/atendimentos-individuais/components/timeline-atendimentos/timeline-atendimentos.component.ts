@@ -70,7 +70,7 @@ export class TimelineAtendimentosComponent {
         link.href = url;
         link.download = arquivo.nomeOriginal || 'arquivo-atendimento';
         link.click();
-        URL.revokeObjectURL(url);
+        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
         this.baixandoId.set(null);
       },
       error: () => {
