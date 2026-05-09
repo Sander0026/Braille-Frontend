@@ -5,12 +5,13 @@ import { AtendimentosIndividuaisApiService } from '../../services/atendimentos-i
 import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
 import { AcompanhamentoCardComponent } from '../../components/acompanhamento-card/acompanhamento-card.component';
 import { EmptyStateAtendimentosComponent } from '../../components/empty-state-atendimentos/empty-state-atendimentos.component';
+import { PaginationComponent } from '../../components/pagination/pagination.component';
 import { ToastService } from '../../../../core/services/toast.service';
 
 @Component({
   selector: 'app-acompanhamentos-arquivados',
   standalone: true,
-  imports: [CommonModule, FormsModule, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent],
+  imports: [CommonModule, FormsModule, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent],
   templateUrl: './acompanhamentos-arquivados.component.html',
   styleUrl: '../acompanhamentos-em-andamento/acompanhamentos-em-andamento.component.scss',
 })

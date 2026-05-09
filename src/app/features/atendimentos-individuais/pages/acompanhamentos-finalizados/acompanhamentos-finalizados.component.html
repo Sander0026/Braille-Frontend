@@ -26,10 +26,12 @@
         <app-acompanhamento-card [acompanhamento]="acompanhamento" />
       }
     </section>
-    <nav class="pagination" aria-label="Paginacao de acompanhamentos finalizados">
-      <button type="button" (click)="paginaAnterior()" [disabled]="page() <= 1">Anterior</button>
-      <span>Pagina {{ page() }} de {{ lastPage() }} - {{ total() }} registros</span>
-      <button type="button" (click)="proximaPagina()" [disabled]="page() >= lastPage()">Proxima</button>
-    </nav>
+    <app-pagination
+      [page]="page()"
+      [lastPage]="lastPage()"
+      [total]="total()"
+      [loading]="carregando()"
+      (previous)="paginaAnterior()"
+      (next)="proximaPagina()" />
   }
 </main>

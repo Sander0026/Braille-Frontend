@@ -134,4 +134,38 @@ describe('DetalheAcompanhamentoComponent', () => {
     expect(dialog).toBeTruthy();
     expect(dialog.textContent).toContain('Desarquivar acompanhamento');
   });
+
+  it('Escape deve fechar a confirmacao de arquivamento', () => {
+    setup('ADMIN', makeAcompanhamento({ status: 'EM_ANDAMENTO' }));
+
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const arquivarBtn = buttons.find((b) => b.textContent?.trim() === 'Arquivar');
+    arquivarBtn?.click();
+    fixture.detectChanges();
+
+    expect(component.confirmacaoArquivo()).toBe('arquivar');
+
+    component.onEscape();
+    fixture.detectChanges();
+
+    expect(component.confirmacaoArquivo()).toBeNull();
+    expect(fixture.nativeElement.querySelector('[role="dialog"]')).toBeFalsy();
+  });
+
+  it('deve devolver foco ao botao que abriu a confirmacao', () => {
+    vi.useFakeTimers();
+    setup('ADMIN', makeAcompanhamento({ status: 'EM_ANDAMENTO' }));
+
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const arquivarBtn = buttons.find((b) => b.textContent?.trim() === 'Arquivar')!;
+    const focusSpy = vi.spyOn(arquivarBtn, 'focus');
+
+    arquivarBtn.click();
+    fixture.detectChanges();
+    component.fecharConfirmacaoArquivo();
+    vi.runAllTimers();
+
+    expect(focusSpy).toHaveBeenCalled();
+    vi.useRealTimers();
+  });
 });
