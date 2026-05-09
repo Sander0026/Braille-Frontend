@@ -43,7 +43,10 @@ export class CriarAcompanhamentoComponent implements OnInit {
     this.isProfessor.set(this.authService.getUser()?.role === 'PROFESSOR');
     this.beneficiariosService.listar(1, 200, undefined, false).subscribe({ next: res => this.alunos.set(res.data) });
     if (!this.isProfessor()) {
-      this.usuariosService.listar(1, 200, undefined, false, 'PROFESSOR').subscribe({ next: res => this.professores.set(res.data) });
+      this.usuariosService.listarResumo(1, 100, undefined, 'PROFESSOR').subscribe({
+        next: res => this.professores.set(res.data),
+        error: () => this.toast.erro('Nao foi possivel carregar os professores disponiveis.'),
+      });
     }
   }
 

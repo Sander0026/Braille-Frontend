@@ -7,11 +7,22 @@
   </header>
 
   <section class="panel">
-    <app-atendimento-form
-      [saving]="salvando()"
-      submitLabel="Salvar atendimento"
-      (save)="salvar($event)"
-      (cancel)="cancelar()" />
+    @if (!atendimentoCriado()) {
+      <app-atendimento-form
+        [saving]="salvando()"
+        submitLabel="Salvar atendimento"
+        (save)="salvar($event)"
+        (cancel)="cancelar()" />
+    } @else {
+      <h2>Anexos do atendimento</h2>
+      <p>O atendimento foi salvo. Anexe atestados, documentos ou materiais relacionados, se necessario.</p>
+      <app-upload-arquivos-atendimento
+        [atendimentoId]="atendimentoCriado()!.id" />
+
+      <div class="actions">
+        <button type="button" class="primary" (click)="finalizarFluxo()">Concluir</button>
+      </div>
+    }
   </section>
 </main>
 }

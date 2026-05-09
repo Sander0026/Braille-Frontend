@@ -23,7 +23,7 @@ import { ArquivoAtendimentoIndividual, CategoriaArquivoAtendimentoIndividual } f
 
       <label>
         <span>Arquivo</span>
-        <input type="file" accept=".pdf,.png,.jpg,.jpeg,.docx" (change)="selecionar($event)" />
+        <input type="file" accept=".pdf,.png,.jpg,.jpeg" (change)="selecionar($event)" />
       </label>
 
       <p aria-live="polite">{{ status }}</p>
@@ -43,7 +43,7 @@ export class UploadArquivosAtendimentoComponent {
   @Output() uploaded = new EventEmitter<ArquivoAtendimentoIndividual>();
 
   categoria: CategoriaArquivoAtendimentoIndividual = 'OUTRO';
-  status = 'Selecione PDF, imagem ou DOCX com ate 10 MB.';
+  status = 'Selecione PDF, PNG, JPG ou JPEG com ate 10 MB.';
 
   selecionar(event: Event): void {
     const file = (event.target as HTMLInputElement).files?.[0];

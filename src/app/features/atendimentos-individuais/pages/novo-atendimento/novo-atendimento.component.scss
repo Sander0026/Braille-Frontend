@@ -3,4 +3,6 @@
 h1 { margin:.35rem 0 0; font-size:1.7rem; }
 p { margin:.35rem 0 0; color:#64748b; }
 .panel { padding:1rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; }
+.actions { display:flex; justify-content:flex-end; margin-top:1rem; }
+.primary { min-height:2.5rem; border:0; border-radius:8px; padding:.55rem .9rem; background:#f2c300; color:#111827; font-weight:800; cursor:pointer; }
 @media (max-width:760px) { .page { padding:1rem; } }
