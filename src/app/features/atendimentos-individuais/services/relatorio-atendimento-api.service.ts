@@ -20,4 +20,8 @@ export class RelatorioAtendimentoApiService {
 
     return this.http.get<RelatorioAtendimentoIndividual>(this.url, { params });
   }
+
+  exportarPdf(filtros: FiltroRelatorioAtendimento = {}): Observable<Blob> {
+    return this.http.post(`${this.url}/pdf`, filtros, { responseType: 'blob' });
+  }
 }

@@ -7,6 +7,7 @@ import { AtendimentoFormComponent } from '../../components/atendimento-form/aten
 import { AtendimentoIndividual, CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
 import { UploadArquivosAtendimentoComponent } from '../../components/upload-arquivos-atendimento/upload-arquivos-atendimento.component';
 import { ToastService } from '../../../../core/services/toast.service';
+import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
 
 @Component({
   selector: 'app-novo-atendimento',
@@ -49,6 +50,12 @@ export class NovoAtendimentoComponent implements OnInit {
   finalizarFluxo(): void {
     const item = this.acompanhamento();
     if (item) this.router.navigate(['/admin/atendimentos-individuais', item.id]);
+  }
+
+  categoriaPadraoAnexo(): CategoriaArquivoAtendimentoIndividual {
+    return this.atendimentoCriado()?.tipoRegistro === 'FALTA_JUSTIFICADA'
+      ? 'ATESTADO'
+      : 'OUTRO';
   }
 
   cancelar(): void {

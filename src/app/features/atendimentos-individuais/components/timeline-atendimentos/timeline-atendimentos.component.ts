@@ -23,7 +23,7 @@ import { TipoRegistroBadgeComponent } from '../tipo-registro-badge/tipo-registro
             @if (item.arquivos?.length) {
               <ul class="files" aria-label="Arquivos anexados">
                 @for (arquivo of item.arquivos; track arquivo.id) {
-                  <li><a [href]="arquivo.urlArquivo" target="_blank" rel="noopener">{{ arquivo.nomeOriginal }}</a></li>
+                  <li><a [href]="arquivo.downloadUrl" target="_blank" rel="noopener">{{ arquivo.nomeOriginal }}</a></li>
                 }
               </ul>
             }

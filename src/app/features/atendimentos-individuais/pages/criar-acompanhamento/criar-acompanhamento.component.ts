@@ -48,7 +48,6 @@ export class CriarAcompanhamentoComponent implements OnInit {
       this.incluirPrimeiroAtendimento.set(false);
     }
 
-    this.beneficiariosService.listar(1, 200, undefined, false).subscribe({ next: res => this.alunos.set(res.data) });
     if (!this.isProfessor()) {
       this.usuariosService.listarResumo(1, 100, undefined, 'PROFESSOR').subscribe({
         next: res => this.professores.set(res.data),
@@ -59,6 +58,13 @@ export class CriarAcompanhamentoComponent implements OnInit {
 
   selecionarAluno(aluno: Beneficiario | null): void {
     this.alunoId = aluno?.id ?? '';
+  }
+
+  buscarAlunos(termo: string): void {
+    this.beneficiariosService.buscarResumo(termo).subscribe({
+      next: alunos => this.alunos.set(alunos),
+      error: () => this.toast.erro('Nao foi possivel buscar alunos.'),
+    });
   }
 
   capturarPrimeiroAtendimento(payload: CriarAtendimentoIndividualPayload): void {

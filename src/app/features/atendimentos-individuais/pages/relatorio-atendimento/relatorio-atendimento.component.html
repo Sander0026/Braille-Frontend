@@ -9,6 +9,7 @@
       <app-aluno-autocomplete
         [alunos]="alunos()"
         label="Aluno"
+        (search)="buscarAlunos($event)"
         (selected)="selecionarAluno($event)" />
 
       @if (!isProfessor) {
@@ -50,6 +51,7 @@
 
     <div class="actions">
       <button type="button" class="primary" (click)="gerar()">{{ carregando ? 'Gerando...' : 'Gerar relatorio' }}</button>
+      <button type="button" class="secondary" (click)="exportarPdf()">Exportar PDF</button>
       <button type="button" class="secondary" (click)="imprimir()" [disabled]="!relatorio()">Imprimir</button>
     </div>
   </section>

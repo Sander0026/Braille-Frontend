@@ -5,7 +5,7 @@ export interface ArquivoAtendimentoIndividual {
   atendimentoId: string;
   nomeOriginal: string;
   nomeArquivo: string;
-  urlArquivo: string;
+  downloadUrl: string;
   tipoArquivo: string;
   tamanho: number;
   categoria: CategoriaArquivoAtendimentoIndividual;

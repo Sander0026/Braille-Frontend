@@ -1,11 +1,20 @@
 <main class="page">
   <header>
     <h1>Criar acompanhamento individual</h1>
-    <p>Selecione o aluno, defina o assunto principal e registre o primeiro atendimento se desejar.</p>
+    <p>
+      @if (isSecretaria()) {
+        Selecione o aluno, defina o professor responsavel e crie o acompanhamento para registro posterior do professor.
+      } @else {
+        Selecione o aluno, defina o assunto principal e registre o primeiro atendimento se desejar.
+      }
+    </p>
   </header>
 
   <section class="panel">
-    <app-aluno-autocomplete [alunos]="alunos()" (selected)="selecionarAluno($event)" />
+    <app-aluno-autocomplete
+      [alunos]="alunos()"
+      (search)="buscarAlunos($event)"
+      (selected)="selecionarAluno($event)" />
 
     @if (!isProfessor()) {
       <label>

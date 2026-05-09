@@ -142,6 +142,11 @@ export class BeneficiariosService {
         return req$;
     }
 
+    buscarResumo(busca: string): Observable<Beneficiario[]> {
+        let params = new HttpParams().set('busca', busca);
+        return this.http.get<Beneficiario[]>(`${this.url}/search`, { params });
+    }
+
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {
         let params = new HttpParams();
         if (busca) params = params.set('busca', busca);

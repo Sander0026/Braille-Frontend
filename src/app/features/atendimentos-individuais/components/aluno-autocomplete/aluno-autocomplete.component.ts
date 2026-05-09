@@ -55,8 +55,10 @@ export class AlunoAutocompleteComponent {
   @Input() alunos: Beneficiario[] = [];
   @Input() label = 'Aluno cadastrado';
   @Output() selected = new EventEmitter<Beneficiario | null>();
+  @Output() search = new EventEmitter<string>();
 
   termo = '';
+  private searchTimer: ReturnType<typeof setTimeout> | null = null;
   readonly selecionado = signal<Beneficiario | null>(null);
 
   readonly resultados = computed(() => {
@@ -77,6 +79,11 @@ export class AlunoAutocompleteComponent {
 
   onSearchChange(value: string): void {
     this.termo = value;
+    if (this.searchTimer) clearTimeout(this.searchTimer);
+    const q = value.trim();
+    if (q.length < 3 || this.selecionado()) return;
+
+    this.searchTimer = setTimeout(() => this.search.emit(q), 300);
   }
 
   selecionar(aluno: Beneficiario): void {

@@ -17,7 +17,8 @@
       <h2>Anexos do atendimento</h2>
       <p>O atendimento foi salvo. Anexe atestados, documentos ou materiais relacionados, se necessario.</p>
       <app-upload-arquivos-atendimento
-        [atendimentoId]="atendimentoCriado()!.id" />
+        [atendimentoId]="atendimentoCriado()!.id"
+        [categoriaPadrao]="categoriaPadraoAnexo()" />
 
       <div class="actions">
         <button type="button" class="primary" (click)="finalizarFluxo()">Concluir</button>

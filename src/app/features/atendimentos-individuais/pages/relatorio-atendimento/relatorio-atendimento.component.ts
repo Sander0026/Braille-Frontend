@@ -38,7 +38,6 @@ export class RelatorioAtendimentoComponent {
   };
 
   constructor() {
-    this.beneficiariosService.listar(1, 200, undefined, false).subscribe({ next: res => this.alunos.set(res.data) });
     if (!this.isProfessor) {
       this.usuariosService.listarResumo(1, 100, undefined, 'PROFESSOR').subscribe({
         next: res => this.professores.set(res.data),
@@ -48,6 +47,13 @@ export class RelatorioAtendimentoComponent {
 
   selecionarAluno(aluno: Beneficiario | null): void {
     this.filtros.alunoId = aluno?.id ?? '';
+  }
+
+  buscarAlunos(termo: string): void {
+    this.beneficiariosService.buscarResumo(termo).subscribe({
+      next: alunos => this.alunos.set(alunos),
+      error: () => this.toast.erro('Nao foi possivel buscar alunos.'),
+    });
   }
 
   gerar(): void {
@@ -75,5 +81,26 @@ export class RelatorioAtendimentoComponent {
 
   imprimir(): void {
     window.print();
+  }
+
+  exportarPdf(): void {
+    this.api.exportarPdf({
+      alunoId: this.filtros.alunoId || undefined,
+      professorId: this.filtros.professorId || undefined,
+      dataInicio: this.filtros.dataInicio || undefined,
+      dataFim: this.filtros.dataFim || undefined,
+      status: this.filtros.status as any || undefined,
+      tipoRegistro: this.filtros.tipoRegistro as any || undefined,
+    }).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `relatorio-atendimento-individual-${new Date().toISOString().slice(0, 10)}.pdf`;
+        link.click();
+        URL.revokeObjectURL(url);
+      },
+      error: () => this.toast.erro('Nao foi possivel exportar o PDF.'),
+    });
   }
 }
