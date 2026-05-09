@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Beneficiario } from '../../../../core/services/beneficiarios.service';
+import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.service';
 
 @Component({
   selector: 'app-aluno-autocomplete',
@@ -33,7 +33,7 @@ import { Beneficiario } from '../../../../core/services/beneficiarios.service';
           <li>
             <button type="button" (click)="selecionar(aluno)">
               <strong>{{ aluno.nomeCompleto }}</strong>
-              <span>{{ aluno.matricula || 'sem matricula' }}</span>
+              <span>{{ aluno.matricula || aluno.cpfMascarado || 'sem matricula' }}</span>
             </button>
           </li>
         }
@@ -52,20 +52,20 @@ import { Beneficiario } from '../../../../core/services/beneficiarios.service';
   `],
 })
 export class AlunoAutocompleteComponent {
-  @Input() alunos: Beneficiario[] = [];
+  @Input() alunos: BeneficiarioResumo[] = [];
   @Input() label = 'Aluno cadastrado';
-  @Output() selected = new EventEmitter<Beneficiario | null>();
+  @Output() selected = new EventEmitter<BeneficiarioResumo | null>();
   @Output() search = new EventEmitter<string>();
 
   termo = '';
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
-  readonly selecionado = signal<Beneficiario | null>(null);
+  readonly selecionado = signal<BeneficiarioResumo | null>(null);
 
   readonly resultados = computed(() => {
     const q = this.termo.trim().toLowerCase();
     if (q.length < 3) return [];
     return this.alunos.filter((aluno) => {
-      const texto = `${aluno.nomeCompleto} ${aluno.matricula ?? ''} ${aluno.cpf ?? ''}`.toLowerCase();
+      const texto = `${aluno.nomeCompleto} ${aluno.matricula ?? ''} ${aluno.cpfMascarado ?? ''}`.toLowerCase();
       return texto.includes(q);
     }).slice(0, 10);
   });
@@ -86,7 +86,7 @@ export class AlunoAutocompleteComponent {
     this.searchTimer = setTimeout(() => this.search.emit(q), 300);
   }
 
-  selecionar(aluno: Beneficiario): void {
+  selecionar(aluno: BeneficiarioResumo): void {
     this.selecionado.set(aluno);
     this.termo = aluno.nomeCompleto;
     this.selected.emit(aluno);

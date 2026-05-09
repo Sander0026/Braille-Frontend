@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RouterLink } from '@angular/router';
-import { Beneficiario, BeneficiariosService } from '../../../../core/services/beneficiarios.service';
+import { BeneficiarioResumo, BeneficiariosService } from '../../../../core/services/beneficiarios.service';
 import { Usuario, UsuariosService } from '../../../../core/services/usuarios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -27,7 +27,7 @@ export class CriarAcompanhamentoComponent implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly router = inject(Router);
 
-  readonly alunos = signal<Beneficiario[]>([]);
+  readonly alunos = signal<BeneficiarioResumo[]>([]);
   readonly professores = signal<Usuario[]>([]);
   readonly salvando = signal(false);
   readonly incluirPrimeiroAtendimento = signal(true);
@@ -56,7 +56,7 @@ export class CriarAcompanhamentoComponent implements OnInit {
     }
   }
 
-  selecionarAluno(aluno: Beneficiario | null): void {
+  selecionarAluno(aluno: BeneficiarioResumo | null): void {
     this.alunoId = aluno?.id ?? '';
   }
 

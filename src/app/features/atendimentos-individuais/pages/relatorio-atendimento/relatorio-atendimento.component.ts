@@ -5,7 +5,7 @@ import { RelatorioAtendimentoApiService } from '../../services/relatorio-atendim
 import { RelatorioAtendimentoIndividual } from '../../models/relatorio-atendimento.model';
 import { ResumoAtendimentosComponent } from '../../components/resumo-atendimentos/resumo-atendimentos.component';
 import { AlunoAutocompleteComponent } from '../../components/aluno-autocomplete/aluno-autocomplete.component';
-import { Beneficiario, BeneficiariosService } from '../../../../core/services/beneficiarios.service';
+import { BeneficiarioResumo, BeneficiariosService } from '../../../../core/services/beneficiarios.service';
 import { Usuario, UsuariosService } from '../../../../core/services/usuarios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
@@ -24,7 +24,7 @@ export class RelatorioAtendimentoComponent {
   private readonly authService = inject(AuthService);
   private readonly toast = inject(ToastService);
   readonly relatorio = signal<RelatorioAtendimentoIndividual | null>(null);
-  readonly alunos = signal<Beneficiario[]>([]);
+  readonly alunos = signal<BeneficiarioResumo[]>([]);
   readonly professores = signal<Usuario[]>([]);
   carregando = false;
   readonly isProfessor = this.authService.getUser()?.role === 'PROFESSOR';
@@ -45,7 +45,7 @@ export class RelatorioAtendimentoComponent {
     }
   }
 
-  selecionarAluno(aluno: Beneficiario | null): void {
+  selecionarAluno(aluno: BeneficiarioResumo | null): void {
     this.filtros.alunoId = aluno?.id ?? '';
   }
 

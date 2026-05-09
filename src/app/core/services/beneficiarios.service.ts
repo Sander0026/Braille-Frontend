@@ -66,6 +66,14 @@ export interface Beneficiario {
     }[];
 }
 
+export interface BeneficiarioResumo {
+    id: string;
+    nomeCompleto: string;
+    matricula?: string | null;
+    cpfMascarado?: string | null;
+    statusAtivo: boolean;
+}
+
 export type BeneficiarioPayload = Partial<
     Omit<Beneficiario, 'id' | 'statusAtivo' | 'criadoEm' | 'matricula' | 'matriculasOficina'>
 >;
@@ -142,9 +150,9 @@ export class BeneficiariosService {
         return req$;
     }
 
-    buscarResumo(busca: string): Observable<Beneficiario[]> {
+    buscarResumo(busca: string): Observable<BeneficiarioResumo[]> {
         let params = new HttpParams().set('busca', busca);
-        return this.http.get<Beneficiario[]>(`${this.url}/search`, { params });
+        return this.http.get<BeneficiarioResumo[]>(`${this.url}/search`, { params });
     }
 
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {
