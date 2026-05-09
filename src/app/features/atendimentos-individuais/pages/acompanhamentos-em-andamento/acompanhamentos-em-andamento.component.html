@@ -10,9 +10,9 @@
   <section class="toolbar">
     <label>
       <span>Buscar</span>
-      <input type="search" [(ngModel)]="busca" placeholder="Nome, matricula ou assunto" (keyup.enter)="carregar()" />
+      <input type="search" [(ngModel)]="busca" placeholder="Nome, matricula ou assunto" (keyup.enter)="filtrar()" />
     </label>
-    <button type="button" (click)="carregar()">Filtrar</button>
+    <button type="button" (click)="filtrar()">Filtrar</button>
   </section>
 
   @if (carregando()) {
@@ -29,5 +29,10 @@
           [canCreateAtendimento]="canCreateAtendimento(acompanhamento)" />
       }
     </section>
+    <nav class="pagination" aria-label="Paginacao de acompanhamentos em andamento">
+      <button type="button" (click)="paginaAnterior()" [disabled]="page() <= 1">Anterior</button>
+      <span>Pagina {{ page() }} de {{ lastPage() }} - {{ total() }} registros</span>
+      <button type="button" (click)="proximaPagina()" [disabled]="page() >= lastPage()">Proxima</button>
+    </nav>
   }
 </main>

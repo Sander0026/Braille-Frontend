@@ -66,8 +66,11 @@ export class TimelineAtendimentosComponent {
     this.arquivosApi.download(arquivo.id).subscribe({
       next: blob => {
         const url = URL.createObjectURL(blob);
-        window.open(url, '_blank', 'noopener');
-        window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = arquivo.nomeOriginal || 'arquivo-atendimento';
+        link.click();
+        URL.revokeObjectURL(url);
         this.baixandoId.set(null);
       },
       error: () => {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
@@ -37,9 +37,6 @@ import { StatusAcompanhamentoBadgeComponent } from '../status-acompanhamento-bad
         @if (acompanhamento.status === 'EM_ANDAMENTO' && canCreateAtendimento) {
           <a class="btn-primary" [routerLink]="['/admin/atendimentos-individuais', acompanhamento.id, 'novo-atendimento']">Novo atendimento</a>
         }
-        @if (acompanhamento.status === 'EM_ANDAMENTO' && canFinish) {
-          <button type="button" class="btn-ghost" (click)="finish.emit(acompanhamento)">Finalizar</button>
-        }
       </div>
     </article>
   `,
@@ -63,6 +60,4 @@ import { StatusAcompanhamentoBadgeComponent } from '../status-acompanhamento-bad
 export class AcompanhamentoCardComponent {
   @Input({ required: true }) acompanhamento!: AcompanhamentoIndividual;
   @Input() canCreateAtendimento = false;
-  @Input() canFinish = false;
-  @Output() finish = new EventEmitter<AcompanhamentoIndividual>();
 }

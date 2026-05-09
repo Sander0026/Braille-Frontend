@@ -7,4 +7,8 @@ p { margin:.35rem 0 0; color:#64748b; }
 label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
 input { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; }
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(21rem,1fr)); gap:1rem; }
+.pagination { display:flex; align-items:center; justify-content:flex-end; gap:.75rem; flex-wrap:wrap; }
+.pagination button { min-height:2.5rem; border:1px solid #cbd5e1; border-radius:8px; background:#fff; padding:.55rem .9rem; font-weight:800; cursor:pointer; }
+.pagination button:disabled { color:#94a3b8; cursor:not-allowed; }
+.pagination span { color:#475569; font-weight:800; }
 @media (max-width:760px) { .page { padding:1rem; } header, .toolbar { grid-template-columns:1fr; flex-direction:column; } .primary { width:100%; text-align:center; } }
