@@ -38,6 +38,8 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
     } @else if (isListVisible()) {
       @if (loading) {
         <div class="results status" role="status">Buscando alunos...</div>
+      } @else if (!resultados().length) {
+        <div class="results status" role="status">Nenhum aluno encontrado.</div>
       } @else {
         <ul class="results" [id]="listboxId" role="listbox" aria-label="Resultados de alunos">
           @for (aluno of resultados(); track aluno.id; let i = $index) {

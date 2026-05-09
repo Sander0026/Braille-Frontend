@@ -31,6 +31,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   readonly finalizandoAcompanhamento = signal(false);
   readonly alterandoArquivo = signal(false);
   readonly confirmacaoArquivo = signal<'arquivar' | 'desarquivar' | null>(null);
+  @ViewChild('confirmacaoDialog') private confirmacaoDialog?: ElementRef<HTMLElement>;
   @ViewChild('confirmacaoCancelar') private confirmacaoCancelar?: ElementRef<HTMLButtonElement>;
   private ultimoBotaoConfirmacao: HTMLElement | null = null;
 
@@ -161,7 +162,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   solicitarConfirmacaoArquivo(acao: 'arquivar' | 'desarquivar', event: Event): void {
     this.ultimoBotaoConfirmacao = event.currentTarget as HTMLElement;
     this.confirmacaoArquivo.set(acao);
-    window.setTimeout(() => this.confirmacaoCancelar?.nativeElement.focus());
+    window.setTimeout(() => this.confirmacaoDialog?.nativeElement.focus());
   }
 
   fecharConfirmacaoArquivo(): void {
@@ -173,11 +174,16 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     if (event.key !== 'Tab') return;
 
     const root = event.currentTarget as HTMLElement;
-    const focusable = Array.from(root.querySelectorAll<HTMLElement>('button:not([disabled])'));
+    const focusable = Array.from(root.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'));
     if (!focusable.length) return;
 
     const first = focusable[0];
     const last = focusable[focusable.length - 1];
+    if (document.activeElement === root) {
+      event.preventDefault();
+      (event.shiftKey ? last : first).focus();
+      return;
+    }
     if (event.shiftKey && document.activeElement === first) {
       event.preventDefault();
       last.focus();
