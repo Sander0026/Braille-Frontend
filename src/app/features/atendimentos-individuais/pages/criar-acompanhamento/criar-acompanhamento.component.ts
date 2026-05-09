@@ -32,6 +32,7 @@ export class CriarAcompanhamentoComponent implements OnInit {
   readonly salvando = signal(false);
   readonly incluirPrimeiroAtendimento = signal(true);
   readonly isProfessor = signal(false);
+  readonly isSecretaria = signal(false);
 
   alunoId = '';
   professorId = '';
@@ -40,7 +41,13 @@ export class CriarAcompanhamentoComponent implements OnInit {
   primeiroAtendimento: CriarAtendimentoIndividualPayload | null = null;
 
   ngOnInit(): void {
-    this.isProfessor.set(this.authService.getUser()?.role === 'PROFESSOR');
+    const role = this.authService.getUser()?.role;
+    this.isProfessor.set(role === 'PROFESSOR');
+    this.isSecretaria.set(role === 'SECRETARIA');
+    if (this.isSecretaria()) {
+      this.incluirPrimeiroAtendimento.set(false);
+    }
+
     this.beneficiariosService.listar(1, 200, undefined, false).subscribe({ next: res => this.alunos.set(res.data) });
     if (!this.isProfessor()) {
       this.usuariosService.listarResumo(1, 100, undefined, 'PROFESSOR').subscribe({

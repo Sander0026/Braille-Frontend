@@ -8,6 +8,7 @@ import { StatusAcompanhamentoBadgeComponent } from '../../components/status-acom
 import { TimelineAtendimentosComponent } from '../../components/timeline-atendimentos/timeline-atendimentos.component';
 import { ResumoAtendimentosComponent } from '../../components/resumo-atendimentos/resumo-atendimentos.component';
 import { calcularResumoAtendimentos } from '../../utils/calcular-resumo-atendimentos.util';
+import { AuthService } from '../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detalhe-acompanhamento',
@@ -19,6 +20,7 @@ import { calcularResumoAtendimentos } from '../../utils/calcular-resumo-atendime
 export class DetalheAcompanhamentoComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly api = inject(AtendimentosIndividuaisApiService);
+  private readonly authService = inject(AuthService);
   readonly acompanhamento = signal<AcompanhamentoIndividual | null>(null);
   readonly resumo = computed(() => calcularResumoAtendimentos(this.acompanhamento()?.atendimentos ?? []));
 
@@ -65,5 +67,23 @@ export class DetalheAcompanhamentoComponent implements OnInit {
         this.finalizando = false;
       },
     });
+  }
+
+  canCreateAtendimento(item: AcompanhamentoIndividual): boolean {
+    return item.status === 'EM_ANDAMENTO' && this.canMutate(item);
+  }
+
+  canUpdateSubject(item: AcompanhamentoIndividual): boolean {
+    return item.status === 'EM_ANDAMENTO' && this.canMutate(item);
+  }
+
+  canFinish(item: AcompanhamentoIndividual): boolean {
+    return item.status === 'EM_ANDAMENTO' && this.canMutate(item);
+  }
+
+  private canMutate(item: AcompanhamentoIndividual): boolean {
+    const user = this.authService.getUser();
+    if (user?.role === 'ADMIN') return true;
+    return user?.role === 'PROFESSOR' && item.professorId === user.sub;
   }
 }

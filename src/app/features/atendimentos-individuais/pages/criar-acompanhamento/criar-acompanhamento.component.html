@@ -29,10 +29,12 @@
       <textarea rows="4" [(ngModel)]="descricao" maxlength="2000"></textarea>
     </label>
 
-    <label class="check">
-      <input type="checkbox" [ngModel]="incluirPrimeiroAtendimento()" (ngModelChange)="incluirPrimeiroAtendimento.set($event)" />
-      <span>Registrar primeiro atendimento agora</span>
-    </label>
+    @if (!isSecretaria()) {
+      <label class="check">
+        <input type="checkbox" [ngModel]="incluirPrimeiroAtendimento()" (ngModelChange)="incluirPrimeiroAtendimento.set($event)" />
+        <span>Registrar primeiro atendimento agora</span>
+      </label>
+    }
   </section>
 
   @if (incluirPrimeiroAtendimento()) {

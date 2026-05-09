@@ -18,9 +18,15 @@
 
     <div class="actions">
       @if (item.status === 'EM_ANDAMENTO') {
-        <a class="primary" [routerLink]="['/admin/atendimentos-individuais', item.id, 'novo-atendimento']">Novo atendimento</a>
-        <button type="button" class="secondary" (click)="alterandoAssunto = true; novoAssunto = item.assuntoAtual">Modificar assunto</button>
-        <button type="button" class="secondary" (click)="finalizando = true">Finalizar acompanhamento</button>
+        @if (canCreateAtendimento(item)) {
+          <a class="primary" [routerLink]="['/admin/atendimentos-individuais', item.id, 'novo-atendimento']">Novo atendimento</a>
+        }
+        @if (canUpdateSubject(item)) {
+          <button type="button" class="secondary" (click)="alterandoAssunto = true; novoAssunto = item.assuntoAtual">Modificar assunto</button>
+        }
+        @if (canFinish(item)) {
+          <button type="button" class="secondary" (click)="finalizando = true">Finalizar acompanhamento</button>
+        }
       }
       <a class="secondary" routerLink="/admin/atendimentos-individuais/relatorio">Gerar relatorio</a>
     </div>
@@ -28,7 +34,7 @@
 
   <app-resumo-atendimentos [resumo]="resumo()" />
 
-  @if (alterandoAssunto) {
+  @if (alterandoAssunto && canUpdateSubject(item)) {
     <section class="panel">
       <h2>Modificar assunto</h2>
       <label><span>Novo assunto *</span><input type="text" [(ngModel)]="novoAssunto" /></label>
@@ -40,7 +46,7 @@
     </section>
   }
 
-  @if (finalizando) {
+  @if (finalizando && canFinish(item)) {
     <section class="panel">
       <h2>Finalizar acompanhamento</h2>
       <label><span>Resultado final</span><input type="text" [(ngModel)]="resultadoFinal" /></label>
