@@ -41,6 +41,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   motivoAlteracao = '';
   resultadoFinal = '';
   resumoFinal = '';
+  motivoArquivamentoTexto = '';
 
   ngOnInit(): void {
     this.carregar();
@@ -107,13 +108,14 @@ export class DetalheAcompanhamentoComponent implements OnInit {
 
   arquivar(): void {
     const item = this.acompanhamento();
-    if (!item || !this.canArchive()) return;
+    if (!item || !this.canArchive() || !this.motivoArquivamentoTexto.trim()) return;
 
     this.alterandoArquivo.set(true);
-    this.api.arquivar(item.id).subscribe({
+    this.api.arquivar(item.id, this.motivoArquivamentoTexto.trim()).subscribe({
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoArquivo.set(false);
+        this.motivoArquivamentoTexto = '';
         this.fecharConfirmacaoArquivo();
         this.toast.sucesso('Acompanhamento arquivado com sucesso.');
       },
@@ -126,13 +128,14 @@ export class DetalheAcompanhamentoComponent implements OnInit {
 
   desarquivar(): void {
     const item = this.acompanhamento();
-    if (!item || !this.canArchive()) return;
+    if (!item || !this.canArchive() || !this.motivoArquivamentoTexto.trim()) return;
 
     this.alterandoArquivo.set(true);
-    this.api.desarquivar(item.id).subscribe({
+    this.api.desarquivar(item.id, this.motivoArquivamentoTexto.trim()).subscribe({
       next: atual => {
         this.acompanhamento.set(atual);
         this.alterandoArquivo.set(false);
+        this.motivoArquivamentoTexto = '';
         this.fecharConfirmacaoArquivo();
         this.toast.sucesso('Acompanhamento desarquivado com sucesso.');
       },
@@ -167,6 +170,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
 
   fecharConfirmacaoArquivo(): void {
     this.confirmacaoArquivo.set(null);
+    this.motivoArquivamentoTexto = '';
     window.setTimeout(() => this.ultimoBotaoConfirmacao?.focus());
   }
 

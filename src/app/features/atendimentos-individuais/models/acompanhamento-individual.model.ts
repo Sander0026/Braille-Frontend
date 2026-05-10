@@ -15,6 +15,8 @@ export interface AcompanhamentoIndividual {
   arquivadoPorId?: string | null;
   desarquivadoEm?: string | null;
   desarquivadoPorId?: string | null;
+  motivoArquivamento?: string | null;
+  motivoDesarquivamento?: string | null;
   dataInicio: string;
   dataFinalizacao?: string | null;
   resultadoFinal?: string | null;

@@ -76,12 +76,12 @@ export class AtendimentosIndividuaisApiService {
     return this.http.patch<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}/reabrir`, {});
   }
 
-  arquivar(id: string): Observable<AcompanhamentoIndividual> {
-    return this.http.patch<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}/arquivar`, {});
+  arquivar(id: string, motivo: string): Observable<AcompanhamentoIndividual> {
+    return this.http.patch<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}/arquivar`, { motivo });
   }
 
-  desarquivar(id: string): Observable<AcompanhamentoIndividual> {
-    return this.http.patch<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}/desarquivar`, {});
+  desarquivar(id: string, motivo: string): Observable<AcompanhamentoIndividual> {
+    return this.http.patch<AcompanhamentoIndividual>(`${this.url}/acompanhamentos/${id}/desarquivar`, { motivo });
   }
 
   criarAtendimento(acompanhamentoId: string, payload: CriarAtendimentoIndividualPayload): Observable<AtendimentoIndividual> {

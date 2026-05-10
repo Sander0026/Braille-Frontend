@@ -17,4 +17,5 @@ input, textarea { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8p
 .dialog-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:1rem; background:rgba(15,23,42,.58); }
 .dialog-panel { display:grid; gap:1rem; width:min(100%, 34rem); padding:1.25rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; box-shadow:0 24px 60px rgba(15,23,42,.28); outline:0; }
 .dialog-panel:focus { box-shadow:0 0 0 3px #f2c300, 0 24px 60px rgba(15,23,42,.28); }
+.motivo-arquivamento { padding:.75rem 1rem; border-left:3px solid #f59e0b; background:#fffbeb; border-radius:4px; color:#92400e; font-size:.9rem; line-height:1.5; }
 @media (max-width:760px) { .page { padding:1rem; } .hero, .actions { flex-direction:column; align-items:stretch; } }

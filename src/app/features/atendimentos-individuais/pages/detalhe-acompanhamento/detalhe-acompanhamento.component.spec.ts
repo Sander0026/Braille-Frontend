@@ -168,4 +168,77 @@ describe('DetalheAcompanhamentoComponent', () => {
     expect(focusSpy).toHaveBeenCalled();
     vi.useRealTimers();
   });
+
+  // ─── 9. ADMIN não vê ações pedagógicas em acompanhamento arquivado ──
+
+  it('ADMIN nao deve ver acoes pedagogicas em acompanhamento arquivado', () => {
+    setup('ADMIN', makeAcompanhamento({ status: 'EM_ANDAMENTO', arquivado: true }));
+
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const links: HTMLAnchorElement[] = Array.from(fixture.nativeElement.querySelectorAll('a'));
+
+    const novoAtendimentoLink = links.find((a) => a.textContent?.includes('Novo atendimento'));
+    const modificarAssuntoBtn = buttons.find((b) => b.textContent?.includes('Modificar assunto'));
+    const finalizarBtn = buttons.find((b) => b.textContent?.includes('Finalizar'));
+
+    expect(novoAtendimentoLink).toBeFalsy();
+    expect(modificarAssuntoBtn).toBeFalsy();
+    expect(finalizarBtn).toBeFalsy();
+  });
+
+  // ─── 10. Exibe motivo de arquivamento quando presente ───────────────
+
+  it('deve exibir motivo de arquivamento quando presente', () => {
+    setup('ADMIN', makeAcompanhamento({
+      status: 'ARQUIVADO',
+      arquivado: true,
+      motivoArquivamento: 'Aluno transferido para outra instituicao.',
+    }));
+
+    const motivoEl = fixture.nativeElement.querySelector('.motivo-arquivamento');
+    expect(motivoEl).toBeTruthy();
+    expect(motivoEl.textContent).toContain('Aluno transferido para outra instituicao.');
+  });
+
+  // ─── 11. Confirmar desabilitado sem motivo ──────────────────────────
+
+  it('botao Confirmar deve estar desabilitado enquanto motivo estiver vazio', () => {
+    setup('ADMIN', makeAcompanhamento({ status: 'EM_ANDAMENTO' }));
+
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const arquivarBtn = buttons.find((b) => b.textContent?.trim() === 'Arquivar');
+    arquivarBtn?.click();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]');
+    const confirmarBtn: HTMLButtonElement = Array.from(dialog.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
+      .find((b) => b.textContent?.trim() === 'Confirmar')!;
+
+    expect(confirmarBtn.disabled).toBe(true);
+
+    // Preencher motivo via textarea input event para evitar NG0100
+    const textarea = dialog.querySelector('textarea') as HTMLTextAreaElement;
+    textarea.value = 'Motivo de teste';
+    textarea.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    expect(confirmarBtn.disabled).toBe(false);
+  });
+
+  // ─── 12. Motivo limpo ao fechar diálogo ─────────────────────────────
+
+  it('deve limpar motivoArquivamentoTexto ao fechar dialogo', () => {
+    setup('ADMIN', makeAcompanhamento({ status: 'EM_ANDAMENTO' }));
+
+    const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+    const arquivarBtn = buttons.find((b) => b.textContent?.trim() === 'Arquivar');
+    arquivarBtn?.click();
+    fixture.detectChanges();
+
+    component.motivoArquivamentoTexto = 'Texto preenchido';
+    component.fecharConfirmacaoArquivo();
+    fixture.detectChanges();
+
+    expect(component.motivoArquivamentoTexto).toBe('');
+  });
 });
