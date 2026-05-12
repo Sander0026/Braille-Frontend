@@ -1,11 +1,11 @@
 <div class="autocomplete-wrapper">
   <label class="field" [for]="inputId">
-    <span class="field__label">{{ label() }}</span>
+    <span class="field__label">{{ label }}</span>
     <div class="field__input-row">
       <input
         [id]="inputId"
         type="search"
-        [value]="termo"
+        [value]="termo()"
         (input)="onInputChange($event)"
         (keydown)="onKeydown($event)"
         placeholder="Busque por nome, CPF ou matricula"
@@ -19,7 +19,7 @@
         class="field__input"
         [class.field__input--has-value]="selecionado()" />
 
-      @if (loading()) {
+      @if (isLoading()) {
         <span class="field__spinner" aria-hidden="true"></span>
       }
     </div>
@@ -45,7 +45,7 @@
   } @else if (isListVisible()) {
     <div class="dropdown" role="region" aria-label="Resultados da busca">
 
-      @if (loading()) {
+      @if (isLoading()) {
         <div class="dropdown__status" role="status">
           <svg class="dropdown__status-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
@@ -58,7 +58,7 @@
           <svg class="dropdown__status-icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
-          Nenhum aluno encontrado para "{{ termo }}".
+          Nenhum aluno encontrado para "{{ termo() }}".
         </div>
 
       } @else {
