@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
@@ -16,14 +17,12 @@ import { BeneficiarioResumo } from '../../../../core/services/beneficiarios.serv
   styleUrl: './aluno-autocomplete.component.scss',
 })
 export class AlunoAutocompleteComponent {
-  // ── Inputs como Signals (Angular 17+) ──────────────────────────────────────
-  // CORREÇÃO DO BUG: @Input() simples não é rastreável pelo computed().
-  // input() Signal garante que computed() reaja quando o pai atualiza a lista.
-  readonly alunos   = input<BeneficiarioResumo[]>([]);
-  readonly label    = input('Aluno cadastrado');
-  readonly loading  = input(false);
+  // ── Inputs como Signals (Angular 17+ Signal API) ───────────────────────────
+  readonly alunos  = input<BeneficiarioResumo[]>([]);
+  readonly label   = input('Aluno cadastrado');
+  readonly loading = input(false);
 
-  // ── Outputs como Signals ───────────────────────────────────────────────────
+  // ── Outputs ────────────────────────────────────────────────────────────────
   readonly selected = output<BeneficiarioResumo | null>();
   readonly search   = output<string>();
 
@@ -34,14 +33,25 @@ export class AlunoAutocompleteComponent {
 
   // ── Estado interno ─────────────────────────────────────────────────────────
   termo = '';
-  readonly selecionado  = signal<BeneficiarioResumo | null>(null);
-  readonly activeIndex  = signal(-1);
+  readonly selecionado      = signal<BeneficiarioResumo | null>(null);
+  readonly activeIndex      = signal(-1);
   readonly isManuallyClosed = signal(false);
 
-  // ── Computed: reativo porque agora depende do input Signal ─────────────────
+  // Signal interno espelhado — garante reatividade total no computed()
+  // Necessário pois o input() Signal pode não disparar computed() em todos os casos
+  private readonly _alunosList = signal<BeneficiarioResumo[]>([]);
+
+  constructor() {
+    // Effect sincroniza o input Signal → signal interno → dispara computed()
+    effect(() => {
+      this._alunosList.set(this.alunos());
+    });
+  }
+
+  // ── Computed: usa signal interno para reatividade garantida ───────────────
   readonly resultados = computed(() => {
     if (this.termo.trim().length < 3) return [];
-    return this.alunos().slice(0, 10);  // alunos() → Signal → computed() reage ✅
+    return this._alunosList().slice(0, 10);
   });
 
   // ── Estado da lista visível ────────────────────────────────────────────────
@@ -83,7 +93,7 @@ export class AlunoAutocompleteComponent {
       : 'Nenhum aluno encontrado.';
   }
 
-  // ── Handler de input nativo (sem [(ngModel)] para evitar conflito com Signal)
+  // ── Handler de input nativo ────────────────────────────────────────────────
   onInputChange(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.termo = value;
@@ -92,9 +102,14 @@ export class AlunoAutocompleteComponent {
 
     const q = value.trim();
     // Emite o evento de busca — o debounce está centralizado no componente pai
-    // via pipeline RxJS (debounceTime + distinctUntilChanged + switchMap)
+    // via pipeline RxJS (debounceTime(300) + distinctUntilChanged + switchMap)
     if (q.length >= 3 && !this.selecionado()) {
       this.search.emit(q);
+    }
+
+    // Se o usuário apagou o campo abaixo do mínimo, limpa a lista
+    if (q.length < 3) {
+      this._alunosList.set([]);
     }
   }
 
@@ -143,6 +158,7 @@ export class AlunoAutocompleteComponent {
     this.selecionado.set(null);
     this.activeIndex.set(-1);
     this.isManuallyClosed.set(false);
+    this._alunosList.set([]);
     this.termo = '';
     this.selected.emit(null);
   }

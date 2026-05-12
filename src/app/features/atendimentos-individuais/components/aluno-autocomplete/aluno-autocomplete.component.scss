@@ -164,7 +164,14 @@
 }
 
 .dropdown__status-icon {
-  font-size: 1rem;
+  flex-shrink: 0;
+  color: #9ca3af;
+}
+
+/* Ícone de loading gira — padrão do projeto */
+.dropdown__status:not(.dropdown__status--empty) .dropdown__status-icon {
+  animation: spin 1s linear infinite;
+  color: #f2c300;
 }
 
 .dropdown__list {
