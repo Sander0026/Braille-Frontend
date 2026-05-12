@@ -1,0 +1,298 @@
+/* ==========================================================================
+   AlunoAutocomplete — Estilos do componente de busca de alunos
+   Responsivo e acessível (WCAG 2.1 AA)
+   ========================================================================== */
+
+.autocomplete-wrapper {
+  display: grid;
+  gap: 0.4rem;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Campo de busca
+   -------------------------------------------------------------------------- */
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field__label {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: #374151;
+}
+
+.field__input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.field__input {
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.65rem 2.5rem 0.65rem 0.85rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: #111827;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+
+  &:focus {
+    border-color: #f2c300;
+    box-shadow: 0 0 0 3px rgba(242, 195, 0, 0.2);
+  }
+
+  &[type='search']::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+}
+
+/* Spinner de carregamento sobreposto ao input */
+.field__spinner {
+  position: absolute;
+  right: 0.75rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid #e5e7eb;
+  border-top-color: #f2c300;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Aluno selecionado
+   -------------------------------------------------------------------------- */
+
+.selected-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid #d1fae5;
+  border-radius: 8px;
+  background: #f0fdf4;
+  animation: fadeIn 0.15s ease;
+}
+
+.selected-card__info {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.selected-card__name {
+  font-size: 0.9375rem;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selected-card__meta {
+  font-size: 0.8125rem;
+  color: #6b7280;
+}
+
+.selected-card__clear {
+  flex-shrink: 0;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #374151;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+
+  &:hover,
+  &:focus-visible {
+    background: #f9fafb;
+    border-color: #94a3b8;
+    outline: 2px solid #f2c300;
+    outline-offset: 2px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown de resultados
+   -------------------------------------------------------------------------- */
+
+.dropdown {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.12s ease;
+}
+
+.dropdown__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.dropdown__status--empty {
+  color: #9ca3af;
+}
+
+.dropdown__status-icon {
+  font-size: 1rem;
+}
+
+.dropdown__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 17rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  /* Scrollbar discreta */
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 4px;
+  }
+}
+
+.dropdown__item {
+  border-bottom: 1px solid #f1f5f9;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dropdown__item--active .dropdown__btn {
+  background: #fffbeb;
+  outline: 2px solid #f2c300;
+  outline-offset: -2px;
+}
+
+.dropdown__btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border: 0;
+  background: #fff;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s ease;
+
+  &:hover,
+  &:focus-visible {
+    background: #f8fafc;
+    outline: 2px solid #f2c300;
+    outline-offset: -2px;
+  }
+}
+
+.dropdown__name {
+  font-size: 0.9375rem;
+  color: #111827;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown__meta {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  color: #6b7280;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Acessibilidade
+   -------------------------------------------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Animações
+   -------------------------------------------------------------------------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Responsividade
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 480px) {
+  .selected-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .selected-card__clear {
+    align-self: flex-end;
+  }
+
+  .dropdown__btn {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .dropdown__meta {
+    white-space: normal;
+  }
+}

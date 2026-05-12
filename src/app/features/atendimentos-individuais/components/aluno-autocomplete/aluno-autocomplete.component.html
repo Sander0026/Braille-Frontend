@@ -1,0 +1,88 @@
+<div class="autocomplete-wrapper">
+  <label class="field" [for]="inputId">
+    <span class="field__label">{{ label() }}</span>
+    <div class="field__input-row">
+      <input
+        [id]="inputId"
+        type="search"
+        [value]="termo"
+        (input)="onInputChange($event)"
+        (keydown)="onKeydown($event)"
+        placeholder="Busque por nome, CPF ou matricula"
+        role="combobox"
+        [attr.aria-expanded]="isOpen()"
+        [attr.aria-controls]="listboxId"
+        [attr.aria-activedescendant]="activeOptionId()"
+        aria-autocomplete="list"
+        aria-describedby="aluno-autocomplete-status"
+        autocomplete="off"
+        class="field__input"
+        [class.field__input--has-value]="selecionado()" />
+
+      @if (loading()) {
+        <span class="field__spinner" aria-hidden="true"></span>
+      }
+    </div>
+  </label>
+
+  <p id="aluno-autocomplete-status" class="sr-only" aria-live="polite">{{ statusMessage() }}</p>
+
+  @if (selecionado(); as aluno) {
+    <div class="selected-card" role="status" aria-label="Aluno selecionado">
+      <div class="selected-card__info">
+        <strong class="selected-card__name">{{ aluno.nomeCompleto }}</strong>
+        <span class="selected-card__meta">{{ descricaoAluno(aluno) }}</span>
+      </div>
+      <button
+        type="button"
+        class="selected-card__clear"
+        (click)="limpar()"
+        aria-label="Remover aluno selecionado e buscar outro">
+        Trocar aluno
+      </button>
+    </div>
+
+  } @else if (isListVisible()) {
+    <div class="dropdown" role="region" aria-label="Resultados da busca">
+
+      @if (loading()) {
+        <div class="dropdown__status" role="status">
+          <span class="dropdown__status-icon" aria-hidden="true">⏳</span>
+          Buscando alunos...
+        </div>
+
+      } @else if (!resultados().length) {
+        <div class="dropdown__status dropdown__status--empty" role="status">
+          <span class="dropdown__status-icon" aria-hidden="true">🔍</span>
+          Nenhum aluno encontrado para "{{ termo }}".
+        </div>
+
+      } @else {
+        <ul
+          class="dropdown__list"
+          [id]="listboxId"
+          role="listbox"
+          aria-label="Resultados de alunos">
+          @for (aluno of resultados(); track aluno.id; let i = $index) {
+            <li
+              role="option"
+              [id]="optionId(i)"
+              [attr.aria-selected]="activeIndex() === i"
+              class="dropdown__item"
+              [class.dropdown__item--active]="activeIndex() === i">
+              <button
+                type="button"
+                class="dropdown__btn"
+                (mouseenter)="activeIndex.set(i)"
+                (click)="selecionar(aluno)">
+                <strong class="dropdown__name">{{ aluno.nomeCompleto }}</strong>
+                <span class="dropdown__meta">{{ descricaoAluno(aluno) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+    </div>
+  }
+</div>
