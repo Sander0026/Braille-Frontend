@@ -74,6 +74,7 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
   {
     path: ':id',
     canActivate: [atendimentoIndividualPermissionGuard],
+    canDeactivate: [descarteGuard],
     loadComponent: () =>
       import('./pages/detalhe-acompanhamento/detalhe-acompanhamento.component')
         .then(m => m.DetalheAcompanhamentoComponent),

@@ -13,7 +13,10 @@ p { margin:.35rem 0 0; color:#64748b; line-height:1.5; }
 .primary { border:0; background:#f2c300; color:#111827; }
 .secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }
 label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
-input, textarea { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; }
+input, textarea, select { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; background:#fff; }
+.filters { display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:.85rem; }
+.dialog-panel--wide { width:min(100%,52rem); }
+.dialog-desc { margin:-.35rem 0 .25rem; color:#64748b; font-size:.9rem; }
 .dialog-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:1rem; background:rgba(15,23,42,.58); }
 .dialog-panel { display:grid; gap:1rem; width:min(100%, 34rem); padding:1.25rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; box-shadow:0 24px 60px rgba(15,23,42,.28); outline:0; }
 .dialog-panel:focus { box-shadow:0 0 0 3px #f2c300, 0 24px 60px rgba(15,23,42,.28); }
