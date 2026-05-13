@@ -18,17 +18,18 @@ import { ToastService } from '../../../../core/services/toast.service';
 import { AtendimentosIndividuaisApiService } from '../../services/atendimentos-individuais-api.service';
 import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
 import { AlunoAutocompleteComponent } from '../../components/aluno-autocomplete/aluno-autocomplete.component';
-import { AtendimentoFormComponent } from '../../components/atendimento-form/atendimento-form.component';
 import { CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
+import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
+import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
 
 @Component({
   selector: 'app-criar-acompanhamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AlunoAutocompleteComponent, AtendimentoFormComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AlunoAutocompleteComponent],
   templateUrl: './criar-acompanhamento.component.html',
   styleUrl: './criar-acompanhamento.component.scss',
 })
-export class CriarAcompanhamentoComponent implements OnInit {
+export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescarte {
   private readonly api                 = inject(AtendimentosIndividuaisApiService);
   private readonly beneficiariosService = inject(BeneficiariosService);
   private readonly usuariosService      = inject(UsuariosService);
@@ -37,37 +38,47 @@ export class CriarAcompanhamentoComponent implements OnInit {
   private readonly router               = inject(Router);
   private readonly destroyRef           = inject(DestroyRef);
 
+  // ── Wizard ─────────────────────────────────────────────────────────────────
+  readonly passoAtual = signal(1);
+  readonly totalPassos = 3;
+
   // ── Signals de estado ──────────────────────────────────────────────────────
-  readonly alunos                   = signal<BeneficiarioResumo[]>([]);
-  readonly professores              = signal<Usuario[]>([]);
-  readonly salvando                 = signal(false);
-  readonly incluirPrimeiroAtendimento = signal(true);
-  readonly isProfessor              = signal(false);
-  readonly isSecretaria             = signal(false);
-  readonly buscandoAlunos           = signal(false);
-  readonly duplicado                = signal<AcompanhamentoIndividual | null>(null);
-  readonly verificandoDuplicidade   = signal(false);
+  readonly alunos                    = signal<BeneficiarioResumo[]>([]);
+  readonly professores               = signal<Usuario[]>([]);
+  readonly salvando                  = signal(false);
+  readonly isProfessor               = signal(false);
+  readonly isSecretaria              = signal(false);
+  readonly buscandoAlunos            = signal(false);
+  readonly duplicado                 = signal<AcompanhamentoIndividual | null>(null);
+  readonly verificandoDuplicidade    = signal(false);
+  readonly alunoSelecionado          = signal<BeneficiarioResumo | null>(null);
+  readonly formTocado                = signal(false);
+  readonly salvoComSucesso           = signal(false);
 
   // ── Dados do formulário ────────────────────────────────────────────────────
-  alunoId    = '';
+  alunoId     = '';
   professorId = '';
   assuntoAtual = '';
   descricao   = '';
-  primeiroAtendimento: CriarAtendimentoIndividualPayload | null = null;
+
+  // ── Guard de descarte ──────────────────────────────────────────────────────
+  private readonly verificarDescarte = injectFormDescarte(() => this.isFormDirty());
+
+  podeDescartar(): Promise<boolean> {
+    return this.verificarDescarte();
+  }
+
+  isFormDirty(): boolean {
+    return (this.formTocado() || !!this.alunoId || !!this.assuntoAtual.trim()) && !this.salvoComSucesso();
+  }
 
   // ── Pipeline RxJS para busca com debounce ─────────────────────────────────
-  // Substitui o setTimeout manual que existia no componente filho.
-  // switchMap cancela requisições anteriores em voo automaticamente.
   private readonly buscaSubject = new Subject<string>();
 
   ngOnInit(): void {
     const role = this.authService.getUser()?.role;
     this.isProfessor.set(role === 'PROFESSOR');
     this.isSecretaria.set(role === 'SECRETARIA');
-
-    if (this.isSecretaria()) {
-      this.incluirPrimeiroAtendimento.set(false);
-    }
 
     if (!this.isProfessor()) {
       this.usuariosService.listarResumo(1, 100, undefined, 'PROFESSOR').subscribe({
@@ -76,7 +87,6 @@ export class CriarAcompanhamentoComponent implements OnInit {
       });
     }
 
-    // Configura o pipeline de busca com debounce de 300ms
     this.buscaSubject.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -101,26 +111,57 @@ export class CriarAcompanhamentoComponent implements OnInit {
     });
   }
 
+  // ── Handlers de wizard ─────────────────────────────────────────────────────
+
+  avancarPasso(): void {
+    const passo = this.passoAtual();
+    if (passo === 1 && !this.alunoId) {
+      this.toast.erro('Selecione um aluno para continuar.');
+      return;
+    }
+    if (passo === 2 && !this.assuntoAtual.trim()) {
+      this.toast.erro('Informe o assunto principal do acompanhamento.');
+      return;
+    }
+    if (passo === 2 && !this.isProfessor() && !this.professorId) {
+      this.toast.erro('Selecione o professor responsavel.');
+      return;
+    }
+    if (passo < this.totalPassos) {
+      this.passoAtual.set(passo + 1);
+      this.scrollTopo();
+    }
+  }
+
+  voltarPasso(): void {
+    if (this.passoAtual() > 1) {
+      this.passoAtual.set(this.passoAtual() - 1);
+      this.scrollTopo();
+    }
+  }
+
+  private scrollTopo(): void {
+    setTimeout(() => {
+      document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
   // ── Handlers do template ───────────────────────────────────────────────────
 
-  /** Recebe o evento (search) do AlunoAutocompleteComponent e alimenta o Subject */
   buscarAlunos(termo: string): void {
     this.buscaSubject.next(termo);
   }
 
   selecionarAluno(aluno: BeneficiarioResumo | null): void {
     this.alunoId = aluno?.id ?? '';
+    this.alunoSelecionado.set(aluno);
+    this.formTocado.set(true);
     this.duplicado.set(null);
   }
 
-  capturarPrimeiroAtendimento(payload: CriarAtendimentoIndividualPayload): void {
-    this.primeiroAtendimento = payload;
-    this.salvar();
-  }
-
-  salvarSemPrimeiroAtendimento(): void {
-    this.primeiroAtendimento = null;
-    this.salvar();
+  marcarFormTocado(): void {
+    this.formTocado.set(true);
+    this.duplicado.set(null);
   }
 
   continuarMesmoComDuplicidade(): void {
@@ -136,9 +177,15 @@ export class CriarAcompanhamentoComponent implements OnInit {
     this.duplicado.set(null);
   }
 
+  nomeProfessor(): string {
+    if (!this.professorId) return '—';
+    const prof = this.professores().find(p => p.id === this.professorId);
+    return prof ? `${prof.nome}${prof.matricula ? ' — ' + prof.matricula : ''}` : '—';
+  }
+
   // ── Lógica de persistência ─────────────────────────────────────────────────
 
-  private salvar(ignorarDuplicidade = false): void {
+  salvar(ignorarDuplicidade = false): void {
     if (!this.alunoId || !this.assuntoAtual.trim()) {
       this.toast.erro('Informe o aluno e o assunto principal.');
       return;
@@ -159,10 +206,10 @@ export class CriarAcompanhamentoComponent implements OnInit {
       professorId: this.isProfessor() ? undefined : this.professorId,
       assuntoAtual: this.assuntoAtual,
       descricao: this.descricao || undefined,
-      primeiroAtendimento: this.incluirPrimeiroAtendimento() ? this.primeiroAtendimento ?? undefined : undefined,
     }).subscribe({
       next: acompanhamento => {
         this.salvando.set(false);
+        this.salvoComSucesso.set(true);
         this.toast.sucesso('Acompanhamento individual criado.');
         this.router.navigate(['/admin/atendimentos-individuais', acompanhamento.id]);
       },

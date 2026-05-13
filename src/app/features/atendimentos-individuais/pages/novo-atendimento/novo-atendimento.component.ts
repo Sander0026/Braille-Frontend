@@ -9,6 +9,8 @@ import { UploadArquivosAtendimentoComponent } from '../../components/upload-arqu
 import { ToastService } from '../../../../core/services/toast.service';
 import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
 import { AuthService } from '../../../../core/services/auth.service';
+import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
+import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
 
 @Component({
   selector: 'app-novo-atendimento',
@@ -17,7 +19,7 @@ import { AuthService } from '../../../../core/services/auth.service';
   templateUrl: './novo-atendimento.component.html',
   styleUrl: './novo-atendimento.component.scss',
 })
-export class NovoAtendimentoComponent implements OnInit {
+export class NovoAtendimentoComponent implements OnInit, ComponenteComDescarte {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly api = inject(AtendimentosIndividuaisApiService);
@@ -28,6 +30,19 @@ export class NovoAtendimentoComponent implements OnInit {
   readonly salvando = signal(false);
   readonly carregando = signal(true);
   readonly erro = signal('');
+  readonly formTocado = signal(false);
+  readonly salvoComSucesso = signal(false);
+
+  // ── Guard de descarte ──────────────────────────────────────────────────────
+  private readonly verificarDescarte = injectFormDescarte(() => this.isFormDirty());
+
+  podeDescartar(): Promise<boolean> {
+    return this.verificarDescarte();
+  }
+
+  isFormDirty(): boolean {
+    return this.formTocado() && !this.salvoComSucesso() && !this.atendimentoCriado();
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -48,6 +63,10 @@ export class NovoAtendimentoComponent implements OnInit {
     });
   }
 
+  onFormChange(): void {
+    this.formTocado.set(true);
+  }
+
   salvar(payload: CriarAtendimentoIndividualPayload): void {
     const item = this.acompanhamento();
     if (!item || !this.canCreateAtendimento(item)) return;
@@ -55,6 +74,7 @@ export class NovoAtendimentoComponent implements OnInit {
     this.api.criarAtendimento(item.id, payload).subscribe({
       next: atendimento => {
         this.salvando.set(false);
+        this.salvoComSucesso.set(true);
         this.atendimentoCriado.set(atendimento);
         this.toast.sucesso('Atendimento registrado. Voce pode anexar arquivos agora.');
       },

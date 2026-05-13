@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { atendimentoIndividualPermissionGuard } from './guards/atendimento-individual-permission.guard';
+import { descarteGuard } from '../../core/guards/descarte.guard';
 
 export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
   {
@@ -12,6 +13,7 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
   {
     path: 'criar',
     canActivate: [atendimentoIndividualPermissionGuard],
+    canDeactivate: [descarteGuard],
     loadComponent: () =>
       import('./pages/criar-acompanhamento/criar-acompanhamento.component')
         .then(m => m.CriarAcompanhamentoComponent),
@@ -54,8 +56,17 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
         .then(m => m.RelatorioAtendimentoComponent),
   },
   {
+    path: ':id/atendimentos/:atendimentoId/editar',
+    canActivate: [atendimentoIndividualPermissionGuard],
+    canDeactivate: [descarteGuard],
+    loadComponent: () =>
+      import('./pages/editar-atendimento/editar-atendimento.component')
+        .then(m => m.EditarAtendimentoComponent),
+  },
+  {
     path: ':id/novo-atendimento',
     canActivate: [atendimentoIndividualPermissionGuard],
+    canDeactivate: [descarteGuard],
     loadComponent: () =>
       import('./pages/novo-atendimento/novo-atendimento.component')
         .then(m => m.NovoAtendimentoComponent),

@@ -91,4 +91,12 @@ export class AtendimentosIndividuaisApiService {
   listarAtendimentos(acompanhamentoId: string): Observable<AtendimentoIndividual[]> {
     return this.http.get<AtendimentoIndividual[]>(`${this.url}/acompanhamentos/${acompanhamentoId}/atendimentos`);
   }
+
+  buscarAtendimento(atendimentoId: string): Observable<AtendimentoIndividual> {
+    return this.http.get<AtendimentoIndividual>(`${this.url}/atendimentos/${atendimentoId}`);
+  }
+
+  atualizarAtendimento(atendimentoId: string, payload: CriarAtendimentoIndividualPayload): Observable<AtendimentoIndividual> {
+    return this.http.patch<AtendimentoIndividual>(`${this.url}/atendimentos/${atendimentoId}`, payload);
+  }
 }

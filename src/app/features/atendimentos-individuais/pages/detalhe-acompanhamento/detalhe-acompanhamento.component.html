@@ -129,7 +129,9 @@
   <section class="panel">
     <h2>Timeline de atendimentos</h2>
     @if (item.atendimentos?.length) {
-      <app-timeline-atendimentos [atendimentos]="item.atendimentos || []" />
+      <app-timeline-atendimentos
+        [atendimentos]="item.atendimentos || []"
+        [acompanhamentoId]="item.id" />
     } @else {
       <p>Nenhum atendimento registrado neste acompanhamento.</p>
     }

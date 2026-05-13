@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -28,114 +28,27 @@ type AtendimentoFormGroup = FormGroup<{
   selector: 'app-atendimento-form',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  template: `
-    <form class="form" [formGroup]="form" (ngSubmit)="submit()">
-      <label>
-        <span>Tipo de registro *</span>
-        <select formControlName="tipoRegistro">
-          <option value="ATENDIMENTO_REALIZADO">Atendimento realizado</option>
-          <option value="FALTA_JUSTIFICADA">Falta justificada</option>
-          <option value="FALTA_NAO_JUSTIFICADA">Falta nao justificada</option>
-          <option value="CANCELADO">Cancelado</option>
-        </select>
-      </label>
-
-      <label>
-        <span>Data do atendimento *</span>
-        <input type="date" formControlName="dataAtendimento" />
-      </label>
-
-      <div class="three-cols">
-        <label>
-          <span>Inicio</span>
-          <input type="time" formControlName="horaInicio" />
-        </label>
-        <label>
-          <span>Fim</span>
-          <input type="time" formControlName="horaFim" />
-        </label>
-        <label>
-          <span>Duracao (min)</span>
-          <input type="number" min="1" max="1440" formControlName="duracaoMinutos" />
-        </label>
-      </div>
-
-      <div class="two-cols">
-        <label>
-          <span>Modalidade</span>
-          <select formControlName="modalidade">
-            <option value="">Nao informar</option>
-            <option value="PRESENCIAL">Presencial</option>
-            <option value="REMOTO">Remoto</option>
-            <option value="TELEFONE">Telefone</option>
-            <option value="OUTRO">Outro</option>
-          </select>
-        </label>
-        <label>
-          <span>Local</span>
-          <input type="text" formControlName="localAtendimento" maxlength="120" placeholder="Sala, endereco ou plataforma" />
-        </label>
-      </div>
-
-      @if (tipoRegistroAtual() === 'ATENDIMENTO_REALIZADO') {
-        <label>
-          <span>Assunto do dia *</span>
-          <input type="text" formControlName="assuntoDoDia" maxlength="200" />
-        </label>
-        <label>
-          <span>Observacao / resumo *</span>
-          <textarea rows="4" formControlName="observacao" maxlength="2000"></textarea>
-        </label>
-        <div class="two-cols">
-          <label><span>Evolucao</span><textarea rows="3" formControlName="evolucao"></textarea></label>
-          <label><span>Dificuldades</span><textarea rows="3" formControlName="dificuldades"></textarea></label>
-        </div>
-        <div class="two-cols">
-          <label><span>Pendencias</span><textarea rows="3" formControlName="pendencias"></textarea></label>
-          <label><span>Recomendacoes</span><textarea rows="3" formControlName="recomendacoes"></textarea></label>
-        </div>
-      } @else if (tipoRegistroAtual() === 'FALTA_JUSTIFICADA') {
-        <label>
-          <span>Motivo da falta *</span>
-          <textarea rows="4" formControlName="observacao" maxlength="2000"></textarea>
-        </label>
-      } @else {
-        <label>
-          <span>{{ tipoRegistroAtual() === 'CANCELADO' ? 'Motivo do cancelamento' : 'Observacao opcional' }}</span>
-          <textarea rows="4" formControlName="observacao" maxlength="2000"></textarea>
-        </label>
-      }
-
-      <p class="error" aria-live="assertive">{{ error }}</p>
-
-      <div class="actions">
-        <button type="button" class="btn-secondary" (click)="cancel.emit()">Cancelar</button>
-        <button type="submit" class="btn-primary" [disabled]="saving">{{ saving ? 'Salvando...' : submitLabel }}</button>
-      </div>
-    </form>
-  `,
-  styles: [`
-    .form { display:grid; gap:1rem; }
-    label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
-    input, select, textarea { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; background:#fff; }
-    textarea { resize:vertical; }
-    .two-cols { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
-    .three-cols { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
-    .actions { display:flex; justify-content:flex-end; gap:.75rem; }
-    .btn-primary, .btn-secondary { min-height:2.5rem; border-radius:8px; padding:.55rem .9rem; font-weight:800; cursor:pointer; }
-    .btn-primary { border:0; background:#f2c300; color:#111827; }
-    .btn-secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }
-    .error { min-height:1.25rem; color:#b91c1c; margin:0; font-weight:700; }
-    @media (max-width:760px) { .two-cols, .three-cols { grid-template-columns:1fr; } .actions { flex-direction:column; } }
-  `],
+  templateUrl: './atendimento-form.component.html',
+  styleUrl: './atendimento-form.component.scss',
 })
 export class AtendimentoFormComponent implements OnDestroy {
   @Input() saving = false;
   @Input() submitLabel = 'Salvar atendimento';
+  @Input() set initialValues(v: CriarAtendimentoIndividualPayload | null | undefined) {
+    if (v) {
+      this.value = v;
+      // Marca o form como pristine após pré-carregar para não disparar dirty prematuramente
+      this.form.markAsPristine();
+    }
+  }
   @Output() save = new EventEmitter<CriarAtendimentoIndividualPayload>();
   @Output() cancel = new EventEmitter<void>();
+  @Output() formChanged = new EventEmitter<void>();
 
   error = '';
+  readonly passoAtual = signal(1);
+  readonly totalPassos = 3;
+
   readonly form: AtendimentoFormGroup = new FormGroup({
     dataAtendimento: new FormControl(new Date().toISOString().slice(0, 10), { nonNullable: true, validators: [Validators.required] }),
     tipoRegistro: new FormControl<TipoRegistroAtendimentoIndividual>('ATENDIMENTO_REALIZADO', { nonNullable: true, validators: [Validators.required] }),
@@ -169,6 +82,11 @@ export class AtendimentoFormComponent implements OnDestroy {
         this.form.updateValueAndValidity({ emitEvent: false });
       }),
     );
+    this.subscriptions.add(
+      this.form.valueChanges.subscribe(() => {
+        if (this.form.dirty) this.formChanged.emit();
+      }),
+    );
   }
 
   get value(): CriarAtendimentoIndividualPayload {
@@ -176,8 +94,12 @@ export class AtendimentoFormComponent implements OnDestroy {
   }
 
   set value(payload: CriarAtendimentoIndividualPayload) {
+    const dataIso = typeof payload.dataAtendimento === 'string'
+      ? payload.dataAtendimento.slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+
     this.form.patchValue({
-      dataAtendimento: payload.dataAtendimento ?? new Date().toISOString().slice(0, 10),
+      dataAtendimento: dataIso,
       tipoRegistro: payload.tipoRegistro ?? 'ATENDIMENTO_REALIZADO',
       horaInicio: payload.horaInicio ?? '',
       horaFim: payload.horaFim ?? '',
@@ -199,6 +121,60 @@ export class AtendimentoFormComponent implements OnDestroy {
 
   tipoRegistroAtual(): TipoRegistroAtendimentoIndividual {
     return this.form.controls.tipoRegistro.value;
+  }
+
+  avancarPasso(): void {
+    // Validate current step before advancing
+    this.error = '';
+    const step = this.passoAtual();
+    if (step === 1) {
+      if (this.form.controls.dataAtendimento.invalid) {
+        this.error = 'Informe a data do atendimento.';
+        return;
+      }
+      if (this.form.hasError('horarioInvalido')) {
+        this.error = 'O horário de fim deve ser posterior ao horário de início.';
+        return;
+      }
+      if (this.form.controls.duracaoMinutos.invalid) {
+        this.error = 'Informe uma duração entre 1 e 1440 minutos.';
+        return;
+      }
+    } else if (step === 2) {
+      if (this.form.hasError('assuntoObrigatorio')) {
+        this.error = 'Informe o assunto do dia.';
+        return;
+      }
+      if (this.form.hasError('observacaoObrigatoria')) {
+        this.error = 'Informe a observação do atendimento.';
+        return;
+      }
+      if (this.form.hasError('motivoObrigatorio')) {
+        this.error = 'Informe o motivo da falta justificada.';
+        return;
+      }
+    }
+
+    if (step < this.totalPassos) {
+      this.passoAtual.set(step + 1);
+    }
+  }
+
+  voltarPasso(): void {
+    this.error = '';
+    if (this.passoAtual() > 1) {
+      this.passoAtual.set(this.passoAtual() - 1);
+    }
+  }
+
+  formatarTipoRegistro(tipo: string): string {
+    const tipos: Record<string, string> = {
+      'ATENDIMENTO_REALIZADO': 'Atendimento realizado',
+      'FALTA_JUSTIFICADA': 'Falta justificada',
+      'FALTA_NAO_JUSTIFICADA': 'Falta não justificada',
+      'CANCELADO': 'Cancelado'
+    };
+    return tipos[tipo] || tipo;
   }
 
   submit(): void {
