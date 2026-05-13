@@ -17,7 +17,6 @@ import { BeneficiarioResumo, BeneficiariosService } from '../../../../core/servi
 import { Usuario, UsuariosService } from '../../../../core/services/usuarios.service';
 import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
 import { AtendimentoFormComponent } from '../../components/atendimento-form/atendimento-form.component';
-import { UploadArquivosAtendimentoComponent } from '../../components/upload-arquivos-atendimento/upload-arquivos-atendimento.component';
 import { AtendimentoIndividual, CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
 import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
 
@@ -31,7 +30,6 @@ import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-aten
     ResumoAtendimentosComponent,
     AlunoAutocompleteComponent,
     AtendimentoFormComponent,
-    UploadArquivosAtendimentoComponent,
   ],
   templateUrl: './detalhe-acompanhamento.component.html',
   styleUrl: './detalhe-acompanhamento.component.scss',

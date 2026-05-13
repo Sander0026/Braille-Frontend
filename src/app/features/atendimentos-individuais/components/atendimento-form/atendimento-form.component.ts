@@ -7,6 +7,8 @@ import {
   ModalidadeAtendimentoIndividual,
   TipoRegistroAtendimentoIndividual,
 } from '../../models/atendimento-individual.model';
+import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
+import { UploadArquivosAtendimentoComponent } from '../upload-arquivos-atendimento/upload-arquivos-atendimento.component';
 
 type AtendimentoFormGroup = FormGroup<{
   dataAtendimento: FormControl<string>;
@@ -27,13 +29,15 @@ type AtendimentoFormGroup = FormGroup<{
 @Component({
   selector: 'app-atendimento-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, UploadArquivosAtendimentoComponent],
   templateUrl: './atendimento-form.component.html',
   styleUrl: './atendimento-form.component.scss',
 })
 export class AtendimentoFormComponent implements OnDestroy {
   @Input() saving = false;
   @Input() submitLabel = 'Salvar atendimento';
+  @Input() atendimentoId: string | null = null;
+  @Input() categoriaPadrao: CategoriaArquivoAtendimentoIndividual = 'OUTRO';
   @Input() set initialValues(v: CriarAtendimentoIndividualPayload | null | undefined) {
     if (v) {
       this.value = v;
@@ -47,7 +51,9 @@ export class AtendimentoFormComponent implements OnDestroy {
 
   error = '';
   readonly passoAtual = signal(1);
-  readonly totalPassos = 3;
+
+  get totalPassos(): number { return this.atendimentoId ? 4 : 3; }
+  get stepsIndicator(): number[] { return this.atendimentoId ? [1, 2, 3, 4] : [1, 2, 3]; }
 
   readonly form: AtendimentoFormGroup = new FormGroup({
     dataAtendimento: new FormControl(new Date().toISOString().slice(0, 10), { nonNullable: true, validators: [Validators.required] }),

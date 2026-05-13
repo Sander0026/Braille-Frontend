@@ -3,7 +3,7 @@
   <!-- Cabeçalho do Wizard (Progresso) -->
   <header class="wizard-header">
     <div class="steps-indicator" aria-hidden="true">
-      @for (step of [1, 2, 3]; track step) {
+      @for (step of stepsIndicator; track step) {
         <div class="step-item">
           <div class="step-dot" [class.active]="step === passoAtual()" [class.done]="step < passoAtual()">
             @if (step < passoAtual()) {
@@ -17,9 +17,10 @@
               @case (1) { Informações }
               @case (2) { Detalhamento }
               @case (3) { Revisão }
+              @case (4) { Arquivos }
             }
           </span>
-          @if (step < 3) {
+          @if (step < totalPassos) {
             <div class="step-line" [class.done]="step < passoAtual()"></div>
           }
         </div>
@@ -175,6 +176,18 @@
       </section>
     }
 
+    <!-- PASSO 4: Arquivos e Anexos -->
+    @if (passoAtual() === 4 && atendimentoId) {
+      <section class="wizard-step" aria-labelledby="step4-title">
+        <h2 id="step4-title" class="step-title">Passo 4 — Arquivos e Anexos</h2>
+        <p class="step-desc">Anexe atestados, documentos ou materiais relacionados ao atendimento (opcional).</p>
+        <app-upload-arquivos-atendimento
+          [atendimentoId]="atendimentoId"
+          [categoriaPadrao]="categoriaPadrao">
+        </app-upload-arquivos-atendimento>
+      </section>
+    }
+
     <!-- Mensagens de erro de validação -->
     @if (error) {
       <p class="error" aria-live="assertive">{{ error }}</p>
@@ -203,6 +216,8 @@
           <button type="submit" class="btn btn--primary" [disabled]="saving">
             @if (saving) {
               <span class="spinner" aria-hidden="true"></span> Salvando...
+            } @else if (atendimentoId && passoAtual() === 4) {
+              Concluir
             } @else {
               {{ submitLabel }}
             }

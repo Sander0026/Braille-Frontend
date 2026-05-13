@@ -316,21 +316,12 @@
           <app-atendimento-form
             [saving]="salvandoEdicao()"
             [initialValues]="valores"
+            [atendimentoId]="atendimentoEmEdicao()?.id ?? null"
+            [categoriaPadrao]="categoriaPadraoAnexo()"
             submitLabel="Salvar alterações"
             (save)="salvarEdicao($event)"
             (formChanged)="formEdicaoTocado = true"
             (cancel)="fecharModalEdicao()" />
-        }
-
-        @if (atendimentoEmEdicao(); as at) {
-          <div class="attachments-section">
-            <h3>Arquivos e Anexos</h3>
-            <p>Anexe atestados, documentos ou materiais relacionados, se necessário.</p>
-            <app-upload-arquivos-atendimento
-              [atendimentoId]="at.id"
-              [categoriaPadrao]="categoriaPadraoAnexo()">
-            </app-upload-arquivos-atendimento>
-          </div>
         }
       </div>
     </section>
