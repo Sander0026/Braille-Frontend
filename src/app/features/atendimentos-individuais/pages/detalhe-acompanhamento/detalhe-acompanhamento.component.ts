@@ -33,7 +33,13 @@ export class DetalheAcompanhamentoComponent implements OnInit {
   readonly confirmacaoArquivo = signal<'arquivar' | 'desarquivar' | null>(null);
   @ViewChild('confirmacaoDialog') private confirmacaoDialog?: ElementRef<HTMLElement>;
   @ViewChild('confirmacaoCancelar') private confirmacaoCancelar?: ElementRef<HTMLButtonElement>;
+  @ViewChild('assuntoDialog') private assuntoDialog?: ElementRef<HTMLElement>;
+  @ViewChild('assuntoPrimeiroFoco') private assuntoPrimeiroFoco?: ElementRef<HTMLElement>;
+  @ViewChild('finalizacaoDialog') private finalizacaoDialog?: ElementRef<HTMLElement>;
+  @ViewChild('finalizacaoPrimeiroFoco') private finalizacaoPrimeiroFoco?: ElementRef<HTMLElement>;
   private ultimoBotaoConfirmacao: HTMLElement | null = null;
+  private ultimoBotaoAssunto: HTMLElement | null = null;
+  private ultimoBotaoFinalizacao: HTMLElement | null = null;
 
   alterandoAssunto = false;
   finalizando = false;
@@ -64,6 +70,20 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     });
   }
 
+  abrirModalAssunto(assuntoAtual: string, event: Event): void {
+    this.ultimoBotaoAssunto = event.currentTarget as HTMLElement;
+    this.novoAssunto = assuntoAtual;
+    this.motivoAlteracao = '';
+    this.alterandoAssunto = true;
+    window.setTimeout(() => this.assuntoPrimeiroFoco?.nativeElement.focus());
+  }
+
+  fecharModalAssunto(): void {
+    if (this.salvandoAssunto()) return;
+    this.alterandoAssunto = false;
+    window.setTimeout(() => this.ultimoBotaoAssunto?.focus());
+  }
+
   salvarAssunto(): void {
     const item = this.acompanhamento();
     if (!item || !this.novoAssunto.trim() || !this.motivoAlteracao.trim()) return;
@@ -74,7 +94,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     }).subscribe({
       next: atual => {
         this.acompanhamento.set(atual);
-        this.alterandoAssunto = false;
+        this.fecharModalAssunto();
         this.salvandoAssunto.set(false);
         this.toast.sucesso('Assunto atualizado com sucesso.');
       },
@@ -85,9 +105,23 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     });
   }
 
+  abrirModalFinalizacao(event: Event): void {
+    this.ultimoBotaoFinalizacao = event.currentTarget as HTMLElement;
+    this.resultadoFinal = '';
+    this.resumoFinal = '';
+    this.finalizando = true;
+    window.setTimeout(() => this.finalizacaoPrimeiroFoco?.nativeElement.focus());
+  }
+
+  fecharModalFinalizacao(): void {
+    if (this.finalizandoAcompanhamento()) return;
+    this.finalizando = false;
+    window.setTimeout(() => this.ultimoBotaoFinalizacao?.focus());
+  }
+
   finalizar(): void {
     const item = this.acompanhamento();
-    if (!item) return;
+    if (!item || !this.resultadoFinal.trim()) return;
     this.finalizandoAcompanhamento.set(true);
     this.api.finalizar(item.id, {
       resultadoFinal: this.resultadoFinal || undefined,
@@ -95,7 +129,7 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     }).subscribe({
       next: atual => {
         this.acompanhamento.set(atual);
-        this.finalizando = false;
+        this.fecharModalFinalizacao();
         this.finalizandoAcompanhamento.set(false);
         this.toast.sucesso('Acompanhamento finalizado com sucesso.');
       },
@@ -174,11 +208,22 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     window.setTimeout(() => this.ultimoBotaoConfirmacao?.focus());
   }
 
-  onConfirmacaoKeydown(event: KeyboardEvent): void {
+  /** Trap de teclado reutilizável para todos os dialogs da página. */
+  onDialogKeydown(event: KeyboardEvent, dialog: 'confirmacao' | 'assunto' | 'finalizacao'): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (dialog === 'confirmacao' && !this.alterandoArquivo()) this.fecharConfirmacaoArquivo();
+      if (dialog === 'assunto') this.fecharModalAssunto();
+      if (dialog === 'finalizacao') this.fecharModalFinalizacao();
+      return;
+    }
+
     if (event.key !== 'Tab') return;
 
     const root = event.currentTarget as HTMLElement;
-    const focusable = Array.from(root.querySelectorAll<HTMLElement>('button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+    const focusable = Array.from(root.querySelectorAll<HTMLElement>(
+      'button:not([disabled]), [href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
     if (!focusable.length) return;
 
     const first = focusable[0];
@@ -199,8 +244,15 @@ export class DetalheAcompanhamentoComponent implements OnInit {
     }
   }
 
+  /** Mantido para o dialog de confirmação que usa (keydown) separado. */
+  onConfirmacaoKeydown(event: KeyboardEvent): void {
+    this.onDialogKeydown(event, 'confirmacao');
+  }
+
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.alterandoAssunto && !this.salvandoAssunto()) { this.fecharModalAssunto(); return; }
+    if (this.finalizando && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
     if (this.confirmacaoArquivo() && !this.alterandoArquivo()) this.fecharConfirmacaoArquivo();
   }
 

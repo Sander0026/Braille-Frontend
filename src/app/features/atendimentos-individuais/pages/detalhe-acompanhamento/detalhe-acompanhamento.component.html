@@ -37,10 +37,10 @@
           <a class="primary" [routerLink]="['/admin/atendimentos-individuais', item.id, 'novo-atendimento']">Novo atendimento</a>
         }
         @if (canUpdateSubject(item)) {
-          <button type="button" class="secondary" (click)="alterandoAssunto = true; novoAssunto = item.assuntoAtual">Modificar assunto</button>
+          <button type="button" class="secondary" (click)="abrirModalAssunto(item.assuntoAtual, $event)">Modificar assunto</button>
         }
         @if (canFinish(item)) {
-          <button type="button" class="secondary" (click)="finalizando = true">Finalizar acompanhamento</button>
+          <button type="button" class="secondary" (click)="abrirModalFinalizacao($event)">Finalizar acompanhamento</button>
         }
       }
       @if (canArchive() && !item.arquivado) {
@@ -99,31 +99,87 @@
   }
 
   @if (alterandoAssunto && canUpdateSubject(item)) {
-    <section class="panel">
-      <h2>Modificar assunto</h2>
-      <label><span>Novo assunto *</span><input type="text" [(ngModel)]="novoAssunto" /></label>
-      <label><span>Motivo da alteracao *</span><textarea rows="3" [(ngModel)]="motivoAlteracao"></textarea></label>
-      <div class="actions">
-        <button class="secondary" type="button" (click)="alterandoAssunto = false">Cancelar</button>
-        <button class="primary" type="button" (click)="salvarAssunto()" [disabled]="salvandoAssunto()">
-          {{ salvandoAssunto() ? 'Salvando...' : 'Salvar assunto' }}
-        </button>
-      </div>
-    </section>
+    <div class="dialog-backdrop" (click)="fecharModalAssunto()">
+      <section
+        #assuntoDialog
+        class="dialog-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assunto-dialog-title"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onDialogKeydown($event, 'assunto')">
+        <h2 id="assunto-dialog-title">Modificar assunto</h2>
+        <label>
+          <span>Novo assunto *</span>
+          <input
+            #assuntoPrimeiroFoco
+            id="novo-assunto-input"
+            type="text"
+            [(ngModel)]="novoAssunto"
+            aria-required="true"
+            aria-label="Novo assunto" />
+        </label>
+        <label>
+          <span>Motivo da alteração *</span>
+          <textarea
+            id="motivo-alteracao-textarea"
+            rows="3"
+            [(ngModel)]="motivoAlteracao"
+            aria-required="true"
+            aria-label="Motivo da alteração"
+            placeholder="Descreva o motivo da alteração do assunto"></textarea>
+        </label>
+        <div class="actions">
+          <button #assuntoCancelar class="secondary" type="button" (click)="fecharModalAssunto()" [disabled]="salvandoAssunto()">Cancelar</button>
+          <button class="primary" type="button" (click)="salvarAssunto()" [disabled]="salvandoAssunto() || !novoAssunto.trim() || !motivoAlteracao.trim()">
+            {{ salvandoAssunto() ? 'Salvando...' : 'Salvar assunto' }}
+          </button>
+        </div>
+      </section>
+    </div>
   }
 
   @if (finalizando && canFinish(item)) {
-    <section class="panel">
-      <h2>Finalizar acompanhamento</h2>
-      <label><span>Resultado final</span><input type="text" [(ngModel)]="resultadoFinal" /></label>
-      <label><span>Resumo geral</span><textarea rows="4" [(ngModel)]="resumoFinal"></textarea></label>
-      <div class="actions">
-        <button class="secondary" type="button" (click)="finalizando = false">Cancelar</button>
-        <button class="primary" type="button" (click)="finalizar()" [disabled]="finalizandoAcompanhamento()">
-          {{ finalizandoAcompanhamento() ? 'Finalizando...' : 'Finalizar' }}
-        </button>
-      </div>
-    </section>
+    <div class="dialog-backdrop" (click)="fecharModalFinalizacao()">
+      <section
+        #finalizacaoDialog
+        class="dialog-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="finalizacao-dialog-title"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onDialogKeydown($event, 'finalizacao')">
+        <h2 id="finalizacao-dialog-title">Finalizar acompanhamento</h2>
+        <label>
+          <span>Resultado final *</span>
+          <input
+            #finalizacaoPrimeiroFoco
+            id="resultado-final-input"
+            type="text"
+            [(ngModel)]="resultadoFinal"
+            aria-required="true"
+            aria-label="Resultado final"
+            placeholder="Ex: Alta, Encaminhamento, Continuidade..." />
+        </label>
+        <label>
+          <span>Resumo geral</span>
+          <textarea
+            id="resumo-final-textarea"
+            rows="4"
+            [(ngModel)]="resumoFinal"
+            aria-label="Resumo geral"
+            placeholder="Observações finais sobre o acompanhamento (opcional)"></textarea>
+        </label>
+        <div class="actions">
+          <button #finalizacaoCancelar class="secondary" type="button" (click)="fecharModalFinalizacao()" [disabled]="finalizandoAcompanhamento()">Cancelar</button>
+          <button class="primary" type="button" (click)="finalizar()" [disabled]="finalizandoAcompanhamento() || !resultadoFinal.trim()">
+            {{ finalizandoAcompanhamento() ? 'Finalizando...' : 'Confirmar finalização' }}
+          </button>
+        </div>
+      </section>
+    </div>
   }
 
   <section class="panel">
