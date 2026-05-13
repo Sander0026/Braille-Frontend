@@ -16,6 +16,10 @@ import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.s
 import { BeneficiarioResumo, BeneficiariosService } from '../../../../core/services/beneficiarios.service';
 import { Usuario, UsuariosService } from '../../../../core/services/usuarios.service';
 import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
+import { AtendimentoFormComponent } from '../../components/atendimento-form/atendimento-form.component';
+import { UploadArquivosAtendimentoComponent } from '../../components/upload-arquivos-atendimento/upload-arquivos-atendimento.component';
+import { AtendimentoIndividual, CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
+import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
 
 @Component({
   selector: 'app-detalhe-acompanhamento',
@@ -26,6 +30,8 @@ import { ComponenteComDescarte } from '../../../../core/interfaces/componente-co
     TimelineAtendimentosComponent,
     ResumoAtendimentosComponent,
     AlunoAutocompleteComponent,
+    AtendimentoFormComponent,
+    UploadArquivosAtendimentoComponent,
   ],
   templateUrl: './detalhe-acompanhamento.component.html',
   styleUrl: './detalhe-acompanhamento.component.scss',
@@ -61,16 +67,26 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   @ViewChild('finalizacaoPrimeiroFoco') private finalizacaoPrimeiroFoco?: ElementRef<HTMLElement>;
   @ViewChild('relatorioDialog')      private relatorioDialog?:      ElementRef<HTMLElement>;
   @ViewChild('relatorioPrimeiroFoco') private relatorioPrimeiroFoco?: ElementRef<HTMLElement>;
+  @ViewChild('edicaoDialog')         private edicaoDialog?:         ElementRef<HTMLElement>;
+  @ViewChild('edicaoPrimeiroFoco')   private edicaoPrimeiroFoco?:   ElementRef<HTMLElement>;
 
   private ultimoBotaoConfirmacao: HTMLElement | null = null;
   private ultimoBotaoAssunto:     HTMLElement | null = null;
   private ultimoBotaoFinalizacao: HTMLElement | null = null;
   private ultimoBotaoRelatorio:   HTMLElement | null = null;
+  private ultimoBotaoEdicao:      HTMLElement | null = null;
 
   // ── Estado dos modais ─────────────────────────────────────
   alterandoAssunto   = false;
   finalizando        = false;
   exibindoRelatorio  = false;
+  editandoAtendimento = false;
+
+  // ── Estado modal de edição ────────────────────────────────
+  readonly atendimentoEmEdicao = signal<AtendimentoIndividual | null>(null);
+  readonly salvandoEdicao      = signal(false);
+  formEdicaoTocado             = false;
+  salvoEdicaoComSucesso        = false;
 
   novoAssunto         = '';
   private assuntoOriginal = '';
@@ -306,13 +322,14 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   // ── ACESSIBILIDADE ────────────────────────────────────────
   onConfirmacaoKeydown(event: KeyboardEvent): void { this.onDialogKeydown(event, 'confirmacao'); }
 
-  onDialogKeydown(event: KeyboardEvent, modal: 'confirmacao' | 'assunto' | 'finalizacao' | 'relatorio'): void {
+  onDialogKeydown(event: KeyboardEvent, modal: 'confirmacao' | 'assunto' | 'finalizacao' | 'relatorio' | 'edicao'): void {
     if (event.key === 'Escape') {
       event.preventDefault();
       if (modal === 'confirmacao') this.fecharConfirmacaoArquivo();
       if (modal === 'assunto')     this.fecharModalAssunto();
       if (modal === 'finalizacao') this.fecharModalFinalizacao();
       if (modal === 'relatorio')   this.fecharModalRelatorio();
+      if (modal === 'edicao')      this.fecharModalEdicao();
       return;
     }
     if (event.key !== 'Tab') return;
@@ -333,18 +350,20 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.exibindoRelatorio && !this.exportandoPdfRelatorio) { this.fecharModalRelatorio();   return; }
-    if (this.alterandoAssunto  && !this.salvandoAssunto())      { this.fecharModalAssunto();     return; }
-    if (this.finalizando       && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
-    if (this.confirmacaoArquivo() && !this.alterandoArquivo())  { this.fecharConfirmacaoArquivo(); }
+    if (this.editandoAtendimento  && !this.salvandoEdicao())         { this.fecharModalEdicao();      return; }
+    if (this.exibindoRelatorio    && !this.exportandoPdfRelatorio)   { this.fecharModalRelatorio();   return; }
+    if (this.alterandoAssunto     && !this.salvandoAssunto())        { this.fecharModalAssunto();     return; }
+    if (this.finalizando          && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
+    if (this.confirmacaoArquivo() && !this.alterandoArquivo())       { this.fecharConfirmacaoArquivo(); }
   }
 
   // ── DESCARTE (descarteGuard) ──────────────────────────────
   async podeDescartar(): Promise<boolean> {
     const temAlteracao =
-      (this.alterandoAssunto   && this.temAlteracoesAssunto()) ||
-      (this.finalizando        && this.temAlteracoesFinalizacao()) ||
-      (this.exibindoRelatorio  && this.temAlteracoesRelatorio()) ||
+      (this.editandoAtendimento  && this.temAlteracoesEdicao()) ||
+      (this.alterandoAssunto     && this.temAlteracoesAssunto()) ||
+      (this.finalizando          && this.temAlteracoesFinalizacao()) ||
+      (this.exibindoRelatorio    && this.temAlteracoesRelatorio()) ||
       (!!this.confirmacaoArquivo() && this.motivoArquivamentoTexto.trim() !== '');
     return temAlteracao ? this.confirmarDescarte() : true;
   }
@@ -363,5 +382,77 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
     const user = this.authService.getUser();
     if (user?.role === 'ADMIN') return true;
     return user?.role === 'PROFESSOR' && item.professorId === user.sub;
+  }
+
+  // ── EDIÇÃO DE ATENDIMENTO (MODAL) ─────────────────────────
+  abrirModalEdicao(atendimento: AtendimentoIndividual, event?: Event): void {
+    if (event) this.ultimoBotaoEdicao = event.currentTarget as HTMLElement;
+    this.atendimentoEmEdicao.set(atendimento);
+    this.formEdicaoTocado      = false;
+    this.salvoEdicaoComSucesso = false;
+    this.editandoAtendimento   = true;
+    window.setTimeout(() => this.edicaoPrimeiroFoco?.nativeElement.focus());
+  }
+
+  async fecharModalEdicao(): Promise<void> {
+    if (this.salvandoEdicao()) return;
+    if (this.temAlteracoesEdicao() && !(await this.confirmarDescarte())) return;
+    this.editandoAtendimento = false;
+    this.atendimentoEmEdicao.set(null);
+    window.setTimeout(() => this.ultimoBotaoEdicao?.focus());
+  }
+
+  salvarEdicao(payload: CriarAtendimentoIndividualPayload): void {
+    const atendimento    = this.atendimentoEmEdicao();
+    const acompanhamento = this.acompanhamento();
+    if (!atendimento || !acompanhamento) return;
+    this.salvandoEdicao.set(true);
+    this.api.atualizarAtendimento(atendimento.id, payload).subscribe({
+      next: atualizado => {
+        const atual = this.acompanhamento();
+        if (atual) {
+          const lista = (atual.atendimentos ?? []).map(a => a.id === atualizado.id ? atualizado : a);
+          this.acompanhamento.set({ ...atual, atendimentos: lista });
+        }
+        this.salvandoEdicao.set(false);
+        this.salvoEdicaoComSucesso = true;
+        this.editandoAtendimento   = false;
+        this.atendimentoEmEdicao.set(null);
+        window.setTimeout(() => this.ultimoBotaoEdicao?.focus());
+        this.toast.sucesso('Atendimento atualizado com sucesso.');
+      },
+      error: () => {
+        this.salvandoEdicao.set(false);
+        this.toast.erro('Nao foi possivel salvar as alteracoes do atendimento.');
+      },
+    });
+  }
+
+  temAlteracoesEdicao(): boolean {
+    return this.formEdicaoTocado && !this.salvoEdicaoComSucesso;
+  }
+
+  valoresIniciaisEdicao(): CriarAtendimentoIndividualPayload | null {
+    const a = this.atendimentoEmEdicao();
+    if (!a) return null;
+    return {
+      dataAtendimento:  a.dataAtendimento,
+      tipoRegistro:     a.tipoRegistro,
+      horaInicio:       a.horaInicio       ?? undefined,
+      horaFim:          a.horaFim          ?? undefined,
+      duracaoMinutos:   a.duracaoMinutos   ?? undefined,
+      modalidade:       a.modalidade       ?? undefined,
+      localAtendimento: a.localAtendimento ?? undefined,
+      assuntoDoDia:     a.assuntoDoDia     ?? undefined,
+      observacao:       a.observacao       ?? undefined,
+      evolucao:         a.evolucao         ?? undefined,
+      dificuldades:     a.dificuldades     ?? undefined,
+      pendencias:       a.pendencias       ?? undefined,
+      recomendacoes:    a.recomendacoes    ?? undefined,
+    };
+  }
+
+  categoriaPadraoAnexo(): CategoriaArquivoAtendimentoIndividual {
+    return this.atendimentoEmEdicao()?.tipoRegistro === 'FALTA_JUSTIFICADA' ? 'ATESTADO' : 'OUTRO';
   }
 }

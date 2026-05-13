@@ -1,6 +1,5 @@
-import { Component, Input, inject, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { AtendimentoIndividual } from '../../models/atendimento-individual.model';
 import { TipoRegistroBadgeComponent } from '../tipo-registro-badge/tipo-registro-badge.component';
 import { ArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
@@ -10,7 +9,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 @Component({
   selector: 'app-timeline-atendimentos',
   standalone: true,
-  imports: [CommonModule, TipoRegistroBadgeComponent, RouterLink],
+  imports: [CommonModule, TipoRegistroBadgeComponent],
   template: `
     <ol class="timeline" aria-label="Timeline de atendimentos">
       @for (item of atendimentos; track item.id) {
@@ -23,8 +22,8 @@ import { ToastService } from '../../../../core/services/toast.service';
                 <button
                   type="button"
                   class="btn-edit"
-                  [routerLink]="['/admin/atendimentos-individuais', acompanhamentoId, 'atendimentos', item.id, 'editar']"
-                  aria-label="Editar atendimento de {{ item.dataAtendimento | date:'dd/MM/yyyy' }}">
+                  (click)="editarClicado.emit(item)"
+                  [attr.aria-label]="'Editar atendimento de ' + (item.dataAtendimento | date:'dd/MM/yyyy')">
                   <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                   Editar
                 </button>
@@ -82,9 +81,14 @@ import { ToastService } from '../../../../core/services/toast.service';
 export class TimelineAtendimentosComponent {
   private readonly arquivosApi = inject(ArquivosAtendimentoApiService);
   private readonly toast = inject(ToastService);
+
   @Input() atendimentos: AtendimentoIndividual[] = [];
-  /** UUID do acompanhamento pai – necessário para montar o link de edição */
+  /** UUID do acompanhamento pai – necessário para exibir o botão Editar */
   @Input() acompanhamentoId: string | null = null;
+
+  /** Emite o atendimento clicado para o pai abrir o modal de edição */
+  @Output() readonly editarClicado = new EventEmitter<AtendimentoIndividual>();
+
   readonly baixandoId = signal<string | null>(null);
 
   abrirArquivo(arquivo: ArquivoAtendimentoIndividual): void {

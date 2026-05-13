@@ -226,9 +226,9 @@ $transition: 200ms ease;
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid $gray-200;
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  border-top: 2px solid $gray-200;
 
   &__left, &__right {
     display: flex;
