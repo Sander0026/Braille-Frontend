@@ -35,7 +35,7 @@
   min-height: 2.75rem;
   border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  padding: 0.65rem 2.5rem 0.65rem 0.85rem;
+  padding: 0.65rem 2.75rem 0.65rem 0.85rem;
   font: inherit;
   font-size: 0.9375rem;
   color: #111827;
@@ -55,6 +55,47 @@
 
   &[type='search']::-webkit-search-cancel-button {
     -webkit-appearance: none;
+  }
+}
+
+/* Campo com aluno selecionado — aparência de preenchido */
+.field__input--selected {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #374151;
+  cursor: default;
+
+  &:focus {
+    border-color: #9ca3af;
+    box-shadow: none;
+  }
+}
+
+/* Botão X para limpar aluno selecionado */
+.field__clear-btn {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover,
+  &:focus-visible {
+    background: #e5e7eb;
+    color: #111827;
+    outline: 2px solid #f2c300;
+    outline-offset: 2px;
   }
 }
 
@@ -82,70 +123,23 @@
    Aluno selecionado
    -------------------------------------------------------------------------- */
 
-.selected-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 0.25rem;
-  padding: 0.75rem 1rem;
-  border: 1.5px solid #d1fae5;
-  border-radius: 8px;
-  background: #f0fdf4;
-  animation: fadeIn 0.15s ease;
-}
-
-.selected-card__info {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-}
-
-.selected-card__name {
-  font-size: 0.9375rem;
-  color: #111827;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.selected-card__meta {
-  font-size: 0.8125rem;
-  color: #6b7280;
-}
-
-.selected-card__clear {
-  flex-shrink: 0;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 8px;
-  background: #fff;
-  padding: 0.4rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: #374151;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
-  white-space: nowrap;
-
-  &:hover,
-  &:focus-visible {
-    background: #f9fafb;
-    border-color: #94a3b8;
-    outline: 2px solid #f2c300;
-    outline-offset: 2px;
-  }
-}
+/* selected-card — não mais renderizado no template, mantido apenas por compatibilidade */
+.selected-card { display: none; }
 
 /* --------------------------------------------------------------------------
    Dropdown de resultados
    -------------------------------------------------------------------------- */
 
 .dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 9999;
   border: 1.5px solid #e2e8f0;
   border-radius: 8px;
-  overflow: hidden;
   background: #fff;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   animation: fadeIn 0.12s ease;
 }
 
@@ -240,12 +234,8 @@
   text-overflow: ellipsis;
 }
 
-.dropdown__meta {
-  flex-shrink: 0;
-  font-size: 0.8125rem;
-  color: #6b7280;
-  white-space: nowrap;
-}
+/* Meta ocultada — dropdown mostra apenas o nome */
+.dropdown__meta { display: none; }
 
 /* --------------------------------------------------------------------------
    Acessibilidade
@@ -283,23 +273,9 @@
    -------------------------------------------------------------------------- */
 
 @media (max-width: 480px) {
-  .selected-card {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .selected-card__clear {
-    align-self: flex-end;
-  }
-
   .dropdown__btn {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.2rem;
-  }
-
-  .dropdown__meta {
-    white-space: normal;
   }
 }

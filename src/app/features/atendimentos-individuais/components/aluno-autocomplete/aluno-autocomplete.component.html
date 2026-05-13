@@ -17,9 +17,21 @@
         aria-describedby="aluno-autocomplete-status"
         autocomplete="off"
         class="field__input"
-        [class.field__input--has-value]="selecionado()" />
+        [class.field__input--has-value]="selecionado()"
+        [class.field__input--selected]="selecionado()"
+        [readonly]="!!selecionado()" />
 
-      @if (isLoading()) {
+      @if (selecionado()) {
+        <button
+          type="button"
+          class="field__clear-btn"
+          (click)="limpar()"
+          aria-label="Remover aluno selecionado">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      } @else if (isLoading()) {
         <span class="field__spinner" aria-hidden="true"></span>
       }
     </div>
@@ -27,22 +39,7 @@
 
   <p id="aluno-autocomplete-status" class="sr-only" aria-live="polite">{{ statusMessage() }}</p>
 
-  @if (selecionado(); as aluno) {
-    <div class="selected-card" role="status" aria-label="Aluno selecionado">
-      <div class="selected-card__info">
-        <strong class="selected-card__name">{{ aluno.nomeCompleto }}</strong>
-        <span class="selected-card__meta">{{ descricaoAluno(aluno) }}</span>
-      </div>
-      <button
-        type="button"
-        class="selected-card__clear"
-        (click)="limpar()"
-        aria-label="Remover aluno selecionado e buscar outro">
-        Trocar aluno
-      </button>
-    </div>
-
-  } @else if (isListVisible()) {
+  @if (isListVisible()) {
     <div class="dropdown" role="region" aria-label="Resultados da busca">
 
       @if (isLoading()) {
@@ -80,7 +77,6 @@
                 (mouseenter)="activeIndex.set(i)"
                 (click)="selecionar(aluno)">
                 <strong class="dropdown__name">{{ aluno.nomeCompleto }}</strong>
-                <span class="dropdown__meta">{{ descricaoAluno(aluno) }}</span>
               </button>
             </li>
           }
