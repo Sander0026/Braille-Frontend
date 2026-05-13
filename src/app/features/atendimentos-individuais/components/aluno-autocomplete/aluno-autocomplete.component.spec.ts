@@ -17,7 +17,7 @@ describe('AlunoAutocompleteComponent', () => {
   beforeEach(() => {
     component = new AlunoAutocompleteComponent();
     component.alunos = makeAlunos();
-    component.termo = 'Ana Silva test';
+    component.termo.set('Ana Silva test');
   });
 
   // ─── 1. Navega com setas ───────────────────────────────────────────
@@ -75,7 +75,7 @@ describe('AlunoAutocompleteComponent', () => {
 
   it('deve informar carregamento enquanto busca alunos', () => {
     component.loading = true;
-    component.termo = 'Ana';
+    component.termo.set('Ana');
 
     expect(component.statusMessage()).toBe('Buscando alunos...');
   });
