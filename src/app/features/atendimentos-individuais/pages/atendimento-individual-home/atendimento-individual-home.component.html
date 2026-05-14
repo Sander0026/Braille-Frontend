@@ -4,7 +4,7 @@
       <h1>Atendimento Individual</h1>
       <p>Acompanhe atendimentos, faltas, evolucao pedagogica e historico individual dos alunos.</p>
     </div>
-    <a class="primary" routerLink="/admin/atendimentos-individuais/criar">Criar acompanhamento</a>
+    <button type="button" class="primary" (click)="abrirModalCriacao()">Criar acompanhamento</button>
   </header>
 
   <section class="indicators" aria-label="Indicadores de atendimento individual">
@@ -17,11 +17,6 @@
   </section>
 
   <nav class="cards" aria-label="Navegacao do modulo de atendimento individual">
-    <a routerLink="/admin/atendimentos-individuais/criar">
-      <span class="material-symbols-rounded" aria-hidden="true">add_circle</span>
-      <strong>Criar acompanhamento</strong>
-      <small>Inicie um acompanhamento e registre o primeiro atendimento.</small>
-    </a>
     <a routerLink="/admin/atendimentos-individuais/em-andamento">
       <span class="material-symbols-rounded" aria-hidden="true">pending_actions</span>
       <strong>Em andamento</strong>
@@ -46,3 +41,10 @@
     }
   </nav>
 </main>
+
+@if (criandoAcompanhamento()) {
+  <app-criar-acompanhamento-modal
+    (salvo)="onCriacaoSalva($event)"
+    (fechado)="fecharModalCriacao()">
+  </app-criar-acompanhamento-modal>
+}

@@ -4,7 +4,7 @@
       <h1>Acompanhamentos em andamento</h1>
       <p>Registre novos atendimentos e acompanhe a evolucao dos alunos.</p>
     </div>
-    <a class="primary" routerLink="/admin/atendimentos-individuais/criar">Criar acompanhamento</a>
+    <button type="button" class="primary" (click)="abrirModalCriacao()">Criar acompanhamento</button>
   </header>
 
   <section class="toolbar">
@@ -46,4 +46,11 @@
     (salvo)="onAtendimentoSalvo($event)"
     (fechado)="fecharNovoAtendimento()">
   </app-novo-atendimento-modal>
+}
+
+@if (criandoAcompanhamento()) {
+  <app-criar-acompanhamento-modal
+    (salvo)="onCriacaoSalva($event)"
+    (fechado)="fecharModalCriacao()">
+  </app-criar-acompanhamento-modal>
 }

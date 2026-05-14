@@ -1,0 +1,205 @@
+<div class="dialog-backdrop" (click)="fechar()">
+  <section
+    class="dialog-panel dialog-panel--xl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="criacao-dialog-title"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="onDialogKeydown($event)">
+
+    <!-- Cabeçalho do modal -->
+    <div class="modal-header wizard-header">
+      <div>
+        <h2 id="criacao-dialog-title" #primeiroFoco tabindex="-1">Novo acompanhamento individual</h2>
+        <p class="dialog-desc">Etapa <strong>{{ passoAtual() }}</strong> de {{ totalPassos }}</p>
+      </div>
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fechar()"
+        [disabled]="salvando()"
+        aria-label="Fechar modal de novo acompanhamento">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <progress class="wizard-progress" [max]="totalPassos" [value]="passoAtual()" aria-label="Progresso do cadastro"></progress>
+
+    <!-- Corpo com rolagem -->
+    <div class="modal-body">
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASSO 1 — Seleção do Aluno                                          -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      @if (passoAtual() === 1) {
+        <section class="wizard-step panel" aria-labelledby="step1-title">
+          <h2 id="step1-title" class="step-title">Passo 1 — Aluno</h2>
+          <p class="step-desc">Busque e selecione o aluno que receberá o acompanhamento.</p>
+
+          <app-aluno-autocomplete
+            [alunos]="alunos()"
+            [loading]="buscandoAlunos()"
+            (search)="buscarAlunos($event)"
+            (selected)="selecionarAluno($event)" />
+
+          @if (alunoSelecionado(); as aluno) {
+            <div class="aluno-card" role="status" aria-label="Aluno selecionado">
+              <svg class="aluno-card__icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <div class="aluno-card__info">
+                <strong>{{ aluno.nomeCompleto }}</strong>
+                @if (aluno.matricula) { <span>Matrícula: {{ aluno.matricula }}</span> }
+              </div>
+              <span class="badge badge--ok">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Selecionado
+              </span>
+            </div>
+          }
+        </section>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASSO 2 — Informações do Acompanhamento                             -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      @if (passoAtual() === 2) {
+        <section class="wizard-step panel" aria-labelledby="step2-title">
+          <h2 id="step2-title" class="step-title">Passo 2 — Informações do acompanhamento</h2>
+          <p class="step-desc">Defina o responsável, assunto e observações iniciais.</p>
+
+          @if (!isProfessor()) {
+            <label class="field-group" for="criar-professorId">
+              <span class="field-group__label">Professor responsável <abbr title="obrigatório" aria-label="obrigatório">*</abbr></span>
+              <select id="criar-professorId" [(ngModel)]="professorId" (ngModelChange)="marcarFormTocado()">
+                <option value="">Selecione um professor</option>
+                @for (professor of professores(); track professor.id) {
+                  <option [value]="professor.id">{{ professor.nome }} — {{ professor.matricula || 'sem matrícula' }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          <label class="field-group" for="criar-assunto">
+            <span class="field-group__label">Assunto principal <abbr title="obrigatório" aria-label="obrigatório">*</abbr></span>
+            <input
+              id="criar-assunto"
+              type="text"
+              [(ngModel)]="assuntoAtual"
+              (ngModelChange)="marcarFormTocado()"
+              maxlength="200"
+              placeholder="Descreva o tema central do acompanhamento" />
+          </label>
+
+          <label class="field-group" for="criar-descricao">
+            <span class="field-group__label">Observações iniciais <span class="optional">(opcional)</span></span>
+            <textarea
+              id="criar-descricao"
+              rows="4"
+              [(ngModel)]="descricao"
+              (ngModelChange)="marcarFormTocado()"
+              maxlength="2000"
+              placeholder="Contexto inicial, histórico relevante ou outras informações importantes..."></textarea>
+          </label>
+
+          @if (duplicado(); as existente) {
+            <section class="duplicate-alert" role="alert" aria-live="assertive">
+              <div class="duplicate-alert__icon">
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="duplicate-alert__body">
+                <h3>Acompanhamento semelhante encontrado</h3>
+                <p>Já existe um acompanhamento em andamento para este aluno com o assunto <strong>{{ existente.assuntoAtual }}</strong>.</p>
+                <div class="duplicate-alert__actions">
+                  <button type="button" class="btn btn--primary" (click)="continuarMesmoComDuplicidade()" [disabled]="salvando()">
+                    Criar mesmo assim
+                  </button>
+                </div>
+              </div>
+            </section>
+          }
+        </section>
+      }
+
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      <!-- PASSO 3 — Revisão                                                   -->
+      <!-- ════════════════════════════════════════════════════════════════════ -->
+      @if (passoAtual() === 3) {
+        <section class="wizard-step panel" aria-labelledby="step3-title">
+          <h2 id="step3-title" class="step-title">Passo 3 — Revisão</h2>
+          <p class="step-desc">Confira as informações antes de criar o acompanhamento.</p>
+
+          <dl class="review-list">
+            <div class="review-list__item">
+              <dt>Aluno</dt>
+              <dd>{{ alunoSelecionado()?.nomeCompleto || '—' }}</dd>
+            </div>
+            @if (alunoSelecionado()?.matricula) {
+              <div class="review-list__item">
+                <dt>Matrícula</dt>
+                <dd>{{ alunoSelecionado()?.matricula }}</dd>
+              </div>
+            }
+            @if (!isProfessor()) {
+              <div class="review-list__item">
+                <dt>Professor responsável</dt>
+                <dd>{{ nomeProfessor() }}</dd>
+              </div>
+            }
+            <div class="review-list__item">
+              <dt>Assunto principal</dt>
+              <dd>{{ assuntoAtual || '—' }}</dd>
+            </div>
+            @if (descricao) {
+              <div class="review-list__item review-list__item--full">
+                <dt>Observações iniciais</dt>
+                <dd>{{ descricao }}</dd>
+              </div>
+            }
+          </dl>
+        </section>
+      }
+
+    </div>
+    
+    <!-- ── Rodapé do wizard ──────────────────────────────────────────────── -->
+    <div class="modal-footer wizard-footer">
+      <div class="wizard-footer__left">
+        @if (passoAtual() > 1) {
+          <button type="button" class="btn btn--ghost" (click)="voltarPasso()">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Voltar
+          </button>
+        } @else {
+          <button type="button" class="btn btn--ghost" (click)="fechar()">Cancelar</button>
+        }
+      </div>
+      <div class="wizard-footer__right">
+        @if (passoAtual() < totalPassos) {
+          <button type="button" class="btn btn--primary" (click)="avancarPasso()">
+            Avançar
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        } @else {
+          <button
+            type="button"
+            class="btn btn--primary"
+            (click)="salvar()"
+            [disabled]="salvando() || verificandoDuplicidade()"
+            [attr.aria-busy]="salvando()">
+            @if (salvando()) {
+              <span class="spinner" aria-hidden="true"></span>
+              <span class="sr-only">Salvando...</span>
+              <span aria-hidden="true">Salvando...</span>
+            } @else if (verificandoDuplicidade()) {
+              Verificando...
+            } @else {
+              Criar acompanhamento
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+  </section>
+</div>

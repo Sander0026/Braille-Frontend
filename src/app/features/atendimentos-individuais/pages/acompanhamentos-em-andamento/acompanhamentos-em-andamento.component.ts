@@ -11,11 +11,12 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
 import { NovoAtendimentoModalComponent } from '../../components/novo-atendimento-modal/novo-atendimento-modal.component';
+import { CriarAcompanhamentoModalComponent } from '../../components/criar-acompanhamento-modal/criar-acompanhamento-modal.component';
 
 @Component({
   selector: 'app-acompanhamentos-em-andamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent, NovoAtendimentoModalComponent],
+  imports: [CommonModule, FormsModule, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent, NovoAtendimentoModalComponent, CriarAcompanhamentoModalComponent],
   templateUrl: './acompanhamentos-em-andamento.component.html',
   styleUrl: './acompanhamentos-em-andamento.component.scss',
 })
@@ -96,5 +97,20 @@ export class AcompanhamentosEmAndamentoComponent implements OnInit {
       this.acompanhamentos.set(novaLista);
     }
     this.acompanhamentoCriacao.set(null);
+  }
+
+  readonly criandoAcompanhamento = signal(false);
+
+  abrirModalCriacao(): void {
+    this.criandoAcompanhamento.set(true);
+  }
+
+  fecharModalCriacao(): void {
+    this.criandoAcompanhamento.set(false);
+  }
+
+  onCriacaoSalva(acomp: AcompanhamentoIndividual): void {
+    this.fecharModalCriacao();
+    this.carregar(1);
   }
 }
