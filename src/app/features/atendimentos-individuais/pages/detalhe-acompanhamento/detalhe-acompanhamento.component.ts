@@ -19,6 +19,7 @@ import { ComponenteComDescarte } from '../../../../core/interfaces/componente-co
 import { AtendimentoFormComponent } from '../../components/atendimento-form/atendimento-form.component';
 import { AtendimentoIndividual, CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
 import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
+import { NovoAtendimentoModalComponent } from '../../components/novo-atendimento-modal/novo-atendimento-modal.component';
 
 @Component({
   selector: 'app-detalhe-acompanhamento',
@@ -30,6 +31,7 @@ import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-aten
     ResumoAtendimentosComponent,
     AlunoAutocompleteComponent,
     AtendimentoFormComponent,
+    NovoAtendimentoModalComponent,
   ],
   templateUrl: './detalhe-acompanhamento.component.html',
   styleUrl: './detalhe-acompanhamento.component.scss',
@@ -82,11 +84,6 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   exibindoRelatorio  = false;
   editandoAtendimento = false;
   criandoAtendimento  = false;
-
-  // ── Estado modal de criação ────────────────────────────────
-  readonly salvandoCriacao = signal(false);
-  formCriacaoTocado = false;
-  salvoCriacaoComSucesso = false;
 
   // ── Estado modal de edição ────────────────────────────────
   readonly atendimentoEmEdicao = signal<AtendimentoIndividual | null>(null);
@@ -358,7 +355,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.editandoAtendimento  && !this.salvandoEdicao())         { this.fecharModalEdicao();      return; }
-    if (this.criandoAtendimento   && !this.salvandoCriacao())        { this.fecharModalCriacao();     return; }
+    if (this.criandoAtendimento) { return; }
     if (this.exibindoRelatorio    && !this.exportandoPdfRelatorio)   { this.fecharModalRelatorio();   return; }
     if (this.alterandoAssunto     && !this.salvandoAssunto())        { this.fecharModalAssunto();     return; }
     if (this.finalizando          && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
@@ -369,7 +366,6 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   async podeDescartar(): Promise<boolean> {
     const temAlteracao =
       (this.editandoAtendimento  && this.temAlteracoesEdicao()) ||
-      (this.criandoAtendimento   && this.temAlteracoesCriacao()) ||
       (this.alterandoAssunto     && this.temAlteracoesAssunto()) ||
       (this.finalizando          && this.temAlteracoesFinalizacao()) ||
       (this.exibindoRelatorio    && this.temAlteracoesRelatorio()) ||
@@ -468,44 +464,20 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   // ── CRIAÇÃO DE ATENDIMENTO (MODAL) ─────────────────────────
   abrirModalCriacao(event?: Event): void {
     if (event) this.ultimoBotaoCriacao = event.currentTarget as HTMLElement;
-    this.formCriacaoTocado      = false;
-    this.salvoCriacaoComSucesso = false;
-    this.criandoAtendimento     = true;
-    window.setTimeout(() => this.criacaoPrimeiroFoco?.nativeElement.focus());
+    this.criandoAtendimento = true;
   }
 
-  async fecharModalCriacao(): Promise<void> {
-    if (this.salvandoCriacao()) return;
-    if (this.temAlteracoesCriacao() && !(await this.confirmarDescarte())) return;
+  fecharModalCriacao(): void {
     this.criandoAtendimento = false;
     window.setTimeout(() => this.ultimoBotaoCriacao?.focus());
   }
 
-  salvarCriacao(payload: CriarAtendimentoIndividualPayload): void {
-    const acompanhamento = this.acompanhamento();
-    if (!acompanhamento) return;
-    this.salvandoCriacao.set(true);
-    this.api.criarAtendimento(acompanhamento.id, payload).subscribe({
-      next: criado => {
-        const atual = this.acompanhamento();
-        if (atual) {
-          const lista = [criado, ...(atual.atendimentos ?? [])].sort((a, b) => new Date(b.dataAtendimento).getTime() - new Date(a.dataAtendimento).getTime());
-          this.acompanhamento.set({ ...atual, atendimentos: lista });
-        }
-        this.salvandoCriacao.set(false);
-        this.salvoCriacaoComSucesso = true;
-        this.criandoAtendimento   = false;
-        window.setTimeout(() => this.ultimoBotaoCriacao?.focus());
-        this.toast.sucesso('Atendimento criado com sucesso.');
-      },
-      error: () => {
-        this.salvandoCriacao.set(false);
-        this.toast.erro('Não foi possível salvar o atendimento.');
-      },
-    });
-  }
-
-  temAlteracoesCriacao(): boolean {
-    return this.formCriacaoTocado && !this.salvoCriacaoComSucesso;
+  onCriacaoSalva(criado: AtendimentoIndividual): void {
+    const atual = this.acompanhamento();
+    if (atual) {
+      const lista = [criado, ...(atual.atendimentos ?? [])].sort((a, b) => new Date(b.dataAtendimento).getTime() - new Date(a.dataAtendimento).getTime());
+      this.acompanhamento.set({ ...atual, atendimentos: lista });
+    }
+    this.fecharModalCriacao();
   }
 }

@@ -26,7 +26,8 @@
       @for (acompanhamento of acompanhamentos(); track acompanhamento.id) {
         <app-acompanhamento-card
           [acompanhamento]="acompanhamento"
-          [canCreateAtendimento]="canCreateAtendimento(acompanhamento)" />
+          [canCreateAtendimento]="canCreateAtendimento(acompanhamento)"
+          (novoAtendimento)="abrirNovoAtendimento($event)" />
       }
     </section>
     <app-pagination
@@ -38,3 +39,11 @@
       (next)="proximaPagina()" />
   }
 </main>
+
+@if (acompanhamentoCriacao()) {
+  <app-novo-atendimento-modal
+    [acompanhamento]="acompanhamentoCriacao()!"
+    (salvo)="onAtendimentoSalvo($event)"
+    (fechado)="fecharNovoAtendimento()">
+  </app-novo-atendimento-modal>
+}

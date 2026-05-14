@@ -10,10 +10,12 @@ import { PaginationComponent } from '../../components/pagination/pagination.comp
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
 
+import { NovoAtendimentoModalComponent } from '../../components/novo-atendimento-modal/novo-atendimento-modal.component';
+
 @Component({
   selector: 'app-acompanhamentos-em-andamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent, NovoAtendimentoModalComponent],
   templateUrl: './acompanhamentos-em-andamento.component.html',
   styleUrl: './acompanhamentos-em-andamento.component.scss',
 })
@@ -69,5 +71,30 @@ export class AcompanhamentosEmAndamentoComponent implements OnInit {
 
   proximaPagina(): void {
     if (this.page() < this.lastPage()) this.carregar(this.page() + 1);
+  }
+
+  readonly acompanhamentoCriacao = signal<AcompanhamentoIndividual | null>(null);
+
+  abrirNovoAtendimento(acompanhamento: AcompanhamentoIndividual): void {
+    this.acompanhamentoCriacao.set(acompanhamento);
+  }
+
+  fecharNovoAtendimento(): void {
+    this.acompanhamentoCriacao.set(null);
+  }
+
+  onAtendimentoSalvo(novoAtendimento: any): void {
+    const list = this.acompanhamentos();
+    const idAcomp = this.acompanhamentoCriacao()?.id;
+    if (idAcomp) {
+      const novaLista = list.map(a => {
+        if (a.id === idAcomp) {
+           return { ...a, _count: { atendimentos: (a._count?.atendimentos || 0) + 1 } };
+        }
+        return a;
+      });
+      this.acompanhamentos.set(novaLista);
+    }
+    this.acompanhamentoCriacao.set(null);
   }
 }
