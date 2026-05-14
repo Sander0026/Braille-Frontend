@@ -10,14 +10,7 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
       import('./pages/atendimento-individual-home/atendimento-individual-home.component')
         .then(m => m.AtendimentoIndividualHomeComponent),
   },
-  {
-    path: 'criar',
-    canActivate: [atendimentoIndividualPermissionGuard],
-    canDeactivate: [descarteGuard],
-    loadComponent: () =>
-      import('./pages/criar-acompanhamento/criar-acompanhamento.component')
-        .then(m => m.CriarAcompanhamentoComponent),
-  },
+
   {
     path: 'dashboard',
     canActivate: [atendimentoIndividualPermissionGuard],
@@ -48,29 +41,8 @@ export const ATENDIMENTOS_INDIVIDUAIS_ROUTES: Routes = [
       import('./pages/acompanhamentos-arquivados/acompanhamentos-arquivados.component')
         .then(m => m.AcompanhamentosArquivadosComponent),
   },
-  {
-    path: 'relatorio',
-    canActivate: [atendimentoIndividualPermissionGuard],
-    loadComponent: () =>
-      import('./pages/relatorio-atendimento/relatorio-atendimento.component')
-        .then(m => m.RelatorioAtendimentoComponent),
-  },
-  {
-    path: ':id/atendimentos/:atendimentoId/editar',
-    canActivate: [atendimentoIndividualPermissionGuard],
-    canDeactivate: [descarteGuard],
-    loadComponent: () =>
-      import('./pages/editar-atendimento/editar-atendimento.component')
-        .then(m => m.EditarAtendimentoComponent),
-  },
-  {
-    path: ':id/novo-atendimento',
-    canActivate: [atendimentoIndividualPermissionGuard],
-    canDeactivate: [descarteGuard],
-    loadComponent: () =>
-      import('./pages/novo-atendimento/novo-atendimento.component')
-        .then(m => m.NovoAtendimentoComponent),
-  },
+
+
   {
     path: ':id',
     canActivate: [atendimentoIndividualPermissionGuard],

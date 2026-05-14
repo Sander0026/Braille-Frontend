@@ -1,0 +1,40 @@
+<div class="dialog-backdrop" (click)="fechar()">
+  <section
+    class="dialog-panel dialog-panel--xl"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="criacao-dialog-title"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown)="onDialogKeydown($event)">
+
+    <!-- Cabeçalho do modal -->
+    <div class="modal-header">
+      <div>
+        <h2 id="criacao-dialog-title" #criacaoPrimeiroFoco tabindex="-1">Novo atendimento</h2>
+        <p class="dialog-desc">{{ acompanhamento.aluno?.nomeCompleto || 'Aluno não informado' }} · {{ acompanhamento.assuntoAtual }}</p>
+      </div>
+      <button
+        type="button"
+        class="modal-close"
+        (click)="fechar()"
+        [disabled]="salvando()"
+        aria-label="Fechar modal de novo atendimento">
+        <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Corpo com rolagem -->
+    <div class="modal-body">
+      <app-atendimento-form
+        [saving]="salvando()"
+        [initialValues]="null"
+        submitLabel="Salvar atendimento"
+        (save)="salvar($event)"
+        (formChanged)="formTocado = true"
+        (cancel)="fechar()" />
+    </div>
+  </section>
+</div>

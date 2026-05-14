@@ -1,48 +1,41 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, ElementRef, EventEmitter, HostListener, OnInit, Output, ViewChild, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { RouterLink } from '@angular/router';
 import { Subject, switchMap, debounceTime, distinctUntilChanged, of, catchError } from 'rxjs';
 import { BeneficiarioResumo, BeneficiariosService } from '../../../../core/services/beneficiarios.service';
 import { Usuario, UsuariosService } from '../../../../core/services/usuarios.service';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ToastService } from '../../../../core/services/toast.service';
+import { ConfirmDialogService } from '../../../../core/services/confirm-dialog.service';
 import { AtendimentosIndividuaisApiService } from '../../services/atendimentos-individuais-api.service';
 import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
-import { AlunoAutocompleteComponent } from '../../components/aluno-autocomplete/aluno-autocomplete.component';
-import { CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
-import { injectFormDescarte } from '../../../../shared/classes/base-form-descarte';
-import { ComponenteComDescarte } from '../../../../core/interfaces/componente-com-descarte.interface';
+import { AlunoAutocompleteComponent } from '../aluno-autocomplete/aluno-autocomplete.component';
 
 @Component({
-  selector: 'app-criar-acompanhamento',
+  selector: 'app-criar-acompanhamento-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, AlunoAutocompleteComponent],
-  templateUrl: './criar-acompanhamento.component.html',
-  styleUrl: './criar-acompanhamento.component.scss',
+  imports: [CommonModule, FormsModule, AlunoAutocompleteComponent],
+  templateUrl: './criar-acompanhamento-modal.component.html',
+  styleUrl: './criar-acompanhamento-modal.component.scss',
 })
-export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescarte {
+export class CriarAcompanhamentoModalComponent implements OnInit {
   private readonly api                 = inject(AtendimentosIndividuaisApiService);
   private readonly beneficiariosService = inject(BeneficiariosService);
   private readonly usuariosService      = inject(UsuariosService);
   private readonly authService          = inject(AuthService);
   private readonly toast                = inject(ToastService);
-  private readonly router               = inject(Router);
   private readonly destroyRef           = inject(DestroyRef);
+  private readonly confirmDialog        = inject(ConfirmDialogService);
 
-  // ── Wizard ─────────────────────────────────────────────────────────────────
+  @Output() salvo = new EventEmitter<AcompanhamentoIndividual>();
+  @Output() fechado = new EventEmitter<void>();
+
+  @ViewChild('primeiroFoco') private primeiroFoco?: ElementRef<HTMLElement>;
+
   readonly passoAtual = signal(1);
   readonly totalPassos = 3;
 
-  // ── Signals de estado ──────────────────────────────────────────────────────
   readonly alunos                    = signal<BeneficiarioResumo[]>([]);
   readonly professores               = signal<Usuario[]>([]);
   readonly salvando                  = signal(false);
@@ -55,24 +48,11 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
   readonly formTocado                = signal(false);
   readonly salvoComSucesso           = signal(false);
 
-  // ── Dados do formulário ────────────────────────────────────────────────────
   alunoId     = '';
   professorId = '';
   assuntoAtual = '';
   descricao   = '';
 
-  // ── Guard de descarte ──────────────────────────────────────────────────────
-  private readonly verificarDescarte = injectFormDescarte(() => this.isFormDirty());
-
-  podeDescartar(): Promise<boolean> {
-    return this.verificarDescarte();
-  }
-
-  isFormDirty(): boolean {
-    return (this.formTocado() || !!this.alunoId || !!this.assuntoAtual.trim()) && !this.salvoComSucesso();
-  }
-
-  // ── Pipeline RxJS para busca com debounce ─────────────────────────────────
   private readonly buscaSubject = new Subject<string>();
 
   ngOnInit(): void {
@@ -83,7 +63,7 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
     if (!this.isProfessor()) {
       this.usuariosService.listarResumo(1, 100, undefined, 'PROFESSOR').subscribe({
         next: res => this.professores.set(res.data),
-        error: () => this.toast.erro('Nao foi possivel carregar os professores disponiveis.'),
+        error: () => this.toast.erro('Não foi possível carregar os professores disponíveis.'),
       });
     }
 
@@ -99,7 +79,7 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
         this.buscandoAlunos.set(true);
         return this.beneficiariosService.buscarResumo(termo).pipe(
           catchError(() => {
-            this.toast.erro('Nao foi possivel buscar alunos.');
+            this.toast.erro('Não foi possível buscar alunos.');
             return of([]);
           }),
         );
@@ -111,7 +91,59 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
     });
   }
 
-  // ── Handlers de wizard ─────────────────────────────────────────────────────
+  ngAfterViewInit() {
+    window.setTimeout(() => this.primeiroFoco?.nativeElement.focus());
+  }
+
+  isFormDirty(): boolean {
+    return (this.formTocado() || !!this.alunoId || !!this.assuntoAtual.trim()) && !this.salvoComSucesso();
+  }
+
+  async fechar(): Promise<void> {
+    if (this.salvando()) return;
+    if (this.isFormDirty() && !(await this.confirmarDescarte())) return;
+    this.fechado.emit();
+  }
+
+  private confirmarDescarte(): Promise<boolean> {
+    return this.confirmDialog.confirmar({
+      titulo: 'Descartar alterações?',
+      mensagem: 'Existem alterações não salvas. Deseja realmente sair e descartar as informações preenchidas?',
+      textoBotaoConfirmar: 'Descartar alterações',
+      textoBotaoCancelar: 'Continuar editando',
+      tipo: 'warning',
+    });
+  }
+
+  onDialogKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.fechar();
+      return;
+    }
+    if (event.key === 'Tab') {
+      this.trapFocus(event);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (!this.salvando()) {
+      this.fechar();
+    }
+  }
+
+  private trapFocus(event: KeyboardEvent): void {
+    const root = event.currentTarget as HTMLElement;
+    const sel = 'button:not([disabled]),[href],input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    const focusable = Array.from(root.querySelectorAll<HTMLElement>(sel));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (document.activeElement === root) { event.preventDefault(); (event.shiftKey ? last : first).focus(); return; }
+    if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); return; }
+    if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+  }
 
   avancarPasso(): void {
     const passo = this.passoAtual();
@@ -124,7 +156,7 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
       return;
     }
     if (passo === 2 && !this.isProfessor() && !this.professorId) {
-      this.toast.erro('Selecione o professor responsavel.');
+      this.toast.erro('Selecione o professor responsável.');
       return;
     }
     if (passo < this.totalPassos) {
@@ -142,11 +174,9 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
 
   private scrollTopo(): void {
     setTimeout(() => {
-      document.querySelector('.wizard-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelector('.modal-body')?.scrollTo({ top: 0, behavior: 'smooth' });
     }, 80);
   }
-
-  // ── Handlers do template ───────────────────────────────────────────────────
 
   buscarAlunos(termo: string): void {
     this.buscaSubject.next(termo);
@@ -168,11 +198,6 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
     this.salvar(true);
   }
 
-  abrirAcompanhamentoDuplicado(): void {
-    const existente = this.duplicado();
-    if (existente) this.router.navigate(['/admin/atendimentos-individuais', existente.id]);
-  }
-
   limparDuplicidade(): void {
     this.duplicado.set(null);
   }
@@ -183,15 +208,13 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
     return prof ? `${prof.nome}${prof.matricula ? ' — ' + prof.matricula : ''}` : '—';
   }
 
-  // ── Lógica de persistência ─────────────────────────────────────────────────
-
   salvar(ignorarDuplicidade = false): void {
     if (!this.alunoId || !this.assuntoAtual.trim()) {
       this.toast.erro('Informe o aluno e o assunto principal.');
       return;
     }
     if (!this.isProfessor() && !this.professorId) {
-      this.toast.erro('Selecione o professor responsavel.');
+      this.toast.erro('Selecione o professor responsável.');
       return;
     }
 
@@ -210,12 +233,12 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
       next: acompanhamento => {
         this.salvando.set(false);
         this.salvoComSucesso.set(true);
-        this.toast.sucesso('Acompanhamento individual criado.');
-        this.router.navigate(['/admin/atendimentos-individuais', acompanhamento.id]);
+        this.toast.sucesso('Acompanhamento criado com sucesso.');
+        this.salvo.emit(acompanhamento);
       },
       error: () => {
         this.salvando.set(false);
-        this.toast.erro('Nao foi possivel criar o acompanhamento.');
+        this.toast.erro('Não foi possível criar o acompanhamento.');
       },
     });
   }
@@ -231,14 +254,14 @@ export class CriarAcompanhamentoComponent implements OnInit, ComponenteComDescar
         this.verificandoDuplicidade.set(false);
         if (resultado.duplicado && resultado.acompanhamento) {
           this.duplicado.set(resultado.acompanhamento);
-          this.toast.erro('Ja existe um acompanhamento semelhante em andamento.');
+          this.toast.erro('Já existe um acompanhamento semelhante em andamento.');
           return;
         }
         this.salvar(true);
       },
       error: () => {
         this.verificandoDuplicidade.set(false);
-        this.toast.erro('Nao foi possivel verificar acompanhamentos semelhantes.');
+        this.toast.erro('Não foi possível verificar acompanhamentos semelhantes.');
       },
     });
   }

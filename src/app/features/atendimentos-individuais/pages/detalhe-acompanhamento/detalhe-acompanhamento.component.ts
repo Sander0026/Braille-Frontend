@@ -19,6 +19,7 @@ import { ComponenteComDescarte } from '../../../../core/interfaces/componente-co
 import { AtendimentoFormComponent } from '../../components/atendimento-form/atendimento-form.component';
 import { AtendimentoIndividual, CriarAtendimentoIndividualPayload } from '../../models/atendimento-individual.model';
 import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-atendimento.model';
+import { NovoAtendimentoModalComponent } from '../../components/novo-atendimento-modal/novo-atendimento-modal.component';
 
 @Component({
   selector: 'app-detalhe-acompanhamento',
@@ -30,6 +31,7 @@ import { CategoriaArquivoAtendimentoIndividual } from '../../models/arquivo-aten
     ResumoAtendimentosComponent,
     AlunoAutocompleteComponent,
     AtendimentoFormComponent,
+    NovoAtendimentoModalComponent,
   ],
   templateUrl: './detalhe-acompanhamento.component.html',
   styleUrl: './detalhe-acompanhamento.component.scss',
@@ -67,18 +69,21 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   @ViewChild('relatorioPrimeiroFoco') private relatorioPrimeiroFoco?: ElementRef<HTMLElement>;
   @ViewChild('edicaoDialog')         private edicaoDialog?:         ElementRef<HTMLElement>;
   @ViewChild('edicaoPrimeiroFoco')   private edicaoPrimeiroFoco?:   ElementRef<HTMLElement>;
+  @ViewChild('criacaoPrimeiroFoco')  private criacaoPrimeiroFoco?:  ElementRef<HTMLElement>;
 
   private ultimoBotaoConfirmacao: HTMLElement | null = null;
   private ultimoBotaoAssunto:     HTMLElement | null = null;
   private ultimoBotaoFinalizacao: HTMLElement | null = null;
   private ultimoBotaoRelatorio:   HTMLElement | null = null;
   private ultimoBotaoEdicao:      HTMLElement | null = null;
+  private ultimoBotaoCriacao:     HTMLElement | null = null;
 
   // ── Estado dos modais ─────────────────────────────────────
   alterandoAssunto   = false;
   finalizando        = false;
   exibindoRelatorio  = false;
   editandoAtendimento = false;
+  criandoAtendimento  = false;
 
   // ── Estado modal de edição ────────────────────────────────
   readonly atendimentoEmEdicao = signal<AtendimentoIndividual | null>(null);
@@ -320,7 +325,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   // ── ACESSIBILIDADE ────────────────────────────────────────
   onConfirmacaoKeydown(event: KeyboardEvent): void { this.onDialogKeydown(event, 'confirmacao'); }
 
-  onDialogKeydown(event: KeyboardEvent, modal: 'confirmacao' | 'assunto' | 'finalizacao' | 'relatorio' | 'edicao'): void {
+  onDialogKeydown(event: KeyboardEvent, modal: 'confirmacao' | 'assunto' | 'finalizacao' | 'relatorio' | 'edicao' | 'criacao'): void {
     if (event.key === 'Escape') {
       event.preventDefault();
       if (modal === 'confirmacao') this.fecharConfirmacaoArquivo();
@@ -328,6 +333,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
       if (modal === 'finalizacao') this.fecharModalFinalizacao();
       if (modal === 'relatorio')   this.fecharModalRelatorio();
       if (modal === 'edicao')      this.fecharModalEdicao();
+      if (modal === 'criacao')     this.fecharModalCriacao();
       return;
     }
     if (event.key !== 'Tab') return;
@@ -349,6 +355,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.editandoAtendimento  && !this.salvandoEdicao())         { this.fecharModalEdicao();      return; }
+    if (this.criandoAtendimento) { return; }
     if (this.exibindoRelatorio    && !this.exportandoPdfRelatorio)   { this.fecharModalRelatorio();   return; }
     if (this.alterandoAssunto     && !this.salvandoAssunto())        { this.fecharModalAssunto();     return; }
     if (this.finalizando          && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
@@ -452,5 +459,25 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
 
   categoriaPadraoAnexo(): CategoriaArquivoAtendimentoIndividual {
     return this.atendimentoEmEdicao()?.tipoRegistro === 'FALTA_JUSTIFICADA' ? 'ATESTADO' : 'OUTRO';
+  }
+
+  // ── CRIAÇÃO DE ATENDIMENTO (MODAL) ─────────────────────────
+  abrirModalCriacao(event?: Event): void {
+    if (event) this.ultimoBotaoCriacao = event.currentTarget as HTMLElement;
+    this.criandoAtendimento = true;
+  }
+
+  fecharModalCriacao(): void {
+    this.criandoAtendimento = false;
+    window.setTimeout(() => this.ultimoBotaoCriacao?.focus());
+  }
+
+  onCriacaoSalva(criado: AtendimentoIndividual): void {
+    const atual = this.acompanhamento();
+    if (atual) {
+      const lista = [criado, ...(atual.atendimentos ?? [])].sort((a, b) => new Date(b.dataAtendimento).getTime() - new Date(a.dataAtendimento).getTime());
+      this.acompanhamento.set({ ...atual, atendimentos: lista });
+    }
+    this.fecharModalCriacao();
   }
 }

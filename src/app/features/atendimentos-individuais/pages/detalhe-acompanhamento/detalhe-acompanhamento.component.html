@@ -34,7 +34,7 @@
     <div class="actions">
       @if (item.status === 'EM_ANDAMENTO' && !item.arquivado) {
         @if (canCreateAtendimento(item)) {
-          <a class="primary" [routerLink]="['/admin/atendimentos-individuais', item.id, 'novo-atendimento']">Novo atendimento</a>
+          <button type="button" class="primary" (click)="abrirModalCriacao($event)">Novo atendimento</button>
         }
         @if (canUpdateSubject(item)) {
           <button type="button" class="secondary" (click)="abrirModalAssunto(item.assuntoAtual, $event)">Modificar assunto</button>
@@ -275,6 +275,15 @@
     }
   </section>
 </main>
+}
+
+<!-- ── MODAL: Novo atendimento ─────────────────── -->
+@if (criandoAtendimento && acompanhamento(); as item) {
+  <app-novo-atendimento-modal
+    [acompanhamento]="item"
+    (salvo)="onCriacaoSalva($event)"
+    (fechado)="fecharModalCriacao()">
+  </app-novo-atendimento-modal>
 }
 
 <!-- ── MODAL: Editar atendimento ─────────────────── -->
