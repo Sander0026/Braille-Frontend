@@ -67,18 +67,26 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   @ViewChild('relatorioPrimeiroFoco') private relatorioPrimeiroFoco?: ElementRef<HTMLElement>;
   @ViewChild('edicaoDialog')         private edicaoDialog?:         ElementRef<HTMLElement>;
   @ViewChild('edicaoPrimeiroFoco')   private edicaoPrimeiroFoco?:   ElementRef<HTMLElement>;
+  @ViewChild('criacaoPrimeiroFoco')  private criacaoPrimeiroFoco?:  ElementRef<HTMLElement>;
 
   private ultimoBotaoConfirmacao: HTMLElement | null = null;
   private ultimoBotaoAssunto:     HTMLElement | null = null;
   private ultimoBotaoFinalizacao: HTMLElement | null = null;
   private ultimoBotaoRelatorio:   HTMLElement | null = null;
   private ultimoBotaoEdicao:      HTMLElement | null = null;
+  private ultimoBotaoCriacao:     HTMLElement | null = null;
 
   // ── Estado dos modais ─────────────────────────────────────
   alterandoAssunto   = false;
   finalizando        = false;
   exibindoRelatorio  = false;
   editandoAtendimento = false;
+  criandoAtendimento  = false;
+
+  // ── Estado modal de criação ────────────────────────────────
+  readonly salvandoCriacao = signal(false);
+  formCriacaoTocado = false;
+  salvoCriacaoComSucesso = false;
 
   // ── Estado modal de edição ────────────────────────────────
   readonly atendimentoEmEdicao = signal<AtendimentoIndividual | null>(null);
@@ -320,7 +328,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   // ── ACESSIBILIDADE ────────────────────────────────────────
   onConfirmacaoKeydown(event: KeyboardEvent): void { this.onDialogKeydown(event, 'confirmacao'); }
 
-  onDialogKeydown(event: KeyboardEvent, modal: 'confirmacao' | 'assunto' | 'finalizacao' | 'relatorio' | 'edicao'): void {
+  onDialogKeydown(event: KeyboardEvent, modal: 'confirmacao' | 'assunto' | 'finalizacao' | 'relatorio' | 'edicao' | 'criacao'): void {
     if (event.key === 'Escape') {
       event.preventDefault();
       if (modal === 'confirmacao') this.fecharConfirmacaoArquivo();
@@ -328,6 +336,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
       if (modal === 'finalizacao') this.fecharModalFinalizacao();
       if (modal === 'relatorio')   this.fecharModalRelatorio();
       if (modal === 'edicao')      this.fecharModalEdicao();
+      if (modal === 'criacao')     this.fecharModalCriacao();
       return;
     }
     if (event.key !== 'Tab') return;
@@ -349,6 +358,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.editandoAtendimento  && !this.salvandoEdicao())         { this.fecharModalEdicao();      return; }
+    if (this.criandoAtendimento   && !this.salvandoCriacao())        { this.fecharModalCriacao();     return; }
     if (this.exibindoRelatorio    && !this.exportandoPdfRelatorio)   { this.fecharModalRelatorio();   return; }
     if (this.alterandoAssunto     && !this.salvandoAssunto())        { this.fecharModalAssunto();     return; }
     if (this.finalizando          && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
@@ -359,6 +369,7 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
   async podeDescartar(): Promise<boolean> {
     const temAlteracao =
       (this.editandoAtendimento  && this.temAlteracoesEdicao()) ||
+      (this.criandoAtendimento   && this.temAlteracoesCriacao()) ||
       (this.alterandoAssunto     && this.temAlteracoesAssunto()) ||
       (this.finalizando          && this.temAlteracoesFinalizacao()) ||
       (this.exibindoRelatorio    && this.temAlteracoesRelatorio()) ||
@@ -452,5 +463,49 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
 
   categoriaPadraoAnexo(): CategoriaArquivoAtendimentoIndividual {
     return this.atendimentoEmEdicao()?.tipoRegistro === 'FALTA_JUSTIFICADA' ? 'ATESTADO' : 'OUTRO';
+  }
+
+  // ── CRIAÇÃO DE ATENDIMENTO (MODAL) ─────────────────────────
+  abrirModalCriacao(event?: Event): void {
+    if (event) this.ultimoBotaoCriacao = event.currentTarget as HTMLElement;
+    this.formCriacaoTocado      = false;
+    this.salvoCriacaoComSucesso = false;
+    this.criandoAtendimento     = true;
+    window.setTimeout(() => this.criacaoPrimeiroFoco?.nativeElement.focus());
+  }
+
+  async fecharModalCriacao(): Promise<void> {
+    if (this.salvandoCriacao()) return;
+    if (this.temAlteracoesCriacao() && !(await this.confirmarDescarte())) return;
+    this.criandoAtendimento = false;
+    window.setTimeout(() => this.ultimoBotaoCriacao?.focus());
+  }
+
+  salvarCriacao(payload: CriarAtendimentoIndividualPayload): void {
+    const acompanhamento = this.acompanhamento();
+    if (!acompanhamento) return;
+    this.salvandoCriacao.set(true);
+    this.api.criarAtendimento(acompanhamento.id, payload).subscribe({
+      next: criado => {
+        const atual = this.acompanhamento();
+        if (atual) {
+          const lista = [criado, ...(atual.atendimentos ?? [])].sort((a, b) => new Date(b.dataAtendimento).getTime() - new Date(a.dataAtendimento).getTime());
+          this.acompanhamento.set({ ...atual, atendimentos: lista });
+        }
+        this.salvandoCriacao.set(false);
+        this.salvoCriacaoComSucesso = true;
+        this.criandoAtendimento   = false;
+        window.setTimeout(() => this.ultimoBotaoCriacao?.focus());
+        this.toast.sucesso('Atendimento criado com sucesso.');
+      },
+      error: () => {
+        this.salvandoCriacao.set(false);
+        this.toast.erro('Não foi possível salvar o atendimento.');
+      },
+    });
+  }
+
+  temAlteracoesCriacao(): boolean {
+    return this.formCriacaoTocado && !this.salvoCriacaoComSucesso;
   }
 }
