@@ -9,11 +9,8 @@
     (keydown)="onDialogKeydown($event)">
 
     <!-- Cabeçalho do modal -->
-    <div class="modal-header wizard-header">
-      <div>
-        <h2 id="criacao-dialog-title" #primeiroFoco tabindex="-1">Novo acompanhamento individual</h2>
-        <p class="dialog-desc">Etapa <strong>{{ passoAtual() }}</strong> de {{ totalPassos }}</p>
-      </div>
+    <div class="modal-header">
+      <h2 id="criacao-dialog-title" #primeiroFoco tabindex="-1">Novo acompanhamento individual</h2>
       <button
         type="button"
         class="modal-close"
@@ -25,7 +22,34 @@
         </svg>
       </button>
     </div>
-    <progress class="wizard-progress" [max]="totalPassos" [value]="passoAtual()" aria-label="Progresso do cadastro"></progress>
+
+    <!-- Stepper visual de etapas -->
+    <div class="modal-stepper" aria-hidden="true">
+      <div class="steps-indicator">
+        @for (step of [1, 2, 3]; track step) {
+          <div class="step-item">
+            <div class="step-dot" [class.active]="step === passoAtual()" [class.done]="step < passoAtual()">
+              @if (step < passoAtual()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              } @else {
+                {{ step }}
+              }
+            </div>
+            <span class="step-label" [class.active]="step === passoAtual()" [class.done]="step < passoAtual()">
+              @switch (step) {
+                @case (1) { Aluno }
+                @case (2) { Acompanhamento }
+                @case (3) { Revisão }
+              }
+            </span>
+            @if (step < 3) {
+              <div class="step-line" [class.done]="step < passoAtual()"></div>
+            }
+          </div>
+        }
+      </div>
+      <progress class="wizard-progress" [max]="totalPassos" [value]="passoAtual()" aria-label="Progresso do cadastro"></progress>
+    </div>
 
     <!-- Corpo com rolagem -->
     <div class="modal-body">
