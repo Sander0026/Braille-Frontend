@@ -1,0 +1,75 @@
+<main class="page">
+  <header class="hero">
+    <div>
+      <a routerLink="/admin/atendimentos-individuais" class="back">Voltar</a>
+      <h1>Dashboard administrativo</h1>
+      <p>Indicadores consolidados de atendimentos individuais no periodo de {{ periodoLabel() }}.</p>
+    </div>
+    <button type="button" class="secondary" (click)="carregar()" [disabled]="carregando()">
+      {{ carregando() ? 'Atualizando...' : 'Atualizar' }}
+    </button>
+  </header>
+
+  @if (carregando()) {
+    <section class="panel" aria-live="polite">
+      <h2>Carregando indicadores</h2>
+      <p>Aguarde enquanto os dados administrativos sao consolidados.</p>
+    </section>
+  } @else if (erro()) {
+    <section class="panel" role="alert">
+      <h2>Falha ao carregar dashboard</h2>
+      <p>{{ erro() }}</p>
+      <button type="button" class="secondary" (click)="carregar()">Tentar novamente</button>
+    </section>
+  } @else if (dashboard(); as data) {
+    <section class="indicators" aria-label="Indicadores gerais">
+      <article><span>Em andamento</span><strong>{{ data.indicadores.emAndamento }}</strong></article>
+      <article><span>Finalizados</span><strong>{{ data.indicadores.finalizados }}</strong></article>
+      <article><span>Arquivados</span><strong>{{ data.indicadores.arquivados }}</strong></article>
+      <article><span>Atendimentos no mes</span><strong>{{ data.indicadores.atendimentosNoMes }}</strong></article>
+      <article><span>Faltas com comprovante</span><strong>{{ data.indicadores.faltasJustificadasComComprovante }}</strong></article>
+      <article><span>Faltas sem comprovante</span><strong>{{ data.indicadores.faltasJustificadasSemComprovante }}</strong></article>
+      <article><span>Media por acompanhamento</span><strong>{{ data.indicadores.mediaAtendimentosPorAcompanhamento }}</strong></article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>Atendimentos por professor</h2>
+        @if (data.atendimentosPorProfessor.length) {
+          <ol class="ranking">
+            @for (professor of data.atendimentosPorProfessor; track professor.professorId) {
+              <li>
+                <div>
+                  <strong>{{ professor.nome }}</strong>
+                  <span>{{ professor.matricula || 'Sem matricula' }}</span>
+                </div>
+                <b>{{ professor.total }}</b>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p>Nenhum atendimento registrado no mes.</p>
+        }
+      </article>
+
+      <article class="panel">
+        <h2>Alunos mais atendidos</h2>
+        @if (data.alunosMaisAtendidos.length) {
+          <ol class="ranking">
+            @for (aluno of data.alunosMaisAtendidos; track aluno.alunoId) {
+              <li>
+                <div>
+                  <strong>{{ aluno.nome }}</strong>
+                  <span>{{ aluno.matricula || 'Sem matricula' }}</span>
+                </div>
+                <b>{{ aluno.total }}</b>
+              </li>
+            }
+          </ol>
+        } @else {
+          <p>Nenhum aluno atendido no mes.</p>
+        }
+      </article>
+    </section>
+  }
+</main>

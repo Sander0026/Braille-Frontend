@@ -1,0 +1,50 @@
+<main class="page">
+  <header class="hero">
+    <div>
+      <h1>Atendimento Individual</h1>
+      <p>Acompanhe atendimentos, faltas, evolucao pedagogica e historico individual dos alunos.</p>
+    </div>
+    <button type="button" class="primary" (click)="abrirModalCriacao()">Criar acompanhamento</button>
+  </header>
+
+  <section class="indicators" aria-label="Indicadores de atendimento individual">
+    <article><span>Em andamento</span><strong>{{ emAndamento() }}</strong></article>
+    <article><span>Alunos acompanhados</span><strong>{{ alunosAcompanhados() }}</strong></article>
+    <article><span>Finalizados</span><strong>{{ finalizados() }}</strong></article>
+    @if (canViewArquivados()) {
+      <article><span>Arquivados</span><strong>{{ arquivados() }}</strong></article>
+    }
+  </section>
+
+  <nav class="cards" aria-label="Navegacao do modulo de atendimento individual">
+    <a routerLink="/admin/atendimentos-individuais/em-andamento">
+      <span class="material-symbols-rounded" aria-hidden="true">pending_actions</span>
+      <strong>Em andamento</strong>
+      <small>Veja acompanhamentos ativos e registre novos atendimentos.</small>
+    </a>
+    <a routerLink="/admin/atendimentos-individuais/finalizados">
+      <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>
+      <strong>Finalizados</strong>
+      <small>Consulte historicos encerrados.</small>
+    </a>
+    @if (canViewArquivados()) {
+      <a routerLink="/admin/atendimentos-individuais/dashboard">
+        <span class="material-symbols-rounded" aria-hidden="true">monitoring</span>
+        <strong>Dashboard administrativo</strong>
+        <small>Acompanhe indicadores do mes, faltas e ranking de atendimentos.</small>
+      </a>
+      <a routerLink="/admin/atendimentos-individuais/arquivados">
+        <span class="material-symbols-rounded" aria-hidden="true">inventory_2</span>
+        <strong>Arquivados</strong>
+        <small>Consulte acompanhamentos ocultados da visualizacao principal.</small>
+      </a>
+    }
+  </nav>
+</main>
+
+@if (criandoAcompanhamento()) {
+  <app-criar-acompanhamento-modal
+    (salvo)="onCriacaoSalva($event)"
+    (fechado)="fecharModalCriacao()">
+  </app-criar-acompanhamento-modal>
+}

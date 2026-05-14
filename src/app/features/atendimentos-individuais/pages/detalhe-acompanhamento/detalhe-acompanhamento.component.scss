@@ -1,0 +1,77 @@
+.page { display:grid; gap:1.25rem; padding:2rem; }
+.hero { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
+.back { color:#0f5f95; font-weight:800; text-decoration:none; }
+h1 { margin:.35rem 0 0; font-size:1.7rem; }
+h2 { margin:0; font-size:1.15rem; }
+p { margin:.35rem 0 0; color:#64748b; line-height:1.5; }
+.panel { display:grid; gap:1rem; padding:1rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; }
+.subject { display:grid; gap:.25rem; }
+.subject span { color:#64748b; font-weight:800; text-transform:uppercase; font-size:.78rem; }
+.subject strong { font-size:1.15rem; }
+.actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.75rem; }
+.primary, .secondary { min-height:2.5rem; border-radius:8px; padding:.6rem 1rem; font-weight:900; text-decoration:none; cursor:pointer; }
+.primary { border:0; background:#f2c300; color:#111827; }
+.secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }
+label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
+input, textarea, select { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; background:#fff; }
+.filters { display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:.85rem; }
+.dialog-panel--wide { width:min(100%,52rem); }
+.dialog-desc { margin:-.35rem 0 .25rem; color:#64748b; font-size:.9rem; }
+.dialog-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:1rem; background:rgba(15,23,42,.58); }
+.dialog-panel { display:grid; gap:1rem; width:min(100%, 34rem); padding:1.25rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; box-shadow:0 24px 60px rgba(15,23,42,.28); outline:0; }
+.dialog-panel:focus { box-shadow:0 0 0 3px #f2c300, 0 24px 60px rgba(15,23,42,.28); }
+.motivo-arquivamento { padding:.75rem 1rem; border-left:3px solid #f59e0b; background:#fffbeb; border-radius:4px; color:#92400e; font-size:.9rem; line-height:1.5; }
+
+/* Modal XL — editar atendimento */
+.dialog-panel--xl {
+  width: min(100%, 46rem);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+}
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+.modal-header h2 { margin:0; font-size:1.2rem; outline:0; }
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: grid;
+  gap: 2rem;
+  overscroll-behavior: contain;
+}
+.modal-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+  &:hover:not(:disabled) { background:#f1f5f9; color:#111827; }
+  &:focus-visible { outline: 2px solid #f2c300; outline-offset: 2px; }
+  &:disabled { opacity:.5; cursor:not-allowed; }
+}
+.attachments-section {
+  display: grid;
+  gap: .75rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  h3 { margin:0; font-size:1rem; }
+  p  { margin:0; color:#64748b; font-size:.875rem; }
+}
+@media (max-width:760px) { .page { padding:1rem; } .hero, .actions { flex-direction:column; align-items:stretch; } .dialog-panel--xl { max-height:95vh; } .modal-header, .modal-body { padding-left:1rem; padding-right:1rem; } }

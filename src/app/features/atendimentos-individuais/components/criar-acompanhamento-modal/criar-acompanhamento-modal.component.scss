@@ -1,0 +1,344 @@
+.dialog-desc { margin:-.35rem 0 .25rem; color:#64748b; font-size:.9rem; }
+.dialog-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:1rem; background:rgba(15,23,42,.58); }
+.dialog-panel { display:grid; gap:1rem; width:min(100%, 34rem); padding:1.25rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; box-shadow:0 24px 60px rgba(15,23,42,.28); outline:0; }
+.dialog-panel:focus { box-shadow:0 0 0 3px #f2c300, 0 24px 60px rgba(15,23,42,.28); }
+
+/* Modal XL */
+.dialog-panel--xl {
+  width: min(100%, 46rem);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: visible;
+  padding: 0;
+  gap: 0;
+  overscroll-behavior: contain;
+}
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+  border-radius: 8px 8px 0 0;
+}
+.modal-header h2 { margin:0; font-size:1.35rem; font-weight:800; outline:0; }
+.modal-body {
+  flex: 1;
+  overflow: visible;
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  min-height: 0;
+}
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 0 0 8px 8px;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+.modal-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+  &:hover:not(:disabled) { background:#f1f5f9; color:#111827; }
+  &:focus-visible { outline: 2px solid #f2c300; outline-offset: 2px; }
+  &:disabled { opacity:.5; cursor:not-allowed; }
+}
+@media (max-width:760px) { .dialog-panel--xl { max-height:95vh; } .modal-header, .modal-body, .modal-footer { padding-left:1rem; padding-right:1rem; } }
+
+// ── Wizard Utils ────────────────────────────────────────────
+$primary: #f5c800;
+$primary-dark: #d4a900;
+$black: #1a1a00;
+$success: #16a34a;
+$danger: #dc2626;
+$gray-100: #f5f5f5;
+$gray-200: #e5e7eb;
+$gray-400: #9ca3af;
+$gray-600: #5c5c5c;
+$gray-900: #1f1f1f;
+$transition: 200ms ease;
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0;
+}
+
+// ── Stepper de etapas ─────────────────────────────────────
+.modal-stepper {
+  padding: 0.75rem 1.5rem 0;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+  background: #fafbfc;
+  position: sticky;
+  top: 4.5rem; /* abaixo do modal-header sticky */
+  z-index: 9;
+
+  @media (max-width: 760px) {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    top: 4rem;
+  }
+}
+
+.steps-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 0.6rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+  &:last-child { flex: 0; }
+}
+
+.step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 2px solid $gray-200;
+  background: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $gray-400;
+  transition: all $transition;
+  flex-shrink: 0;
+
+  &.active {
+    border-color: $primary;
+    background: $primary;
+    color: $black;
+  }
+
+  &.done {
+    border-color: $success;
+    background: $success;
+    color: #fff;
+  }
+}
+
+.step-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: $gray-400;
+  white-space: nowrap;
+  transition: color $transition;
+  &.active { color: $gray-900; }
+  &.done   { color: $success; }
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: $gray-200;
+  margin: 0 0.4rem;
+  transition: background $transition;
+  &.done { background: $success; }
+}
+
+.wizard-progress {
+  width: 100%;
+  height: 3px;
+  appearance: none;
+  background: $gray-200;
+  margin: 0;
+  display: block;
+  flex-shrink: 0;
+  &::-webkit-progress-bar { background: $gray-200; }
+  &::-webkit-progress-value { background: $primary; transition: width 400ms ease; }
+  &::-moz-progress-bar { background: $primary; }
+}
+
+// ── Panel (cartão de etapa) ────────────────────────────────
+.panel {
+  background: #fff;
+  border: 1px solid $gray-200;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.step-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $gray-900;
+  margin: 0 0 0.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid $primary;
+}
+.step-desc {
+  font-size: 0.875rem;
+  color: $gray-600;
+  margin: 0.5rem 0 1.25rem;
+}
+
+// ── Campos do formulário ───────────────────────────────────
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+  &:last-child { margin-bottom: 0; }
+  .field-group__label {
+    font-size: 0.8rem; font-weight: 600; color: $gray-600;
+    abbr { color: $danger; text-decoration: none; margin-left: 2px; }
+  }
+  .optional { font-size: 0.72rem; color: $gray-400; font-weight: 400; }
+  input, select, textarea {
+    width: 100%; min-height: 2.65rem; border: 1px solid #d1d5db; border-radius: 0.375rem;
+    padding: 0.625rem 0.75rem; font: inherit; font-size: 0.875rem; color: #111827;
+    background: #fff; transition: border-color 150ms, box-shadow 150ms; outline: none;
+    &:focus { border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1); }
+  }
+  textarea { resize: vertical; }
+}
+
+// ── Card do aluno selecionado ──────────────────────────────
+.aluno-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.875rem 1rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  &__icon { color: $success; flex-shrink: 0; }
+  &__info {
+    display: flex; flex-direction: column; gap: 0.1rem; flex: 1;
+    strong { font-size: 0.9rem; color: $gray-900; }
+    span   { font-size: 0.8rem; color: $gray-600; }
+  }
+}
+.badge {
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.2rem 0.6rem; border-radius: 9999px; font-size: 0.72rem; font-weight: 700;
+  &--ok { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+}
+
+// ── Alerta de duplicidade ──────────────────────────────────
+.duplicate-alert {
+  display: flex;
+  gap: 0.875rem;
+  padding: 1rem;
+  border: 1px solid #f59e0b;
+  border-radius: 0.5rem;
+  background: #fffbeb;
+  color: #78350f;
+  margin-top: 1rem;
+  &__icon { flex-shrink: 0; color: #b45309; padding-top: 0.1rem; }
+  &__body {
+    display: grid; gap: 0.5rem;
+    h3 { font-size: 0.9rem; font-weight: 700; margin: 0; }
+    p  { font-size: 0.875rem; margin: 0; line-height: 1.5; }
+  }
+  &__actions {
+    display: flex; gap: 0.65rem; flex-wrap: wrap; margin-top: 0.25rem;
+  }
+}
+
+// ── Revisão ────────────────────────────────────────────────
+.review-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  &__item {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid $gray-200;
+    &:last-child { border-bottom: 0; }
+    &--full { grid-template-columns: 1fr; }
+    dt { font-size: 0.8rem; font-weight: 600; color: $gray-600; }
+    dd { font-size: 0.875rem; color: $gray-900; margin: 0; word-break: break-word; }
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr; gap: 0.15rem;
+    }
+  }
+}
+
+// ── Botões ─────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 1rem;
+  border-radius: 0.5rem;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all $transition;
+  text-decoration: none;
+  &:focus-visible { outline: 2px solid $primary; outline-offset: 2px; }
+  &--primary {
+    border: 0; background: $primary; color: $black;
+    &:hover:not(:disabled) { background: $primary-dark; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+  &--secondary {
+    border: 1px solid $gray-200; background: #fff; color: $gray-900;
+    &:hover:not(:disabled) { background: $gray-100; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+  &--ghost {
+    border: 1px solid transparent; background: transparent; color: $gray-600;
+    &:hover { background: $gray-100; color: $gray-900; }
+  }
+}
+
+// ── Spinner ────────────────────────────────────────────────
+.spinner {
+  display: inline-block; width: 14px; height: 14px;
+  border: 2px solid rgba(26, 26, 0, 0.3); border-top-color: $black;
+  border-radius: 50%; animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Rodapé do wizard ───────────────────────────────────────
+.wizard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  &__left, &__right {
+    display: flex; align-items: center; gap: 0.75rem;
+  }
+}
+@media (max-width: 600px) {
+  .wizard-footer { flex-direction: column-reverse; align-items: stretch; }
+  .wizard-footer__left, .wizard-footer__right { justify-content: center; }
+  .btn { justify-content: center; }
+  .review-list__item { grid-template-columns: 1fr; }
+}

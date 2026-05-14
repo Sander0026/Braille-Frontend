@@ -1,0 +1,56 @@
+<main class="page">
+  <header>
+    <div>
+      <h1>Acompanhamentos em andamento</h1>
+      <p>Registre novos atendimentos e acompanhe a evolucao dos alunos.</p>
+    </div>
+    <button type="button" class="primary" (click)="abrirModalCriacao()">Criar acompanhamento</button>
+  </header>
+
+  <section class="toolbar">
+    <label>
+      <span>Buscar</span>
+      <input type="search" [(ngModel)]="busca" placeholder="Nome, matricula ou assunto" (keyup.enter)="filtrar()" />
+    </label>
+    <button type="button" (click)="filtrar()">Filtrar</button>
+  </section>
+
+  @if (carregando()) {
+    <app-empty-state-atendimentos title="Carregando acompanhamentos" description="Aguarde enquanto buscamos os registros." />
+  } @else if (erro()) {
+    <app-empty-state-atendimentos title="Falha ao carregar acompanhamentos" [description]="erro()" />
+  } @else if (acompanhamentos().length === 0) {
+    <app-empty-state-atendimentos title="Nenhum acompanhamento em andamento" description="Crie um novo acompanhamento para iniciar o historico individual." />
+  } @else {
+    <section class="grid">
+      @for (acompanhamento of acompanhamentos(); track acompanhamento.id) {
+        <app-acompanhamento-card
+          [acompanhamento]="acompanhamento"
+          [canCreateAtendimento]="canCreateAtendimento(acompanhamento)"
+          (novoAtendimento)="abrirNovoAtendimento($event)" />
+      }
+    </section>
+    <app-pagination
+      [page]="page()"
+      [lastPage]="lastPage()"
+      [total]="total()"
+      [loading]="carregando()"
+      (previous)="paginaAnterior()"
+      (next)="proximaPagina()" />
+  }
+</main>
+
+@if (acompanhamentoCriacao()) {
+  <app-novo-atendimento-modal
+    [acompanhamento]="acompanhamentoCriacao()!"
+    (salvo)="onAtendimentoSalvo($event)"
+    (fechado)="fecharNovoAtendimento()">
+  </app-novo-atendimento-modal>
+}
+
+@if (criandoAcompanhamento()) {
+  <app-criar-acompanhamento-modal
+    (salvo)="onCriacaoSalva($event)"
+    (fechado)="fecharModalCriacao()">
+  </app-criar-acompanhamento-modal>
+}
