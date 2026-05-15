@@ -128,6 +128,9 @@ export class CriarAcompanhamentoModalComponent implements OnInit {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    // Não interceptar se o ConfirmDialog de descarte estiver aberto —
+    // o <dialog> nativo já trata o Escape via evento 'cancel'
+    if (this.confirmDialog.dialogData()) return;
     if (!this.salvando()) {
       this.fechar();
     }
