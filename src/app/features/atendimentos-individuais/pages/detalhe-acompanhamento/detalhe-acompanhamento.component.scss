@@ -111,63 +111,9 @@ p {
   }
 }
 
-// Botão primário — mesmo padrão .btn .btn-primary global
-.primary {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-2;
-  min-height: 2.5rem;
-  border: 2px solid $color-primary;
-  border-radius: $border-radius;
-  background-color: $color-primary;
-  color: $color-primary-text;
-  padding: calc(#{$space-2} + 0.125rem) $space-5;
-  font-family: $font-family-base;
-  font-size: $font-size-sm;          // 0.875rem
-  font-weight: $font-weight-semibold; // 600
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color $transition-fast, border-color $transition-fast;
 
-  &:hover:not(:disabled) {
-    background-color: $color-primary-dark;
-    border-color: $color-primary-dark;
-  }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
 
-// Botão secundário — mesmo padrão .btn .btn-secondary global
-.secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-2;
-  min-height: 2.5rem;
-  border: 2px solid $color-gray-300;
-  border-radius: $border-radius;
-  background: $color-white;
-  color: $color-gray-700;
-  padding: calc(#{$space-2} + 0.125rem) $space-5;
-  font-family: $font-family-base;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color $transition-fast, border-color $transition-fast;
-
-  &:hover:not(:disabled) {
-    background-color: $color-gray-100;
-    border-color: $color-gray-400;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-}
 
 // ── Filtros ─────────────────────────────────────────────────
 .filters {

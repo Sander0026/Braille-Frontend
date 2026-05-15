@@ -5,7 +5,7 @@
       <h1>Dashboard administrativo</h1>
       <p>Indicadores consolidados de atendimentos individuais no periodo de {{ periodoLabel() }}.</p>
     </div>
-    <button type="button" class="secondary" (click)="carregar()" [disabled]="carregando()">
+    <button type="button" class="btn btn-secondary" (click)="carregar()" [disabled]="carregando()">
       {{ carregando() ? 'Atualizando...' : 'Atualizar' }}
     </button>
   </header>
@@ -19,7 +19,7 @@
     <section class="panel" role="alert">
       <h2>Falha ao carregar dashboard</h2>
       <p>{{ erro() }}</p>
-      <button type="button" class="secondary" (click)="carregar()">Tentar novamente</button>
+      <button type="button" class="btn btn-secondary" (click)="carregar()">Tentar novamente</button>
     </section>
   } @else if (dashboard(); as data) {
     <section class="indicators" aria-label="Indicadores gerais">

@@ -47,34 +47,9 @@
 }
 
 // ── Botão primário (usa a classe global .btn .btn-primary) ──
-// O botão no template usa class="primary" — mantemos compatibilidade
-// mas alinhamos font-size/weight ao padrão global .btn
-.hero .primary {
-  display: inline-flex;
-  align-items: center;
-  gap: $space-2;
-  padding: calc(#{$space-2} + 0.125rem) $space-5;
-  font-family: $font-family-base;
-  font-size: $font-size-sm;      // 0.875rem
-  font-weight: $font-weight-semibold; // 600
-  line-height: 1;
-  border: 2px solid $color-primary;
-  border-radius: $border-radius;
-  background-color: $color-primary;
-  color: $color-primary-text;
-  cursor: pointer;
-  text-decoration: none;
-  transition: background-color $transition-fast, border-color $transition-fast;
-  white-space: nowrap;
-
-  &:hover {
-    background-color: $color-primary-dark;
-    border-color: $color-primary-dark;
-  }
-
+.hero .btn-primary {
   @media (max-width: $bp-md) {
     width: 100%;
-    justify-content: center;
   }
 }
 
