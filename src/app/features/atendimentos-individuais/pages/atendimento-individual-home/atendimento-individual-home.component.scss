@@ -1,14 +1,165 @@
-.page { display:grid; gap:1.25rem; padding:2rem; }
-.hero { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
-h1 { margin:0; font-size:1.8rem; }
-p { margin:.35rem 0 0; color:#596579; }
-.primary { border-radius:8px; background:#f2c300; color:#111827; padding:.75rem 1rem; font-weight:900; text-decoration:none; }
-.indicators, .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(14rem,1fr)); gap:1rem; }
-.indicators article, .cards a { border:1px solid #dde3ec; border-radius:8px; background:#fff; padding:1rem; }
-.indicators span { color:#64748b; font-weight:800; text-transform:uppercase; font-size:.78rem; }
-.indicators strong { display:block; margin-top:.35rem; font-size:2rem; }
-.cards a { display:grid; gap:.45rem; color:#111827; text-decoration:none; }
-.cards a:focus-visible { outline:3px solid #f2c300; outline-offset:3px; }
-.cards .material-symbols-rounded { color:#b89a00; font-size:2rem; }
-.cards small { color:#64748b; line-height:1.45; }
-@media (max-width:760px) { .page { padding:1rem; } .hero { flex-direction:column; } .primary { width:100%; text-align:center; } }
+// ============================================================
+// atendimento-individual-home — Tipografia alinhada com Alunos
+// ============================================================
+@use '../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// ── Layout de página ────────────────────────────────────────
+.page {
+  display: grid;
+  gap: $space-5;
+  padding: $space-8;
+
+  @media (max-width: $bp-md) {
+    padding: $space-4;
+    gap: $space-4;
+  }
+}
+
+// ── Cabeçalho da página ────────────────────────────────────
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+// Título principal — mesmo padrão .page-title de Alunos
+.hero h1 {
+  margin: 0;
+  font-size: $font-size-2xl;     // 1.5rem — igual a beneficiary-form.scss
+  font-weight: $font-weight-bold; // 700
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// Subtítulo — igual a .page-subtitle de _components.scss
+.hero p {
+  margin: $space-1 0 0;
+  font-size: $font-size-sm;      // 0.875rem
+  font-weight: $font-weight-normal;
+  color: $color-gray-500;
+  line-height: $line-height-normal;
+}
+
+// ── Botão primário (usa a classe global .btn .btn-primary) ──
+// O botão no template usa class="primary" — mantemos compatibilidade
+// mas alinhamos font-size/weight ao padrão global .btn
+.hero .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: calc(#{$space-2} + 0.125rem) $space-5;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;      // 0.875rem
+  font-weight: $font-weight-semibold; // 600
+  line-height: 1;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius;
+  background-color: $color-primary;
+  color: $color-primary-text;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color $transition-fast, border-color $transition-fast;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
+  }
+
+  @media (max-width: $bp-md) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+// ── Cards de indicadores ────────────────────────────────────
+.indicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: $space-4;
+}
+
+.indicators article {
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  padding: $space-4;
+  box-shadow: $shadow-sm;
+}
+
+// Rótulo do indicador — mesmo padrão .filter-section__title de Alunos
+.indicators span {
+  display: block;
+  font-size: $font-size-xs;         // 0.75rem
+  font-weight: $font-weight-bold;   // 700
+  color: $color-gray-600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Valor numérico do indicador
+.indicators strong {
+  display: block;
+  margin-top: $space-1 + 0.125rem;
+  font-size: 2rem;
+  font-weight: $font-weight-bold;
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// ── Cards de navegação ──────────────────────────────────────
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: $space-4;
+}
+
+.cards a {
+  display: grid;
+  gap: $space-1 + 0.125rem;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  padding: $space-4;
+  color: $color-gray-900;
+  text-decoration: none;
+  box-shadow: $shadow-sm;
+  transition: box-shadow $transition-normal, transform $transition-normal;
+
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: $focus-ring-width solid $color-focus-ring;
+    outline-offset: $focus-ring-offset;
+  }
+}
+
+// Ícone do card
+.cards .material-symbols-rounded {
+  color: $color-primary-dark;
+  font-size: 2rem;
+}
+
+// Título do card
+.cards strong {
+  font-size: $font-size-base;      // 1rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+}
+
+// Descrição do card
+.cards small {
+  font-size: $font-size-sm;       // 0.875rem
+  font-weight: $font-weight-normal;
+  color: $color-gray-500;
+  line-height: $line-height-relaxed;
+}

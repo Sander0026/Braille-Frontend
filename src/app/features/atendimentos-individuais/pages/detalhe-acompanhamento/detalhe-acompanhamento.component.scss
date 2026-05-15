@@ -1,28 +1,267 @@
-.page { display:grid; gap:1.25rem; padding:2rem; }
-.hero { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; }
-.back { color:#0f5f95; font-weight:800; text-decoration:none; }
-h1 { margin:.35rem 0 0; font-size:1.7rem; }
-h2 { margin:0; font-size:1.15rem; }
-p { margin:.35rem 0 0; color:#64748b; line-height:1.5; }
-.panel { display:grid; gap:1rem; padding:1rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; }
-.subject { display:grid; gap:.25rem; }
-.subject span { color:#64748b; font-weight:800; text-transform:uppercase; font-size:.78rem; }
-.subject strong { font-size:1.15rem; }
-.actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.75rem; }
-.primary, .secondary { min-height:2.5rem; border-radius:8px; padding:.6rem 1rem; font-weight:900; text-decoration:none; cursor:pointer; }
-.primary { border:0; background:#f2c300; color:#111827; }
-.secondary { border:1px solid #cbd5e1; background:#fff; color:#111827; }
-label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
-input, textarea, select { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; background:#fff; }
-.filters { display:grid; grid-template-columns:repeat(auto-fill,minmax(13rem,1fr)); gap:.85rem; }
-.dialog-panel--wide { width:min(100%,52rem); }
-.dialog-desc { margin:-.35rem 0 .25rem; color:#64748b; font-size:.9rem; }
-.dialog-backdrop { position:fixed; inset:0; z-index:1000; display:grid; place-items:center; padding:1rem; background:rgba(15,23,42,.58); }
-.dialog-panel { display:grid; gap:1rem; width:min(100%, 34rem); padding:1.25rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; box-shadow:0 24px 60px rgba(15,23,42,.28); outline:0; }
-.dialog-panel:focus { box-shadow:0 0 0 3px #f2c300, 0 24px 60px rgba(15,23,42,.28); }
-.motivo-arquivamento { padding:.75rem 1rem; border-left:3px solid #f59e0b; background:#fffbeb; border-radius:4px; color:#92400e; font-size:.9rem; line-height:1.5; }
+// ============================================================
+// detalhe-acompanhamento — Tipografia alinhada com Alunos
+// ============================================================
+@use '../../../../../styles/variables' as *;
 
-/* Modal XL — editar atendimento */
+:host {
+  display: block;
+}
+
+// ── Layout de página ────────────────────────────────────────
+.page {
+  display: grid;
+  gap: $space-5;
+  padding: $space-8;
+
+  @media (max-width: $bp-md) {
+    padding: $space-4;
+    gap: $space-4;
+  }
+}
+
+// ── Cabeçalho da página ────────────────────────────────────
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+// Link voltar
+.back {
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-medium;  // 500
+  color: $color-info;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Título principal — igual a .page-title
+.hero h1 {
+  margin: $space-1 0 0;
+  font-size: $font-size-2xl;         // 1.5rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// Subtítulo de seção
+.hero h2 {
+  margin: 0;
+  font-size: $font-size-lg;          // 1.125rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+}
+
+// Texto descritivo — igual a .page-subtitle
+p {
+  margin: $space-1 0 0;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-500;
+  line-height: $line-height-normal;
+}
+
+// ── Painel de informações ───────────────────────────────────
+.panel {
+  display: grid;
+  gap: $space-4;
+  padding: $space-4;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  box-shadow: $shadow-sm;
+}
+
+// ── Assunto do acompanhamento ───────────────────────────────
+.subject {
+  display: grid;
+  gap: $space-1 * 0.5;
+}
+
+// Rótulo de campo — igual a filter-section__title de Alunos
+.subject span {
+  font-size: $font-size-xs;          // 0.75rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Valor do assunto
+.subject strong {
+  font-size: $font-size-lg;          // 1.125rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+}
+
+// ── Área de ações ───────────────────────────────────────────
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: $space-3;
+
+  @media (max-width: $bp-md) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+// Botão primário — mesmo padrão .btn .btn-primary global
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  min-height: 2.5rem;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius;
+  background-color: $color-primary;
+  color: $color-primary-text;
+  padding: calc(#{$space-2} + 0.125rem) $space-5;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-semibold; // 600
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color $transition-fast, border-color $transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Botão secundário — mesmo padrão .btn .btn-secondary global
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  min-height: 2.5rem;
+  border: 2px solid $color-gray-300;
+  border-radius: $border-radius;
+  background: $color-white;
+  color: $color-gray-700;
+  padding: calc(#{$space-2} + 0.125rem) $space-5;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color $transition-fast, border-color $transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: $color-gray-100;
+    border-color: $color-gray-400;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ── Filtros ─────────────────────────────────────────────────
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: $space-3 + 0.125rem;
+}
+
+// Label de filtro — padrão .form-label
+label {
+  display: grid;
+  gap: $space-1 + 0.125rem;
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-medium;  // 500
+  color: $color-gray-700;
+}
+
+// Inputs/selects/textareas — padrão .form-input global
+input,
+textarea,
+select {
+  min-height: 2.5rem;
+  border: 1.5px solid $color-gray-300;
+  border-radius: $border-radius;
+  padding: calc(#{$space-2} + 0.125rem) $space-3;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-900;
+  background: $color-white;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+  outline: none;
+
+  &::placeholder {
+    color: $color-gray-400;
+  }
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
+  }
+}
+
+// ── Modal de ação simples ───────────────────────────────────
+.dialog-panel--wide {
+  width: min(100%, 52rem);
+}
+
+// Descrição dentro do diálogo
+.dialog-desc {
+  margin: -#{$space-1} 0 $space-1;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-500;
+}
+
+// Backdrop do diálogo
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: $space-4;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+// Painel do diálogo
+.dialog-panel {
+  display: grid;
+  gap: $space-4;
+  width: min(100%, 34rem);
+  padding: $space-5;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  box-shadow: $shadow-lg;
+  outline: 0;
+
+  &:focus {
+    box-shadow: 0 0 0 3px $color-primary, $shadow-lg;
+  }
+}
+
+// Aviso de motivo de arquivamento
+.motivo-arquivamento {
+  padding: $space-3 $space-4;
+  border-left: 3px solid $color-warning;
+  background: $color-warning-light;
+  border-radius: $border-radius-sm;
+  color: $color-warning;
+  font-size: $font-size-sm;          // 0.875rem
+  line-height: $line-height-normal;
+}
+
+// ── Modal XL — editar atendimento ──────────────────────────
 .dialog-panel--xl {
   width: min(100%, 46rem);
   max-height: 90vh;
@@ -30,25 +269,52 @@ input, textarea, select { min-height:2.75rem; border:1px solid #cbd5e1; border-r
   flex-direction: column;
   padding: 0;
   gap: 0;
+
+  @media (max-width: $bp-md) {
+    max-height: 95vh;
+  }
 }
+
 .modal-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1.25rem 1.5rem 1rem;
-  border-bottom: 1px solid #e2e8f0;
+  gap: $space-4;
+  padding: $space-5 $space-6 $space-4;
+  border-bottom: 1px solid $color-gray-200;
   flex-shrink: 0;
+
+  // Título do modal — igual a .modal-header h2 global
+  h2 {
+    margin: 0;
+    font-size: $font-size-lg;        // 1.125rem — maior que 1rem p/ modal xl
+    font-weight: $font-weight-bold;  // 700
+    color: $color-gray-900;
+    outline: 0;
+    line-height: $line-height-tight;
+  }
+
+  @media (max-width: $bp-md) {
+    padding-left: $space-4;
+    padding-right: $space-4;
+  }
 }
-.modal-header h2 { margin:0; font-size:1.2rem; outline:0; }
+
 .modal-body {
   flex: 1;
   overflow-y: auto;
-  padding: 1.25rem 1.5rem 1.5rem;
+  padding: $space-5 $space-6 $space-6;
   display: grid;
-  gap: 2rem;
+  gap: $space-8;
   overscroll-behavior: contain;
+
+  @media (max-width: $bp-md) {
+    padding-left: $space-4;
+    padding-right: $space-4;
+  }
 }
+
+// Botão fechar modal
 .modal-close {
   flex-shrink: 0;
   display: flex;
@@ -57,21 +323,45 @@ input, textarea, select { min-height:2.75rem; border:1px solid #cbd5e1; border-r
   width: 2rem;
   height: 2rem;
   border: 0;
-  border-radius: 50%;
+  border-radius: $border-radius-full;
   background: transparent;
-  color: #64748b;
+  color: $color-gray-500;
   cursor: pointer;
-  transition: background 150ms, color 150ms;
-  &:hover:not(:disabled) { background:#f1f5f9; color:#111827; }
-  &:focus-visible { outline: 2px solid #f2c300; outline-offset: 2px; }
-  &:disabled { opacity:.5; cursor:not-allowed; }
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: $color-gray-100;
+    color: $color-gray-900;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 }
+
+// ── Seção de anexos ─────────────────────────────────────────
 .attachments-section {
   display: grid;
-  gap: .75rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #e2e8f0;
-  h3 { margin:0; font-size:1rem; }
-  p  { margin:0; color:#64748b; font-size:.875rem; }
+  gap: $space-3;
+  padding-top: $space-6;
+  border-top: 1px solid $color-gray-200;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-base;      // 1rem
+    font-weight: $font-weight-semibold; // 600
+    color: $color-gray-900;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;        // 0.875rem
+    color: $color-gray-500;
+  }
 }
-@media (max-width:760px) { .page { padding:1rem; } .hero, .actions { flex-direction:column; align-items:stretch; } .dialog-panel--xl { max-height:95vh; } .modal-header, .modal-body { padding-left:1rem; padding-right:1rem; } }
