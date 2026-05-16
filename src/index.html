@@ -46,12 +46,17 @@
   </div>
   <script>
     /* O script do VLibras ainda referencia assets do branch @dev no jsdelivr em algumas versoes.
-       Esse CDN entra em loop de redirect; redirecionamos antes da imagem ser requisitada. */
+       Em 08/05/2026, os assets access_icon.svg/access_popup.jpg entram em loop tanto
+       no jsdelivr quanto via vlibras.gov.br. Substituimos esses recursos por imagens
+       inline para evitar ruido no console sem impedir a inicializacao do widget. */
     (function patchVlibrasAssets() {
-      const cdnBase = 'https://cdn.jsdelivr.net/gh/spbgovbr-vlibras/vlibras-portal@dev/app/';
-      const officialBase = 'https://vlibras.gov.br/app/';
+      const vlibrasIconSvg = 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2272%22 height=%2272%22 viewBox=%220 0 72 72%22%3E%3Crect width=%2272%22 height=%2272%22 rx=%2214%22 fill=%22%23005CA9%22/%3E%3Cpath d=%22M24 44c0 7 5 12 12 12h6c5 0 9-4 9-9V31c0-2-2-4-4-4s-4 2-4 4v8h-2V22c0-2-2-4-4-4s-4 2-4 4v17h-2V25c0-2-2-4-4-4s-4 2-4 4v17l-4-4c-2-2-4-2-6 0s-2 4 0 6l5 6z%22 fill=%22%23fff%22/%3E%3Ctext x=%2236%22 y=%2265%22 text-anchor=%22middle%22 font-family=%22Arial,sans-serif%22 font-size=%2210%22 font-weight=%22700%22 fill=%22%23fff%22%3ELIBRAS%3C/text%3E%3C/svg%3E';
+      const transparentGif = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
       const normalizeVlibrasUrl = function (value) {
-        return typeof value === 'string' ? value.replace(cdnBase, officialBase) : value;
+        if (typeof value !== 'string') return value;
+        if (/\/assets\/access_icon\.svg(?:[?#].*)?$/i.test(value)) return vlibrasIconSvg;
+        if (/\/assets\/access_popup\.jpg(?:[?#].*)?$/i.test(value)) return transparentGif;
+        return value;
       };
 
       const srcDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');

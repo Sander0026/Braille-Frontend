@@ -1,0 +1,338 @@
+@if (carregando()) {
+<main class="page">
+  <section class="panel" aria-live="polite">
+    <h1>Carregando acompanhamento</h1>
+    <p>Aguarde enquanto buscamos o historico individual.</p>
+  </section>
+</main>
+} @else if (erro()) {
+<main class="page">
+  <section class="panel" role="alert">
+    <h1>Falha ao carregar acompanhamento</h1>
+    <p>{{ erro() }}</p>
+    <button class="btn btn-secondary" type="button" (click)="carregar()">Tentar novamente</button>
+  </section>
+</main>
+} @else if (acompanhamento(); as item) {
+<main class="page">
+  <header class="hero">
+    <div>
+      <a routerLink="/admin/atendimentos-individuais/em-andamento" class="back">Voltar para acompanhamentos</a>
+      <h1>{{ item.aluno?.nomeCompleto }}</h1>
+      <p>{{ item.professor?.nome }} · Inicio em {{ item.dataInicio | date:'dd/MM/yyyy' }}</p>
+    </div>
+    <app-status-acompanhamento-badge [status]="item.status" />
+  </header>
+
+  <section class="panel">
+    <div class="subject">
+      <span>Assunto principal</span>
+      <strong>{{ item.assuntoAtual }}</strong>
+    </div>
+    @if (item.descricao) { <p>{{ item.descricao }}</p> }
+
+    <div class="actions">
+      @if (item.status === 'EM_ANDAMENTO' && !item.arquivado) {
+        @if (canCreateAtendimento(item)) {
+          <button type="button" class="btn btn-primary" (click)="abrirModalCriacao($event)">Novo atendimento</button>
+        }
+        @if (canUpdateSubject(item)) {
+          <button type="button" class="btn btn-secondary" (click)="abrirModalAssunto(item.assuntoAtual, $event)">Modificar assunto</button>
+        }
+        @if (canFinish(item)) {
+          <button type="button" class="btn btn-secondary" (click)="abrirModalFinalizacao($event)">Finalizar acompanhamento</button>
+        }
+      }
+      @if (canArchive() && !item.arquivado) {
+        <button type="button" class="btn btn-secondary" (click)="solicitarConfirmacaoArquivo('arquivar', $event)" [disabled]="alterandoArquivo()">Arquivar</button>
+      }
+      @if (canArchive() && item.arquivado) {
+        <button type="button" class="btn btn-secondary" (click)="solicitarConfirmacaoArquivo('desarquivar', $event)" [disabled]="alterandoArquivo()">Desarquivar</button>
+      }
+      <button type="button" class="btn btn-secondary" (click)="abrirModalRelatorio($event)">Gerar relatorio</button>
+    </div>
+    @if (item.arquivado && item.motivoArquivamento) {
+      <div class="motivo-arquivamento" role="note">
+        <strong>Motivo do arquivamento:</strong> {{ item.motivoArquivamento }}
+      </div>
+    }
+  </section>
+
+  <app-resumo-atendimentos [resumo]="resumo()" />
+
+  <!-- ── MODAL: Arquivar / Desarquivar ─────────────────── -->
+  @if (confirmacaoArquivo(); as acao) {
+    <div class="dialog-backdrop" (click)="fecharConfirmacaoArquivo()">
+      <section
+        #confirmacaoDialog
+        class="dialog-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirmacao-arquivo-title"
+        aria-describedby="confirmacao-arquivo-desc"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onConfirmacaoKeydown($event)">
+        <h2 id="confirmacao-arquivo-title">{{ acao === 'arquivar' ? 'Arquivar acompanhamento' : 'Desarquivar acompanhamento' }}</h2>
+        <p id="confirmacao-arquivo-desc">
+          @if (acao === 'arquivar') {
+            Este acompanhamento sera ocultado das listagens principais e ficara disponivel na tela de arquivados.
+          } @else {
+            Este acompanhamento voltara ao status anterior ao arquivamento.
+          }
+        </p>
+        <label>
+          <span>Motivo (obrigatorio) *</span>
+          <textarea
+            rows="3"
+            [(ngModel)]="motivoArquivamentoTexto"
+            [attr.aria-required]="true"
+            placeholder="Informe o motivo do {{ acao === 'arquivar' ? 'arquivamento' : 'desarquivamento' }}"
+            maxlength="2000"></textarea>
+        </label>
+        <div class="actions">
+          <button class="btn btn-secondary" type="button" (click)="fecharConfirmacaoArquivo()" [disabled]="alterandoArquivo()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="acao === 'arquivar' ? arquivar() : desarquivar()" [disabled]="alterandoArquivo() || !motivoArquivamentoTexto.trim()">
+            {{ alterandoArquivo() ? 'Processando...' : 'Confirmar' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- ── MODAL: Modificar assunto ──────────────────────── -->
+  @if (alterandoAssunto && canUpdateSubject(item)) {
+    <div class="dialog-backdrop" (click)="fecharModalAssunto()">
+      <section
+        #assuntoDialog
+        class="dialog-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="assunto-dialog-title"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onDialogKeydown($event, 'assunto')">
+        <h2 id="assunto-dialog-title">Modificar assunto</h2>
+        <label>
+          <span>Novo assunto *</span>
+          <input
+            #assuntoPrimeiroFoco
+            id="novo-assunto-input"
+            type="text"
+            [(ngModel)]="novoAssunto"
+            aria-required="true"
+            aria-label="Novo assunto" />
+        </label>
+        <label>
+          <span>Motivo da alteração *</span>
+          <textarea
+            id="motivo-alteracao-textarea"
+            rows="3"
+            [(ngModel)]="motivoAlteracao"
+            aria-required="true"
+            aria-label="Motivo da alteração"
+            placeholder="Descreva o motivo da alteração do assunto"></textarea>
+        </label>
+        <div class="actions">
+          <button class="btn btn-secondary" type="button" (click)="fecharModalAssunto()" [disabled]="salvandoAssunto()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="salvarAssunto()" [disabled]="salvandoAssunto() || !novoAssunto.trim() || !motivoAlteracao.trim()">
+            {{ salvandoAssunto() ? 'Salvando...' : 'Salvar assunto' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- ── MODAL: Finalizar acompanhamento ───────────────── -->
+  @if (finalizando && canFinish(item)) {
+    <div class="dialog-backdrop" (click)="fecharModalFinalizacao()">
+      <section
+        #finalizacaoDialog
+        class="dialog-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="finalizacao-dialog-title"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onDialogKeydown($event, 'finalizacao')">
+        <h2 id="finalizacao-dialog-title">Finalizar acompanhamento</h2>
+        <label>
+          <span>Resultado final *</span>
+          <input
+            #finalizacaoPrimeiroFoco
+            id="resultado-final-input"
+            type="text"
+            [(ngModel)]="resultadoFinal"
+            aria-required="true"
+            aria-label="Resultado final"
+            placeholder="Ex: Alta, Encaminhamento, Continuidade..." />
+        </label>
+        <label>
+          <span>Resumo geral</span>
+          <textarea
+            id="resumo-final-textarea"
+            rows="4"
+            [(ngModel)]="resumoFinal"
+            aria-label="Resumo geral"
+            placeholder="Observações finais sobre o acompanhamento (opcional)"></textarea>
+        </label>
+        <div class="actions">
+          <button class="btn btn-secondary" type="button" (click)="fecharModalFinalizacao()" [disabled]="finalizandoAcompanhamento()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="finalizar()" [disabled]="finalizandoAcompanhamento() || !resultadoFinal.trim()">
+            {{ finalizandoAcompanhamento() ? 'Finalizando...' : 'Confirmar finalização' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  <!-- ── MODAL: Gerar relatório ─────────────────────────── -->
+  @if (exibindoRelatorio) {
+    <div class="dialog-backdrop" (click)="fecharModalRelatorio()">
+      <section
+        #relatorioDialog
+        class="dialog-panel dialog-panel--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="relatorio-dialog-title"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="onDialogKeydown($event, 'relatorio')">
+        <h2 id="relatorio-dialog-title">Gerar relatório</h2>
+        <p class="dialog-desc">Configure os filtros e exporte o relatório em PDF.</p>
+
+        <div class="filters">
+          <app-aluno-autocomplete
+            #relatorioPrimeiroFoco
+            [alunos]="alunos()"
+            [loading]="buscandoAlunos"
+            label="Aluno"
+            (search)="buscarAlunos($event)"
+            (selected)="selecionarAlunoRelatorio($event)" />
+
+          @if (!isProfessor) {
+            <label>
+              <span>Professor</span>
+              <select [(ngModel)]="filtrosRelatorio.professorId" aria-label="Professor">
+                <option value="">Todos os professores</option>
+                @for (prof of professores(); track prof.id) {
+                  <option [value]="prof.id">{{ prof.nome }}</option>
+                }
+              </select>
+            </label>
+          }
+
+          <label>
+            <span>Data inicial</span>
+            <input type="date" [(ngModel)]="filtrosRelatorio.dataInicio" aria-label="Data inicial" />
+          </label>
+          <label>
+            <span>Data final</span>
+            <input type="date" [(ngModel)]="filtrosRelatorio.dataFim" aria-label="Data final" />
+          </label>
+
+          <label>
+            <span>Status</span>
+            <select [(ngModel)]="filtrosRelatorio.status" aria-label="Status">
+              <option value="">Todos</option>
+              <option value="EM_ANDAMENTO">Em andamento</option>
+              <option value="FINALIZADO">Finalizado</option>
+              <option value="ARQUIVADO">Arquivado</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Tipo de registro</span>
+            <select [(ngModel)]="filtrosRelatorio.tipoRegistro" aria-label="Tipo de registro">
+              <option value="">Todos</option>
+              <option value="ATENDIMENTO_REALIZADO">Atendimento realizado</option>
+              <option value="FALTA_JUSTIFICADA">Falta justificada</option>
+              <option value="FALTA_NAO_JUSTIFICADA">Falta não justificada</option>
+              <option value="CANCELADO">Cancelado</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-secondary" type="button" (click)="fecharModalRelatorio()" [disabled]="exportandoPdfRelatorio">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="exportarPdfRelatorio()" [disabled]="exportandoPdfRelatorio">
+            {{ exportandoPdfRelatorio ? 'Exportando...' : 'Gerar relatório (PDF)' }}
+          </button>
+        </div>
+      </section>
+    </div>
+  }
+
+  <section class="panel">
+    <h2>Timeline de atendimentos</h2>
+    @if (item.atendimentos?.length) {
+      <app-timeline-atendimentos
+        [atendimentos]="item.atendimentos || []"
+        [acompanhamentoId]="item.id"
+        (editarClicado)="abrirModalEdicao($event)" />
+    } @else {
+      <p>Nenhum atendimento registrado neste acompanhamento.</p>
+    }
+  </section>
+</main>
+}
+
+<!-- ── MODAL: Novo atendimento ─────────────────── -->
+@if (criandoAtendimento && acompanhamento(); as item) {
+  <app-novo-atendimento-modal
+    [acompanhamento]="item"
+    (salvo)="onCriacaoSalva($event)"
+    (fechado)="fecharModalCriacao()">
+  </app-novo-atendimento-modal>
+}
+
+<!-- ── MODAL: Editar atendimento ─────────────────── -->
+@if (editandoAtendimento) {
+  <div class="dialog-backdrop" (click)="fecharModalEdicao()">
+    <section
+      #edicaoDialog
+      class="dialog-panel dialog-panel--xl"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="edicao-dialog-title"
+      tabindex="-1"
+      (click)="$event.stopPropagation()"
+      (keydown)="onDialogKeydown($event, 'edicao')">
+
+      <!-- Cabeçalho do modal -->
+      <div class="modal-header">
+        <div>
+          <h2 id="edicao-dialog-title" #edicaoPrimeiroFoco tabindex="-1">Editar atendimento</h2>
+          @if (atendimentoEmEdicao(); as at) {
+            <p class="dialog-desc">{{ at.assuntoDoDia || (at.dataAtendimento | date:'dd/MM/yyyy') }}</p>
+          }
+        </div>
+        <button
+          type="button"
+          class="modal-close"
+          (click)="fecharModalEdicao()"
+          [disabled]="salvandoEdicao()"
+          aria-label="Fechar modal de edição">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Corpo com rolagem -->
+      <div class="modal-body">
+        @if (valoresIniciaisEdicao(); as valores) {
+          <app-atendimento-form
+            [saving]="salvandoEdicao()"
+            [initialValues]="valores"
+            [atendimentoId]="atendimentoEmEdicao()?.id ?? null"
+            [categoriaPadrao]="categoriaPadraoAnexo()"
+            submitLabel="Salvar alterações"
+            (save)="salvarEdicao($event)"
+            (formChanged)="formEdicaoTocado = true"
+            (cancel)="fecharModalEdicao()" />
+        }
+      </div>
+    </section>
+  </div>
+}

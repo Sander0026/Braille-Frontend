@@ -1,0 +1,182 @@
+// ============================================================
+// dashboard-atendimento — Tipografia alinhada com Alunos
+// ============================================================
+@use '../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// ── Layout de página ────────────────────────────────────────
+.page {
+  display: grid;
+  gap: $space-5;
+  padding: $space-8;
+
+  @media (max-width: $bp-md) {
+    padding: $space-4;
+    gap: $space-4;
+  }
+}
+
+// ── Cabeçalho da página ────────────────────────────────────
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+// Link voltar — tom informativo discreto
+.back {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  color: $color-info;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Título principal
+.hero h1 {
+  margin: $space-1 0 0;
+  font-size: $font-size-2xl;         // 1.5rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// Subtítulo
+.hero h2 {
+  margin: 0;
+  font-size: $font-size-lg;          // 1.125rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+}
+
+// Texto auxiliar/descritivo
+.hero p,
+p {
+  margin: $space-1 0 0;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-500;
+  line-height: $line-height-normal;
+}
+
+// ── Botão secundário ────────────────────────────────────────
+.btn-secondary {
+  @media (max-width: $bp-md) {
+    width: 100%;
+  }
+}
+
+// ── Painel de informações ───────────────────────────────────
+.panel {
+  display: grid;
+  gap: $space-4;
+  padding: $space-4;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  box-shadow: $shadow-sm;
+}
+
+// ── Cards de indicadores ────────────────────────────────────
+.indicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: $space-4;
+}
+
+.indicators article {
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  padding: $space-4;
+  box-shadow: $shadow-sm;
+}
+
+// Rótulo do indicador
+.indicators span {
+  display: block;
+  font-size: $font-size-xs;          // 0.75rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Valor numérico do indicador
+.indicators strong {
+  display: block;
+  margin-top: $space-1 + 0.125rem;
+  font-size: 2rem;
+  font-weight: $font-weight-bold;
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// ── Grid de 2 colunas ───────────────────────────────────────
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-4;
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Ranking ─────────────────────────────────────────────────
+.ranking {
+  display: grid;
+  gap: $space-2 + 0.125rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ranking li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-3;
+  border: 1px solid $color-gray-100;
+  border-radius: $border-radius;
+  background: $color-gray-50;
+}
+
+.ranking div {
+  display: grid;
+  gap: $space-1 * 0.5;
+  min-width: 0;
+}
+
+.ranking strong {
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+  overflow-wrap: anywhere;
+}
+
+.ranking span {
+  font-size: $font-size-sm;
+  color: $color-gray-500;
+}
+
+// Número do ranking
+.ranking b {
+  min-width: 2.4rem;
+  min-height: 2.4rem;
+  display: grid;
+  place-items: center;
+  border-radius: $border-radius-full;
+  background: $color-primary;
+  color: $color-primary-text;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-bold;
+}

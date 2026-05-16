@@ -1,0 +1,294 @@
+// ============================================================
+// atendimento-form — Wizard de novo/editar atendimento
+// Tipografia alinhada com beneficiary-form.scss (Alunos)
+// ============================================================
+@use '../../../../../styles/variables' as *;
+
+// ── Utilitários de Acessibilidade ───────────────────────────
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// ── Wrapper ─────────────────────────────────────────────────
+.wizard-container {
+  display: grid;
+  gap: $space-6;
+}
+
+// ── Indicador de etapas ─────────────────────────────────────
+.wizard-header {
+  display: block;
+}
+
+.steps-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: $space-2;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: $space-1 + 0.125rem;
+  flex: 1;
+
+  &:last-child {
+    flex: 0;
+  }
+}
+
+// Bolinha do stepper — igual a beneficiary-form.scss
+.step-dot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: $border-radius-full;
+  border: 2px solid $color-gray-200;
+  background: $color-white;
+  font-size: $font-size-xs;           // 0.75rem (era 0.75rem — ok)
+  font-weight: $font-weight-bold;     // 700
+  color: $color-gray-400;
+  transition: all $transition-fast;
+  flex-shrink: 0;
+
+  &.active {
+    border-color: $color-primary;
+    background: $color-primary;
+    color: $color-primary-text;
+  }
+
+  &.done {
+    border-color: $color-success;
+    background: $color-success;
+    color: $color-white;
+  }
+}
+
+// Rótulo da etapa
+.step-label {
+  font-size: 0.7rem;                  // igual a beneficiary-form
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-400;
+  white-space: nowrap;
+  transition: color $transition-fast;
+
+  &.active {
+    color: $color-gray-900;
+  }
+
+  &.done {
+    color: $color-success;
+  }
+}
+
+// Linha conectora
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: $color-gray-200;
+  margin: 0 $space-1 + 0.125rem;
+  transition: background $transition-fast;
+
+  &.done {
+    background: $color-success;
+  }
+}
+
+// ── Seção da Etapa ───────────────────────────────────────────
+.wizard-step {
+  margin-top: $space-2;
+}
+
+// Título da etapa — igual a .wizard-section-title de beneficiary-form
+.step-title {
+  font-size: $font-size-base;         // 1rem
+  font-weight: $font-weight-bold;     // 700
+  color: $color-gray-900;
+  margin: 0 0 $space-1;
+  padding-bottom: $space-2;
+  border-bottom: 2px solid $color-primary;
+  line-height: $line-height-tight;
+}
+
+// Descrição da etapa
+.step-desc {
+  font-size: $font-size-sm;           // 0.875rem
+  color: $color-gray-600;
+  margin: $space-2 0 $space-5;
+  line-height: $line-height-normal;
+}
+
+// ── Campos do formulário ────────────────────────────────────
+.form {
+  display: grid;
+  gap: $space-4;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1 + 0.125rem;
+  margin-bottom: $space-4;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  // Label — igual a .form-group label de beneficiary-form (0.8rem/600)
+  span {
+    font-size: 0.8rem;
+    font-weight: $font-weight-semibold; // 600 (era 800 — corrigido)
+    color: $color-gray-600;
+
+    abbr {
+      color: $color-danger;
+      text-decoration: none;
+      margin-left: $space-1 * 0.5;
+    }
+  }
+
+  // Inputs — igual a .form-input global
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 2.5rem;
+    border: 1.5px solid $color-gray-300;
+    border-radius: $border-radius;
+    padding: calc(#{$space-2} + 0.125rem) $space-3;
+    font-family: $font-family-base;
+    font-size: $font-size-sm;         // 0.875rem
+    color: $color-gray-900;
+    background: $color-white;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    outline: none;
+
+    &::placeholder {
+      color: $color-gray-400;
+    }
+
+    &:focus {
+      border-color: $color-primary;
+      box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+// ── Grids de campos ──────────────────────────────────────────
+.two-cols {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: $space-4;
+}
+
+.three-cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $space-4;
+}
+
+// ── Lista de revisão ─────────────────────────────────────────
+.review-list {
+  display: grid;
+  gap: 0;
+  margin: 0;
+
+  &__item {
+    display: grid;
+    grid-template-columns: 10rem 1fr;
+    gap: $space-2;
+    padding: $space-3 0;
+    border-bottom: 1px solid $color-gray-200;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+
+    &--full {
+      grid-template-columns: 1fr;
+    }
+
+    // Label de revisão
+    dt {
+      font-size: 0.8rem;
+      font-weight: $font-weight-semibold;
+      color: $color-gray-600;
+    }
+
+    // Valor de revisão
+    dd {
+      font-size: $font-size-sm;
+      color: $color-gray-900;
+      margin: 0;
+      word-break: break-word;
+    }
+
+    @media (max-width: $bp-sm) {
+      grid-template-columns: 1fr;
+      gap: $space-1 * 0.375;
+    }
+  }
+}
+
+// ── Mensagem de erro global ──────────────────────────────────
+.error {
+  min-height: 1.25rem;
+  color: $color-danger;
+  margin: 0;
+  font-weight: $font-weight-semibold; // 600 (era 700)
+  font-size: $font-size-sm;           // 0.875rem
+}
+
+// ── Rodapé do wizard ─────────────────────────────────────────
+.wizard-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $space-4;
+  flex-wrap: wrap;
+  margin-top: $space-8;
+  padding-top: $space-5;
+  border-top: 2px solid $color-gray-200;
+
+  &__left,
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: $space-3;
+  }
+}
+
+
+
+// ── Responsivo ───────────────────────────────────────────────
+@media (max-width: $bp-md) {
+  .two-cols,
+  .three-cols {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .wizard-footer__left,
+  .wizard-footer__right {
+    justify-content: center;
+  }
+}
