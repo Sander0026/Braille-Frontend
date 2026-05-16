@@ -10,7 +10,7 @@
   <section class="panel" role="alert">
     <h1>Falha ao carregar acompanhamento</h1>
     <p>{{ erro() }}</p>
-    <button class="secondary" type="button" (click)="carregar()">Tentar novamente</button>
+    <button class="btn btn-secondary" type="button" (click)="carregar()">Tentar novamente</button>
   </section>
 </main>
 } @else if (acompanhamento(); as item) {
@@ -34,22 +34,22 @@
     <div class="actions">
       @if (item.status === 'EM_ANDAMENTO' && !item.arquivado) {
         @if (canCreateAtendimento(item)) {
-          <button type="button" class="primary" (click)="abrirModalCriacao($event)">Novo atendimento</button>
+          <button type="button" class="btn btn-primary" (click)="abrirModalCriacao($event)">Novo atendimento</button>
         }
         @if (canUpdateSubject(item)) {
-          <button type="button" class="secondary" (click)="abrirModalAssunto(item.assuntoAtual, $event)">Modificar assunto</button>
+          <button type="button" class="btn btn-secondary" (click)="abrirModalAssunto(item.assuntoAtual, $event)">Modificar assunto</button>
         }
         @if (canFinish(item)) {
-          <button type="button" class="secondary" (click)="abrirModalFinalizacao($event)">Finalizar acompanhamento</button>
+          <button type="button" class="btn btn-secondary" (click)="abrirModalFinalizacao($event)">Finalizar acompanhamento</button>
         }
       }
       @if (canArchive() && !item.arquivado) {
-        <button type="button" class="secondary" (click)="solicitarConfirmacaoArquivo('arquivar', $event)" [disabled]="alterandoArquivo()">Arquivar</button>
+        <button type="button" class="btn btn-secondary" (click)="solicitarConfirmacaoArquivo('arquivar', $event)" [disabled]="alterandoArquivo()">Arquivar</button>
       }
       @if (canArchive() && item.arquivado) {
-        <button type="button" class="secondary" (click)="solicitarConfirmacaoArquivo('desarquivar', $event)" [disabled]="alterandoArquivo()">Desarquivar</button>
+        <button type="button" class="btn btn-secondary" (click)="solicitarConfirmacaoArquivo('desarquivar', $event)" [disabled]="alterandoArquivo()">Desarquivar</button>
       }
-      <button type="button" class="secondary" (click)="abrirModalRelatorio($event)">Gerar relatorio</button>
+      <button type="button" class="btn btn-secondary" (click)="abrirModalRelatorio($event)">Gerar relatorio</button>
     </div>
     @if (item.arquivado && item.motivoArquivamento) {
       <div class="motivo-arquivamento" role="note">
@@ -91,8 +91,8 @@
             maxlength="2000"></textarea>
         </label>
         <div class="actions">
-          <button class="secondary" type="button" (click)="fecharConfirmacaoArquivo()" [disabled]="alterandoArquivo()">Cancelar</button>
-          <button class="primary" type="button" (click)="acao === 'arquivar' ? arquivar() : desarquivar()" [disabled]="alterandoArquivo() || !motivoArquivamentoTexto.trim()">
+          <button class="btn btn-secondary" type="button" (click)="fecharConfirmacaoArquivo()" [disabled]="alterandoArquivo()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="acao === 'arquivar' ? arquivar() : desarquivar()" [disabled]="alterandoArquivo() || !motivoArquivamentoTexto.trim()">
             {{ alterandoArquivo() ? 'Processando...' : 'Confirmar' }}
           </button>
         </div>
@@ -134,8 +134,8 @@
             placeholder="Descreva o motivo da alteração do assunto"></textarea>
         </label>
         <div class="actions">
-          <button class="secondary" type="button" (click)="fecharModalAssunto()" [disabled]="salvandoAssunto()">Cancelar</button>
-          <button class="primary" type="button" (click)="salvarAssunto()" [disabled]="salvandoAssunto() || !novoAssunto.trim() || !motivoAlteracao.trim()">
+          <button class="btn btn-secondary" type="button" (click)="fecharModalAssunto()" [disabled]="salvandoAssunto()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="salvarAssunto()" [disabled]="salvandoAssunto() || !novoAssunto.trim() || !motivoAlteracao.trim()">
             {{ salvandoAssunto() ? 'Salvando...' : 'Salvar assunto' }}
           </button>
         </div>
@@ -177,8 +177,8 @@
             placeholder="Observações finais sobre o acompanhamento (opcional)"></textarea>
         </label>
         <div class="actions">
-          <button class="secondary" type="button" (click)="fecharModalFinalizacao()" [disabled]="finalizandoAcompanhamento()">Cancelar</button>
-          <button class="primary" type="button" (click)="finalizar()" [disabled]="finalizandoAcompanhamento() || !resultadoFinal.trim()">
+          <button class="btn btn-secondary" type="button" (click)="fecharModalFinalizacao()" [disabled]="finalizandoAcompanhamento()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="finalizar()" [disabled]="finalizandoAcompanhamento() || !resultadoFinal.trim()">
             {{ finalizandoAcompanhamento() ? 'Finalizando...' : 'Confirmar finalização' }}
           </button>
         </div>
@@ -254,8 +254,8 @@
         </div>
 
         <div class="actions">
-          <button class="secondary" type="button" (click)="fecharModalRelatorio()" [disabled]="exportandoPdfRelatorio">Cancelar</button>
-          <button class="primary" type="button" (click)="exportarPdfRelatorio()" [disabled]="exportandoPdfRelatorio">
+          <button class="btn btn-secondary" type="button" (click)="fecharModalRelatorio()" [disabled]="exportandoPdfRelatorio">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="exportarPdfRelatorio()" [disabled]="exportandoPdfRelatorio">
             {{ exportandoPdfRelatorio ? 'Exportando...' : 'Gerar relatório (PDF)' }}
           </button>
         </div>

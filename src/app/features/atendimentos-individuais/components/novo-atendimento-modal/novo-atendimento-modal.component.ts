@@ -82,6 +82,7 @@ export class NovoAtendimentoModalComponent {
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
+    if (this.confirmDialog.dialogData()) return;
     if (!this.salvando()) {
       this.fechar();
     }

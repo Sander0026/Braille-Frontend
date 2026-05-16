@@ -1,10 +1,154 @@
-.page { display:grid; gap:1.25rem; padding:2rem; }
-header { display:flex; justify-content:space-between; gap:1rem; align-items:flex-start; }
-h1 { margin:0; font-size:1.7rem; }
-p { margin:.35rem 0 0; color:#64748b; }
-.primary, .toolbar button { border:0; border-radius:8px; background:#f2c300; color:#111827; padding:.7rem 1rem; font-weight:900; text-decoration:none; cursor:pointer; }
-.toolbar { display:grid; grid-template-columns:1fr auto; gap:.75rem; align-items:end; padding:1rem; border:1px solid #dde3ec; border-radius:8px; background:#fff; }
-label { display:grid; gap:.35rem; font-weight:800; color:#4b5563; }
-input { min-height:2.75rem; border:1px solid #cbd5e1; border-radius:8px; padding:.65rem .8rem; font:inherit; }
-.grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(21rem,1fr)); gap:1rem; }
-@media (max-width:760px) { .page { padding:1rem; } header, .toolbar { grid-template-columns:1fr; flex-direction:column; } .primary { width:100%; text-align:center; } }
+// ============================================================
+// acompanhamentos-em-andamento — Tipografia alinhada com Alunos
+// ============================================================
+@use '../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// ── Layout de página ────────────────────────────────────────
+.page {
+  display: grid;
+  gap: $space-5;
+  padding: $space-8;
+
+  @media (max-width: $bp-md) {
+    padding: $space-4;
+    gap: $space-4;
+  }
+}
+
+// ── Cabeçalho da página ────────────────────────────────────
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+// Título principal — mesmo padrão .page-title
+header h1 {
+  margin: 0;
+  font-size: $font-size-2xl;         // 1.5rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// Subtítulo — igual a .page-subtitle
+header p {
+  margin: $space-1 0 0;
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-normal;
+  color: $color-gray-500;
+}
+
+// ── Botão primário de cabeçalho ─────────────────────────────
+header .primary,
+.primary {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  padding: calc(#{$space-2} + 0.125rem) $space-5;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-semibold; // 600
+  line-height: 1;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius;
+  background-color: $color-primary;
+  color: $color-primary-text;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color $transition-fast, border-color $transition-fast;
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
+  }
+
+  @media (max-width: $bp-md) {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+// ── Barra de ferramentas / filtro ───────────────────────────
+.toolbar {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: $space-3;
+  align-items: end;
+  padding: $space-4;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Label dentro da toolbar — igual a .form-label global
+.toolbar label {
+  display: grid;
+  gap: $space-1 + 0.125rem;
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-medium;  // 500
+  color: $color-gray-700;
+}
+
+// Input dentro da toolbar — igual a .form-input global
+.toolbar input {
+  min-height: 2.5rem;
+  border: 1.5px solid $color-gray-300;
+  border-radius: $border-radius;
+  padding: calc(#{$space-2} + 0.125rem) $space-3;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-900;
+  background: $color-white;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+  outline: none;
+
+  &::placeholder {
+    color: $color-gray-400;
+  }
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
+  }
+}
+
+// Botão "Filtrar" da toolbar
+.toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(#{$space-2} + 0.125rem) $space-5;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius;
+  background-color: $color-primary;
+  color: $color-primary-text;
+  cursor: pointer;
+  transition: background-color $transition-fast;
+
+  &:hover {
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
+  }
+}
+
+// ── Grid de cards ───────────────────────────────────────────
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr));
+  gap: $space-4;
+}
