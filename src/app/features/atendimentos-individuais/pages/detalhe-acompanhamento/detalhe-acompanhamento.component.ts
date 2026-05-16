@@ -354,12 +354,14 @@ export class DetalheAcompanhamentoComponent implements OnInit, ComponenteComDesc
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.editandoAtendimento  && !this.salvandoEdicao())         { this.fecharModalEdicao();      return; }
+    // Não interceptar enquanto o ConfirmDialog global estiver aberto
+    if (this.confirmDialog.dialogData()) return;
+    if (this.editandoAtendimento  && !this.salvandoEdicao())           { this.fecharModalEdicao();      return; }
     if (this.criandoAtendimento) { return; }
-    if (this.exibindoRelatorio    && !this.exportandoPdfRelatorio)   { this.fecharModalRelatorio();   return; }
-    if (this.alterandoAssunto     && !this.salvandoAssunto())        { this.fecharModalAssunto();     return; }
+    if (this.exibindoRelatorio    && !this.exportandoPdfRelatorio)     { this.fecharModalRelatorio();   return; }
+    if (this.alterandoAssunto     && !this.salvandoAssunto())          { this.fecharModalAssunto();     return; }
     if (this.finalizando          && !this.finalizandoAcompanhamento()) { this.fecharModalFinalizacao(); return; }
-    if (this.confirmacaoArquivo() && !this.alterandoArquivo())       { this.fecharConfirmacaoArquivo(); }
+    if (this.confirmacaoArquivo() && !this.alterandoArquivo())         { this.fecharConfirmacaoArquivo(); }
   }
 
   // ── DESCARTE (descarteGuard) ──────────────────────────────

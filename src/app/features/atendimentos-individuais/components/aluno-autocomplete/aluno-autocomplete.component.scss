@@ -1,11 +1,12 @@
 /* ==========================================================================
-   AlunoAutocomplete — Estilos do componente de busca de alunos
-   Responsivo e acessível (WCAG 2.1 AA)
+   AlunoAutocomplete — Tipografia alinhada com módulo Alunos
+   Padrão: beneficiary-form.scss + _components.scss
    ========================================================================== */
+@use '../../../../../styles/variables' as *;
 
 .autocomplete-wrapper {
   display: grid;
-  gap: 0.4rem;
+  gap: $space-1 + 0.125rem;
   position: relative;
 }
 
@@ -15,13 +16,15 @@
 
 .field {
   display: grid;
-  gap: 0.35rem;
+  gap: $space-1 + 0.125rem;
 }
 
+// Label do campo — igual a .form-group label de beneficiary-form (0.8rem/600)
 .field__label {
-  font-weight: 700;
-  font-size: 0.875rem;
-  color: #374151;
+  font-family: $font-family-base;
+  font-size: 0.8rem;                  // (era 0.875rem/700 — corrigido)
+  font-weight: $font-weight-semibold; // 600 (era 700 — corrigido)
+  color: $color-gray-600;             // (era #374151 — harmonizado com Alunos)
 }
 
 .field__input-row {
@@ -30,27 +33,28 @@
   align-items: center;
 }
 
+// Input de busca — igual a .form-input global
 .field__input {
   width: 100%;
-  min-height: 2.75rem;
-  border: 1.5px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 0.65rem 2.75rem 0.65rem 0.85rem;
-  font: inherit;
-  font-size: 0.9375rem;
-  color: #111827;
-  background: #fff;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  min-height: 2.5rem;
+  border: 1.5px solid $color-gray-300;
+  border-radius: $border-radius;
+  padding: calc(#{$space-2} + 0.125rem) 2.75rem calc(#{$space-2} + 0.125rem) $space-3;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;           // 0.875rem (era 0.9375rem — corrigido)
+  color: $color-gray-900;
+  background: $color-white;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
   outline: none;
   box-sizing: border-box;
 
   &::placeholder {
-    color: #9ca3af;
+    color: $color-gray-400;
   }
 
   &:focus {
-    border-color: #f2c300;
-    box-shadow: 0 0 0 3px rgba(242, 195, 0, 0.2);
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
   }
 
   &[type='search']::-webkit-search-cancel-button {
@@ -58,15 +62,15 @@
   }
 }
 
-/* Campo com aluno selecionado — aparência de preenchido */
+/* Campo com aluno selecionado */
 .field__input--selected {
-  background: #f3f4f6;
-  border-color: #9ca3af;
-  color: #374151;
+  background: $color-gray-100;
+  border-color: $color-gray-400;
+  color: $color-gray-700;
   cursor: default;
 
   &:focus {
-    border-color: #9ca3af;
+    border-color: $color-gray-400;
     box-shadow: none;
   }
 }
@@ -74,7 +78,7 @@
 /* Botão X para limpar aluno selecionado */
 .field__clear-btn {
   position: absolute;
-  right: 0.6rem;
+  right: $space-2 + 0.125rem;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -83,31 +87,31 @@
   width: 1.75rem;
   height: 1.75rem;
   border: 0;
-  border-radius: 50%;
+  border-radius: $border-radius-full;
   background: transparent;
-  color: #6b7280;
+  color: $color-gray-500;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition: background $transition-fast, color $transition-fast;
   flex-shrink: 0;
 
   &:hover,
   &:focus-visible {
-    background: #e5e7eb;
-    color: #111827;
-    outline: 2px solid #f2c300;
+    background: $color-gray-200;
+    color: $color-gray-900;
+    outline: 2px solid $color-primary;
     outline-offset: 2px;
   }
 }
 
-/* Spinner de carregamento sobreposto ao input */
+/* Spinner de carregamento */
 .field__spinner {
   position: absolute;
-  right: 0.75rem;
+  right: $space-3;
   width: 1.1rem;
   height: 1.1rem;
-  border: 2px solid #e5e7eb;
-  border-top-color: #f2c300;
-  border-radius: 50%;
+  border: 2px solid $color-gray-200;
+  border-top-color: $color-primary;
+  border-radius: $border-radius-full;
   animation: spin 0.7s linear infinite;
   pointer-events: none;
   flex-shrink: 0;
@@ -120,11 +124,11 @@
 }
 
 /* --------------------------------------------------------------------------
-   Aluno selecionado
+   Aluno selecionado (compatibilidade)
    -------------------------------------------------------------------------- */
-
-/* selected-card — não mais renderizado no template, mantido apenas por compatibilidade */
-.selected-card { display: none; }
+.selected-card {
+  display: none;
+}
 
 /* --------------------------------------------------------------------------
    Dropdown de resultados
@@ -136,62 +140,61 @@
   left: 0;
   right: 0;
   z-index: 9999;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border: 1.5px solid $color-gray-200;
+  border-radius: $border-radius;
+  background: $color-white;
+  box-shadow: $shadow-md;
   animation: fadeIn 0.12s ease;
 }
 
 .dropdown__status {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.9rem 1rem;
-  color: #6b7280;
-  font-size: 0.9rem;
-  font-weight: 500;
+  gap: $space-2;
+  padding: $space-3 + 0.125rem $space-4;
+  color: $color-gray-500;
+  font-size: $font-size-sm;           // 0.875rem (era 0.9rem — corrigido)
+  font-weight: $font-weight-medium;   // 500
 }
 
 .dropdown__status--empty {
-  color: #9ca3af;
+  color: $color-gray-400;
 }
 
 .dropdown__status-icon {
   flex-shrink: 0;
-  color: #9ca3af;
+  color: $color-gray-400;
 }
 
-/* Ícone de loading gira — padrão do projeto */
+/* Ícone de loading gira */
 .dropdown__status:not(.dropdown__status--empty) .dropdown__status-icon {
   animation: spin 1s linear infinite;
-  color: #f2c300;
+  color: $color-primary;
 }
 
 .dropdown__list {
   margin: 0;
   padding: 0;
   list-style: none;
-  max-height: 220px; /* ≈ 4 itens de ~52px cada */
+  max-height: 220px;
   overflow-y: auto;
   overscroll-behavior: contain;
 
-  /* Scrollbar discreta */
   scrollbar-width: thin;
-  scrollbar-color: #e2e8f0 transparent;
+  scrollbar-color: $color-gray-200 transparent;
 
   &::-webkit-scrollbar {
     width: 4px;
   }
 
   &::-webkit-scrollbar-thumb {
-    background: #e2e8f0;
+    background: $color-gray-200;
     border-radius: 4px;
   }
 }
 
 .dropdown__item {
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid $color-gray-100;
 
   &:last-child {
     border-bottom: none;
@@ -199,8 +202,8 @@
 }
 
 .dropdown__item--active .dropdown__btn {
-  background: #fffbeb;
-  outline: 2px solid #f2c300;
+  background: $color-primary-light;
+  outline: 2px solid $color-primary;
   outline-offset: -2px;
 }
 
@@ -209,33 +212,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: $space-4;
   border: 0;
-  background: #fff;
-  padding: 0.75rem 1rem;
+  background: $color-white;
+  padding: $space-3 $space-4;
   text-align: left;
   cursor: pointer;
-  transition: background 0.1s ease;
+  transition: background $transition-fast;
 
   &:hover,
   &:focus-visible {
-    background: #f8fafc;
-    outline: 2px solid #f2c300;
+    background: $color-gray-50;
+    outline: 2px solid $color-primary;
     outline-offset: -2px;
   }
 }
 
+// Nome do aluno no dropdown — igual a td da tabela de Alunos
 .dropdown__name {
-  font-size: 0.9375rem;
-  color: #111827;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;           // 0.875rem (era 0.9375rem — corrigido)
+  font-weight: $font-weight-medium;   // 500
+  color: $color-gray-900;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Meta ocultada — dropdown mostra apenas o nome */
-.dropdown__meta { display: none; }
+/* Meta ocultada */
+.dropdown__meta {
+  display: none;
+}
 
 /* --------------------------------------------------------------------------
    Acessibilidade
@@ -262,6 +270,7 @@
     opacity: 0;
     transform: translateY(-4px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -272,10 +281,10 @@
    Responsividade
    -------------------------------------------------------------------------- */
 
-@media (max-width: 480px) {
+@media (max-width: $bp-sm) {
   .dropdown__btn {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.2rem;
+    gap: $space-1 * 0.5;
   }
 }
