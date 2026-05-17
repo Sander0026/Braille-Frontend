@@ -1,0 +1,13 @@
+@use '../shared-relatorio-table' as table;
+
+:host {
+  display: block;
+}
+
+@include table.relatorio-table();
+
+.text-wide {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

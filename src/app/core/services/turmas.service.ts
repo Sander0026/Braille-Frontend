@@ -11,6 +11,22 @@ export interface GradeHorariaDto {
 }
 
 export type TurmaStatus = 'PREVISTA' | 'ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
+export type MatriculaStatus = 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA' | 'TRANSFERIDA';
+export type StatusEncerramentoMatricula = Exclude<MatriculaStatus, 'ATIVA'>;
+export type MotivoEncerramentoMatricula =
+    | 'CONCLUSAO'
+    | 'EVASAO_SEM_JUSTIFICATIVA'
+    | 'MUDANCA_DE_TURNO'
+    | 'TRANSFERENCIA_DE_TURMA'
+    | 'MUDANCA_DE_CIDADE'
+    | 'DIFICULDADE_TRANSPORTE'
+    | 'PROBLEMA_SAUDE'
+    | 'PROBLEMA_FAMILIAR'
+    | 'INCOMPATIBILIDADE_HORARIO'
+    | 'FALTA_DE_CONTATO'
+    | 'DESISTENCIA_VOLUNTARIA'
+    | 'CANCELAMENTO_DA_TURMA'
+    | 'OUTRO';
 
 export interface AlunoMatriculadoResumo {
     id: string;
@@ -20,9 +36,21 @@ export interface AlunoMatriculadoResumo {
 
 export interface MatriculaOficinaResumo {
     id: string;
-    status: string;
+    status: MatriculaStatus;
     dataEntrada: string;
+    dataEncerramento?: string | null;
+    motivoEncerramento?: MotivoEncerramentoMatricula | null;
+    observacao?: string | null;
+    encerradoPorId?: string | null;
+    encerradoEm?: string | null;
     aluno: AlunoMatriculadoResumo;
+}
+
+export interface EncerrarMatriculaDto {
+    status: StatusEncerramentoMatricula;
+    motivoEncerramento: MotivoEncerramentoMatricula;
+    observacao?: string;
+    dataEncerramento?: string;
 }
 
 /**
@@ -152,9 +180,9 @@ export class TurmasService {
         return this.http.post(`${this.url}/${turmaId}/alunos/${alunoId}`, {});
     }
 
-    desmatricularAluno(turmaId: string, alunoId: string): Observable<any> {
+    encerrarMatriculaAluno(turmaId: string, alunoId: string, dados: EncerrarMatriculaDto): Observable<MatriculaOficinaResumo> {
         this.dashboardService.limparCache();
-        return this.http.delete(`${this.url}/${turmaId}/alunos/${alunoId}`);
+        return this.http.patch<MatriculaOficinaResumo>(`${this.url}/${turmaId}/alunos/${alunoId}/encerrar`, dados);
     }
 
     mudarStatus(id: string, status: TurmaStatus): Observable<{ id: string; nome: string; status: TurmaStatus; statusAtivo: boolean }> {

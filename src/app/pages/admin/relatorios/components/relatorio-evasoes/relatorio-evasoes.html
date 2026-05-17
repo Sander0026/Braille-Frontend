@@ -1,0 +1,54 @@
+@if (carregando) {
+  <div class="loading-state">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+    <span>Carregando evasões</span>
+  </div>
+} @else if (relatorio; as dados) {
+  <div class="section-toolbar">
+    <div>
+      <h2>Evasões</h2>
+      <p>{{ dados.totalEncerramentos }} encerramento(s)</p>
+    </div>
+    <div class="summary-pills" aria-label="Resumo de encerramentos">
+      <span>Evasões {{ dados.totalEvasoes }}</span>
+      <span>Canceladas {{ dados.porStatus['CANCELADA'] || 0 }}</span>
+      <span>Transferidas {{ dados.porStatus['TRANSFERIDA'] || 0 }}</span>
+    </div>
+  </div>
+
+  @if (dados.data.length) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Turma</th>
+            <th>Status</th>
+            <th>Motivo</th>
+            <th>Encerramento</th>
+            <th>Cidade</th>
+            <th>Observação</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of dados.data; track item.id) {
+            <tr>
+              <td class="main-cell">{{ item.aluno.nomeCompleto }}</td>
+              <td>{{ item.turma.nome }}</td>
+              <td><span class="badge" [ngClass]="statusClass(item.status)">{{ statusLabel(item.status) }}</span></td>
+              <td>{{ motivoLabel(item.motivoEncerramento) }}</td>
+              <td>{{ formatarData(item.encerradoEm || item.dataEncerramento) }}</td>
+              <td>{{ item.aluno.cidade || '-' }}</td>
+              <td class="text-wide">{{ item.observacao || '-' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded" aria-hidden="true">check_circle</span>
+      <h3>Nenhuma evasão encontrada</h3>
+    </div>
+  }
+}

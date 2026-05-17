@@ -212,11 +212,11 @@
             @if (!isProfessor) {
             <!-- aria-label contém o nome do aluno para contexto completo (WCAG 2.5.3) -->
             <button class="btn btn-danger btn-sm"
-              (click)="removerAluno(matricula.aluno.id, matricula.aluno.nomeCompleto)"
+              (click)="abrirEncerramentoMatricula(matricula)"
               [disabled]="operacaoEmProgresso()"
-              [attr.aria-label]="'Remover ' + matricula.aluno.nomeCompleto + ' desta oficina'"
+              [attr.aria-label]="'Encerrar participação de ' + matricula.aluno.nomeCompleto + ' nesta oficina'"
               style="padding: 0.25rem 0.5rem; display: flex; align-items: center; justify-content: center; font-weight: 600;">
-              Remover
+              Encerrar participação
             </button>
             }
           </li>
@@ -233,5 +233,75 @@
         aria-label="Fechar o perfil da oficina e retornar à lista">Fechar Quadro</button>
     </div>
   </dialog>
+
+  @if (modalEncerramentoAberto()) {
+  <div class="modal-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Encerrar participação na oficina"
+    (click)="fecharEncerramentoMatricula()"
+    style="background: rgba(15, 23, 42, 0.45); z-index: 30;">
+    <dialog class="modal" open (click)="$event.stopPropagation()" style="max-width: 540px;">
+      <form [formGroup]="encerramentoForm" (ngSubmit)="confirmarEncerramentoMatricula()">
+        <div class="modal-header">
+          <h2 class="modal-title" style="font-size: 1.2rem;">Encerrar participação</h2>
+          <button type="button" class="modal-close" (click)="fecharEncerramentoMatricula()"
+            aria-label="Fechar encerramento de participação">✕</button>
+        </div>
+
+        <div class="modal-body">
+          @if (matriculaEmEncerramento()) {
+          <p style="margin-top: 0; color: #475569;">
+            {{ matriculaEmEncerramento()?.aluno?.nomeCompleto }}
+          </p>
+          }
+
+          <div class="form-group">
+            <label for="tipoEncerramento">Tipo de encerramento</label>
+            <select id="tipoEncerramento" class="form-input" formControlName="status">
+              @for (opcao of statusEncerramentoOptions; track opcao.value) {
+              <option [value]="opcao.value">{{ opcao.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="motivoEncerramento">Motivo</label>
+            <select id="motivoEncerramento" class="form-input" formControlName="motivoEncerramento">
+              @for (opcao of motivoEncerramentoOptions; track opcao.value) {
+              <option [value]="opcao.value">{{ opcao.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="observacaoEncerramento">Observação</label>
+            <textarea id="observacaoEncerramento" class="form-input" formControlName="observacao"
+              rows="4" maxlength="1000"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="dataEncerramento">Data do encerramento</label>
+            <input id="dataEncerramento" type="date" class="form-input" formControlName="dataEncerramento" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="fecharEncerramentoMatricula()"
+            [disabled]="operacaoEmProgresso()">Cancelar</button>
+          <button type="submit" class="btn btn-danger"
+            [disabled]="operacaoEmProgresso() || encerramentoForm.invalid"
+            [attr.aria-busy]="operacaoEmProgresso()">
+            @if (operacaoEmProgresso()) {
+            Encerrando...
+            } @else {
+            Confirmar encerramento
+            }
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+  }
 </div>
 }

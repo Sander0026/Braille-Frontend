@@ -1,0 +1,54 @@
+@if (carregando) {
+  <div class="loading-state">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+    <span>Carregando atendimentos</span>
+  </div>
+} @else if (relatorio; as dados) {
+  <div class="section-toolbar">
+    <div>
+      <h2>Atendimentos</h2>
+      <p>{{ dados.total }} registro(s)</p>
+    </div>
+    <div class="summary-pills" aria-label="Resumo de atendimentos">
+      <span>Realizados {{ dados.porTipoRegistro['ATENDIMENTO_REALIZADO'] || 0 }}</span>
+      <span>Faltas {{ dados.porTipoRegistro['FALTA_NAO_JUSTIFICADA'] || 0 }}</span>
+      <span>Cancelados {{ dados.porTipoRegistro['CANCELADO'] || 0 }}</span>
+    </div>
+  </div>
+
+  @if (dados.data.length) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Aluno</th>
+            <th>Professor</th>
+            <th>Tipo</th>
+            <th>Horário</th>
+            <th>Modalidade</th>
+            <th>Assunto</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of dados.data; track item.id) {
+            <tr>
+              <td>{{ formatarData(item.dataAtendimento) }}</td>
+              <td class="main-cell">{{ item.aluno.nomeCompleto }}</td>
+              <td>{{ item.professor.nome }}</td>
+              <td>{{ formatarEnum(item.tipoRegistro) }}</td>
+              <td>{{ formatarHorario(item.horaInicioMinutos) }}</td>
+              <td>{{ formatarEnum(item.modalidade) }}</td>
+              <td class="text-wide">{{ item.assuntoDoDia || item.acompanhamento.assuntoAtual }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded" aria-hidden="true">event_busy</span>
+      <h3>Nenhum atendimento encontrado</h3>
+    </div>
+  }
+}

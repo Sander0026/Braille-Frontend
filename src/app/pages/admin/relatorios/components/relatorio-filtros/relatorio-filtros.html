@@ -1,0 +1,103 @@
+<form class="filters-panel" (ngSubmit)="aplicarFiltros()">
+  <div class="filters-grid">
+    <label class="field">
+      <span>Início</span>
+      <input type="date" name="dataInicio" [(ngModel)]="form.dataInicio" [disabled]="carregando" />
+    </label>
+
+    <label class="field">
+      <span>Fim</span>
+      <input type="date" name="dataFim" [(ngModel)]="form.dataFim" [disabled]="carregando" />
+    </label>
+
+    <label class="field">
+      <span>Turma</span>
+      <select name="turmaId" [(ngModel)]="form.turmaId" [disabled]="carregando">
+        <option value="">Todas</option>
+        @for (turma of turmas; track turma.id) {
+          <option [value]="turma.id">{{ turma.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Professor</span>
+      <select name="professorId" [(ngModel)]="form.professorId" [disabled]="carregando">
+        <option value="">Todos</option>
+        @for (professor of professores; track professor.id) {
+          <option [value]="professor.id">{{ professor.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Status do aluno</span>
+      <select name="statusAluno" [(ngModel)]="form.statusAluno" [disabled]="carregando">
+        @for (status of statusAlunoOptions; track status.value) {
+          <option [value]="status.value">{{ status.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Status da turma</span>
+      <select name="statusTurma" [(ngModel)]="form.statusTurma" [disabled]="carregando">
+        <option value="">Todos</option>
+        @for (status of statusTurmaOptions; track status.value) {
+          <option [value]="status.value">{{ status.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Status da matrícula</span>
+      <select name="statusMatricula" [(ngModel)]="form.statusMatricula" [disabled]="carregando">
+        <option value="">Todos</option>
+        @for (status of statusMatriculaOptions; track status.value) {
+          <option [value]="status.value">{{ status.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Motivo</span>
+      <select name="motivoEncerramento" [(ngModel)]="form.motivoEncerramento" [disabled]="carregando">
+        <option value="">Todos</option>
+        @for (motivo of motivoOptions; track motivo.value) {
+          <option [value]="motivo.value">{{ motivo.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Cidade</span>
+      <input type="text" name="cidade" [(ngModel)]="form.cidade" [disabled]="carregando" />
+    </label>
+
+    <label class="field">
+      <span>Bairro</span>
+      <input type="text" name="bairro" [(ngModel)]="form.bairro" [disabled]="carregando" />
+    </label>
+
+    <label class="field">
+      <span>Deficiência</span>
+      <select name="tipoDeficiencia" [(ngModel)]="form.tipoDeficiencia" [disabled]="carregando">
+        <option value="">Todas</option>
+        @for (tipo of tipoDeficienciaOptions; track tipo.value) {
+          <option [value]="tipo.value">{{ tipo.label }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  <div class="filters-actions">
+    <button type="button" class="btn btn-secondary" (click)="limparFiltros()" [disabled]="carregando">
+      <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
+      Limpar
+    </button>
+    <button type="submit" class="btn btn-primary" [disabled]="carregando">
+      <span class="material-symbols-rounded" aria-hidden="true">filter_alt</span>
+      Aplicar filtros
+    </button>
+  </div>
+</form>

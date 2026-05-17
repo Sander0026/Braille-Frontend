@@ -89,6 +89,16 @@ export const routes: Routes = [
       },
 
       {
+        path: 'relatorios',
+        loadComponent: () =>
+          import('./pages/admin/relatorios/relatorios-dashboard/relatorios-dashboard')
+            .then(m => m.RelatoriosDashboard),
+        title: 'Relatórios — ILBES',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'SECRETARIA'] }
+      },
+
+      {
         path: 'atendimentos-individuais',
         loadChildren: () => import('./features/atendimentos-individuais/atendimentos-individuais.routes').then(m => m.ATENDIMENTOS_INDIVIDUAIS_ROUTES),
         title: 'Atendimentos Individuais — ILBES',

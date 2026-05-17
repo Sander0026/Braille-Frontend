@@ -11,7 +11,7 @@
  *  1.1.1 — SVG icons com aria-hidden + focusable=false; avatar aria-hidden
  *  1.4.1 — Badge "Lotada" com aria-label (não depende só de cor)
  *  4.1.3 — role=status + aria-live nos empty-states; aria-busy no loader
- *  2.5.3 — aria-label do botão Remover contém nome do aluno; botão Fechar descritivo
+ *  2.5.3 — aria-label do botão Encerrar participação contém nome do aluno; botão Fechar descritivo
  *  1.3.1 — role=tabpanel + aria-labelledby nos painéis; checkboxes com for+id
  */
 
@@ -65,7 +65,7 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
   let fixture:   ComponentFixture<TurmaAlunosModalComponent>;
   let component: TurmaAlunosModalComponent;
 
-  const turmaSvc   = { buscarPorId: vi.fn(), alunosDisponiveis: vi.fn(), matricularAluno: vi.fn(), desmatricularAluno: vi.fn() };
+  const turmaSvc   = { buscarPorId: vi.fn(), alunosDisponiveis: vi.fn(), matricularAluno: vi.fn(), encerrarMatriculaAluno: vi.fn() };
   const confirmSvc = { confirmar: vi.fn() };
   const toastSvc   = { sucesso: vi.fn(), erro: vi.fn(), aviso: vi.fn() };
 
@@ -269,18 +269,19 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
       component.alterarAba('adicionar');
       component.buscarAlunosParaMatricula('');
       component.salvarMatriculasEmLote();
-      await component.removerAluno('a1', 'Ana Silva');
+      component.abrirEncerramentoMatricula(TURMA_DETALHE.matriculasOficina[0] as any);
 
       expect(component.abaAtual()).toBe('remover');
+      expect(component.modalEncerramentoAberto()).toBe(false);
       expect(turmaSvc.alunosDisponiveis).not.toHaveBeenCalled();
       expect(turmaSvc.matricularAluno).not.toHaveBeenCalled();
-      expect(turmaSvc.desmatricularAluno).not.toHaveBeenCalled();
+      expect(turmaSvc.encerrarMatriculaAluno).not.toHaveBeenCalled();
     });
   });
 
-  // ── 9. WCAG 2.5.3 — Botão Remover com nome do aluno ──────────────
+  // ── 9. WCAG 2.5.3 — Botão Encerrar participação com nome do aluno ──────────────
 
-  describe('2.5.3 — Botão Remover contém nome do aluno no aria-label', () => {
+  describe('2.5.3 — Botão Encerrar participação contém nome do aluno no aria-label', () => {
     beforeEach(() => {
       // Garante que turmaDetalhes está setada com a aluna e aba 'remover' ativa
       component.turmaDetalhes.set(TURMA_DETALHE as any);
@@ -288,12 +289,12 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
       fixture.detectChanges();
     });
 
-    it('botão Remover deve mencionar "Ana Silva" no aria-label', () => {
+    it('botão Encerrar participação deve mencionar "Ana Silva" no aria-label', () => {
       const btn = qs<HTMLButtonElement>(fixture, 'button[aria-label*="Ana Silva"]');
       expect(btn).toBeTruthy();
     });
 
-    it('aria-label do botão Remover deve mencionar "esta oficina"', () => {
+    it('aria-label do botão Encerrar participação deve mencionar "esta oficina"', () => {
       const label = qs<HTMLButtonElement>(fixture, 'button[aria-label*="Ana Silva"]').getAttribute('aria-label') ?? '';
       expect(label.toLowerCase()).toContain('oficina');
     });
