@@ -1,145 +1,237 @@
-<form class="filters-panel" (ngSubmit)="aplicarFiltros()">
-  <div class="filters-grid">
-    <label class="field">
-      <span>Início</span>
-      <input type="date" name="dataInicio" [(ngModel)]="form.dataInicio" [disabled]="carregando" />
-    </label>
+@if (aberto) {
+  <!-- Overlay: fecha ao clicar fora (aria-hidden para SR) -->
+  <div
+    class="filter-overlay"
+    (click)="fechar()"
+    tabindex="-1"
+    aria-hidden="true">
+  </div>
+}
 
-    <label class="field">
-      <span>Fim</span>
-      <input type="date" name="dataFim" [(ngModel)]="form.dataFim" [disabled]="carregando" />
-    </label>
+<!-- Drawer lateral -->
+<dialog
+  open
+  id="relatorio-filter-drawer"
+  class="filter-drawer"
+  [class.filter-drawer--open]="aberto"
+  aria-modal="true"
+  aria-label="Filtros avançados de relatórios"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="aberto">
 
-    @if (!modoPublico) {
-      <label class="field">
-        <span>Turma</span>
-        <select name="turmaId" [(ngModel)]="form.turmaId" [disabled]="carregando">
-          <option value="">Todas</option>
-          @for (turma of turmas; track turma.id) {
-            <option [value]="turma.id">{{ turma.label }}</option>
-          }
-        </select>
-      </label>
-
-      <label class="field">
-        <span>Professor</span>
-        <select name="professorId" [(ngModel)]="form.professorId" [disabled]="carregando">
-          <option value="">Todos</option>
-          @for (professor of professores; track professor.id) {
-            <option [value]="professor.id">{{ professor.label }}</option>
-          }
-        </select>
-      </label>
-
-    <label class="field">
-      <span>Aluno</span>
-      <select name="alunoId" [(ngModel)]="form.alunoId" [disabled]="carregando">
-        <option value="">Todos</option>
-        @for (aluno of alunos; track aluno.id) {
-          <option [value]="aluno.id">{{ aluno.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Status do aluno</span>
-      <select name="statusAluno" [(ngModel)]="form.statusAluno" [disabled]="carregando">
-        @for (status of statusAlunoOptions; track status.value) {
-          <option [value]="status.value">{{ status.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Status da turma</span>
-      <select name="statusTurma" [(ngModel)]="form.statusTurma" [disabled]="carregando">
-        <option value="">Todos</option>
-        @for (status of statusTurmaOptions; track status.value) {
-          <option [value]="status.value">{{ status.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Status da matrícula</span>
-      <select name="statusMatricula" [(ngModel)]="form.statusMatricula" [disabled]="carregando">
-        <option value="">Todos</option>
-        @for (status of statusMatriculaOptions; track status.value) {
-          <option [value]="status.value">{{ status.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Motivo</span>
-      <select name="motivoEncerramento" [(ngModel)]="form.motivoEncerramento" [disabled]="carregando">
-        <option value="">Todos</option>
-        @for (motivo of motivoOptions; track motivo.value) {
-          <option [value]="motivo.value">{{ motivo.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Status do acompanhamento</span>
-      <select name="statusAcompanhamento" [(ngModel)]="form.statusAcompanhamento" [disabled]="carregando">
-        <option value="">Todos</option>
-        @for (status of statusAcompanhamentoOptions; track status.value) {
-          <option [value]="status.value">{{ status.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Tipo de registro</span>
-      <select name="tipoRegistroAtendimento" [(ngModel)]="form.tipoRegistroAtendimento" [disabled]="carregando">
-        <option value="">Todos</option>
-        @for (tipo of tipoRegistroAtendimentoOptions; track tipo.value) {
-          <option [value]="tipo.value">{{ tipo.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Modalidade</span>
-      <select name="modalidadeAtendimento" [(ngModel)]="form.modalidadeAtendimento" [disabled]="carregando">
-        <option value="">Todas</option>
-        @for (modalidade of modalidadeAtendimentoOptions; track modalidade.value) {
-          <option [value]="modalidade.value">{{ modalidade.label }}</option>
-        }
-      </select>
-    </label>
-
-    <label class="field">
-      <span>Cidade</span>
-      <input type="text" name="cidade" [(ngModel)]="form.cidade" [disabled]="carregando" />
-    </label>
-
-    <label class="field">
-      <span>Bairro</span>
-      <input type="text" name="bairro" [(ngModel)]="form.bairro" [disabled]="carregando" />
-    </label>
-
-      <label class="field">
-        <span>Deficiência</span>
-        <select name="tipoDeficiencia" [(ngModel)]="form.tipoDeficiencia" [disabled]="carregando">
-          <option value="">Todas</option>
-          @for (tipo of tipoDeficienciaOptions; track tipo.value) {
-            <option [value]="tipo.value">{{ tipo.label }}</option>
-          }
-        </select>
-      </label>
-    }
+  <div class="filter-drawer__header">
+    <h2 class="filter-drawer__title">
+      <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+      Filtros Avançados
+    </h2>
+    <button
+      type="button"
+      class="drawer-close-btn"
+      (click)="fechar()"
+      aria-label="Fechar painel de filtros">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
   </div>
 
-  <div class="filters-actions">
-    <button type="button" class="btn btn-secondary" (click)="limparFiltros()" [disabled]="carregando">
+  <form class="filter-drawer__body" (ngSubmit)="aplicarFiltros()">
+
+    <!-- Período -->
+    <section class="filter-section" aria-labelledby="filtro-periodo-titulo">
+      <h3 id="filtro-periodo-titulo" class="filter-section__title">Período</h3>
+      <div class="filter-field-row">
+        <div class="filter-field">
+          <label class="form-label" for="f-data-inicio">Início</label>
+          <input id="f-data-inicio" type="date" class="form-input" name="dataInicio"
+            [(ngModel)]="form.dataInicio" [disabled]="carregando" />
+        </div>
+        <div class="filter-field">
+          <label class="form-label" for="f-data-fim">Fim</label>
+          <input id="f-data-fim" type="date" class="form-input" name="dataFim"
+            [(ngModel)]="form.dataFim" [disabled]="carregando" />
+        </div>
+      </div>
+    </section>
+
+    @if (!modoPublico) {
+      <!-- Turma e Professor -->
+      <section class="filter-section" aria-labelledby="filtro-turma-titulo">
+        <h3 id="filtro-turma-titulo" class="filter-section__title">Turma / Professor</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-turma">Turma</label>
+          <select id="f-turma" class="form-input" name="turmaId"
+            [(ngModel)]="form.turmaId" [disabled]="carregando">
+            <option value="">Todas</option>
+            @for (turma of turmas; track turma.id) {
+              <option [value]="turma.id">{{ turma.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-professor">Professor</label>
+          <select id="f-professor" class="form-input" name="professorId"
+            [(ngModel)]="form.professorId" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (professor of professores; track professor.id) {
+              <option [value]="professor.id">{{ professor.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Aluno -->
+      <section class="filter-section" aria-labelledby="filtro-aluno-titulo">
+        <h3 id="filtro-aluno-titulo" class="filter-section__title">Aluno</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-aluno">Aluno</label>
+          <select id="f-aluno" class="form-input" name="alunoId"
+            [(ngModel)]="form.alunoId" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (aluno of alunos; track aluno.id) {
+              <option [value]="aluno.id">{{ aluno.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-aluno">Status do aluno</label>
+          <select id="f-status-aluno" class="form-input" name="statusAluno"
+            [(ngModel)]="form.statusAluno" [disabled]="carregando">
+            @for (status of statusAlunoOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-deficiencia">Deficiência</label>
+          <select id="f-deficiencia" class="form-input" name="tipoDeficiencia"
+            [(ngModel)]="form.tipoDeficiencia" [disabled]="carregando">
+            <option value="">Todas</option>
+            @for (tipo of tipoDeficienciaOptions; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Matrícula -->
+      <section class="filter-section" aria-labelledby="filtro-matricula-titulo">
+        <h3 id="filtro-matricula-titulo" class="filter-section__title">Matrícula</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-turma">Status da turma</label>
+          <select id="f-status-turma" class="form-input" name="statusTurma"
+            [(ngModel)]="form.statusTurma" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (status of statusTurmaOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-matricula">Status da matrícula</label>
+          <select id="f-status-matricula" class="form-input" name="statusMatricula"
+            [(ngModel)]="form.statusMatricula" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (status of statusMatriculaOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-motivo">Motivo de encerramento</label>
+          <select id="f-motivo" class="form-input" name="motivoEncerramento"
+            [(ngModel)]="form.motivoEncerramento" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (motivo of motivoOptions; track motivo.value) {
+              <option [value]="motivo.value">{{ motivo.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Atendimentos -->
+      <section class="filter-section" aria-labelledby="filtro-atendimentos-titulo">
+        <h3 id="filtro-atendimentos-titulo" class="filter-section__title">Atendimentos</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-acomp">Status do acompanhamento</label>
+          <select id="f-status-acomp" class="form-input" name="statusAcompanhamento"
+            [(ngModel)]="form.statusAcompanhamento" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (status of statusAcompanhamentoOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-tipo-registro">Tipo de registro</label>
+          <select id="f-tipo-registro" class="form-input" name="tipoRegistroAtendimento"
+            [(ngModel)]="form.tipoRegistroAtendimento" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (tipo of tipoRegistroAtendimentoOptions; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-modalidade">Modalidade</label>
+          <select id="f-modalidade" class="form-input" name="modalidadeAtendimento"
+            [(ngModel)]="form.modalidadeAtendimento" [disabled]="carregando">
+            <option value="">Todas</option>
+            @for (modalidade of modalidadeAtendimentoOptions; track modalidade.value) {
+              <option [value]="modalidade.value">{{ modalidade.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Localização -->
+      <section class="filter-section" aria-labelledby="filtro-local-titulo">
+        <h3 id="filtro-local-titulo" class="filter-section__title">Localização</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-cidade">Cidade</label>
+          <input id="f-cidade" type="text" class="form-input" name="cidade"
+            [(ngModel)]="form.cidade" [disabled]="carregando" />
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-bairro">Bairro</label>
+          <input id="f-bairro" type="text" class="form-input" name="bairro"
+            [(ngModel)]="form.bairro" [disabled]="carregando" />
+        </div>
+      </section>
+    }
+
+    <!-- Período (modo público) -->
+    @if (modoPublico) {
+      <section class="filter-section" aria-labelledby="filtro-pub-titulo">
+        <h3 id="filtro-pub-titulo" class="filter-section__title">Período de análise</h3>
+        <p class="filter-hint">Use os campos de data acima para filtrar por período.</p>
+      </section>
+    }
+
+  </form>
+
+  <div class="filter-drawer__footer">
+    <button type="button" class="btn btn-secondary" (click)="limparFiltros()" [disabled]="carregando"
+      aria-label="Limpar todos os filtros">
       <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
       Limpar
     </button>
-    <button type="submit" class="btn btn-primary" [disabled]="carregando">
+    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()" [disabled]="carregando"
+      aria-label="Aplicar filtros selecionados">
       <span class="material-symbols-rounded" aria-hidden="true">filter_alt</span>
-      Aplicar filtros
+      Aplicar Filtros
     </button>
   </div>
-</form>
+
+</dialog>

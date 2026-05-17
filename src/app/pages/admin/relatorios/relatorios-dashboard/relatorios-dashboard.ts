@@ -94,6 +94,21 @@ export class RelatoriosDashboard implements OnInit {
   readonly exportandoPdf = signal(false);
   readonly exportandoXlsx = signal(false);
   readonly exportandoAtendimentosPdf = signal(false);
+  readonly filtroDrawerAberto = signal(false);
+
+  /** Quantidade de filtros ativos (para badge no botão) */
+  readonly filtrosAtivos = computed(() => {
+    const f = this.filtros();
+    const campos: (keyof RelatorioFiltro)[] = [
+      'dataInicio', 'dataFim', 'turmaId', 'professorId', 'alunoId',
+      'statusTurma', 'statusMatricula', 'motivoEncerramento',
+      'statusAcompanhamento', 'tipoRegistroAtendimento', 'modalidadeAtendimento',
+      'cidade', 'bairro', 'tipoDeficiencia',
+    ];
+    let count = campos.filter(c => !!f[c]).length;
+    if (f.statusAluno && f.statusAluno !== 'TODOS') count++;
+    return count;
+  });
 
   readonly turmasOptions = signal<RelatorioFiltroOption[]>([]);
   readonly professoresOptions = signal<RelatorioFiltroOption[]>([]);
@@ -122,8 +137,17 @@ export class RelatoriosDashboard implements OnInit {
     this.anunciar(`Aba ${this.tabLabel(aba)} selecionada.`);
   }
 
+  abrirFiltros(): void {
+    this.filtroDrawerAberto.set(true);
+  }
+
+  fecharFiltros(): void {
+    this.filtroDrawerAberto.set(false);
+  }
+
   aplicarFiltros(filtros: RelatorioFiltro): void {
     this.filtros.set(this.normalizarFiltro(filtros));
+    this.filtroDrawerAberto.set(false);
     this.carregarRelatorios();
   }
 

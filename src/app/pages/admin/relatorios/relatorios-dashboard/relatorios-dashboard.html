@@ -6,21 +6,28 @@
       <h1>Relatórios</h1>
       <p>Indicadores institucionais de alunos, turmas, matrículas, frequência e atendimentos.</p>
     </div>
-    <button type="button" class="icon-action" (click)="recarregar()" [disabled]="carregando()" aria-label="Atualizar relatórios">
-      <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
-    </button>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-filtros"
+        [class.btn-filtros--active]="filtrosAtivos() > 0"
+        (click)="abrirFiltros()"
+        [attr.aria-expanded]="filtroDrawerAberto()"
+        aria-controls="relatorio-filter-drawer"
+        aria-label="Abrir filtros avançados de relatórios">
+        <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+        Filtros
+        @if (filtrosAtivos() > 0) {
+          <span class="filtros-badge" aria-label="{{ filtrosAtivos() }} filtro(s) ativo(s)">{{ filtrosAtivos() }}</span>
+        }
+      </button>
+      <button type="button" class="icon-action" (click)="recarregar()" [disabled]="carregando()" aria-label="Atualizar relatórios">
+        <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+      </button>
+    </div>
   </header>
 
-  <app-relatorio-filtros
-    [filtros]="filtros()"
-    [turmas]="turmasOptions()"
-    [professores]="professoresOptions()"
-    [alunos]="alunosOptions()"
-    [modoPublico]="ehComunicacao"
-    [carregando]="carregando()"
-    (aplicar)="aplicarFiltros($event)"
-    (limpar)="limparFiltros()">
-  </app-relatorio-filtros>
+
 
   @if (erro()) {
     <div class="alert danger" role="alert">
@@ -175,3 +182,17 @@
     </section>
   </div>
 </section>
+
+<!-- Drawer de filtros -->
+<app-relatorio-filtros
+  [aberto]="filtroDrawerAberto()"
+  [filtros]="filtros()"
+  [turmas]="turmasOptions()"
+  [professores]="professoresOptions()"
+  [alunos]="alunosOptions()"
+  [modoPublico]="ehComunicacao"
+  [carregando]="carregando()"
+  (aplicar)="aplicarFiltros($event)"
+  (limpar)="limparFiltros()"
+  (aoFechar)="fecharFiltros()">
+</app-relatorio-filtros>

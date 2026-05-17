@@ -1,6 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { A11yModule } from '@angular/cdk/a11y';
 import {
   MatriculaStatusRelatorio,
   ModalidadeAtendimentoRelatorio,
@@ -25,7 +33,7 @@ type LabelOption<T extends string = string> = {
 @Component({
   selector: 'app-relatorio-filtros',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, A11yModule],
   templateUrl: './relatorio-filtros.html',
   styleUrl: './relatorio-filtros.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,11 +45,18 @@ export class RelatorioFiltros implements OnChanges {
   @Input() alunos: RelatorioFiltroOption[] = [];
   @Input() carregando = false;
   @Input() modoPublico = false;
+  /** Controla abertura/fechamento do drawer */
+  @Input() aberto = false;
 
   @Output() aplicar = new EventEmitter<RelatorioFiltro>();
   @Output() limpar = new EventEmitter<void>();
+  /** Emitido quando o usuário fecha o drawer */
+  @Output() aoFechar = new EventEmitter<void>();
 
   form: RelatorioFiltro = { statusAluno: 'TODOS' };
+
+  /** Elemento que abriu o drawer — foco restaurado ao fechar (WCAG 2.4.3) */
+  private lastFocus: HTMLElement | null = null;
 
   readonly statusAlunoOptions: LabelOption<StatusAlunoRelatorio>[] = [
     { value: 'TODOS', label: 'Todos' },
@@ -108,14 +123,26 @@ export class RelatorioFiltros implements OnChanges {
 
   ngOnChanges(): void {
     this.form = { statusAluno: 'TODOS', ...this.filtros };
+
+    if (this.aberto) {
+      // Captura elemento focado antes de abrir (WCAG 2.4.3)
+      this.lastFocus = document.activeElement as HTMLElement;
+    }
   }
 
   aplicarFiltros(): void {
     this.aplicar.emit({ ...this.form });
+    this.fechar();
   }
 
   limparFiltros(): void {
     this.form = { statusAluno: 'TODOS' };
     this.limpar.emit();
+  }
+
+  fechar(): void {
+    this.aoFechar.emit();
+    // Restaura foco ao elemento que abriu (WCAG 2.4.3)
+    setTimeout(() => this.lastFocus?.focus(), 0);
   }
 }
