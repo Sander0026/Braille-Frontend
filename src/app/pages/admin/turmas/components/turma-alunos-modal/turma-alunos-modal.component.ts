@@ -9,10 +9,14 @@ import {
   MotivoEncerramentoMatricula,
   StatusEncerramentoMatricula,
   Turma,
+  TurmaStatus,
   TurmasService,
 } from '../../../../../core/services/turmas.service';
 import { Beneficiario } from '../../../../../core/services/beneficiarios.service';
 import { ToastService } from '../../../../../core/services/toast.service';
+
+const STATUS_TURMA_ACEITA_MATRICULA: TurmaStatus[] = ['PREVISTA', 'ANDAMENTO'];
+const AVISO_TURMA_ENCERRADA_MATRICULA = 'Esta turma está encerrada e não aceita novas matrículas.';
 
 @Directive({
   selector: '[appBuscaItem]',
@@ -138,18 +142,17 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
         this.verAlunos(this.turmaOriginal.id);
       } else {
         this.turmaDetalhes.set(null);
-        this.alunosBuscaRestado.set([]);
-        this.alunosSelecionadosParaMatricula.set([]);
+        this.limparBuscaMatricula();
         this.modalEncerramentoAberto.set(false);
         this.matriculaEmEncerramento.set(null);
-        this.buscaAlunoCtrl.setValue('', { emitEvent: false });
       }
     }
   }
 
   verAlunos(idTurma: string): void {
     this.carregandoDetalhes.set(true);
-    this.abaAtual.set(this.isProfessor ? 'remover' : 'adicionar');
+    this.abaAtual.set('remover');
+    this.limparBuscaMatricula();
 
     this.turmasService.buscarPorId(idTurma)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -157,7 +160,10 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
         next: (t) => {
           this.turmaDetalhes.set(t);
           this.carregandoDetalhes.set(false);
-          if (!this.isProfessor) {
+          this.sincronizarControleBuscaMatricula();
+
+          if (!this.isProfessor && this.turmaAceitaMatricula(t)) {
+            this.abaAtual.set('adicionar');
             this.buscarAlunosParaMatricula('');
           }
         },
@@ -169,25 +175,26 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
   }
 
   alterarAba(aba: 'adicionar' | 'remover'): void {
-    if (this.isProfessor && aba === 'adicionar') return;
+    if (aba === 'adicionar' && (this.isProfessor || !this.turmaAceitaMatricula())) {
+      this.abaAtual.set('remover');
+      this.limparBuscaMatricula();
+      return;
+    }
 
     this.abaAtual.set(aba);
     if (aba === 'adicionar') {
+      this.sincronizarControleBuscaMatricula();
       this.buscaAlunoCtrl.setValue('', { emitEvent: false });
       this.buscarAlunosParaMatricula('');
     }
   }
 
   buscarAlunosParaMatricula(termo: string): void {
-    if (this.isProfessor) {
-      this.alunosBuscaRestado.set([]);
-      this.alunosSelecionadosParaMatricula.set([]);
-      this.buscandoAlunos.set(false);
+    const turma = this.turmaDetalhes();
+    if (this.isProfessor || !turma || !this.turmaAceitaMatricula(turma)) {
+      this.limparBuscaMatricula();
       return;
     }
-
-    const turma = this.turmaDetalhes();
-    if (!turma) return;
 
     this.buscandoAlunos.set(true);
 
@@ -243,6 +250,13 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
     const selecionados = this.alunosSelecionadosParaMatricula();
 
     if (!turma || this.operacaoEmProgresso() || selecionados.length === 0) return;
+
+    if (!this.turmaAceitaMatricula(turma)) {
+      this.limparBuscaMatricula();
+      this.abaAtual.set('remover');
+      this.toast.erro(AVISO_TURMA_ENCERRADA_MATRICULA);
+      return;
+    }
     
     const capacidade = turma.capacidadeMaxima;
     const matriculadosAtuais = turma.matriculasOficina?.length || 0;
@@ -285,6 +299,7 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
     // Atualiza base visual
     this.turmasService.buscarPorId(this.turmaDetalhes()!.id).subscribe((novaTurma) => {
       this.turmaDetalhes.set(novaTurma);
+      this.sincronizarControleBuscaMatricula();
       const remaining = this.alunosBuscaRestado().filter(r => !submetidos.includes(r.id));
       this.alunosBuscaRestado.set(remaining);
       this.operacaoEmProgresso.set(false);
@@ -397,6 +412,35 @@ export class TurmaAlunosModalComponent implements OnInit, OnChanges {
     const hoje = new Date();
     const local = new Date(hoje.getTime() - hoje.getTimezoneOffset() * 60_000);
     return local.toISOString().slice(0, 10);
+  }
+
+  turmaAceitaMatricula(turma: Turma | null = this.turmaDetalhes()): boolean {
+    return !!turma && STATUS_TURMA_ACEITA_MATRICULA.includes(turma.status);
+  }
+
+  turmaEncerrada(turma: Turma | null = this.turmaDetalhes()): boolean {
+    return turma?.status === 'CONCLUIDA' || turma?.status === 'CANCELADA';
+  }
+
+  avisoTurmaEncerradaMatricula(): string {
+    return AVISO_TURMA_ENCERRADA_MATRICULA;
+  }
+
+  private limparBuscaMatricula(): void {
+    this.alunosBuscaRestado.set([]);
+    this.alunosSelecionadosParaMatricula.set([]);
+    this.buscandoAlunos.set(false);
+    this.buscaAlunoCtrl.setValue('', { emitEvent: false });
+    this.sincronizarControleBuscaMatricula();
+  }
+
+  private sincronizarControleBuscaMatricula(): void {
+    const podeBuscar = !this.isProfessor && this.turmaAceitaMatricula();
+    if (podeBuscar && this.buscaAlunoCtrl.disabled) {
+      this.buscaAlunoCtrl.enable({ emitEvent: false });
+    } else if (!podeBuscar && this.buscaAlunoCtrl.enabled) {
+      this.buscaAlunoCtrl.disable({ emitEvent: false });
+    }
   }
 
   aoFechar(): void {

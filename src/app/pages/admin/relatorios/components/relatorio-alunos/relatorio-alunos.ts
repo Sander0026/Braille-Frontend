@@ -1,6 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { RelatorioAlunosResponse } from '../../../../../core/services/relatorios.service';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import {
+  RelatorioAlunoItem,
+  RelatorioAlunosDistribuicoes,
+  RelatorioAlunosListaResponse,
+  RelatorioAlunosResumo,
+  RelatorioRankingItem,
+} from '../../../../../core/services/relatorios.service';
 
 @Component({
   selector: 'app-relatorio-alunos',
@@ -11,8 +17,15 @@ import { RelatorioAlunosResponse } from '../../../../../core/services/relatorios
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RelatorioAlunos {
-  @Input() relatorio: RelatorioAlunosResponse | null = null;
+  @Input() resumo: RelatorioAlunosResumo | null = null;
+  @Input() distribuicoes: RelatorioAlunosDistribuicoes | null = null;
+  @Input() lista: RelatorioAlunosListaResponse | null = null;
   @Input() carregando = false;
+  @Input() carregandoLista = false;
+  @Input() listaAberta = false;
+
+  @Output() abrirLista = new EventEmitter<void>();
+  @Output() verMais = new EventEmitter<void>();
 
   formatarData(value?: string | null): string {
     if (!value) return '-';
@@ -30,7 +43,7 @@ export class RelatorioAlunos {
       .join(' ');
   }
 
-  possuiLaudo(aluno: RelatorioAlunosResponse['data'][number]): boolean {
+  possuiLaudo(aluno: RelatorioAlunoItem): boolean {
     return aluno.possuiLaudo || Boolean(aluno.laudoUrl);
   }
 
@@ -38,9 +51,16 @@ export class RelatorioAlunos {
     return value ? 'Sim' : 'Não';
   }
 
-  grupoEntries(grupo: Record<string, number>): Array<{ label: string; total: number }> {
-    return Object.entries(grupo)
-      .map(([label, total]) => ({ label, total }))
-      .sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+  ranking(items?: RelatorioRankingItem[] | null): RelatorioRankingItem[] {
+    return items ?? [];
+  }
+
+  podeVerMais(): boolean {
+    const meta = this.lista?.meta;
+    return Boolean(meta && meta.page < meta.lastPage);
+  }
+
+  totalCarregado(): number {
+    return this.lista?.data.length ?? 0;
   }
 }

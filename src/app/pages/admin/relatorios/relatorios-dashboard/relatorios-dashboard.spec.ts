@@ -28,31 +28,32 @@ describe('RelatoriosDashboard', () => {
     indicadores: { taxaEvasao: 0, taxaConclusao: 0, taxaPermanencia: 0 },
   };
 
-  const alunosVazio = {
-    filtros: {},
-    total: 0,
-    indicadores: {
-      totalCadastrados: 0,
-      ativos: 0,
-      inativos: 0,
-      cadastradosNoPeriodo: 0,
-      porTipoDeficiencia: {},
-      porCausaDeficiencia: {},
-      porPreferenciaAcessibilidade: {},
-      porCidade: {},
-      porBairro: {},
-      porEscolaridade: {},
-      porRendaFamiliar: {},
-      recebemBeneficioGov: 0,
-      precisamAcompanhante: 0,
-      comLaudo: 0,
-      semLaudo: 0,
-      lgpdAceito: 0,
-    },
-    porStatus: { ativos: 0, inativos: 0 },
-    porCidade: {},
-    porTipoDeficiencia: {},
+  const alunosResumoVazio = {
+    totalCadastrados: 0,
+    ativos: 0,
+    inativos: 0,
+    comLaudo: 0,
+    semLaudo: 0,
+    precisamAcompanhante: 0,
+    lgpdAceito: 0,
+  };
+
+  const alunosDistribuicoesVazio = {
+    porTipoDeficiencia: [],
+    porCidadeTop10: [],
+    porBairroTop10: [],
+    porEscolaridadeTop10: [],
+    porRendaFamiliarTop10: [],
+  };
+
+  const alunosListaVazio = {
     data: [],
+    meta: {
+      page: 1,
+      limit: 20,
+      total: 0,
+      lastPage: 1,
+    },
   };
 
   const turmasVazio = {
@@ -115,6 +116,51 @@ describe('RelatoriosDashboard', () => {
     data: [],
   };
 
+  const riscoEvasaoVazio = {
+    filtros: {},
+    total: 0,
+    indicadores: {
+      alto: 0,
+      medio: 0,
+      baixo: 0,
+      tresFaltasSeguidas: 0,
+      presencaAbaixo60: 0,
+      semRegistro30Dias: 0,
+      matriculaAtivaSemFrequenciaRecente: 0,
+    },
+    data: [],
+  };
+
+  const impactoSocialVazio = {
+    filtros: {},
+    periodo: {
+      atual: { dataInicio: '2026-05-01', dataFim: '2026-05-31' },
+      anterior: { dataInicio: '2026-03-31', dataFim: '2026-04-30' },
+    },
+    metricas: {
+      totalAlunosAtendidos: 0,
+      totalAtendimentosIndividuais: 0,
+      totalTurmasOfertadas: 0,
+      totalCertificadosEmitidos: 0,
+      totalAlunosDeficienciaVisualAtendidos: 0,
+      totalBairrosAlcancados: 0,
+      totalCidadesAlcancadas: 0,
+      taxaPermanencia: 0,
+      taxaConclusao: 0,
+    },
+    comparativo: {
+      totalAlunosAtendidos: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      totalAtendimentosIndividuais: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      totalTurmasOfertadas: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      totalCertificadosEmitidos: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      totalAlunosDeficienciaVisualAtendidos: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      totalBairrosAlcancados: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      totalCidadesAlcancadas: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      taxaPermanencia: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+      taxaConclusao: { atual: 0, anterior: 0, variacaoPercentual: 0, direcao: 'ESTAVEL' },
+    },
+  };
+
   const atendimentosVazio = {
     filtros: {},
     totalAcompanhamentos: 0,
@@ -165,10 +211,20 @@ describe('RelatoriosDashboard', () => {
 
     relatoriosService = {
       resumo: vi.fn().mockReturnValue(erroApi ? throwError(() => new Error('Falha')) : of(resumoVazio)),
-      alunos: vi.fn().mockReturnValue(of(alunosVazio)),
+      alunos: vi.fn(),
+      alunosResumo: vi.fn().mockReturnValue(of(alunosResumoVazio)),
+      alunosDistribuicoes: vi.fn().mockReturnValue(of(alunosDistribuicoesVazio)),
+      alunosLista: vi.fn().mockReturnValue(of(alunosListaVazio)),
       turmas: vi.fn().mockReturnValue(of(turmasVazio)),
       evasoes: vi.fn().mockReturnValue(of(evasoesVazio)),
       frequencias: vi.fn().mockReturnValue(of(frequenciasVazio)),
+      riscoEvasao: vi.fn().mockReturnValue(of(riscoEvasaoVazio)),
+      impactoSocial: vi.fn().mockReturnValue(of(impactoSocialVazio)),
+      buscarOpcoesTurmas: vi.fn().mockReturnValue(of([{ id: 'turma-1', label: 'Braille Basico' }])),
+      buscarOpcoesProfessores: vi.fn().mockReturnValue(of([{ id: 'prof-1', label: 'Professora Ana' }])),
+      buscarOpcoesAlunos: vi.fn().mockReturnValue(of([{ id: 'aluno-1', label: 'Ana Silva (A001)' }])),
+      buscarOpcoesCidades: vi.fn().mockReturnValue(of([{ id: 'Serra', label: 'Serra' }])),
+      buscarOpcoesBairros: vi.fn().mockReturnValue(of([{ id: 'Jardim Limoeiro', label: 'Jardim Limoeiro' }])),
       exportarPdf: vi.fn().mockReturnValue(of(new Blob(['pdf']))),
       exportarXlsx: vi.fn().mockReturnValue(of(new Blob(['xlsx']))),
     };
@@ -219,12 +275,33 @@ describe('RelatoriosDashboard', () => {
       'turmas',
       'evasoes',
       'atendimentos',
+      'impacto-social',
       'exportacoes',
     ]);
     expect(component.abaAtiva()).toBe('visao-geral');
     expect(component.resumo()).toEqual(resumoVazio);
+    expect(component.alunosResumo()).toBeNull();
+    expect(component.alunosDistribuicoes()).toBeNull();
+    expect(component.alunosLista()).toBeNull();
+    expect(component.turmas()).toBeNull();
+    expect(component.evasoes()).toBeNull();
+    expect(component.riscoEvasao()).toBeNull();
+    expect(component.atendimentos()).toBeNull();
+    expect(component.impactoSocial()).toBeNull();
     expect(component.totalRegistros()).toBe(0);
-    expect(fixture.nativeElement.querySelectorAll('.tab-btn').length).toBe(6);
+    expect(fixture.nativeElement.querySelectorAll('.tab-btn').length).toBe(7);
+    expect(relatoriosService.alunos).not.toHaveBeenCalled();
+    expect(relatoriosService.alunosResumo).not.toHaveBeenCalled();
+    expect(relatoriosService.alunosDistribuicoes).not.toHaveBeenCalled();
+    expect(relatoriosService.alunosLista).not.toHaveBeenCalled();
+    expect(relatoriosService.turmas).not.toHaveBeenCalled();
+    expect(relatoriosService.evasoes).not.toHaveBeenCalled();
+    expect(relatoriosService.riscoEvasao).not.toHaveBeenCalled();
+    expect(relatoriosService.impactoSocial).not.toHaveBeenCalled();
+    expect(relatorioAtendimentoApi.gerar).not.toHaveBeenCalled();
+    expect(turmasService.listar).not.toHaveBeenCalled();
+    expect(turmasService.listarProfessoresAtivos).not.toHaveBeenCalled();
+    expect(beneficiariosService.listar).not.toHaveBeenCalled();
   });
 
   it('recarrega os relatorios quando filtros sao aplicados', async () => {
@@ -247,11 +324,7 @@ describe('RelatoriosDashboard', () => {
       statusAluno: 'ATIVO',
       tipoRegistroAtendimento: 'ATENDIMENTO_REALIZADO',
     });
-    expect(relatorioAtendimentoApi.gerar).toHaveBeenCalledWith({
-      professorId: 'prof-1',
-      dataInicio: '2026-05-01',
-      tipoRegistro: 'ATENDIMENTO_REALIZADO',
-    });
+    expect(relatorioAtendimentoApi.gerar).not.toHaveBeenCalled();
   });
 
   it('alterna abas sem perder o estado carregado', async () => {
@@ -262,6 +335,64 @@ describe('RelatoriosDashboard', () => {
 
     expect(component.abaAtiva()).toBe('evasoes');
     expect(fixture.nativeElement.querySelector('#painel-evasoes')).not.toBeNull();
+    expect(relatoriosService.evasoes).toHaveBeenCalledWith({ statusAluno: 'TODOS' });
+    expect(relatoriosService.riscoEvasao).toHaveBeenCalledWith({ statusAluno: 'TODOS' });
+
+    relatoriosService.evasoes.mockClear();
+    relatoriosService.riscoEvasao.mockClear();
+    component.mudarAba('visao-geral');
+    component.mudarAba('evasoes');
+
+    expect(relatoriosService.evasoes).not.toHaveBeenCalled();
+    expect(relatoriosService.riscoEvasao).not.toHaveBeenCalled();
+  });
+
+  it('carrega impacto social somente ao abrir a aba dedicada', async () => {
+    await montarComponente('ADMIN');
+
+    expect(relatoriosService.impactoSocial).not.toHaveBeenCalled();
+
+    component.mudarAba('impacto-social');
+
+    expect(relatoriosService.impactoSocial).toHaveBeenCalledWith({ statusAluno: 'TODOS' });
+    expect(component.impactoSocial()).toEqual(impactoSocialVazio);
+    expect(component.abasCarregadas()['impacto-social']).toBe(true);
+  });
+
+  it('carrega alunos somente ao abrir a aba de alunos e nao carrega a lista automaticamente', async () => {
+    await montarComponente('ADMIN');
+
+    component.mudarAba('alunos');
+
+    expect(relatoriosService.alunosResumo).toHaveBeenCalledWith({ statusAluno: 'TODOS' });
+    expect(relatoriosService.alunosDistribuicoes).toHaveBeenCalledWith({ statusAluno: 'TODOS' });
+    expect(component.alunosResumo()).toEqual(alunosResumoVazio);
+    expect(component.alunosDistribuicoes()).toEqual(alunosDistribuicoesVazio);
+    expect(relatoriosService.alunosLista).not.toHaveBeenCalled();
+  });
+
+  it('invalida cache ao mudar filtros e recarrega somente a aba ativa', async () => {
+    await montarComponente('ADMIN');
+    component.mudarAba('atendimentos');
+    relatoriosService.resumo.mockClear();
+    relatoriosService.alunosResumo.mockClear();
+    relatoriosService.turmas.mockClear();
+    relatoriosService.evasoes.mockClear();
+    relatoriosService.riscoEvasao.mockClear();
+    relatoriosService.impactoSocial.mockClear();
+    relatorioAtendimentoApi.gerar.mockClear();
+
+    component.aplicarFiltros({ professorId: 'prof-1', statusAluno: 'ATIVO' });
+
+    expect(relatorioAtendimentoApi.gerar).toHaveBeenCalledWith({ professorId: 'prof-1' });
+    expect(relatoriosService.resumo).not.toHaveBeenCalled();
+    expect(relatoriosService.alunosResumo).not.toHaveBeenCalled();
+    expect(relatoriosService.turmas).not.toHaveBeenCalled();
+    expect(relatoriosService.evasoes).not.toHaveBeenCalled();
+    expect(relatoriosService.riscoEvasao).not.toHaveBeenCalled();
+    expect(relatoriosService.impactoSocial).not.toHaveBeenCalled();
+    expect(component.abasCarregadas().atendimentos).toBe(true);
+    expect(component.abasCarregadas()['visao-geral']).toBe(false);
   });
 
   it('executa exportacoes institucionais e mostra feedback de sucesso', async () => {
@@ -296,16 +427,21 @@ describe('RelatoriosDashboard', () => {
     await montarComponente('ADMIN');
 
     expect(component.erro()).toBe('');
-    expect(component.alunos()?.data).toEqual([]);
-    expect(component.turmas()?.data).toEqual([]);
-    expect(component.evasoes()?.data).toEqual([]);
+    expect(component.alunosLista()).toBeNull();
+    expect(component.turmas()).toBeNull();
+    expect(component.evasoes()).toBeNull();
+
+    component.abrirListaAlunos();
+
+    expect(relatoriosService.alunosLista).toHaveBeenCalledWith({ statusAluno: 'TODOS' }, 1, 20);
+    expect(component.alunosLista()?.data).toEqual([]);
   });
 
   it('exibe mensagem amigavel quando a API falha', async () => {
     await montarComponente('ADMIN', true);
     fixture.detectChanges();
 
-    expect(component.erro()).toBe('Não foi possível carregar os relatórios.');
-    expect(fixture.nativeElement.textContent).toContain('Não foi possível carregar os relatórios.');
+    expect(component.erro()).toBe('Nao foi possivel carregar o resumo dos relatorios.');
+    expect(fixture.nativeElement.textContent).toContain('Nao foi possivel carregar o resumo dos relatorios.');
   });
 });

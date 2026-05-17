@@ -5,7 +5,13 @@ import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup, FormsModule }
 import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin } from 'rxjs';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { BeneficiariosService, Beneficiario } from '../../../core/services/beneficiarios.service';
+import {
+  BeneficiariosService,
+  Beneficiario,
+  InativarAlunoPayload,
+  MotivoInativacaoAluno,
+  StatusInativacaoMatricula,
+} from '../../../core/services/beneficiarios.service';
 import { FrequenciasService } from '../../../core/services/frequencias.service';
 import { ConfirmDialogService } from '../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -40,6 +46,13 @@ export class TabelaTrFocavelDirective implements FocusableOption {
     this.element.nativeElement.focus();
   }
 }
+
+type InativacaoForm = {
+  motivoInativacao: MotivoInativacaoAluno;
+  encerrarMatriculasAtivas: boolean;
+  statusMatricula: StatusInativacaoMatricula;
+  observacao: string;
+};
 
 @Component({
   selector: 'app-beneficiary-list',
@@ -79,6 +92,30 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   alunoParaRestaurar: Beneficiario | null = null;
   alunoParaExcluirDefinitivo: Beneficiario | null = null;
   salvando = false;
+  readonly motivosInativacaoOptions: ReadonlyArray<{ value: MotivoInativacaoAluno; label: string }> = [
+    { value: 'EVASAO_INSTITUCIONAL', label: 'Evasão institucional' },
+    { value: 'MUDANCA_DE_CIDADE', label: 'Mudança de cidade' },
+    { value: 'PROBLEMA_SAUDE', label: 'Problema de saúde' },
+    { value: 'PROBLEMA_FAMILIAR', label: 'Problema familiar' },
+    { value: 'DIFICULDADE_TRANSPORTE', label: 'Dificuldade de transporte' },
+    { value: 'FALECIMENTO', label: 'Falecimento' },
+    { value: 'SOLICITACAO_DO_ALUNO', label: 'Solicitação do aluno' },
+    { value: 'FALTA_DE_CONTATO', label: 'Falta de contato' },
+    { value: 'CADASTRO_DUPLICADO', label: 'Cadastro duplicado' },
+    { value: 'OUTRO', label: 'Outro' },
+  ];
+  readonly statusMatriculaInativacaoOptions: ReadonlyArray<{ value: StatusInativacaoMatricula; label: string }> = [
+    { value: 'EVADIDA', label: 'Evadida' },
+    { value: 'CANCELADA', label: 'Cancelada' },
+    { value: 'TRANSFERIDA', label: 'Transferida' },
+  ];
+  private readonly inativacaoFormPadrao: InativacaoForm = {
+    motivoInativacao: 'EVASAO_INSTITUCIONAL',
+    encerrarMatriculasAtivas: true,
+    statusMatricula: 'EVADIDA',
+    observacao: '',
+  };
+  inativacaoForm: InativacaoForm = { ...this.inativacaoFormPadrao };
 
   documentoParaExcluir: { tipo: 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl'; url: string } | null = null;
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
@@ -757,32 +794,53 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
 
   inativar(aluno: Beneficiario): void {
     this.pushFocus();
+    this.inativacaoForm = { ...this.inativacaoFormPadrao };
     this.alunoParaInativar = aluno;
   }
 
   cancelarInativacao(): void {
     this.popFocus();
     this.alunoParaInativar = null;
+    this.inativacaoForm = { ...this.inativacaoFormPadrao };
   }
 
   confirmarInativacao(): void {
     if (!this.alunoParaInativar) return;
+    if (!this.inativacaoForm.motivoInativacao) {
+      this.toast.erro('Informe o motivo da inativação.');
+      return;
+    }
+
+    const observacao = this.inativacaoForm.observacao.trim();
+    const payload: InativarAlunoPayload = {
+      motivoInativacao: this.inativacaoForm.motivoInativacao,
+      encerrarMatriculasAtivas: this.inativacaoForm.encerrarMatriculasAtivas,
+      observacao: observacao || undefined,
+      ...(this.inativacaoForm.encerrarMatriculasAtivas
+        ? { statusMatricula: this.inativacaoForm.statusMatricula }
+        : {}),
+    };
+
     this.salvando = true;
 
-    this.beneficiariosService.inativar(this.alunoParaInativar.id).subscribe({
+    this.beneficiariosService.inativar(this.alunoParaInativar.id, payload).subscribe({
       next: () => {
         setTimeout(() => {
           this.salvando = false;
           this.alunoParaInativar = null;
+          this.inativacaoForm = { ...this.inativacaoFormPadrao };
           this.toast.sucesso('Aluno inativado com sucesso!');
           this.carregar();
+          this.popFocus();
+          this.cdr.markForCheck();
         }, 0);
       },
-      error: () => {
+      error: (e) => {
         setTimeout(() => {
+          const detalhe = e?.error?.message;
+          const mensagem = Array.isArray(detalhe) ? detalhe.join(' ') : detalhe || 'Erro ao inativar aluno.';
           this.salvando = false;
-          this.popFocus();
-          this.toast.erro('Erro ao inativar aluno.');
+          this.toast.erro(mensagem);
           this.cdr.markForCheck();
         }, 0);
       }

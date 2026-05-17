@@ -6,40 +6,53 @@ import {
   ElementRef,
   OnInit,
   ViewChild,
+  WritableSignal,
   computed,
   inject,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { forkJoin } from 'rxjs';
-import { BeneficiariosService } from '../../../../core/services/beneficiarios.service';
+import { catchError, debounceTime, distinctUntilChanged, forkJoin, Observable, of, Subject, switchMap } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
-  RelatorioAlunosResponse,
+  RelatorioAlunosDistribuicoes,
+  RelatorioAlunosListaResponse,
+  RelatorioAlunosResumo,
   RelatorioEvasoesResponse,
   RelatorioFiltro,
-  RelatorioFrequenciasResponse,
+  RelatorioImpactoSocialResponse,
+  RelatorioOpcao,
   RelatorioResumo,
+  RelatorioRiscoEvasaoResponse,
   RelatorioTurmasResponse,
   RelatoriosService,
 } from '../../../../core/services/relatorios.service';
 import { ToastService } from '../../../../core/services/toast.service';
-import { TurmasService } from '../../../../core/services/turmas.service';
 import { FiltroRelatorioAtendimento } from '../../../../features/atendimentos-individuais/models/filtros-atendimento.model';
 import { RelatorioAtendimentoIndividual } from '../../../../features/atendimentos-individuais/models/relatorio-atendimento.model';
 import { RelatorioAtendimentoApiService } from '../../../../features/atendimentos-individuais/services/relatorio-atendimento-api.service';
 import { CardsIndicadores } from '../components/cards-indicadores/cards-indicadores';
-import {
-  RelatorioFiltroOption,
-  RelatorioFiltros,
-} from '../components/relatorio-filtros/relatorio-filtros';
+import { RelatorioFiltros } from '../components/relatorio-filtros/relatorio-filtros';
 import { RelatorioAlunos } from '../components/relatorio-alunos/relatorio-alunos';
 import { RelatorioAtendimentos } from '../components/relatorio-atendimentos/relatorio-atendimentos';
 import { RelatorioEvasoes } from '../components/relatorio-evasoes/relatorio-evasoes';
 import { RelatorioExportacoes } from '../components/relatorio-exportacoes/relatorio-exportacoes';
+import { RelatorioImpactoSocial } from '../components/relatorio-impacto-social/relatorio-impacto-social';
 import { RelatorioTurmas } from '../components/relatorio-turmas/relatorio-turmas';
 
-type RelatorioAba = 'visao-geral' | 'alunos' | 'turmas' | 'evasoes' | 'atendimentos' | 'exportacoes';
+type RelatorioAba =
+  | 'visao-geral'
+  | 'alunos'
+  | 'turmas'
+  | 'evasoes'
+  | 'atendimentos'
+  | 'impacto-social'
+  | 'exportacoes';
+
+type BuscaBairro = {
+  busca: string;
+  cidade?: string;
+};
 
 interface RelatorioTab {
   id: RelatorioAba;
@@ -58,6 +71,7 @@ interface RelatorioTab {
     RelatorioTurmas,
     RelatorioEvasoes,
     RelatorioAtendimentos,
+    RelatorioImpactoSocial,
     RelatorioExportacoes,
   ],
   templateUrl: './relatorios-dashboard.html',
@@ -67,11 +81,15 @@ interface RelatorioTab {
 export class RelatoriosDashboard implements OnInit {
   private readonly relatoriosService = inject(RelatoriosService);
   private readonly relatorioAtendimentoApi = inject(RelatorioAtendimentoApiService);
-  private readonly beneficiariosService = inject(BeneficiariosService);
   private readonly authService = inject(AuthService);
-  private readonly turmasService = inject(TurmasService);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly buscaTurmas$ = new Subject<string>();
+  private readonly buscaProfessores$ = new Subject<string>();
+  private readonly buscaAlunos$ = new Subject<string>();
+  private readonly buscaCidades$ = new Subject<string>();
+  private readonly buscaBairros$ = new Subject<BuscaBairro>();
+  private readonly limiteAlunosLista = 20;
 
   @ViewChild('anuncio', { static: true }) private anuncioEl!: ElementRef<HTMLDivElement>;
 
@@ -84,17 +102,20 @@ export class RelatoriosDashboard implements OnInit {
         { id: 'turmas', label: 'Turmas', icon: 'school' },
         { id: 'evasoes', label: 'Evasões', icon: 'warning' },
         { id: 'atendimentos', label: 'Atendimentos Individuais', icon: 'clinical_notes' },
+        { id: 'impacto-social', label: 'Impacto Social', icon: 'volunteer_activism' },
         { id: 'exportacoes', label: 'Exportações', icon: 'download' },
       ];
 
   readonly abaAtiva = signal<RelatorioAba>(this.ehComunicacao ? 'exportacoes' : 'visao-geral');
   readonly filtros = signal<RelatorioFiltro>({ statusAluno: 'TODOS' });
-  readonly carregando = signal(false);
   readonly erro = signal('');
   readonly exportandoPdf = signal(false);
   readonly exportandoXlsx = signal(false);
   readonly exportandoAtendimentosPdf = signal(false);
   readonly filtroDrawerAberto = signal(false);
+  readonly abasCarregadas = signal<Record<RelatorioAba, boolean>>(this.estadoAbas(false));
+  readonly carregandoPorAba = signal<Record<RelatorioAba, boolean>>(this.estadoAbas(false));
+  readonly carregando = computed(() => this.carregandoPorAba()[this.abaAtiva()] ?? false);
 
   /** Quantidade de filtros ativos (para badge no botão) */
   readonly filtrosAtivos = computed(() => {
@@ -110,16 +131,23 @@ export class RelatoriosDashboard implements OnInit {
     return count;
   });
 
-  readonly turmasOptions = signal<RelatorioFiltroOption[]>([]);
-  readonly professoresOptions = signal<RelatorioFiltroOption[]>([]);
-  readonly alunosOptions = signal<RelatorioFiltroOption[]>([]);
+  readonly turmasOptions = signal<RelatorioOpcao[]>([]);
+  readonly professoresOptions = signal<RelatorioOpcao[]>([]);
+  readonly alunosOptions = signal<RelatorioOpcao[]>([]);
+  readonly cidadesOptions = signal<RelatorioOpcao[]>([]);
+  readonly bairrosOptions = signal<RelatorioOpcao[]>([]);
 
   readonly resumo = signal<RelatorioResumo | null>(null);
-  readonly alunos = signal<RelatorioAlunosResponse | null>(null);
+  readonly alunosResumo = signal<RelatorioAlunosResumo | null>(null);
+  readonly alunosDistribuicoes = signal<RelatorioAlunosDistribuicoes | null>(null);
+  readonly alunosLista = signal<RelatorioAlunosListaResponse | null>(null);
+  readonly carregandoListaAlunos = signal(false);
+  readonly listaAlunosAberta = signal(false);
   readonly turmas = signal<RelatorioTurmasResponse | null>(null);
   readonly evasoes = signal<RelatorioEvasoesResponse | null>(null);
+  readonly riscoEvasao = signal<RelatorioRiscoEvasaoResponse | null>(null);
   readonly atendimentos = signal<RelatorioAtendimentoIndividual | null>(null);
-  readonly frequencias = signal<RelatorioFrequenciasResponse | null>(null);
+  readonly impactoSocial = signal<RelatorioImpactoSocialResponse | null>(null);
 
   readonly totalRegistros = computed(() => {
     const resumo = this.resumo();
@@ -128,13 +156,14 @@ export class RelatoriosDashboard implements OnInit {
   });
 
   ngOnInit(): void {
-    this.carregarOpcoes();
-    this.carregarRelatorios();
+    this.configurarBuscaOpcoes();
+    this.carregarAbaAtual();
   }
 
   mudarAba(aba: RelatorioAba): void {
     this.abaAtiva.set(aba);
     this.anunciar(`Aba ${this.tabLabel(aba)} selecionada.`);
+    this.carregarAbaAtual();
   }
 
   abrirFiltros(): void {
@@ -148,16 +177,58 @@ export class RelatoriosDashboard implements OnInit {
   aplicarFiltros(filtros: RelatorioFiltro): void {
     this.filtros.set(this.normalizarFiltro(filtros));
     this.filtroDrawerAberto.set(false);
-    this.carregarRelatorios();
+    this.invalidarCacheRelatorios();
+    this.carregarAbaAtual();
   }
 
   limparFiltros(): void {
     this.filtros.set({ statusAluno: 'TODOS' });
-    this.carregarRelatorios();
+    this.turmasOptions.set([]);
+    this.professoresOptions.set([]);
+    this.alunosOptions.set([]);
+    this.cidadesOptions.set([]);
+    this.bairrosOptions.set([]);
+    this.invalidarCacheRelatorios();
+    this.carregarAbaAtual();
   }
 
   recarregar(): void {
-    this.carregarRelatorios();
+    this.invalidarCacheRelatorios();
+    this.carregarAbaAtual();
+  }
+
+  buscarTurmasOpcoes(busca: string): void {
+    this.buscaTurmas$.next(busca);
+  }
+
+  buscarProfessoresOpcoes(busca: string): void {
+    this.buscaProfessores$.next(busca);
+  }
+
+  buscarAlunosOpcoes(busca: string): void {
+    this.buscaAlunos$.next(busca);
+  }
+
+  buscarCidadesOpcoes(busca: string): void {
+    this.buscaCidades$.next(busca);
+  }
+
+  buscarBairrosOpcoes(payload: BuscaBairro): void {
+    this.buscaBairros$.next(payload);
+  }
+
+  abrirListaAlunos(): void {
+    if (this.carregandoListaAlunos()) return;
+    this.listaAlunosAberta.set(true);
+    if (!this.alunosLista()) {
+      this.carregarListaAlunos(1, false);
+    }
+  }
+
+  verMaisAlunos(): void {
+    const lista = this.alunosLista();
+    if (!lista || this.carregandoListaAlunos() || lista.meta.page >= lista.meta.lastPage) return;
+    this.carregarListaAlunos(lista.meta.page + 1, true);
   }
 
   exportarPdf(): void {
@@ -223,73 +294,294 @@ export class RelatoriosDashboard implements OnInit {
     return this.tabs.find((tab) => tab.id === aba)?.label ?? aba;
   }
 
-  private carregarRelatorios(): void {
+  private carregarAbaAtual(): void {
+    this.carregarAba(this.abaAtiva());
+  }
+
+  private carregarAba(aba: RelatorioAba): void {
     if (this.ehComunicacao) {
-      this.carregando.set(false);
       this.erro.set('');
+      this.marcarAbaCarregada(aba);
       return;
     }
 
-    this.carregando.set(true);
+    if (this.abasCarregadas()[aba]) return;
+
+    if (aba === 'exportacoes') {
+      this.marcarAbaCarregada(aba);
+      return;
+    }
+
     this.erro.set('');
 
-    const filtros = this.filtros();
-    forkJoin({
-      resumo: this.relatoriosService.resumo(filtros),
-      alunos: this.relatoriosService.alunos(filtros),
-      turmas: this.relatoriosService.turmas(filtros),
-      evasoes: this.relatoriosService.evasoes(filtros),
-      atendimentos: this.relatorioAtendimentoApi.gerar(this.mapearFiltroAtendimento(filtros)),
-      frequencias: this.relatoriosService.frequencias(filtros),
-    })
+    if (aba === 'visao-geral') {
+      this.carregarResumo();
+      return;
+    }
+
+    if (aba === 'alunos') {
+      this.carregarAlunos();
+      return;
+    }
+
+    if (aba === 'turmas') {
+      this.carregarTurmas();
+      return;
+    }
+
+    if (aba === 'evasoes') {
+      this.carregarEvasoes();
+      return;
+    }
+
+    if (aba === 'atendimentos') {
+      this.carregarAtendimentos();
+      return;
+    }
+
+    if (aba === 'impacto-social') {
+      this.carregarImpactoSocial();
+    }
+  }
+
+  private carregarResumo(): void {
+    this.marcarAbaCarregando('visao-geral', true);
+    this.relatoriosService
+      .resumo(this.filtros())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (resultado) => {
-          this.resumo.set(resultado.resumo);
-          this.alunos.set(resultado.alunos);
-          this.turmas.set(resultado.turmas);
-          this.evasoes.set(resultado.evasoes);
-          this.atendimentos.set(resultado.atendimentos);
-          this.frequencias.set(resultado.frequencias);
-          this.carregando.set(false);
+        next: (resumo) => {
+          this.resumo.set(resumo);
+          this.marcarAbaCarregada('visao-geral');
         },
         error: () => {
-          this.erro.set('Não foi possível carregar os relatórios.');
-          this.carregando.set(false);
+          this.erro.set('Nao foi possivel carregar o resumo dos relatorios.');
+          this.marcarAbaCarregando('visao-geral', false);
         },
       });
   }
 
-  private carregarOpcoes(): void {
+  private carregarAlunos(): void {
+    const filtros = this.filtros();
+    this.marcarAbaCarregando('alunos', true);
+    forkJoin({
+      resumo: this.relatoriosService.alunosResumo(filtros),
+      distribuicoes: this.relatoriosService.alunosDistribuicoes(filtros),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ resumo, distribuicoes }) => {
+          this.alunosResumo.set(resumo);
+          this.alunosDistribuicoes.set(distribuicoes);
+          this.marcarAbaCarregada('alunos');
+        },
+        error: () => {
+          this.erro.set('Nao foi possivel carregar o relatorio de alunos.');
+          this.marcarAbaCarregando('alunos', false);
+        },
+      });
+  }
+
+  private carregarTurmas(): void {
+    this.marcarAbaCarregando('turmas', true);
+    this.relatoriosService
+      .turmas(this.filtros())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (turmas) => {
+          this.turmas.set(turmas);
+          this.marcarAbaCarregada('turmas');
+        },
+        error: () => {
+          this.erro.set('Nao foi possivel carregar o relatorio de turmas.');
+          this.marcarAbaCarregando('turmas', false);
+        },
+      });
+  }
+
+  private carregarEvasoes(): void {
+    this.marcarAbaCarregando('evasoes', true);
+    const filtros = this.filtros();
+    forkJoin({
+      evasoes: this.relatoriosService.evasoes(filtros),
+      risco: this.relatoriosService.riscoEvasao(filtros),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ evasoes, risco }) => {
+          this.evasoes.set(evasoes);
+          this.riscoEvasao.set(risco);
+          this.marcarAbaCarregada('evasoes');
+        },
+        error: () => {
+          this.erro.set('Nao foi possivel carregar o relatorio de evasoes.');
+          this.marcarAbaCarregando('evasoes', false);
+        },
+      });
+  }
+
+  private carregarImpactoSocial(): void {
+    this.marcarAbaCarregando('impacto-social', true);
+    this.relatoriosService
+      .impactoSocial(this.filtros())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (impactoSocial) => {
+          this.impactoSocial.set(impactoSocial);
+          this.marcarAbaCarregada('impacto-social');
+        },
+        error: () => {
+          this.erro.set('Nao foi possivel carregar o relatorio de impacto social.');
+          this.marcarAbaCarregando('impacto-social', false);
+        },
+      });
+  }
+
+  private carregarAtendimentos(): void {
+    this.marcarAbaCarregando('atendimentos', true);
+    this.relatorioAtendimentoApi
+      .gerar(this.mapearFiltroAtendimento(this.filtros()))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (atendimentos) => {
+          this.atendimentos.set(atendimentos);
+          this.marcarAbaCarregada('atendimentos');
+        },
+        error: () => {
+          this.erro.set('Nao foi possivel carregar o relatorio de atendimentos.');
+          this.marcarAbaCarregando('atendimentos', false);
+        },
+      });
+  }
+
+  private carregarListaAlunos(page: number, acumular: boolean): void {
+    this.carregandoListaAlunos.set(true);
+    this.relatoriosService
+      .alunosLista(this.filtros(), page, this.limiteAlunosLista)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (resultado) => {
+          const atual = this.alunosLista();
+          this.alunosLista.set({
+            ...resultado,
+            data: acumular && atual ? [...atual.data, ...resultado.data] : resultado.data,
+          });
+          this.carregandoListaAlunos.set(false);
+        },
+        error: () => {
+          this.toast.erro('Nao foi possivel carregar a lista de alunos.');
+          this.carregandoListaAlunos.set(false);
+        },
+      });
+  }
+
+  private resetarListaAlunos(): void {
+    this.listaAlunosAberta.set(false);
+    this.alunosLista.set(null);
+    this.carregandoListaAlunos.set(false);
+  }
+
+  private invalidarCacheRelatorios(): void {
+    this.abasCarregadas.set(this.estadoAbas(false));
+    this.carregandoPorAba.set(this.estadoAbas(false));
+    this.resumo.set(null);
+    this.alunosResumo.set(null);
+    this.alunosDistribuicoes.set(null);
+    this.turmas.set(null);
+    this.evasoes.set(null);
+    this.riscoEvasao.set(null);
+    this.atendimentos.set(null);
+    this.impactoSocial.set(null);
+    this.resetarListaAlunos();
+  }
+
+  private marcarAbaCarregando(aba: RelatorioAba, carregando: boolean): void {
+    this.carregandoPorAba.update((estado) => ({ ...estado, [aba]: carregando }));
+  }
+
+  private marcarAbaCarregada(aba: RelatorioAba): void {
+    this.abasCarregadas.update((estado) => ({ ...estado, [aba]: true }));
+    this.marcarAbaCarregando(aba, false);
+  }
+
+  private estadoAbas(value: boolean): Record<RelatorioAba, boolean> {
+    return {
+      'visao-geral': value,
+      alunos: value,
+      turmas: value,
+      evasoes: value,
+      atendimentos: value,
+      'impacto-social': value,
+      exportacoes: value,
+    };
+  }
+
+  private configurarBuscaOpcoes(): void {
     if (this.ehComunicacao) {
       this.turmasOptions.set([]);
       this.professoresOptions.set([]);
       this.alunosOptions.set([]);
+      this.cidadesOptions.set([]);
+      this.bairrosOptions.set([]);
       return;
     }
 
-    forkJoin({
-      turmas: this.turmasService.listar(1, 500, undefined, 'all', undefined, undefined, 'all'),
-      professores: this.turmasService.listarProfessoresAtivos(),
-      alunos: this.beneficiariosService.listar(1, 500, undefined, true),
-    })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ turmas, professores, alunos }) => {
-          this.turmasOptions.set(turmas.data.map((turma) => ({ id: turma.id, label: turma.nome })));
-          this.professoresOptions.set(professores.map((professor) => ({ id: professor.id, label: professor.nome })));
-          this.alunosOptions.set(
-            alunos.data.map((aluno) => ({
-              id: aluno.id,
-              label: aluno.matricula ? `${aluno.nomeCompleto} (${aluno.matricula})` : aluno.nomeCompleto,
-            })),
-          );
-        },
-        error: () => {
-          this.turmasOptions.set([]);
-          this.professoresOptions.set([]);
-          this.alunosOptions.set([]);
-        },
+    this.conectarBuscaOpcao(this.buscaTurmas$, this.turmasOptions, (busca) =>
+      this.relatoriosService.buscarOpcoesTurmas(busca),
+    );
+    this.conectarBuscaOpcao(this.buscaProfessores$, this.professoresOptions, (busca) =>
+      this.relatoriosService.buscarOpcoesProfessores(busca),
+    );
+    this.conectarBuscaOpcao(this.buscaAlunos$, this.alunosOptions, (busca) =>
+      this.relatoriosService.buscarOpcoesAlunos(busca),
+    );
+    this.conectarBuscaOpcao(this.buscaCidades$, this.cidadesOptions, (busca) =>
+      this.relatoriosService.buscarOpcoesCidades(busca),
+    );
+    this.conectarBuscaBairros();
+  }
+
+  private conectarBuscaOpcao(
+    origem$: Subject<string>,
+    destino: WritableSignal<RelatorioOpcao[]>,
+    buscar: (busca: string) => Observable<RelatorioOpcao[]>,
+  ): void {
+    origem$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        switchMap((busca) => {
+          const termo = busca.trim();
+          if (termo.length < 2) {
+            destino.set([]);
+            return of([]);
+          }
+          return buscar(termo).pipe(catchError(() => of([])));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((opcoes) => {
+        destino.set(opcoes);
+      });
+  }
+
+  private conectarBuscaBairros(): void {
+    this.buscaBairros$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged((anterior, atual) => anterior.busca === atual.busca && anterior.cidade === atual.cidade),
+        switchMap(({ busca, cidade }) => {
+          const termo = busca.trim();
+          if (termo.length < 2) {
+            this.bairrosOptions.set([]);
+            return of([]);
+          }
+          return this.relatoriosService.buscarOpcoesBairros(termo, cidade).pipe(catchError(() => of([])));
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((opcoes) => {
+        this.bairrosOptions.set(opcoes);
       });
   }
 

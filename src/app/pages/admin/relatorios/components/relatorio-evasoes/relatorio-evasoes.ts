@@ -4,6 +4,7 @@ import {
   MatriculaStatusRelatorio,
   MotivoEncerramentoMatricula,
   RelatorioEvasoesResponse,
+  RelatorioRiscoEvasaoResponse,
 } from '../../../../../core/services/relatorios.service';
 
 @Component({
@@ -16,6 +17,7 @@ import {
 })
 export class RelatorioEvasoes {
   @Input() relatorio: RelatorioEvasoesResponse | null = null;
+  @Input() risco: RelatorioRiscoEvasaoResponse | null = null;
   @Input() carregando = false;
 
   grupoEntries(grupo?: Record<string, number>): Array<{ label: string; total: number }> {
@@ -61,6 +63,20 @@ export class RelatorioEvasoes {
     if (value === null || value === undefined) return '-';
     const formatado = value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
     return `${formatado} dia${value === 1 ? '' : 's'}`;
+  }
+
+  formatarPercentual(value?: number | null): string {
+    if (value === null || value === undefined) return '-';
+    return `${value.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
+  }
+
+  nivelRiscoLabel(nivel: string): string {
+    const labels: Record<string, string> = {
+      ALTO: 'Alto',
+      MEDIO: 'Médio',
+      BAIXO: 'Baixo',
+    };
+    return labels[nivel] ?? nivel;
   }
 
   formatarResumoAtendimento(item: RelatorioEvasoesResponse['data'][number]): string {

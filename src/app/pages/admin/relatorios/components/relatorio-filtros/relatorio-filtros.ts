@@ -6,6 +6,7 @@ import {
   Input,
   OnChanges,
   Output,
+  SimpleChanges,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { A11yModule } from '@angular/cdk/a11y';
@@ -43,6 +44,8 @@ export class RelatorioFiltros implements OnChanges {
   @Input() turmas: RelatorioFiltroOption[] = [];
   @Input() professores: RelatorioFiltroOption[] = [];
   @Input() alunos: RelatorioFiltroOption[] = [];
+  @Input() cidades: RelatorioFiltroOption[] = [];
+  @Input() bairros: RelatorioFiltroOption[] = [];
   @Input() carregando = false;
   @Input() modoPublico = false;
   /** Controla abertura/fechamento do drawer */
@@ -50,10 +53,20 @@ export class RelatorioFiltros implements OnChanges {
 
   @Output() aplicar = new EventEmitter<RelatorioFiltro>();
   @Output() limpar = new EventEmitter<void>();
+  @Output() buscarTurmas = new EventEmitter<string>();
+  @Output() buscarProfessores = new EventEmitter<string>();
+  @Output() buscarAlunos = new EventEmitter<string>();
+  @Output() buscarCidades = new EventEmitter<string>();
+  @Output() buscarBairros = new EventEmitter<{ busca: string; cidade?: string }>();
   /** Emitido quando o usuário fecha o drawer */
   @Output() aoFechar = new EventEmitter<void>();
 
   form: RelatorioFiltro = { statusAluno: 'TODOS' };
+  buscaTurma = '';
+  buscaProfessor = '';
+  buscaAluno = '';
+  buscaCidade = '';
+  buscaBairro = '';
 
   /** Elemento que abriu o drawer — foco restaurado ao fechar (WCAG 2.4.3) */
   private lastFocus: HTMLElement | null = null;
@@ -121,13 +134,111 @@ export class RelatorioFiltros implements OnChanges {
     { value: 'VISAO_MONOCULAR', label: 'Visão monocular' },
   ];
 
-  ngOnChanges(): void {
-    this.form = { statusAluno: 'TODOS', ...this.filtros };
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['filtros']) {
+      this.form = { statusAluno: 'TODOS', ...this.filtros };
+      this.buscaCidade = this.form.cidade ?? '';
+      this.buscaBairro = this.form.bairro ?? '';
+    }
 
-    if (this.aberto) {
+    if (changes['aberto']?.currentValue) {
       // Captura elemento focado antes de abrir (WCAG 2.4.3)
       this.lastFocus = document.activeElement as HTMLElement;
     }
+  }
+
+  onBuscaTurma(termo: string): void {
+    this.buscaTurma = termo;
+    this.form.turmaId = undefined;
+    this.buscarTurmas.emit(termo);
+  }
+
+  onBuscaProfessor(termo: string): void {
+    this.buscaProfessor = termo;
+    this.form.professorId = undefined;
+    this.buscarProfessores.emit(termo);
+  }
+
+  onBuscaAluno(termo: string): void {
+    this.buscaAluno = termo;
+    this.form.alunoId = undefined;
+    this.buscarAlunos.emit(termo);
+  }
+
+  onBuscaCidade(termo: string): void {
+    this.buscaCidade = termo;
+    this.form.cidade = undefined;
+    this.form.bairro = undefined;
+    this.buscaBairro = '';
+    this.buscarCidades.emit(termo);
+    this.buscarBairros.emit({ busca: '' });
+  }
+
+  onBuscaBairro(termo: string): void {
+    this.buscaBairro = termo;
+    this.form.bairro = undefined;
+    this.buscarBairros.emit({ busca: termo, cidade: this.form.cidade });
+  }
+
+  selecionarTurma(opcao: RelatorioFiltroOption): void {
+    this.form.turmaId = opcao.id;
+    this.buscaTurma = opcao.label;
+  }
+
+  selecionarProfessor(opcao: RelatorioFiltroOption): void {
+    this.form.professorId = opcao.id;
+    this.buscaProfessor = opcao.label;
+  }
+
+  selecionarAluno(opcao: RelatorioFiltroOption): void {
+    this.form.alunoId = opcao.id;
+    this.buscaAluno = opcao.label;
+  }
+
+  selecionarCidade(opcao: RelatorioFiltroOption): void {
+    this.form.cidade = opcao.label;
+    this.form.bairro = undefined;
+    this.buscaCidade = opcao.label;
+    this.buscaBairro = '';
+    this.buscarBairros.emit({ busca: '' });
+  }
+
+  selecionarBairro(opcao: RelatorioFiltroOption): void {
+    this.form.bairro = opcao.label;
+    this.buscaBairro = opcao.label;
+  }
+
+  limparTurma(): void {
+    this.form.turmaId = undefined;
+    this.buscaTurma = '';
+    this.buscarTurmas.emit('');
+  }
+
+  limparProfessor(): void {
+    this.form.professorId = undefined;
+    this.buscaProfessor = '';
+    this.buscarProfessores.emit('');
+  }
+
+  limparAluno(): void {
+    this.form.alunoId = undefined;
+    this.buscaAluno = '';
+    this.buscarAlunos.emit('');
+  }
+
+  limparCidade(): void {
+    this.form.cidade = undefined;
+    this.form.bairro = undefined;
+    this.buscaCidade = '';
+    this.buscaBairro = '';
+    this.buscarCidades.emit('');
+    this.buscarBairros.emit({ busca: '' });
+  }
+
+  limparBairro(): void {
+    this.form.bairro = undefined;
+    this.buscaBairro = '';
+    this.buscarBairros.emit({ busca: '', cidade: this.form.cidade });
   }
 
   aplicarFiltros(): void {
@@ -137,6 +248,16 @@ export class RelatorioFiltros implements OnChanges {
 
   limparFiltros(): void {
     this.form = { statusAluno: 'TODOS' };
+    this.buscaTurma = '';
+    this.buscaProfessor = '';
+    this.buscaAluno = '';
+    this.buscaCidade = '';
+    this.buscaBairro = '';
+    this.buscarTurmas.emit('');
+    this.buscarProfessores.emit('');
+    this.buscarAlunos.emit('');
+    this.buscarCidades.emit('');
+    this.buscarBairros.emit({ busca: '' });
     this.limpar.emit();
   }
 

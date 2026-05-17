@@ -31,6 +31,7 @@ import { ToastService }         from '../../../../../core/services/toast.service
 const TURMA_DETALHE = {
   id: 't1',
   nome: 'Oficina de Braille',
+  status: 'ANDAMENTO',
   statusAtivo: true,
   capacidadeMaxima: 10,
   professor: { id: 'p1', nome: 'Prof. Ana' },
@@ -176,6 +177,7 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
     });
 
     it('painel-adicionar deve ter role=tabpanel e aria-labelledby="tab-adicionar"', () => {
+      component.turmaDetalhes.set(TURMA_DETALHE as any);
       component.abaAtual.set('adicionar');
       fixture.detectChanges();
       const painel = qs<HTMLElement>(fixture, '#painel-adicionar');
@@ -281,6 +283,64 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
 
   // ── 9. WCAG 2.5.3 — Botão Encerrar participação com nome do aluno ──────────────
 
+  describe('Turma encerrada para matriculas', () => {
+    it('oculta aba Adicionar, desabilita busca e exibe aviso quando a turma esta concluida', () => {
+      vi.clearAllMocks();
+      turmaSvc.buscarPorId.mockReturnValue(of({
+        ...TURMA_DETALHE,
+        status: 'CONCLUIDA',
+      }));
+      turmaSvc.alunosDisponiveis.mockReturnValue(of(ALUNOS_DISPONIVEIS));
+
+      component.aberto = false;
+      component.ngOnChanges({
+        aberto: {
+          currentValue: false,
+          previousValue: true,
+          firstChange: false,
+          isFirstChange: () => false,
+        },
+      } as any);
+      fixture.detectChanges();
+
+      component.isProfessor = false;
+      component.turmaOriginal = { id: 't1', nome: 'Oficina de Braille' } as any;
+      component.aberto = true;
+      component.ngOnChanges({
+        aberto: {
+          currentValue: true,
+          previousValue: false,
+          firstChange: false,
+          isFirstChange: () => false,
+        },
+      } as any);
+      fixture.detectChanges();
+
+      expect(component.abaAtual()).toBe('remover');
+      expect(component.buscaAlunoCtrl.disabled).toBe(true);
+      expect(turmaSvc.alunosDisponiveis).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelector('#tab-adicionar')).toBeNull();
+      expect(fixture.nativeElement.textContent).toContain('Esta turma está encerrada e não aceita novas matrículas.');
+    });
+
+    it('bloqueia busca e salvamento programatico quando a turma esta cancelada', () => {
+      vi.clearAllMocks();
+      component.isProfessor = false;
+      component.turmaDetalhes.set({ ...TURMA_DETALHE, status: 'CANCELADA' } as any);
+
+      component.alterarAba('adicionar');
+      component.buscarAlunosParaMatricula('ana');
+      component.alunosSelecionadosParaMatricula.set(['b1']);
+      component.salvarMatriculasEmLote();
+
+      expect(component.abaAtual()).toBe('remover');
+      expect(component.buscaAlunoCtrl.disabled).toBe(true);
+      expect(turmaSvc.alunosDisponiveis).not.toHaveBeenCalled();
+      expect(turmaSvc.matricularAluno).not.toHaveBeenCalled();
+      expect(toastSvc.erro).toHaveBeenCalledWith('Esta turma está encerrada e não aceita novas matrículas.');
+    });
+  });
+
   describe('2.5.3 — Botão Encerrar participação contém nome do aluno no aria-label', () => {
     beforeEach(() => {
       // Garante que turmaDetalhes está setada com a aluna e aba 'remover' ativa
@@ -304,6 +364,7 @@ describe('TurmaAlunosModalComponent — Acessibilidade WCAG 2.1 AA', () => {
 
   describe('1.3.1 — Checkboxes de busca com label[for] associado ao id do input', () => {
     beforeEach(() => {
+      component.turmaDetalhes.set(TURMA_DETALHE as any);
       component.abaAtual.set('adicionar');
       component.alunosBuscaRestado.set(ALUNOS_DISPONIVEIS as any);
       fixture.detectChanges();

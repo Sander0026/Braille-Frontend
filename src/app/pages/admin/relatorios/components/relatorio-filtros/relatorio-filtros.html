@@ -53,47 +53,83 @@
     </section>
 
     @if (!modoPublico) {
-      <!-- Turma e Professor -->
-      <section class="filter-section" aria-labelledby="filtro-turma-titulo">
-        <h3 id="filtro-turma-titulo" class="filter-section__title">Turma / Professor</h3>
+      <!-- Filtros especificos -->
+      <section class="filter-section" aria-labelledby="filtro-especifico-titulo">
+        <h3 id="filtro-especifico-titulo" class="filter-section__title">Filtros específicos</h3>
 
-        <div class="filter-field">
-          <label class="form-label" for="f-turma">Turma</label>
-          <select id="f-turma" class="form-input" name="turmaId"
-            [(ngModel)]="form.turmaId" [disabled]="carregando">
-            <option value="">Todas</option>
-            @for (turma of turmas; track turma.id) {
-              <option [value]="turma.id">{{ turma.label }}</option>
-            }
-          </select>
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-busca-turma">Buscar turma</label>
+          <input id="f-busca-turma" type="search" class="form-input" name="buscaTurma"
+            [ngModel]="buscaTurma" (ngModelChange)="onBuscaTurma($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.turmaId) {
+            <button type="button" class="selected-option" (click)="limparTurma()" [disabled]="carregando">
+              <span>{{ buscaTurma }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaTurma.trim().length > 0 && buscaTurma.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (turmas.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Turmas encontradas">
+              @for (turma of turmas; track turma.id) {
+                <button type="button" role="option" (click)="selecionarTurma(turma)">
+                  {{ turma.label }}
+                </button>
+              }
+            </div>
+          }
         </div>
 
-        <div class="filter-field">
-          <label class="form-label" for="f-professor">Professor</label>
-          <select id="f-professor" class="form-input" name="professorId"
-            [(ngModel)]="form.professorId" [disabled]="carregando">
-            <option value="">Todos</option>
-            @for (professor of professores; track professor.id) {
-              <option [value]="professor.id">{{ professor.label }}</option>
-            }
-          </select>
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-busca-professor">Buscar professor</label>
+          <input id="f-busca-professor" type="search" class="form-input" name="buscaProfessor"
+            [ngModel]="buscaProfessor" (ngModelChange)="onBuscaProfessor($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.professorId) {
+            <button type="button" class="selected-option" (click)="limparProfessor()" [disabled]="carregando">
+              <span>{{ buscaProfessor }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaProfessor.trim().length > 0 && buscaProfessor.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (professores.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Professores encontrados">
+              @for (professor of professores; track professor.id) {
+                <button type="button" role="option" (click)="selecionarProfessor(professor)">
+                  {{ professor.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-busca-aluno">Buscar aluno</label>
+          <input id="f-busca-aluno" type="search" class="form-input" name="buscaAluno"
+            [ngModel]="buscaAluno" (ngModelChange)="onBuscaAluno($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.alunoId) {
+            <button type="button" class="selected-option" (click)="limparAluno()" [disabled]="carregando">
+              <span>{{ buscaAluno }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaAluno.trim().length > 0 && buscaAluno.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (alunos.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Alunos encontrados">
+              @for (aluno of alunos; track aluno.id) {
+                <button type="button" role="option" (click)="selecionarAluno(aluno)">
+                  {{ aluno.label }}
+                </button>
+              }
+            </div>
+          }
         </div>
       </section>
 
       <!-- Aluno -->
       <section class="filter-section" aria-labelledby="filtro-aluno-titulo">
         <h3 id="filtro-aluno-titulo" class="filter-section__title">Aluno</h3>
-
-        <div class="filter-field">
-          <label class="form-label" for="f-aluno">Aluno</label>
-          <select id="f-aluno" class="form-input" name="alunoId"
-            [(ngModel)]="form.alunoId" [disabled]="carregando">
-            <option value="">Todos</option>
-            @for (aluno of alunos; track aluno.id) {
-              <option [value]="aluno.id">{{ aluno.label }}</option>
-            }
-          </select>
-        </div>
 
         <div class="filter-field">
           <label class="form-label" for="f-status-aluno">Status do aluno</label>
@@ -197,16 +233,52 @@
       <section class="filter-section" aria-labelledby="filtro-local-titulo">
         <h3 id="filtro-local-titulo" class="filter-section__title">Localização</h3>
 
-        <div class="filter-field">
+        <div class="filter-field autocomplete-field">
           <label class="form-label" for="f-cidade">Cidade</label>
-          <input id="f-cidade" type="text" class="form-input" name="cidade"
-            [(ngModel)]="form.cidade" [disabled]="carregando" />
+          <input id="f-cidade" type="search" class="form-input" name="buscaCidade"
+            [ngModel]="buscaCidade" (ngModelChange)="onBuscaCidade($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.cidade) {
+            <button type="button" class="selected-option" (click)="limparCidade()" [disabled]="carregando">
+              <span>{{ buscaCidade }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaCidade.trim().length > 0 && buscaCidade.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (cidades.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Cidades encontradas">
+              @for (cidade of cidades; track cidade.id) {
+                <button type="button" role="option" (click)="selecionarCidade(cidade)">
+                  {{ cidade.label }}
+                </button>
+              }
+            </div>
+          }
         </div>
 
-        <div class="filter-field">
+        <div class="filter-field autocomplete-field">
           <label class="form-label" for="f-bairro">Bairro</label>
-          <input id="f-bairro" type="text" class="form-input" name="bairro"
-            [(ngModel)]="form.bairro" [disabled]="carregando" />
+          <input id="f-bairro" type="search" class="form-input" name="buscaBairro"
+            [ngModel]="buscaBairro" (ngModelChange)="onBuscaBairro($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.bairro) {
+            <button type="button" class="selected-option" (click)="limparBairro()" [disabled]="carregando">
+              <span>{{ buscaBairro }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaBairro.trim().length > 0 && buscaBairro.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (bairros.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Bairros encontrados">
+              @for (bairro of bairros; track bairro.id) {
+                <button type="button" role="option" (click)="selecionarBairro(bairro)">
+                  {{ bairro.label }}
+                </button>
+              }
+            </div>
+          } @else if (form.cidade) {
+            <p class="filter-hint">Sugestões restritas à cidade selecionada.</p>
+          }
         </div>
       </section>
     }

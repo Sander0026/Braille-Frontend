@@ -43,11 +43,18 @@ export interface Beneficiario {
     outrasComorbidades?: string;
     contatoEmergencia?: string;
     statusAtivo: boolean;
+    motivoInativacao?: MotivoInativacaoAluno | null;
+    observacaoInativacao?: string | null;
+    inativadoEm?: string | null;
+    inativadoPorId?: string | null;
+    reativadoEm?: string | null;
+    reativadoPorId?: string | null;
+    motivoReativacao?: string | null;
     criadoEm: string;
     matricula?: string;
     matriculasOficina?: {
         id: string;
-        status: 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA';
+        status: 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA' | 'TRANSFERIDA';
         dataEntrada: string;
         dataEncerramento?: string;
         turma: { id: string; nome: string; horario?: string; modeloCertificadoId?: string | null; status?: string };
@@ -72,6 +79,43 @@ export interface BeneficiarioResumo {
     matricula?: string | null;
     cpfMascarado?: string | null;
     statusAtivo: boolean;
+}
+
+export type MotivoInativacaoAluno =
+    | 'EVASAO_INSTITUCIONAL'
+    | 'MUDANCA_DE_CIDADE'
+    | 'PROBLEMA_SAUDE'
+    | 'PROBLEMA_FAMILIAR'
+    | 'DIFICULDADE_TRANSPORTE'
+    | 'FALECIMENTO'
+    | 'SOLICITACAO_DO_ALUNO'
+    | 'FALTA_DE_CONTATO'
+    | 'CADASTRO_DUPLICADO'
+    | 'OUTRO';
+
+export type StatusInativacaoMatricula = 'EVADIDA' | 'CANCELADA' | 'TRANSFERIDA';
+
+export type MotivoEncerramentoMatricula =
+    | 'CONCLUSAO'
+    | 'EVASAO_SEM_JUSTIFICATIVA'
+    | 'MUDANCA_DE_TURNO'
+    | 'TRANSFERENCIA_DE_TURMA'
+    | 'MUDANCA_DE_CIDADE'
+    | 'DIFICULDADE_TRANSPORTE'
+    | 'PROBLEMA_SAUDE'
+    | 'PROBLEMA_FAMILIAR'
+    | 'INCOMPATIBILIDADE_HORARIO'
+    | 'FALTA_DE_CONTATO'
+    | 'DESISTENCIA_VOLUNTARIA'
+    | 'CANCELAMENTO_DA_TURMA'
+    | 'OUTRO';
+
+export interface InativarAlunoPayload {
+    motivoInativacao: MotivoInativacaoAluno;
+    observacao?: string;
+    encerrarMatriculasAtivas?: boolean;
+    statusMatricula?: StatusInativacaoMatricula;
+    motivoEncerramentoMatricula?: MotivoEncerramentoMatricula;
 }
 
 export type BeneficiarioPayload = Partial<
@@ -185,9 +229,9 @@ export class BeneficiariosService {
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);
     }
 
-    inativar(id: string): Observable<void> {
+    inativar(id: string, dados: InativarAlunoPayload): Observable<void> {
         this.limparCache();
-        return this.http.delete<void>(`${this.url}/${id}`);
+        return this.http.delete<void>(`${this.url}/${id}`, { body: dados });
     }
 
     restaurar(id: string): Observable<void> {

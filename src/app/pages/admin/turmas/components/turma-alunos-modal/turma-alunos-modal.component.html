@@ -58,12 +58,18 @@
           </div>
         </div>
       </div>
+      @if (turmaEncerrada()) {
+      <div class="empty-state empty-state--sm" role="status" aria-live="polite"
+        style="padding: 1rem; margin-bottom: 1rem; border: 1px solid #fecaca; background: #fef2f2;">
+        <p>{{ avisoTurmaEncerradaMatricula() }}</p>
+      </div>
+      }
       }
 
       <!-- Navegação Interna — padrão ARIA tabs (WCAG 4.1.2) -->
       <div class="tabs-container" role="tablist" aria-label="Navegação interna do perfil da oficina"
         style="margin-bottom: 1.5rem;">
-        @if (!isProfessor) {
+        @if (!isProfessor && turmaAceitaMatricula()) {
         <button
           id="tab-adicionar"
           class="tab-btn"
@@ -97,7 +103,7 @@
       }
 
       <!-- PAINEL: Adicionar Alunos -->
-      @if (abaAtual() === 'adicionar') {
+      @if (abaAtual() === 'adicionar' && turmaAceitaMatricula()) {
       <div id="painel-adicionar" role="tabpanel" aria-labelledby="tab-adicionar">
         <div class="busca-alunos-container" style="margin-bottom: 1.5rem;">
           <label for="buscarAlunoInput" class="sr-only">Buscar aluno por nome para matricular</label>

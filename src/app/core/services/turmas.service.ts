@@ -61,11 +61,11 @@ export interface EncerrarMatriculaDto {
  * | Campo        | Tipo          | Semantica                                                                 |
  * |--------------|---------------|---------------------------------------------------------------------------|
  * | `status`     | `TurmaStatus` | Progresso pedagogico: PREVISTA -> ANDAMENTO -> CONCLUIDA -> CANCELADA.   |
- * | `statusAtivo`| `boolean`     | Visibilidade administrativa: true = aba Ativas; false = Arquivadas.      |
+ * | `statusAtivo`| `boolean`     | Operacao academica: true para PREVISTA/ANDAMENTO; false para encerradas. |
  * | `excluido`   | `boolean`     | Soft-delete: true = oculto de todas as abas. Historico preservado.       |
  *
- * Uma turma pode ter status='CONCLUIDA' e statusAtivo=true simultaneamente.
- * Os dois campos sao INDEPENDENTES entre si.
+ * Regra unica adotada: `statusAtivo` e derivado do `status` academico.
+ * PREVISTA/ANDAMENTO ficam em operacao; CONCLUIDA/CANCELADA ficam encerradas.
  */
 export interface Turma {
     id: string;

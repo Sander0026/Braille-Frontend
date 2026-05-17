@@ -90,33 +90,6 @@
           </article>
         }
 
-        @if (frequencias(); as freq) {
-          <article class="overview-panel">
-            <div class="panel-title">
-              <span class="material-symbols-rounded" aria-hidden="true">fact_check</span>
-              <h2>Frequências</h2>
-            </div>
-            <div class="progress-list">
-              <div>
-                <span>Presenças</span>
-                <strong>{{ freq.presentes }}</strong>
-              </div>
-              <div>
-                <span>Faltas</span>
-                <strong>{{ freq.faltas }}</strong>
-              </div>
-              <div>
-                <span>Justificadas</span>
-                <strong>{{ freq.faltasJustificadas }}</strong>
-              </div>
-              <div>
-                <span>Taxa de presença</span>
-                <strong>{{ freq.taxaPresenca }}%</strong>
-              </div>
-            </div>
-          </article>
-        }
-
         <article class="overview-panel">
           <div class="panel-title">
             <span class="material-symbols-rounded" aria-hidden="true">dataset</span>
@@ -127,21 +100,34 @@
               <span>Registros-base</span>
               <strong>{{ totalRegistros() }}</strong>
             </div>
-            <div>
-              <span>Atendimentos individuais</span>
-              <strong>{{ atendimentos()?.totalRegistros || 0 }}</strong>
-            </div>
-            <div>
-              <span>Encerramentos</span>
-              <strong>{{ evasoes()?.totalEncerramentos || 0 }}</strong>
-            </div>
+            @if (atendimentos(); as atendimentosResumo) {
+              <div>
+                <span>Atendimentos individuais</span>
+                <strong>{{ atendimentosResumo.totalRegistros }}</strong>
+              </div>
+            }
+            @if (evasoes(); as evasoesResumo) {
+              <div>
+                <span>Encerramentos</span>
+                <strong>{{ evasoesResumo.totalEncerramentos }}</strong>
+              </div>
+            }
           </div>
         </article>
       </div>
     </section>
 
     <section *ngSwitchCase="'alunos'" id="painel-alunos" role="tabpanel" aria-labelledby="tab-alunos">
-      <app-relatorio-alunos [relatorio]="alunos()" [carregando]="carregando()"></app-relatorio-alunos>
+      <app-relatorio-alunos
+        [resumo]="alunosResumo()"
+        [distribuicoes]="alunosDistribuicoes()"
+        [lista]="alunosLista()"
+        [carregando]="carregando()"
+        [carregandoLista]="carregandoListaAlunos()"
+        [listaAberta]="listaAlunosAberta()"
+        (abrirLista)="abrirListaAlunos()"
+        (verMais)="verMaisAlunos()">
+      </app-relatorio-alunos>
     </section>
 
     <section *ngSwitchCase="'turmas'" id="painel-turmas" role="tabpanel" aria-labelledby="tab-turmas">
@@ -149,7 +135,11 @@
     </section>
 
     <section *ngSwitchCase="'evasoes'" id="painel-evasoes" role="tabpanel" aria-labelledby="tab-evasoes">
-      <app-relatorio-evasoes [relatorio]="evasoes()" [carregando]="carregando()"></app-relatorio-evasoes>
+      <app-relatorio-evasoes
+        [relatorio]="evasoes()"
+        [risco]="riscoEvasao()"
+        [carregando]="carregando()">
+      </app-relatorio-evasoes>
     </section>
 
     <section
@@ -163,6 +153,17 @@
         [exportandoPdf]="exportandoAtendimentosPdf()"
         (baixarPdf)="exportarAtendimentosPdf()">
       </app-relatorio-atendimentos>
+    </section>
+
+    <section
+      *ngSwitchCase="'impacto-social'"
+      id="painel-impacto-social"
+      role="tabpanel"
+      aria-labelledby="tab-impacto-social">
+      <app-relatorio-impacto-social
+        [relatorio]="impactoSocial()"
+        [carregando]="carregando()">
+      </app-relatorio-impacto-social>
     </section>
 
     <section
@@ -190,8 +191,15 @@
   [turmas]="turmasOptions()"
   [professores]="professoresOptions()"
   [alunos]="alunosOptions()"
+  [cidades]="cidadesOptions()"
+  [bairros]="bairrosOptions()"
   [modoPublico]="ehComunicacao"
   [carregando]="carregando()"
+  (buscarTurmas)="buscarTurmasOpcoes($event)"
+  (buscarProfessores)="buscarProfessoresOpcoes($event)"
+  (buscarAlunos)="buscarAlunosOpcoes($event)"
+  (buscarCidades)="buscarCidadesOpcoes($event)"
+  (buscarBairros)="buscarBairrosOpcoes($event)"
   (aplicar)="aplicarFiltros($event)"
   (limpar)="limparFiltros()"
   (aoFechar)="fecharFiltros()">

@@ -45,6 +45,11 @@ export interface RelatorioFiltro {
   tipoDeficiencia?: string;
 }
 
+export interface RelatorioOpcao {
+  id: string;
+  label: string;
+}
+
 export interface RelatorioResumo {
   alunos: {
     total: number;
@@ -95,7 +100,7 @@ export interface RelatorioAlunoItem {
   termoLgpdAceito: boolean;
   statusAtivo: boolean;
   criadoEm: string;
-  matriculasOficina: Array<{
+  matriculasOficina?: Array<{
     id: string;
     status: MatriculaStatusRelatorio;
     dataEntrada: string;
@@ -137,6 +142,39 @@ export interface RelatorioAlunosResponse {
   porCidade: Record<string, number>;
   porTipoDeficiencia: Record<string, number>;
   data: RelatorioAlunoItem[];
+}
+
+export interface RelatorioAlunosResumo {
+  totalCadastrados: number;
+  ativos: number;
+  inativos: number;
+  comLaudo: number;
+  semLaudo: number;
+  precisamAcompanhante: number;
+  lgpdAceito: number;
+}
+
+export interface RelatorioRankingItem {
+  label: string;
+  total: number;
+}
+
+export interface RelatorioAlunosDistribuicoes {
+  porTipoDeficiencia: RelatorioRankingItem[];
+  porCidadeTop10: RelatorioRankingItem[];
+  porBairroTop10: RelatorioRankingItem[];
+  porEscolaridadeTop10: RelatorioRankingItem[];
+  porRendaFamiliarTop10: RelatorioRankingItem[];
+}
+
+export interface RelatorioAlunosListaResponse {
+  data: RelatorioAlunoItem[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    lastPage: number;
+  };
 }
 
 export interface RelatorioTurmaItem {
@@ -362,6 +400,70 @@ export interface RelatorioFrequenciasResponse {
   data: RelatorioFrequenciaItem[];
 }
 
+export type NivelRiscoEvasao = 'ALTO' | 'MEDIO' | 'BAIXO';
+
+export interface RelatorioRiscoEvasaoItem {
+  alunoId: string;
+  nomeCompleto: string;
+  matricula: string | null;
+  cidade: string | null;
+  bairro: string | null;
+  turmaId: string;
+  turma: string;
+  professor: string | null;
+  faltasSeguidas: number;
+  taxaPresenca: number;
+  ultimaFrequencia: string | null;
+  ultimoAtendimento: string | null;
+  diasSemRegistro: number | null;
+  criterios: string[];
+  nivel: NivelRiscoEvasao;
+}
+
+export interface RelatorioRiscoEvasaoResponse {
+  filtros: RelatorioFiltro;
+  total: number;
+  indicadores: {
+    alto: number;
+    medio: number;
+    baixo: number;
+    tresFaltasSeguidas: number;
+    presencaAbaixo60: number;
+    semRegistro30Dias: number;
+    matriculaAtivaSemFrequenciaRecente: number;
+  };
+  data: RelatorioRiscoEvasaoItem[];
+}
+
+export interface RelatorioImpactoMetricas {
+  totalAlunosAtendidos: number;
+  totalAtendimentosIndividuais: number;
+  totalTurmasOfertadas: number;
+  totalCertificadosEmitidos: number;
+  totalAlunosDeficienciaVisualAtendidos: number;
+  totalBairrosAlcancados: number;
+  totalCidadesAlcancadas: number;
+  taxaPermanencia: number;
+  taxaConclusao: number;
+}
+
+export interface RelatorioComparativoItem {
+  atual: number;
+  anterior: number;
+  variacaoPercentual: number;
+  direcao: 'SUBIU' | 'DESCEU' | 'ESTAVEL';
+}
+
+export interface RelatorioImpactoSocialResponse {
+  filtros: RelatorioFiltro;
+  periodo: {
+    atual: { dataInicio: string; dataFim: string };
+    anterior: { dataInicio: string; dataFim: string };
+  };
+  metricas: RelatorioImpactoMetricas;
+  comparativo: Record<keyof RelatorioImpactoMetricas, RelatorioComparativoItem>;
+}
+
 const RELATORIO_INSTITUCIONAL_KEYS = [
   'dataInicio',
   'dataFim',
@@ -391,6 +493,21 @@ export class RelatoriosService {
     return this.http.get<RelatorioAlunosResponse>(`${this.url}/alunos`, { params: this.buildParams(filtro) });
   }
 
+  alunosResumo(filtro: RelatorioFiltro): Observable<RelatorioAlunosResumo> {
+    return this.http.get<RelatorioAlunosResumo>(`${this.url}/alunos/resumo`, { params: this.buildParams(filtro) });
+  }
+
+  alunosDistribuicoes(filtro: RelatorioFiltro): Observable<RelatorioAlunosDistribuicoes> {
+    return this.http.get<RelatorioAlunosDistribuicoes>(`${this.url}/alunos/distribuicoes`, {
+      params: this.buildParams(filtro),
+    });
+  }
+
+  alunosLista(filtro: RelatorioFiltro, page = 1, limit = 20): Observable<RelatorioAlunosListaResponse> {
+    const params = this.buildParams(filtro).set('page', page).set('limit', limit);
+    return this.http.get<RelatorioAlunosListaResponse>(`${this.url}/alunos/lista`, { params });
+  }
+
   turmas(filtro: RelatorioFiltro): Observable<RelatorioTurmasResponse> {
     return this.http.get<RelatorioTurmasResponse>(`${this.url}/turmas`, { params: this.buildParams(filtro) });
   }
@@ -409,6 +526,50 @@ export class RelatoriosService {
     return this.http.get<RelatorioFrequenciasResponse>(`${this.url}/frequencias`, {
       params: this.buildParams(filtro),
     });
+  }
+
+  riscoEvasao(filtro: RelatorioFiltro): Observable<RelatorioRiscoEvasaoResponse> {
+    return this.http.get<RelatorioRiscoEvasaoResponse>(`${this.url}/risco-evasao`, {
+      params: this.buildParams(filtro),
+    });
+  }
+
+  impactoSocial(filtro: RelatorioFiltro): Observable<RelatorioImpactoSocialResponse> {
+    return this.http.get<RelatorioImpactoSocialResponse>(`${this.url}/impacto-social`, {
+      params: this.buildParams(filtro),
+    });
+  }
+
+  buscarOpcoesTurmas(busca: string): Observable<RelatorioOpcao[]> {
+    return this.http.get<RelatorioOpcao[]>(`${this.url}/opcoes/turmas`, {
+      params: new HttpParams().set('busca', busca.trim()),
+    });
+  }
+
+  buscarOpcoesProfessores(busca: string): Observable<RelatorioOpcao[]> {
+    return this.http.get<RelatorioOpcao[]>(`${this.url}/opcoes/professores`, {
+      params: new HttpParams().set('busca', busca.trim()),
+    });
+  }
+
+  buscarOpcoesAlunos(busca: string): Observable<RelatorioOpcao[]> {
+    return this.http.get<RelatorioOpcao[]>(`${this.url}/opcoes/alunos`, {
+      params: new HttpParams().set('busca', busca.trim()),
+    });
+  }
+
+  buscarOpcoesCidades(busca: string): Observable<RelatorioOpcao[]> {
+    return this.http.get<RelatorioOpcao[]>(`${this.url}/opcoes/cidades`, {
+      params: new HttpParams().set('busca', busca.trim()),
+    });
+  }
+
+  buscarOpcoesBairros(busca: string, cidade?: string): Observable<RelatorioOpcao[]> {
+    let params = new HttpParams().set('busca', busca.trim());
+    if (cidade?.trim()) {
+      params = params.set('cidade', cidade.trim());
+    }
+    return this.http.get<RelatorioOpcao[]>(`${this.url}/opcoes/bairros`, { params });
   }
 
   exportarPdf(filtro: RelatorioFiltro): Observable<Blob> {

@@ -51,6 +51,67 @@
     </article>
   </div>
 
+  @if (risco; as riscoEvasao) {
+    <section class="risk-panel" aria-label="Alunos com risco de evasão">
+      <header>
+        <div>
+          <h3>Alunos com risco de evasão</h3>
+          <p>{{ riscoEvasao.total }} aluno(s) priorizado(s) para busca ativa</p>
+        </div>
+        <div class="risk-summary">
+          <span class="risk-chip risk-chip--alto">Alto {{ riscoEvasao.indicadores.alto }}</span>
+          <span class="risk-chip risk-chip--medio">Médio {{ riscoEvasao.indicadores.medio }}</span>
+          <span class="risk-chip risk-chip--baixo">Baixo {{ riscoEvasao.indicadores.baixo }}</span>
+        </div>
+      </header>
+
+      <div class="risk-indicators">
+        <article>
+          <span>3 faltas seguidas</span>
+          <strong>{{ riscoEvasao.indicadores.tresFaltasSeguidas }}</strong>
+        </article>
+        <article>
+          <span>Presença abaixo de 60%</span>
+          <strong>{{ riscoEvasao.indicadores.presencaAbaixo60 }}</strong>
+        </article>
+        <article>
+          <span>Sem registro há 30+ dias</span>
+          <strong>{{ riscoEvasao.indicadores.semRegistro30Dias }}</strong>
+        </article>
+        <article>
+          <span>Sem frequência recente</span>
+          <strong>{{ riscoEvasao.indicadores.matriculaAtivaSemFrequenciaRecente }}</strong>
+        </article>
+      </div>
+
+      @if (riscoEvasao.data.length) {
+        <div class="risk-list">
+          @for (item of riscoEvasao.data; track item.alunoId + '-' + item.turmaId) {
+            <article class="risk-card" [ngClass]="'risk-card--' + item.nivel.toLowerCase()">
+              <div>
+                <strong>{{ item.nomeCompleto }}</strong>
+                <span>{{ item.turma }} · {{ item.professor || 'Professor não informado' }}</span>
+              </div>
+              <div class="risk-card__metrics">
+                <span>{{ nivelRiscoLabel(item.nivel) }}</span>
+                <span>{{ item.faltasSeguidas }} falta(s) seguidas</span>
+                <span>{{ formatarPercentual(item.taxaPresenca) }} presença</span>
+                <span>{{ formatarDias(item.diasSemRegistro) }} sem registro</span>
+              </div>
+              <div class="risk-card__criteria">
+                @for (criterio of item.criterios; track criterio) {
+                  <span>{{ criterio }}</span>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="empty-panel">Nenhum aluno em risco pelos critérios atuais.</p>
+      }
+    </section>
+  }
+
   <div class="analysis-grid">
     <section class="analysis-panel">
       <header>

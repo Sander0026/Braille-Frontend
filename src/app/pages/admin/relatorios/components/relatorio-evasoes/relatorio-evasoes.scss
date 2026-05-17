@@ -43,6 +43,140 @@
   margin-bottom: 1rem;
 }
 
+.risk-panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+
+  > header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+
+    h3 {
+      color: #111827;
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    p {
+      color: #6b7280;
+      font-size: 0.86rem;
+      margin: 0.2rem 0 0;
+    }
+  }
+}
+
+.risk-summary,
+.risk-card__criteria,
+.risk-card__metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.risk-chip,
+.risk-card__criteria span,
+.risk-card__metrics span {
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 0.25rem 0.55rem;
+}
+
+.risk-chip--alto {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.risk-chip--medio {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.risk-chip--baixo {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.risk-indicators {
+  display: grid;
+  gap: 0.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: 0.85rem;
+
+  article {
+    border: 1px solid #f3f4f6;
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+
+  span {
+    color: #4b5563;
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+  strong {
+    color: #111827;
+    display: block;
+    font-size: 1.3rem;
+    margin-top: 0.3rem;
+  }
+}
+
+.risk-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.risk-card {
+  border-left: 4px solid #0284c7;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+
+  strong {
+    color: #111827;
+    display: block;
+  }
+
+  div > span {
+    color: #4b5563;
+    font-size: 0.82rem;
+  }
+}
+
+.risk-card--alto {
+  border-left-color: #dc2626;
+}
+
+.risk-card--medio {
+  border-left-color: #b68e00;
+}
+
+.risk-card--baixo {
+  border-left-color: #0284c7;
+}
+
+.risk-card__criteria span {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.risk-card__metrics span {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+}
+
 .analysis-panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;

@@ -3,154 +3,201 @@
     <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
     <span>Carregando alunos</span>
   </div>
-} @else if (relatorio; as dados) {
+} @else if (resumo; as dados) {
   <div class="section-toolbar">
     <div>
       <h2>Alunos</h2>
-      <p>{{ dados.total }} registro(s)</p>
+      <p>{{ dados.totalCadastrados }} registro(s)</p>
     </div>
     <div class="summary-pills" aria-label="Resumo de alunos">
-      <span>Ativos {{ dados.porStatus.ativos }}</span>
-      <span>Inativos {{ dados.porStatus.inativos }}</span>
+      <span>Ativos {{ dados.ativos }}</span>
+      <span>Inativos {{ dados.inativos }}</span>
     </div>
   </div>
 
   <section class="alunos-indicators" aria-label="Indicadores de alunos">
     <article>
       <span class="material-symbols-rounded" aria-hidden="true">groups</span>
-      <strong>{{ dados.indicadores.totalCadastrados }}</strong>
+      <strong>{{ dados.totalCadastrados }}</strong>
       <small>Total cadastrados</small>
     </article>
     <article>
       <span class="material-symbols-rounded" aria-hidden="true">verified_user</span>
-      <strong>{{ dados.indicadores.ativos }}</strong>
+      <strong>{{ dados.ativos }}</strong>
       <small>Ativos</small>
     </article>
     <article>
       <span class="material-symbols-rounded" aria-hidden="true">person_off</span>
-      <strong>{{ dados.indicadores.inativos }}</strong>
+      <strong>{{ dados.inativos }}</strong>
       <small>Inativos</small>
     </article>
     <article>
-      <span class="material-symbols-rounded" aria-hidden="true">person_add</span>
-      <strong>{{ dados.indicadores.cadastradosNoPeriodo }}</strong>
-      <small>Cadastrados no período</small>
-    </article>
-    <article>
       <span class="material-symbols-rounded" aria-hidden="true">medical_information</span>
-      <strong>{{ dados.indicadores.comLaudo }}</strong>
+      <strong>{{ dados.comLaudo }}</strong>
       <small>Com laudo</small>
     </article>
     <article>
       <span class="material-symbols-rounded" aria-hidden="true">description</span>
-      <strong>{{ dados.indicadores.semLaudo }}</strong>
+      <strong>{{ dados.semLaudo }}</strong>
       <small>Sem laudo</small>
     </article>
     <article>
       <span class="material-symbols-rounded" aria-hidden="true">accessible</span>
-      <strong>{{ dados.indicadores.precisamAcompanhante }}</strong>
+      <strong>{{ dados.precisamAcompanhante }}</strong>
       <small>Precisam acompanhante</small>
     </article>
     <article>
       <span class="material-symbols-rounded" aria-hidden="true">privacy_tip</span>
-      <strong>{{ dados.indicadores.lgpdAceito }}</strong>
+      <strong>{{ dados.lgpdAceito }}</strong>
       <small>LGPD aceito</small>
     </article>
   </section>
 
-  <section class="profile-grid" aria-label="Perfil institucional de alunos">
-    <article>
-      <h3>Deficiência</h3>
-      @for (item of grupoEntries(dados.indicadores.porTipoDeficiencia); track item.label) {
-        <div><span>{{ formatarEnum(item.label) }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-    <article>
-      <h3>Causa</h3>
-      @for (item of grupoEntries(dados.indicadores.porCausaDeficiencia); track item.label) {
-        <div><span>{{ formatarEnum(item.label) }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-    <article>
-      <h3>Acessibilidade</h3>
-      @for (item of grupoEntries(dados.indicadores.porPreferenciaAcessibilidade); track item.label) {
-        <div><span>{{ formatarEnum(item.label) }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-    <article>
-      <h3>Perfil social</h3>
-      <div><span>Recebem benefício</span><strong>{{ dados.indicadores.recebemBeneficioGov }}</strong></div>
-      @for (item of grupoEntries(dados.indicadores.porEscolaridade); track item.label) {
-        <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-    <article>
-      <h3>Cidades</h3>
-      @for (item of grupoEntries(dados.indicadores.porCidade); track item.label) {
-        <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-    <article>
-      <h3>Bairros</h3>
-      @for (item of grupoEntries(dados.indicadores.porBairro); track item.label) {
-        <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-    <article>
-      <h3>Renda familiar</h3>
-      @for (item of grupoEntries(dados.indicadores.porRendaFamiliar); track item.label) {
-        <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
-      }
-    </article>
-  </section>
-
-  @if (dados.data.length) {
-    <div class="table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Matrícula</th>
-            <th>Nome</th>
-            <th>Status</th>
-            <th>CPF</th>
-            <th>Telefone</th>
-            <th>Cidade</th>
-            <th>Bairro</th>
-            <th>Tipo de deficiência</th>
-            <th>Preferência de acessibilidade</th>
-            <th>Possui laudo</th>
-            <th>Precisa acompanhante</th>
-            <th>Data de cadastro</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (aluno of dados.data; track aluno.id) {
-            <tr>
-              <td>{{ aluno.matricula || '-' }}</td>
-              <td class="main-cell">{{ aluno.nomeCompleto }}</td>
-              <td>
-                <span class="badge" [class.badge-success]="aluno.statusAtivo" [class.badge-muted]="!aluno.statusAtivo">
-                  {{ aluno.statusAtivo ? 'Ativo' : 'Inativo' }}
-                </span>
-              </td>
-              <td>{{ aluno.cpf || '-' }}</td>
-              <td>{{ aluno.telefoneContato || '-' }}</td>
-              <td>{{ aluno.cidade || '-' }}</td>
-              <td>{{ aluno.bairro || '-' }}</td>
-              <td>{{ formatarEnum(aluno.tipoDeficiencia) }}</td>
-              <td>{{ formatarEnum(aluno.prefAcessibilidade) }}</td>
-              <td>{{ simNao(possuiLaudo(aluno)) }}</td>
-              <td>{{ simNao(aluno.precisaAcompanhante) }}</td>
-              <td>{{ formatarData(aluno.criadoEm) }}</td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  } @else {
-    <div class="empty-state">
-      <span class="material-symbols-rounded" aria-hidden="true">search_off</span>
-      <h3>Nenhum aluno encontrado</h3>
-    </div>
+  @if (distribuicoes; as dist) {
+    <section class="profile-grid" aria-label="Perfil institucional de alunos">
+      <article>
+        <h3>Deficiência</h3>
+        @for (item of ranking(dist.porTipoDeficiencia); track item.label) {
+          <div><span>{{ formatarEnum(item.label) }}</span><strong>{{ item.total }}</strong></div>
+        } @empty {
+          <p class="profile-empty">Sem dados</p>
+        }
+      </article>
+      <article>
+        <h3>Top 10 cidades</h3>
+        @for (item of ranking(dist.porCidadeTop10); track item.label) {
+          <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
+        } @empty {
+          <p class="profile-empty">Sem dados</p>
+        }
+      </article>
+      <article>
+        <h3>Top 10 bairros</h3>
+        @for (item of ranking(dist.porBairroTop10); track item.label) {
+          <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
+        } @empty {
+          <p class="profile-empty">Sem dados</p>
+        }
+      </article>
+      <article>
+        <h3>Escolaridade</h3>
+        @for (item of ranking(dist.porEscolaridadeTop10); track item.label) {
+          <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
+        } @empty {
+          <p class="profile-empty">Sem dados</p>
+        }
+      </article>
+      <article>
+        <h3>Renda familiar</h3>
+        @for (item of ranking(dist.porRendaFamiliarTop10); track item.label) {
+          <div><span>{{ item.label }}</span><strong>{{ item.total }}</strong></div>
+        } @empty {
+          <p class="profile-empty">Sem dados</p>
+        }
+      </article>
+    </section>
   }
+
+  <section class="lista-detalhada" aria-label="Lista detalhada de alunos">
+    <div class="lista-header">
+      <div>
+        <h3>Lista detalhada</h3>
+        @if (lista; as dadosLista) {
+          <p>{{ totalCarregado() }} de {{ dadosLista.meta.total }} aluno(s)</p>
+        }
+      </div>
+
+      @if (!listaAberta) {
+        <button type="button" class="secondary-action" (click)="abrirLista.emit()">
+          <span class="material-symbols-rounded" aria-hidden="true">table_rows</span>
+          <span>Lista detalhada</span>
+        </button>
+      }
+    </div>
+
+    @if (listaAberta) {
+      @if (carregandoLista && !lista) {
+        <div class="loading-state loading-state-inline">
+          <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+          <span>Carregando lista</span>
+        </div>
+      }
+
+      @if (lista; as dadosLista) {
+        @if (dadosLista.data.length) {
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Matrícula</th>
+                  <th>Nome</th>
+                  <th>Status</th>
+                  <th>CPF</th>
+                  <th>Telefone</th>
+                  <th>Cidade</th>
+                  <th>Bairro</th>
+                  <th>Tipo de deficiência</th>
+                  <th>Preferência de acessibilidade</th>
+                  <th>Possui laudo</th>
+                  <th>Precisa acompanhante</th>
+                  <th>Data de cadastro</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (aluno of dadosLista.data; track aluno.id) {
+                  <tr>
+                    <td>{{ aluno.matricula || '-' }}</td>
+                    <td class="main-cell">{{ aluno.nomeCompleto }}</td>
+                    <td>
+                      <span
+                        class="badge"
+                        [class.badge-success]="aluno.statusAtivo"
+                        [class.badge-muted]="!aluno.statusAtivo">
+                        {{ aluno.statusAtivo ? 'Ativo' : 'Inativo' }}
+                      </span>
+                    </td>
+                    <td>{{ aluno.cpf || '-' }}</td>
+                    <td>{{ aluno.telefoneContato || '-' }}</td>
+                    <td>{{ aluno.cidade || '-' }}</td>
+                    <td>{{ aluno.bairro || '-' }}</td>
+                    <td>{{ formatarEnum(aluno.tipoDeficiencia) }}</td>
+                    <td>{{ formatarEnum(aluno.prefAcessibilidade) }}</td>
+                    <td>{{ simNao(possuiLaudo(aluno)) }}</td>
+                    <td>{{ simNao(aluno.precisaAcompanhante) }}</td>
+                    <td>{{ formatarData(aluno.criadoEm) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else if (!carregandoLista) {
+          <div class="empty-state">
+            <span class="material-symbols-rounded" aria-hidden="true">search_off</span>
+            <h3>Nenhum aluno encontrado</h3>
+          </div>
+        }
+
+        <div class="load-more-row">
+          @if (podeVerMais()) {
+            <button type="button" class="secondary-action" [disabled]="carregandoLista" (click)="verMais.emit()">
+              @if (carregandoLista) {
+                <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+                <span>Carregando</span>
+              } @else {
+                <span class="material-symbols-rounded" aria-hidden="true">expand_more</span>
+                <span>Ver mais</span>
+              }
+            </button>
+          } @else if (dadosLista.meta.total > 0) {
+            <span class="lista-fim">Todos os alunos carregados</span>
+          }
+        </div>
+      }
+    }
+  </section>
+} @else {
+  <div class="empty-state">
+    <span class="material-symbols-rounded" aria-hidden="true">search_off</span>
+    <h3>Nenhum aluno encontrado</h3>
+  </div>
 }
