@@ -72,6 +72,10 @@ Principais metodos:
 | `exportarPdf(filtro)` | `POST /api/relatorios/exportar/pdf` |
 | `exportarXlsx(filtro)` | `POST /api/relatorios/exportar/xlsx` |
 
+O metodo `alunos(filtro)` ainda existe no service apenas por compatibilidade com o endpoint legado
+`GET /api/relatorios/alunos`. Nao use em novas telas; prefira `alunosResumo`,
+`alunosDistribuicoes` e `alunosLista`.
+
 O relatorio de atendimentos individuais usa outro service:
 
 `src/app/features/atendimentos-individuais/services/relatorio-atendimento-api.service.ts`

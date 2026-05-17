@@ -231,7 +231,7 @@ export class BeneficiariosService {
 
     inativar(id: string, dados: InativarAlunoPayload): Observable<void> {
         this.limparCache();
-        return this.http.delete<void>(`${this.url}/${id}`, { body: dados });
+        return this.http.patch<void>(`${this.url}/${id}/inativar`, dados);
     }
 
     restaurar(id: string): Observable<void> {
