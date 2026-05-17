@@ -5,6 +5,13 @@ import { Observable } from 'rxjs';
 export type StatusAlunoRelatorio = 'ATIVO' | 'INATIVO' | 'TODOS';
 export type TurmaStatusRelatorio = 'PREVISTA' | 'ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
 export type MatriculaStatusRelatorio = 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA' | 'TRANSFERIDA';
+export type StatusAcompanhamentoRelatorio = 'EM_ANDAMENTO' | 'FINALIZADO' | 'ARQUIVADO';
+export type TipoRegistroAtendimentoRelatorio =
+  | 'ATENDIMENTO_REALIZADO'
+  | 'FALTA_JUSTIFICADA'
+  | 'FALTA_NAO_JUSTIFICADA'
+  | 'CANCELADO';
+export type ModalidadeAtendimentoRelatorio = 'PRESENCIAL' | 'REMOTO' | 'TELEFONE' | 'OUTRO';
 export type MotivoEncerramentoMatricula =
   | 'CONCLUSAO'
   | 'EVASAO_SEM_JUSTIFICATIVA'
@@ -29,6 +36,9 @@ export interface RelatorioFiltro {
   statusAluno?: StatusAlunoRelatorio;
   statusTurma?: TurmaStatusRelatorio;
   statusMatricula?: MatriculaStatusRelatorio;
+  statusAcompanhamento?: StatusAcompanhamentoRelatorio;
+  tipoRegistroAtendimento?: TipoRegistroAtendimentoRelatorio;
+  modalidadeAtendimento?: ModalidadeAtendimentoRelatorio;
   motivoEncerramento?: MotivoEncerramentoMatricula;
   cidade?: string;
   bairro?: string;
@@ -204,7 +214,28 @@ export interface RelatorioEvasaoItem {
   observacao: string | null;
   dataEntrada: string;
   dataEncerramento: string | null;
+  dataSaida: string | null;
   encerradoEm: string | null;
+  encerradoPorId: string | null;
+  tempoPermanenciaDias: number | null;
+  atendimentosIndividuais: {
+    possuiAtendimento: boolean;
+    totalAtendimentos: number;
+    faltasJustificadas: number;
+    faltasNaoJustificadas: number;
+    cancelados: number;
+    acompanhamentosTotal: number;
+    acompanhamentosEmAndamento: number;
+    acompanhamentosFinalizados: number;
+    acompanhamentosArquivados: number;
+    teveFalta: boolean;
+  };
+  registradoPor: {
+    id: string;
+    nome: string;
+    email: string | null;
+    matricula: string | null;
+  } | null;
   aluno: {
     id: string;
     nomeCompleto: string;
@@ -228,6 +259,30 @@ export interface RelatorioEvasoesResponse {
   filtros: RelatorioFiltro;
   totalEncerramentos: number;
   totalEvasoes: number;
+  indicadores: {
+    totalEvasoes: number;
+    totalCancelamentos: number;
+    totalTransferencias: number;
+    semMotivoEstruturado: number;
+    evasoesComAtendimentoIndividual: number;
+    evasoesSemAtendimentoIndividual: number;
+    evasoesComFaltasEmAtendimento: number;
+    evasoesComAcompanhamentoFinalizado: number;
+    evasoesComAcompanhamentoArquivado: number;
+    porTurma: Record<string, number>;
+    porProfessor: Record<string, number>;
+    porMes: Record<string, number>;
+    porMotivo: Record<string, number>;
+    porTipoDeficiencia: Record<string, number>;
+    porCidade: Record<string, number>;
+    porBairro: Record<string, number>;
+    porCidadeBairro: Record<string, number>;
+    tempoMedioPermanenciaDias: number;
+    rankingTurmas: Array<{
+      nome: string;
+      total: number;
+    }>;
+  };
   porStatus: Record<string, number>;
   porMotivo: Record<string, number>;
   data: RelatorioEvasaoItem[];
@@ -307,6 +362,21 @@ export interface RelatorioFrequenciasResponse {
   data: RelatorioFrequenciaItem[];
 }
 
+const RELATORIO_INSTITUCIONAL_KEYS = [
+  'dataInicio',
+  'dataFim',
+  'turmaId',
+  'professorId',
+  'alunoId',
+  'statusAluno',
+  'statusTurma',
+  'statusMatricula',
+  'motivoEncerramento',
+  'cidade',
+  'bairro',
+  'tipoDeficiencia',
+] as const;
+
 @Injectable({ providedIn: 'root' })
 export class RelatoriosService {
   private readonly url = '/api/relatorios';
@@ -342,25 +412,36 @@ export class RelatoriosService {
   }
 
   exportarPdf(filtro: RelatorioFiltro): Observable<Blob> {
-    return this.http.post(`${this.url}/exportar/pdf`, this.limparFiltro(filtro), { responseType: 'blob' });
+    return this.http.post(`${this.url}/exportar/pdf`, this.limparFiltro(filtro, RELATORIO_INSTITUCIONAL_KEYS), {
+      responseType: 'blob',
+    });
   }
 
   exportarXlsx(filtro: RelatorioFiltro): Observable<Blob> {
-    return this.http.post(`${this.url}/exportar/xlsx`, this.limparFiltro(filtro), { responseType: 'blob' });
+    return this.http.post(`${this.url}/exportar/xlsx`, this.limparFiltro(filtro, RELATORIO_INSTITUCIONAL_KEYS), {
+      responseType: 'blob',
+    });
   }
 
-  private buildParams(filtro: RelatorioFiltro): HttpParams {
+  private buildParams(
+    filtro: RelatorioFiltro,
+    allowedKeys: readonly (keyof RelatorioFiltro)[] = RELATORIO_INSTITUCIONAL_KEYS,
+  ): HttpParams {
     let params = new HttpParams();
-    Object.entries(this.limparFiltro(filtro)).forEach(([key, value]) => {
+    Object.entries(this.limparFiltro(filtro, allowedKeys)).forEach(([key, value]) => {
       params = params.set(key, String(value));
     });
     return params;
   }
 
-  private limparFiltro(filtro: RelatorioFiltro): RelatorioFiltro {
-    const limpo: RelatorioFiltro = {};
+  private limparFiltro(
+    filtro: RelatorioFiltro,
+    allowedKeys?: readonly (keyof RelatorioFiltro)[],
+  ): Partial<RelatorioFiltro> {
+    const limpo: Partial<RelatorioFiltro> = {};
     Object.entries(filtro).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      const keyPermitida = !allowedKeys || allowedKeys.includes(key as keyof RelatorioFiltro);
+      if (keyPermitida && value !== undefined && value !== null && value !== '') {
         limpo[key as keyof RelatorioFiltro] = value as never;
       }
     });

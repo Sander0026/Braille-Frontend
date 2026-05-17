@@ -15,6 +15,8 @@
     [filtros]="filtros()"
     [turmas]="turmasOptions()"
     [professores]="professoresOptions()"
+    [alunos]="alunosOptions()"
+    [modoPublico]="ehComunicacao"
     [carregando]="carregando()"
     (aplicar)="aplicarFiltros($event)"
     (limpar)="limparFiltros()">
@@ -119,8 +121,8 @@
               <strong>{{ totalRegistros() }}</strong>
             </div>
             <div>
-              <span>Atendimentos</span>
-              <strong>{{ atendimentos()?.total || 0 }}</strong>
+              <span>Atendimentos individuais</span>
+              <strong>{{ atendimentos()?.totalRegistros || 0 }}</strong>
             </div>
             <div>
               <span>Encerramentos</span>
@@ -148,7 +150,12 @@
       id="painel-atendimentos"
       role="tabpanel"
       aria-labelledby="tab-atendimentos">
-      <app-relatorio-atendimentos [relatorio]="atendimentos()" [carregando]="carregando()"></app-relatorio-atendimentos>
+      <app-relatorio-atendimentos
+        [relatorio]="atendimentos()"
+        [carregando]="carregando()"
+        [exportandoPdf]="exportandoAtendimentosPdf()"
+        (baixarPdf)="exportarAtendimentosPdf()">
+      </app-relatorio-atendimentos>
     </section>
 
     <section
@@ -161,6 +168,7 @@
         [resumo]="resumo()"
         [exportandoPdf]="exportandoPdf()"
         [exportandoXlsx]="exportandoXlsx()"
+        [somentePdf]="ehComunicacao"
         (baixarPdf)="exportarPdf()"
         (baixarXlsx)="exportarXlsx()">
       </app-relatorio-exportacoes>

@@ -15,6 +15,7 @@ export class RelatorioExportacoes {
   @Input() resumo: RelatorioResumo | null = null;
   @Input() exportandoPdf = false;
   @Input() exportandoXlsx = false;
+  @Input() somentePdf = false;
 
   @Output() baixarPdf = new EventEmitter<void>();
   @Output() baixarXlsx = new EventEmitter<void>();

@@ -1,45 +1,179 @@
 @if (carregando) {
   <div class="loading-state">
     <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
-    <span>Carregando atendimentos</span>
+    <span>Carregando atendimentos individuais</span>
   </div>
 } @else if (relatorio; as dados) {
   <div class="section-toolbar">
     <div>
-      <h2>Atendimentos</h2>
-      <p>{{ dados.total }} registro(s)</p>
+      <h2>Atendimentos Individuais</h2>
+      <p>{{ dados.totalAcompanhamentos }} acompanhamento(s), {{ dados.totalRegistros }} registro(s)</p>
     </div>
-    <div class="summary-pills" aria-label="Resumo de atendimentos">
-      <span>Realizados {{ dados.porTipoRegistro['ATENDIMENTO_REALIZADO'] || 0 }}</span>
-      <span>Faltas {{ dados.porTipoRegistro['FALTA_NAO_JUSTIFICADA'] || 0 }}</span>
-      <span>Cancelados {{ dados.porTipoRegistro['CANCELADO'] || 0 }}</span>
+    <div class="toolbar-side">
+      <div class="summary-pills" aria-label="Resumo de atendimentos individuais">
+        <span>Realizados {{ dados.totais.atendimentosRealizados }}</span>
+        <span>Faltas {{ dados.totais.faltasJustificadas + dados.totais.faltasNaoJustificadas }}</span>
+        <span>Cancelados {{ dados.totais.cancelados }}</span>
+      </div>
+      <button type="button" class="export-button" (click)="baixarPdf.emit()" [disabled]="exportandoPdf">
+        <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+        {{ exportandoPdf ? 'Gerando' : 'PDF' }}
+      </button>
     </div>
   </div>
 
-  @if (dados.data.length) {
+  <div class="atendimentos-indicators" aria-label="Indicadores de atendimentos individuais">
+    <article>
+      <span>Total de acompanhamentos</span>
+      <strong>{{ dados.indicadores.totalAcompanhamentos }}</strong>
+    </article>
+    <article>
+      <span>Em andamento</span>
+      <strong>{{ dados.indicadores.emAndamento }}</strong>
+    </article>
+    <article>
+      <span>Finalizados</span>
+      <strong>{{ dados.indicadores.finalizados }}</strong>
+    </article>
+    <article>
+      <span>Arquivados</span>
+      <strong>{{ dados.indicadores.arquivados }}</strong>
+    </article>
+    <article>
+      <span>Atendimentos realizados</span>
+      <strong>{{ dados.indicadores.totalAtendimentosRealizados }}</strong>
+    </article>
+    <article>
+      <span>Faltas justificadas</span>
+      <strong>{{ dados.indicadores.faltasJustificadas }}</strong>
+    </article>
+    <article>
+      <span>Faltas não justificadas</span>
+      <strong>{{ dados.indicadores.faltasNaoJustificadas }}</strong>
+    </article>
+    <article>
+      <span>Cancelados</span>
+      <strong>{{ dados.indicadores.atendimentosCancelados }}</strong>
+    </article>
+    <article>
+      <span>Média por aluno</span>
+      <strong>{{ dados.indicadores.mediaAtendimentosPorAluno }}</strong>
+    </article>
+    <article>
+      <span>Duração média</span>
+      <strong>{{ formatarDuracao(dados.indicadores.mediaDuracaoMinutos) }}</strong>
+    </article>
+  </div>
+
+  <div class="analysis-grid">
+    <section class="analysis-panel">
+      <header>
+        <h3>Atendimentos por professor</h3>
+      </header>
+      @for (item of dados.atendimentosPorProfessor; track item.professorId) {
+        <div class="bar-row">
+          <span>{{ item.nome }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill" [style.width]="larguraRanking(item.total, dados.atendimentosPorProfessor)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem atendimentos por professor.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Alunos mais atendidos</h3>
+      </header>
+      @for (item of dados.alunosMaisAtendidos; track item.alunoId) {
+        <div class="bar-row">
+          <span>{{ item.nome }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill warning" [style.width]="larguraRanking(item.total, dados.alunosMaisAtendidos)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem alunos no ranking.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Tipos de registro</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porTipoRegistro); track item.label) {
+        <div class="bar-row">
+          <span>{{ formatarTipoRegistro(item.label) }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill" [style.width]="larguraBarra(item.total, dados.indicadores.porTipoRegistro)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem registros no período.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Modalidades</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porModalidade); track item.label) {
+        <div class="compact-row">
+          <span>{{ formatarModalidade(item.label) }}</span>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem modalidade informada.</p>
+      }
+    </section>
+  </div>
+
+  @if (registros().length) {
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="data-table atendimentos-table">
         <thead>
           <tr>
             <th>Data</th>
             <th>Aluno</th>
             <th>Professor</th>
+            <th>Acompanhamento</th>
+            <th>Status</th>
             <th>Tipo</th>
-            <th>Horário</th>
             <th>Modalidade</th>
+            <th>Duração</th>
             <th>Assunto</th>
+            <th>Evolução</th>
+            <th>Dificuldades</th>
+            <th>Pendências</th>
           </tr>
         </thead>
         <tbody>
-          @for (item of dados.data; track item.id) {
+          @for (item of registros(); track item.atendimento.id) {
             <tr>
-              <td>{{ formatarData(item.dataAtendimento) }}</td>
-              <td class="main-cell">{{ item.aluno.nomeCompleto }}</td>
-              <td>{{ item.professor.nome }}</td>
-              <td>{{ formatarEnum(item.tipoRegistro) }}</td>
-              <td>{{ formatarHorario(item.horaInicioMinutos) }}</td>
-              <td>{{ formatarEnum(item.modalidade) }}</td>
-              <td class="text-wide">{{ item.assuntoDoDia || item.acompanhamento.assuntoAtual }}</td>
+              <td>{{ formatarData(item.atendimento.dataAtendimento) }}</td>
+              <td class="main-cell">{{ item.acompanhamento.aluno?.nomeCompleto || '-' }}</td>
+              <td>{{ item.acompanhamento.professor?.nome || '-' }}</td>
+              <td class="text-wide">{{ item.acompanhamento.assuntoAtual }}</td>
+              <td>
+                <span class="badge" [ngClass]="statusClass(item.acompanhamento.status)">
+                  {{ formatarStatus(item.acompanhamento.status) }}
+                </span>
+              </td>
+              <td>
+                <span class="badge" [ngClass]="tipoClass(item.atendimento.tipoRegistro)">
+                  {{ formatarTipoRegistro(item.atendimento.tipoRegistro) }}
+                </span>
+              </td>
+              <td>{{ formatarModalidade(item.atendimento.modalidade) }}</td>
+              <td>{{ formatarDuracao(item.atendimento.duracaoMinutos) }}</td>
+              <td class="text-wide">{{ item.atendimento.assuntoDoDia || '-' }}</td>
+              <td class="text-wide">{{ item.atendimento.evolucao || '-' }}</td>
+              <td class="text-wide">{{ item.atendimento.dificuldades || '-' }}</td>
+              <td class="text-wide">{{ item.atendimento.pendencias || '-' }}</td>
             </tr>
           }
         </tbody>
@@ -48,7 +182,7 @@
   } @else {
     <div class="empty-state">
       <span class="material-symbols-rounded" aria-hidden="true">event_busy</span>
-      <h3>Nenhum atendimento encontrado</h3>
+      <h3>Nenhum atendimento individual encontrado</h3>
     </div>
   }
 }

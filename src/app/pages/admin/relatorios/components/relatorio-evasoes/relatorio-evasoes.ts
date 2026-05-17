@@ -18,11 +18,73 @@ export class RelatorioEvasoes {
   @Input() relatorio: RelatorioEvasoesResponse | null = null;
   @Input() carregando = false;
 
+  grupoEntries(grupo?: Record<string, number>): Array<{ label: string; total: number }> {
+    return Object.entries(grupo ?? {})
+      .map(([label, total]) => ({ label, total }))
+      .sort((a, b) => b.total - a.total || a.label.localeCompare(b.label));
+  }
+
+  rankingTurmas(): Array<{ label: string; total: number }> {
+    return (this.relatorio?.indicadores.rankingTurmas ?? []).map((item) => ({
+      label: item.nome,
+      total: item.total,
+    }));
+  }
+
+  larguraBarra(total: number, grupo?: Record<string, number>): string {
+    const maior = Math.max(...Object.values(grupo ?? {}), 0);
+    if (!maior) return '0%';
+    return `${Math.max(8, (total / maior) * 100)}%`;
+  }
+
+  larguraRanking(total: number): string {
+    const maior = Math.max(...(this.relatorio?.indicadores.rankingTurmas ?? []).map((item) => item.total), 0);
+    if (!maior) return '0%';
+    return `${Math.max(8, (total / maior) * 100)}%`;
+  }
+
   formatarData(value?: string | null): string {
     if (!value) return '-';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return '-';
     return date.toLocaleDateString('pt-BR');
+  }
+
+  formatarMes(value: string): string {
+    if (!/^\d{4}-\d{2}$/.test(value)) return value;
+    const date = new Date(`${value}-01T00:00:00`);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric' }).format(date);
+  }
+
+  formatarDias(value?: number | null): string {
+    if (value === null || value === undefined) return '-';
+    const formatado = value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+    return `${formatado} dia${value === 1 ? '' : 's'}`;
+  }
+
+  formatarResumoAtendimento(item: RelatorioEvasoesResponse['data'][number]): string {
+    const resumo = item.atendimentosIndividuais;
+    if (!resumo.possuiAtendimento) return 'Sem acompanhamento';
+    return `${resumo.totalAtendimentos} atendimento${resumo.totalAtendimentos === 1 ? '' : 's'}`;
+  }
+
+  formatarResumoAcompanhamento(item: RelatorioEvasoesResponse['data'][number]): string {
+    const resumo = item.atendimentosIndividuais;
+    if (!resumo.acompanhamentosTotal) return '-';
+    const partes = [
+      resumo.acompanhamentosEmAndamento ? `${resumo.acompanhamentosEmAndamento} em andamento` : null,
+      resumo.acompanhamentosFinalizados ? `${resumo.acompanhamentosFinalizados} finalizado(s)` : null,
+      resumo.acompanhamentosArquivados ? `${resumo.acompanhamentosArquivados} arquivado(s)` : null,
+    ].filter(Boolean);
+    return partes.join(', ') || `${resumo.acompanhamentosTotal} acompanhamento(s)`;
+  }
+
+  formatarFaltasAtendimento(item: RelatorioEvasoesResponse['data'][number]): string {
+    const resumo = item.atendimentosIndividuais;
+    const total = resumo.faltasJustificadas + resumo.faltasNaoJustificadas;
+    if (!total) return '-';
+    return `${total} falta${total === 1 ? '' : 's'}`;
   }
 
   statusLabel(status: MatriculaStatusRelatorio): string {
@@ -53,6 +115,27 @@ export class RelatorioEvasoes {
       OUTRO: 'Outro',
     };
     return motivo ? (labels[motivo] ?? motivo) : '-';
+  }
+
+  motivoGrupoLabel(motivo: string): string {
+    const motivos: MotivoEncerramentoMatricula[] = [
+      'CONCLUSAO',
+      'EVASAO_SEM_JUSTIFICATIVA',
+      'MUDANCA_DE_TURNO',
+      'TRANSFERENCIA_DE_TURMA',
+      'MUDANCA_DE_CIDADE',
+      'DIFICULDADE_TRANSPORTE',
+      'PROBLEMA_SAUDE',
+      'PROBLEMA_FAMILIAR',
+      'INCOMPATIBILIDADE_HORARIO',
+      'FALTA_DE_CONTATO',
+      'DESISTENCIA_VOLUNTARIA',
+      'CANCELAMENTO_DA_TURMA',
+      'OUTRO',
+    ];
+    return motivos.includes(motivo as MotivoEncerramentoMatricula)
+      ? this.motivoLabel(motivo as MotivoEncerramentoMatricula)
+      : motivo;
   }
 
   statusClass(status: MatriculaStatusRelatorio): string {

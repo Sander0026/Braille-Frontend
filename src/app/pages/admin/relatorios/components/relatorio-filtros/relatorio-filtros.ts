@@ -3,9 +3,12 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Out
 import { FormsModule } from '@angular/forms';
 import {
   MatriculaStatusRelatorio,
+  ModalidadeAtendimentoRelatorio,
   MotivoEncerramentoMatricula,
   RelatorioFiltro,
+  StatusAcompanhamentoRelatorio,
   StatusAlunoRelatorio,
+  TipoRegistroAtendimentoRelatorio,
   TurmaStatusRelatorio,
 } from '../../../../../core/services/relatorios.service';
 
@@ -31,7 +34,9 @@ export class RelatorioFiltros implements OnChanges {
   @Input({ required: true }) filtros!: RelatorioFiltro;
   @Input() turmas: RelatorioFiltroOption[] = [];
   @Input() professores: RelatorioFiltroOption[] = [];
+  @Input() alunos: RelatorioFiltroOption[] = [];
   @Input() carregando = false;
+  @Input() modoPublico = false;
 
   @Output() aplicar = new EventEmitter<RelatorioFiltro>();
   @Output() limpar = new EventEmitter<void>();
@@ -72,6 +77,26 @@ export class RelatorioFiltros implements OnChanges {
     { value: 'FALTA_DE_CONTATO', label: 'Falta de contato' },
     { value: 'DESISTENCIA_VOLUNTARIA', label: 'Desistência voluntária' },
     { value: 'CANCELAMENTO_DA_TURMA', label: 'Cancelamento da turma' },
+    { value: 'OUTRO', label: 'Outro' },
+  ];
+
+  readonly statusAcompanhamentoOptions: LabelOption<StatusAcompanhamentoRelatorio>[] = [
+    { value: 'EM_ANDAMENTO', label: 'Em andamento' },
+    { value: 'FINALIZADO', label: 'Finalizado' },
+    { value: 'ARQUIVADO', label: 'Arquivado' },
+  ];
+
+  readonly tipoRegistroAtendimentoOptions: LabelOption<TipoRegistroAtendimentoRelatorio>[] = [
+    { value: 'ATENDIMENTO_REALIZADO', label: 'Atendimento realizado' },
+    { value: 'FALTA_JUSTIFICADA', label: 'Falta justificada' },
+    { value: 'FALTA_NAO_JUSTIFICADA', label: 'Falta não justificada' },
+    { value: 'CANCELADO', label: 'Cancelado' },
+  ];
+
+  readonly modalidadeAtendimentoOptions: LabelOption<ModalidadeAtendimentoRelatorio>[] = [
+    { value: 'PRESENCIAL', label: 'Presencial' },
+    { value: 'REMOTO', label: 'Remoto' },
+    { value: 'TELEFONE', label: 'Telefone' },
     { value: 'OUTRO', label: 'Outro' },
   ];
 

@@ -10,22 +10,33 @@
       <input type="date" name="dataFim" [(ngModel)]="form.dataFim" [disabled]="carregando" />
     </label>
 
-    <label class="field">
-      <span>Turma</span>
-      <select name="turmaId" [(ngModel)]="form.turmaId" [disabled]="carregando">
-        <option value="">Todas</option>
-        @for (turma of turmas; track turma.id) {
-          <option [value]="turma.id">{{ turma.label }}</option>
-        }
-      </select>
-    </label>
+    @if (!modoPublico) {
+      <label class="field">
+        <span>Turma</span>
+        <select name="turmaId" [(ngModel)]="form.turmaId" [disabled]="carregando">
+          <option value="">Todas</option>
+          @for (turma of turmas; track turma.id) {
+            <option [value]="turma.id">{{ turma.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Professor</span>
+        <select name="professorId" [(ngModel)]="form.professorId" [disabled]="carregando">
+          <option value="">Todos</option>
+          @for (professor of professores; track professor.id) {
+            <option [value]="professor.id">{{ professor.label }}</option>
+          }
+        </select>
+      </label>
 
     <label class="field">
-      <span>Professor</span>
-      <select name="professorId" [(ngModel)]="form.professorId" [disabled]="carregando">
+      <span>Aluno</span>
+      <select name="alunoId" [(ngModel)]="form.alunoId" [disabled]="carregando">
         <option value="">Todos</option>
-        @for (professor of professores; track professor.id) {
-          <option [value]="professor.id">{{ professor.label }}</option>
+        @for (aluno of alunos; track aluno.id) {
+          <option [value]="aluno.id">{{ aluno.label }}</option>
         }
       </select>
     </label>
@@ -70,6 +81,36 @@
     </label>
 
     <label class="field">
+      <span>Status do acompanhamento</span>
+      <select name="statusAcompanhamento" [(ngModel)]="form.statusAcompanhamento" [disabled]="carregando">
+        <option value="">Todos</option>
+        @for (status of statusAcompanhamentoOptions; track status.value) {
+          <option [value]="status.value">{{ status.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Tipo de registro</span>
+      <select name="tipoRegistroAtendimento" [(ngModel)]="form.tipoRegistroAtendimento" [disabled]="carregando">
+        <option value="">Todos</option>
+        @for (tipo of tipoRegistroAtendimentoOptions; track tipo.value) {
+          <option [value]="tipo.value">{{ tipo.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span>Modalidade</span>
+      <select name="modalidadeAtendimento" [(ngModel)]="form.modalidadeAtendimento" [disabled]="carregando">
+        <option value="">Todas</option>
+        @for (modalidade of modalidadeAtendimentoOptions; track modalidade.value) {
+          <option [value]="modalidade.value">{{ modalidade.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
       <span>Cidade</span>
       <input type="text" name="cidade" [(ngModel)]="form.cidade" [disabled]="carregando" />
     </label>
@@ -79,15 +120,16 @@
       <input type="text" name="bairro" [(ngModel)]="form.bairro" [disabled]="carregando" />
     </label>
 
-    <label class="field">
-      <span>Deficiência</span>
-      <select name="tipoDeficiencia" [(ngModel)]="form.tipoDeficiencia" [disabled]="carregando">
-        <option value="">Todas</option>
-        @for (tipo of tipoDeficienciaOptions; track tipo.value) {
-          <option [value]="tipo.value">{{ tipo.label }}</option>
-        }
-      </select>
-    </label>
+      <label class="field">
+        <span>Deficiência</span>
+        <select name="tipoDeficiencia" [(ngModel)]="form.tipoDeficiencia" [disabled]="carregando">
+          <option value="">Todas</option>
+          @for (tipo of tipoDeficienciaOptions; track tipo.value) {
+            <option [value]="tipo.value">{{ tipo.label }}</option>
+          }
+        </select>
+      </label>
+    }
   </div>
 
   <div class="filters-actions">

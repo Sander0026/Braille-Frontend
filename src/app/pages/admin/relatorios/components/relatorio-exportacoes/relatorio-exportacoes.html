@@ -17,14 +17,22 @@
       <span class="material-symbols-rounded" aria-hidden="true">
         {{ exportandoPdf ? 'progress_activity' : 'picture_as_pdf' }}
       </span>
-      PDF institucional
+      <span>
+        <strong>PDF institucional</strong>
+        <small>Relatório formal para parceiros</small>
+      </span>
     </button>
 
-    <button type="button" class="export-btn" (click)="baixarXlsx.emit()" [disabled]="exportandoPdf || exportandoXlsx">
-      <span class="material-symbols-rounded" aria-hidden="true">
-        {{ exportandoXlsx ? 'progress_activity' : 'table_view' }}
-      </span>
-      Planilha XLSX
-    </button>
+    @if (!somentePdf) {
+      <button type="button" class="export-btn" (click)="baixarXlsx.emit()" [disabled]="exportandoPdf || exportandoXlsx">
+        <span class="material-symbols-rounded" aria-hidden="true">
+          {{ exportandoXlsx ? 'progress_activity' : 'table_view' }}
+        </span>
+        <span>
+          <strong>Excel institucional</strong>
+          <small>Abas consolidadas para prestação de contas</small>
+        </span>
+      </button>
+    }
   </div>
 </section>

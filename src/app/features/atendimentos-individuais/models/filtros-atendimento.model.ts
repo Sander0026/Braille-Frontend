@@ -1,5 +1,5 @@
 import { StatusAcompanhamentoIndividual } from './acompanhamento-individual.model';
-import { TipoRegistroAtendimentoIndividual } from './atendimento-individual.model';
+import { ModalidadeAtendimentoIndividual, TipoRegistroAtendimentoIndividual } from './atendimento-individual.model';
 
 export interface FiltroAcompanhamentoIndividual {
   page?: number;
@@ -17,6 +17,7 @@ export interface FiltroRelatorioAtendimento {
   professorId?: string;
   status?: StatusAcompanhamentoIndividual;
   tipoRegistro?: TipoRegistroAtendimentoIndividual;
+  modalidade?: ModalidadeAtendimentoIndividual;
   dataInicio?: string;
   dataFim?: string;
 }

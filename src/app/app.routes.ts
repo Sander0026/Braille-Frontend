@@ -95,7 +95,7 @@ export const routes: Routes = [
             .then(m => m.RelatoriosDashboard),
         title: 'Relatórios — ILBES',
         canActivate: [roleGuard],
-        data: { roles: ['ADMIN', 'SECRETARIA'] }
+        data: { roles: ['ADMIN', 'SECRETARIA', 'COMUNICACAO'] }
       },
 
       {

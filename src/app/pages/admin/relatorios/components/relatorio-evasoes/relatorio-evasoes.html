@@ -7,39 +7,198 @@
   <div class="section-toolbar">
     <div>
       <h2>Evasões</h2>
-      <p>{{ dados.totalEncerramentos }} encerramento(s)</p>
+      <p>{{ dados.totalEncerramentos }} encerramento(s) analisado(s)</p>
     </div>
-    <div class="summary-pills" aria-label="Resumo de encerramentos">
-      <span>Evasões {{ dados.totalEvasoes }}</span>
-      <span>Canceladas {{ dados.porStatus['CANCELADA'] || 0 }}</span>
-      <span>Transferidas {{ dados.porStatus['TRANSFERIDA'] || 0 }}</span>
+    <div class="summary-pills" aria-label="Resumo de evasões e saídas">
+      <span>Evasões {{ dados.indicadores.totalEvasoes }}</span>
+      <span>Canceladas {{ dados.indicadores.totalCancelamentos }}</span>
+      <span>Transferidas {{ dados.indicadores.totalTransferencias }}</span>
     </div>
+  </div>
+
+  <div class="evasoes-indicators" aria-label="Indicadores de evasões">
+    <article>
+      <span>Total de evasões</span>
+      <strong>{{ dados.indicadores.totalEvasoes }}</strong>
+    </article>
+    <article>
+      <span>Transferências</span>
+      <strong>{{ dados.indicadores.totalTransferencias }}</strong>
+    </article>
+    <article>
+      <span>Cancelamentos</span>
+      <strong>{{ dados.indicadores.totalCancelamentos }}</strong>
+    </article>
+    <article>
+      <span>Permanência média</span>
+      <strong>{{ formatarDias(dados.indicadores.tempoMedioPermanenciaDias) }}</strong>
+    </article>
+    <article>
+      <span>Sem motivo estruturado</span>
+      <strong>{{ dados.indicadores.semMotivoEstruturado }}</strong>
+    </article>
+    <article>
+      <span>Com atendimento individual</span>
+      <strong>{{ dados.indicadores.evasoesComAtendimentoIndividual }}</strong>
+    </article>
+    <article>
+      <span>Sem atendimento individual</span>
+      <strong>{{ dados.indicadores.evasoesSemAtendimentoIndividual }}</strong>
+    </article>
+    <article>
+      <span>Com faltas em atendimento</span>
+      <strong>{{ dados.indicadores.evasoesComFaltasEmAtendimento }}</strong>
+    </article>
+  </div>
+
+  <div class="analysis-grid">
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por motivo</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porMotivo); track item.label) {
+        <div class="bar-row">
+          <span>{{ motivoGrupoLabel(item.label) }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill danger" [style.width]="larguraBarra(item.total, dados.indicadores.porMotivo)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem evasões para os filtros informados.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por turma</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porTurma); track item.label) {
+        <div class="bar-row">
+          <span>{{ item.label }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill" [style.width]="larguraBarra(item.total, dados.indicadores.porTurma)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Nenhuma turma com evasão.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por mês</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porMes); track item.label) {
+        <div class="bar-row">
+          <span>{{ formatarMes(item.label) }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill" [style.width]="larguraBarra(item.total, dados.indicadores.porMes)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Nenhum mês com evasão.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Ranking de turmas</h3>
+      </header>
+      @for (item of rankingTurmas(); track item.label) {
+        <div class="bar-row ranking-row">
+          <span>{{ item.label }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill warning" [style.width]="larguraRanking(item.total)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Nenhuma turma no ranking.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por professor</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porProfessor); track item.label) {
+        <div class="compact-row">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem professor vinculado.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Perfil e território</h3>
+      </header>
+      <div class="mini-groups">
+        <div>
+          <h4>Tipo de deficiência</h4>
+          @for (item of grupoEntries(dados.indicadores.porTipoDeficiencia); track item.label) {
+            <span>{{ item.label }} <strong>{{ item.total }}</strong></span>
+          } @empty {
+            <span>Sem dados</span>
+          }
+        </div>
+        <div>
+          <h4>Cidade / bairro</h4>
+          @for (item of grupoEntries(dados.indicadores.porCidadeBairro); track item.label) {
+            <span>{{ item.label }} <strong>{{ item.total }}</strong></span>
+          } @empty {
+            <span>Sem dados</span>
+          }
+        </div>
+      </div>
+    </section>
   </div>
 
   @if (dados.data.length) {
     <div class="table-wrap">
-      <table class="data-table">
+      <table class="data-table evasoes-table">
         <thead>
           <tr>
             <th>Aluno</th>
+            <th>Matrícula</th>
             <th>Turma</th>
-            <th>Status</th>
+            <th>Professor</th>
+            <th>Data de entrada</th>
+            <th>Data de saída</th>
+            <th>Permanência</th>
+            <th>Status final</th>
             <th>Motivo</th>
-            <th>Encerramento</th>
-            <th>Cidade</th>
+            <th>Atendimento individual</th>
+            <th>Faltas no atendimento</th>
+            <th>Acompanhamento</th>
             <th>Observação</th>
+            <th>Registrado por</th>
+            <th>Data do registro</th>
           </tr>
         </thead>
         <tbody>
           @for (item of dados.data; track item.id) {
             <tr>
               <td class="main-cell">{{ item.aluno.nomeCompleto }}</td>
+              <td>{{ item.aluno.matricula || '-' }}</td>
               <td>{{ item.turma.nome }}</td>
+              <td>{{ item.turma.professor.nome || '-' }}</td>
+              <td>{{ formatarData(item.dataEntrada) }}</td>
+              <td>{{ formatarData(item.dataSaida || item.dataEncerramento || item.encerradoEm) }}</td>
+              <td>{{ formatarDias(item.tempoPermanenciaDias) }}</td>
               <td><span class="badge" [ngClass]="statusClass(item.status)">{{ statusLabel(item.status) }}</span></td>
               <td>{{ motivoLabel(item.motivoEncerramento) }}</td>
-              <td>{{ formatarData(item.encerradoEm || item.dataEncerramento) }}</td>
-              <td>{{ item.aluno.cidade || '-' }}</td>
+              <td>{{ formatarResumoAtendimento(item) }}</td>
+              <td>{{ formatarFaltasAtendimento(item) }}</td>
+              <td class="text-wide">{{ formatarResumoAcompanhamento(item) }}</td>
               <td class="text-wide">{{ item.observacao || '-' }}</td>
+              <td>{{ item.registradoPor?.nome || '-' }}</td>
+              <td>{{ formatarData(item.encerradoEm) }}</td>
             </tr>
           }
         </tbody>
