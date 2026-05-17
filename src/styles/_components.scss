@@ -512,7 +512,7 @@
     position: fixed;
     inset: 0;
     background-color: color-mix(in srgb, $color-black 55%, transparent);
-    z-index: 1000;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -521,6 +521,12 @@
 }
 
 .modal {
+    // Reset para elemento nativo <dialog> que quebra o Flexbox do pai
+    position: relative;
+    margin: 0;
+    padding: 0;
+    border: none;
+
     background: $color-white;
     border-radius: $border-radius-2xl;
     box-shadow: $shadow-lg;
