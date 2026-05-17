@@ -127,6 +127,9 @@ describe('RelatoriosDashboard', () => {
       presencaAbaixo60: 0,
       semRegistro30Dias: 0,
       matriculaAtivaSemFrequenciaRecente: 0,
+      acoesPendentes: 0,
+      acoesVencidas: 0,
+      acoesResolvidasNoMes: 0,
     },
     data: [],
   };

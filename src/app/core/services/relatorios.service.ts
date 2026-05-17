@@ -418,6 +418,12 @@ export interface RelatorioRiscoEvasaoItem {
   diasSemRegistro: number | null;
   criterios: string[];
   nivel: NivelRiscoEvasao;
+  acaoAberta?: {
+    id: string;
+    status: StatusAcaoRiscoEvasao;
+    responsavel?: string;
+    prazo?: string;
+  };
 }
 
 export interface RelatorioRiscoEvasaoResponse {
@@ -431,9 +437,24 @@ export interface RelatorioRiscoEvasaoResponse {
     presencaAbaixo60: number;
     semRegistro30Dias: number;
     matriculaAtivaSemFrequenciaRecente: number;
+    acoesPendentes: number;
+    acoesVencidas: number;
+    acoesResolvidasNoMes: number;
   };
   data: RelatorioRiscoEvasaoItem[];
 }
+
+export type StatusAcaoRiscoEvasao = 'PENDENTE' | 'EM_ANDAMENTO' | 'RESOLVIDA' | 'SEM_CONTATO' | 'CANCELADA';
+export type TipoAcaoRiscoEvasao =
+  | 'CONTATO_TELEFONICO'
+  | 'WHATSAPP'
+  | 'REUNIAO_PRESENCIAL'
+  | 'ENCAMINHAMENTO_ASSISTENCIAL'
+  | 'AJUSTE_DE_HORARIO'
+  | 'TRANSFERENCIA_DE_TURMA'
+  | 'JUSTIFICATIVA_DE_FALTA'
+  | 'VISITA_DOMICILIAR'
+  | 'OUTRO';
 
 export interface RelatorioImpactoMetricas {
   totalAlunosAtendidos: number;

@@ -15,7 +15,7 @@ describe('BeneficiaryList', () => {
 
   beforeEach(async () => {
     beneficiariosService = {
-      listar: () => of({ items: [], total: 0 }),
+      listar: () => of({ data: [], meta: { total: 0, page: 1, lastPage: 1 } }),
     };
 
     await TestBed.configureTestingModule({
@@ -66,6 +66,8 @@ describe('BeneficiaryList', () => {
 
     it('deve comunicar regiões de carregamento ao leitor com aria-live="polite" e aria-busy="true"', () => {
       component.isLoading = true;
+      component.erro = '';
+      (component as any).cdr.markForCheck();
       fixture.detectChanges();
       
       const loadingDiv = fixture.nativeElement.querySelector('.data-table-wrapper[aria-busy="true"]');

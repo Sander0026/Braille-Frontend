@@ -23,11 +23,20 @@ import { formatarTelefone, formatarCep } from '../../../shared/utils/masks.util'
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { BeneficiaryFormComponent } from '../beneficiary-form/beneficiary-form';
+import { AlunoLinhaTempoComponent } from '../components/aluno-linha-tempo/aluno-linha-tempo';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
 import { AtestadosService, Atestado, PreviewAtestado } from '../../../core/services/atestados.service';
 import { LaudosService, LaudoMedico } from '../../../core/services/laudos.service';
 import { ModelosCertificadosService } from '../../../core/services/modelos-certificados.service';
+import {
+  AreaPdi,
+  PdiAluno,
+  PdiMeta,
+  PdiService,
+  StatusMetaPdi,
+  StatusPdi,
+} from '../../../core/services/pdi.service';
 import { ComponenteComDescarte } from '../../../core/interfaces/componente-com-descarte.interface';
 import { AcompanhamentoIndividual } from '../../atendimentos-individuais/models/acompanhamento-individual.model';
 import { AtendimentosIndividuaisApiService } from '../../atendimentos-individuais/services/atendimentos-individuais-api.service';
@@ -54,11 +63,36 @@ type InativacaoForm = {
   observacao: string;
 };
 
+type PdiForm = {
+  titulo: string;
+  objetivoGeral: string;
+  diagnosticoInicial: string;
+  necessidadesAcessibilidade: string;
+  recursosUtilizados: string;
+  observacoesGerais: string;
+  dataInicio: string;
+  dataFimPrevista: string;
+};
+
+type PdiMetaForm = {
+  area: AreaPdi;
+  descricao: string;
+  estrategia: string;
+  prazo: string;
+};
+
+type PdiEvolucaoForm = {
+  descricao: string;
+  dificuldades: string;
+  avancos: string;
+  proximosPassos: string;
+};
+
 @Component({
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, TelefonePipe, CepPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, TelefonePipe, CepPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent, AlunoLinhaTempoComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -121,6 +155,34 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
   frequenciasMap: Map<string, { presentes: number; faltas: number; taxaPresenca: number }> = new Map();
   acompanhamentosIndividuaisAluno: AcompanhamentoIndividual[] = [];
   carregandoAtendimentosIndividuais = false;
+  pdisAluno: PdiAluno[] = [];
+  pdiAtivoAluno: PdiAluno | null = null;
+  carregandoPdi = false;
+  salvandoPdi = false;
+  erroPdi = '';
+  modalPdiFormAberto = false;
+  modalPdiMetaAberto = false;
+  modalPdiEvolucaoAberto = false;
+  pdiForm: PdiForm = this.criarPdiFormPadrao();
+  pdiMetaForm: PdiMetaForm = this.criarPdiMetaFormPadrao();
+  pdiEvolucaoForm: PdiEvolucaoForm = this.criarPdiEvolucaoFormPadrao();
+  readonly areasPdiOptions: ReadonlyArray<{ value: AreaPdi; label: string }> = [
+    { value: 'BRAILLE', label: 'Braille' },
+    { value: 'ORIENTACAO_MOBILIDADE', label: 'Orientacao e mobilidade' },
+    { value: 'INFORMATICA_ACESSIVEL', label: 'Informatica acessivel' },
+    { value: 'AUTONOMIA', label: 'Autonomia' },
+    { value: 'SOCIALIZACAO', label: 'Socializacao' },
+    { value: 'ATIVIDADE_PEDAGOGICA', label: 'Atividade pedagogica' },
+    { value: 'OUTRO', label: 'Outro' },
+  ];
+  readonly statusMetaPdiOptions: ReadonlyArray<{ value: StatusMetaPdi; label: string }> = [
+    { value: 'NAO_INICIADA', label: 'Nao iniciada' },
+    { value: 'EM_ANDAMENTO', label: 'Em andamento' },
+    { value: 'ALCANCADA', label: 'Alcancada' },
+    { value: 'PARCIALMENTE_ALCANCADA', label: 'Parcialmente alcancada' },
+    { value: 'NAO_ALCANCADA', label: 'Nao alcancada' },
+    { value: 'CANCELADA', label: 'Cancelada' },
+  ];
 
   // KeyManager
   @ViewChildren(TabelaTrFocavelDirective) linhasTabela!: QueryList<TabelaTrFocavelDirective>;
@@ -203,6 +265,18 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     }
     if (this.modalLgpdAberto) {
       this.fecharModalLgpd();
+      return true;
+    }
+    if (this.modalPdiEvolucaoAberto) {
+      this.fecharModalEvolucaoPdi();
+      return true;
+    }
+    if (this.modalPdiMetaAberto) {
+      this.fecharModalMetaPdi();
+      return true;
+    }
+    if (this.modalPdiFormAberto) {
+      this.fecharModalCriarPdi();
       return true;
     }
     if (this.modalLaudoAberto) {
@@ -296,7 +370,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     private readonly laudosService: LaudosService,
     private readonly http: HttpClient,
     private readonly modelosCertificadosService: ModelosCertificadosService,
-    private readonly atendimentosIndividuaisService: AtendimentosIndividuaisApiService
+    private readonly atendimentosIndividuaisService: AtendimentosIndividuaisApiService,
+    private readonly pdiService: PdiService
   ) {
 
     this.filterForm = this.fb.group({
@@ -353,6 +428,7 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       !!this.alunoParaExcluirDefinitivo || !!this.documentoParaExcluir ||
       this.gerenciandoAtestados || this.modalAtestadoAberto ||
       this.gerenciandoLaudos || this.modalLaudoAberto ||
+      this.modalPdiFormAberto || this.modalPdiMetaAberto || this.modalPdiEvolucaoAberto ||
       this.modalLgpdAberto || this.mostrarVisualizadorPdf ||
       this.mostrarModalImagem || this.mostrarModalFicha;
 
@@ -932,11 +1008,15 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.alunoSelecionado = null;
     this.frequenciasMap.clear();
     this.acompanhamentosIndividuaisAluno = [];
+    this.pdisAluno = [];
+    this.pdiAtivoAluno = null;
+    this.erroPdi = '';
 
     this.beneficiariosService.buscarPorId(aluno.id).subscribe({
       next: (dadosCompletos) => {
         this.alunoSelecionado = dadosCompletos;
         this.carregarAcompanhamentosIndividuaisDoAluno(dadosCompletos.id);
+        this.carregarPdisDoAluno(dadosCompletos.id);
 
         // Se o aluno tiver matrículas em oficinas, busca as frequências para cada uma
         const matriculasAtivas = dadosCompletos.matriculasOficina?.filter(m => m.status === 'ATIVA' || m.status === 'CONCLUIDA') || [];
@@ -992,17 +1072,255 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
       });
   }
 
+  private carregarPdisDoAluno(alunoId: string): void {
+    this.carregandoPdi = true;
+    this.pdiService.listarPorAluno(alunoId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (pdis) => {
+          this.pdisAluno = pdis;
+          this.pdiAtivoAluno = pdis.find((pdi) => pdi.status === 'ATIVO') ?? null;
+          this.carregandoPdi = false;
+          this.cdr.markForCheck();
+        },
+        error: () => {
+          this.pdisAluno = [];
+          this.pdiAtivoAluno = null;
+          this.carregandoPdi = false;
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  abrirModalCriarPdi(): void {
+    if (!this.alunoSelecionado) return;
+    this.erroPdi = '';
+    this.pdiForm = this.criarPdiFormPadrao();
+    this.pdiForm.titulo = `PDI - ${this.alunoSelecionado.nomeCompleto}`;
+    this.modalPdiFormAberto = true;
+  }
+
+  fecharModalCriarPdi(): void {
+    this.modalPdiFormAberto = false;
+    this.pdiForm = this.criarPdiFormPadrao();
+    this.erroPdi = '';
+  }
+
+  salvarPdi(): void {
+    if (!this.alunoSelecionado || this.salvandoPdi) return;
+    if (!this.pdiForm.titulo.trim() || !this.pdiForm.objetivoGeral.trim()) {
+      this.erroPdi = 'Informe titulo e objetivo geral do PDI.';
+      return;
+    }
+
+    this.salvandoPdi = true;
+    this.pdiService.criar({
+      alunoId: this.alunoSelecionado.id,
+      titulo: this.pdiForm.titulo,
+      objetivoGeral: this.pdiForm.objetivoGeral,
+      diagnosticoInicial: this.pdiForm.diagnosticoInicial,
+      necessidadesAcessibilidade: this.pdiForm.necessidadesAcessibilidade,
+      recursosUtilizados: this.pdiForm.recursosUtilizados,
+      observacoesGerais: this.pdiForm.observacoesGerais,
+      dataInicio: this.pdiForm.dataInicio,
+      dataFimPrevista: this.pdiForm.dataFimPrevista,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.salvandoPdi = false;
+        this.toast.sucesso('PDI criado com sucesso.');
+        this.fecharModalCriarPdi();
+        this.carregarPdisDoAluno(this.alunoSelecionado!.id);
+      },
+      error: (err) => {
+        this.salvandoPdi = false;
+        this.erroPdi = err?.error?.message || 'Nao foi possivel criar o PDI.';
+        this.toast.erro(this.erroPdi);
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  abrirModalMetaPdi(): void {
+    if (!this.pdiAtivoAluno) return;
+    this.erroPdi = '';
+    this.pdiMetaForm = this.criarPdiMetaFormPadrao();
+    this.modalPdiMetaAberto = true;
+  }
+
+  fecharModalMetaPdi(): void {
+    this.modalPdiMetaAberto = false;
+    this.pdiMetaForm = this.criarPdiMetaFormPadrao();
+    this.erroPdi = '';
+  }
+
+  salvarMetaPdi(): void {
+    if (!this.alunoSelecionado || !this.pdiAtivoAluno || this.salvandoPdi) return;
+    if (!this.pdiMetaForm.descricao.trim()) {
+      this.erroPdi = 'Informe a descricao da meta.';
+      return;
+    }
+
+    this.salvandoPdi = true;
+    this.pdiService.criarMeta(this.pdiAtivoAluno.id, this.pdiMetaForm)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.salvandoPdi = false;
+          this.toast.sucesso('Meta adicionada ao PDI.');
+          this.fecharModalMetaPdi();
+          this.carregarPdisDoAluno(this.alunoSelecionado!.id);
+        },
+        error: (err) => {
+          this.salvandoPdi = false;
+          this.erroPdi = err?.error?.message || 'Nao foi possivel adicionar a meta.';
+          this.toast.erro(this.erroPdi);
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  atualizarStatusMetaPdi(meta: PdiMeta, status: StatusMetaPdi): void {
+    if (!this.alunoSelecionado || !this.pdiAtivoAluno) return;
+    this.pdiService.atualizarMeta(this.pdiAtivoAluno.id, meta.id, { status })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.toast.sucesso('Status da meta atualizado.');
+          this.carregarPdisDoAluno(this.alunoSelecionado!.id);
+        },
+        error: (err) => this.toast.erro(err?.error?.message || 'Nao foi possivel atualizar a meta.')
+      });
+  }
+
+  abrirModalEvolucaoPdi(): void {
+    if (!this.pdiAtivoAluno) return;
+    this.erroPdi = '';
+    this.pdiEvolucaoForm = this.criarPdiEvolucaoFormPadrao();
+    this.modalPdiEvolucaoAberto = true;
+  }
+
+  fecharModalEvolucaoPdi(): void {
+    this.modalPdiEvolucaoAberto = false;
+    this.pdiEvolucaoForm = this.criarPdiEvolucaoFormPadrao();
+    this.erroPdi = '';
+  }
+
+  salvarEvolucaoPdi(): void {
+    if (!this.alunoSelecionado || !this.pdiAtivoAluno || this.salvandoPdi) return;
+    if (!this.pdiEvolucaoForm.descricao.trim()) {
+      this.erroPdi = 'Informe a descricao da evolucao.';
+      return;
+    }
+
+    this.salvandoPdi = true;
+    this.pdiService.criarEvolucao(this.pdiAtivoAluno.id, this.pdiEvolucaoForm)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.salvandoPdi = false;
+          this.toast.sucesso('Evolucao registrada no PDI.');
+          this.fecharModalEvolucaoPdi();
+          this.carregarPdisDoAluno(this.alunoSelecionado!.id);
+        },
+        error: (err) => {
+          this.salvandoPdi = false;
+          this.erroPdi = err?.error?.message || 'Nao foi possivel registrar a evolucao.';
+          this.toast.erro(this.erroPdi);
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  concluirPdi(): void {
+    if (!this.alunoSelecionado || !this.pdiAtivoAluno || this.salvandoPdi) return;
+    this.salvandoPdi = true;
+    this.pdiService.atualizar(this.pdiAtivoAluno.id, {
+      status: 'CONCLUIDO',
+      dataConclusao: this.hojeIso(),
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.salvandoPdi = false;
+        this.toast.sucesso('PDI concluido com sucesso.');
+        this.carregarPdisDoAluno(this.alunoSelecionado!.id);
+      },
+      error: (err) => {
+        this.salvandoPdi = false;
+        this.toast.erro(err?.error?.message || 'Nao foi possivel concluir o PDI.');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  statusPdiLabel(status?: StatusPdi | string | null): string {
+    const labels: Record<StatusPdi, string> = {
+      ATIVO: 'Ativo',
+      CONCLUIDO: 'Concluido',
+      SUSPENSO: 'Suspenso',
+      ARQUIVADO: 'Arquivado',
+    };
+    return status ? (labels[status as StatusPdi] ?? status) : '-';
+  }
+
+  areaPdiLabel(area?: AreaPdi | string | null): string {
+    return this.areasPdiOptions.find((item) => item.value === area)?.label ?? area ?? '-';
+  }
+
+  statusMetaPdiLabel(status?: StatusMetaPdi | string | null): string {
+    return this.statusMetaPdiOptions.find((item) => item.value === status)?.label ?? status ?? '-';
+  }
+
+  private criarPdiFormPadrao(): PdiForm {
+    return {
+      titulo: '',
+      objetivoGeral: '',
+      diagnosticoInicial: '',
+      necessidadesAcessibilidade: '',
+      recursosUtilizados: '',
+      observacoesGerais: '',
+      dataInicio: this.hojeIso(),
+      dataFimPrevista: '',
+    };
+  }
+
+  private criarPdiMetaFormPadrao(): PdiMetaForm {
+    return {
+      area: 'BRAILLE',
+      descricao: '',
+      estrategia: '',
+      prazo: '',
+    };
+  }
+
+  private criarPdiEvolucaoFormPadrao(): PdiEvolucaoForm {
+    return {
+      descricao: '',
+      dificuldades: '',
+      avancos: '',
+      proximosPassos: '',
+    };
+  }
+
+  private hojeIso(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
   fecharModal(): void {
     this.gerenciandoAtestados = false;
     this.modalAtestadoAberto = false;
     this.gerenciandoLaudos = false;
     this.modalLaudoAberto = false;
     this.modalLgpdAberto = false;
+    this.modalPdiFormAberto = false;
+    this.modalPdiMetaAberto = false;
+    this.modalPdiEvolucaoAberto = false;
     this.statusAtestados = '';
     this.statusLaudos = '';
     this.statusLgpd = '';
+    this.erroPdi = '';
     this.modalAberto = false;
     this.alunoSelecionado = null;
+    this.pdisAluno = [];
+    this.pdiAtivoAluno = null;
     this.popFocus();
   }
 

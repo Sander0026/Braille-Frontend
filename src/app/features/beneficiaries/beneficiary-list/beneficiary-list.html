@@ -248,7 +248,7 @@
         <button type="button" class="btn btn-secondary" (click)="limparFiltros()">
             Limpar
         </button>
-        <button type="button" class="btn btn-primary" (click)="aplicarFiltros()">
+        <button type="button" class="btn btn-primary" (click)="aplicarFiltros()" aria-label="Aplicar filtros avançados">
             <span class="material-symbols-rounded">check</span>
             Aplicar Filtros
             @if (quantidadeFiltrosAtivos > 0) { ({{ quantidadeFiltrosAtivos }}) }
@@ -689,6 +689,129 @@
                 }
             </div>
 
+            <div class="profile-section full-width historico-section pdi-section">
+                <div class="pdi-header">
+                    <h4>
+                        <span class="material-symbols-rounded"
+                            style="font-size:16px;vertical-align:middle;margin-right:4px;">track_changes</span>
+                        Plano Individual do Aluno
+                    </h4>
+                    <div class="pdi-actions">
+                        @if (pdiAtivoAluno) {
+                        <button class="btn btn-outline-primary btn-sm" (click)="abrirModalMetaPdi()">Adicionar meta</button>
+                        <button class="btn btn-outline-primary btn-sm" (click)="abrirModalEvolucaoPdi()">Adicionar evolução</button>
+                        <button class="btn btn-outline-secondary btn-sm" (click)="concluirPdi()" [disabled]="salvandoPdi">Concluir PDI</button>
+                        } @else {
+                        <button class="btn btn-primary btn-sm" (click)="abrirModalCriarPdi()">Criar PDI</button>
+                        }
+                    </div>
+                </div>
+
+                @if (carregandoPdi) {
+                <p style="color: #4b5563; font-size: 0.875rem; margin-top: 4px;">Carregando PDI...</p>
+                } @else if (pdiAtivoAluno; as pdi) {
+                <div class="pdi-card">
+                    <div class="pdi-summary">
+                        <span class="badge-status badge-status--ativa">{{ statusPdiLabel(pdi.status) }}</span>
+                        <span><strong>Professor responsável:</strong> {{ pdi.professorResponsavel?.nome || 'Não informado' }}</span>
+                        <span><strong>Início:</strong> {{ pdi.dataInicio | dataBraille }}</span>
+                        <span><strong>Previsão:</strong> {{ pdi.dataFimPrevista ? (pdi.dataFimPrevista | dataBraille) : 'N/I' }}</span>
+                    </div>
+                    <h5>{{ pdi.titulo }}</h5>
+                    <p><strong>Objetivo geral:</strong> {{ pdi.objetivoGeral }}</p>
+                    @if (pdi.necessidadesAcessibilidade || pdi.recursosUtilizados) {
+                    <p>
+                        @if (pdi.necessidadesAcessibilidade) {
+                        <strong>Necessidades:</strong> {{ pdi.necessidadesAcessibilidade }}
+                        }
+                        @if (pdi.recursosUtilizados) {
+                        <br><strong>Recursos:</strong> {{ pdi.recursosUtilizados }}
+                        }
+                    </p>
+                    }
+                </div>
+
+                <h5 class="pdi-subtitle">Metas</h5>
+                @if (pdi.metas.length) {
+                <div class="table-responsive">
+                    <table class="historico-table">
+                        <thead>
+                            <tr>
+                                <th>Meta</th>
+                                <th>Área</th>
+                                <th>Prazo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (meta of pdi.metas; track meta.id) {
+                            <tr>
+                                <td>
+                                    <strong>{{ meta.descricao }}</strong>
+                                    @if (meta.estrategia) {
+                                    <br><small>{{ meta.estrategia }}</small>
+                                    }
+                                </td>
+                                <td>{{ areaPdiLabel(meta.area) }}</td>
+                                <td>{{ meta.prazo ? (meta.prazo | dataBraille) : 'N/I' }}</td>
+                                <td>
+                                    <select class="pdi-status-select" [ngModel]="meta.status"
+                                        (ngModelChange)="atualizarStatusMetaPdi(meta, $event)">
+                                        @for (status of statusMetaPdiOptions; track status.value) {
+                                        <option [value]="status.value">{{ status.label }}</option>
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                } @else {
+                <p style="color: #4b5563; font-size: 0.875rem;">Nenhuma meta registrada.</p>
+                }
+
+                <h5 class="pdi-subtitle">Evoluções</h5>
+                @if (pdi.evolucoes.length) {
+                <div class="table-responsive">
+                    <table class="historico-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Registrado por</th>
+                                <th>Avanços</th>
+                                <th>Dificuldades</th>
+                                <th>Próximos passos</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (evolucao of pdi.evolucoes; track evolucao.id) {
+                            <tr>
+                                <td>{{ evolucao.dataRegistro | dataBraille }}</td>
+                                <td>{{ evolucao.registradoPor?.nome || 'N/I' }}</td>
+                                <td>{{ evolucao.avancos || evolucao.descricao }}</td>
+                                <td>{{ evolucao.dificuldades || '-' }}</td>
+                                <td>{{ evolucao.proximosPassos || '-' }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                } @else {
+                <p style="color: #4b5563; font-size: 0.875rem;">Nenhuma evolução registrada.</p>
+                }
+                } @else {
+                <p style="color: #4b5563; font-size: 0.875rem; margin-top: 4px;">
+                    Nenhum PDI ativo para este aluno.
+                    @if (pdisAluno.length > 0) {
+                    Histórico preservado: {{ pdisAluno.length }} PDI(s) registrado(s).
+                    }
+                </p>
+                }
+            </div>
+
+            <app-aluno-linha-tempo [alunoId]="alunoSelecionado.id"></app-aluno-linha-tempo>
+
             <!-- ═══ Documentação de Saúde & Presença (Botões de Ação) ═══ -->
             <div class="profile-section full-width historico-section">
                 <h4 style="display:flex; align-items:center; gap:0.5rem; margin-bottom: 1rem;">
@@ -735,6 +858,143 @@
                 Imprimir Ficha
             </button>
             }
+        </div>
+    </div>
+</div>
+}
+
+@if (modalPdiFormAberto) {
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-labelledby="modal-pdi-titulo"
+    (click)="fecharModalCriarPdi()">
+    <div class="modal modal--large pdi-modal" (click)="$event.stopPropagation()" tabindex="-1">
+        <div class="modal-header">
+            <h2 id="modal-pdi-titulo">Criar PDI</h2>
+            <button class="btn-close" (click)="fecharModalCriarPdi()" aria-label="Fechar modal de PDI">×</button>
+        </div>
+        <div class="modal-body pdi-form-grid">
+            @if (erroPdi) {
+            <div class="pdi-error" role="alert">{{ erroPdi }}</div>
+            }
+            <label>
+                Título
+                <input type="text" [(ngModel)]="pdiForm.titulo" maxlength="180">
+            </label>
+            <label>
+                Data de início
+                <input type="date" [(ngModel)]="pdiForm.dataInicio">
+            </label>
+            <label>
+                Previsão de término
+                <input type="date" [(ngModel)]="pdiForm.dataFimPrevista">
+            </label>
+            <label class="span-2">
+                Objetivo geral
+                <textarea rows="4" maxlength="3000" [(ngModel)]="pdiForm.objetivoGeral"></textarea>
+            </label>
+            <label class="span-2">
+                Diagnóstico inicial
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiForm.diagnosticoInicial"></textarea>
+            </label>
+            <label class="span-2">
+                Necessidades de acessibilidade
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiForm.necessidadesAcessibilidade"></textarea>
+            </label>
+            <label class="span-2">
+                Recursos utilizados
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiForm.recursosUtilizados"></textarea>
+            </label>
+            <label class="span-2">
+                Observações gerais
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiForm.observacoesGerais"></textarea>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalCriarPdi()">Cancelar</button>
+            <button class="btn btn-primary" [disabled]="salvandoPdi" (click)="salvarPdi()">
+                {{ salvandoPdi ? 'Salvando...' : 'Criar PDI' }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+@if (modalPdiMetaAberto) {
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-labelledby="modal-pdi-meta-titulo"
+    (click)="fecharModalMetaPdi()">
+    <div class="modal pdi-modal" (click)="$event.stopPropagation()" tabindex="-1">
+        <div class="modal-header">
+            <h2 id="modal-pdi-meta-titulo">Adicionar meta ao PDI</h2>
+            <button class="btn-close" (click)="fecharModalMetaPdi()" aria-label="Fechar modal de meta">×</button>
+        </div>
+        <div class="modal-body pdi-form-grid">
+            @if (erroPdi) {
+            <div class="pdi-error" role="alert">{{ erroPdi }}</div>
+            }
+            <label>
+                Área
+                <select [(ngModel)]="pdiMetaForm.area">
+                    @for (area of areasPdiOptions; track area.value) {
+                    <option [value]="area.value">{{ area.label }}</option>
+                    }
+                </select>
+            </label>
+            <label>
+                Prazo
+                <input type="date" [(ngModel)]="pdiMetaForm.prazo">
+            </label>
+            <label class="span-2">
+                Meta
+                <textarea rows="4" maxlength="1200" [(ngModel)]="pdiMetaForm.descricao"></textarea>
+            </label>
+            <label class="span-2">
+                Estratégia
+                <textarea rows="3" maxlength="1200" [(ngModel)]="pdiMetaForm.estrategia"></textarea>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalMetaPdi()">Cancelar</button>
+            <button class="btn btn-primary" [disabled]="salvandoPdi" (click)="salvarMetaPdi()">
+                {{ salvandoPdi ? 'Salvando...' : 'Adicionar meta' }}
+            </button>
+        </div>
+    </div>
+</div>
+}
+
+@if (modalPdiEvolucaoAberto) {
+<div class="modal-backdrop modal-edicao" role="dialog" aria-modal="true" aria-labelledby="modal-pdi-evolucao-titulo"
+    (click)="fecharModalEvolucaoPdi()">
+    <div class="modal pdi-modal" (click)="$event.stopPropagation()" tabindex="-1">
+        <div class="modal-header">
+            <h2 id="modal-pdi-evolucao-titulo">Registrar evolução</h2>
+            <button class="btn-close" (click)="fecharModalEvolucaoPdi()" aria-label="Fechar modal de evolução">×</button>
+        </div>
+        <div class="modal-body pdi-form-grid">
+            @if (erroPdi) {
+            <div class="pdi-error" role="alert">{{ erroPdi }}</div>
+            }
+            <label class="span-2">
+                Descrição
+                <textarea rows="4" maxlength="3000" [(ngModel)]="pdiEvolucaoForm.descricao"></textarea>
+            </label>
+            <label class="span-2">
+                Avanços
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiEvolucaoForm.avancos"></textarea>
+            </label>
+            <label class="span-2">
+                Dificuldades
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiEvolucaoForm.dificuldades"></textarea>
+            </label>
+            <label class="span-2">
+                Próximos passos
+                <textarea rows="3" maxlength="3000" [(ngModel)]="pdiEvolucaoForm.proximosPassos"></textarea>
+            </label>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="fecharModalEvolucaoPdi()">Cancelar</button>
+            <button class="btn btn-primary" [disabled]="salvandoPdi" (click)="salvarEvolucaoPdi()">
+                {{ salvandoPdi ? 'Salvando...' : 'Registrar evolução' }}
+            </button>
         </div>
     </div>
 </div>

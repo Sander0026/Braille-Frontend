@@ -138,7 +138,8 @@
       <app-relatorio-evasoes
         [relatorio]="evasoes()"
         [risco]="riscoEvasao()"
-        [carregando]="carregando()">
+        [carregando]="carregando()"
+        (acaoRiscoAtualizada)="recarregar()">
       </app-relatorio-evasoes>
     </section>
 

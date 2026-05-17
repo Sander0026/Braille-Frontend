@@ -1,0 +1,222 @@
+.timeline-section {
+  .timeline-header {
+    align-items: flex-start;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.85rem;
+
+    h4 {
+      align-items: center;
+      display: flex;
+      gap: 0.35rem;
+      margin-bottom: 0.2rem;
+    }
+
+    p {
+      color: #6b7280;
+      font-size: 0.82rem;
+      margin: 0;
+    }
+  }
+}
+
+.timeline-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+}
+
+.timeline-filter {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  color: #374151;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-height: 34px;
+  padding: 0.35rem 0.75rem;
+
+  &.active {
+    background: #0f766e;
+    border-color: #0f766e;
+    color: #ffffff;
+  }
+}
+
+.timeline-loading,
+.timeline-empty,
+.timeline-error {
+  border-radius: 8px;
+  font-size: 0.86rem;
+  margin: 0;
+  padding: 0.8rem;
+}
+
+.timeline-loading {
+  align-items: center;
+  background: #f8fafc;
+  color: #4b5563;
+  display: flex;
+  gap: 0.65rem;
+}
+
+.timeline-empty {
+  background: #f8fafc;
+  color: #4b5563;
+}
+
+.timeline-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+}
+
+.timeline-list {
+  position: relative;
+
+  &::before {
+    background: #d1d5db;
+    bottom: 0;
+    content: '';
+    left: 7px;
+    position: absolute;
+    top: 2.1rem;
+    width: 2px;
+  }
+}
+
+.timeline-year {
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin: 0.7rem 0 0.45rem 1.8rem;
+}
+
+.timeline-month {
+  color: #4b5563;
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin: 0.35rem 0 0.45rem 1.8rem;
+  text-transform: capitalize;
+}
+
+.timeline-event {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: 16px minmax(0, 1fr);
+  margin-bottom: 0.75rem;
+  position: relative;
+
+  .timeline-marker {
+    background: #64748b;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px #cbd5e1;
+    height: 14px;
+    margin-top: 0.55rem;
+    width: 14px;
+    z-index: 1;
+  }
+
+  .timeline-content {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 0.75rem 0.85rem;
+  }
+
+  h5 {
+    color: #111827;
+    font-size: 0.94rem;
+    margin: 0.25rem 0;
+  }
+
+  p {
+    color: #4b5563;
+    font-size: 0.86rem;
+    line-height: 1.45;
+    margin: 0.3rem 0 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.timeline-event__top,
+.timeline-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+}
+
+.timeline-event__top {
+  align-items: center;
+
+  time {
+    color: #111827;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  span {
+    background: #f3f4f6;
+    border-radius: 999px;
+    color: #374151;
+    font-size: 0.7rem;
+    font-weight: 800;
+    padding: 0.16rem 0.5rem;
+    text-transform: uppercase;
+  }
+}
+
+.timeline-meta {
+  margin-top: 0.5rem;
+
+  span {
+    color: #6b7280;
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+}
+
+.timeline-event--frequencia .timeline-marker {
+  background: #2563eb;
+}
+
+.timeline-event--pdi .timeline-marker {
+  background: #7c3aed;
+}
+
+.timeline-event--matricula .timeline-marker {
+  background: #0f766e;
+}
+
+.timeline-event--certificado .timeline-marker {
+  background: #ca8a04;
+}
+
+.timeline-event--risco .timeline-marker {
+  background: #dc2626;
+}
+
+.timeline-event--documento .timeline-marker {
+  background: #0891b2;
+}
+
+.timeline-event--atendimento .timeline-marker {
+  background: #4f46e5;
+}
+
+.timeline-more {
+  margin-left: 1.8rem;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 640px) {
+  .timeline-filter {
+    flex: 1 1 calc(50% - 0.45rem);
+  }
+}

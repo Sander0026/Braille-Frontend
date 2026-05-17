@@ -127,6 +127,55 @@ export interface PaginatedResponse<T> {
     meta: { total: number; page: number; lastPage: number };
 }
 
+export type TipoEventoLinhaTempoAluno =
+    | 'CADASTRO'
+    | 'ATUALIZACAO_CADASTRO'
+    | 'MATRICULA_TURMA'
+    | 'ENCERRAMENTO_MATRICULA'
+    | 'FREQUENCIA_PRESENTE'
+    | 'FREQUENCIA_FALTA'
+    | 'FREQUENCIA_FALTA_JUSTIFICADA'
+    | 'ATENDIMENTO_INDIVIDUAL'
+    | 'FALTA_ATENDIMENTO'
+    | 'ATESTADO'
+    | 'LAUDO'
+    | 'CERTIFICADO'
+    | 'PDI_CRIADO'
+    | 'PDI_META_ATUALIZADA'
+    | 'PDI_EVOLUCAO'
+    | 'ACAO_RISCO_EVASAO'
+    | 'INATIVACAO'
+    | 'REATIVACAO';
+
+export interface LinhaTempoAlunoItem {
+    id: string;
+    tipo: TipoEventoLinhaTempoAluno;
+    data: string;
+    titulo: string;
+    descricao?: string;
+    origem: string;
+    alunoId: string;
+    turmaId?: string;
+    turmaNome?: string;
+    professorNome?: string;
+    usuarioNome?: string;
+    metadata?: Record<string, unknown>;
+}
+
+export interface LinhaTempoAlunoResponse {
+    data: LinhaTempoAlunoItem[];
+    meta: { page: number; limit: number; total: number; lastPage: number };
+}
+
+export interface LinhaTempoAlunoQuery {
+    dataInicio?: string;
+    dataFim?: string;
+    tipo?: string;
+    turmaId?: string;
+    page?: number;
+    limit?: number;
+}
+
 /** Resposta quando o CPF/RG já existe inativo no sistema */
 export interface ReativacaoAluno {
     _reativacao: true;
@@ -197,6 +246,16 @@ export class BeneficiariosService {
     buscarResumo(busca: string): Observable<BeneficiarioResumo[]> {
         let params = new HttpParams().set('busca', busca);
         return this.http.get<BeneficiarioResumo[]>(`${this.url}/search`, { params });
+    }
+
+    linhaTempo(id: string, query: LinhaTempoAlunoQuery = {}): Observable<LinhaTempoAlunoResponse> {
+        let params = new HttpParams();
+        Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params = params.set(key, String(value));
+            }
+        });
+        return this.http.get<LinhaTempoAlunoResponse>(`${this.url}/${id}/linha-tempo`, { params });
     }
 
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {

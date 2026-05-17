@@ -177,6 +177,186 @@
   color: #374151;
 }
 
+.risk-card__action {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  min-width: 0;
+  padding: 0.65rem;
+
+  > div:first-child {
+    min-width: 0;
+  }
+
+  strong {
+    color: #111827;
+    font-size: 0.86rem;
+  }
+
+  span {
+    color: #4b5563;
+    display: block;
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.risk-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  justify-content: flex-end;
+}
+
+.modal-backdrop {
+  background: rgba(17, 24, 39, 0.46);
+  inset: 0;
+  position: fixed;
+  z-index: 70;
+}
+
+.action-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 24px 60px rgba(17, 24, 39, 0.24);
+  display: grid;
+  gap: 1rem;
+  left: 50%;
+  max-height: min(720px, calc(100vh - 2rem));
+  max-width: min(680px, calc(100vw - 2rem));
+  overflow: auto;
+  padding: 1rem;
+  position: fixed;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  z-index: 80;
+
+  > header,
+  > footer {
+    align-items: flex-start;
+    display: flex;
+    gap: 0.8rem;
+    justify-content: space-between;
+  }
+
+  > footer {
+    align-items: center;
+    border-top: 1px solid #e5e7eb;
+    justify-content: flex-end;
+    padding-top: 0.85rem;
+  }
+
+  h3 {
+    color: #111827;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  p {
+    color: #4b5563;
+    font-size: 0.84rem;
+    margin: 0.25rem 0 0;
+  }
+}
+
+.icon-button {
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  color: #374151;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1.1rem;
+  font-weight: 800;
+  height: 36px;
+  justify-content: center;
+  line-height: 1;
+  width: 36px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-grid label,
+.result-field {
+  color: #374151;
+  display: grid;
+  font-size: 0.82rem;
+  font-weight: 800;
+  gap: 0.35rem;
+}
+
+.form-grid select,
+.form-grid input,
+.form-grid textarea,
+.result-field textarea {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  color: #111827;
+  font: inherit;
+  min-height: 42px;
+  padding: 0.55rem 0.65rem;
+  resize: vertical;
+}
+
+.span-2 {
+  grid-column: 1 / -1;
+}
+
+.form-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  font-size: 0.86rem;
+  font-weight: 800;
+  margin: 0;
+  padding: 0.65rem;
+}
+
+.action-details {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+
+  div {
+    border-bottom: 1px solid #f3f4f6;
+    display: grid;
+    gap: 0.35rem;
+    grid-template-columns: minmax(110px, 0.35fr) minmax(0, 1fr);
+    padding-bottom: 0.55rem;
+  }
+
+  div:last-child {
+    border-bottom: 0;
+  }
+
+  dt {
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+
+  dd {
+    color: #111827;
+    font-size: 0.86rem;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
 .analysis-panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -306,6 +486,16 @@
 }
 
 @media (max-width: 720px) {
+  .risk-card__action,
+  .risk-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
   .bar-row {
     grid-template-columns: minmax(0, 1fr) auto;
   }

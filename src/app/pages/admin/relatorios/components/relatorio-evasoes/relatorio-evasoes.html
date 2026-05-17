@@ -82,6 +82,18 @@
           <span>Sem frequência recente</span>
           <strong>{{ riscoEvasao.indicadores.matriculaAtivaSemFrequenciaRecente }}</strong>
         </article>
+        <article>
+          <span>Ações pendentes</span>
+          <strong>{{ riscoEvasao.indicadores.acoesPendentes }}</strong>
+        </article>
+        <article>
+          <span>Ações vencidas</span>
+          <strong>{{ riscoEvasao.indicadores.acoesVencidas }}</strong>
+        </article>
+        <article>
+          <span>Resolvidas no mês</span>
+          <strong>{{ riscoEvasao.indicadores.acoesResolvidasNoMes }}</strong>
+        </article>
       </div>
 
       @if (riscoEvasao.data.length) {
@@ -103,12 +115,146 @@
                   <span>{{ criterio }}</span>
                 }
               </div>
+              <div class="risk-card__action">
+                @if (item.acaoAberta) {
+                  <div>
+                    <strong>{{ statusAcaoLabel(item.acaoAberta.status) }}</strong>
+                    <span>{{ item.acaoAberta.responsavel || 'Sem responsável' }} · prazo {{ formatarData(item.acaoAberta.prazo) }}</span>
+                  </div>
+                  <div class="risk-actions">
+                    <button type="button" class="btn btn-sm btn-secondary" (click)="abrirVerAcao(item)">Ver ação</button>
+                    <button type="button" class="btn btn-sm btn-success" (click)="abrirResolverAcao(item)">Resolver</button>
+                  </div>
+                } @else {
+                  <button type="button" class="btn btn-sm btn-primary" (click)="abrirCriarAcao(item)">Criar ação</button>
+                }
+              </div>
             </article>
           }
         </div>
       } @else {
         <p class="empty-panel">Nenhum aluno em risco pelos critérios atuais.</p>
       }
+    </section>
+  }
+
+  @if (itemCriacaoAcao(); as item) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharCriarAcao()"></div>
+    <section class="action-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-criar-acao">
+      <header>
+        <div>
+          <h3 id="titulo-criar-acao">Criar ação de intervenção</h3>
+          <p>{{ item.nomeCompleto }} · {{ item.turma }}</p>
+        </div>
+        <button type="button" class="icon-button" aria-label="Fechar" (click)="fecharCriarAcao()">×</button>
+      </header>
+
+      @if (erroAcao()) {
+        <p class="form-error" role="alert">{{ erroAcao() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Tipo de ação
+          <select [(ngModel)]="formAcao.tipoAcao">
+            @for (tipo of tiposAcao; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Motivo do risco
+          <select [(ngModel)]="formAcao.motivoRisco">
+            @for (criterio of item.criterios; track criterio) {
+              <option [value]="criterio">{{ criterio }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Responsável
+          <select [(ngModel)]="formAcao.responsavelId">
+            <option value="">Sem responsável definido</option>
+            @for (responsavel of responsaveis(); track responsavel.id) {
+              <option [value]="responsavel.id">{{ responsavel.nome }} · {{ responsavel.role }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Prazo
+          <input type="date" [(ngModel)]="formAcao.prazo">
+        </label>
+
+        <label class="span-2">
+          Descrição
+          <textarea rows="4" maxlength="1000" [(ngModel)]="formAcao.descricao"></textarea>
+        </label>
+      </div>
+
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="fecharCriarAcao()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="salvandoAcao()" (click)="salvarCriarAcao()">
+          {{ salvandoAcao() ? 'Salvando...' : 'Criar ação' }}
+        </button>
+      </footer>
+    </section>
+  }
+
+  @if (acaoDetalhe(); as acao) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharVerAcao()"></div>
+    <section class="action-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-ver-acao">
+      <header>
+        <div>
+          <h3 id="titulo-ver-acao">Ação de intervenção</h3>
+          <p>{{ acao.aluno.nomeCompleto }} · {{ acao.turma?.nome || 'Sem turma' }}</p>
+        </div>
+        <button type="button" class="icon-button" aria-label="Fechar" (click)="fecharVerAcao()">×</button>
+      </header>
+
+      <dl class="action-details">
+        <div><dt>Tipo</dt><dd>{{ tipoAcaoLabel(acao.tipoAcao) }}</dd></div>
+        <div><dt>Status</dt><dd>{{ statusAcaoLabel(acao.status) }}</dd></div>
+        <div><dt>Responsável</dt><dd>{{ acao.responsavel?.nome || '-' }}</dd></div>
+        <div><dt>Prazo</dt><dd>{{ formatarData(acao.prazo) }}</dd></div>
+        <div><dt>Motivo</dt><dd>{{ acao.motivoRisco }}</dd></div>
+        <div><dt>Descrição</dt><dd>{{ acao.descricao || '-' }}</dd></div>
+        <div><dt>Resultado</dt><dd>{{ acao.resultado || '-' }}</dd></div>
+      </dl>
+
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="fecharVerAcao()">Fechar</button>
+      </footer>
+    </section>
+  }
+
+  @if (acaoResolucao(); as item) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharResolverAcao()"></div>
+    <section class="action-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-resolver-acao">
+      <header>
+        <div>
+          <h3 id="titulo-resolver-acao">Resolver ação</h3>
+          <p>{{ item.nomeCompleto }} · {{ item.turma }}</p>
+        </div>
+        <button type="button" class="icon-button" aria-label="Fechar" (click)="fecharResolverAcao()">×</button>
+      </header>
+
+      @if (erroAcao()) {
+        <p class="form-error" role="alert">{{ erroAcao() }}</p>
+      }
+
+      <label class="result-field">
+        Resultado da intervenção
+        <textarea rows="5" maxlength="1000" [(ngModel)]="formResolucao.resultado"></textarea>
+      </label>
+
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="fecharResolverAcao()">Cancelar</button>
+        <button type="button" class="btn btn-success" [disabled]="salvandoAcao()" (click)="resolverAcao()">
+          {{ salvandoAcao() ? 'Salvando...' : 'Marcar como resolvida' }}
+        </button>
+      </footer>
     </section>
   }
 

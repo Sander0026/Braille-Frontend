@@ -30,6 +30,7 @@ sensiveis.
 | Rota lazy | `src/app/app.routes.ts` | Carrega `RelatoriosDashboard` em `/admin/relatorios` |
 | Menu lateral | `src/app/layouts/admin-layout/admin-layout.ts` | Exibe link Relatorios por role |
 | Service HTTP | `src/app/core/services/relatorios.service.ts` | Interfaces TS, filtros e chamadas para `/api/relatorios` |
+| Service de acoes de risco | `src/app/core/services/risco-evasao.service.ts` | Criacao, detalhe, status e cancelamento das intervencoes |
 | Container da tela | `src/app/pages/admin/relatorios/relatorios-dashboard/` | Estado, cache por aba, filtros e exportacoes |
 | Filtros | `components/relatorio-filtros/` | Drawer com filtros avancados e autocomplete |
 | Cards gerais | `components/cards-indicadores/` | Indicadores da aba Visao Geral |
@@ -71,6 +72,17 @@ Principais metodos:
 | `buscarOpcoes*` | `GET /api/relatorios/opcoes/*` |
 | `exportarPdf(filtro)` | `POST /api/relatorios/exportar/pdf` |
 | `exportarXlsx(filtro)` | `POST /api/relatorios/exportar/xlsx` |
+
+O acompanhamento de risco usa um service separado:
+
+| Metodo | Endpoint |
+|---|---|
+| `criar(payload)` | `POST /api/risco-evasao/acoes` |
+| `buscar(id)` | `GET /api/risco-evasao/acoes/:id` |
+| `atualizar(id, payload)` | `PATCH /api/risco-evasao/acoes/:id` |
+| `atualizarStatus(id, status, resultado)` | `PATCH /api/risco-evasao/acoes/:id/status` |
+| `listar(params)` | `GET /api/risco-evasao/acoes` |
+| `cancelar(id)` | `DELETE /api/risco-evasao/acoes/:id` |
 
 O metodo `alunos(filtro)` ainda existe no service apenas por compatibilidade com o endpoint legado
 `GET /api/relatorios/alunos`. Nao use em novas telas; prefira `alunosResumo`,
@@ -184,6 +196,7 @@ O risco de evasao mostra:
 - total priorizado;
 - contagem por nivel (`ALTO`, `MEDIO`, `BAIXO`);
 - contagem por criterio;
+- contagem de acoes pendentes, vencidas e resolvidas no mes;
 - lista de alunos com turma, professor, taxa de presenca, faltas seguidas e criterios.
 
 Criterios calculados no backend:
@@ -194,6 +207,32 @@ Criterios calculados no backend:
 - matricula ativa sem frequencia recente.
 
 O frontend apenas apresenta o resultado. Nao replique essa regra na tela.
+
+## Acoes de intervencao
+
+Cada item de risco pode vir com `acaoAberta`.
+
+Quando nao existe acao aberta, o card mostra `Criar acao`. O modal cria uma intervencao com:
+
+- tipo de acao;
+- motivo do risco;
+- responsavel opcional;
+- prazo;
+- descricao.
+
+Quando ja existe acao aberta, o card mostra:
+
+- status;
+- responsavel;
+- prazo;
+- botoes `Ver acao` e `Resolver`.
+
+Ao resolver, o modal exige `resultado`. Depois de criar ou resolver, o componente emite
+`acaoRiscoAtualizada`, e o dashboard chama `recarregar()` para atualizar `/evasoes` e
+`/risco-evasao` com o mesmo filtro.
+
+As regras de duplicidade, prazo vencido, permissao e auditoria ficam no backend. A tela apenas
+aciona os endpoints e exibe toast/erro.
 
 ---
 

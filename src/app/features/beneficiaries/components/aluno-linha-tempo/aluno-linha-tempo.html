@@ -1,0 +1,80 @@
+<section class="profile-section full-width historico-section timeline-section" aria-labelledby="linha-tempo-titulo">
+  <div class="timeline-header">
+    <div>
+      <h4 id="linha-tempo-titulo">
+        <span class="material-symbols-rounded" aria-hidden="true">timeline</span>
+        Linha do Tempo
+      </h4>
+      <p>{{ total }} evento(s) encontrado(s)</p>
+    </div>
+  </div>
+
+  <div class="timeline-filters" role="tablist" aria-label="Filtros da linha do tempo">
+    @for (filtro of filtros; track filtro.id) {
+      <button
+        type="button"
+        class="timeline-filter"
+        [class.active]="filtroAtivo === filtro.id"
+        [attr.aria-selected]="filtroAtivo === filtro.id ? 'true' : 'false'"
+        role="tab"
+        (click)="selecionarFiltro(filtro.id)">
+        {{ filtro.label }}
+      </button>
+    }
+  </div>
+
+  @if (erro) {
+    <p class="timeline-error" role="alert">{{ erro }}</p>
+  }
+
+  @if (carregando && eventos.length === 0) {
+    <div class="timeline-loading" aria-busy="true" aria-live="polite">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <span>Carregando linha do tempo...</span>
+    </div>
+  } @else if (eventos.length === 0) {
+    <p class="timeline-empty">Nenhum evento encontrado para este filtro.</p>
+  } @else {
+    <div class="timeline-list">
+      @for (evento of eventos; track evento.id; let i = $index) {
+        @if (mostrarAno(i)) {
+          <div class="timeline-year">{{ ano(evento.data) }}</div>
+        }
+        @if (mostrarMes(i)) {
+          <div class="timeline-month">{{ mesAno(evento.data) }}</div>
+        }
+
+        <article class="timeline-event" [ngClass]="classeTipo(evento.tipo)">
+          <div class="timeline-marker" aria-hidden="true"></div>
+          <div class="timeline-content">
+            <div class="timeline-event__top">
+              <time [attr.datetime]="evento.data">{{ evento.data | dataBraille }}</time>
+              <span>{{ tipoLabel(evento.tipo) }}</span>
+            </div>
+            <h5>{{ evento.titulo }}</h5>
+            @if (evento.descricao) {
+              <p>{{ evento.descricao }}</p>
+            }
+            <div class="timeline-meta">
+              @if (evento.turmaNome) {
+                <span>{{ evento.turmaNome }}</span>
+              }
+              @if (evento.professorNome) {
+                <span>Professor: {{ evento.professorNome }}</span>
+              }
+              @if (evento.usuarioNome) {
+                <span>Responsavel: {{ evento.usuarioNome }}</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+
+    @if (page < lastPage) {
+      <button type="button" class="btn btn-outline-primary btn-sm timeline-more" [disabled]="carregando" (click)="verMais()">
+        {{ carregando ? 'Carregando...' : 'Ver mais' }}
+      </button>
+    }
+  }
+</section>
