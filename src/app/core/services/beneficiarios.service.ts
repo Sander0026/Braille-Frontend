@@ -178,6 +178,11 @@ export interface LinhaTempoAlunoResumo {
     ultimaAcaoRisco?: string;
 }
 
+export interface LinhaTempoTurmaResumo {
+    id: string;
+    nome: string;
+}
+
 export interface LinhaTempoAlunoQuery {
     dataInicio?: string;
     dataFim?: string;
@@ -280,6 +285,10 @@ export class BeneficiariosService {
 
     linhaTempoResumo(id: string): Observable<LinhaTempoAlunoResumo> {
         return this.http.get<LinhaTempoAlunoResumo>(`${this.url}/${id}/linha-tempo/resumo`);
+    }
+
+    linhaTempoTurmas(id: string): Observable<LinhaTempoTurmaResumo[]> {
+        return this.http.get<LinhaTempoTurmaResumo[]>(`${this.url}/${id}/linha-tempo/turmas`);
     }
 
     criarEventoLinhaTempoManual(

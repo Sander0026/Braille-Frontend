@@ -29,7 +29,12 @@
 
       <label>
         <span>Turma</span>
-        <input type="text" name="turmaId" [(ngModel)]="turmaId" placeholder="UUID da turma">
+        <select name="turmaId" [(ngModel)]="turmaId" [disabled]="carregandoTurmas">
+          <option value="">{{ carregandoTurmas ? 'Carregando turmas...' : 'Todas as turmas do aluno' }}</option>
+          @for (turma of turmas; track turma.id) {
+            <option [value]="turma.id">{{ turma.nome }}</option>
+          }
+        </select>
       </label>
 
       <div class="timeline-filter-actions">

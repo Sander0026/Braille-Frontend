@@ -1,11 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import {
   Beneficiario,
   BeneficiariosService,
   LinhaTempoAlunoResumo,
+  LinhaTempoTurmaResumo,
 } from '../../../core/services/beneficiarios.service';
 import { DataBraillePipe } from '../../../shared/pipes/data-braille.pipe';
 import { AlunoLinhaTempoComponent } from '../components/aluno-linha-tempo/aluno-linha-tempo';
@@ -13,17 +15,31 @@ import { AlunoLinhaTempoComponent } from '../components/aluno-linha-tempo/aluno-
 @Component({
   selector: 'app-aluno-linha-tempo-page',
   standalone: true,
-  imports: [CommonModule, DataBraillePipe, AlunoLinhaTempoComponent],
+  imports: [CommonModule, FormsModule, DataBraillePipe, AlunoLinhaTempoComponent],
   templateUrl: './aluno-linha-tempo-page.html',
   styleUrl: './aluno-linha-tempo-page.scss',
 })
 export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
+  readonly tiposObservacao = [
+    'Reuniao com familia',
+    'Entrega de material',
+    'Contato com responsavel',
+    'Encaminhamento externo',
+    'Orientacao da secretaria',
+    'Observacao administrativa',
+  ];
+
   alunoId = '';
   aluno: Beneficiario | null = null;
   carregandoAluno = true;
   erro = '';
   resumo: LinhaTempoAlunoResumo = { totalEventos: 0 };
   refreshKey = 0;
+  observacaoAberta = false;
+  salvandoObservacao = false;
+  erroObservacao = '';
+  turmasObservacao: LinhaTempoTurmaResumo[] = [];
+  observacaoManual = this.novaObservacaoManual();
 
   private readonly destroy$ = new Subject<void>();
 
@@ -64,6 +80,56 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
     // Reservado para a proxima fase de exportacao.
   }
 
+  abrirObservacaoManual(): void {
+    this.observacaoManual = this.novaObservacaoManual();
+    this.erroObservacao = '';
+    this.observacaoAberta = true;
+    this.carregarTurmasObservacao();
+  }
+
+  fecharObservacaoManual(): void {
+    if (this.salvandoObservacao) return;
+    this.observacaoAberta = false;
+  }
+
+  selecionarTipoObservacao(titulo: string): void {
+    this.observacaoManual.titulo = titulo;
+  }
+
+  salvarObservacaoManual(): void {
+    const titulo = this.observacaoManual.titulo.trim();
+    if (!titulo) {
+      this.erroObservacao = 'Informe um titulo para a observacao.';
+      return;
+    }
+
+    this.salvandoObservacao = true;
+    this.erroObservacao = '';
+
+    this.beneficiariosService
+      .criarEventoLinhaTempoManual(this.alunoId, {
+        tipo: 'OBSERVACAO_MANUAL',
+        dataEvento: this.observacaoManual.dataEvento || undefined,
+        titulo,
+        descricao: this.observacaoManual.descricao.trim() || undefined,
+        turmaId: this.observacaoManual.turmaId || undefined,
+        sensivel: this.observacaoManual.sensivel,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.salvandoObservacao = false;
+          this.observacaoAberta = false;
+          this.refreshKey++;
+          this.carregarResumoLinhaTempo();
+        },
+        error: (err) => {
+          this.erroObservacao = err?.error?.message || 'Nao foi possivel registrar a observacao.';
+          this.salvandoObservacao = false;
+        },
+      });
+  }
+
   private carregarAluno(): void {
     this.carregandoAluno = true;
     this.erro = '';
@@ -95,5 +161,29 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
           this.resumo = { totalEventos: 0 };
         },
       });
+  }
+
+  private carregarTurmasObservacao(): void {
+    this.beneficiariosService
+      .linhaTempoTurmas(this.alunoId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (turmas) => {
+          this.turmasObservacao = turmas;
+        },
+        error: () => {
+          this.turmasObservacao = [];
+        },
+      });
+  }
+
+  private novaObservacaoManual() {
+    return {
+      titulo: '',
+      descricao: '',
+      dataEvento: new Date().toISOString().slice(0, 10),
+      turmaId: '',
+      sensivel: false,
+    };
   }
 }

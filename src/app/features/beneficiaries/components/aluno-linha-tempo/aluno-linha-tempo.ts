@@ -5,6 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import {
   BeneficiariosService,
   LinhaTempoAlunoItem,
+  LinhaTempoTurmaResumo,
   TipoEventoLinhaTempoAluno,
 } from '../../../../core/services/beneficiarios.service';
 import { DataBraillePipe } from '../../../../shared/pipes/data-braille.pipe';
@@ -49,12 +50,18 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   dataInicio = '';
   dataFim = '';
   turmaId = '';
+  turmas: LinhaTempoTurmaResumo[] = [];
+  carregandoTurmas = false;
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(private readonly beneficiariosService: BeneficiariosService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
+    if ((changes['alunoId'] || changes['modo']) && this.alunoId && this.modo === 'completo') {
+      this.carregarTurmas();
+    }
+
     if ((changes['alunoId'] || changes['refreshKey']) && this.alunoId) {
       this.recarregar();
     }
@@ -153,6 +160,29 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
     this.total = 0;
     this.lastPage = 1;
     this.carregar(1, false);
+  }
+
+  private carregarTurmas(): void {
+    if (!this.alunoId) return;
+    this.carregandoTurmas = true;
+
+    this.beneficiariosService
+      .linhaTempoTurmas(this.alunoId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (turmas) => {
+          this.turmas = turmas;
+          if (this.turmaId && !turmas.some((turma) => turma.id === this.turmaId)) {
+            this.turmaId = '';
+          }
+          this.carregandoTurmas = false;
+        },
+        error: () => {
+          this.turmas = [];
+          this.turmaId = '';
+          this.carregandoTurmas = false;
+        },
+      });
   }
 
   private carregar(page: number, append: boolean): void {

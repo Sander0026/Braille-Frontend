@@ -92,6 +92,109 @@
   padding: 1rem;
 }
 
+.timeline-modal {
+  align-items: center;
+  background: rgba(17, 24, 39, 0.52);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 1rem;
+  position: fixed;
+  z-index: 1100;
+}
+
+.timeline-modal__dialog {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 20px 70px rgba(17, 24, 39, 0.28);
+  display: grid;
+  gap: 1rem;
+  max-height: calc(100vh - 2rem);
+  max-width: 720px;
+  overflow: auto;
+  padding: 1rem;
+  width: min(720px, 100%);
+
+  header {
+    align-items: flex-start;
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
+  }
+
+  h2 {
+    color: #111827;
+    font-size: 1.15rem;
+    margin: 0 0 0.25rem;
+  }
+
+  p {
+    color: #4b5563;
+    margin: 0;
+  }
+}
+
+.timeline-observation-form {
+  display: grid;
+  gap: 0.85rem;
+
+  label {
+    color: #374151;
+    display: grid;
+    font-size: 0.82rem;
+    font-weight: 800;
+    gap: 0.35rem;
+  }
+
+  input,
+  select,
+  textarea {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #111827;
+    font: inherit;
+    min-height: 38px;
+    padding: 0.5rem 0.65rem;
+    width: 100%;
+  }
+
+  textarea {
+    min-height: 104px;
+    resize: vertical;
+  }
+}
+
+.timeline-observation-form__quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.timeline-observation-form__grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.timeline-observation-form__check {
+  align-items: center;
+  display: flex !important;
+  gap: 0.5rem;
+
+  input {
+    min-height: auto;
+    width: auto;
+  }
+}
+
+.timeline-observation-form__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: flex-end;
+}
+
 .btn {
   align-items: center;
   display: inline-flex;
@@ -124,6 +227,16 @@
   }
 
   .timeline-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-modal__dialog header,
+  .timeline-observation-form__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .timeline-observation-form__grid {
     grid-template-columns: 1fr;
   }
 }

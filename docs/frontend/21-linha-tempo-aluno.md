@@ -22,7 +22,7 @@ tela dedicada, mantendo o perfil mais limpo.
 | Area | Arquivo | Papel |
 |---|---|---|
 | Rotas | `src/app/app.routes.ts` | Define `/admin/alunos/:id/linha-tempo` para `ADMIN`, `SECRETARIA` e `PROFESSOR` |
-| Servico HTTP | `src/app/core/services/beneficiarios.service.ts` | Tipos e chamadas `linhaTempo`, `linhaTempoResumo`, `criarEventoLinhaTempoManual` |
+| Servico HTTP | `src/app/core/services/beneficiarios.service.ts` | Tipos e chamadas `linhaTempo`, `linhaTempoResumo`, `linhaTempoTurmas`, `criarEventoLinhaTempoManual` |
 | Pagina dedicada | `src/app/features/beneficiaries/aluno-linha-tempo-page/` | Tela completa da timeline |
 | Componente reutilizavel | `src/app/features/beneficiaries/components/aluno-linha-tempo/` | Lista, filtros, paginacao e estados |
 | Perfil do aluno | `src/app/features/beneficiaries/beneficiary-list/` | Card com botao para abrir a timeline completa |
@@ -64,6 +64,20 @@ export interface LinhaTempoAlunoResumo {
 }
 ```
 
+## `GET /api/beneficiaries/:id/linha-tempo/turmas`
+
+Usado pelo filtro avancado de turma na tela completa. A UI mostra nomes de turmas do aluno em vez
+de exigir UUID manual.
+
+Contrato:
+
+```ts
+export interface LinhaTempoTurmaResumo {
+  id: string;
+  nome: string;
+}
+```
+
 ## `POST /api/beneficiaries/:id/linha-tempo/manual`
 
 Contrato ja exposto no service Angular para observacoes manuais:
@@ -79,7 +93,9 @@ export interface CriarEventoLinhaTempoManualPayload {
 }
 ```
 
-A UI de formulario para criar observacao manual ainda pode ser adicionada sobre esse metodo.
+A tela completa possui o botao "Adicionar observacao", com atalhos para reuniao com familia,
+entrega de material, contato com responsavel, encaminhamento externo, orientacao da secretaria e
+observacao administrativa.
 
 ---
 
@@ -121,7 +137,9 @@ Responsabilidades:
 - carregar resumo via `/linha-tempo/resumo`;
 - renderizar cards de ultimo atendimento, ultima frequencia, PDI e risco;
 - renderizar `app-aluno-linha-tempo` em `modo="completo"`;
-- permitir atualizacao manual da tela.
+- permitir atualizacao manual da tela;
+- registrar observacoes manuais institucionais;
+- indicar que a exportacao PDF esta "Em breve".
 
 ---
 
