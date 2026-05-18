@@ -24,16 +24,18 @@ type FiltroLinhaTempo = {
 })
 export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   @Input() alunoId?: string;
+  @Input() modo: 'compacto' | 'completo' = 'compacto';
+  @Input() refreshKey = 0;
 
   readonly filtros: FiltroLinhaTempo[] = [
     { id: 'TODOS', label: 'Todos' },
     { id: 'MATRICULAS', label: 'Matriculas', tipos: ['MATRICULA_TURMA', 'ENCERRAMENTO_MATRICULA'] },
     { id: 'FREQUENCIA', label: 'Frequencia', tipos: ['FREQUENCIA_PRESENTE', 'FREQUENCIA_FALTA', 'FREQUENCIA_FALTA_JUSTIFICADA'] },
     { id: 'ATENDIMENTOS', label: 'Atendimentos', tipos: ['ATENDIMENTO_INDIVIDUAL', 'FALTA_ATENDIMENTO'] },
-    { id: 'PDI', label: 'PDI', tipos: ['PDI_CRIADO', 'PDI_META_ATUALIZADA', 'PDI_EVOLUCAO'] },
+    { id: 'PDI', label: 'PDI', tipos: ['PDI_CRIADO', 'PDI_META_CRIADA', 'PDI_META_ATUALIZADA', 'PDI_EVOLUCAO'] },
     { id: 'DOCUMENTOS', label: 'Documentos', tipos: ['ATESTADO', 'LAUDO'] },
     { id: 'CERTIFICADOS', label: 'Certificados', tipos: ['CERTIFICADO'] },
-    { id: 'RISCO', label: 'Risco/Evasao', tipos: ['ACAO_RISCO_EVASAO', 'INATIVACAO', 'REATIVACAO'] },
+    { id: 'RISCO', label: 'Risco/Evasao', tipos: ['ACAO_RISCO_EVASAO', 'ACAO_RISCO_RESOLVIDA', 'INATIVACAO', 'REATIVACAO'] },
   ];
 
   filtroAtivo = 'TODOS';
@@ -44,13 +46,16 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   limit = 20;
   total = 0;
   lastPage = 1;
+  dataInicio = '';
+  dataFim = '';
+  turmaId = '';
 
   private readonly destroy$ = new Subject<void>();
 
   constructor(private readonly beneficiariosService: BeneficiariosService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['alunoId'] && this.alunoId) {
+    if ((changes['alunoId'] || changes['refreshKey']) && this.alunoId) {
       this.recarregar();
     }
   }
@@ -69,6 +74,17 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   verMais(): void {
     if (this.carregando || this.page >= this.lastPage) return;
     this.carregar(this.page + 1, true);
+  }
+
+  aplicarFiltrosAvancados(): void {
+    this.recarregar();
+  }
+
+  limparFiltrosAvancados(): void {
+    this.dataInicio = '';
+    this.dataFim = '';
+    this.turmaId = '';
+    this.recarregar();
   }
 
   mostrarAno(index: number): boolean {
@@ -108,11 +124,14 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
       LAUDO: 'Documento',
       CERTIFICADO: 'Certificado',
       PDI_CRIADO: 'PDI',
+      PDI_META_CRIADA: 'PDI',
       PDI_META_ATUALIZADA: 'PDI',
       PDI_EVOLUCAO: 'PDI',
       ACAO_RISCO_EVASAO: 'Risco/Evasao',
+      ACAO_RISCO_RESOLVIDA: 'Risco/Evasao',
       INATIVACAO: 'Situacao',
       REATIVACAO: 'Situacao',
+      OBSERVACAO_MANUAL: 'Observacao',
     };
     return labels[tipo];
   }
@@ -122,7 +141,7 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
     if (tipo.startsWith('PDI')) return 'timeline-event--pdi';
     if (tipo.includes('MATRICULA')) return 'timeline-event--matricula';
     if (tipo === 'CERTIFICADO') return 'timeline-event--certificado';
-    if (tipo === 'ACAO_RISCO_EVASAO' || tipo === 'INATIVACAO') return 'timeline-event--risco';
+    if (tipo === 'ACAO_RISCO_EVASAO' || tipo === 'ACAO_RISCO_RESOLVIDA' || tipo === 'INATIVACAO') return 'timeline-event--risco';
     if (tipo === 'ATESTADO' || tipo === 'LAUDO') return 'timeline-event--documento';
     if (tipo.includes('ATENDIMENTO')) return 'timeline-event--atendimento';
     return 'timeline-event--cadastro';
@@ -145,7 +164,14 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
     const tipo = filtro?.tipos?.join(',');
 
     this.beneficiariosService
-      .linhaTempo(this.alunoId, { page, limit: this.limit, tipo })
+      .linhaTempo(this.alunoId, {
+        page,
+        limit: this.limit,
+        tipo,
+        dataInicio: this.dataInicio,
+        dataFim: this.dataFim,
+        turmaId: this.turmaId.trim(),
+      })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res) => {

@@ -66,6 +66,15 @@ export const routes: Routes = [
         data: { roles: ['ADMIN', 'SECRETARIA'] }
       },
       {
+        path: 'alunos/:id/linha-tempo',
+        loadComponent: () =>
+          import('./features/beneficiaries/aluno-linha-tempo-page/aluno-linha-tempo-page')
+            .then(m => m.AlunoLinhaTempoPage),
+        title: 'Linha do Tempo do Aluno - ILBES',
+        canActivate: [roleGuard],
+        data: { roles: ['ADMIN', 'SECRETARIA', 'PROFESSOR'] }
+      },
+      {
         path: 'alunos/cadastro',
         loadComponent: () => import('./features/beneficiaries/beneficiary-form/beneficiary-form').then(m => m.BeneficiaryFormComponent),
         title: 'Novo Aluno — ILBES',

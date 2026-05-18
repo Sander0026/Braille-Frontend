@@ -810,7 +810,24 @@
                 }
             </div>
 
-            <app-aluno-linha-tempo [alunoId]="alunoSelecionado.id"></app-aluno-linha-tempo>
+            <div class="profile-section full-width historico-section timeline-summary-card">
+                <h4>
+                    <span class="material-symbols-rounded" aria-hidden="true">timeline</span>
+                    Linha do Tempo
+                </h4>
+
+                <p>
+                    Veja o histórico completo do aluno na instituição: matrículas, frequência,
+                    atendimentos, PDI, documentos, certificados e ações de risco.
+                </p>
+
+                <button
+                    type="button"
+                    class="btn btn-outline-primary"
+                    (click)="abrirLinhaTempoAluno(alunoSelecionado.id)">
+                    Abrir linha do tempo completa
+                </button>
+            </div>
 
             <!-- ═══ Documentação de Saúde & Presença (Botões de Ação) ═══ -->
             <div class="profile-section full-width historico-section">

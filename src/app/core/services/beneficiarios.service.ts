@@ -141,11 +141,14 @@ export type TipoEventoLinhaTempoAluno =
     | 'LAUDO'
     | 'CERTIFICADO'
     | 'PDI_CRIADO'
+    | 'PDI_META_CRIADA'
     | 'PDI_META_ATUALIZADA'
     | 'PDI_EVOLUCAO'
     | 'ACAO_RISCO_EVASAO'
+    | 'ACAO_RISCO_RESOLVIDA'
     | 'INATIVACAO'
-    | 'REATIVACAO';
+    | 'REATIVACAO'
+    | 'OBSERVACAO_MANUAL';
 
 export interface LinhaTempoAlunoItem {
     id: string;
@@ -167,6 +170,14 @@ export interface LinhaTempoAlunoResponse {
     meta: { page: number; limit: number; total: number; lastPage: number };
 }
 
+export interface LinhaTempoAlunoResumo {
+    totalEventos: number;
+    ultimaFrequencia?: string;
+    ultimoAtendimento?: string;
+    ultimoPdi?: string;
+    ultimaAcaoRisco?: string;
+}
+
 export interface LinhaTempoAlunoQuery {
     dataInicio?: string;
     dataFim?: string;
@@ -174,6 +185,15 @@ export interface LinhaTempoAlunoQuery {
     turmaId?: string;
     page?: number;
     limit?: number;
+}
+
+export interface CriarEventoLinhaTempoManualPayload {
+    tipo: 'OBSERVACAO_MANUAL';
+    dataEvento?: string;
+    titulo: string;
+    descricao?: string;
+    turmaId?: string;
+    sensivel?: boolean;
 }
 
 /** Resposta quando o CPF/RG já existe inativo no sistema */
@@ -256,6 +276,17 @@ export class BeneficiariosService {
             }
         });
         return this.http.get<LinhaTempoAlunoResponse>(`${this.url}/${id}/linha-tempo`, { params });
+    }
+
+    linhaTempoResumo(id: string): Observable<LinhaTempoAlunoResumo> {
+        return this.http.get<LinhaTempoAlunoResumo>(`${this.url}/${id}/linha-tempo/resumo`);
+    }
+
+    criarEventoLinhaTempoManual(
+        id: string,
+        payload: CriarEventoLinhaTempoManualPayload
+    ): Observable<LinhaTempoAlunoItem> {
+        return this.http.post<LinhaTempoAlunoItem>(`${this.url}/${id}/linha-tempo/manual`, payload);
     }
 
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {

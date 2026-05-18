@@ -1,0 +1,67 @@
+<main class="timeline-page">
+  <header class="timeline-page__header">
+    <div>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="voltar()">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+        Voltar
+      </button>
+      <h1>Linha do Tempo do Aluno</h1>
+      @if (aluno) {
+        <p>{{ aluno.nomeCompleto }} @if (aluno.matricula) { <span>- Matricula {{ aluno.matricula }}</span> }</p>
+      }
+    </div>
+
+    <div class="timeline-page__actions">
+      <button type="button" class="btn btn-outline-primary" (click)="atualizar()">
+        <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+        Atualizar
+      </button>
+      <button type="button" class="btn btn-outline-secondary" (click)="exportar()" disabled>
+        <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+        Exportar PDF
+      </button>
+    </div>
+  </header>
+
+  @if (erro) {
+    <p class="timeline-page__error" role="alert">{{ erro }}</p>
+  }
+
+  @if (carregandoAluno) {
+    <section class="timeline-page__loading" aria-busy="true">
+      <div class="loading-spinner" aria-hidden="true"></div>
+      <span>Carregando aluno...</span>
+    </section>
+  } @else {
+    <section class="timeline-stats" aria-label="Resumo da linha do tempo">
+      <article>
+        <span>Total de eventos</span>
+        <strong>{{ resumo.totalEventos }}</strong>
+      </article>
+      <article>
+        <span>Ultimo atendimento</span>
+        <strong>{{ resumo.ultimoAtendimento ? (resumo.ultimoAtendimento | dataBraille) : 'Sem eventos' }}</strong>
+      </article>
+      <article>
+        <span>Ultima frequencia</span>
+        <strong>{{ resumo.ultimaFrequencia ? (resumo.ultimaFrequencia | dataBraille) : 'Sem eventos' }}</strong>
+      </article>
+      <article>
+        <span>Ultima acao de risco</span>
+        <strong>{{ resumo.ultimaAcaoRisco ? (resumo.ultimaAcaoRisco | dataBraille) : 'Sem eventos' }}</strong>
+      </article>
+      <article>
+        <span>PDI</span>
+        <strong>{{ resumo.ultimoPdi ? (resumo.ultimoPdi | dataBraille) : 'Sem eventos' }}</strong>
+      </article>
+    </section>
+
+    <section class="timeline-panel">
+      <app-aluno-linha-tempo
+        [alunoId]="alunoId"
+        [refreshKey]="refreshKey"
+        modo="completo">
+      </app-aluno-linha-tempo>
+    </section>
+  }
+</main>

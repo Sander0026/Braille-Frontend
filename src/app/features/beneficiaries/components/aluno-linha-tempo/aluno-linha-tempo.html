@@ -1,4 +1,10 @@
-<section class="profile-section full-width historico-section timeline-section" aria-labelledby="linha-tempo-titulo">
+<section
+  class="timeline-section"
+  [class.profile-section]="modo === 'compacto'"
+  [class.full-width]="modo === 'compacto'"
+  [class.historico-section]="modo === 'compacto'"
+  [class.timeline-section--full]="modo === 'completo'"
+  aria-labelledby="linha-tempo-titulo">
   <div class="timeline-header">
     <div>
       <h4 id="linha-tempo-titulo">
@@ -8,6 +14,30 @@
       <p>{{ total }} evento(s) encontrado(s)</p>
     </div>
   </div>
+
+  @if (modo === 'completo') {
+    <form class="timeline-advanced-filters" (ngSubmit)="aplicarFiltrosAvancados()" aria-label="Filtros avancados da linha do tempo">
+      <label>
+        <span>Inicio</span>
+        <input type="date" name="dataInicio" [(ngModel)]="dataInicio">
+      </label>
+
+      <label>
+        <span>Fim</span>
+        <input type="date" name="dataFim" [(ngModel)]="dataFim">
+      </label>
+
+      <label>
+        <span>Turma</span>
+        <input type="text" name="turmaId" [(ngModel)]="turmaId" placeholder="UUID da turma">
+      </label>
+
+      <div class="timeline-filter-actions">
+        <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="limparFiltrosAvancados()">Limpar</button>
+      </div>
+    </form>
+  }
 
   <div class="timeline-filters" role="tablist" aria-label="Filtros da linha do tempo">
     @for (filtro of filtros; track filtro.id) {
