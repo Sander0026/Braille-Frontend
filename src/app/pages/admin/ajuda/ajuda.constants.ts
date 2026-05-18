@@ -96,7 +96,7 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
     titulo: 'Cadastrar um novo aluno',
     descricao: 'Passo a passo para registrar um aluno no sistema.',
     arquivo: '/assets/manuais/cadastrar_um_novo_aluno.pdf',
-    nomeArquivo: 'cadastrar_um_novo_aluno.pdf',
+    nomeArquivo: 'cadastrar_novo_aluno.pdf',
     cardIds: ['secretaria', 'administrador'],
     roles: ['SECRETARIA'],
     conteudo: {
@@ -171,10 +171,18 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     titulo: 'Cadastrar um novo apoiador',
     descricao: 'Passo a passo para registrar um apoiador no sistema.',
-    arquivo: '/assets/manuais/cadastrar_um_novo_apoiador.pdf',
-    nomeArquivo: 'cadastrar_um_novo_apoiador.pdf',
+    arquivo: '/assets/manuais/registro_novo_apoiador.pdf',
+    nomeArquivo: 'registro_novo_apoiador.pdf',
     cardIds: ['secretaria', 'administrador', 'comunicacao'],
     roles: ['COMUNICACAO']
+  },
+  {
+    titulo: 'Cadastrar uma nova oficina',
+    descricao: 'Passo a passo para registrar uma nova oficina no sistema.',
+    arquivo: '/assets/manuais/cadastro_nova_oficina.pdf',
+    nomeArquivo: 'cadastro_nova_oficina.pdf',
+    cardIds: ['secretaria', 'administrador', 'comunicacao'],
+    roles: ['SECRETARIA'] // Mesmo que seja só para SECRETARIA, é bom deixar claro
   },
   {
     titulo: 'Cadastrar um novo certificado',
