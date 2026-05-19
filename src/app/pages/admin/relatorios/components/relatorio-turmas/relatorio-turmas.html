@@ -1,0 +1,120 @@
+@if (carregando) {
+  <div class="loading-state">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+    <span>Carregando turmas</span>
+  </div>
+} @else if (relatorio; as dados) {
+  <div class="section-toolbar">
+    <div>
+      <h2>Turmas</h2>
+      <p>{{ dados.total }} registro(s)</p>
+    </div>
+    <div class="summary-pills" aria-label="Resumo de turmas">
+      <span>Andamento {{ dados.indicadores.andamento }}</span>
+      <span>Concluídas {{ dados.indicadores.concluidas }}</span>
+      <span>Arquivadas {{ dados.indicadores.arquivadas }}</span>
+    </div>
+  </div>
+
+  <section class="turmas-indicators" aria-label="Indicadores de turmas">
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">school</span>
+      <strong>{{ dados.indicadores.totalTurmas }}</strong>
+      <small>Total de turmas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">pending_actions</span>
+      <strong>{{ dados.indicadores.previstas }}</strong>
+      <small>Previstas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">play_circle</span>
+      <strong>{{ dados.indicadores.andamento }}</strong>
+      <small>Em andamento</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">task_alt</span>
+      <strong>{{ dados.indicadores.concluidas }}</strong>
+      <small>Concluídas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">cancel</span>
+      <strong>{{ dados.indicadores.canceladas }}</strong>
+      <small>Canceladas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">archive</span>
+      <strong>{{ dados.indicadores.arquivadas }}</strong>
+      <small>Arquivadas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">event_seat</span>
+      <strong>{{ dados.indicadores.totalVagas }}</strong>
+      <small>Total de vagas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">how_to_reg</span>
+      <strong>{{ dados.indicadores.vagasOcupadas }}</strong>
+      <small>Vagas ocupadas</small>
+    </article>
+    <article>
+      <span class="material-symbols-rounded" aria-hidden="true">percent</span>
+      <strong>{{ formatarPercentual(dados.indicadores.taxaMediaOcupacao) }}</strong>
+      <small>Taxa média de ocupação</small>
+    </article>
+  </section>
+
+  @if (dados.data.length) {
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Nome da turma</th>
+            <th>Professor</th>
+            <th>Status</th>
+            <th>Data de início</th>
+            <th>Data de fim</th>
+            <th>Carga horária</th>
+            <th>Capacidade máxima</th>
+            <th>Matrículas ativas</th>
+            <th>Concluídos</th>
+            <th>Evadidos</th>
+            <th>Cancelados</th>
+            <th>Transferidos</th>
+            <th>Total matrículas</th>
+            <th>Taxa ocupação</th>
+            <th>Taxa evasão</th>
+            <th>Taxa conclusão</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (turma of dados.data; track turma.id) {
+            <tr>
+              <td class="main-cell">{{ turma.nome }}</td>
+              <td>{{ turma.professor.nome }}</td>
+              <td><span class="badge" [ngClass]="statusClass(turma.status)">{{ statusLabel(turma.status) }}</span></td>
+              <td>{{ formatarData(turma.dataInicio) }}</td>
+              <td>{{ formatarData(turma.dataFim) }}</td>
+              <td>{{ turma.cargaHoraria || '-' }}</td>
+              <td>{{ turma.capacidadeMaxima || '-' }}</td>
+              <td>{{ turma.metricas.matriculasAtivas }}</td>
+              <td>{{ turma.metricas.matriculasConcluidas }}</td>
+              <td>{{ turma.metricas.matriculasEvadidas }}</td>
+              <td>{{ turma.metricas.matriculasCanceladas }}</td>
+              <td>{{ turma.metricas.matriculasTransferidas }}</td>
+              <td>{{ turma.metricas.totalMatriculas }}</td>
+              <td>{{ formatarPercentual(turma.metricas.taxaOcupacao) }}</td>
+              <td>{{ formatarPercentual(turma.metricas.taxaEvasao) }}</td>
+              <td>{{ formatarPercentual(turma.metricas.taxaConclusao) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded" aria-hidden="true">search_off</span>
+      <h3>Nenhuma turma encontrada</h3>
+    </div>
+  }
+}

@@ -8,7 +8,9 @@ import {
   signal,
   OnChanges,
   SimpleChanges,
-  inject
+  inject,
+  ViewChild,
+  ElementRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -54,6 +56,8 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
   @Output() fechar = new EventEmitter<void>();
   @Output() salvar = new EventEmitter<CreateTurmaDto>();
   @Output() tentarFecharSujo = new EventEmitter<boolean>();
+
+  @ViewChild('erroApiBanner') private erroApiBanner?: ElementRef<HTMLElement>;
 
   private readonly fb = inject(FormBuilder);
   private readonly liveAnnouncer = inject(LiveAnnouncer);
@@ -119,6 +123,10 @@ export class TurmaFormModalComponent implements OnInit, OnChanges {
 
       this.gradeOriginalStr = JSON.stringify(this.gradeHoraria());
       setTimeout(() => document.getElementById('modalNomeTurma')?.focus(), 100);
+    }
+
+    if (changes['erroAPI']?.currentValue) {
+      setTimeout(() => this.erroApiBanner?.nativeElement.focus(), 0);
     }
   }
 
