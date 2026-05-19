@@ -31,7 +31,7 @@ export class AuditFriendlyPipe implements PipeTransform {
       case 'MATRICULAR':
         return `${usuario} matriculou um aluno.`;
       case 'DESMATRICULAR':
-        return `${usuario} cancelou uma matrícula.`;
+        return `${usuario} encerrou uma participação em turma.`;
       case 'FECHAR_DIARIO':
         return `${usuario} fechou/aprovou o diário de frequência.`;
       case 'REABRIR_DIARIO':

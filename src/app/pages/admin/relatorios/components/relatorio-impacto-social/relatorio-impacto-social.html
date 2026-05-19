@@ -1,0 +1,42 @@
+@if (carregando) {
+  <div class="loading-state">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+    <span>Carregando impacto social</span>
+  </div>
+} @else if (relatorio; as dados) {
+  <div class="section-toolbar">
+    <div>
+      <h2>Impacto Social</h2>
+      <p>{{ periodoAtual() }}</p>
+    </div>
+    <div class="impact-period">
+      <span>Comparado com</span>
+      <strong>{{ periodoAnterior() }}</strong>
+    </div>
+  </div>
+
+  <section class="impact-grid" aria-label="Indicadores de impacto social">
+    @for (metrica of metricas; track metrica.key) {
+      @let comparativoItem = comparativo(metrica.key);
+      <article class="impact-card">
+        <div class="impact-card__icon">
+          <span class="material-symbols-rounded" aria-hidden="true">{{ metrica.icon }}</span>
+        </div>
+        <div>
+          <span>{{ metrica.label }}</span>
+          <strong>{{ valor(metrica.key) }}</strong>
+          <small [ngClass]="classeComparativo(comparativoItem)">
+            {{ textoComparativo(comparativoItem) }}
+          </small>
+        </div>
+      </article>
+    }
+  </section>
+
+  <section class="impact-note">
+    <span class="material-symbols-rounded" aria-hidden="true">verified</span>
+    <p>
+      Os indicadores desta aba são agregados e próprios para comunicação institucional, prestação de contas e relatórios para apoiadores.
+    </p>
+  </section>
+}

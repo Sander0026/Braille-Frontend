@@ -1,0 +1,53 @@
+@use '../shared-relatorio-table' as table;
+
+:host {
+  display: block;
+}
+
+@include table.relatorio-table();
+
+.turmas-indicators {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+
+  article {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      'icon value'
+      'icon label';
+    column-gap: 0.75rem;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    min-height: 76px;
+    padding: 0.9rem;
+  }
+
+  .material-symbols-rounded {
+    grid-area: icon;
+    color: #b68e00;
+    font-size: 1.5rem;
+  }
+
+  strong {
+    grid-area: value;
+    color: #111827;
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+
+  small {
+    grid-area: label;
+    color: #4b5563;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+}
+
+.data-table {
+  min-width: 1520px;
+}

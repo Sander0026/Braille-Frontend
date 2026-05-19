@@ -236,7 +236,9 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
       },
       error: (e) => {
         this.salvandoTurma.set(false);
-        this.erroSalvarTurma.set(e?.error?.message || 'Erro de conexão/servidor ao salvar oficina.');
+        const mensagem = e?.error?.message || 'Erro de conexão/servidor ao salvar oficina.';
+        this.erroSalvarTurma.set(mensagem);
+        this.toast.erro(mensagem);
       }
     });
   }
@@ -275,10 +277,9 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
     
     action$.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.toast.sucesso(`Oficina ${arquivada ? 'desarquivada' : 'arquivada'} com sucesso.`);
-          // Optimistic UI Update: Mudamos localmente e os Signals recomputam a aba em 0.1ms 
-          this.turmas.update(lista => lista.map(t => t.id === turmaId ? { ...t, statusAtivo: arquivada } : t));
+          this.turmas.update(lista => lista.map(t => t.id === turmaId ? { ...t, ...res } : t));
         },
         error: () => {
           this.toast.erro('Inconsistência de acesso para arquivamento.');
@@ -338,15 +339,18 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
     }
 
     this.carregando.set(true);
-    // Cast para bypass da DTO limpa preservando as restrições anti-any
-    const payload = { status: novoStatus } as unknown as Partial<CreateTurmaDto>;
-    this.turmasService.atualizar(turma.id, payload)
+    this.turmasService.mudarStatus(turma.id, novoStatus)
       .subscribe({
-        next: () => {
+        next: (res) => {
           this.carregando.set(false);
-          this.toast.sucesso(`Oficina alterada para ${novoStatus}`);
-          // Optimistic UI Update: Sem recarregamento N+1 no Postgre, pura reatividade.
-          this.turmas.update(lista => lista.map(t => t.id === turma.id ? { ...t, status: novoStatus } : t));
+          this.toast.sucesso(`Oficina alterada para ${res.status}`);
+          this.turmas.update(lista =>
+            lista.map(t =>
+              t.id === turma.id
+                ? { ...t, status: res.status, statusAtivo: res.statusAtivo }
+                : t
+            )
+          );
         },
         error: () => {
           this.carregando.set(false);

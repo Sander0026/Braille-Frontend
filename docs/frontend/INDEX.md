@@ -48,6 +48,9 @@
 | 16 | [Decisões Técnicas (ADRs)](./16-decisoes-tecnicas.md) | 11 ADRs: Angular standalone, JWT, interceptors, Sentry, branches |
 | 17 | [Atendimentos Individuais](./17-atendimentos-individuais.md) | Acompanhamentos independentes de turmas, tela admin e perfil do aluno |
 | 18 | [Atendimento Individual — Técnico](./17-atendimento-individual.md) | Acompanhamentos, atendimentos, timeline, modais, relatórios, descarte e arquivamento |
+| 19 | [Relatorios Institucionais](./19-relatorios.md) | Abas sob demanda, filtros, risco de evasao, impacto social e exportacoes |
+| 20 | [PDI / Plano Individual do Aluno](./20-pdi.md) | Plano individual no perfil do aluno, metas, evolucoes e historico |
+| 21 | [Linha do Tempo do Aluno](./21-linha-tempo-aluno.md) | Eventos unificados do aluno no perfil, filtros por categoria e paginacao |
 
 ---
 

@@ -8,6 +8,7 @@ import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 
 import { UsuariosService, CreateUsuarioResponse, ReativacaoResponse } from '../../../../core/services/usuarios.service';
 import { BaseFormDescarte } from '../../../../shared/classes/base-form-descarte';
+import { cpfValidator } from '../../../../shared/validators/documento.validator';
 
 @Component({
     selector: 'app-cadastro-usuario-wizard',
@@ -59,7 +60,7 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
         this.cadastroUsuarioForm = this.fb.group({
             dadosPessoais: this.fb.group({
                 nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
-                cpf: ['', [Validators.required, Validators.minLength(14)]],
+                cpf: ['', [Validators.required, cpfValidator]],
                 funcao: ['', Validators.required],
                 email: ['', [Validators.email]],
             }),
@@ -121,6 +122,12 @@ export class CadastroUsuarioWizard extends BaseFormDescarte implements OnInit {
         const limpo = valor.replace(/\D/g, '');
 
         if (!limpo || limpo.length !== 11) {
+            this.cpfStatus.set('');
+            this.cpfConflito.set(null);
+            return;
+        }
+
+        if (this.cadastroUsuarioForm.get('dadosPessoais.cpf')?.hasError('cpfInvalido')) {
             this.cpfStatus.set('');
             this.cpfConflito.set(null);
             return;

@@ -21,7 +21,7 @@
       aria-describedby="modal-turma-titulo">
 
       @if (erroAPI) {
-      <div class="error-banner" role="alert" aria-live="assertive">{{ erroAPI }}</div>
+      <div #erroApiBanner class="error-banner" role="alert" aria-live="assertive" tabindex="-1">{{ erroAPI }}</div>
       }
 
       <!-- ── Campos Obrigatórios ─────────────────────────────── -->

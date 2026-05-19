@@ -26,6 +26,7 @@ describe('TurmasLista Component', () => {
       listarProfessoresAtivos: vi.fn(),
       criar: vi.fn(),
       atualizar: vi.fn(),
+      mudarStatus: vi.fn(),
       excluir: vi.fn(),
       restaurar: vi.fn()
     };
@@ -173,6 +174,7 @@ describe('TurmasLista Component', () => {
 
       expect(component.salvandoTurma()).toBe(false);
       expect(component.erroSalvarTurma()).toBe('Erro Banco Fake');
+      expect(mockToast.erro).toHaveBeenCalledWith('Erro Banco Fake');
       expect(mockToast.sucesso).not.toHaveBeenCalled();
     });
 
@@ -181,7 +183,9 @@ describe('TurmasLista Component', () => {
       
       // Simula conformação de UX do administrador
       mockConfirmDialog.confirmar.mockResolvedValue(true);
-      mockTurmasService.restaurar.mockReturnValue(of(true));
+      mockTurmasService.restaurar.mockReturnValue(
+        of({ id: '101', nome: 'Oficina Inativa', status: 'PREVISTA', statusAtivo: true })
+      );
 
       await component.alternarArquivamento('101', true, new Event('click'));
       
@@ -192,7 +196,33 @@ describe('TurmasLista Component', () => {
       });
       
       expect(mockTurmasService.restaurar).toHaveBeenCalledWith('101');
+      expect(component.turmas()[1]).toEqual(
+        expect.objectContaining({
+          status: 'PREVISTA',
+          statusAtivo: true
+        })
+      );
       expect(mockToast.sucesso).toHaveBeenCalledWith('Oficina desarquivada com sucesso.');
+    });
+
+    it('deve mudar status rapido pelo endpoint dedicado e refletir statusAtivo retornado pela API', async () => {
+      fixture.detectChanges();
+      mockConfirmDialog.confirmar.mockResolvedValue(true);
+      mockTurmasService.mudarStatus.mockReturnValue(
+        of({ id: '100', nome: 'Oficina Ativa', status: 'CONCLUIDA', statusAtivo: false })
+      );
+
+      await component.atualizarStatusRapido(component.turmas()[0], 'CONCLUIDA');
+
+      expect(mockTurmasService.mudarStatus).toHaveBeenCalledWith('100', 'CONCLUIDA');
+      expect(mockTurmasService.atualizar).not.toHaveBeenCalled();
+      expect(component.turmas()[0]).toEqual(
+        expect.objectContaining({
+          status: 'CONCLUIDA',
+          statusAtivo: false
+        })
+      );
+      expect(mockToast.sucesso).toHaveBeenCalledWith('Oficina alterada para CONCLUIDA');
     });
   });
 
