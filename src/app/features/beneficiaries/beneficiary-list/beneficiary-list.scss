@@ -691,7 +691,11 @@
     }
 }
 
+/* PDI — seção ocultada visualmente. A lógica permanece intacta no código.
+   Para reexibir, remova a linha abaixo (display: none). */
 .pdi-section {
+    display: none;
+
     .pdi-header {
         align-items: center;
         display: flex;
