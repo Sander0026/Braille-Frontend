@@ -228,8 +228,15 @@
   background: #2563eb;
 }
 
-.timeline-event--pdi .timeline-marker {
-  background: #7c3aed;
+/* PDI — ocultado visualmente. Lógica e backend intactos.
+   Para reexibir, remova as duas regras abaixo. */
+.timeline-event--pdi {
+  display: none;
+}
+
+/* Oculta o botão de filtro "PDI" (5º item da lista de filtros) */
+.timeline-filters .timeline-filter:nth-child(5) {
+  display: none;
 }
 
 .timeline-event--matricula .timeline-marker {
