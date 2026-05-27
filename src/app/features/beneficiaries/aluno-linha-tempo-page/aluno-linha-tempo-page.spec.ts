@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { afterEach, describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { BeneficiariosService } from '../../../core/services/beneficiarios.service';
 import { AlunoLinhaTempoPage } from './aluno-linha-tempo-page';
@@ -80,6 +80,11 @@ describe('AlunoLinhaTempoPage', () => {
     component = fixture.componentInstance;
   });
 
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
   it('deve consultar aluno, resumo e eventos ao abrir a tela completa', () => {
     fixture.detectChanges();
 
@@ -135,5 +140,73 @@ describe('AlunoLinhaTempoPage', () => {
     component.voltar();
 
     expect(router.navigate).toHaveBeenCalledWith(['/admin/alunos']);
+  });
+
+  it('deve deixar o botao de exportar PDF habilitado', () => {
+    fixture.detectChanges();
+
+    const buttons = Array.from(fixture.nativeElement.querySelectorAll('button')) as HTMLButtonElement[];
+    const button = buttons.find((item) => item.textContent?.includes('Exportar PDF')) as HTMLButtonElement;
+
+    expect(button).toBeTruthy();
+    expect(button.disabled).toBe(false);
+  });
+
+  it('deve exportar PDF respeitando os filtros atuais da linha do tempo', async () => {
+    vi.useFakeTimers();
+    const print = vi.fn();
+    const close = vi.fn();
+    const write = vi.fn();
+    const documentOpen = vi.fn();
+    const documentClose = vi.fn();
+    vi.spyOn(window, 'open').mockReturnValue({
+      document: {
+        write,
+        open: documentOpen,
+        close: documentClose,
+      },
+      focus: vi.fn(),
+      print,
+      close,
+    } as unknown as Window);
+
+    fixture.detectChanges();
+    component.linhaTempoComponent!.dataInicio = '2026-05-01';
+    component.linhaTempoComponent!.dataFim = '2026-05-31';
+    component.linhaTempoComponent!.selecionarFiltro('ATENDIMENTOS');
+    beneficiariosService.linhaTempo.mockClear();
+    beneficiariosService.linhaTempo.mockReturnValueOnce(
+      of({
+        data: [
+          {
+            id: 'evento-export',
+            alunoId: 'aluno-1',
+            tipo: 'ATENDIMENTO_INDIVIDUAL',
+            origem: 'ATENDIMENTO_INDIVIDUAL',
+            data: '2026-05-24T10:00:00.000Z',
+            titulo: 'Atendimento exportado',
+            descricao: 'Conteudo do PDF',
+          },
+        ],
+        meta: { page: 1, limit: 100, total: 1, lastPage: 1 },
+      }),
+    );
+
+    await component.exportar();
+    vi.runAllTimers();
+
+    expect(beneficiariosService.linhaTempo).toHaveBeenCalledWith(
+      'aluno-1',
+      expect.objectContaining({
+        page: 1,
+        limit: 100,
+        dataInicio: '2026-05-01',
+        dataFim: '2026-05-31',
+        tipo: 'ATENDIMENTO_INDIVIDUAL,FALTA_ATENDIMENTO',
+      }),
+    );
+    expect(write.mock.calls.some(([html]) => String(html).includes('Atendimento exportado'))).toBe(true);
+    expect(print).toHaveBeenCalledTimes(1);
+    expect(close).not.toHaveBeenCalled();
   });
 });

@@ -5,6 +5,7 @@ import { Subject, finalize, takeUntil } from 'rxjs';
 import {
   BeneficiariosService,
   LinhaTempoAlunoItem,
+  LinhaTempoAlunoQuery,
   LinhaTempoTurmaResumo,
   TipoEventoLinhaTempoAluno,
 } from '../../../../core/services/beneficiarios.service';
@@ -90,6 +91,27 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
 
   aplicarFiltrosAvancados(): void {
     this.recarregar();
+  }
+
+  queryExportacao(limit = 100): LinhaTempoAlunoQuery {
+    const filtro = this.filtros.find((item) => item.id === this.filtroAtivo);
+    return {
+      page: 1,
+      limit,
+      tipo: filtro?.tipos?.join(','),
+      dataInicio: this.dataInicio,
+      dataFim: this.dataFim,
+      turmaId: this.turmaId.trim(),
+    };
+  }
+
+  descricaoFiltroAtual(): string {
+    return this.filtros.find((item) => item.id === this.filtroAtivo)?.label ?? 'Todos';
+  }
+
+  descricaoTurmaAtual(): string {
+    if (!this.turmaId) return 'Todas as turmas do aluno';
+    return this.turmas.find((turma) => turma.id === this.turmaId)?.nome ?? this.turmaId;
   }
 
   limparFiltrosAvancados(): void {

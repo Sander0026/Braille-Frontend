@@ -24,11 +24,11 @@
         type="button"
         class="btn btn-outline-secondary"
         (click)="exportar()"
-        disabled
-        title="Em breve"
-        aria-label="Exportar PDF em breve">
+        [disabled]="exportandoPdf || !alunoId"
+        [attr.aria-busy]="exportandoPdf ? 'true' : null"
+        aria-label="Exportar linha do tempo em PDF">
         <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
-        Exportar PDF
+        {{ exportandoPdf ? 'Exportando...' : 'Exportar PDF' }}
       </button>
     </div>
   </header>
@@ -112,6 +112,10 @@
 
   @if (erro) {
     <p class="timeline-page__error" role="alert">{{ erro }}</p>
+  }
+
+  @if (erroExportacao) {
+    <p class="timeline-page__error" role="alert">{{ erroExportacao }}</p>
   }
 
   <section class="timeline-stats" aria-label="Resumo da linha do tempo">
