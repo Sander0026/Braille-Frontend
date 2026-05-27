@@ -1,0 +1,151 @@
+<main class="timeline-page">
+  <header class="timeline-page__header">
+    <div>
+      <button type="button" class="btn btn-outline-secondary btn-sm" (click)="voltar()">
+        <span class="material-symbols-rounded" aria-hidden="true">arrow_back</span>
+        Voltar
+      </button>
+      <h1>Linha do Tempo do Aluno</h1>
+      @if (aluno) {
+        <p>{{ aluno.nomeCompleto }} @if (aluno.matricula) { <span>- Matricula {{ aluno.matricula }}</span> }</p>
+      }
+    </div>
+
+    <div class="timeline-page__actions">
+      <button type="button" class="btn btn-primary" (click)="abrirObservacaoManual()">
+        <span class="material-symbols-rounded" aria-hidden="true">note_add</span>
+        Adicionar observacao
+      </button>
+      <button type="button" class="btn btn-outline-primary" (click)="atualizar()">
+        <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+        Atualizar
+      </button>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="exportar()"
+        [disabled]="exportandoPdf || !alunoId"
+        [attr.aria-busy]="exportandoPdf ? 'true' : null"
+        aria-label="Exportar linha do tempo em PDF">
+        <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+        {{ exportandoPdf ? 'Exportando...' : 'Exportar PDF' }}
+      </button>
+    </div>
+  </header>
+
+  @if (observacaoAberta) {
+    <div class="timeline-modal" role="presentation" (click)="fecharObservacaoManual()">
+      <section
+        class="timeline-modal__dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="observacao-manual-titulo"
+        (click)="$event.stopPropagation()">
+        <header>
+          <div>
+            <h2 id="observacao-manual-titulo">Adicionar observacao</h2>
+            <p>Registre fatos institucionais importantes no historico do aluno.</p>
+          </div>
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="fecharObservacaoManual()">
+            <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            Fechar
+          </button>
+        </header>
+
+        <form class="timeline-observation-form" (ngSubmit)="salvarObservacaoManual()">
+          <div class="timeline-observation-form__quick">
+            @for (tipo of tiposObservacao; track tipo) {
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="selecionarTipoObservacao(tipo)">
+                {{ tipo }}
+              </button>
+            }
+          </div>
+
+          <label>
+            <span>Titulo</span>
+            <input type="text" name="tituloObservacao" [(ngModel)]="observacaoManual.titulo" maxlength="120" required>
+          </label>
+
+          <div class="timeline-observation-form__grid">
+            <label>
+              <span>Data</span>
+              <input type="date" name="dataEventoObservacao" [(ngModel)]="observacaoManual.dataEvento">
+            </label>
+
+            <label>
+              <span>Turma</span>
+              <select name="turmaObservacao" [(ngModel)]="observacaoManual.turmaId">
+                <option value="">Sem turma vinculada</option>
+                @for (turma of turmasObservacao; track turma.id) {
+                  <option [value]="turma.id">{{ turma.nome }}</option>
+                }
+              </select>
+            </label>
+          </div>
+
+          <label>
+            <span>Descricao</span>
+            <textarea name="descricaoObservacao" [(ngModel)]="observacaoManual.descricao" rows="4" maxlength="1000"></textarea>
+          </label>
+
+          <label class="timeline-observation-form__check">
+            <input type="checkbox" name="sensivelObservacao" [(ngModel)]="observacaoManual.sensivel">
+            <span>Marcar como sensivel</span>
+          </label>
+
+          @if (erroObservacao) {
+            <p class="timeline-page__error" role="alert">{{ erroObservacao }}</p>
+          }
+
+          <div class="timeline-observation-form__actions">
+            <button type="button" class="btn btn-outline-secondary" (click)="fecharObservacaoManual()" [disabled]="salvandoObservacao">
+              Cancelar
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="salvandoObservacao">
+              {{ salvandoObservacao ? 'Salvando...' : 'Salvar observacao' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  }
+
+  @if (erro) {
+    <p class="timeline-page__error" role="alert">{{ erro }}</p>
+  }
+
+  @if (erroExportacao) {
+    <p class="timeline-page__error" role="alert">{{ erroExportacao }}</p>
+  }
+
+  <section class="timeline-stats" aria-label="Resumo da linha do tempo">
+    <article>
+      <span>Total de eventos</span>
+      <strong>{{ resumo.totalEventos }}</strong>
+    </article>
+    <article>
+      <span>Ultimo atendimento</span>
+      <strong>{{ resumo.ultimoAtendimento ? (resumo.ultimoAtendimento | dataBraille) : 'Sem eventos' }}</strong>
+    </article>
+    <article>
+      <span>Ultima frequencia</span>
+      <strong>{{ resumo.ultimaFrequencia ? (resumo.ultimaFrequencia | dataBraille) : 'Sem eventos' }}</strong>
+    </article>
+    <article>
+      <span>Ultima acao de risco</span>
+      <strong>{{ resumo.ultimaAcaoRisco ? (resumo.ultimaAcaoRisco | dataBraille) : 'Sem eventos' }}</strong>
+    </article>
+    <article>
+      <span>PDI</span>
+      <strong>{{ resumo.ultimoPdi ? (resumo.ultimoPdi | dataBraille) : 'Sem eventos' }}</strong>
+    </article>
+  </section>
+
+  <section class="timeline-panel">
+    <app-aluno-linha-tempo
+      [alunoId]="alunoId"
+      [refreshKey]="refreshKey"
+      modo="completo">
+    </app-aluno-linha-tempo>
+  </section>
+</main>

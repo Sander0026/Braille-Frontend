@@ -57,7 +57,11 @@
                             <label for="cpfCnpj" class="form-label">Documento (CPF ou CNPJ)</label>
                             <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj"
                                 placeholder="Apenas números ou formato padrão" (input)="onMaskCpfCnpj($event)"
-                                maxlength="18">
+                                maxlength="18"
+                                [class.input-error]="isCampoInvalido('informacoesPrincipais', 'cpfCnpj')">
+                            @if (isCampoInvalido('informacoesPrincipais', 'cpfCnpj')) {
+                            <span class="error-text" role="alert">CPF ou CNPJ invalido.</span>
+                            }
                         </div>
                     </div>
 

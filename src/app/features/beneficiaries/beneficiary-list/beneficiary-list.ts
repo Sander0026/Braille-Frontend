@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy, Directive, ElementRef, HostListener, Input, ViewChildren, QueryList, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormBuilder, FormGroup, FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil, forkJoin } from 'rxjs';
@@ -23,7 +23,6 @@ import { formatarTelefone, formatarCep } from '../../../shared/utils/masks.util'
 import { PdfViewerComponent } from '../../../shared/components/pdf-viewer/pdf-viewer.component';
 import { ImportModalComponent } from '../import-modal/import-modal';
 import { BeneficiaryFormComponent } from '../beneficiary-form/beneficiary-form';
-import { AlunoLinhaTempoComponent } from '../components/aluno-linha-tempo/aluno-linha-tempo';
 import { AuthService } from '../../../core/services/auth.service';
 import { A11yModule, FocusKeyManager, FocusableOption, LiveAnnouncer } from '@angular/cdk/a11y';
 import { AtestadosService, Atestado, PreviewAtestado } from '../../../core/services/atestados.service';
@@ -92,7 +91,7 @@ type PdiEvolucaoForm = {
   selector: 'app-beneficiary-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, TelefonePipe, CepPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent, AlunoLinhaTempoComponent],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, A11yModule, DataBraillePipe, CpfRgPipe, TelefonePipe, CepPipe, PdfViewerComponent, ImportModalComponent, BeneficiaryFormComponent],
   templateUrl: './beneficiary-list.html',
   styleUrl: './beneficiary-list.scss'
 })
@@ -371,7 +370,8 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     private readonly http: HttpClient,
     private readonly modelosCertificadosService: ModelosCertificadosService,
     private readonly atendimentosIndividuaisService: AtendimentosIndividuaisApiService,
-    private readonly pdiService: PdiService
+    private readonly pdiService: PdiService,
+    private readonly router: Router
   ) {
 
     this.filterForm = this.fb.group({
@@ -1322,6 +1322,11 @@ export class BeneficiaryList implements OnInit, OnDestroy, ComponenteComDescarte
     this.pdisAluno = [];
     this.pdiAtivoAluno = null;
     this.popFocus();
+  }
+
+  abrirLinhaTempoAluno(alunoId: string): void {
+    this.fecharModal();
+    this.router.navigate(['/admin/alunos', alunoId, 'linha-tempo']);
   }
 
   getAvatarUrl(aluno: Beneficiario): string {

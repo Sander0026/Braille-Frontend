@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, map, shareReplay } from 'rxjs';
 import { DashboardService } from './dashboard.service';
 import { StorageService } from './storage.service';
 
@@ -141,11 +141,14 @@ export type TipoEventoLinhaTempoAluno =
     | 'LAUDO'
     | 'CERTIFICADO'
     | 'PDI_CRIADO'
+    | 'PDI_META_CRIADA'
     | 'PDI_META_ATUALIZADA'
     | 'PDI_EVOLUCAO'
     | 'ACAO_RISCO_EVASAO'
+    | 'ACAO_RISCO_RESOLVIDA'
     | 'INATIVACAO'
-    | 'REATIVACAO';
+    | 'REATIVACAO'
+    | 'OBSERVACAO_MANUAL';
 
 export interface LinhaTempoAlunoItem {
     id: string;
@@ -167,6 +170,19 @@ export interface LinhaTempoAlunoResponse {
     meta: { page: number; limit: number; total: number; lastPage: number };
 }
 
+export interface LinhaTempoAlunoResumo {
+    totalEventos: number;
+    ultimaFrequencia?: string;
+    ultimoAtendimento?: string;
+    ultimoPdi?: string;
+    ultimaAcaoRisco?: string;
+}
+
+export interface LinhaTempoTurmaResumo {
+    id: string;
+    nome: string;
+}
+
 export interface LinhaTempoAlunoQuery {
     dataInicio?: string;
     dataFim?: string;
@@ -175,6 +191,21 @@ export interface LinhaTempoAlunoQuery {
     page?: number;
     limit?: number;
 }
+
+export interface CriarEventoLinhaTempoManualPayload {
+    tipo: 'OBSERVACAO_MANUAL';
+    dataEvento?: string;
+    titulo: string;
+    descricao?: string;
+    turmaId?: string;
+    sensivel?: boolean;
+}
+
+type ApiEnvelope<T> = {
+    success?: boolean;
+    message?: string;
+    data: T;
+};
 
 /** Resposta quando o CPF/RG já existe inativo no sistema */
 export interface ReativacaoAluno {
@@ -255,7 +286,44 @@ export class BeneficiariosService {
                 params = params.set(key, String(value));
             }
         });
-        return this.http.get<LinhaTempoAlunoResponse>(`${this.url}/${id}/linha-tempo`, { params });
+        return this.http
+            .get<LinhaTempoAlunoResponse | ApiEnvelope<LinhaTempoAlunoResponse>>(`${this.url}/${id}/linha-tempo`, { params })
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    linhaTempoResumo(id: string): Observable<LinhaTempoAlunoResumo> {
+        return this.http
+            .get<LinhaTempoAlunoResumo | ApiEnvelope<LinhaTempoAlunoResumo>>(`${this.url}/${id}/linha-tempo/resumo`)
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    linhaTempoTurmas(id: string): Observable<LinhaTempoTurmaResumo[]> {
+        return this.http
+            .get<LinhaTempoTurmaResumo[] | ApiEnvelope<LinhaTempoTurmaResumo[]>>(`${this.url}/${id}/linha-tempo/turmas`)
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    criarEventoLinhaTempoManual(
+        id: string,
+        payload: CriarEventoLinhaTempoManualPayload
+    ): Observable<LinhaTempoAlunoItem> {
+        return this.http
+            .post<LinhaTempoAlunoItem | ApiEnvelope<LinhaTempoAlunoItem>>(`${this.url}/${id}/linha-tempo/manual`, payload)
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    private unwrapApiData<T>(response: T | ApiEnvelope<T>): T {
+        if (this.isApiEnvelope<T>(response)) {
+            return response.data;
+        }
+        return response;
+    }
+
+    private isApiEnvelope<T>(response: T | ApiEnvelope<T>): response is ApiEnvelope<T> {
+        return !!response
+            && typeof response === 'object'
+            && 'data' in response
+            && ('success' in response || 'message' in response);
     }
 
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {

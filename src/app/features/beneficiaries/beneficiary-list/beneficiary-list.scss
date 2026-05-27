@@ -635,6 +635,22 @@
     margin-top: 0.5rem;
 }
 
+.timeline-summary-card {
+    h4 {
+        align-items: center;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    p {
+        max-width: 760px;
+    }
+
+    .btn {
+        margin-top: 0.75rem;
+    }
+}
+
 .historico-table {
     width: 100%;
     border-collapse: collapse;
