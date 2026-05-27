@@ -28,15 +28,39 @@
   flex-wrap: wrap;
 }
 
-// Link voltar — tom informativo discreto
-.back {
+// ── Botão Voltar — cor primária amarela do sistema ──────────
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-2;
+  margin-bottom: $space-2;
+  padding: calc(#{$space-2} + 0.125rem) $space-4;
+  font-family: $font-family-base;
   font-size: $font-size-sm;
-  font-weight: $font-weight-medium;
-  color: $color-info;
+  font-weight: $font-weight-semibold;
+  line-height: 1;
+  border: 2px solid $color-primary;
+  border-radius: $border-radius;
+  background-color: $color-primary;
+  color: $color-primary-text;
   text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color $transition-fast, border-color $transition-fast;
 
-  &:hover {
-    text-decoration: underline;
+  &::before {
+    content: '←';
+    font-size: 1rem;
+  }
+
+  &:hover:not(:disabled) {
+    background-color: $color-primary-dark;
+    border-color: $color-primary-dark;
+  }
+
+  @media (max-width: $bp-md) {
+    width: 100%;
+    justify-content: center;
   }
 }
 
