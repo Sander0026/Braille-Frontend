@@ -250,7 +250,7 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Criar turma ou oficina",
     "descricao": "Passo a passo para criar uma turma ou oficina no sistema.",
-    "arquivo": "/assets/manuais/criar_turma_oficina.pdf",
+    "arquivo": "/assets/manuais/criar_turma_oficina.pdf", 
     "nomeArquivo": "criar_turma_oficina.pdf",
     "cardIds": [
       "secretaria",
@@ -303,8 +303,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Gerenciar matrículas em turma",
     "descricao": "Passo a passo para adicionar e remover alunos de uma turma.",
-    "arquivo": "/assets/manuais/gerenciar_matriculas_em_turma.pdf",
-    "nomeArquivo": "gerenciar_matriculas_em_turma.pdf",
+    "arquivo": "/assets/manuais/gerenciar_matriculas_turma.pdf",
+    "nomeArquivo": "gerenciar_matriculas_turma.pdf",
     "cardIds": [
       "secretaria",
       "administrador"
@@ -408,8 +408,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Consultar histórico de frequência",
     "descricao": "Passo a passo para consultar chamadas já registradas.",
-    "arquivo": "/assets/manuais/consultar_historico_de_frequencia.pdf",
-    "nomeArquivo": "consultar_historico_de_frequencia.pdf",
+    "arquivo": "/assets/manuais/consultar_historico_frequencia.pdf",
+    "nomeArquivo": "consultar_historico_frequencia.pdf",
     "cardIds": [
       "professor",
       "secretaria",
@@ -456,8 +456,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Criar modelo de certificado",
     "descricao": "Passo a passo para criar um modelo de certificado ou honraria.",
-    "arquivo": "/assets/manuais/criar_modelo_de_certificado.pdf",
-    "nomeArquivo": "criar_modelo_de_certificado.pdf",
+    "arquivo": "/assets/manuais/criar_modelo_certificado.pdf",
+    "nomeArquivo": "criar_modelo_certificado.pdf",
     "cardIds": [
       "secretaria",
       "administrador"
@@ -557,8 +557,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Emitir honraria para apoiador",
     "descricao": "Passo a passo para gerar uma honraria manual para apoiador.",
-    "arquivo": "/assets/manuais/emitir_honraria_para_apoiador.pdf",
-    "nomeArquivo": "emitir_honraria_para_apoiador.pdf",
+    "arquivo": "/assets/manuais/emitir_honraria_apoiador.pdf",
+    "nomeArquivo": "emitir_honraria_apoiador.pdf",
     "cardIds": [
       "comunicacao",
       "administrador"
@@ -658,8 +658,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Alterar informações do site",
     "descricao": "Passo a passo para atualizar conteúdo institucional do site.",
-    "arquivo": "/assets/manuais/alterar_informacoes_do_site.pdf",
-    "nomeArquivo": "alterar_informacoes_do_site.pdf",
+    "arquivo": "/assets/manuais/alterar_informacoes_site.pdf",
+    "nomeArquivo": "alterar_informacoes_site.pdf",
     "cardIds": [
       "comunicacao",
       "administrador"
@@ -949,8 +949,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Gerar relatório de atendimento individual",
     "descricao": "Passo a passo para consultar e imprimir relatório de atendimentos individuais.",
-    "arquivo": "/assets/manuais/gerar_relatorio_de_atendimento_individual.pdf",
-    "nomeArquivo": "gerar_relatorio_de_atendimento_individual.pdf",
+    "arquivo": "/assets/manuais/gerar_relatorio_atendimento_individual.pdf",
+    "nomeArquivo": "gerar_relatorio_atendimento_individual.pdf",
     "cardIds": [
       "professor",
       "secretaria",
@@ -1048,8 +1048,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Evasões e risco de evasão",
     "descricao": "Passo a passo para consultar evasões e registrar ações de risco.",
-    "arquivo": "/assets/manuais/evasoes_e_risco_de_evasao.pdf",
-    "nomeArquivo": "evasoes_e_risco_de_evasao.pdf",
+    "arquivo": "/assets/manuais/evasoes_e_risco_evasao.pdf",
+    "nomeArquivo": "evasoes_e_risco_evasao.pdf",
     "cardIds": [
       "secretaria",
       "administrador"
@@ -1095,8 +1095,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "PDI do aluno",
     "descricao": "Passo a passo para criar e acompanhar o Plano de Desenvolvimento Individual do aluno.",
-    "arquivo": "/assets/manuais/pdi_do_aluno.pdf",
-    "nomeArquivo": "pdi_do_aluno.pdf",
+    "arquivo": "/assets/manuais/pdi_aluno.pdf",
+    "nomeArquivo": "pdi_aluno.pdf",
     "cardIds": [
       "professor",
       "secretaria",
@@ -1149,8 +1149,8 @@ export const ARQUIVOS_MANUAIS_AJUDA: ManualArquivo[] = [
   {
     "titulo": "Linha do tempo do aluno",
     "descricao": "Passo a passo para consultar a linha do tempo institucional do aluno.",
-    "arquivo": "/assets/manuais/linha_do_tempo_do_aluno.pdf",
-    "nomeArquivo": "linha_do_tempo_do_aluno.pdf",
+    "arquivo": "/assets/manuais/linha_tempo_aluno.pdf",
+    "nomeArquivo": "linha_tempo_aluno.pdf",
     "cardIds": [
       "professor",
       "secretaria",
