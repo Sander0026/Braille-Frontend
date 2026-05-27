@@ -219,9 +219,14 @@ export class RelatoriosDashboard implements OnInit {
 
   abrirListaAlunos(): void {
     if (this.carregandoListaAlunos()) return;
-    this.listaAlunosAberta.set(true);
-    if (!this.alunosLista()) {
-      this.carregarListaAlunos(1, false);
+    
+    if (this.listaAlunosAberta()) {
+      this.listaAlunosAberta.set(false);
+    } else {
+      this.listaAlunosAberta.set(true);
+      if (!this.alunosLista()) {
+        this.carregarListaAlunos(1, false);
+      }
     }
   }
 
