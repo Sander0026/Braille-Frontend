@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AtendimentosIndividuaisApiService } from '../../services/atendimentos-individuais-api.service';
 import { AcompanhamentoIndividual } from '../../models/acompanhamento-individual.model';
 import { AcompanhamentoCardComponent } from '../../components/acompanhamento-card/acompanhamento-card.component';
@@ -11,7 +12,7 @@ import { ToastService } from '../../../../core/services/toast.service';
 @Component({
   selector: 'app-acompanhamentos-finalizados',
   standalone: true,
-  imports: [CommonModule, FormsModule, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent],
   templateUrl: './acompanhamentos-finalizados.component.html',
   styleUrl: '../acompanhamentos-em-andamento/acompanhamentos-em-andamento.component.scss',
 })

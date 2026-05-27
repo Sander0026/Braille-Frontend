@@ -16,7 +16,7 @@ import { CriarAcompanhamentoModalComponent } from '../../components/criar-acompa
 @Component({
   selector: 'app-acompanhamentos-em-andamento',
   standalone: true,
-  imports: [CommonModule, FormsModule, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent, NovoAtendimentoModalComponent, CriarAcompanhamentoModalComponent],
+  imports: [CommonModule, FormsModule, RouterLink, AcompanhamentoCardComponent, EmptyStateAtendimentosComponent, PaginationComponent, NovoAtendimentoModalComponent, CriarAcompanhamentoModalComponent],
   templateUrl: './acompanhamentos-em-andamento.component.html',
   styleUrl: './acompanhamentos-em-andamento.component.scss',
 })
