@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import {
   BeneficiariosService,
   LinhaTempoAlunoItem,
@@ -54,8 +54,12 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   carregandoTurmas = false;
 
   private readonly destroy$ = new Subject<void>();
+  private destruido = false;
 
-  constructor(private readonly beneficiariosService: BeneficiariosService) {}
+  constructor(
+    private readonly beneficiariosService: BeneficiariosService,
+    private readonly cdr: ChangeDetectorRef,
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['alunoId'] || changes['modo']) && this.alunoId && this.modo === 'completo') {
@@ -68,6 +72,7 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destruido = true;
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -165,22 +170,27 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
   private carregarTurmas(): void {
     if (!this.alunoId) return;
     this.carregandoTurmas = true;
+    this.atualizarTela();
 
     this.beneficiariosService
       .linhaTempoTurmas(this.alunoId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.carregandoTurmas = false;
+          this.atualizarTela();
+        }),
+      )
       .subscribe({
         next: (turmas) => {
           this.turmas = turmas;
           if (this.turmaId && !turmas.some((turma) => turma.id === this.turmaId)) {
             this.turmaId = '';
           }
-          this.carregandoTurmas = false;
         },
         error: () => {
           this.turmas = [];
           this.turmaId = '';
-          this.carregandoTurmas = false;
         },
       });
   }
@@ -189,6 +199,7 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
     if (!this.alunoId) return;
     this.carregando = true;
     this.erro = '';
+    this.atualizarTela();
 
     const filtro = this.filtros.find((item) => item.id === this.filtroAtivo);
     const tipo = filtro?.tipos?.join(',');
@@ -202,20 +213,32 @@ export class AlunoLinhaTempoComponent implements OnChanges, OnDestroy {
         dataFim: this.dataFim,
         turmaId: this.turmaId.trim(),
       })
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.carregando = false;
+          this.atualizarTela();
+        }),
+      )
       .subscribe({
         next: (res) => {
-          this.eventos = append ? [...this.eventos, ...res.data] : res.data;
-          this.page = res.meta.page;
-          this.limit = res.meta.limit;
-          this.total = res.meta.total;
-          this.lastPage = res.meta.lastPage;
-          this.carregando = false;
+          const eventos = Array.isArray(res?.data) ? res.data : [];
+          const meta = res?.meta ?? { page, limit: this.limit, total: eventos.length, lastPage: 1 };
+
+          this.eventos = append ? [...this.eventos, ...eventos] : eventos;
+          this.page = meta.page ?? page;
+          this.limit = meta.limit ?? this.limit;
+          this.total = meta.total ?? this.eventos.length;
+          this.lastPage = meta.lastPage ?? 1;
         },
         error: (err) => {
           this.erro = err?.error?.message || 'Nao foi possivel carregar a linha do tempo.';
-          this.carregando = false;
         },
       });
+  }
+
+  private atualizarTela(): void {
+    if (this.destruido) return;
+    this.cdr.detectChanges();
   }
 }

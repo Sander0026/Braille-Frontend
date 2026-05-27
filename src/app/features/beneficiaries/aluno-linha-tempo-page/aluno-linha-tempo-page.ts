@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, finalize, takeUntil } from 'rxjs';
 import {
   Beneficiario,
   BeneficiariosService,
@@ -42,11 +42,13 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
   observacaoManual = this.novaObservacaoManual();
 
   private readonly destroy$ = new Subject<void>();
+  private destruido = false;
 
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly beneficiariosService: BeneficiariosService,
+    private readonly cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -62,6 +64,7 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destruido = true;
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -122,10 +125,12 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
           this.observacaoAberta = false;
           this.refreshKey++;
           this.carregarResumoLinhaTempo();
+          this.atualizarTela();
         },
         error: (err) => {
           this.erroObservacao = err?.error?.message || 'Nao foi possivel registrar a observacao.';
           this.salvandoObservacao = false;
+          this.atualizarTela();
         },
       });
   }
@@ -136,15 +141,19 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
 
     this.beneficiariosService
       .buscarPorId(this.alunoId)
-      .pipe(takeUntil(this.destroy$))
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => {
+          this.carregandoAluno = false;
+          this.atualizarTela();
+        }),
+      )
       .subscribe({
         next: (aluno) => {
           this.aluno = aluno;
-          this.carregandoAluno = false;
         },
         error: (err) => {
           this.erro = err?.error?.message || 'Nao foi possivel carregar os dados do aluno.';
-          this.carregandoAluno = false;
         },
       });
   }
@@ -156,9 +165,11 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
       .subscribe({
         next: (resumo) => {
           this.resumo = resumo;
+          this.atualizarTela();
         },
         error: () => {
           this.resumo = { totalEventos: 0 };
+          this.atualizarTela();
         },
       });
   }
@@ -170,9 +181,11 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
       .subscribe({
         next: (turmas) => {
           this.turmasObservacao = turmas;
+          this.atualizarTela();
         },
         error: () => {
           this.turmasObservacao = [];
+          this.atualizarTela();
         },
       });
   }
@@ -185,5 +198,10 @@ export class AlunoLinhaTempoPage implements OnInit, OnDestroy {
       turmaId: '',
       sensivel: false,
     };
+  }
+
+  private atualizarTela(): void {
+    if (this.destruido) return;
+    this.cdr.detectChanges();
   }
 }
