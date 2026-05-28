@@ -242,18 +242,7 @@ $transition: 200ms ease;
     }
 }
 
-.btn-arquivar {
-    background-color: #b45309;
-    border-color: #b45309;
-    color: #fff;
-    transition: background 0.2s;
 
-    &:hover {
-        background-color: #92400e;
-        border-color: #92400e;
-        color: #fff;
-    }
-}
 // ── Badges ─────────────────────────────────────────────────
 .badge--neutral {
     background: #f3f4f6;
