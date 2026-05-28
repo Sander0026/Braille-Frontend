@@ -132,10 +132,10 @@
 
 .secondary-action {
   align-items: center;
-  background: #111827;
-  border: 1px solid #111827;
+  background: #f5c800;
+  border: 1px solid #f5c800;
   border-radius: 6px;
-  color: #ffffff;
+  color: #1a1a00;
   cursor: pointer;
   display: inline-flex;
   font-size: 0.86rem;
@@ -144,6 +144,12 @@
   min-height: 2.4rem;
   padding: 0.55rem 0.8rem;
   white-space: nowrap;
+  transition: all 200ms ease;
+
+  &:hover:not(:disabled) {
+    background: #eab308;
+    border-color: #eab308;
+  }
 
   &:disabled {
     cursor: wait;
