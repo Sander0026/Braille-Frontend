@@ -4,6 +4,14 @@
 // ============================================================
 @use '../../../../../styles/variables' as *;
 
+:host {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
 // ── Utilitários de Acessibilidade ───────────────────────────
 .sr-only {
   position: absolute;
@@ -19,8 +27,15 @@
 
 // ── Wrapper ─────────────────────────────────────────────────
 .wizard-container {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: $space-6;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: $bp-md) {
+    gap: $space-4;
+  }
 }
 
 // ── Indicador de etapas ─────────────────────────────────────
@@ -33,6 +48,17 @@
   align-items: center;
   gap: 0;
   margin-bottom: $space-2;
+
+  @media (max-width: $bp-md) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 8px;
+    gap: 16px;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+  }
 }
 
 .step-item {
@@ -41,8 +67,16 @@
   gap: $space-1 + 0.125rem;
   flex: 1;
 
+  @media (max-width: $bp-md) {
+    flex: 0 0 auto;
+    min-width: max-content;
+  }
+
   &:last-child {
     flex: 0;
+    @media (max-width: $bp-md) {
+      flex: 0 0 auto;
+    }
   }
 }
 
@@ -119,6 +153,12 @@
   padding-bottom: $space-2;
   border-bottom: 2px solid $color-primary;
   line-height: $line-height-tight;
+
+  @media (max-width: $bp-md) {
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
 }
 
 // Descrição da etapa
@@ -127,12 +167,23 @@
   color: $color-gray-600;
   margin: $space-2 0 $space-5;
   line-height: $line-height-normal;
+
+  @media (max-width: $bp-md) {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
 }
 
 // ── Campos do formulário ────────────────────────────────────
 .form {
   display: grid;
   gap: $space-4;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .field-group {
@@ -140,6 +191,9 @@
   flex-direction: column;
   gap: $space-1 + 0.125rem;
   margin-bottom: $space-4;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 
   &:last-child {
     margin-bottom: 0;
@@ -150,6 +204,12 @@
     font-size: 0.8rem;
     font-weight: $font-weight-semibold; // 600 (era 800 — corrigido)
     color: $color-gray-600;
+
+    @media (max-width: $bp-md) {
+      white-space: normal;
+      overflow-wrap: break-word;
+      max-width: 100%;
+    }
 
     abbr {
       color: $color-danger;
@@ -163,6 +223,9 @@
   select,
   textarea {
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     min-height: 2.5rem;
     border: 1.5px solid $color-gray-300;
     border-radius: $border-radius;
@@ -194,12 +257,24 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: $space-4;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 .three-cols {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: $space-4;
+  width: 100%;
+  box-sizing: border-box;
+
+  @media (max-width: $bp-md) {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 // ── Lista de revisão ─────────────────────────────────────────
@@ -277,18 +352,18 @@
 
 // ── Responsivo ───────────────────────────────────────────────
 @media (max-width: $bp-md) {
-  .two-cols,
-  .three-cols {
-    grid-template-columns: 1fr;
-  }
-
   .wizard-footer {
     flex-direction: column-reverse;
-    align-items: stretch;
+    align-items: center;
+    gap: 16px;
   }
 
   .wizard-footer__left,
   .wizard-footer__right {
+    flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
+    width: 100%;
+    gap: 12px;
   }
 }
