@@ -12,8 +12,10 @@
         class="btn-filtros"
         [class.btn-filtros--active]="filtrosAtivos() > 0"
         (click)="abrirFiltros()"
+        [disabled]="abaAtiva() === 'impacto-social'"
         [attr.aria-expanded]="filtroDrawerAberto()"
         aria-controls="relatorio-filter-drawer"
+        [attr.title]="abaAtiva() === 'impacto-social' ? 'Filtros avançados não se aplicam a esta aba' : null"
         aria-label="Abrir filtros avançados de relatórios">
         <span class="material-symbols-rounded" aria-hidden="true">tune</span>
         Filtros
@@ -163,7 +165,11 @@
       aria-labelledby="tab-impacto-social">
       <app-relatorio-impacto-social
         [relatorio]="impactoSocial()"
-        [carregando]="carregando()">
+        [carregando]="carregando()"
+        [comparativoInicio]="comparativoImpactoInicio()"
+        [comparativoFim]="comparativoImpactoFim()"
+        [erroLocal]="erroImpactoSocial()"
+        (periodoComparativoChange)="onComparativoImpactoChange($event)">
       </app-relatorio-impacto-social>
     </section>
 
