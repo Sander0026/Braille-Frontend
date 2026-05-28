@@ -8,7 +8,7 @@
       </div>
 
       @if (!isProfessor()) {
-        <button class="btn btn-primary action-btn-nova shadow-sm" style="background:#eab308; border-color:#eab308; color:#1a1a00; font-weight:600; padding:0.5rem 1rem;" (click)="abrirModalCriar()" aria-label="Adicionar nova oficina">
+        <button class="btn btn-primary action-btn-nova shadow-sm" (click)="abrirModalCriar()" aria-label="Adicionar nova oficina">
           Nova Oficina
         </button>
       }

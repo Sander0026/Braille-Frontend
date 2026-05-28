@@ -22,15 +22,15 @@
           }
 
           <!-- Botões Trocar/Remover Foto -->
-          <div class="avatar-actions">
+          <div class="avatar-actions" (click)="fileInput.click()" style="cursor: pointer;">
             <!-- Botão nativo aciona o file input oculto. Restaura eventos de teclado nativos (Enter/Space) -->
-            <button class="btn btn-sm btn-primary btn-icon" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" [disabled]="salvando()" (click)="fileInput.click()">
-              <span class="material-symbols-rounded" aria-hidden="true">photo_camera</span>
+            <button class="btn btn-sm btn-icon" title="Atualizar Foto" aria-label="Atualizar Foto de Perfil" [disabled]="salvando()" (click)="fileInput.click(); $event.stopPropagation()">
+              <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 20px;">photo_camera</span>
             </button>
-            <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" [disabled]="salvando()" aria-hidden="true" />
+            <input #fileInput type="file" (change)="onFileSelected($event)" accept="image/jpeg, image/png, image/webp" class="sr-only" tabindex="-1" [disabled]="salvando()" aria-hidden="true" (click)="$event.stopPropagation()" />
             @if (u.fotoPerfil) {
-              <button class="btn btn-sm btn-danger btn-icon" title="Remover Foto" aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">
-                <span class="material-symbols-rounded" aria-hidden="true">delete</span>
+              <button class="btn btn-sm btn-icon" title="Remover Foto" aria-label="Remover Foto de Perfil" (click)="removerFotoAdmin(); $event.stopPropagation()" [disabled]="salvando()" [attr.aria-disabled]="salvando()">
+                <span class="material-symbols-rounded" aria-hidden="true" style="font-size: 20px;">delete</span>
               </button>
             }
           </div>
