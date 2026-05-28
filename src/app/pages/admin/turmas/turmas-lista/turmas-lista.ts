@@ -278,11 +278,12 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
     action$.pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.toast.sucesso(`Oficina ${arquivada ? 'desarquivada' : 'arquivada'} com sucesso.`);
+          this.toast.sucesso(arquivada ? 'Turma restaurada com sucesso.' : 'Turma arquivada com sucesso.');
           this.turmas.update(lista => lista.map(t => t.id === turmaId ? { ...t, ...res } : t));
         },
-        error: () => {
-          this.toast.erro('Inconsistência de acesso para arquivamento.');
+        error: (err) => {
+          const msg = err?.error?.message || 'Não foi possível arquivar a turma. Tente novamente.';
+          this.toast.erro(msg);
         }
       });
   }
@@ -352,9 +353,10 @@ export class TurmasLista implements OnInit, ComponenteComDescarte {
             )
           );
         },
-        error: () => {
+        error: (err) => {
           this.carregando.set(false);
-          this.toast.erro('Erro ao aplicar alteração de status.');
+          const msg = err?.error?.message || 'Erro ao aplicar alteração de status.';
+          this.toast.erro(msg);
           this.turmas.update(t => [...t]); // Reverte UI
         }
       });
