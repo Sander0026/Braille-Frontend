@@ -12,6 +12,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { catchError, debounceTime, distinctUntilChanged, forkJoin, Observable, of, Subject, switchMap } from 'rxjs';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
@@ -148,6 +149,9 @@ export class RelatoriosDashboard implements OnInit {
   readonly riscoEvasao = signal<RelatorioRiscoEvasaoResponse | null>(null);
   readonly atendimentos = signal<RelatorioAtendimentoIndividual | null>(null);
   readonly impactoSocial = signal<RelatorioImpactoSocialResponse | null>(null);
+  readonly comparativoImpactoInicio = signal('');
+  readonly comparativoImpactoFim = signal('');
+  readonly erroImpactoSocial = signal('');
 
   readonly totalRegistros = computed(() => {
     const resumo = this.resumo();
@@ -183,6 +187,8 @@ export class RelatoriosDashboard implements OnInit {
 
   limparFiltros(): void {
     this.filtros.set({ statusAluno: 'TODOS' });
+    this.comparativoImpactoInicio.set('');
+    this.comparativoImpactoFim.set('');
     this.turmasOptions.set([]);
     this.professoresOptions.set([]);
     this.alunosOptions.set([]);
@@ -195,6 +201,16 @@ export class RelatoriosDashboard implements OnInit {
   recarregar(): void {
     this.invalidarCacheRelatorios();
     this.carregarAbaAtual();
+  }
+
+  onComparativoImpactoChange(evento: { inicio: string; fim: string }): void {
+    this.comparativoImpactoInicio.set(evento.inicio);
+    this.comparativoImpactoFim.set(evento.fim);
+    this.erroImpactoSocial.set('');
+    this.abasCarregadas.update((estado) => ({ ...estado, 'impacto-social': false }));
+    this.carregandoPorAba.update((estado) => ({ ...estado, 'impacto-social': false }));
+    this.impactoSocial.set(null);
+    this.carregarImpactoSocial();
   }
 
   buscarTurmasOpcoes(busca: string): void {
@@ -427,16 +443,42 @@ export class RelatoriosDashboard implements OnInit {
 
   private carregarImpactoSocial(): void {
     this.marcarAbaCarregando('impacto-social', true);
+    const filtro: RelatorioFiltro = { ...this.filtros() };
+    const inicio = this.comparativoImpactoInicio();
+    const fim = this.comparativoImpactoFim();
+    const periodoComparativo = inicio && fim ? { inicio, fim } : undefined;
+
+    if (periodoComparativo) {
+      const dataInicioComparativo = new Date(`${inicio}T00:00:00`);
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      if (dataInicioComparativo > hoje) {
+        this.erroImpactoSocial.set(
+          'Não é possível comparar com um período futuro. Ainda não existem dados disponíveis para esse mês.'
+        );
+        this.marcarAbaCarregando('impacto-social', false);
+        return;
+      }
+    }
+
     this.relatoriosService
-      .impactoSocial(this.filtros())
+      .impactoSocial(filtro, periodoComparativo)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (impactoSocial) => {
           this.impactoSocial.set(impactoSocial);
+          this.erroImpactoSocial.set('');
           this.marcarAbaCarregada('impacto-social');
         },
-        error: () => {
-          this.erro.set('Nao foi possivel carregar o relatorio de impacto social.');
+        error: (err: unknown) => {
+          let mensagem = 'Não foi possível carregar o relatório de impacto social. Tente novamente em instantes.';
+          if (err instanceof HttpErrorResponse) {
+            if (err.status === 400) {
+              mensagem = 'Período de comparação inválido. Verifique as datas selecionadas.';
+            }
+          }
+          this.erroImpactoSocial.set(mensagem);
           this.marcarAbaCarregando('impacto-social', false);
         },
       });
@@ -497,6 +539,7 @@ export class RelatoriosDashboard implements OnInit {
     this.riscoEvasao.set(null);
     this.atendimentos.set(null);
     this.impactoSocial.set(null);
+    this.erroImpactoSocial.set('');
     this.resetarListaAlunos();
   }
 

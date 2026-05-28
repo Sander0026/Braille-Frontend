@@ -1,30 +1,134 @@
+@use '../shared-relatorio-table' as table;
+
 :host {
   display: block;
 }
 
-.impact-period {
-  background: #f8fafc;
+@include table.relatorio-table();
+
+// ── Seletor de período de comparação ───────────────────────
+.comparativo-periodo {
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
-  padding: 0.65rem 0.8rem;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0.5rem 1rem;
 
-  span {
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
     color: #6b7280;
-    display: block;
-    font-size: 0.74rem;
-    font-weight: 800;
+    font-size: 0.75rem;
     text-transform: uppercase;
+    white-space: nowrap;
+
+    strong {
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .material-symbols-rounded {
+      color: #b68e00;
+      font-size: 1.1rem;
+    }
   }
 
-  strong {
-    color: #111827;
-    display: block;
-    font-size: 0.86rem;
-    margin-top: 0.15rem;
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+  }
+
+  &__fields {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-left: auto;
   }
 }
 
+.comparativo-campo {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.comparativo-label {
+  color: #4b5563;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.comparativo-input {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  box-sizing: border-box;
+  color: #111827;
+  font: inherit;
+  font-size: 0.82rem;
+  height: 34px;
+  min-width: 110px;
+  padding: 0.28rem 0.45rem;
+  transition: border-color 150ms ease, outline 150ms ease;
+
+  &:focus {
+    border-color: #b68e00;
+    outline: 2px solid rgba(245, 200, 0, 0.4);
+  }
+
+  &:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+  }
+}
+
+.comparativo-limpar {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #6b7280;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 700;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  transition: color 140ms ease;
+  white-space: nowrap;
+
+  &:hover {
+    color: #111827;
+  }
+
+  .material-symbols-rounded {
+    font-size: 0.9rem;
+  }
+}
+
+.comparativo-hint {
+  color: #6b7280;
+  font-size: 0.75rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+// ── Cards de impacto ────────────────────────────────────────
 .impact-grid {
   display: grid;
   gap: 0.8rem;
@@ -63,6 +167,85 @@
     font-weight: 800;
     margin-top: 0.5rem;
   }
+
+  // Tooltip interaction
+  position: relative;
+  outline: none; // Remover contorno de focus-visible nativo ou estilizá-lo
+  
+  &:hover,
+  &:focus-within,
+  &:active {
+    .impact-card__tooltip {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  &:focus-visible {
+    box-shadow: 0 0 0 2px rgba(245, 200, 0, 0.4);
+    border-color: #b68e00;
+  }
+}
+
+.impact-card__tooltip {
+  background: #1f2937;
+  border-radius: 6px;
+  bottom: calc(100% + 10px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  color: #f9fafb;
+  left: 50%;
+  opacity: 0;
+  padding: 0.75rem 0.85rem;
+  pointer-events: none;
+  position: absolute;
+  transform: translateX(-50%) translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), visibility 0.2s;
+  visibility: hidden;
+  width: max-content;
+  max-width: 280px;
+  z-index: 10;
+
+  &::after {
+    border-color: #1f2937 transparent transparent transparent;
+    border-style: solid;
+    border-width: 6px 6px 0 6px;
+    bottom: -6px;
+    content: '';
+    left: calc(50% - 6px);
+    position: absolute;
+  }
+
+  strong {
+    color: #9ca3af;
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+  }
+}
+
+.impact-card__tooltip-row {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  
+  & + & {
+    margin-top: 0.25rem;
+  }
+}
+
+.impact-card__tooltip-label {
+  color: #d1d5db;
+}
+
+.impact-card__tooltip-value {
+  color: #ffffff;
+  font-weight: 700;
+  margin-left: auto;
 }
 
 .impact-card__icon {
@@ -76,6 +259,7 @@
   width: 38px;
 }
 
+// ── Classes de comparativo ──────────────────────────────────
 .comparativo--subiu {
   color: #047857;
 }
@@ -88,6 +272,7 @@
   color: #6b7280;
 }
 
+// ── Nota institucional ──────────────────────────────────────
 .impact-note {
   align-items: flex-start;
   background: #f0fdf4;
@@ -105,8 +290,72 @@
   }
 }
 
+// ── Estado de erro local ────────────────────────────────────
+.impacto-erro {
+  align-items: center;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  color: #991b1b;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  justify-content: center;
+  min-height: 200px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+
+  .material-symbols-rounded {
+    color: #ef4444;
+    font-size: 2.2rem;
+  }
+
+  p {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+    max-width: 48ch;
+  }
+}
+
+// ── Responsividade ──────────────────────────────────────────
 @media (max-width: 720px) {
-  .impact-period {
-    text-align: left;
+  .comparativo-periodo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    width: 100%;
+
+    &__content {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.75rem;
+      width: 100%;
+    }
+
+    &__fields {
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    &__actions {
+      margin-left: 0;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+
+  .comparativo-campo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    flex: 1;
+  }
+
+  .comparativo-input {
+    width: 100%;
+    min-width: unset;
   }
 }

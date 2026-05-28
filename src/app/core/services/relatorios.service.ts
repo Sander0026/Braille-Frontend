@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map } from 'rxjs';
 
 export type StatusAlunoRelatorio = 'ATIVO' | 'INATIVO' | 'TODOS';
 export type TurmaStatusRelatorio = 'PREVISTA' | 'ANDAMENTO' | 'CONCLUIDA' | 'CANCELADA';
@@ -555,10 +555,80 @@ export class RelatoriosService {
     });
   }
 
-  impactoSocial(filtro: RelatorioFiltro): Observable<RelatorioImpactoSocialResponse> {
-    return this.http.get<RelatorioImpactoSocialResponse>(`${this.url}/impacto-social`, {
-      params: this.buildParams(filtro),
-    });
+  /**
+   * Busca o relatório de impacto social.
+   * Quando `periodoComparativo` for fornecido (com ambas as datas preenchidas),
+   * faz duas chamadas paralelas ao mesmo endpoint e monta o comparativo no frontend,
+   * pois o backend não expõe parâmetros de período de comparação customizados.
+   */
+  impactoSocial(
+    filtro: RelatorioFiltro,
+    periodoComparativo?: { inicio: string; fim: string },
+  ): Observable<RelatorioImpactoSocialResponse> {
+    const filtroAtual: RelatorioFiltro = { ...filtro };
+
+    if (!periodoComparativo?.inicio || !periodoComparativo?.fim) {
+      // Sem comparativo customizado — chamada simples
+      return this.http.get<RelatorioImpactoSocialResponse>(`${this.url}/impacto-social`, {
+        params: this.buildParams(filtroAtual),
+      });
+    }
+
+    // Com comparativo customizado — duas chamadas paralelas
+    const filtroComparativo: RelatorioFiltro = {
+      ...filtroAtual,
+      dataInicio: periodoComparativo.inicio,
+      dataFim: periodoComparativo.fim,
+    };
+
+    return forkJoin([
+      this.http.get<RelatorioImpactoSocialResponse>(`${this.url}/impacto-social`, {
+        params: this.buildParams(filtroAtual),
+      }),
+      this.http.get<RelatorioImpactoSocialResponse>(`${this.url}/impacto-social`, {
+        params: this.buildParams(filtroComparativo),
+      }),
+    ]).pipe(
+      map(([atual, comparativo]) =>
+        this.mesclarComComparativoCustomizado(atual, comparativo),
+      ),
+    );
+  }
+
+  /**
+   * Combina dois snapshots de impacto social: substitui o comparativo automático
+   * pelo snapshot do período escolhido pelo usuário, recalculando as variações.
+   */
+  private mesclarComComparativoCustomizado(
+    atual: RelatorioImpactoSocialResponse,
+    comparativo: RelatorioImpactoSocialResponse,
+  ): RelatorioImpactoSocialResponse {
+    const metricasAtual = atual.metricas;
+    const metricasComparativo = comparativo.metricas;
+
+    const novoComparativo = (Object.keys(metricasAtual) as (keyof RelatorioImpactoMetricas)[]).reduce(
+      (acc, key) => {
+        const atual = metricasAtual[key];
+        const anterior = metricasComparativo[key] ?? 0;
+        const diferenca = atual - anterior;
+        const variacaoPercentual =
+          anterior === 0 ? (atual > 0 ? 100 : 0) : Math.round((diferenca / anterior) * 100 * 100) / 100;
+        const direcao: 'SUBIU' | 'DESCEU' | 'ESTAVEL' =
+          diferenca > 0 ? 'SUBIU' : diferenca < 0 ? 'DESCEU' : 'ESTAVEL';
+        acc[key] = { atual, anterior, variacaoPercentual, direcao };
+        return acc;
+      },
+      {} as Record<keyof RelatorioImpactoMetricas, RelatorioComparativoItem>,
+    );
+
+    return {
+      ...atual,
+      periodo: {
+        ...atual.periodo,
+        anterior: comparativo.periodo.atual, // O período atual da segunda chamada vira o anterior
+      },
+      comparativo: novoComparativo,
+    };
   }
 
   buscarOpcoesTurmas(busca: string): Observable<RelatorioOpcao[]> {
