@@ -11,31 +11,18 @@ export interface ModeloCertificado {
   nome: string;
   arteBaseUrl: string;
   assinaturaUrl: string;
-  assinaturaUrl2?: string | null;
+  assinaturaUrl2?: string;
   textoTemplate: string;
   nomeAssinante: string;
   cargoAssinante: string;
-  nomeAssinante2?: string | null;
-  cargoAssinante2?: string | null;
-  layoutConfig?: CertificadoLayoutConfig | null;
+  nomeAssinante2?: string;
+  cargoAssinante2?: string;
+  layoutConfig?: CertificadoLayoutConfig;
   tipo: TipoModeloCertificado;
   criadoEm?: string;
   atualizadoEm?: string;
   dataCriacao: string;
   dataAtualizacao: string;
-}
-
-export interface ValidacaoCertificadoResponse {
-  valido: boolean;
-  nome: string;
-  curso: string;
-  data: string;
-  dataEmissao?: string;
-  cargaHoraria?: string;
-  codigoValidacao?: string;
-  status?: string;
-  mensagem?: string;
-  tipo: string;
 }
 
 export interface CertificadoCicloVidaResponse {
@@ -113,8 +100,30 @@ export class ModelosCertificadosService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  validarAutenticidade(codigo: string): Observable<ValidacaoCertificadoResponse> {
-    return this.http.get<ValidacaoCertificadoResponse>(`${this.certificadosUrl}/validar/${codigo}`);
+  validarAutenticidade(codigo: string): Observable<{
+    valido: boolean;
+    nome: string;
+    curso: string;
+    data: string;
+    dataEmissao?: string;
+    cargaHoraria?: string;
+    codigoValidacao?: string;
+    status?: string;
+    mensagem?: string;
+    tipo: string;
+  }> {
+    return this.http.get<{
+      valido: boolean;
+      nome: string;
+      curso: string;
+      data: string;
+      dataEmissao?: string;
+      cargaHoraria?: string;
+      codigoValidacao?: string;
+      status?: string;
+      mensagem?: string;
+      tipo: string;
+    }>(`${this.certificadosUrl}/validar/${codigo}`);
   }
 
   emitirAcademico(turmaId: string, alunoId: string): Observable<{ pdfUrl: string; codigoValidacao: string }> {

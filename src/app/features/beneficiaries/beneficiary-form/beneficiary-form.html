@@ -45,7 +45,7 @@
           <input id="e-cpf" type="text" class="edit-input" formControlName="cpf"
             (input)="formatarDocumento($event)" (blur)="verificarCampoUnico('cpf')"
             maxlength="14" placeholder="000.000.000-00" autocomplete="off"
-            [class.edit-input--error]="cpfStatus === 'ativo'">
+            [class.edit-input--error]="cadastroForm.get('dadosPessoais.cpf')?.hasError('cpfInvalido') || cpfStatus === 'ativo'">
         </div>
         <div class="edit-field">
           <label for="e-rg" class="edit-label">RG</label>
@@ -61,6 +61,9 @@
       <span class="edit-error" role="alert">
         CPF já pertence ao aluno ativo: <strong>{{ cpfConflito.nomeCompleto }}</strong>
       </span>
+      }
+      @if (cadastroForm.get('dadosPessoais.cpf')?.hasError('cpfInvalido') && cadastroForm.get('dadosPessoais.cpf')?.touched) {
+      <span class="edit-error" role="alert">CPF invalido.</span>
       }
       @if (rgStatus === 'ativo' && rgConflito) {
       <span class="edit-error" role="alert">
@@ -466,6 +469,9 @@
       <div class="form-group full-width" style="margin-bottom: 1rem;">
         @if (isCampoInvalido('dadosPessoais', 'cpf') && isCampoInvalido('dadosPessoais', 'rg')) {
           <span class="error-text" role="alert">Preencha pelo menos o CPF ou o RG.</span>
+        }
+        @if (cadastroForm.get('dadosPessoais.cpf')?.hasError('cpfInvalido') && cadastroForm.get('dadosPessoais.cpf')?.touched) {
+          <span class="error-text" role="alert">CPF invalido.</span>
         }
         @if (cpfStatus === 'ativo' && cpfConflito) {
           <span class="error-text" role="alert">CPF: aluno ativo <strong>{{ cpfConflito.nomeCompleto }}</strong></span>

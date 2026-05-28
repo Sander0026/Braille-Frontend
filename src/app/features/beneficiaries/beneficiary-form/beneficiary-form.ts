@@ -10,6 +10,7 @@ import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { TabEscapeDirective } from '../../../shared/directives/tab-escape.directive';
 import { BaseFormDescarte } from '../../../shared/classes/base-form-descarte';
 import { formatarCpfCnpj, formatarRg, formatarTelefone, formatarCep } from '../../../shared/utils/masks.util';
+import { cpfValidator } from '../../../shared/validators/documento.validator';
 
 type CampoUploadBeneficiario = 'fotoPerfil' | 'laudoUrl' | 'termoLgpdUrl';
 type ResultadoUploadBeneficiario = { tipo: CampoUploadBeneficiario; url: string };
@@ -189,7 +190,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
       dadosPessoais: this.fb.group({
         nomeCompleto: ['', [Validators.required, Validators.minLength(3)]],
         dataNascimento: ['', Validators.required],
-        cpf: [''],
+        cpf: ['', [cpfValidator]],
         rg: [''],
         genero: [''],
         estadoCivil: [''],
@@ -308,11 +309,17 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
   verificarCampoUnico(tipo: 'cpf' | 'rg') {
     this.verificarObrigatoriedadeCpfRg();
     const valor = this.cadastroForm.get(`dadosPessoais.${tipo}`)?.value ?? '';
+    const control = this.cadastroForm.get(`dadosPessoais.${tipo}`);
     const limpo = tipo === 'cpf' ? String(valor).replaceAll(/\D/g, '') : String(valor).trim();
     
     if (!limpo) { 
         this.atualizarStatusDocumento(tipo, '');
         return; 
+    }
+
+    if (tipo === 'cpf' && control?.hasError('cpfInvalido')) {
+        this.atualizarStatusDocumento(tipo, '');
+        return;
     }
 
     // Se é edição e o documento não mudou, não apitar como erro
@@ -359,6 +366,7 @@ export class BeneficiaryFormComponent extends BaseFormDescarte implements OnInit
     const valorFormatado = formatarCpfCnpj(input.value);
     input.value = valorFormatado;
     this.cadastroForm.get('dadosPessoais.cpf')?.setValue(valorFormatado, { emitEvent: false });
+    this.cadastroForm.get('dadosPessoais.cpf')?.updateValueAndValidity({ emitEvent: false });
     this.verificarObrigatoriedadeCpfRg();
   }
 

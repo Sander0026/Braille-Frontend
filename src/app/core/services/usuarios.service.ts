@@ -127,6 +127,14 @@ export class UsuariosService {
         return req$;
     }
 
+    listarResumo(page = 1, limit = 100, nome?: string, role?: UsuarioRole): Observable<PaginatedResponse<Usuario>> {
+        let params = new HttpParams().set('page', page).set('limit', limit);
+        if (nome) params = params.set('nome', nome);
+        if (role) params = params.set('role', role);
+
+        return this.http.get<PaginatedResponse<Usuario>>(`${this.url}/resumo`, { params });
+    }
+
     /** Cria um novo usuário. O backend retorna `_reativacao: true` se o CPF já existir inativo. */
     criar(dados: CreateUsuarioDto): Observable<CreateUsuarioResponse | ReativacaoResponse> {
         this.limparCache();

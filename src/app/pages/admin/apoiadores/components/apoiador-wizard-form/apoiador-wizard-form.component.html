@@ -57,7 +57,11 @@
                             <label for="cpfCnpj" class="form-label">Documento (CPF ou CNPJ)</label>
                             <input id="cpfCnpj" type="text" class="form-input" formControlName="cpfCnpj"
                                 placeholder="Apenas números ou formato padrão" (input)="onMaskCpfCnpj($event)"
-                                maxlength="18">
+                                maxlength="18"
+                                [class.input-error]="isCampoInvalido('informacoesPrincipais', 'cpfCnpj')">
+                            @if (isCampoInvalido('informacoesPrincipais', 'cpfCnpj')) {
+                            <span class="error-text" role="alert">CPF ou CNPJ invalido.</span>
+                            }
                         </div>
                     </div>
 
@@ -300,6 +304,11 @@
                         </button>
                     </div>
 
+                    <div style="color: #64748b; font-size: 0.85rem; display: flex; align-items: flex-start; gap: 0.25rem; margin-bottom: 1rem;" role="note">
+                        <span class="material-symbols-rounded" style="font-size: 1rem; flex-shrink: 0;" aria-hidden="true">info</span>
+                        <span>Observação: No caso de várias doações, crie uma ação separada para cada uma.</span>
+                    </div>
+
                     <div formArrayName="acoes">
                         @for (acaoCtrl of acoesFormArray.controls; track $index) {
                         <div [formGroupName]="$index"
@@ -314,13 +323,16 @@
                                         class="required">*</span></label>
                                 <div style="display: flex; gap: 0.5rem; align-items: stretch;">
                                     <input type="text" class="form-input" formControlName="descricaoAcao"
-                                        placeholder="Descreva o que foi feito..." style="flex: 1;">
+                                        placeholder="Descreva o que foi feito..." maxlength="25" style="flex: 1;">
                                     <button type="button" class="btn btn-danger btn-sm p-2"
                                         (click)="removeAcaoField($index)" title="Remover esta Ação"
                                         style="display: flex; align-items: center; justify-content: center;">
                                         <span class="material-symbols-rounded"
                                             style="font-size: 1.1rem; margin: 0;">delete</span>
                                     </button>
+                                </div>
+                                <div style="text-align: right; font-size: 0.75rem; color: #94a3b8; margin-top: -0.15rem;">
+                                    {{ acaoCtrl.get('descricaoAcao')?.value?.length || 0 }}/25
                                 </div>
                             </div>
                         </div>

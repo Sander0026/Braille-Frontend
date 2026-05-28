@@ -1,0 +1,38 @@
+<main class="page">
+  <header class="hero">
+    <div>
+      <a routerLink="/admin/atendimentos-individuais" class="back-btn" aria-label="Voltar para a tela principal de atendimentos">Voltar</a>
+      <h1>Acompanhamentos arquivados</h1>
+      <p>Consulte acompanhamentos ocultados da visualizacao principal.</p>
+    </div>
+  </header>
+
+  <section class="toolbar">
+    <label>
+      <span>Buscar</span>
+      <input type="search" [(ngModel)]="busca" placeholder="Nome, matricula ou assunto" (keyup.enter)="filtrar()" />
+    </label>
+    <button type="button" (click)="filtrar()">Filtrar</button>
+  </section>
+
+  @if (carregando()) {
+    <app-empty-state-atendimentos title="Carregando acompanhamentos" description="Aguarde enquanto buscamos os registros." />
+  } @else if (erro()) {
+    <app-empty-state-atendimentos title="Falha ao carregar acompanhamentos" [description]="erro()" />
+  } @else if (acompanhamentos().length === 0) {
+    <app-empty-state-atendimentos title="Nenhum acompanhamento arquivado" description="Quando houver arquivamentos administrativos, eles aparecerao aqui." />
+  } @else {
+    <section class="grid">
+      @for (acompanhamento of acompanhamentos(); track acompanhamento.id) {
+        <app-acompanhamento-card [acompanhamento]="acompanhamento" />
+      }
+    </section>
+    <app-pagination
+      [page]="page()"
+      [lastPage]="lastPage()"
+      [total]="total()"
+      [loading]="carregando()"
+      (previous)="paginaAnterior()"
+      (next)="proximaPagina()" />
+  }
+</main>

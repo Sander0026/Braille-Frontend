@@ -1,0 +1,290 @@
+/* ==========================================================================
+   AlunoAutocomplete — Tipografia alinhada com módulo Alunos
+   Padrão: beneficiary-form.scss + _components.scss
+   ========================================================================== */
+@use '../../../../../styles/variables' as *;
+
+.autocomplete-wrapper {
+  display: grid;
+  gap: $space-1 + 0.125rem;
+  position: relative;
+}
+
+/* --------------------------------------------------------------------------
+   Campo de busca
+   -------------------------------------------------------------------------- */
+
+.field {
+  display: grid;
+  gap: $space-1 + 0.125rem;
+}
+
+// Label do campo — igual a .form-group label de beneficiary-form (0.8rem/600)
+.field__label {
+  font-family: $font-family-base;
+  font-size: 0.8rem;                  // (era 0.875rem/700 — corrigido)
+  font-weight: $font-weight-semibold; // 600 (era 700 — corrigido)
+  color: $color-gray-600;             // (era #374151 — harmonizado com Alunos)
+}
+
+.field__input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+// Input de busca — igual a .form-input global
+.field__input {
+  width: 100%;
+  min-height: 2.5rem;
+  border: 1.5px solid $color-gray-300;
+  border-radius: $border-radius;
+  padding: calc(#{$space-2} + 0.125rem) 2.75rem calc(#{$space-2} + 0.125rem) $space-3;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;           // 0.875rem (era 0.9375rem — corrigido)
+  color: $color-gray-900;
+  background: $color-white;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+  outline: none;
+  box-sizing: border-box;
+
+  &::placeholder {
+    color: $color-gray-400;
+  }
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
+  }
+
+  &[type='search']::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
+}
+
+/* Campo com aluno selecionado */
+.field__input--selected {
+  background: $color-gray-100;
+  border-color: $color-gray-400;
+  color: $color-gray-700;
+  cursor: default;
+
+  &:focus {
+    border-color: $color-gray-400;
+    box-shadow: none;
+  }
+}
+
+/* Botão X para limpar aluno selecionado */
+.field__clear-btn {
+  position: absolute;
+  right: $space-2 + 0.125rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: $border-radius-full;
+  background: transparent;
+  color: $color-gray-500;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+  flex-shrink: 0;
+
+  &:hover,
+  &:focus-visible {
+    background: $color-gray-200;
+    color: $color-gray-900;
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+}
+
+/* Spinner de carregamento */
+.field__spinner {
+  position: absolute;
+  right: $space-3;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 2px solid $color-gray-200;
+  border-top-color: $color-primary;
+  border-radius: $border-radius-full;
+  animation: spin 0.7s linear infinite;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Aluno selecionado (compatibilidade)
+   -------------------------------------------------------------------------- */
+.selected-card {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Dropdown de resultados
+   -------------------------------------------------------------------------- */
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  border: 1.5px solid $color-gray-200;
+  border-radius: $border-radius;
+  background: $color-white;
+  box-shadow: $shadow-md;
+  animation: fadeIn 0.12s ease;
+}
+
+.dropdown__status {
+  display: flex;
+  align-items: center;
+  gap: $space-2;
+  padding: $space-3 + 0.125rem $space-4;
+  color: $color-gray-500;
+  font-size: $font-size-sm;           // 0.875rem (era 0.9rem — corrigido)
+  font-weight: $font-weight-medium;   // 500
+}
+
+.dropdown__status--empty {
+  color: $color-gray-400;
+}
+
+.dropdown__status-icon {
+  flex-shrink: 0;
+  color: $color-gray-400;
+}
+
+/* Ícone de loading gira */
+.dropdown__status:not(.dropdown__status--empty) .dropdown__status-icon {
+  animation: spin 1s linear infinite;
+  color: $color-primary;
+}
+
+.dropdown__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color: $color-gray-200 transparent;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color-gray-200;
+    border-radius: 4px;
+  }
+}
+
+.dropdown__item {
+  border-bottom: 1px solid $color-gray-100;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.dropdown__item--active .dropdown__btn {
+  background: $color-primary-light;
+  outline: 2px solid $color-primary;
+  outline-offset: -2px;
+}
+
+.dropdown__btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $space-4;
+  border: 0;
+  background: $color-white;
+  padding: $space-3 $space-4;
+  text-align: left;
+  cursor: pointer;
+  transition: background $transition-fast;
+
+  &:hover,
+  &:focus-visible {
+    background: $color-gray-50;
+    outline: 2px solid $color-primary;
+    outline-offset: -2px;
+  }
+}
+
+// Nome do aluno no dropdown — igual a td da tabela de Alunos
+.dropdown__name {
+  font-family: $font-family-base;
+  font-size: $font-size-sm;           // 0.875rem (era 0.9375rem — corrigido)
+  font-weight: $font-weight-medium;   // 500
+  color: $color-gray-900;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Meta ocultada */
+.dropdown__meta {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Acessibilidade
+   -------------------------------------------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Animações
+   -------------------------------------------------------------------------- */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Responsividade
+   -------------------------------------------------------------------------- */
+
+@media (max-width: $bp-sm) {
+  .dropdown__btn {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $space-1 * 0.5;
+  }
+}

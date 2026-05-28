@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Apoiador, ApoiadoresService } from '../../apoiadores.service';
 import { MasksUtil } from '../../../../../shared/utils/masks.util';
+import { cpfCnpjValidator } from '../../../../../shared/validators/documento.validator';
 import { A11yModule, LiveAnnouncer } from '@angular/cdk/a11y';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { forkJoin } from 'rxjs';
@@ -65,7 +66,7 @@ export class ApoiadorWizardFormComponent implements OnInit, OnChanges {
         tipo: ['EMPRESA', Validators.required],
         nomeRazaoSocial: ['', Validators.required],
         nomeFantasia: [''],
-        cpfCnpj: ['']
+        cpfCnpj: ['', [cpfCnpjValidator]]
       }),
       contatoEndereco: this.fb.group({
         email: ['', [Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')]],

@@ -40,7 +40,7 @@ describe('ApoiadorCertificadosComponent (SecDevOps Test)', () => {
     const mockBlob = new Blob(['%PDF-1.4 mock content'], { type: 'application/pdf' });
     apoiadoresServiceMock.gerarPdfCertificado.mockReturnValue(of(mockBlob));
 
-    const certMock = { id: 'abc-123', tituloCertificado: 'Honra ao Mérito' };
+    const certMock = { id: 'abc-123', tituloCertificado: 'Honra ao Mérito', dataEmissao: '2026-03-24T10:00:00Z' } as any;
     
     expect(component.processandoId).toBeNull();
     component.abrirPdf(certMock);
@@ -54,7 +54,7 @@ describe('ApoiadorCertificadosComponent (SecDevOps Test)', () => {
   it('deve lidar com erro ao visualizar PDF, resetando UI', () => {
     apoiadoresServiceMock.gerarPdfCertificado.mockReturnValue(throwError(() => new Error('Server limit')));
     
-    const certMock = { id: 'abc-123' };
+    const certMock = { id: 'abc-123', dataEmissao: '2026-03-24T10:00:00Z' } as any;
     component.abrirPdf(certMock);
 
     expect(component.pdfAberto).toBe(false);

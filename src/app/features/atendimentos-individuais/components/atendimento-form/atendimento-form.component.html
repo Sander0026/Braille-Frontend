@@ -1,0 +1,230 @@
+<div class="wizard-container" aria-label="Formulário de atendimento em etapas">
+
+  <!-- Cabeçalho do Wizard (Progresso) -->
+  <header class="wizard-header">
+    <div class="steps-indicator" aria-hidden="true">
+      @for (step of stepsIndicator; track step) {
+        <div class="step-item">
+          <div class="step-dot" [class.active]="step === passoAtual()" [class.done]="step < passoAtual()">
+            @if (step < passoAtual()) {
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            } @else {
+              {{ step }}
+            }
+          </div>
+          <span class="step-label" [class.active]="step === passoAtual()" [class.done]="step < passoAtual()">
+            @switch (step) {
+              @case (1) { Informações }
+              @case (2) { Detalhamento }
+              @case (3) { Revisão }
+              @case (4) { Arquivos }
+            }
+          </span>
+          @if (step < totalPassos) {
+            <div class="step-line" [class.done]="step < passoAtual()"></div>
+          }
+        </div>
+      }
+    </div>
+  </header>
+
+  <!-- Formulário Principal -->
+  <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+
+    <!-- PASSO 1: Informações Básicas -->
+    @if (passoAtual() === 1) {
+      <section class="wizard-step" aria-labelledby="step1-title">
+        <h2 id="step1-title" class="step-title">Passo 1 — Informações básicas</h2>
+        <p class="step-desc">Preencha os dados do registro e horário do atendimento.</p>
+
+        <label class="field-group">
+          <span>Tipo de registro <abbr title="obrigatório">*</abbr></span>
+          <select formControlName="tipoRegistro">
+            <option value="ATENDIMENTO_REALIZADO">Atendimento realizado</option>
+            <option value="FALTA_JUSTIFICADA">Falta justificada</option>
+            <option value="FALTA_NAO_JUSTIFICADA">Falta não justificada</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </label>
+
+        <label class="field-group">
+          <span>Data do atendimento <abbr title="obrigatório">*</abbr></span>
+          <input type="date" formControlName="dataAtendimento" />
+        </label>
+
+        <div class="three-cols">
+          <label class="field-group">
+            <span>Início</span>
+            <input type="time" formControlName="horaInicio" />
+          </label>
+          <label class="field-group">
+            <span>Fim</span>
+            <input type="time" formControlName="horaFim" />
+          </label>
+          <label class="field-group">
+            <span>Duração (min)</span>
+            <input type="number" min="1" max="1440" formControlName="duracaoMinutos" />
+          </label>
+        </div>
+
+        <div class="two-cols">
+          <label class="field-group">
+            <span>Modalidade</span>
+            <select formControlName="modalidade">
+              <option value="">Não informar</option>
+              <option value="PRESENCIAL">Presencial</option>
+              <option value="REMOTO">Remoto</option>
+              <option value="TELEFONE">Telefone</option>
+              <option value="OUTRO">Outro</option>
+            </select>
+          </label>
+          <label class="field-group">
+            <span>Local</span>
+            <input type="text" formControlName="localAtendimento" maxlength="120" placeholder="Sala, endereço ou plataforma" />
+          </label>
+        </div>
+      </section>
+    }
+
+    <!-- PASSO 2: Detalhamento -->
+    @if (passoAtual() === 2) {
+      <section class="wizard-step" aria-labelledby="step2-title">
+        <h2 id="step2-title" class="step-title">Passo 2 — Detalhamento</h2>
+        <p class="step-desc">Registre as observações, pautas ou justificativas.</p>
+
+        @if (tipoRegistroAtual() === 'ATENDIMENTO_REALIZADO') {
+          <label class="field-group">
+            <span>Assunto do dia <abbr title="obrigatório">*</abbr></span>
+            <input type="text" formControlName="assuntoDoDia" maxlength="200" placeholder="Descreva a pauta do atendimento..." />
+          </label>
+          <label class="field-group">
+            <span>Observação / resumo <abbr title="obrigatório">*</abbr></span>
+            <textarea rows="4" formControlName="observacao" maxlength="2000" placeholder="Relato principal do que ocorreu..."></textarea>
+          </label>
+          <div class="two-cols">
+            <label class="field-group"><span>Evolução</span><textarea rows="3" formControlName="evolucao"></textarea></label>
+            <label class="field-group"><span>Dificuldades</span><textarea rows="3" formControlName="dificuldades"></textarea></label>
+          </div>
+          <div class="two-cols">
+            <label class="field-group"><span>Pendências</span><textarea rows="3" formControlName="pendencias"></textarea></label>
+            <label class="field-group"><span>Recomendações</span><textarea rows="3" formControlName="recomendacoes"></textarea></label>
+          </div>
+        } @else if (tipoRegistroAtual() === 'FALTA_JUSTIFICADA') {
+          <label class="field-group">
+            <span>Motivo da falta <abbr title="obrigatório">*</abbr></span>
+            <textarea rows="4" formControlName="observacao" maxlength="2000" placeholder="Descreva por que a falta foi justificada..."></textarea>
+          </label>
+        } @else {
+          <label class="field-group">
+            <span>{{ tipoRegistroAtual() === 'CANCELADO' ? 'Motivo do cancelamento' : 'Observação opcional' }}</span>
+            <textarea rows="4" formControlName="observacao" maxlength="2000" placeholder="Informação adicional (opcional)..."></textarea>
+          </label>
+        }
+      </section>
+    }
+
+    <!-- PASSO 3: Revisão -->
+    @if (passoAtual() === 3) {
+      <section class="wizard-step" aria-labelledby="step3-title">
+        <h2 id="step3-title" class="step-title">Passo 3 — Revisão</h2>
+        <p class="step-desc">Confira as informações antes de salvar o atendimento.</p>
+
+        <dl class="review-list">
+          <div class="review-list__item">
+            <dt>Tipo de registro</dt>
+            <dd>{{ formatarTipoRegistro(tipoRegistroAtual()) }}</dd>
+          </div>
+          <div class="review-list__item">
+            <dt>Data</dt>
+            <dd>{{ form.controls.dataAtendimento.value | date:'dd/MM/yyyy' }}</dd>
+          </div>
+          @if (form.controls.horaInicio.value) {
+            <div class="review-list__item">
+              <dt>Horário</dt>
+              <dd>
+                {{ form.controls.horaInicio.value }}
+                @if (form.controls.horaFim.value) { até {{ form.controls.horaFim.value }} }
+              </dd>
+            </div>
+          }
+          @if (form.controls.modalidade.value) {
+            <div class="review-list__item">
+              <dt>Modalidade</dt>
+              <dd>{{ form.controls.modalidade.value }}</dd>
+            </div>
+          }
+          @if (form.controls.localAtendimento.value) {
+            <div class="review-list__item">
+              <dt>Local</dt>
+              <dd>{{ form.controls.localAtendimento.value }}</dd>
+            </div>
+          }
+
+          @if (tipoRegistroAtual() === 'ATENDIMENTO_REALIZADO') {
+            <div class="review-list__item review-list__item--full">
+              <dt>Assunto do dia</dt>
+              <dd>{{ form.controls.assuntoDoDia.value || '—' }}</dd>
+            </div>
+          }
+          @if (form.controls.observacao.value) {
+            <div class="review-list__item review-list__item--full">
+              <dt>{{ tipoRegistroAtual() === 'FALTA_JUSTIFICADA' ? 'Motivo' : 'Observação' }}</dt>
+              <dd>{{ form.controls.observacao.value }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
+    }
+
+    <!-- PASSO 4: Arquivos e Anexos -->
+    @if (passoAtual() === 4 && atendimentoId) {
+      <section class="wizard-step" aria-labelledby="step4-title">
+        <h2 id="step4-title" class="step-title">Passo 4 — Arquivos e Anexos</h2>
+        <p class="step-desc">Anexe atestados, documentos ou materiais relacionados ao atendimento (opcional).</p>
+        <app-upload-arquivos-atendimento
+          [atendimentoId]="atendimentoId"
+          [categoriaPadrao]="categoriaPadrao">
+        </app-upload-arquivos-atendimento>
+      </section>
+    }
+
+    <!-- Mensagens de erro de validação -->
+    @if (error) {
+      <p class="error" aria-live="assertive">{{ error }}</p>
+    }
+
+    <!-- Rodapé de Ações do Wizard -->
+    <footer class="wizard-footer">
+      <div class="wizard-footer__left">
+        @if (passoAtual() > 1) {
+          <button type="button" class="btn btn-ghost" (click)="voltarPasso()">
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            Voltar
+          </button>
+        } @else {
+          <button type="button" class="btn btn-ghost" (click)="cancel.emit()">Cancelar</button>
+        }
+      </div>
+
+      <div class="wizard-footer__right">
+        @if (passoAtual() < totalPassos) {
+          <button type="button" class="btn btn-primary" (click)="avancarPasso()">
+            Avançar
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+        } @else {
+          <button type="submit" class="btn btn-primary" [disabled]="saving">
+            @if (saving) {
+              <span class="loading-spinner" aria-hidden="true"></span> Salvando...
+            } @else if (atendimentoId && passoAtual() === 4) {
+              Concluir
+            } @else {
+              {{ submitLabel }}
+            }
+          </button>
+        }
+      </div>
+    </footer>
+
+  </form>
+</div>

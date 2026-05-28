@@ -1,0 +1,94 @@
+:host {
+  display: block;
+}
+
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1.25rem;
+}
+
+.indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  min-height: 86px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+
+  .material-symbols-rounded {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    font-size: 1.45rem;
+    background: #f3f4f6;
+    color: #374151;
+    flex: 0 0 auto;
+  }
+
+  div {
+    min-width: 0;
+  }
+
+  strong {
+    display: block;
+    color: #111827;
+    font-size: 1.45rem;
+    line-height: 1.1;
+  }
+
+  span:not(.material-symbols-rounded) {
+    color: #4b5563;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+}
+
+.tone-success .material-symbols-rounded {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tone-warning .material-symbols-rounded {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.tone-danger .material-symbols-rounded {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.tone-info .material-symbols-rounded {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    animation: shimmer 1.2s infinite;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(100%);
+  }
+}

@@ -1,0 +1,13 @@
+<nav class="pagination" aria-label="Paginacao">
+  <button type="button" (click)="goPrevious()" [disabled]="loading || normalizedPage <= 1">
+    Anterior
+  </button>
+
+  <span aria-live="polite">
+    Pagina {{ normalizedPage }} de {{ normalizedLastPage }} - {{ total }} registros
+  </span>
+
+  <button type="button" (click)="goNext()" [disabled]="loading || normalizedPage >= normalizedLastPage">
+    Proxima
+  </button>
+</nav>

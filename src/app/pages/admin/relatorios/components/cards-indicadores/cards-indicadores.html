@@ -1,0 +1,17 @@
+<section class="indicators-grid" aria-label="Indicadores principais">
+  @if (carregando) {
+    @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+      <div class="indicator skeleton" aria-hidden="true"></div>
+    }
+  } @else {
+    @for (card of cards; track card.label) {
+      <article class="indicator" [ngClass]="'tone-' + card.tone">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ card.icon }}</span>
+        <div>
+          <strong>{{ card.valor }}</strong>
+          <span>{{ card.label }}</span>
+        </div>
+      </article>
+    }
+  }
+</section>
