@@ -182,6 +182,12 @@ describe('TurmaFormModalComponent — Acessibilidade WCAG 2.1 AA', () => {
       fixture.detectChanges();
       expect(qs<HTMLElement>(fixture, '.error-banner[role="alert"][aria-live="assertive"]')).toBeTruthy();
     });
+
+    it('erroAPI deve ser focavel para destacar erro retornado pela API', () => {
+      component.erroAPI = 'Choque de horario do professor';
+      fixture.detectChanges();
+      expect(qs<HTMLElement>(fixture, '.error-banner').getAttribute('tabindex')).toBe('-1');
+    });
   });
 
   // ── 6. WCAG 1.3.1 — fieldset+legend e role=group no turno-form ───────

@@ -1,0 +1,118 @@
+<!-- ── Toolbar sempre visível (fora de qualquer condicional) ── -->
+<div class="section-toolbar">
+  <div>
+    <h2>Impacto Social</h2>
+    @if (relatorio) {
+      <p>{{ periodoAtual() }}</p>
+    }
+  </div>
+
+  <div class="comparativo-periodo" role="search" aria-label="Filtro de comparação">
+    <div class="comparativo-periodo__header">
+      <span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
+      <strong>Período de comparação</strong>
+    </div>
+
+    <div class="comparativo-periodo__content">
+      <div class="comparativo-periodo__fields">
+        <div class="comparativo-campo">
+          <label class="comparativo-label" for="comparativo-mes">Mês</label>
+          <select
+            id="comparativo-mes"
+            class="comparativo-input"
+            (change)="onMesChange($event)"
+            [disabled]="carregando"
+            aria-label="Mês do período de comparação">
+            <option value="0" disabled [selected]="localMes === 0"></option>
+            @for (m of meses; track m.valor) {
+              <option [value]="m.valor" [selected]="localMes === m.valor">{{ m.label }}</option>
+            }
+          </select>
+        </div>
+        <div class="comparativo-campo">
+          <label class="comparativo-label" for="comparativo-ano">Ano</label>
+          <select
+            id="comparativo-ano"
+            class="comparativo-input"
+            (change)="onAnoChange($event)"
+            [disabled]="carregando"
+            aria-label="Ano do período de comparação">
+            <option value="0" disabled [selected]="localAno === 0"></option>
+            @for (ano of anos; track ano) {
+              <option [value]="ano" [selected]="localAno === ano">{{ ano }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="comparativo-periodo__actions">
+        @if (localMes && localAno) {
+          <p class="comparativo-hint">{{ intervaloCalculado }}</p>
+          <button
+            type="button"
+            class="comparativo-limpar"
+            (click)="limparComparativo()"
+            [disabled]="carregando"
+            aria-label="Limpar período de comparação">
+            <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
+            Limpar
+          </button>
+        } @else if (relatorio) {
+          <p class="comparativo-hint">{{ periodoAnterior() }}</p>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Área de conteúdo: loading / erro / dados ── -->
+@if (carregando) {
+  <div class="loading-state">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+    <span>Carregando impacto social</span>
+  </div>
+} @else if (erroLocal) {
+  <div class="impacto-erro" role="alert">
+    <span class="material-symbols-rounded" aria-hidden="true">error_outline</span>
+    <p>{{ erroLocal }}</p>
+  </div>
+} @else if (relatorio; as dados) {
+  <section class="impact-grid" aria-label="Indicadores de impacto social">
+    @for (metrica of metricas; track metrica.key) {
+      @let comparativoItem = comparativo(metrica.key);
+      <article class="impact-card" tabindex="0">
+        <div class="impact-card__icon">
+          <span class="material-symbols-rounded" aria-hidden="true">{{ metrica.icon }}</span>
+        </div>
+        <div>
+          <span>{{ metrica.label }}</span>
+          <strong>{{ valor(metrica.key) }}</strong>
+          <small [ngClass]="classeComparativo(comparativoItem)">
+            {{ textoComparativo(comparativoItem) }}
+          </small>
+        </div>
+        
+        @if (comparativoItem) {
+          <div class="impact-card__tooltip" role="tooltip">
+            <strong>Comparação:</strong>
+            <div class="impact-card__tooltip-row">
+              <span class="impact-card__tooltip-label">{{ periodoAnterior() }}:</span>
+              <span class="impact-card__tooltip-value">{{ formatarValorBase(metrica.key, comparativoItem.anterior) }}</span>
+            </div>
+            <div class="impact-card__tooltip-row">
+              <span class="impact-card__tooltip-label">{{ periodoAtual() }}:</span>
+              <span class="impact-card__tooltip-value">{{ formatarValorBase(metrica.key, comparativoItem.atual) }}</span>
+            </div>
+          </div>
+        }
+      </article>
+    }
+  </section>
+
+  <section class="impact-note">
+    <span class="material-symbols-rounded" aria-hidden="true">verified</span>
+    <p>
+      Os indicadores desta aba são agregados e próprios para comunicação institucional, prestação de contas e relatórios para apoiadores.
+    </p>
+  </section>
+}

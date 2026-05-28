@@ -1,0 +1,309 @@
+@if (aberto) {
+  <!-- Overlay: fecha ao clicar fora (aria-hidden para SR) -->
+  <div
+    class="filter-overlay"
+    (click)="fechar()"
+    tabindex="-1"
+    aria-hidden="true">
+  </div>
+}
+
+<!-- Drawer lateral -->
+<dialog
+  open
+  id="relatorio-filter-drawer"
+  class="filter-drawer"
+  [class.filter-drawer--open]="aberto"
+  aria-modal="true"
+  aria-label="Filtros avançados de relatórios"
+  cdkTrapFocus
+  [cdkTrapFocusAutoCapture]="aberto">
+
+  <div class="filter-drawer__header">
+    <h2 class="filter-drawer__title">
+      <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+      Filtros Avançados
+    </h2>
+    <button
+      type="button"
+      class="drawer-close-btn"
+      (click)="fechar()"
+      aria-label="Fechar painel de filtros">
+      <span class="material-symbols-rounded" aria-hidden="true">close</span>
+    </button>
+  </div>
+
+  <form class="filter-drawer__body" (ngSubmit)="aplicarFiltros()">
+
+    <!-- Período -->
+    <section class="filter-section" aria-labelledby="filtro-periodo-titulo">
+      <h3 id="filtro-periodo-titulo" class="filter-section__title">Período</h3>
+      <div class="filter-field-row">
+        <div class="filter-field">
+          <label class="form-label" for="f-data-inicio">Início</label>
+          <input id="f-data-inicio" type="date" class="form-input" name="dataInicio"
+            [(ngModel)]="form.dataInicio" [disabled]="carregando" />
+        </div>
+        <div class="filter-field">
+          <label class="form-label" for="f-data-fim">Fim</label>
+          <input id="f-data-fim" type="date" class="form-input" name="dataFim"
+            [(ngModel)]="form.dataFim" [disabled]="carregando" />
+        </div>
+      </div>
+    </section>
+
+    @if (!modoPublico) {
+      <!-- Filtros especificos -->
+      <section class="filter-section" aria-labelledby="filtro-especifico-titulo">
+        <h3 id="filtro-especifico-titulo" class="filter-section__title">Filtros específicos</h3>
+
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-busca-turma">Buscar turma</label>
+          <input id="f-busca-turma" type="search" class="form-input" name="buscaTurma"
+            [ngModel]="buscaTurma" (ngModelChange)="onBuscaTurma($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.turmaId) {
+            <button type="button" class="selected-option" (click)="limparTurma()" [disabled]="carregando">
+              <span>{{ buscaTurma }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaTurma.trim().length > 0 && buscaTurma.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (turmas.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Turmas encontradas">
+              @for (turma of turmas; track turma.id) {
+                <button type="button" role="option" (click)="selecionarTurma(turma)">
+                  {{ turma.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-busca-professor">Buscar professor</label>
+          <input id="f-busca-professor" type="search" class="form-input" name="buscaProfessor"
+            [ngModel]="buscaProfessor" (ngModelChange)="onBuscaProfessor($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.professorId) {
+            <button type="button" class="selected-option" (click)="limparProfessor()" [disabled]="carregando">
+              <span>{{ buscaProfessor }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaProfessor.trim().length > 0 && buscaProfessor.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (professores.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Professores encontrados">
+              @for (professor of professores; track professor.id) {
+                <button type="button" role="option" (click)="selecionarProfessor(professor)">
+                  {{ professor.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-busca-aluno">Buscar aluno</label>
+          <input id="f-busca-aluno" type="search" class="form-input" name="buscaAluno"
+            [ngModel]="buscaAluno" (ngModelChange)="onBuscaAluno($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.alunoId) {
+            <button type="button" class="selected-option" (click)="limparAluno()" [disabled]="carregando">
+              <span>{{ buscaAluno }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaAluno.trim().length > 0 && buscaAluno.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (alunos.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Alunos encontrados">
+              @for (aluno of alunos; track aluno.id) {
+                <button type="button" role="option" (click)="selecionarAluno(aluno)">
+                  {{ aluno.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- Aluno -->
+      <section class="filter-section" aria-labelledby="filtro-aluno-titulo">
+        <h3 id="filtro-aluno-titulo" class="filter-section__title">Aluno</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-aluno">Status do aluno</label>
+          <select id="f-status-aluno" class="form-input" name="statusAluno"
+            [(ngModel)]="form.statusAluno" [disabled]="carregando">
+            @for (status of statusAlunoOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-deficiencia">Deficiência</label>
+          <select id="f-deficiencia" class="form-input" name="tipoDeficiencia"
+            [(ngModel)]="form.tipoDeficiencia" [disabled]="carregando">
+            <option value="">Todas</option>
+            @for (tipo of tipoDeficienciaOptions; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Matrícula -->
+      <section class="filter-section" aria-labelledby="filtro-matricula-titulo">
+        <h3 id="filtro-matricula-titulo" class="filter-section__title">Matrícula</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-turma">Status da turma</label>
+          <select id="f-status-turma" class="form-input" name="statusTurma"
+            [(ngModel)]="form.statusTurma" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (status of statusTurmaOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-matricula">Status da matrícula</label>
+          <select id="f-status-matricula" class="form-input" name="statusMatricula"
+            [(ngModel)]="form.statusMatricula" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (status of statusMatriculaOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-motivo">Motivo de encerramento</label>
+          <select id="f-motivo" class="form-input" name="motivoEncerramento"
+            [(ngModel)]="form.motivoEncerramento" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (motivo of motivoOptions; track motivo.value) {
+              <option [value]="motivo.value">{{ motivo.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Atendimentos -->
+      <section class="filter-section" aria-labelledby="filtro-atendimentos-titulo">
+        <h3 id="filtro-atendimentos-titulo" class="filter-section__title">Atendimentos</h3>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-status-acomp">Status do acompanhamento</label>
+          <select id="f-status-acomp" class="form-input" name="statusAcompanhamento"
+            [(ngModel)]="form.statusAcompanhamento" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (status of statusAcompanhamentoOptions; track status.value) {
+              <option [value]="status.value">{{ status.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-tipo-registro">Tipo de registro</label>
+          <select id="f-tipo-registro" class="form-input" name="tipoRegistroAtendimento"
+            [(ngModel)]="form.tipoRegistroAtendimento" [disabled]="carregando">
+            <option value="">Todos</option>
+            @for (tipo of tipoRegistroAtendimentoOptions; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label class="form-label" for="f-modalidade">Modalidade</label>
+          <select id="f-modalidade" class="form-input" name="modalidadeAtendimento"
+            [(ngModel)]="form.modalidadeAtendimento" [disabled]="carregando">
+            <option value="">Todas</option>
+            @for (modalidade of modalidadeAtendimentoOptions; track modalidade.value) {
+              <option [value]="modalidade.value">{{ modalidade.label }}</option>
+            }
+          </select>
+        </div>
+      </section>
+
+      <!-- Localização -->
+      <section class="filter-section" aria-labelledby="filtro-local-titulo">
+        <h3 id="filtro-local-titulo" class="filter-section__title">Localização</h3>
+
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-cidade">Cidade</label>
+          <input id="f-cidade" type="search" class="form-input" name="buscaCidade"
+            [ngModel]="buscaCidade" (ngModelChange)="onBuscaCidade($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.cidade) {
+            <button type="button" class="selected-option" (click)="limparCidade()" [disabled]="carregando">
+              <span>{{ buscaCidade }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaCidade.trim().length > 0 && buscaCidade.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (cidades.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Cidades encontradas">
+              @for (cidade of cidades; track cidade.id) {
+                <button type="button" role="option" (click)="selecionarCidade(cidade)">
+                  {{ cidade.label }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="filter-field autocomplete-field">
+          <label class="form-label" for="f-bairro">Bairro</label>
+          <input id="f-bairro" type="search" class="form-input" name="buscaBairro"
+            [ngModel]="buscaBairro" (ngModelChange)="onBuscaBairro($event)" [disabled]="carregando"
+            autocomplete="off" />
+          @if (form.bairro) {
+            <button type="button" class="selected-option" (click)="limparBairro()" [disabled]="carregando">
+              <span>{{ buscaBairro }}</span>
+              <span class="material-symbols-rounded" aria-hidden="true">close</span>
+            </button>
+          } @else if (buscaBairro.trim().length > 0 && buscaBairro.trim().length < 2) {
+            <p class="filter-hint">Digite pelo menos 2 caracteres.</p>
+          } @else if (bairros.length) {
+            <div class="autocomplete-list" role="listbox" aria-label="Bairros encontrados">
+              @for (bairro of bairros; track bairro.id) {
+                <button type="button" role="option" (click)="selecionarBairro(bairro)">
+                  {{ bairro.label }}
+                </button>
+              }
+            </div>
+          } @else if (form.cidade) {
+            <p class="filter-hint">Sugestões restritas à cidade selecionada.</p>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Período (modo público) -->
+    @if (modoPublico) {
+      <section class="filter-section" aria-labelledby="filtro-pub-titulo">
+        <h3 id="filtro-pub-titulo" class="filter-section__title">Período de análise</h3>
+        <p class="filter-hint">Use os campos de data acima para filtrar por período.</p>
+      </section>
+    }
+
+  </form>
+
+  <div class="filter-drawer__footer">
+    <button type="button" class="btn btn-secondary" (click)="limparFiltros()" [disabled]="carregando"
+      aria-label="Limpar todos os filtros">
+      <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
+      Limpar
+    </button>
+    <button type="button" class="btn btn-primary" (click)="aplicarFiltros()" [disabled]="carregando"
+      aria-label="Aplicar filtros selecionados">
+      <span class="material-symbols-rounded" aria-hidden="true">filter_alt</span>
+      Aplicar Filtros
+    </button>
+  </div>
+
+</dialog>

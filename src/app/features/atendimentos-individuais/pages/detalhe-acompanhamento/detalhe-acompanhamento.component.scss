@@ -1,0 +1,313 @@
+// ============================================================
+// detalhe-acompanhamento — Tipografia alinhada com Alunos
+// ============================================================
+@use '../../../../../styles/variables' as *;
+
+:host {
+  display: block;
+}
+
+// ── Layout de página ────────────────────────────────────────
+.page {
+  display: grid;
+  gap: $space-5;
+  padding: $space-8;
+
+  @media (max-width: $bp-md) {
+    padding: $space-4;
+    gap: $space-4;
+  }
+}
+
+// ── Cabeçalho da página ────────────────────────────────────
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-4;
+  flex-wrap: wrap;
+}
+
+// Link voltar
+.back {
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-medium;  // 500
+  color: $color-info;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// Título principal — igual a .page-title
+.hero h1 {
+  margin: $space-1 0 0;
+  font-size: $font-size-2xl;         // 1.5rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-900;
+  line-height: $line-height-tight;
+}
+
+// Subtítulo de seção
+.hero h2 {
+  margin: 0;
+  font-size: $font-size-lg;          // 1.125rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+}
+
+// Texto descritivo — igual a .page-subtitle
+p {
+  margin: $space-1 0 0;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-500;
+  line-height: $line-height-normal;
+}
+
+// ── Painel de informações ───────────────────────────────────
+.panel {
+  display: grid;
+  gap: $space-4;
+  padding: $space-4;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  box-shadow: $shadow-sm;
+}
+
+// ── Assunto do acompanhamento ───────────────────────────────
+.subject {
+  display: grid;
+  gap: $space-1 * 0.5;
+}
+
+// Rótulo de campo — igual a filter-section__title de Alunos
+.subject span {
+  font-size: $font-size-xs;          // 0.75rem
+  font-weight: $font-weight-bold;    // 700
+  color: $color-gray-600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+// Valor do assunto
+.subject strong {
+  font-size: $font-size-lg;          // 1.125rem
+  font-weight: $font-weight-semibold; // 600
+  color: $color-gray-900;
+}
+
+// ── Área de ações ───────────────────────────────────────────
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: $space-3;
+
+  @media (max-width: $bp-md) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+
+
+
+
+// ── Filtros ─────────────────────────────────────────────────
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: $space-3 + 0.125rem;
+}
+
+// Label de filtro — padrão .form-label
+label {
+  display: grid;
+  gap: $space-1 + 0.125rem;
+  font-size: $font-size-sm;          // 0.875rem
+  font-weight: $font-weight-medium;  // 500
+  color: $color-gray-700;
+}
+
+// Inputs/selects/textareas — padrão .form-input global
+input,
+textarea,
+select {
+  min-height: 2.5rem;
+  border: 1.5px solid $color-gray-300;
+  border-radius: $border-radius;
+  padding: calc(#{$space-2} + 0.125rem) $space-3;
+  font-family: $font-family-base;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-900;
+  background: $color-white;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
+  outline: none;
+
+  &::placeholder {
+    color: $color-gray-400;
+  }
+
+  &:focus {
+    border-color: $color-primary;
+    box-shadow: 0 0 0 3px color-mix(in srgb, $color-primary 25%, transparent);
+  }
+}
+
+// ── Modal de ação simples ───────────────────────────────────
+.dialog-panel--wide {
+  width: min(100%, 52rem);
+}
+
+// Descrição dentro do diálogo
+.dialog-desc {
+  margin: -#{$space-1} 0 $space-1;
+  font-size: $font-size-sm;          // 0.875rem
+  color: $color-gray-500;
+}
+
+// Backdrop do diálogo
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: $space-4;
+  background: rgba(15, 23, 42, 0.58);
+}
+
+// Painel do diálogo
+.dialog-panel {
+  display: grid;
+  gap: $space-4;
+  width: min(100%, 34rem);
+  padding: $space-5;
+  border: 1px solid $color-gray-200;
+  border-radius: $border-radius-lg;
+  background: $color-white;
+  box-shadow: $shadow-lg;
+  outline: 0;
+
+  &:focus {
+    box-shadow: 0 0 0 3px $color-primary, $shadow-lg;
+  }
+}
+
+// Aviso de motivo de arquivamento
+.motivo-arquivamento {
+  padding: $space-3 $space-4;
+  border-left: 3px solid $color-warning;
+  background: $color-warning-light;
+  border-radius: $border-radius-sm;
+  color: $color-warning;
+  font-size: $font-size-sm;          // 0.875rem
+  line-height: $line-height-normal;
+}
+
+// ── Modal XL — editar atendimento ──────────────────────────
+.dialog-panel--xl {
+  width: min(100%, 46rem);
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  gap: 0;
+
+  @media (max-width: $bp-md) {
+    max-height: 95vh;
+  }
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $space-4;
+  padding: $space-5 $space-6 $space-4;
+  border-bottom: 1px solid $color-gray-200;
+  flex-shrink: 0;
+
+  // Título do modal — igual a .modal-header h2 global
+  h2 {
+    margin: 0;
+    font-size: $font-size-lg;        // 1.125rem — maior que 1rem p/ modal xl
+    font-weight: $font-weight-bold;  // 700
+    color: $color-gray-900;
+    outline: 0;
+    line-height: $line-height-tight;
+  }
+
+  @media (max-width: $bp-md) {
+    padding-left: $space-4;
+    padding-right: $space-4;
+  }
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: $space-5 $space-6 $space-6;
+  display: grid;
+  gap: $space-8;
+  overscroll-behavior: contain;
+
+  @media (max-width: $bp-md) {
+    padding-left: $space-4;
+    padding-right: $space-4;
+  }
+}
+
+// Botão fechar modal
+.modal-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  border-radius: $border-radius-full;
+  background: transparent;
+  color: $color-gray-500;
+  cursor: pointer;
+  transition: background $transition-fast, color $transition-fast;
+
+  &:hover:not(:disabled) {
+    background: $color-gray-100;
+    color: $color-gray-900;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ── Seção de anexos ─────────────────────────────────────────
+.attachments-section {
+  display: grid;
+  gap: $space-3;
+  padding-top: $space-6;
+  border-top: 1px solid $color-gray-200;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-base;      // 1rem
+    font-weight: $font-weight-semibold; // 600
+    color: $color-gray-900;
+  }
+
+  p {
+    margin: 0;
+    font-size: $font-size-sm;        // 0.875rem
+    color: $color-gray-500;
+  }
+}

@@ -154,6 +154,11 @@ interface Beneficiario {
 - **`descarteGuard`** ativo: ao recarregar a página acidentalmente, o browser exibe o dialog nativo
   "Sair da página? Dados não salvos serão perdidos."
 
+## Inativacao
+
+Use `PATCH /api/beneficiaries/:id/inativar` pelo metodo `BeneficiariosService.inativar(...)`.
+O `DELETE /api/beneficiaries/:id` ficou apenas como endpoint legado no backend para compatibilidade.
+
 ---
 
 # 7. Relação com Outros Módulos

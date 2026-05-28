@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, shareReplay } from 'rxjs';
+import { Observable, map, shareReplay } from 'rxjs';
 import { DashboardService } from './dashboard.service';
 import { StorageService } from './storage.service';
 
@@ -43,11 +43,18 @@ export interface Beneficiario {
     outrasComorbidades?: string;
     contatoEmergencia?: string;
     statusAtivo: boolean;
+    motivoInativacao?: MotivoInativacaoAluno | null;
+    observacaoInativacao?: string | null;
+    inativadoEm?: string | null;
+    inativadoPorId?: string | null;
+    reativadoEm?: string | null;
+    reativadoPorId?: string | null;
+    motivoReativacao?: string | null;
     criadoEm: string;
     matricula?: string;
     matriculasOficina?: {
         id: string;
-        status: 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA';
+        status: 'ATIVA' | 'CONCLUIDA' | 'EVADIDA' | 'CANCELADA' | 'TRANSFERIDA';
         dataEntrada: string;
         dataEncerramento?: string;
         turma: { id: string; nome: string; horario?: string; modeloCertificadoId?: string | null; status?: string };
@@ -66,6 +73,51 @@ export interface Beneficiario {
     }[];
 }
 
+export interface BeneficiarioResumo {
+    id: string;
+    nomeCompleto: string;
+    matricula?: string | null;
+    cpfMascarado?: string | null;
+    statusAtivo: boolean;
+}
+
+export type MotivoInativacaoAluno =
+    | 'EVASAO_INSTITUCIONAL'
+    | 'MUDANCA_DE_CIDADE'
+    | 'PROBLEMA_SAUDE'
+    | 'PROBLEMA_FAMILIAR'
+    | 'DIFICULDADE_TRANSPORTE'
+    | 'FALECIMENTO'
+    | 'SOLICITACAO_DO_ALUNO'
+    | 'FALTA_DE_CONTATO'
+    | 'CADASTRO_DUPLICADO'
+    | 'OUTRO';
+
+export type StatusInativacaoMatricula = 'EVADIDA' | 'CANCELADA' | 'TRANSFERIDA';
+
+export type MotivoEncerramentoMatricula =
+    | 'CONCLUSAO'
+    | 'EVASAO_SEM_JUSTIFICATIVA'
+    | 'MUDANCA_DE_TURNO'
+    | 'TRANSFERENCIA_DE_TURMA'
+    | 'MUDANCA_DE_CIDADE'
+    | 'DIFICULDADE_TRANSPORTE'
+    | 'PROBLEMA_SAUDE'
+    | 'PROBLEMA_FAMILIAR'
+    | 'INCOMPATIBILIDADE_HORARIO'
+    | 'FALTA_DE_CONTATO'
+    | 'DESISTENCIA_VOLUNTARIA'
+    | 'CANCELAMENTO_DA_TURMA'
+    | 'OUTRO';
+
+export interface InativarAlunoPayload {
+    motivoInativacao: MotivoInativacaoAluno;
+    observacao?: string;
+    encerrarMatriculasAtivas?: boolean;
+    statusMatricula?: StatusInativacaoMatricula;
+    motivoEncerramentoMatricula?: MotivoEncerramentoMatricula;
+}
+
 export type BeneficiarioPayload = Partial<
     Omit<Beneficiario, 'id' | 'statusAtivo' | 'criadoEm' | 'matricula' | 'matriculasOficina'>
 >;
@@ -74,6 +126,86 @@ export interface PaginatedResponse<T> {
     data: T[];
     meta: { total: number; page: number; lastPage: number };
 }
+
+export type TipoEventoLinhaTempoAluno =
+    | 'CADASTRO'
+    | 'ATUALIZACAO_CADASTRO'
+    | 'MATRICULA_TURMA'
+    | 'ENCERRAMENTO_MATRICULA'
+    | 'FREQUENCIA_PRESENTE'
+    | 'FREQUENCIA_FALTA'
+    | 'FREQUENCIA_FALTA_JUSTIFICADA'
+    | 'ATENDIMENTO_INDIVIDUAL'
+    | 'FALTA_ATENDIMENTO'
+    | 'ATESTADO'
+    | 'LAUDO'
+    | 'CERTIFICADO'
+    | 'PDI_CRIADO'
+    | 'PDI_META_CRIADA'
+    | 'PDI_META_ATUALIZADA'
+    | 'PDI_EVOLUCAO'
+    | 'ACAO_RISCO_EVASAO'
+    | 'ACAO_RISCO_RESOLVIDA'
+    | 'INATIVACAO'
+    | 'REATIVACAO'
+    | 'OBSERVACAO_MANUAL';
+
+export interface LinhaTempoAlunoItem {
+    id: string;
+    tipo: TipoEventoLinhaTempoAluno;
+    data: string;
+    titulo: string;
+    descricao?: string;
+    origem: string;
+    alunoId: string;
+    turmaId?: string;
+    turmaNome?: string;
+    professorNome?: string;
+    usuarioNome?: string;
+    metadata?: Record<string, unknown>;
+}
+
+export interface LinhaTempoAlunoResponse {
+    data: LinhaTempoAlunoItem[];
+    meta: { page: number; limit: number; total: number; lastPage: number };
+}
+
+export interface LinhaTempoAlunoResumo {
+    totalEventos: number;
+    ultimaFrequencia?: string;
+    ultimoAtendimento?: string;
+    ultimoPdi?: string;
+    ultimaAcaoRisco?: string;
+}
+
+export interface LinhaTempoTurmaResumo {
+    id: string;
+    nome: string;
+}
+
+export interface LinhaTempoAlunoQuery {
+    dataInicio?: string;
+    dataFim?: string;
+    tipo?: string;
+    turmaId?: string;
+    page?: number;
+    limit?: number;
+}
+
+export interface CriarEventoLinhaTempoManualPayload {
+    tipo: 'OBSERVACAO_MANUAL';
+    dataEvento?: string;
+    titulo: string;
+    descricao?: string;
+    turmaId?: string;
+    sensivel?: boolean;
+}
+
+type ApiEnvelope<T> = {
+    success?: boolean;
+    message?: string;
+    data: T;
+};
 
 /** Resposta quando o CPF/RG já existe inativo no sistema */
 export interface ReativacaoAluno {
@@ -142,6 +274,58 @@ export class BeneficiariosService {
         return req$;
     }
 
+    buscarResumo(busca: string): Observable<BeneficiarioResumo[]> {
+        let params = new HttpParams().set('busca', busca);
+        return this.http.get<BeneficiarioResumo[]>(`${this.url}/search`, { params });
+    }
+
+    linhaTempo(id: string, query: LinhaTempoAlunoQuery = {}): Observable<LinhaTempoAlunoResponse> {
+        let params = new HttpParams();
+        Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null && value !== '') {
+                params = params.set(key, String(value));
+            }
+        });
+        return this.http
+            .get<LinhaTempoAlunoResponse | ApiEnvelope<LinhaTempoAlunoResponse>>(`${this.url}/${id}/linha-tempo`, { params })
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    linhaTempoResumo(id: string): Observable<LinhaTempoAlunoResumo> {
+        return this.http
+            .get<LinhaTempoAlunoResumo | ApiEnvelope<LinhaTempoAlunoResumo>>(`${this.url}/${id}/linha-tempo/resumo`)
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    linhaTempoTurmas(id: string): Observable<LinhaTempoTurmaResumo[]> {
+        return this.http
+            .get<LinhaTempoTurmaResumo[] | ApiEnvelope<LinhaTempoTurmaResumo[]>>(`${this.url}/${id}/linha-tempo/turmas`)
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    criarEventoLinhaTempoManual(
+        id: string,
+        payload: CriarEventoLinhaTempoManualPayload
+    ): Observable<LinhaTempoAlunoItem> {
+        return this.http
+            .post<LinhaTempoAlunoItem | ApiEnvelope<LinhaTempoAlunoItem>>(`${this.url}/${id}/linha-tempo/manual`, payload)
+            .pipe(map((response) => this.unwrapApiData(response)));
+    }
+
+    private unwrapApiData<T>(response: T | ApiEnvelope<T>): T {
+        if (this.isApiEnvelope<T>(response)) {
+            return response.data;
+        }
+        return response;
+    }
+
+    private isApiEnvelope<T>(response: T | ApiEnvelope<T>): response is ApiEnvelope<T> {
+        return !!response
+            && typeof response === 'object'
+            && 'data' in response
+            && ('success' in response || 'message' in response);
+    }
+
     exportarLista(busca?: string, inativos?: boolean, filtros?: Record<string, unknown>): Observable<ArrayBuffer> {
         let params = new HttpParams();
         if (busca) params = params.set('busca', busca);
@@ -172,9 +356,9 @@ export class BeneficiariosService {
         return this.http.patch<Beneficiario>(`${this.url}/${id}`, dados);
     }
 
-    inativar(id: string): Observable<void> {
+    inativar(id: string, dados: InativarAlunoPayload): Observable<void> {
         this.limparCache();
-        return this.http.delete<void>(`${this.url}/${id}`);
+        return this.http.patch<void>(`${this.url}/${id}/inativar`, dados);
     }
 
     restaurar(id: string): Observable<void> {

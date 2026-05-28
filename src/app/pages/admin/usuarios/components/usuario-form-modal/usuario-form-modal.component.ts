@@ -20,6 +20,7 @@ import { UsuariosService, Usuario } from '../../../../../core/services/usuarios.
 import { ConfirmDialogService } from '../../../../../core/services/confirm-dialog.service';
 import { ToastService } from '../../../../../core/services/toast.service';
 import { formatarCpfCnpj, formatarTelefone, formatarCep } from '../../../../../shared/utils/masks.util';
+import { cpfValidator } from '../../../../../shared/validators/documento.validator';
 
 @Component({
   selector: 'app-usuario-form-modal',
@@ -83,7 +84,7 @@ export class UsuarioFormModalComponent {
   constructor() {
     this.editForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
-      cpf: ['', [Validators.required, Validators.minLength(14)]],
+      cpf: ['', [Validators.required, cpfValidator]],
       email: ['', [Validators.email]],
       role: ['', Validators.required],
       telefone: [''],
@@ -182,6 +183,12 @@ export class UsuarioFormModalComponent {
     const limpo = valor.replace(/\D/g, '');
 
     if (!limpo || limpo.length !== 11) {
+        this.cpfStatus.set('');
+        this.cpfConflito.set(null);
+        return;
+    }
+
+    if (this.editForm.get('cpf')?.hasError('cpfInvalido')) {
         this.cpfStatus.set('');
         this.cpfConflito.set(null);
         return;

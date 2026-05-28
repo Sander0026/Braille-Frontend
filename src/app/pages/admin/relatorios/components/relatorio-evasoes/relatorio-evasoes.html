@@ -1,0 +1,420 @@
+@if (carregando) {
+  <div class="loading-state">
+    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+    <span>Carregando evasões</span>
+  </div>
+} @else if (relatorio; as dados) {
+  <div class="section-toolbar">
+    <div>
+      <h2>Evasões</h2>
+      <p>{{ dados.totalEncerramentos }} encerramento(s) analisado(s)</p>
+    </div>
+    <div class="summary-pills" aria-label="Resumo de evasões e saídas">
+      <span>Evasões {{ dados.indicadores.totalEvasoes }}</span>
+      <span>Canceladas {{ dados.indicadores.totalCancelamentos }}</span>
+      <span>Transferidas {{ dados.indicadores.totalTransferencias }}</span>
+    </div>
+  </div>
+
+  <div class="evasoes-indicators" aria-label="Indicadores de evasões">
+    <article>
+      <span>Total de evasões</span>
+      <strong>{{ dados.indicadores.totalEvasoes }}</strong>
+    </article>
+    <article>
+      <span>Transferências</span>
+      <strong>{{ dados.indicadores.totalTransferencias }}</strong>
+    </article>
+    <article>
+      <span>Cancelamentos</span>
+      <strong>{{ dados.indicadores.totalCancelamentos }}</strong>
+    </article>
+    <article>
+      <span>Permanência média</span>
+      <strong>{{ formatarDias(dados.indicadores.tempoMedioPermanenciaDias) }}</strong>
+    </article>
+    <article>
+      <span>Sem motivo estruturado</span>
+      <strong>{{ dados.indicadores.semMotivoEstruturado }}</strong>
+    </article>
+    <article>
+      <span>Com atendimento individual</span>
+      <strong>{{ dados.indicadores.evasoesComAtendimentoIndividual }}</strong>
+    </article>
+    <article>
+      <span>Sem atendimento individual</span>
+      <strong>{{ dados.indicadores.evasoesSemAtendimentoIndividual }}</strong>
+    </article>
+    <article>
+      <span>Com faltas em atendimento</span>
+      <strong>{{ dados.indicadores.evasoesComFaltasEmAtendimento }}</strong>
+    </article>
+  </div>
+
+  @if (risco; as riscoEvasao) {
+    <section class="risk-panel" aria-label="Alunos com risco de evasão">
+      <header>
+        <div>
+          <h3>Alunos com risco de evasão</h3>
+          <p>{{ riscoEvasao.total }} aluno(s) priorizado(s) para busca ativa</p>
+        </div>
+        <div class="risk-summary">
+          <span class="risk-chip risk-chip--alto">Alto {{ riscoEvasao.indicadores.alto }}</span>
+          <span class="risk-chip risk-chip--medio">Médio {{ riscoEvasao.indicadores.medio }}</span>
+          <span class="risk-chip risk-chip--baixo">Baixo {{ riscoEvasao.indicadores.baixo }}</span>
+        </div>
+      </header>
+
+      <div class="risk-indicators">
+        <article>
+          <span>3 faltas seguidas</span>
+          <strong>{{ riscoEvasao.indicadores.tresFaltasSeguidas }}</strong>
+        </article>
+        <article>
+          <span>Presença abaixo de 60%</span>
+          <strong>{{ riscoEvasao.indicadores.presencaAbaixo60 }}</strong>
+        </article>
+        <article>
+          <span>Sem registro há 30+ dias</span>
+          <strong>{{ riscoEvasao.indicadores.semRegistro30Dias }}</strong>
+        </article>
+        <article>
+          <span>Sem frequência recente</span>
+          <strong>{{ riscoEvasao.indicadores.matriculaAtivaSemFrequenciaRecente }}</strong>
+        </article>
+        <article>
+          <span>Ações pendentes</span>
+          <strong>{{ riscoEvasao.indicadores.acoesPendentes }}</strong>
+        </article>
+        <article>
+          <span>Ações vencidas</span>
+          <strong>{{ riscoEvasao.indicadores.acoesVencidas }}</strong>
+        </article>
+        <article>
+          <span>Resolvidas no mês</span>
+          <strong>{{ riscoEvasao.indicadores.acoesResolvidasNoMes }}</strong>
+        </article>
+      </div>
+
+      @if (riscoEvasao.data.length) {
+        <div class="risk-list">
+          @for (item of riscoEvasao.data; track item.alunoId + '-' + item.turmaId) {
+            <article class="risk-card" [ngClass]="'risk-card--' + item.nivel.toLowerCase()">
+              <div>
+                <strong>{{ item.nomeCompleto }}</strong>
+                <span>{{ item.turma }} · {{ item.professor || 'Professor não informado' }}</span>
+              </div>
+              <div class="risk-card__metrics">
+                <span>{{ nivelRiscoLabel(item.nivel) }}</span>
+                <span>{{ item.faltasSeguidas }} falta(s) seguidas</span>
+                <span>{{ formatarPercentual(item.taxaPresenca) }} presença</span>
+                <span>{{ formatarDias(item.diasSemRegistro) }} sem registro</span>
+              </div>
+              <div class="risk-card__criteria">
+                @for (criterio of item.criterios; track criterio) {
+                  <span>{{ criterio }}</span>
+                }
+              </div>
+              <div class="risk-card__action">
+                @if (item.acaoAberta) {
+                  <div>
+                    <strong>{{ statusAcaoLabel(item.acaoAberta.status) }}</strong>
+                    <span>{{ item.acaoAberta.responsavel || 'Sem responsável' }} · prazo {{ formatarData(item.acaoAberta.prazo) }}</span>
+                  </div>
+                  <div class="risk-actions">
+                    <button type="button" class="btn btn-sm btn-secondary" (click)="abrirVerAcao(item)">Ver ação</button>
+                    <button type="button" class="btn btn-sm btn-success" (click)="abrirResolverAcao(item)">Resolver</button>
+                  </div>
+                } @else {
+                  <button type="button" class="btn btn-sm btn-primary" (click)="abrirCriarAcao(item)">Criar ação</button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="empty-panel">Nenhum aluno em risco pelos critérios atuais.</p>
+      }
+    </section>
+  }
+
+  @if (itemCriacaoAcao(); as item) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharCriarAcao()"></div>
+    <section class="action-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-criar-acao">
+      <header>
+        <div>
+          <h3 id="titulo-criar-acao">Criar ação de intervenção</h3>
+          <p>{{ item.nomeCompleto }} · {{ item.turma }}</p>
+        </div>
+        <button type="button" class="icon-button" aria-label="Fechar" (click)="fecharCriarAcao()">×</button>
+      </header>
+
+      @if (erroAcao()) {
+        <p class="form-error" role="alert">{{ erroAcao() }}</p>
+      }
+
+      <div class="form-grid">
+        <label>
+          Tipo de ação
+          <select [(ngModel)]="formAcao.tipoAcao">
+            @for (tipo of tiposAcao; track tipo.value) {
+              <option [value]="tipo.value">{{ tipo.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Motivo do risco
+          <select [(ngModel)]="formAcao.motivoRisco">
+            @for (criterio of item.criterios; track criterio) {
+              <option [value]="criterio">{{ criterio }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Responsável
+          <select [(ngModel)]="formAcao.responsavelId">
+            <option value="">Sem responsável definido</option>
+            @for (responsavel of responsaveis(); track responsavel.id) {
+              <option [value]="responsavel.id">{{ responsavel.nome }} · {{ responsavel.role }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          Prazo
+          <input type="date" [(ngModel)]="formAcao.prazo">
+        </label>
+
+        <label class="span-2">
+          Descrição
+          <textarea rows="4" maxlength="1000" [(ngModel)]="formAcao.descricao"></textarea>
+        </label>
+      </div>
+
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="fecharCriarAcao()">Cancelar</button>
+        <button type="button" class="btn btn-primary" [disabled]="salvandoAcao()" (click)="salvarCriarAcao()">
+          {{ salvandoAcao() ? 'Salvando...' : 'Criar ação' }}
+        </button>
+      </footer>
+    </section>
+  }
+
+  @if (acaoDetalhe(); as acao) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharVerAcao()"></div>
+    <section class="action-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-ver-acao">
+      <header>
+        <div>
+          <h3 id="titulo-ver-acao">Ação de intervenção</h3>
+          <p>{{ acao.aluno.nomeCompleto }} · {{ acao.turma?.nome || 'Sem turma' }}</p>
+        </div>
+        <button type="button" class="icon-button" aria-label="Fechar" (click)="fecharVerAcao()">×</button>
+      </header>
+
+      <dl class="action-details">
+        <div><dt>Tipo</dt><dd>{{ tipoAcaoLabel(acao.tipoAcao) }}</dd></div>
+        <div><dt>Status</dt><dd>{{ statusAcaoLabel(acao.status) }}</dd></div>
+        <div><dt>Responsável</dt><dd>{{ acao.responsavel?.nome || '-' }}</dd></div>
+        <div><dt>Prazo</dt><dd>{{ formatarData(acao.prazo) }}</dd></div>
+        <div><dt>Motivo</dt><dd>{{ acao.motivoRisco }}</dd></div>
+        <div><dt>Descrição</dt><dd>{{ acao.descricao || '-' }}</dd></div>
+        <div><dt>Resultado</dt><dd>{{ acao.resultado || '-' }}</dd></div>
+      </dl>
+
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="fecharVerAcao()">Fechar</button>
+      </footer>
+    </section>
+  }
+
+  @if (acaoResolucao(); as item) {
+    <div class="modal-backdrop" role="presentation" (click)="fecharResolverAcao()"></div>
+    <section class="action-modal" role="dialog" aria-modal="true" aria-labelledby="titulo-resolver-acao">
+      <header>
+        <div>
+          <h3 id="titulo-resolver-acao">Resolver ação</h3>
+          <p>{{ item.nomeCompleto }} · {{ item.turma }}</p>
+        </div>
+        <button type="button" class="icon-button" aria-label="Fechar" (click)="fecharResolverAcao()">×</button>
+      </header>
+
+      @if (erroAcao()) {
+        <p class="form-error" role="alert">{{ erroAcao() }}</p>
+      }
+
+      <label class="result-field">
+        Resultado da intervenção
+        <textarea rows="5" maxlength="1000" [(ngModel)]="formResolucao.resultado"></textarea>
+      </label>
+
+      <footer>
+        <button type="button" class="btn btn-secondary" (click)="fecharResolverAcao()">Cancelar</button>
+        <button type="button" class="btn btn-success" [disabled]="salvandoAcao()" (click)="resolverAcao()">
+          {{ salvandoAcao() ? 'Salvando...' : 'Marcar como resolvida' }}
+        </button>
+      </footer>
+    </section>
+  }
+
+  <div class="analysis-grid">
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por motivo</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porMotivo); track item.label) {
+        <div class="bar-row">
+          <span>{{ motivoGrupoLabel(item.label) }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill danger" [style.width]="larguraBarra(item.total, dados.indicadores.porMotivo)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem evasões para os filtros informados.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por turma</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porTurma); track item.label) {
+        <div class="bar-row">
+          <span>{{ item.label }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill" [style.width]="larguraBarra(item.total, dados.indicadores.porTurma)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Nenhuma turma com evasão.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por mês</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porMes); track item.label) {
+        <div class="bar-row">
+          <span>{{ formatarMes(item.label) }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill" [style.width]="larguraBarra(item.total, dados.indicadores.porMes)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Nenhum mês com evasão.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Ranking de turmas</h3>
+      </header>
+      @for (item of rankingTurmas(); track item.label) {
+        <div class="bar-row ranking-row">
+          <span>{{ item.label }}</span>
+          <div class="bar-track" aria-hidden="true">
+            <div class="bar-fill warning" [style.width]="larguraRanking(item.total)"></div>
+          </div>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Nenhuma turma no ranking.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Evasões por professor</h3>
+      </header>
+      @for (item of grupoEntries(dados.indicadores.porProfessor); track item.label) {
+        <div class="compact-row">
+          <span>{{ item.label }}</span>
+          <strong>{{ item.total }}</strong>
+        </div>
+      } @empty {
+        <p class="empty-panel">Sem professor vinculado.</p>
+      }
+    </section>
+
+    <section class="analysis-panel">
+      <header>
+        <h3>Perfil e território</h3>
+      </header>
+      <div class="mini-groups">
+        <div>
+          <h4>Tipo de deficiência</h4>
+          @for (item of grupoEntries(dados.indicadores.porTipoDeficiencia); track item.label) {
+            <span>{{ item.label }} <strong>{{ item.total }}</strong></span>
+          } @empty {
+            <span>Sem dados</span>
+          }
+        </div>
+        <div>
+          <h4>Cidade / bairro</h4>
+          @for (item of grupoEntries(dados.indicadores.porCidadeBairro); track item.label) {
+            <span>{{ item.label }} <strong>{{ item.total }}</strong></span>
+          } @empty {
+            <span>Sem dados</span>
+          }
+        </div>
+      </div>
+    </section>
+  </div>
+
+  @if (dados.data.length) {
+    <div class="table-wrap">
+      <table class="data-table evasoes-table">
+        <thead>
+          <tr>
+            <th>Aluno</th>
+            <th>Matrícula</th>
+            <th>Turma</th>
+            <th>Professor</th>
+            <th>Data de entrada</th>
+            <th>Data de saída</th>
+            <th>Permanência</th>
+            <th>Status final</th>
+            <th>Motivo</th>
+            <th>Atendimento individual</th>
+            <th>Faltas no atendimento</th>
+            <th>Acompanhamento</th>
+            <th>Observação</th>
+            <th>Registrado por</th>
+            <th>Data do registro</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of dados.data; track item.id) {
+            <tr>
+              <td class="main-cell">{{ item.aluno.nomeCompleto }}</td>
+              <td>{{ item.aluno.matricula || '-' }}</td>
+              <td>{{ item.turma.nome }}</td>
+              <td>{{ item.turma.professor.nome || '-' }}</td>
+              <td>{{ formatarData(item.dataEntrada) }}</td>
+              <td>{{ formatarData(item.dataSaida || item.dataEncerramento || item.encerradoEm) }}</td>
+              <td>{{ formatarDias(item.tempoPermanenciaDias) }}</td>
+              <td><span class="badge" [ngClass]="statusClass(item.status)">{{ statusLabel(item.status) }}</span></td>
+              <td>{{ motivoLabel(item.motivoEncerramento) }}</td>
+              <td>{{ formatarResumoAtendimento(item) }}</td>
+              <td>{{ formatarFaltasAtendimento(item) }}</td>
+              <td class="text-wide">{{ formatarResumoAcompanhamento(item) }}</td>
+              <td class="text-wide">{{ item.observacao || '-' }}</td>
+              <td>{{ item.registradoPor?.nome || '-' }}</td>
+              <td>{{ formatarData(item.encerradoEm) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">
+      <span class="material-symbols-rounded" aria-hidden="true">check_circle</span>
+      <h3>Nenhuma evasão encontrada</h3>
+    </div>
+  }
+}

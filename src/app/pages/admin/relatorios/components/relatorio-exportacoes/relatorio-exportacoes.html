@@ -1,0 +1,38 @@
+<section class="exports-panel">
+  <div class="exports-head">
+    <div>
+      <h2>Exportações</h2>
+      <p>{{ filtrosAtivos() }} filtro(s) ativo(s)</p>
+    </div>
+    @if (resumo) {
+      <div class="exports-total" aria-label="Total de matrículas">
+        <strong>{{ resumo.matriculas.total }}</strong>
+        <span>Matrículas</span>
+      </div>
+    }
+  </div>
+
+  <div class="export-actions">
+    <button type="button" class="export-btn" (click)="baixarPdf.emit()" [disabled]="exportandoPdf || exportandoXlsx">
+      <span class="material-symbols-rounded" aria-hidden="true">
+        {{ exportandoPdf ? 'progress_activity' : 'picture_as_pdf' }}
+      </span>
+      <span>
+        <strong>PDF público/institucional</strong>
+        <small>Somente dados agregados, sem CPF, RG, endereços ou observações sensíveis</small>
+      </span>
+    </button>
+
+    @if (!somentePdf) {
+      <button type="button" class="export-btn" (click)="baixarXlsx.emit()" [disabled]="exportandoPdf || exportandoXlsx">
+        <span class="material-symbols-rounded" aria-hidden="true">
+          {{ exportandoXlsx ? 'progress_activity' : 'table_view' }}
+        </span>
+        <span>
+          <strong>XLSX interno detalhado</strong>
+          <small>Dados detalhados restritos a ADMIN e SECRETARIA</small>
+        </span>
+      </button>
+    }
+  </div>
+</section>

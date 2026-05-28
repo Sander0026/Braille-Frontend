@@ -1,0 +1,211 @@
+<div #anuncio aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<section class="relatorios-page">
+  <header class="page-header">
+    <div>
+      <h1>Relatórios</h1>
+      <p>Indicadores institucionais de alunos, turmas, matrículas, frequência e atendimentos.</p>
+    </div>
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-filtros"
+        [class.btn-filtros--active]="filtrosAtivos() > 0"
+        (click)="abrirFiltros()"
+        [attr.aria-expanded]="filtroDrawerAberto()"
+        aria-controls="relatorio-filter-drawer"
+        aria-label="Abrir filtros avançados de relatórios">
+        <span class="material-symbols-rounded" aria-hidden="true">tune</span>
+        Filtros
+        @if (filtrosAtivos() > 0) {
+          <span class="filtros-badge" aria-label="{{ filtrosAtivos() }} filtro(s) ativo(s)">{{ filtrosAtivos() }}</span>
+        }
+      </button>
+      <button type="button" class="icon-action" (click)="recarregar()" [disabled]="carregando()" aria-label="Atualizar relatórios">
+        <span class="material-symbols-rounded" aria-hidden="true">refresh</span>
+      </button>
+    </div>
+  </header>
+
+
+
+  @if (erro()) {
+    <div class="alert danger" role="alert">
+      <span class="material-symbols-rounded" aria-hidden="true">error</span>
+      {{ erro() }}
+    </div>
+  }
+
+  <nav class="tabs-nav" role="tablist" aria-label="Relatórios institucionais">
+    @for (tab of tabs; track tab.id) {
+      <button
+        type="button"
+        class="tab-btn"
+        role="tab"
+        [class.active]="abaAtiva() === tab.id"
+        [attr.aria-selected]="abaAtiva() === tab.id"
+        [attr.tabindex]="abaAtiva() === tab.id ? 0 : -1"
+        [attr.aria-controls]="'painel-' + tab.id"
+        [id]="'tab-' + tab.id"
+        (click)="mudarAba(tab.id)">
+        <span class="material-symbols-rounded" aria-hidden="true">{{ tab.icon }}</span>
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  <div class="tab-content" [ngSwitch]="abaAtiva()">
+    <section
+      *ngSwitchCase="'visao-geral'"
+      id="painel-visao-geral"
+      role="tabpanel"
+      aria-labelledby="tab-visao-geral">
+      <app-cards-indicadores [resumo]="resumo()" [carregando]="carregando()"></app-cards-indicadores>
+
+      <div class="overview-grid">
+        @if (resumo(); as r) {
+          <article class="overview-panel">
+            <div class="panel-title">
+              <span class="material-symbols-rounded" aria-hidden="true">assignment_ind</span>
+              <h2>Matrículas</h2>
+            </div>
+            <div class="progress-list">
+              <div>
+                <span>Ativas</span>
+                <strong>{{ r.matriculas.ativas }}</strong>
+              </div>
+              <div>
+                <span>Concluídas</span>
+                <strong>{{ r.matriculas.concluidas }}</strong>
+              </div>
+              <div>
+                <span>Evadidas</span>
+                <strong>{{ r.matriculas.evadidas }}</strong>
+              </div>
+              <div>
+                <span>Canceladas</span>
+                <strong>{{ r.matriculas.canceladas }}</strong>
+              </div>
+            </div>
+          </article>
+        }
+
+        <article class="overview-panel">
+          <div class="panel-title">
+            <span class="material-symbols-rounded" aria-hidden="true">dataset</span>
+            <h2>Consolidado</h2>
+          </div>
+          <div class="progress-list">
+            <div>
+              <span>Registros-base</span>
+              <strong>{{ totalRegistros() }}</strong>
+            </div>
+            @if (atendimentos(); as atendimentosResumo) {
+              <div>
+                <span>Atendimentos individuais</span>
+                <strong>{{ atendimentosResumo.totalRegistros }}</strong>
+              </div>
+            }
+            @if (evasoes(); as evasoesResumo) {
+              <div>
+                <span>Encerramentos</span>
+                <strong>{{ evasoesResumo.totalEncerramentos }}</strong>
+              </div>
+            }
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section *ngSwitchCase="'alunos'" id="painel-alunos" role="tabpanel" aria-labelledby="tab-alunos">
+      <app-relatorio-alunos
+        [resumo]="alunosResumo()"
+        [distribuicoes]="alunosDistribuicoes()"
+        [lista]="alunosLista()"
+        [carregando]="carregando()"
+        [carregandoLista]="carregandoListaAlunos()"
+        [listaAberta]="listaAlunosAberta()"
+        (abrirLista)="abrirListaAlunos()"
+        (verMais)="verMaisAlunos()">
+      </app-relatorio-alunos>
+    </section>
+
+    <section *ngSwitchCase="'turmas'" id="painel-turmas" role="tabpanel" aria-labelledby="tab-turmas">
+      <app-relatorio-turmas [relatorio]="turmas()" [carregando]="carregando()"></app-relatorio-turmas>
+    </section>
+
+    <section *ngSwitchCase="'evasoes'" id="painel-evasoes" role="tabpanel" aria-labelledby="tab-evasoes">
+      <app-relatorio-evasoes
+        [relatorio]="evasoes()"
+        [risco]="riscoEvasao()"
+        [carregando]="carregando()"
+        (acaoRiscoAtualizada)="recarregar()">
+      </app-relatorio-evasoes>
+    </section>
+
+    <section
+      *ngSwitchCase="'atendimentos'"
+      id="painel-atendimentos"
+      role="tabpanel"
+      aria-labelledby="tab-atendimentos">
+      <app-relatorio-atendimentos
+        [relatorio]="atendimentos()"
+        [carregando]="carregando()"
+        [exportandoPdf]="exportandoAtendimentosPdf()"
+        (baixarPdf)="exportarAtendimentosPdf()">
+      </app-relatorio-atendimentos>
+    </section>
+
+    <section
+      *ngSwitchCase="'impacto-social'"
+      id="painel-impacto-social"
+      role="tabpanel"
+      aria-labelledby="tab-impacto-social">
+      <app-relatorio-impacto-social
+        [relatorio]="impactoSocial()"
+        [carregando]="carregando()"
+        [comparativoInicio]="comparativoImpactoInicio()"
+        [comparativoFim]="comparativoImpactoFim()"
+        [erroLocal]="erroImpactoSocial()"
+        (periodoComparativoChange)="onComparativoImpactoChange($event)">
+      </app-relatorio-impacto-social>
+    </section>
+
+    <section
+      *ngSwitchCase="'exportacoes'"
+      id="painel-exportacoes"
+      role="tabpanel"
+      aria-labelledby="tab-exportacoes">
+      <app-relatorio-exportacoes
+        [filtros]="filtros()"
+        [resumo]="resumo()"
+        [exportandoPdf]="exportandoPdf()"
+        [exportandoXlsx]="exportandoXlsx()"
+        [somentePdf]="ehComunicacao"
+        (baixarPdf)="exportarPdf()"
+        (baixarXlsx)="exportarXlsx()">
+      </app-relatorio-exportacoes>
+    </section>
+  </div>
+</section>
+
+<!-- Drawer de filtros -->
+<app-relatorio-filtros
+  [aberto]="filtroDrawerAberto()"
+  [filtros]="filtros()"
+  [turmas]="turmasOptions()"
+  [professores]="professoresOptions()"
+  [alunos]="alunosOptions()"
+  [cidades]="cidadesOptions()"
+  [bairros]="bairrosOptions()"
+  [modoPublico]="ehComunicacao"
+  [carregando]="carregando()"
+  (buscarTurmas)="buscarTurmasOpcoes($event)"
+  (buscarProfessores)="buscarProfessoresOpcoes($event)"
+  (buscarAlunos)="buscarAlunosOpcoes($event)"
+  (buscarCidades)="buscarCidadesOpcoes($event)"
+  (buscarBairros)="buscarBairrosOpcoes($event)"
+  (aplicar)="aplicarFiltros($event)"
+  (limpar)="limparFiltros()"
+  (aoFechar)="fecharFiltros()">
+</app-relatorio-filtros>
