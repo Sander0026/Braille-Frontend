@@ -61,6 +61,30 @@ $transition: 250ms ease;
     &.modal-md {
         max-width: 500px;
     }
+
+    @media (max-width: 640px) {
+        display: block;
+        overflow-y: auto;
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: $white;
+        }
+
+        .modal-body {
+            overflow-y: visible;
+        }
+
+        .modal-footer {
+            position: sticky;
+            bottom: 0;
+            background: $white;
+            z-index: 5;
+            border-top: 1px solid $gray-200;
+        }
+    }
 }
 
 @keyframes slideUp {

@@ -400,17 +400,23 @@
         justify-content: center;
     }
 
-    .modal-content,
-    .modal-content.modal-lg {
+    .modal-content[open],
+    .modal-content.modal-lg[open] {
         width: 100%;
         max-width: 500px;
         max-height: 90vh;
         border-radius: 12px;
         overflow-x: hidden;
+        display: block !important;
+        overflow-y: auto;
     }
 
     .modal-header {
         padding: 0.6rem 0.875rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #fff;
 
         h2 {
             font-size: 0.9rem;
@@ -420,6 +426,7 @@
     .modal-body {
         padding: 0.5rem 0.75rem;
         overflow-x: hidden;
+        overflow-y: visible;
         word-break: break-word;
     }
 
@@ -428,7 +435,12 @@
     }
 
     .modal-footer {
-        padding: 0.5rem 0.75rem;
+        padding: 1rem 0.75rem;
+        position: sticky;
+        bottom: 0;
+        background: #fff;
+        z-index: 5;
+        border-top: 1px solid #e5e7eb;
 
         .btn {
             width: 100%;
