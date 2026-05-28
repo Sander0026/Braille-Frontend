@@ -443,7 +443,8 @@ export class RelatoriosDashboard implements OnInit {
 
   private carregarImpactoSocial(): void {
     this.marcarAbaCarregando('impacto-social', true);
-    const filtro: RelatorioFiltro = { ...this.filtros() };
+    // Na aba Impacto Social, ignoramos os filtros avançados globais (Opção 3)
+    const filtro: RelatorioFiltro = {};
     const inicio = this.comparativoImpactoInicio();
     const fim = this.comparativoImpactoFim();
     const periodoComparativo = inicio && fim ? { inicio, fim } : undefined;
