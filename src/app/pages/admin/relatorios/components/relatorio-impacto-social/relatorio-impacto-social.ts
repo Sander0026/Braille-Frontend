@@ -7,7 +7,9 @@ import {
   OnChanges,
   Output,
   SimpleChanges,
+  inject
 } from '@angular/core';
+import { ToastService } from '../../../../../core/services/toast.service';
 import {
   RelatorioComparativoItem,
   RelatorioImpactoMetricas,
@@ -29,13 +31,22 @@ export class RelatorioImpactoSocial implements OnChanges {
   @Input() carregando = false;
   @Input() comparativoInicio = '';
   @Input() comparativoFim = '';
+  @Input() principalInicio = '';
+  @Input() principalFim = '';
   @Input() erroLocal = '';
+  
   @Output() periodoComparativoChange = new EventEmitter<{ inicio: string; fim: string }>();
+  @Output() periodoPrincipalChange = new EventEmitter<{ inicio: string; fim: string }>();
+
+  private readonly toast = inject(ToastService);
 
   /** Mês selecionado (1–12); 0 = nenhum */
   localMes = 0;
   /** Ano selecionado (ex.: 2026); 0 = nenhum */
   localAno = 0;
+  
+  localPrincipalInicio = '';
+  localPrincipalFim = '';
 
   readonly meses = [
     { valor: 1,  label: 'Janeiro'   },
@@ -85,6 +96,36 @@ export class RelatorioImpactoSocial implements OnChanges {
         this.localMes = 0;
         this.localAno = 0;
       }
+    }
+    
+    if (changes['principalInicio'] || changes['principalFim']) {
+      if (this.principalInicio) this.localPrincipalInicio = this.principalInicio;
+      if (this.principalFim) this.localPrincipalFim = this.principalFim;
+    }
+  }
+
+  onPrincipalInicioChange(event: Event): void {
+    this.localPrincipalInicio = (event.target as HTMLInputElement).value;
+    this.validarEEmitirPrincipal();
+  }
+
+  onPrincipalFimChange(event: Event): void {
+    this.localPrincipalFim = (event.target as HTMLInputElement).value;
+    this.validarEEmitirPrincipal();
+  }
+
+  private validarEEmitirPrincipal(): void {
+    if (this.localPrincipalInicio && this.localPrincipalFim) {
+      if (this.localPrincipalInicio > this.localPrincipalFim) {
+        this.toast.aviso('A data inicial não pode ser maior que a data final.');
+        // Reverte as variáveis locais para não deixar o input em estado inválido longo?
+        // Ou deixa assim para o usuário arrumar. O usuário arruma.
+        return;
+      }
+      this.periodoPrincipalChange.emit({
+        inicio: this.localPrincipalInicio,
+        fim: this.localPrincipalFim
+      });
     }
   }
 

@@ -149,6 +149,10 @@ export class RelatoriosDashboard implements OnInit {
   readonly riscoEvasao = signal<RelatorioRiscoEvasaoResponse | null>(null);
   readonly atendimentos = signal<RelatorioAtendimentoIndividual | null>(null);
   readonly impactoSocial = signal<RelatorioImpactoSocialResponse | null>(null);
+  
+  readonly principalImpactoInicio = signal<string>('');
+  readonly principalImpactoFim = signal<string>('');
+  
   readonly comparativoImpactoInicio = signal('');
   readonly comparativoImpactoFim = signal('');
   readonly erroImpactoSocial = signal('');
@@ -160,6 +164,14 @@ export class RelatoriosDashboard implements OnInit {
   });
 
   ngOnInit(): void {
+    const hoje = new Date();
+    const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    
+    const formatData = (d: Date) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    
+    this.principalImpactoInicio.set(formatData(primeiroDia));
+    this.principalImpactoFim.set(formatData(hoje));
+
     this.configurarBuscaOpcoes();
     this.carregarAbaAtual();
   }
@@ -189,6 +201,13 @@ export class RelatoriosDashboard implements OnInit {
     this.filtros.set({ statusAluno: 'TODOS' });
     this.comparativoImpactoInicio.set('');
     this.comparativoImpactoFim.set('');
+    
+    const hoje = new Date();
+    const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const formatData = (d: Date) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    this.principalImpactoInicio.set(formatData(primeiroDia));
+    this.principalImpactoFim.set(formatData(hoje));
+
     this.turmasOptions.set([]);
     this.professoresOptions.set([]);
     this.alunosOptions.set([]);
@@ -203,9 +222,19 @@ export class RelatoriosDashboard implements OnInit {
     this.carregarAbaAtual();
   }
 
+  onPrincipalImpactoChange(evento: { inicio: string; fim: string }): void {
+    this.principalImpactoInicio.set(evento.inicio);
+    this.principalImpactoFim.set(evento.fim);
+    this.recarregarImpactoSocial();
+  }
+
   onComparativoImpactoChange(evento: { inicio: string; fim: string }): void {
     this.comparativoImpactoInicio.set(evento.inicio);
     this.comparativoImpactoFim.set(evento.fim);
+    this.recarregarImpactoSocial();
+  }
+
+  private recarregarImpactoSocial(): void {
     this.erroImpactoSocial.set('');
     this.abasCarregadas.update((estado) => ({ ...estado, 'impacto-social': false }));
     this.carregandoPorAba.update((estado) => ({ ...estado, 'impacto-social': false }));
@@ -444,7 +473,10 @@ export class RelatoriosDashboard implements OnInit {
   private carregarImpactoSocial(): void {
     this.marcarAbaCarregando('impacto-social', true);
     // Na aba Impacto Social, ignoramos os filtros avançados globais (Opção 3)
-    const filtro: RelatorioFiltro = {};
+    const filtro: RelatorioFiltro = {
+      dataInicio: this.principalImpactoInicio(),
+      dataFim: this.principalImpactoFim()
+    };
     const inicio = this.comparativoImpactoInicio();
     const fim = this.comparativoImpactoFim();
     const periodoComparativo = inicio && fim ? { inicio, fim } : undefined;
