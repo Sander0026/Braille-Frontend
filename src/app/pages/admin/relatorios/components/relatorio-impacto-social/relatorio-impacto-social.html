@@ -1,65 +1,97 @@
 <!-- ── Toolbar sempre visível (fora de qualquer condicional) ── -->
-<div class="section-toolbar">
-  <div>
-    <h2>Impacto Social</h2>
-    @if (relatorio) {
-      <p>{{ periodoAtual() }}</p>
-    }
-  </div>
+<div class="section-toolbar" style="flex-direction: column; align-items: flex-start; gap: 16px;">
+  <h2>Impacto Social</h2>
 
-  <div class="comparativo-periodo" role="search" aria-label="Filtro de comparação">
-    <div class="comparativo-periodo__header">
-      <span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
-      <strong>Período de comparação</strong>
-    </div>
-
-    <div class="comparativo-periodo__content">
-      <div class="comparativo-periodo__fields">
-        <div class="comparativo-campo">
-          <label class="comparativo-label" for="comparativo-mes">Mês</label>
-          <select
-            id="comparativo-mes"
-            class="comparativo-input"
-            (change)="onMesChange($event)"
-            [disabled]="carregando"
-            aria-label="Mês do período de comparação">
-            <option value="0" disabled [selected]="localMes === 0"></option>
-            @for (m of meses; track m.valor) {
-              <option [value]="m.valor" [selected]="localMes === m.valor">{{ m.label }}</option>
-            }
-          </select>
-        </div>
-        <div class="comparativo-campo">
-          <label class="comparativo-label" for="comparativo-ano">Ano</label>
-          <select
-            id="comparativo-ano"
-            class="comparativo-input"
-            (change)="onAnoChange($event)"
-            [disabled]="carregando"
-            aria-label="Ano do período de comparação">
-            <option value="0" disabled [selected]="localAno === 0"></option>
-            @for (ano of anos; track ano) {
-              <option [value]="ano" [selected]="localAno === ano">{{ ano }}</option>
-            }
-          </select>
+  <div style="display: flex; gap: 16px; flex-wrap: wrap; width: 100%;">
+    <!-- Período Principal -->
+    <div class="comparativo-periodo" role="search" aria-label="Filtro de período principal">
+      <div class="comparativo-periodo__header">
+        <span class="material-symbols-rounded" aria-hidden="true">calendar_today</span>
+        <strong>Período principal</strong>
+      </div>
+      <div class="comparativo-periodo__content">
+        <div class="comparativo-periodo__fields">
+          <div class="comparativo-campo">
+            <label class="comparativo-label" for="principal-inicio">Data inicial</label>
+            <input
+              type="date"
+              id="principal-inicio"
+              class="comparativo-input"
+              [value]="localPrincipalInicio"
+              (change)="onPrincipalInicioChange($event)"
+              [disabled]="carregando"
+              aria-label="Data inicial do período principal">
+          </div>
+          <div class="comparativo-campo">
+            <label class="comparativo-label" for="principal-fim">Data final</label>
+            <input
+              type="date"
+              id="principal-fim"
+              class="comparativo-input"
+              [value]="localPrincipalFim"
+              (change)="onPrincipalFimChange($event)"
+              [disabled]="carregando"
+              aria-label="Data final do período principal">
+          </div>
         </div>
       </div>
+    </div>
 
-      <div class="comparativo-periodo__actions">
-        @if (localMes && localAno) {
-          <p class="comparativo-hint">{{ intervaloCalculado }}</p>
-          <button
-            type="button"
-            class="comparativo-limpar"
-            (click)="limparComparativo()"
-            [disabled]="carregando"
-            aria-label="Limpar período de comparação">
-            <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
-            Limpar
-          </button>
-        } @else if (relatorio) {
-          <p class="comparativo-hint">{{ periodoAnterior() }}</p>
-        }
+    <!-- Período de Comparação -->
+    <div class="comparativo-periodo" role="search" aria-label="Filtro de comparação">
+      <div class="comparativo-periodo__header">
+        <span class="material-symbols-rounded" aria-hidden="true">compare_arrows</span>
+        <strong>Período de comparação</strong>
+      </div>
+
+      <div class="comparativo-periodo__content">
+        <div class="comparativo-periodo__fields">
+          <div class="comparativo-campo">
+            <label class="comparativo-label" for="comparativo-mes">Mês</label>
+            <select
+              id="comparativo-mes"
+              class="comparativo-input"
+              (change)="onMesChange($event)"
+              [disabled]="carregando"
+              aria-label="Mês do período de comparação">
+              <option value="0" disabled [selected]="localMes === 0"></option>
+              @for (m of meses; track m.valor) {
+                <option [value]="m.valor" [selected]="localMes === m.valor">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="comparativo-campo">
+            <label class="comparativo-label" for="comparativo-ano">Ano</label>
+            <select
+              id="comparativo-ano"
+              class="comparativo-input"
+              (change)="onAnoChange($event)"
+              [disabled]="carregando"
+              aria-label="Ano do período de comparação">
+              <option value="0" disabled [selected]="localAno === 0"></option>
+              @for (ano of anos; track ano) {
+                <option [value]="ano" [selected]="localAno === ano">{{ ano }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="comparativo-periodo__actions">
+          @if (localMes && localAno) {
+            <p class="comparativo-hint">{{ intervaloCalculado }}</p>
+            <button
+              type="button"
+              class="comparativo-limpar"
+              (click)="limparComparativo()"
+              [disabled]="carregando"
+              aria-label="Limpar período de comparação">
+              <span class="material-symbols-rounded" aria-hidden="true">restart_alt</span>
+              Limpar
+            </button>
+          } @else if (relatorio) {
+            <p class="comparativo-hint">{{ periodoAnterior() }}</p>
+          }
+        </div>
       </div>
     </div>
   </div>
