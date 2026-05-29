@@ -15,6 +15,7 @@ export interface FiltroAcompanhamentoIndividual {
 export interface FiltroRelatorioAtendimento {
   alunoId?: string;
   professorId?: string;
+  atendimentoId?: string;
   status?: StatusAcompanhamentoIndividual;
   tipoRegistro?: TipoRegistroAtendimentoIndividual;
   modalidade?: ModalidadeAtendimentoIndividual;

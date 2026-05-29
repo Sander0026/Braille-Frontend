@@ -58,9 +58,11 @@ export class AtendimentoIndividualHomeComponent implements OnInit {
 
     // Contagem de arquivados — chamada explícita para não depender
     // do filtro padrão do backend, que pode excluir arquivados por omissão
-    this.api.listar({ status: 'ARQUIVADO', limit: 1 }).subscribe({
-      next: res => this.arquivados.set(res.meta.total),
-    });
+    if (this.canViewArquivados()) {
+      this.api.listar({ status: 'ARQUIVADO', limit: 1 }).subscribe({
+        next: res => this.arquivados.set(res.meta.total),
+      });
+    }
   }
 
   abrirModalCriacao(): void {
