@@ -1209,6 +1209,6 @@ export const TECNOLOGIAS_SISTEMA: TecnologiaItem[] = [
 
 export const EQUIPE_SISTEMA: EquipeItem[] = [
   { nome: 'Alexsander Ribeiro', papel: 'Dev', github: 'https://github.com/Sander0026' },
-  { nome: 'Nickolas Blendes', papel: 'Dev', github: 'https://github.com/NycollasBlenes-max' },
+  { nome: 'Nycollas Blenes', papel: 'Dev', github: 'https://github.com/NycollasBlenes-max' },
   { nome: 'Victor Severiano', papel: 'Dev', github: 'https://github.com/VictorSeveriano' },
 ];
