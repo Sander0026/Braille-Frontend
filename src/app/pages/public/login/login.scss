@@ -288,23 +288,33 @@ $transition: 250ms ease;
 // Responsividade
 @media (max-width: 768px) {
     .login-wrapper {
-        display: block; /* Remove o flex no mobile para não prender o layout */
+        display: block; /* Deve ser bloco para o scroll fluir sem o flex-shrink cortar o conteúdo */
         height: 100dvh; /* A altura PRECISA ser o tamanho da tela para o overflow-y: auto funcionar, pois o app-root tem overflow: hidden */
         overflow-y: auto;
         overflow-x: hidden;
     }
 
     .form-panel {
-        display: block; /* Comportamento de bloco normal, sem cortes no flex */
-        padding: 2rem 1rem;
-        /* o min-height não é mais necessário aqui pois o block flui naturalmente */
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh; /* Toma no mínimo a altura da tela, cresce se necessário */
+        padding: 1rem;
+        
+        /* Pseudo-elementos que centralizam verticalmente de forma "segura" */
+        &::before,
+        &::after {
+            content: '';
+            flex: 1 1 auto;
+            min-height: 2rem; /* Espaçamento mínimo se o formulário for maior que a tela */
+        }
     }
 
     .form-card {
         padding: 1.5rem;
-        margin: 2rem auto; /* Dá um leve respiro no topo e centraliza horizontalmente */
+        margin: 0 auto; /* Centraliza horizontalmente */
         width: 100%;
         max-width: 100%;
+        flex: 0 0 auto; /* Impede que o form encolha ou estique, mantendo seu tamanho nativo */
     }
 
     .form-heading {
