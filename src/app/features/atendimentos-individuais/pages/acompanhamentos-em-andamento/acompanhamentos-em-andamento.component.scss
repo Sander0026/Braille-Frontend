@@ -68,8 +68,8 @@ header {
   }
 
   @media (max-width: $bp-md) {
-    width: 100%;
-    justify-content: center;
+    width: fit-content;
+    justify-content: flex-start;
   }
 }
 
@@ -91,6 +91,7 @@ header p {
 }
 
 // ── Botão primário de cabeçalho ─────────────────────────────
+header .btn-primary,
 header .primary,
 .primary {
   display: inline-flex;
@@ -188,6 +189,10 @@ header .primary,
   &:hover {
     background-color: $color-primary-dark;
     border-color: $color-primary-dark;
+  }
+
+  @media (max-width: $bp-md) {
+    width: 100%;
   }
 }
 
