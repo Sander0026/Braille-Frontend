@@ -166,9 +166,12 @@
       <app-relatorio-impacto-social
         [relatorio]="impactoSocial()"
         [carregando]="carregando()"
+        [principalInicio]="principalImpactoInicio()"
+        [principalFim]="principalImpactoFim()"
         [comparativoInicio]="comparativoImpactoInicio()"
         [comparativoFim]="comparativoImpactoFim()"
         [erroLocal]="erroImpactoSocial()"
+        (periodoPrincipalChange)="onPrincipalImpactoChange($event)"
         (periodoComparativoChange)="onComparativoImpactoChange($event)">
       </app-relatorio-impacto-social>
     </section>

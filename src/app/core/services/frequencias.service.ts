@@ -123,4 +123,12 @@ export class FrequenciasService {
     getRelatorioAluno(turmaId: string, alunoId: string): Observable<FrequenciaRelatorioAluno> {
         return this.obterRelatorioAluno(turmaId, alunoId);
     }
+
+    // ─── Exportação ─────────────────────────────────────────────────────────────
+
+    gerarPdfChamada(turmaId: string, dataAula: string): Observable<Blob> {
+        return this.http.get(`${this.url}/relatorio/turma/${turmaId}/data/${dataAula}/pdf`, {
+            responseType: 'blob'
+        });
+    }
 }
