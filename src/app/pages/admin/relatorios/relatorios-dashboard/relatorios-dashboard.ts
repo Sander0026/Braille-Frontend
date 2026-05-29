@@ -113,6 +113,9 @@ export class RelatoriosDashboard implements OnInit {
   readonly exportandoPdf = signal(false);
   readonly exportandoXlsx = signal(false);
   readonly exportandoAtendimentosPdf = signal(false);
+  readonly exportandoAtendimentoPdfId = signal<string | null>(null);
+  readonly exportandoTurmasPdf = signal(false);
+  readonly exportandoTurmaPdfId = signal<string | null>(null);
   readonly filtroDrawerAberto = signal(false);
   readonly abasCarregadas = signal<Record<RelatorioAba, boolean>>(this.estadoAbas(false));
   readonly carregandoPorAba = signal<Record<RelatorioAba, boolean>>(this.estadoAbas(false));
@@ -336,6 +339,60 @@ export class RelatoriosDashboard implements OnInit {
         error: () => {
           this.toast.erro('Não foi possível gerar o PDF de atendimentos individuais.');
           this.exportandoAtendimentosPdf.set(false);
+        },
+      });
+  }
+
+  exportarPdfPorAtendimento(atendimentoId: string): void {
+    this.exportandoAtendimentoPdfId.set(atendimentoId);
+    this.relatorioAtendimentoApi
+      .exportarPdf({ ...this.mapearFiltroAtendimento(this.filtros()), atendimentoId })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.baixarArquivo(blob, `relatorio-atendimento-${this.hoje()}.pdf`);
+          this.toast.sucesso('PDF do atendimento gerado com sucesso.');
+          this.exportandoAtendimentoPdfId.set(null);
+        },
+        error: () => {
+          this.toast.erro('Não foi possível gerar o PDF do atendimento.');
+          this.exportandoAtendimentoPdfId.set(null);
+        },
+      });
+  }
+
+  exportarTurmasPdf(): void {
+    this.exportandoTurmasPdf.set(true);
+    this.relatoriosService
+      .gerarPdfTurmas(this.filtros())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.baixarArquivo(blob, `relatorio-turmas-${this.hoje()}.pdf`);
+          this.toast.sucesso('PDF de turmas gerado com sucesso.');
+          this.exportandoTurmasPdf.set(false);
+        },
+        error: () => {
+          this.toast.erro('Não foi possível gerar o PDF de turmas.');
+          this.exportandoTurmasPdf.set(false);
+        },
+      });
+  }
+
+  exportarPdfPorTurma(turmaId: string): void {
+    this.exportandoTurmaPdfId.set(turmaId);
+    this.relatoriosService
+      .gerarPdfTurmas({ ...this.filtros(), turmaId })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          this.baixarArquivo(blob, `relatorio-turma-${this.hoje()}.pdf`);
+          this.toast.sucesso('PDF da turma gerado com sucesso.');
+          this.exportandoTurmaPdfId.set(null);
+        },
+        error: () => {
+          this.toast.erro('Não foi possível gerar o PDF da turma.');
+          this.exportandoTurmaPdfId.set(null);
         },
       });
   }

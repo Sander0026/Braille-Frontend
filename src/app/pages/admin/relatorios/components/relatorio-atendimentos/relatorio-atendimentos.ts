@@ -25,8 +25,10 @@ export class RelatorioAtendimentos {
   @Input() relatorio: RelatorioAtendimentoIndividual | null = null;
   @Input() carregando = false;
   @Input() exportandoPdf = false;
+  @Input() exportandoId: string | null = null;
 
   @Output() baixarPdf = new EventEmitter<void>();
+  @Output() baixarPdfAtendimento = new EventEmitter<string>();
 
   registros(): RegistroAtendimentoView[] {
     return (this.relatorio?.acompanhamentos ?? []).flatMap((acompanhamento) =>

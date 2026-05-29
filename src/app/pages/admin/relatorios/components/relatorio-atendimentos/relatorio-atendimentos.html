@@ -149,6 +149,7 @@
             <th>Evolução</th>
             <th>Dificuldades</th>
             <th>Pendências</th>
+            <th class="actions-cell">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -174,6 +175,21 @@
               <td class="text-wide">{{ item.atendimento.evolucao || '-' }}</td>
               <td class="text-wide">{{ item.atendimento.dificuldades || '-' }}</td>
               <td class="text-wide">{{ item.atendimento.pendencias || '-' }}</td>
+              <td class="actions-cell">
+                <button 
+                  type="button" 
+                  class="btn btn-icon btn-sm" 
+                  (click)="baixarPdfAtendimento.emit(item.atendimento.id)"
+                  [disabled]="exportandoId === item.atendimento.id || exportandoPdf"
+                  aria-label="Gerar PDF deste atendimento"
+                  title="Gerar PDF deste atendimento">
+                  @if (exportandoId === item.atendimento.id) {
+                    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+                  } @else {
+                    <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+                  }
+                </button>
+              </td>
             </tr>
           }
         </tbody>

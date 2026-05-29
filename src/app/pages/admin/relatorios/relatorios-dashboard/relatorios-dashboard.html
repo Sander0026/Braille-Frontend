@@ -133,7 +133,14 @@
     </section>
 
     <section *ngSwitchCase="'turmas'" id="painel-turmas" role="tabpanel" aria-labelledby="tab-turmas">
-      <app-relatorio-turmas [relatorio]="turmas()" [carregando]="carregando()"></app-relatorio-turmas>
+      <app-relatorio-turmas 
+        [relatorio]="turmas()" 
+        [carregando]="carregando()"
+        [exportandoPdf]="exportandoTurmasPdf()"
+        [exportandoId]="exportandoTurmaPdfId()"
+        (baixarPdf)="exportarTurmasPdf()"
+        (baixarPdfTurma)="exportarPdfPorTurma($event)">
+      </app-relatorio-turmas>
     </section>
 
     <section *ngSwitchCase="'evasoes'" id="painel-evasoes" role="tabpanel" aria-labelledby="tab-evasoes">
@@ -145,16 +152,14 @@
       </app-relatorio-evasoes>
     </section>
 
-    <section
-      *ngSwitchCase="'atendimentos'"
-      id="painel-atendimentos"
-      role="tabpanel"
-      aria-labelledby="tab-atendimentos">
-      <app-relatorio-atendimentos
-        [relatorio]="atendimentos()"
+    <section *ngSwitchCase="'atendimentos'" id="painel-atendimentos" role="tabpanel" aria-labelledby="tab-atendimentos">
+      <app-relatorio-atendimentos 
+        [relatorio]="atendimentos()" 
         [carregando]="carregando()"
         [exportandoPdf]="exportandoAtendimentosPdf()"
-        (baixarPdf)="exportarAtendimentosPdf()">
+        [exportandoId]="exportandoAtendimentoPdfId()"
+        (baixarPdf)="exportarAtendimentosPdf()"
+        (baixarPdfAtendimento)="exportarPdfPorAtendimento($event)">
       </app-relatorio-atendimentos>
     </section>
 

@@ -663,6 +663,13 @@ export class RelatoriosService {
     return this.http.get<RelatorioOpcao[]>(`${this.url}/opcoes/bairros`, { params });
   }
 
+  gerarPdfTurmas(filtro: RelatorioFiltro): Observable<Blob> {
+    return this.http.get(`${this.url}/turmas/pdf`, {
+      params: this.buildParams(filtro),
+      responseType: 'blob',
+    });
+  }
+
   exportarPdf(filtro: RelatorioFiltro): Observable<Blob> {
     return this.http.post(`${this.url}/exportar/pdf`, this.limparFiltro(filtro, RELATORIO_INSTITUCIONAL_KEYS), {
       responseType: 'blob',

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { RelatorioTurmasResponse, TurmaStatusRelatorio } from '../../../../../core/services/relatorios.service';
 
 @Component({
@@ -13,6 +13,10 @@ import { RelatorioTurmasResponse, TurmaStatusRelatorio } from '../../../../../co
 export class RelatorioTurmas {
   @Input() relatorio: RelatorioTurmasResponse | null = null;
   @Input() carregando = false;
+  @Input() exportandoPdf = false;
+  @Input() exportandoId: string | null = null;
+  @Output() baixarPdf = new EventEmitter<void>();
+  @Output() baixarPdfTurma = new EventEmitter<string>();
 
   formatarData(value?: string | null): string {
     if (!value) return '-';
