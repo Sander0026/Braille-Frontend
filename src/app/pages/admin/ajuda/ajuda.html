@@ -20,10 +20,8 @@
 
     <div class="manuais-grid">
       @for (manual of manuaisVisiveis; track manual.titulo) {
-        <app-manual-card
-          [manual]="manual"
-          (openManualList)="abrirModalManuais($event)">
-        </app-manual-card>
+      <app-manual-card [manual]="manual" (openManualList)="abrirModalManuais($event)">
+      </app-manual-card>
       }
     </div>
   </section>
@@ -83,7 +81,8 @@
             </div>
             <div>
               <strong>
-                <a [href]="membro.github" target="_blank" rel="noopener noreferrer" [attr.aria-label]="membro.nome + ', pagina do GitHub, abre em nova aba'" class="equipe-link">
+                <a [href]="membro.github" target="_blank" rel="noopener noreferrer"
+                  [attr.aria-label]="membro.nome + ', pagina do GitHub, abre em nova aba'" class="equipe-link">
                   {{ membro.nome }}
                   <span class="material-symbols-rounded" aria-hidden="true">open_in_new</span>
                 </a>
@@ -105,19 +104,12 @@
 </div>
 
 @if (modalManuaisAberto()) {
-<div
-  id="modal-lista-manuais"
-  class="modal-backdrop"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-manuais-titulo"
-  aria-describedby="modal-manuais-descricao"
-  (click)="fecharModalManuais()"
-  (keydown.escape)="fecharModalManuais()"
-  cdkTrapFocus
-  [cdkTrapFocusAutoCapture]="true">
+<div id="modal-lista-manuais" class="modal-backdrop" role="dialog" aria-modal="true"
+  aria-labelledby="modal-manuais-titulo" aria-describedby="modal-manuais-descricao" (click)="fecharModalManuais()"
+  (keydown.escape)="fecharModalManuais()" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
 
-  <div class="modal-card modal-card--manual-list" tabindex="-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
+  <div class="modal-card modal-card--manual-list" tabindex="-1" (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()">
     <div class="modal-header">
       <div>
         <h2 id="modal-manuais-titulo">{{ cardAtivo()?.titulo }}</h2>
@@ -131,13 +123,8 @@
     @if (temArquivosNoCardAtivo()) {
     <div class="manual-list" role="list" aria-label="Manuais disponíveis">
       @for (arquivo of arquivosDoCardAtivo(); track arquivo.arquivo) {
-      <button
-        type="button"
-        [id]="idManualLista(arquivo)"
-        class="manual-list-item"
-        role="listitem"
-        (click)="abrirManual(arquivo)"
-        [attr.aria-label]="'Abrir manual acessivel ' + arquivo.titulo">
+      <button type="button" [id]="idManualLista(arquivo)" class="manual-list-item" role="listitem"
+        (click)="abrirManual(arquivo)" [attr.aria-label]="'Abrir manual acessivel ' + arquivo.titulo">
         <span class="material-symbols-rounded" aria-hidden="true">menu_book</span>
         <span class="manual-list-text">
           <strong>{{ arquivo.titulo }}</strong>
@@ -159,33 +146,18 @@
 }
 
 @if (manualAtivo()) {
-<div
-  class="modal-backdrop modal-backdrop--manual"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="manual-viewer-title"
-  cdkTrapFocus
-  [cdkTrapFocusAutoCapture]="true">
-  <app-manual-viewer
-    [manual]="manualAtivo()!"
-    (fecharManual)="fecharManual()"
-    (abrirPdf)="abrirPdfDoManual($event)">
+<div class="modal-backdrop modal-backdrop--manual" role="dialog" aria-modal="true" aria-labelledby="manual-viewer-title"
+  cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
+  <app-manual-viewer [manual]="manualAtivo()!" (fecharManual)="fecharManual()" (abrirPdf)="abrirPdfDoManual($event)">
   </app-manual-viewer>
 </div>
 }
 
 @if (arquivoAtivo()) {
-<div
-  class="modal-backdrop modal-backdrop--viewer"
-  role="dialog"
-  aria-modal="true"
-  [attr.aria-label]="'Visualizador do manual ' + arquivoAtivo()!.titulo"
-  cdkTrapFocus
-  [cdkTrapFocusAutoCapture]="true">
+<div class="modal-backdrop modal-backdrop--viewer" role="dialog" aria-modal="true"
+  [attr.aria-label]="'Visualizador do manual ' + arquivoAtivo()!.titulo" cdkTrapFocus [cdkTrapFocusAutoCapture]="true">
   <div class="pdf-modal-card">
-    <app-pdf-viewer
-      [url]="arquivoAtivo()!.arquivo"
-      (fecharModal)="fecharPdf()">
+    <app-pdf-viewer [url]="arquivoAtivo()!.arquivo" (fecharModal)="fecharPdf()">
     </app-pdf-viewer>
   </div>
 </div>
