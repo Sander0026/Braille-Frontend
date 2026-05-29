@@ -49,7 +49,7 @@
       @if (canArchive() && item.arquivado) {
         <button type="button" class="btn btn-secondary" (click)="solicitarConfirmacaoArquivo('desarquivar', $event)" [disabled]="alterandoArquivo()">Desarquivar</button>
       }
-      <button type="button" class="btn btn-secondary" (click)="abrirModalRelatorio($event)">Gerar relatorio</button>
+      <!-- <button type="button" class="btn btn-secondary" (click)="abrirModalRelatorio($event)">Gerar relatorio</button> -->
     </div>
     @if (item.arquivado && item.motivoArquivamento) {
       <div class="motivo-arquivamento" role="note">

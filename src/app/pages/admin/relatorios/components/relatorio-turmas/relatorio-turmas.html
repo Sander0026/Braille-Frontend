@@ -9,10 +9,26 @@
       <h2>Turmas</h2>
       <p>{{ dados.total }} registro(s)</p>
     </div>
-    <div class="summary-pills" aria-label="Resumo de turmas">
-      <span>Andamento {{ dados.indicadores.andamento }}</span>
-      <span>Concluídas {{ dados.indicadores.concluidas }}</span>
-      <span>Arquivadas {{ dados.indicadores.arquivadas }}</span>
+    <div style="display: flex; gap: 1rem; align-items: center;">
+      <div class="summary-pills" aria-label="Resumo de turmas">
+        <span>Andamento {{ dados.indicadores.andamento }}</span>
+        <span>Concluídas {{ dados.indicadores.concluidas }}</span>
+        <span>Arquivadas {{ dados.indicadores.arquivadas }}</span>
+      </div>
+      <button 
+        type="button" 
+        class="btn btn-secondary btn-sm" 
+        (click)="baixarPdf.emit()"
+        [disabled]="exportandoPdf"
+        aria-label="Gerar PDF do relatório de turmas">
+        @if (exportandoPdf) {
+          <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+          Gerando...
+        } @else {
+          <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+          PDF
+        }
+      </button>
     </div>
   </div>
 
@@ -85,6 +101,7 @@
             <th>Taxa ocupação</th>
             <th>Taxa evasão</th>
             <th>Taxa conclusão</th>
+            <th class="actions-cell">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -106,6 +123,21 @@
               <td>{{ formatarPercentual(turma.metricas.taxaOcupacao) }}</td>
               <td>{{ formatarPercentual(turma.metricas.taxaEvasao) }}</td>
               <td>{{ formatarPercentual(turma.metricas.taxaConclusao) }}</td>
+              <td class="actions-cell">
+                <button 
+                  type="button" 
+                  class="btn btn-icon btn-sm" 
+                  (click)="baixarPdfTurma.emit(turma.id)"
+                  [disabled]="exportandoId === turma.id || exportandoPdf"
+                  aria-label="Gerar PDF desta turma"
+                  title="Gerar PDF desta turma">
+                  @if (exportandoId === turma.id) {
+                    <span class="material-symbols-rounded spinner" aria-hidden="true">progress_activity</span>
+                  } @else {
+                    <span class="material-symbols-rounded" aria-hidden="true">picture_as_pdf</span>
+                  }
+                </button>
+              </td>
             </tr>
           }
         </tbody>
