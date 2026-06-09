@@ -1187,10 +1187,21 @@ $transition: 250ms ease;
     .btn-hero-secondary {
         color: $black;
         border-color: color.change($black, $alpha: .4);
+        // Remove box-shadow do estilo base (projetado para fundo preto):
+        // no fundo amarelo, a sombra escura fica evidente e cria efeito duplicado
+        box-shadow: none;
+        text-shadow: none;
 
         &:hover {
             border-color: $black;
             color: $black;
+        }
+
+        // Foco por teclado: outline visível sem box-shadow duplo
+        &:focus-visible {
+            outline: 3px solid $black !important;
+            outline-offset: 3px !important;
+            box-shadow: none !important;
         }
     }
 }
@@ -1215,5 +1226,76 @@ $transition: 250ms ease;
     .wave-transition-double svg path,
     .wave-transition-concave svg path {
         fill: #000 !important;
+    }
+}
+
+// ============================================================
+// FIX A++ MOBILE — fonte-extragrande (html.fonte-extragrande)
+// Corrige problemas visuais no mobile com font-size: 22px
+// ============================================================
+@media (max-width: 768px) {
+    :host-context(html.fonte-extragrande) {
+
+        // Fix 1: Linha visual após ondulação preta
+        // Com 22px base, margin-bottom: 4rem = 88px e cria gap/linha entre seções
+        .wave-transition {
+            margin-bottom: 0;
+            line-height: 0;
+            font-size: 0;
+            display: block;
+            overflow: hidden;
+
+            svg {
+                display: block;
+                margin-bottom: -1px; // Fecha gap sub-pixel entre SVG e próxima seção
+            }
+        }
+
+        .wave-transition-double {
+            margin-top: -1px;
+            margin-bottom: 1rem; // Reduz de 3rem para evitar espaço excessivo
+            line-height: 0;
+            font-size: 0;
+            display: block;
+            overflow: hidden;
+
+            svg {
+                display: block;
+                margin-bottom: -1px;
+            }
+        }
+
+        .wave-transition-concave {
+            margin-bottom: -1px;
+            line-height: 0;
+            font-size: 0;
+            display: block;
+            overflow: hidden;
+
+            svg {
+                display: block;
+                margin-top: -1px;
+            }
+        }
+
+        // A seção de oficinas não deve ter gap entre ela e a onda
+        .oficinas {
+            padding-top: 0;
+        }
+
+        // Fix 2: Botão Saiba Mais — remove sombra/contorno extra no fundo amarelo
+        // O :focus-visible global aplica box-shadow branco que se sobrepõe ao design
+        // Mantém foco visível apenas com outline (sem box-shadow duplo)
+        .cta-actions .btn-hero-secondary:focus-visible {
+            outline: 3px solid $black !important;
+            outline-offset: 3px !important;
+            box-shadow: none !important;
+        }
+
+        // Remove sombra extra do botão quando A++ ativo (não é via foco)
+        .cta-actions .btn-hero-secondary {
+            // A sombra existente é parte do design, apenas normaliza com A++
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
     }
 }
